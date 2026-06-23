@@ -280,19 +280,23 @@ class CatalogController < ApplicationController
   #   structural membership field.
   # @param noid [String] the anchor's bare noid, as stored in the descendants'
   #   ancestor chain. Only consulted in subtree mode.
-  def find_children(uuid, noid)
+  # +exclude_uuids+ removes specific children from the result *at query time* (an
+  # fq), so the response's documents AND its facet counts reflect the same set.
+  # Used to hide empty Featured showcases from a community browse without leaving
+  # the Type facet counting them (a Ruby post-filter on the documents would not
+  # touch Solr's facets).
+  def find_children(uuid, noid, exclude_uuids: [])
     return Blacklight::Solr::Response.new({}, {}) if uuid.blank?
 
+    # Direct members (browse), or the whole subtree when a keyword query is active.
     membership = if params[:q].present?
                    subtree_membership_fq(uuid, noid)
                  else
                    MembershipQuery.members_fq([uuid], include_linked: true)
                  end
-
-    builder = search_service.search_builder
-                            .with(search_state)
-                            .with_filters(membership)
-
+    filters = [membership]
+    filters << MembershipQuery.excluding_fq(MembershipQuery.identity_fq(exclude_uuids)) if exclude_uuids.present?
+    builder = search_service.search_builder.with(search_state).with_filters(*filters)
     Blacklight.default_index.search(builder)
   end
 

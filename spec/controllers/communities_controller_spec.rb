@@ -218,34 +218,38 @@ describe CommunitiesController do
     end
   end
 
-  # The v1-faithful hide-if-empty gate, unit-tested on the private seam (the full
-  # show stack is exercised elsewhere; here we isolate the filtering + facet read).
-  describe '#hide_empty_showcases (private)' do
-    def doc(id, featured:, title: 'X')
-      SolrDocument.new('id' => id, 'featured_bsi' => featured, 'title_tsim' => [title])
+  # The v1-faithful hide-if-empty gate. Excluding empties at query time (vs a
+  # Ruby post-filter) keeps the Type facet counts matching what's shown.
+  describe '#empty_showcase_uuids (private)' do
+    it 'returns the community featured showcases that have no members' do
+      allow(controller).to receive(:featured_showcase_uuids).with('comm-uuid').and_return(%w[a b c])
+      allow(controller).to receive(:populated_showcase_ids).with(%w[a b c]).and_return(Set['a'])
+
+      expect(controller.send(:empty_showcase_uuids, 'comm-uuid')).to match_array(%w[b c])
     end
 
-    it 'drops empty featured showcases, keeping populated ones and ordinary collections' do
-      empty = doc('uuid-empty', featured: true, title: 'Datasets')
-      full  = doc('uuid-full',  featured: true, title: 'Presentations')
-      plain = doc('uuid-plain', featured: false)
-      documents = [empty, full, plain]
-      response_double = instance_double(Blacklight::Solr::Response, documents: documents, total: 3,
-                                                                    response: { 'numFound' => 3 })
-      controller.instance_variable_set(:@response, response_double)
-      allow(controller).to receive(:populated_showcase_ids).and_return(Set['uuid-full'])
-
-      controller.send(:hide_empty_showcases)
-
-      expect(documents).to contain_exactly(full, plain)
+    it 'returns [] when the community has no featured showcases' do
+      allow(controller).to receive(:featured_showcase_uuids).and_return([])
+      expect(controller.send(:empty_showcase_uuids, 'comm-uuid')).to eq([])
     end
+  end
 
-    it 'is a no-op when the browse has no featured showcases' do
-      plain = doc('uuid-plain', featured: false)
-      response_double = instance_double(Blacklight::Solr::Response, documents: [plain])
-      controller.instance_variable_set(:@response, response_double)
+  describe 'show hides empty featured showcases (integration)' do
+    render_views
 
-      expect { controller.send(:hide_empty_showcases) }.not_to raise_error
+    it 'excludes an empty featured showcase from the browse and its facets' do
+      AtlasRb::Community.metadata(community.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      showcase = AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml',
+                                            featured: true, nuid: '000000004')
+      AtlasRb::Collection.metadata(showcase.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+
+      get :show, params: { id: community.id }
+
+      # The empty showcase is filtered at query time, so it's absent from the
+      # documents (and therefore from Solr's facet counts).
+      expect(assigns(:response).documents.map(&:id)).not_to include(showcase.valkyrie_id)
+    ensure
+      AtlasRb::Collection.tombstone(showcase.id) if showcase
     end
   end
 

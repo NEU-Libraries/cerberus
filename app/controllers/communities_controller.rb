@@ -17,8 +17,8 @@ class CommunitiesController < CatalogController
     return render_gone(@community) if @community.tombstoned
 
     authorize_show!
-    @response = find_children(@community.valkyrie_id, params[:id])
-    hide_empty_showcases
+    @response = find_children(@community.valkyrie_id, params[:id],
+                              exclude_uuids: empty_showcase_uuids(@community.valkyrie_id))
     prepend_faculty_staff_entry(params[:id])
     @can_tombstone = current_ability.can?(:tombstone,
                                           solr_doc_from_permissions(@permissions, klass: 'Community'))
@@ -58,31 +58,32 @@ class CommunitiesController < CatalogController
 
     # v1-faithful: only show Featured Collections that have content. Provisioning
     # seeds every community with the full genre showcase set, so without this the
-    # browse would be littered with empty showcase rows. Drop featured-showcase
-    # documents with zero members (structural or linked) from the response, in a
-    # single gated facet query (no N+1). Ordinary empty user/workspace Collections
-    # are left alone — showing an empty collection one created is intentional;
-    # this gate is scoped to `featured?` showcases, pairing with the Faculty &
-    # Staff node so both curated affordances appear only when populated.
-    def hide_empty_showcases
-      showcases = @response.documents.select { |doc| showcase?(doc) }
-      return if showcases.empty?
+    # browse would be littered with empty showcase rows. We compute the empty
+    # showcases up front and exclude them from find_children *at query time* (an
+    # fq) — not as a Ruby post-filter on the documents — so the Type facet counts
+    # match what's shown (a post-filter leaves Solr's facets counting the hidden
+    # rows). Ordinary empty user/workspace Collections are left alone (showing an
+    # empty collection one created is intentional); this is scoped to `featured?`
+    # showcases, pairing with the Faculty & Staff node so both curated affordances
+    # appear only when populated.
+    #
+    # @param community_uuid [String] the community's valkyrie_id.
+    # @return [Array<String>] Solr uniqueKeys of empty featured showcases.
+    def empty_showcase_uuids(community_uuid)
+      showcase_uuids = featured_showcase_uuids(community_uuid)
+      return [] if showcase_uuids.empty?
 
-      populated = populated_showcase_ids(showcases.map(&:id))
-      empties   = showcases.reject { |doc| populated.include?(doc.id) }
-      drop_documents(empties) if empties.any?
+      showcase_uuids - populated_showcase_ids(showcase_uuids).to_a
     end
 
-    def showcase?(doc)
-      doc.respond_to?(:featured?) && doc.featured?
-    end
-
-    # Remove +docs+ from the rendered response and keep "Displaying N" honest by
-    # discounting them from numFound (a synthetic count adjustment, since the
-    # docs are real Solr hits we're choosing to suppress).
-    def drop_documents(docs)
-      @response.documents.delete_if { |doc| docs.include?(doc) }
-      @response.response['numFound'] = [@response.total - docs.size, 0].max
+    # The Solr uniqueKeys of the community's featured showcase Collections (its
+    # structural children flagged featured).
+    def featured_showcase_uuids(community_uuid)
+      builder = search_service.search_builder.with({}).with_filters(
+        'internal_resource_tesim:Collection', 'featured_bsi:true', '-tombstoned_bsi:true',
+        MembershipQuery.members_fq([community_uuid], include_linked: false)
+      ).merge(rows: 100)
+      Blacklight.default_index.search(builder).documents.map(&:id)
     end
 
     # The subset of +showcase_uuids+ (Solr uniqueKeys) that have >=1 member,
