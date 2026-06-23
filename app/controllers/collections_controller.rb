@@ -7,8 +7,7 @@ class CollectionsController < CatalogController
   include DepositorContext
   include CollectionBreadcrumbs
 
-  before_action :authorize_edit!, only: [:edit]
-  before_action :authorize_tombstone!, only: [:tombstone]
+  authorize_resource_writes!
 
   def show
     @collection = AtlasRb::Collection.find(params[:id])

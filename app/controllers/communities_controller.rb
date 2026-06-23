@@ -5,8 +5,7 @@ class CommunitiesController < CatalogController
   include Transformable
   include ShowScopedSearch
 
-  before_action :authorize_edit!, only: [:edit]
-  before_action :authorize_tombstone!, only: [:tombstone]
+  authorize_resource_writes!
 
   # Solr membership fields faceted to decide whether a showcase has content
   # (structural children + linked-member edges). See #populated_showcase_ids.

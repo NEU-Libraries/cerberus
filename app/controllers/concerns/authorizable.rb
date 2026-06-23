@@ -13,6 +13,37 @@ module Authorizable
   # before_action route).
   class ResourceNotFound < StandardError; end
 
+  class_methods do
+    # Deny-by-default write gating for the standard REST resource
+    # controllers (works / collections / communities). Declaring the
+    # uniform "can this principal do this to this resource?" gates from
+    # one place is the structural fix for the opt-in-per-action drift the
+    # authorization audit found: a new resource controller that calls this
+    # can't silently ship a write that's gated only at the GET form.
+    #
+    # Three gates, matching the policy:
+    #   - authentication on the create surface (new/create). Cerberus has
+    #     no :create ability — the role/parent decision is Atlas's — so
+    #     this is the UX/defense-in-depth gate: a logged-out caller is
+    #     redirected to sign in rather than bounced by an Atlas error.
+    #   - the :edit ability on BOTH the edit form and the write that
+    #     follows (edit/update), closing the "form gated, write open" gap.
+    #   - the tombstone gate on tombstone.
+    #
+    # `extra_edit:` folds controller-specific edit-gated actions into the
+    # :edit gate (Works' metadata / update_metadata tabs).
+    def authorize_resource_writes!(extra_edit: [])
+      # The filtered actions live in the including controller, not this concern,
+      # so the lexical-scope cop can't see them — that indirection is the whole
+      # point of the macro.
+      # rubocop:disable Rails/LexicallyScopedActionFilter
+      before_action :authenticate_user!,   only: %i[new create]
+      before_action :authorize_edit!,      only: %i[edit update] + Array(extra_edit)
+      before_action :authorize_tombstone!, only: %i[tombstone]
+      # rubocop:enable Rails/LexicallyScopedActionFilter
+    end
+  end
+
   included do
     rescue_from CanCan::AccessDenied do
       render template: 'errors/forbidden', status: :forbidden
@@ -52,7 +83,15 @@ module Authorizable
     end
 
     def authorize_edit!
-      @permissions = AtlasRb::Resource.permissions(params[:id])
+      authorize_edit_for!(params[:id])
+    end
+
+    # The :edit gate keyed on an explicit id rather than params[:id], so
+    # callers whose resource id rides a different param can reuse it. The
+    # XML editor needs this: `xml#editor` carries params[:id] while
+    # `xml#validate`/`xml#update` carry params[:resource_id].
+    def authorize_edit_for!(id)
+      @permissions = AtlasRb::Resource.permissions(id)
       raise ResourceNotFound if @permissions.nil?
 
       authorize! :edit, solr_doc_from_permissions(@permissions)

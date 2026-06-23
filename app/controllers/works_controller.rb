@@ -19,8 +19,7 @@ class WorksController < ApplicationController
                         'Please try again or deposit to your workspace.'
 
   before_action :authorize_show!, only: [:downloads, :manifest]
-  before_action :authorize_edit!, only: [:edit, :metadata, :update_metadata]
-  before_action :authorize_tombstone!, only: [:tombstone]
+  authorize_resource_writes!(extra_edit: %i[metadata update_metadata])
   before_action :reject_if_in_progress, only: [:edit]
 
   def show
