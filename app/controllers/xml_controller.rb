@@ -1,11 +1,15 @@
 # frozen_string_literal: true
 
 class XmlController < ApplicationController
+  include DepositorContext
+  include CollectionBreadcrumbs
+
   def editor
     item = AtlasRb::Resource.find(params[:id])
     @resource = item.resource
     @klass = item.klass
     resource_mods(item.klass)
+    editor_breadcrumbs(item.klass)
   end
 
   def validate
@@ -25,6 +29,18 @@ class XmlController < ApplicationController
   end
 
   private
+
+    # The XML editor is a sub-tab of the resource's edit page, so its trail mirrors
+    # that edit page: a Collection reuses the personal-root-aware trail (My DRS / …
+    # for the owner), while a Work uses the structural edit trail — matching
+    # WorksController#edit and CollectionsController#edit respectively.
+    def editor_breadcrumbs(klass)
+      if klass == 'Collection'
+        collection_breadcrumbs(params[:id], editing: true)
+      else
+        breadcrumbs(params[:id], editing: true)
+      end
+    end
 
     def resource_mods(klass)
       @mods = AtlasRb.const_get(klass).mods(params[:id], 'html')
