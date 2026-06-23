@@ -125,26 +125,27 @@ RSpec.describe SearchBuilder do
     end
   end
 
-  # Featured showcase Collections are dropped only on the global catalog index,
-  # flagged via the search-service context (CatalogController#search_service_context).
-  describe '#exclude_featured_collections' do
+  # Curation/structural containers (Featured showcases + personal roots) are
+  # dropped only on the global catalog index, flagged via the search-service
+  # context (CatalogController#search_service_context).
+  describe '#exclude_curation_containers' do
     def exclude_fq(scope)
       params = {}
-      described_class.new(scope).exclude_featured_collections(params)
+      described_class.new(scope).exclude_curation_containers(params)
       Array(params[:fq])
     end
 
-    it 'drops featured collections when the context flags the global index' do
+    it 'drops featured showcases and personal roots when the context flags the global index' do
       scope = instance_double(Blacklight::SearchService,
                               blacklight_config: CatalogController.blacklight_config,
-                              context:           { exclude_featured: true })
-      expect(exclude_fq(scope)).to include('-featured_bsi:true')
+                              context:           { catalog_index: true })
+      expect(exclude_fq(scope)).to include('-featured_bsi:true', '-personal_root_bsi:true')
     end
 
-    it 'leaves featured collections in a scoped browse (flag off)' do
+    it 'leaves them in a scoped browse (flag off)' do
       scope = instance_double(Blacklight::SearchService,
                               blacklight_config: CatalogController.blacklight_config,
-                              context:           { exclude_featured: false })
+                              context:           { catalog_index: false })
       expect(exclude_fq(scope)).to be_empty
     end
 

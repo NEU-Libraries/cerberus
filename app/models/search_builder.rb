@@ -3,7 +3,7 @@
 class SearchBuilder < Blacklight::SearchBuilder
   include Blacklight::Solr::SearchBuilderBehavior
 
-  self.default_processor_chain += [:apply_gated_discovery, :append_extra_filters, :exclude_featured_collections]
+  self.default_processor_chain += [:apply_gated_discovery, :append_extra_filters, :exclude_curation_containers]
 
   def apply_gated_discovery(solr_parameters)
     # Admins carry the `can :manage, :all` short-circuit in Ability, but that
@@ -48,19 +48,21 @@ class SearchBuilder < Blacklight::SearchBuilder
     solr_parameters[:fq].concat(@extra_filters)
   end
 
-  # Drop genre-showcase ("Featured") Collections from the *global* catalog index.
-  # They're community-scoped curation surfaces — they read as Featured Content on
-  # a Community show page, but out of that context (in general search) they're
-  # just empty-looking folders. Scoped strictly to the catalog index via the
-  # search-service context flag (see CatalogController#search_service_context), so
-  # the community/collection browse (find_children) and the genre/Featured
-  # landings — which legitimately list showcases — are untouched.
-  def exclude_featured_collections(solr_parameters)
+  # Drop curation/structural container Collections from the *global* catalog
+  # index: genre-showcase ("Featured") Collections and personal roots. Both are
+  # containers, not content — a showcase reads as Featured Content on a Community
+  # show page, a personal root is a depositor's workspace shell — but in general
+  # search they're just empty-looking folders. Scoped strictly to the catalog
+  # index via the search-service context flag (see
+  # CatalogController#search_service_context), so the community/collection browse
+  # (find_children), the genre/Featured landings, and My DRS — which legitimately
+  # surface these — are untouched.
+  def exclude_curation_containers(solr_parameters)
     return unless scope.respond_to?(:context)
-    return unless (scope.context || {})[:exclude_featured]
+    return unless (scope.context || {})[:catalog_index]
 
     solr_parameters[:fq] ||= []
-    solr_parameters[:fq] << '-featured_bsi:true'
+    solr_parameters[:fq].push('-featured_bsi:true', '-personal_root_bsi:true')
   end
 
   private

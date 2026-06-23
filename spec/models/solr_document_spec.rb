@@ -45,4 +45,16 @@ describe SolrDocument do
       expect(SolrDocument.new(id: '1', featured_bsi: false).featured?).to be(false)
     end
   end
+
+  describe '#personal_root?' do
+    it 'is true for a JSON-boolean or string personal_root_bsi' do
+      expect(SolrDocument.new(id: '1', personal_root_bsi: true).personal_root?).to be(true)
+      expect(SolrDocument.new(id: '1', personal_root_bsi: 'true').personal_root?).to be(true)
+    end
+
+    it 'is false when absent or falsey' do
+      expect(SolrDocument.new(id: '1').personal_root?).to be(false)
+      expect(SolrDocument.new(id: '1', personal_root_bsi: false).personal_root?).to be(false)
+    end
+  end
 end

@@ -183,7 +183,7 @@ describe CollectionsController do
       allow(AtlasRb::Resource).to receive(:find).with('cnoid').and_return(OpenStruct.new(resource: item, klass: 'Collection'))
     end
 
-    it 'trails "My DRS" for a collection under the viewer\'s own personal root' do
+    it 'trails "My DRS" for the owner viewing a collection under their own personal root' do
       stub_collection(parent_noid: 'janeroot')
       allow(controller).to receive(:deposit_person).and_return(AtlasRb::Mash.new('personal_root_id' => 'janeroot'))
 
@@ -194,9 +194,27 @@ describe CollectionsController do
       controller.send(:collection_breadcrumbs, 'cnoid')
     end
 
-    it 'falls back to the structural trail for a collection outside the viewer root' do
-      stub_collection(parent_noid: 'someones-root')
-      allow(controller).to receive(:deposit_person).and_return(AtlasRb::Mash.new('personal_root_id' => 'janeroot'))
+    it 'trails "People / <Person>" for the public view of a workspace collection' do
+      stub_collection(parent_noid: 'janeroot')
+      allow(controller).to receive(:deposit_person).and_return(nil) # logged out / non-owner
+      root_doc = SolrDocument.new('id' => 'uuid-jr', 'personal_root_bsi' => true, 'depositor_ssi' => '000000002')
+      allow(controller).to receive(:collection_doc).with('janeroot').and_return(root_doc)
+      allow(AtlasRb::Person).to receive(:resolve).with(['000000002'])
+                                                 .and_return([AtlasRb::Mash.new('id' => 'jnoid', 'display_name' => 'Jane Doe')])
+
+      expect(controller).to receive(:breadcrumb).with('People', people_path)
+      expect(controller).to receive(:breadcrumb).with('Jane Doe', person_path('jnoid'))
+      expect(controller).to receive(:add_breadcrumb_for).with('cnoid', 'Collection', 'Working Files')
+      expect(controller).not_to receive(:breadcrumbs)
+
+      controller.send(:collection_breadcrumbs, 'cnoid')
+    end
+
+    it 'falls back to the structural trail for an ordinary (non-workspace) collection' do
+      stub_collection(parent_noid: 'a-community')
+      allow(controller).to receive(:deposit_person).and_return(nil)
+      ordinary = SolrDocument.new('id' => 'uuid-x', 'personal_root_bsi' => false)
+      allow(controller).to receive(:collection_doc).with('a-community').and_return(ordinary)
 
       expect(controller).to receive(:breadcrumbs).with('cnoid', result: anything)
       expect(controller).not_to receive(:breadcrumb).with('My DRS', anything)

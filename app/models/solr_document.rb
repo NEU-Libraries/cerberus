@@ -39,6 +39,15 @@ class SolrDocument
     value == true || value.to_s == 'true'
   end
 
+  # A depositor's personal-root Collection — Atlas flags it personal_root_bsi.
+  # A structural container, not content: excluded from the global catalog index
+  # and replaced (by the owning Person) in workspace-item breadcrumbs. Solr
+  # returns a JSON boolean; coerce defensively for string-typed responses.
+  def personal_root?
+    value = self['personal_root_bsi']
+    value == true || value.to_s == 'true'
+  end
+
   def to_param
     raw = alternate_ids&.first
     noid = raw.split('id-').last if raw.present?
