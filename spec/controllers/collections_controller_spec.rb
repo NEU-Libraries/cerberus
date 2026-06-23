@@ -216,10 +216,33 @@ describe CollectionsController do
       ordinary = SolrDocument.new('id' => 'uuid-x', 'personal_root_bsi' => false)
       allow(controller).to receive(:collection_doc).with('a-community').and_return(ordinary)
 
-      expect(controller).to receive(:breadcrumbs).with('cnoid', result: anything)
+      expect(controller).to receive(:breadcrumbs).with('cnoid', editing: false, result: anything)
       expect(controller).not_to receive(:breadcrumb).with('My DRS', anything)
 
       controller.send(:collection_breadcrumbs, 'cnoid')
+    end
+
+    it 'keeps the "My DRS" prefix and uses the edit tail when editing an owner-workspace collection' do
+      stub_collection(parent_noid: 'janeroot')
+      allow(controller).to receive(:deposit_person).and_return(AtlasRb::Mash.new('personal_root_id' => 'janeroot'))
+
+      expect(controller).to receive(:breadcrumb).with('My DRS', my_drs_path)
+      expect(controller).to receive(:edit_breadcrumb_tail).with(anything, 'Collection')
+      expect(controller).not_to receive(:add_breadcrumb_for)
+      expect(controller).not_to receive(:breadcrumbs)
+
+      controller.send(:collection_breadcrumbs, 'cnoid', editing: true)
+    end
+
+    it 'passes editing through to the structural trail for an ordinary collection edit' do
+      stub_collection(parent_noid: 'a-community')
+      allow(controller).to receive(:deposit_person).and_return(nil)
+      ordinary = SolrDocument.new('id' => 'uuid-x', 'personal_root_bsi' => false)
+      allow(controller).to receive(:collection_doc).with('a-community').and_return(ordinary)
+
+      expect(controller).to receive(:breadcrumbs).with('cnoid', editing: true, result: anything)
+
+      controller.send(:collection_breadcrumbs, 'cnoid', editing: true)
     end
   end
 end

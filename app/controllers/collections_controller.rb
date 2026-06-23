@@ -33,7 +33,7 @@ class CollectionsController < CatalogController
     @collection = AtlasRb::Collection.find(params[:id])
     form_preparation(@permissions)
     load_descriptive!('Collection')
-    breadcrumbs(params[:id], editing: true)
+    collection_breadcrumbs(params[:id], editing: true)
   end
 
   def create
@@ -55,20 +55,23 @@ class CollectionsController < CatalogController
     #   * everyone else (incl. logged-out) sees "People / <Person> / <collection>"
     #     — the public, person-rooted trail.
     # Any other collection gets the plain structural trail (sharing the one
-    # AtlasRb::Resource.find via the result: hand-off).
-    def collection_breadcrumbs(id)
+    # AtlasRb::Resource.find via the result: hand-off). Shared by show and edit so
+    # the edit page keeps the same personal-root prefix instead of falling back to
+    # the structural "People / Personal Root" trail; +editing+ swaps in the edit
+    # tail (collection as link + "Edit Collection" current crumb).
+    def collection_breadcrumbs(id, editing: false)
       result = AtlasRb::Resource.find(id)
       parent_noid = Array(result.resource.ancestor_chain).last&.dig('noid')
 
       if owner_workspace?(parent_noid)
         breadcrumb('My DRS', my_drs_path)
-        add_collection_crumb(result)
+        workspace_collection_tail(result, editing: editing)
       elsif (owner = personal_root_owner(parent_noid))
         breadcrumb('People', people_path)
         breadcrumb(owner['display_name'], person_path(owner['id']))
-        add_collection_crumb(result)
+        workspace_collection_tail(result, editing: editing)
       else
-        breadcrumbs(id, result: result)
+        breadcrumbs(id, editing: editing, result: result)
       end
     end
 
@@ -77,8 +80,15 @@ class CollectionsController < CatalogController
       parent_noid.present? && parent_noid == deposit_person&.[]('personal_root_id')
     end
 
-    def add_collection_crumb(result)
-      add_breadcrumb_for(result.resource.id, result.klass, result.resource.title)
+    # The trail tail after the personal-root prefix: on a show page the collection
+    # is the you-are-here crumb; on an edit page it becomes a link back to the show
+    # page followed by the "Edit Collection" current crumb (shared edit_breadcrumb_tail).
+    def workspace_collection_tail(result, editing:)
+      if editing
+        edit_breadcrumb_tail(result.resource, result.klass)
+      else
+        add_breadcrumb_for(result.resource.id, result.klass, result.resource.title)
+      end
     end
 
     # The Person who owns +parent_noid+ when it's a personal root (flagged
