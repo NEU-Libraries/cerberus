@@ -15,19 +15,12 @@ Rails.application.routes.draw do
     concerns :searchable
   end
 
-  concern :exportable, Blacklight::Routes::Exportable.new
-
-  resources :solr_documents, only: [:show], path: '/catalog', controller: 'catalog' do
-    concerns :exportable
-  end
-
-  resources :bookmarks do
-    concerns :exportable
-
-    collection do
-      delete 'clear'
-    end
-  end
+  # The Blacklight :exportable concern (catalog#email/#sms) and the bookmarks
+  # resource are intentionally NOT mounted: bookmarks is unused in Cerberus and
+  # the email/sms tool links are stripped from the catalog config
+  # (navbar/document_actions are empty), so these only ever existed as
+  # anonymous, reachable POST send/abuse surfaces (authorization audit G5).
+  resources :solr_documents, only: [:show], path: '/catalog', controller: 'catalog'
 
   resources :communities, except: [:destroy] do
     member do

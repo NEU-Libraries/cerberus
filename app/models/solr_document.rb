@@ -5,11 +5,9 @@ class SolrDocument
 
   # self.unique_key = 'id'
 
-  # Email uses the semantic field mappings below to generate the body of an email.
-  SolrDocument.use_extension(Blacklight::Document::Email)
-
-  # SMS uses the semantic field mappings below to generate the body of an SMS email.
-  SolrDocument.use_extension(Blacklight::Document::Sms)
+  # The Email / SMS document extensions are intentionally not registered: the
+  # catalog#email/#sms send routes are unmounted (authorization audit G5), so
+  # the to_email_text / to_sms_text helpers they add would be dead code.
 
   # DublinCore uses the semantic field mappings below to assemble an OAI-compliant Dublin Core document
   # Semantic mappings of solr stored fields. Fields may be multi or
