@@ -244,7 +244,16 @@ class CatalogController < ApplicationController
   # membership and the admin short-circuit (across container/set contents and
   # the catalog index alike). `effective_user` honors a view-as session.
   def search_service_context
-    { current_user: current_user, effective_user: effective_user }
+    { current_user: current_user, effective_user: effective_user,
+      exclude_featured: catalog_index? }
+  end
+
+  # The global catalog index (/catalog) — vs a scoped browse served by a
+  # subclass show/index (communities, collections, genres, people). Only the
+  # global index drops Featured showcase Collections (see
+  # SearchBuilder#exclude_featured_collections); scoped browses keep them.
+  def catalog_index?
+    controller_name == 'catalog' && action_name == 'index'
   end
 
   # Children listing for a Community/Collection show page.

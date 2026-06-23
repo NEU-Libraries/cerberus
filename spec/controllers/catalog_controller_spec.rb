@@ -21,13 +21,35 @@ describe CatalogController do
       expect(response.body).to include('class="thumb-type-pill">Community')
     end
 
-    it 'labels a featured showcase Collection "Featured" in the standard pill (no special styling)' do
-      collection = AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml',
-                                              featured: true, nuid: '000000004')
-      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+    it 'excludes featured showcase Collections from the global index but keeps ordinary ones' do
+      featured = AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml',
+                                            featured: true, nuid: '000000004')
+      AtlasRb::Collection.metadata(featured.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      ordinary = AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml',
+                                            nuid: '000000004')
+      AtlasRb::Collection.metadata(ordinary.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+
       get :index
-      expect(response.body).to include('class="thumb-type-pill">Featured')
-      expect(response.body).not_to include('thumb-type-pill--featured')
+
+      ids = assigns(:response).documents.map(&:id)
+      expect(ids).to include(ordinary.valkyrie_id)     # ordinary public collection is in general search
+      expect(ids).not_to include(featured.valkyrie_id) # the showcase is not
+    ensure
+      AtlasRb::Collection.tombstone(featured.id) if featured
+      AtlasRb::Collection.tombstone(ordinary.id) if ordinary
+    end
+
+    # The "Featured" pill still renders for showcases where they *do* appear
+    # (a community browse / find_children) — verified via the shared helper, as
+    # the global index now excludes them.
+    it 'labels a featured collection "Featured" in the standard pill via the thumbnail helper' do
+      get :index # establishes a view context
+      doc = SolrDocument.new('id' => 'c1', 'internal_resource_tesim' => ['Collection'], 'featured_bsi' => true)
+
+      html = controller.view_context.iiif_thumbnail(doc)
+
+      expect(html).to include('>Featured</span>')
+      expect(html).not_to include('thumb-type-pill--featured')
     end
   end
 
