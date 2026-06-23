@@ -17,36 +17,9 @@
           Deposit
 
 .row.g-4
-  -# Workspace — the depositor's own collections (v1's "User Created Collections").
-  -# Card-shell matches the audit-history register: white body, neutral header
-  -# strip, gray border, subtle shadow.
-  .col-lg-6
-    .bg-white.border.rounded-3.h-100.overflow-hidden.shadow-sm
-      .p-3.bg-body-secondary.border-bottom.d-flex.align-items-start
-        .flex-grow-1
-          %h5.mb-1
-            %i.fa-solid.fa-box-archive.me-2{ 'aria-hidden' => 'true' }
-            My workspace
-          %p.small.text-muted.mb-0
-            Personal collections — discoverable by their own visibility, never promoted.
-        - if @personal_root_id.present?
-          = link_to new_collection_path(parent_id: @personal_root_id), class: 'btn btn-sm btn-outline-secondary ms-2 flex-shrink-0' do
-            %i.fa-solid.fa-plus.me-1{ 'aria-hidden' => 'true' }
-            New collection
-      .p-3
-        - if @workspace_collections.present?
-          %ul.list-unstyled.mb-0
-            - @workspace_collections.each do |coll|
-              %li.py-2.border-bottom.d-flex.align-items-center
-                %i.fa-regular.fa-folder-open.text-muted.me-2{ 'aria-hidden' => 'true' }
-                = link_to Array(coll['title_tsim']).first.presence || '(untitled)', collection_path(coll)
-        - else
-          %p.text-muted.mb-0
-            No collections yet. Deposit a file to start your workspace.
-
   -# Published — works promoted into community genre showcases, grouped by category.
-  -# Same white card-shell; the teal header strip is the one accent carrying the
-  -# curation-tier signal (workspace vs published).
+  -# Placed first (left) as the outward-facing, professional tier; the teal header
+  -# strip is the one accent carrying the curation-tier signal (workspace vs published).
   .col-lg-6
     .bg-white.border.rounded-3.h-100.overflow-hidden.shadow-sm
       .p-3.bg-success-subtle.border-bottom.border-success-subtle
@@ -55,16 +28,74 @@
           Published to my community
         %p.small.mb-0.text-success-emphasis
           Promoted into your community's featured showcases, grouped by category.
-      .p-3
-        - if @published.present?
-          - @published.each do |label, works|
-            %section.mb-3
-              %h6.text-uppercase.small.text-muted.mb-2= label
-              %ul.list-unstyled.mb-0
-                - works.each do |work|
-                  %li.py-2.border-bottom.d-flex.align-items-center
-                    %i.fa-regular.fa-file.text-muted.me-2{ 'aria-hidden' => 'true' }
-                    = link_to Array(work['title_tsim']).first.presence || '(untitled)', work_path(work)
-        - else
+      - if @published.present?
+        -# Registry ledger (admin-registry-table). The showcase category is promoted
+        -# from a section header to a real grouped column (rowspan), so the grouping
+        -# is table structure rather than decoration — Category | Work.
+        .table-responsive
+          %table.table.table-borderless.admin-registry-table
+            %thead
+              %tr
+                %th{ scope: 'col' } Category
+                %th{ scope: 'col' } Work
+            %tbody
+              - @published.each do |label, works|
+                - works.each_with_index do |work, i|
+                  %tr
+                    - if i.zero?
+                      %td.align-top{ rowspan: works.size }
+                        %span.text-uppercase.small.text-muted.fw-semibold= label
+                    %td.admin-registry-table__name
+                      %i.fa-regular.fa-file.text-muted.me-2{ 'aria-hidden' => 'true' }
+                      = link_to Array(work['title_tsim']).first.presence || '(untitled)', work_path(work)
+      - else
+        .p-3
           %p.text-muted.mb-0
             Nothing published yet. Choose “Publish to my community” when you deposit a file.
+
+  -# Workspace — the depositor's own collections (v1's "User Created Collections").
+  -# Card-shell matches the audit-history register: white body, neutral header
+  -# strip, gray border, subtle shadow.
+  .col-lg-6
+    .bg-white.border.rounded-3.h-100.overflow-hidden.shadow-sm.d-flex.flex-column
+      .p-3.bg-body-secondary.border-bottom
+        %h5.mb-1
+          %i.fa-solid.fa-box-archive.me-2{ 'aria-hidden' => 'true' }
+          My workspace
+        %p.small.text-muted.mb-0
+          Personal collections — discoverable by their own visibility, never promoted.
+      - if @workspace_collections.present?
+        -# Full-bleed registry ledger (admin-registry-table) — uppercase column
+        -# microcopy, warm hover, monospace-grade tabular chrome. Visibility is
+        -# the meaningful second column: workspace collections are "discoverable
+        -# by their own visibility", so it carries real information here.
+        .table-responsive
+          %table.table.table-borderless.admin-registry-table
+            %thead
+              %tr
+                %th{ scope: 'col' } Collection
+                %th{ scope: 'col' } Visibility
+            %tbody
+              - @workspace_collections.each do |coll|
+                %tr
+                  %td.admin-registry-table__name
+                    %i.fa-regular.fa-folder-open.text-muted.me-2{ 'aria-hidden' => 'true' }
+                    = link_to Array(coll['title_tsim']).first.presence || '(untitled)', collection_path(coll)
+                  %td.text-muted.small.text-nowrap
+                    - if Array(coll['read_access_group_ssim']).include?('public')
+                      %i.fa-solid.fa-globe.me-1{ 'aria-hidden' => 'true' }
+                      Public
+                    - else
+                      %i.fa-solid.fa-lock.me-1{ 'aria-hidden' => 'true' }
+                      Private
+      - else
+        .p-3
+          %p.text-muted.mb-0
+            No collections yet. Deposit a file to start your workspace.
+      -# Action footer, pinned to the card bottom (mt-auto), button right-aligned so
+      -# the "add" affordance sits below the rows rather than lost in the header strip.
+      - if @personal_root_id.present?
+        .p-3.border-top.mt-auto.d-flex.justify-content-end
+          = link_to new_collection_path(parent_id: @personal_root_id), class: 'btn btn-sm btn-outline-secondary' do
+            %i.fa-solid.fa-plus.me-1{ 'aria-hidden' => 'true' }
+            New collection
