@@ -8,6 +8,15 @@ describe XmlController do
   let(:work) { AtlasRb::Work.create(collection.id, '/home/cerberus/web/spec/fixtures/files/work-mods.xml', nuid: '000000004') }
   let(:raw_xml) { '<mods><titleInfo><title>Test Title</title></titleInfo></mods>' }
 
+  # The raw-XML editor is now authenticate + edit-gated (audit G1); sign in as
+  # the admin who owns the fixtures so every example passes the gate and
+  # exercises the editor behaviour as before.
+  let(:admin) do
+    User.new(email: 'admin@example.com', nuid: '000000004', name: 'Admin, User', role: 'admin', groups: [])
+  end
+
+  before { sign_in admin }
+
   describe 'editor' do
     render_views
     it 'renders the editor partial' do

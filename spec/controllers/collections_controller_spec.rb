@@ -124,6 +124,11 @@ describe CollectionsController do
   end
 
   describe 'new' do
+    # #new now requires authentication (audit G3, deny-by-default macro).
+    let(:user) { User.new(email: 'dep@example.com', nuid: '000000004', role: 'standard', groups: []) }
+
+    before { sign_in user }
+
     it 'assigns a open struct to collection' do
       get :new
       expect(assigns(:collection)).to be_a(OpenStruct)

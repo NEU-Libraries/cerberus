@@ -213,6 +213,11 @@ describe WorksController do
   end
 
   describe 'new' do
+    # #new now requires authentication (audit G3, deny-by-default macro).
+    let(:user) { User.new(email: 'dep@example.com', nuid: '000000004', role: 'standard', groups: []) }
+
+    before { sign_in user }
+
     it 'presents the interface to upload a file' do
       get :new
       expect(response).to render_template('works/new')
