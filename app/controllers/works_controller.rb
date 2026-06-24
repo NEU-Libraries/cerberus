@@ -6,6 +6,7 @@ class WorksController < ApplicationController
   include DepositorContext
   include WorkDeposit
   include WorkBreadcrumbs
+  include WorkChangeRequest
   # The weighted deposit fork's context queries (the depositor's own workspace
   # Collections, a community's publish showcases via ShowcaseFinder) run through
   # the Blacklight SearchBuilder, so this controller needs the catalog config —
@@ -17,10 +18,6 @@ class WorksController < ApplicationController
   IN_PROGRESS_NOTICE = 'This work is still being processed and cannot be edited yet.'
   PUBLISH_UNAVAILABLE = 'That publish destination is unavailable. ' \
                         'Please try again or deposit to your workspace.'
-
-  # The actions an editor may *request* (not perform) on their own work, routed
-  # to the DRS staff inbox rather than mutating anything directly.
-  REQUEST_ACTIONS = %w[withdraw move].freeze
 
   before_action :authorize_show!, only: [:downloads, :manifest]
   authorize_resource_writes!(extra_edit: %i[metadata update_metadata request_change])
@@ -119,42 +116,7 @@ class WorksController < ApplicationController
     process_derivative_widths
   end
 
-  # An editor's request to withdraw or move this work. Cerberus has no
-  # request/approval model: the request is a notification to the DRS staff
-  # group inbox (read-time group delivery, see Message.inbox_for), which staff
-  # fulfill with the existing tools (the show-page tombstone / the admin
-  # re-parent finder). Edit-gated via authorize_resource_writes! above.
-  def request_change
-    action = params[:request_action].to_s
-    note   = params[:request_note].to_s.strip
-
-    return redirect_to(edit_work_path(params[:id]), alert: 'Choose whether to request a withdrawal or a move.') unless REQUEST_ACTIONS.include?(action)
-    return redirect_to(edit_work_path(params[:id]), alert: 'Tell the staff where this work should move to.') if action == 'move' && note.blank?
-
-    deliver_change_request(action, note)
-    redirect_to work_path(params[:id]),
-                notice: 'Your request has been sent to the DRS staff — they will follow up in your inbox.'
-  end
-
   private
-
-    # Compose the staff-group inbox message for a withdraw/move request. A
-    # user-sent message (sender = the requester, attribution-aware like the
-    # deposit/set-sharing paths), so staff see who asked and can reply.
-    def deliver_change_request(action, note)
-      work = AtlasRb::Work.find(params[:id])
-      requester = current_user.try(:name).presence || current_user&.nuid
-      lines = ["#{requester} has requested that this work be #{action == 'withdraw' ? 'withdrawn' : 'moved'}.",
-               '', %(Work: “#{work.title}”), work_url(params[:id])]
-      lines += ['', "#{action == 'move' ? 'Requested destination' : 'Note'}: #{note}"] if note.present?
-
-      Message.create(
-        sender_nuid:     attributed_nuid,
-        recipient_group: Permissions::STAFF_EDIT_GROUP,
-        subject:         %(Request to #{action} “#{work.title}”),
-        body:            lines.join("\n")
-      )
-    end
 
     # Server backstop for the metadata page's opt-in download sizes. The
     # Stimulus controller is the primary enforcement, so a violation here

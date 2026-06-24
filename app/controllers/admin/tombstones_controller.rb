@@ -34,21 +34,30 @@ module Admin
       @response = TombstonedItems.call(scope: self, page: params[:page])
     end
 
-    # Restore is not one of atlas_rb's typed-error paths (reparent / linked /
-    # Compilation / upload), so a non-2xx response flows back as a plain
-    # Faraday::Response rather than raising — hence the explicit `success?`
-    # check. A transport-level failure (host down) still raises Faraday::Error.
     def restore
       restorer = RESTORERS[params[:type]]
       return redirect_to(admin_tombstones_path, alert: 'Unknown resource type — nothing was restored.') if restorer.nil?
 
-      response = restorer.restore(params[:id])
-      return redirect_to(admin_tombstones_path, alert: RESTORE_FAILED) if response.respond_to?(:success?) && !response.success?
-
-      redirect_to admin_tombstones_path, notice: 'Withdrawal reversed — the item is live again.'
+      if restored?(restorer)
+        redirect_to admin_tombstones_path, notice: 'Withdrawal reversed — the item is live again.'
+      else
+        redirect_to admin_tombstones_path, alert: RESTORE_FAILED
+      end
     rescue Faraday::Error => e
       Rails.logger.error("Admin::TombstonesController#restore: #{e.class} #{e.message}")
       redirect_to admin_tombstones_path, alert: RESTORE_FAILED
     end
+
+    private
+
+      # Restore is not one of atlas_rb's typed-error paths (reparent / linked /
+      # Compilation / upload), so a non-2xx response flows back as a plain
+      # Faraday::Response rather than raising — hence the explicit success? check.
+      # A value that doesn't respond to success? is treated as a success; a
+      # transport-level failure (host down) still raises Faraday::Error.
+      def restored?(restorer)
+        response = restorer.restore(params[:id])
+        !response.respond_to?(:success?) || response.success?
+      end
   end
 end
