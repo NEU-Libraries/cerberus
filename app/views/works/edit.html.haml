@@ -12,7 +12,9 @@
   %li.nav-item
     %button#permissions-tab.nav-link{"aria-controls" => "permissions", "aria-selected" => "false", "data-bs-target" => "#permissions", "data-bs-toggle" => "tab", role: "tab", type: "button"} Permissions
   %li.nav-item
-    %button#request-tab.nav-link{"aria-controls" => "request", "aria-selected" => "false", "data-bs-target" => "#request", "data-bs-toggle" => "tab", role: "tab", type: "button"} Request
+    %button#move-tab.nav-link{"aria-controls" => "move", "aria-selected" => "false", "data-bs-target" => "#move", "data-bs-toggle" => "tab", role: "tab", type: "button"} Move
+  %li.nav-item
+    %button#delete-tab.nav-link{"aria-controls" => "delete", "aria-selected" => "false", "data-bs-target" => "#delete", "data-bs-toggle" => "tab", role: "tab", type: "button"} Delete
   %li.nav-item
     %a.nav-link{href: xml_editor_path(params[:id])} XML
   - if show_history
@@ -62,31 +64,33 @@
           .well.p-3.my-3.rounded-3
             = f.button :submit, class: "btn btn-success"
             = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"
-  #request.tab-pane{"aria-labelledby" => "request-tab", role: "tabpanel"}
+  #move.tab-pane{"aria-labelledby" => "move-tab", role: "tabpanel"}
     .py-2.px-1
       %p.text-muted.small.mb-3
-        Ask the DRS staff to withdraw this work or move it to a different collection. Your request is sent to the staff inbox — they will follow up with you there.
+        Ask the DRS staff to move this work to a different collection. Your request is sent to the staff inbox — they will follow up with you there.
       = form_with url: request_change_work_path(params[:id]), method: :post do
+        = hidden_field_tag :request_action, "move"
         .well.p-3.my-3.rounded-3
-          %fieldset
-            %legend.h6.mb-2 What would you like to request?
-            .form-check
-              %input.form-check-input#request_withdraw{type: "radio", name: "request_action", value: "withdraw", checked: true}
-              %label.form-check-label{for: "request_withdraw"}
-                %i.fa-solid.fa-trash-can.me-1{"aria-hidden" => "true"}
-                Withdraw this work
-            .form-check
-              %input.form-check-input#request_move{type: "radio", name: "request_action", value: "move"}
-              %label.form-check-label{for: "request_move"}
-                %i.fa-solid.fa-folder-open.me-1{"aria-hidden" => "true"}
-                Move this work to another collection
-          .mt-3
-            %label.form-label{for: "request_note"} Details
-            %textarea.form-control#request_note{name: "request_note", rows: 3, placeholder: "For a move, name the destination collection (required). For a withdrawal, add an optional reason."}
+          %label.form-label{for: "move_note"} Destination collection
+          %textarea.form-control#move_note{name: "request_note", rows: 3, required: true, placeholder: "Name the collection this work should move to."}
           .mt-3
             %button.btn.btn-primary{type: "submit"}
-              %i.fa-solid.fa-paper-plane.me-1{"aria-hidden" => "true"}
-              Send request
+              %i.fa-solid.fa-folder-open.me-1{"aria-hidden" => "true"}
+              Request move
+            = link_to "Cancel", work_path(params[:id]), class: "btn btn-light"
+  #delete.tab-pane{"aria-labelledby" => "delete-tab", role: "tabpanel"}
+    .py-2.px-1
+      %p.text-muted.small.mb-3
+        Ask the DRS staff to delete (withdraw) this work. Your request is sent to the staff inbox — they will follow up with you there.
+      = form_with url: request_change_work_path(params[:id]), method: :post do
+        = hidden_field_tag :request_action, "withdraw"
+        .well.p-3.my-3.rounded-3
+          %label.form-label{for: "delete_note"} Reason (optional)
+          %textarea.form-control#delete_note{name: "request_note", rows: 3, placeholder: "Optionally, tell the staff why this work should be deleted."}
+          .mt-3
+            %button.btn.btn-danger{type: "submit"}
+              %i.fa-solid.fa-trash-can.me-1{"aria-hidden" => "true"}
+              Request deletion
             = link_to "Cancel", work_path(params[:id]), class: "btn btn-light"
   - if show_history
     #history.tab-pane{"aria-labelledby" => "history-tab", role: "tabpanel"}
