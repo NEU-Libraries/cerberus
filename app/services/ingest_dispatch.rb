@@ -12,6 +12,11 @@
 # - everything       → ContentCreationJob (the primary Blob — enrichment
 #                      never gates or blocks it)
 #
+# Full text rides alongside, for body-text search + the "Full Text Match"
+# snippet: native PDFs and plain text → FullTextExtractionJob here; Office
+# docs get theirs from the PDF rendition instead (PdfRenditionJob enqueues
+# it on the converted PDF, so soffice runs once).
+#
 # `include_primary:` controls that last branch. The deposit/loader paths leave
 # it true (the primary Blob is created here). The admin "replace a file" path
 # passes false: the primary bytes are written separately by Blob.update (NOID
@@ -57,12 +62,20 @@ class IngestDispatch < ApplicationService
     elsif CONVERTIBLE_MIME_TYPES.include?(mime_type)
       PdfRenditionJob.perform_later(@work_id, @staged_path, rendition_key)
     end
+    FullTextExtractionJob.perform_later(@work_id, @staged_path) if extractable_text?
     return unless @include_primary
 
     ContentCreationJob.perform_later(@work_id, @staged_path, @original_filename, @idempotency_key)
   end
 
   private
+
+    # Direct full-text candidates: native PDFs and plain text. Office docs are
+    # excluded here — their text comes from the PDF rendition (PdfRenditionJob),
+    # so soffice converts once.
+    def extractable_text?
+      mime_type == 'application/pdf' || mime_type.start_with?('text/')
+    end
 
     def mime_type
       @mime_type ||= begin

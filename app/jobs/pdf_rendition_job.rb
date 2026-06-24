@@ -49,6 +49,8 @@ class PdfRenditionJob < ApplicationJob
     AtlasRb::Blob.create(work_id, pdf_path, File.basename(pdf_path), idempotency_key: rendition_key)
     # perform_now so the ambient acting NUID carries through (see ApplicationJob).
     IiifAssetsJob.perform_now(work_id, pdf_path)
+    # Office docs get their full text from this rendition (so soffice ran once).
+    FullTextExtractionJob.perform_later(work_id, pdf_path)
   end
 
   private
