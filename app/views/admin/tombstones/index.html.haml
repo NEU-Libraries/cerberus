@@ -1,0 +1,49 @@
+- documents = @response.documents
+
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-trash-can-arrow-up{'aria-hidden' => 'true'}
+      Withdrawn items
+      - if documents.any?
+        %span.admin-registry__count= pluralize(documents.size, 'item')
+    .admin-registry__head-actions
+      %span.admin-registry__subtitle
+        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+        Admin-only
+
+  .p-3
+    %p.text-muted.small.mb-0
+      Every withdrawn (tombstoned) Work, Collection and Community. Restoring reverses the withdrawal — the item becomes discoverable again and its History records the restore. A Collection or Community can only be restored once any withdrawn parent above it is restored.
+
+  - if documents.any?
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table
+        %thead
+          %tr
+            %th{scope: 'col'} Title
+            %th{scope: 'col'} Type
+            %th{scope: 'col'} NUID
+            %th{scope: 'col'}
+        %tbody
+          - documents.each do |doc|
+            %tr
+              %td
+                .admin-registry-table__name= finder_doc_title(doc)
+              %td= finder_type_chip(doc.klass_type)
+              %td
+                %span.admin-registry-table__id= doc.to_param
+              %td.text-end
+                = button_to restore_admin_tombstone_path(doc.to_param), params: { type: doc.klass_type }, class: 'admin-registry-table__edit admin-registry-table__edit--restore', form: { data: { turbo_confirm: "Restore “#{finder_doc_title(doc)}”? It will be discoverable again." } } do
+                  %i.fa-solid.fa-rotate-left{'aria-hidden' => 'true'}
+                  Restore
+
+    - if @response.respond_to?(:total_pages) && @response.total_pages > 1
+      .px-3.pt-2
+        = paginate @response
+  - else
+    .admin-registry__empty
+      %i.fa-solid.fa-trash-can-arrow-up.admin-registry__empty-icon{'aria-hidden' => 'true'}
+      %p.mb-1.fw-semibold.text-body Nothing is withdrawn
+      %p.mb-0.small.text-muted
+        When a Work, Collection or Community is deleted, it appears here so it can be restored.

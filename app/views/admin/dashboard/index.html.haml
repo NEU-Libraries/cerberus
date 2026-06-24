@@ -41,6 +41,16 @@
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
 
+    = link_to admin_tombstones_path, class: 'admin-action-card admin-action-card--restore', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-trash-can-arrow-up{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Restore a withdrawal
+      %span.admin-action-card__desc
+        Review every withdrawn Work, Collection and Community, and reverse a withdrawal — the item becomes discoverable again, with the restore recorded in its History.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
     = link_to admin_impersonation_path, class: 'admin-action-card admin-action-card--impersonation', role: 'listitem' do
       %span.admin-action-card__icon
         %i.fa-solid.fa-user-secret{'aria-hidden' => 'true'}

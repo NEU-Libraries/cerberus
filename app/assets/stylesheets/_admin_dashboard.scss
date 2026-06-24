@@ -147,6 +147,7 @@
   // desaturated brick-red for impersonation (the high-danger surface).
   &--structure    { --admin-action-color: #{$blue}; }
   &--link         { --admin-action-color: #{$success}; }
+  &--restore      { --admin-action-color: #138f76; } // teal-deep: bringing back to life
   &--impersonation { --admin-action-color: #a8322a; }
 }
 

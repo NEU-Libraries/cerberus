@@ -135,6 +135,14 @@ Rails.application.routes.draw do
       end
     end
 
+    # Restore a withdrawal — a registry of every tombstoned Work / Collection /
+    # Community, each with a Restore action (reverses the show-page tombstone via
+    # atlas_rb's operator-only Admin.restore). :id is the resource NOID; the
+    # `type` body param selects the right Admin restorer.
+    resources :tombstones, only: [:index] do
+      member { post :restore }
+    end
+
     # Impersonation — a hub action surface (GET) hosting the start form, then
     # begin acting-as (write) or view-as (read-only) for a target NUID; the
     # DELETE (reusing admin_impersonation_path) ends whichever mode is active.
