@@ -22,11 +22,14 @@
 
       <%# "Full Text Match" — a Solr highlight fragment from the document body
           (all_text_timv), shown only when the query matched inside the text.
-          List view only: the gallery component is image-forward and omits it. %>
-      <% if @document.has_highlight_field?('all_text_timv') %>
+          List view only: the gallery component is image-forward and omits it.
+          Pick the first non-empty fragment: the highlighter can emit a leading
+          empty fragment (notably with hl.fragsize), which .first would render blank. %>
+      <% if @document.has_highlight_field?('all_text_timv') &&
+            (fragment = @document.highlight_field('all_text_timv').find(&:present?)) %>
         <div class="full-text-match">
           <div class="full-text-match__label">Full Text Match</div>
-          <div class="full-text-match__snippet">… <%= sanitize(@document.highlight_field('all_text_timv').first, tags: %w[em]) %> …</div>
+          <div class="full-text-match__snippet">… <%= sanitize(fragment, tags: %w[em]) %> …</div>
         </div>
       <% end %>
 
