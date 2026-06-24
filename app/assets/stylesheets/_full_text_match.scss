@@ -1,0 +1,37 @@
+// ---------------------------------------------------------------------
+// "Full Text Match" — a Solr highlight fragment from a document's body
+// (all_text_timv), shown under a result's metadata in the LIST view only
+// (the gallery is image-forward and omits it). Quiet archival register: a
+// small uppercase label over a .well-tinted panel, with the matched term
+// picked out in the desaturated Cerberus blue. v1 parity: the term is
+// upright + bold, not italic, so it reads as emphasis rather than a title.
+// ---------------------------------------------------------------------
+
+.full-text-match {
+  margin-top: 0.5rem;
+
+  &__label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: $gray-600;
+    margin-bottom: 0.25rem;
+  }
+
+  &__snippet {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: $gray-800;
+    background-color: #ecf0f1; // matches .well
+    border: 1px solid $gray-300;
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+
+    em {
+      font-style: normal;
+      font-weight: 600;
+      color: $blue;
+    }
+  }
+}

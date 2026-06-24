@@ -26,12 +26,14 @@ class CatalogController < ApplicationController
     # config.raw_endpoint.enabled = false
 
     ## Default parameters to send to solr for all search-like requests. See also SearchBuilder#processed_parameters
+    # hl*: body-text highlighting for the "Full Text Match" snippet, over the
+    # stored all_text_timv field Atlas projects from extracted document text.
     config.default_solr_params = {
-      rows: 10,
-      fq:   ['-internal_resource_tesim:FileSet',
-             '-internal_resource_tesim:Blob',
-             '-internal_resource_tesim:Delegate',
-             '-tombstoned_bsi:true']
+      rows: 10, hl: true, 'hl.fl': 'all_text_timv', 'hl.fragsize': 200,
+      fq: ['-internal_resource_tesim:FileSet',
+           '-internal_resource_tesim:Blob',
+           '-internal_resource_tesim:Delegate',
+           '-tombstoned_bsi:true']
     }
 
     # solr path which will be added to solr base url before the other solr params.
