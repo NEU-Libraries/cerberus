@@ -20,6 +20,13 @@
       %a.nav-link{href: "#{public_send("edit_#{@klass.downcase}_path", @resource.id)}#advanced"} Advanced
   %li.nav-item
     %a.nav-link{href: "#{public_send("edit_#{@klass.downcase}_path", @resource.id)}#permissions"} Permissions
+  -# Move / Delete are Works-only request tabs (containers have no request_change
+  -# route); link back to the edit page's panes via the tab-hash fragment.
+  - if @klass == 'Work'
+    %li.nav-item
+      %a.nav-link{href: "#{public_send("edit_#{@klass.downcase}_path", @resource.id)}#move"} Move
+    %li.nav-item
+      %a.nav-link{href: "#{public_send("edit_#{@klass.downcase}_path", @resource.id)}#delete"} Delete
   %li.nav-item
     %a.nav-link.active{href: "#"} XML
   - if can?(:read, :audit_event)
