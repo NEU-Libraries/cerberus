@@ -39,6 +39,10 @@ Rails.application.routes.draw do
       get :metadata
       patch :metadata, action: :update_metadata
       post :tombstone
+      # An editor-submitted request to withdraw or move the work — notifies the
+      # DRS staff inbox (no direct mutation; staff fulfill it with the tombstone
+      # / re-parent tools). Edit-gated via authorize_resource_writes!.
+      post :request_change
     end
   end
   # People / profile pages. :id is the Person's NOID (opaque, public-safe — the

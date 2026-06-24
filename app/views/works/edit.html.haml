@@ -12,6 +12,8 @@
   %li.nav-item
     %button#permissions-tab.nav-link{"aria-controls" => "permissions", "aria-selected" => "false", "data-bs-target" => "#permissions", "data-bs-toggle" => "tab", role: "tab", type: "button"} Permissions
   %li.nav-item
+    %button#request-tab.nav-link{"aria-controls" => "request", "aria-selected" => "false", "data-bs-target" => "#request", "data-bs-toggle" => "tab", role: "tab", type: "button"} Request
+  %li.nav-item
     %a.nav-link{href: xml_editor_path(params[:id])} XML
   - if show_history
     %li.nav-item
@@ -60,6 +62,32 @@
           .well.p-3.my-3.rounded-3
             = f.button :submit, class: "btn btn-success"
             = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"
+  #request.tab-pane{"aria-labelledby" => "request-tab", role: "tabpanel"}
+    .py-2.px-1
+      %p.text-muted.small.mb-3
+        Ask the DRS staff to withdraw this work or move it to a different collection. Your request is sent to the staff inbox — they will follow up with you there.
+      = form_with url: request_change_work_path(params[:id]), method: :post do
+        .well.p-3.my-3.rounded-3
+          %fieldset
+            %legend.h6.mb-2 What would you like to request?
+            .form-check
+              %input.form-check-input#request_withdraw{type: "radio", name: "request_action", value: "withdraw", checked: true}
+              %label.form-check-label{for: "request_withdraw"}
+                %i.fa-solid.fa-trash-can.me-1{"aria-hidden" => "true"}
+                Withdraw this work
+            .form-check
+              %input.form-check-input#request_move{type: "radio", name: "request_action", value: "move"}
+              %label.form-check-label{for: "request_move"}
+                %i.fa-solid.fa-folder-open.me-1{"aria-hidden" => "true"}
+                Move this work to another collection
+          .mt-3
+            %label.form-label{for: "request_note"} Details
+            %textarea.form-control#request_note{name: "request_note", rows: 3, placeholder: "For a move, name the destination collection (required). For a withdrawal, add an optional reason."}
+          .mt-3
+            %button.btn.btn-primary{type: "submit"}
+              %i.fa-solid.fa-paper-plane.me-1{"aria-hidden" => "true"}
+              Send request
+            = link_to "Cancel", work_path(params[:id]), class: "btn btn-light"
   - if show_history
     #history.tab-pane{"aria-labelledby" => "history-tab", role: "tabpanel"}
       = render 'audit_events/history', resource_id: params[:id]
