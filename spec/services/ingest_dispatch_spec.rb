@@ -81,6 +81,26 @@ RSpec.describe IngestDispatch do
     expect(keys.first).to match(/\A\h{8}-\h{4}-\h{4}-\h{4}-\h{12}\z/)
   end
 
+  context 'full-text dispatch' do
+    it 'enqueues FullTextExtractionJob for a native PDF' do
+      path = fixtures.join('example.pdf')
+      expect { dispatch(path) }.to have_enqueued_job(FullTextExtractionJob).with(work_id, path.to_s)
+    end
+
+    it 'enqueues FullTextExtractionJob for plain text' do
+      path = fixtures.join('plain.txt')
+      expect { dispatch(path) }.to have_enqueued_job(FullTextExtractionJob).with(work_id, path.to_s)
+    end
+
+    it 'does not enqueue full text for images (no text layer)' do
+      expect { dispatch(fixtures.join('image.png')) }.to not_have_enqueued_job(FullTextExtractionJob)
+    end
+
+    it 'does not enqueue full text directly for Office docs (the PDF rendition handles it)' do
+      expect { dispatch(fixtures.join('example.docx')) }.to not_have_enqueued_job(FullTextExtractionJob)
+    end
+  end
+
   context 'with include_primary: false (the replace path)' do
     def dispatch_derivatives_only(path, name = File.basename(path))
       described_class.call(work_id: work_id, staged_path: path.to_s, original_filename: name,

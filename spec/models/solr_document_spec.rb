@@ -46,6 +46,24 @@ describe SolrDocument do
     end
   end
 
+  describe 'highlight access (the "Full Text Match" snippet data path)' do
+    # The snippet reads Solr highlight fragments for all_text_timv off the
+    # document's response; verify the wiring the list component depends on.
+    let(:response) do
+      { 'highlighting' => { '1' => { 'all_text_timv' => ['… running <em>Boston</em> on the …'] } } }
+    end
+
+    it 'exposes highlight fragments for a matched field' do
+      doc = SolrDocument.new({ id: '1' }, response)
+      expect(doc.has_highlight_field?('all_text_timv')).to be(true)
+      expect(doc.highlight_field('all_text_timv').first).to include('<em>Boston</em>')
+    end
+
+    it 'reports no highlight when the body did not match' do
+      expect(SolrDocument.new({ id: '1' }, {}).has_highlight_field?('all_text_timv')).to be(false)
+    end
+  end
+
   describe '#personal_root?' do
     it 'is true for a JSON-boolean or string personal_root_bsi' do
       expect(SolrDocument.new(id: '1', personal_root_bsi: true).personal_root?).to be(true)
