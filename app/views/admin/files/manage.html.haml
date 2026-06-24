@@ -1,0 +1,84 @@
+.admin-actions.my-3
+  = link_to admin_files_path, class: 'admin-actions__back' do
+    %i.fa-solid.fa-arrow-left-long{'aria-hidden' => 'true'}
+    Back to file search
+
+  %header.admin-actions__head
+    %span.admin-actions__title
+      %i.fa-solid.fa-arrows-rotate{'aria-hidden' => 'true'}
+      Replace a file
+    %span.admin-actions__subtitle
+      %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+      Admin-only
+
+  %p.admin-actions__lede
+    Replacing a file in
+    %strong= @work.title
+    adds a new version and keeps the same identifier — nothing is overwritten. The original filename is preserved; prior versions stay below, downloadable and revertible.
+
+- if @blobs.empty?
+  .admin-registry.my-3
+    .admin-registry__empty
+      %i.fa-solid.fa-file.admin-registry__empty-icon{'aria-hidden' => 'true'}
+      %p.mb-0.small.text-muted This work has no replaceable files.
+
+- @blobs.each do |row|
+  - asset = row[:asset]
+  - versions = row[:versions]
+  .admin-registry.my-3
+    %header.admin-registry__head
+      %span.admin-registry__title
+        %span.me-1{class: file_type_icon(asset.mime_type), 'aria-hidden' => 'true'}
+        = asset.label.presence || asset[:use] || 'File'
+        - if versions.any?
+          %span.admin-registry__count= pluralize(versions.size, 'version')
+      .admin-registry__head-actions
+        - if asset[:size]
+          %span.admin-registry__subtitle= number_to_human_size(asset[:size])
+        %span.admin-registry-table__id= asset.noid
+
+    .admin-registry__body
+      = form_with url: admin_files_replace_path, method: :post, multipart: true do
+        = hidden_field_tag :work_id, params[:work_id]
+        = hidden_field_tag :blob_noid, asset.noid
+        .row.g-2.align-items-end
+          .col-sm
+            %label.admin-registry-form__label{for: "binary-#{asset.noid}"}
+              %i.fa-solid.fa-arrow-up-from-bracket{'aria-hidden' => 'true'}
+              Upload a replacement
+            %input.form-control.form-control-sm{id: "binary-#{asset.noid}", name: 'binary', type: 'file', required: true}
+          .col-sm-auto
+            %button.btn.btn-primary.btn-sm{type: 'submit'}
+              %i.fa-solid.fa-arrows-rotate.me-1{'aria-hidden' => 'true'}
+              Replace file
+        %p.admin-registry-form__hint.mt-1
+          The current file becomes the newest version below; older versions remain retrievable.
+
+    - if versions.any?
+      .table-responsive
+        %table.table.table-borderless.admin-registry-table
+          %thead
+            %tr
+              %th{scope: 'col'} Version
+              %th{scope: 'col'} When
+              %th{scope: 'col'} Who
+              %th{scope: 'col'} Fixity
+              %th.text-end{scope: 'col'} Actions
+          %tbody
+            - versions.each_with_index do |version, i|
+              %tr
+                %td
+                  %span.admin-registry-table__id= version['version_id']
+                  - if i.zero?
+                    %span.badge.rounded-pill.text-bg-light.ms-1 current
+                %td.text-muted.small{style: 'font-variant-numeric: tabular-nums'}= file_version_when(version['created'])
+                %td= file_version_who(version['actor_nuid'])
+                %td= file_version_digest(version['digest'])
+                %td.text-end
+                  = link_to admin_file_version_content_path(asset.noid, version['version_id']), class: 'admin-registry-table__edit', data: { turbo: false } do
+                    %i.fa-solid.fa-download{'aria-hidden' => 'true'}
+                    Download
+                  - unless i.zero?
+                    = button_to admin_files_rollback_path, method: :post, params: { work_id: params[:work_id], blob_noid: asset.noid, version_id: version['version_id'] }, class: 'admin-registry-table__edit admin-registry-table__edit--restore ms-1', form_class: 'd-inline' do
+                      %i.fa-solid.fa-rotate-left{'aria-hidden' => 'true'}
+                      Revert

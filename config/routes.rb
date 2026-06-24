@@ -154,6 +154,17 @@ Rails.application.routes.draw do
     post   'act_as',        to: 'impersonations#create_acting_as', as: :act_as
     post   'view_as',       to: 'impersonations#create_view_as',   as: :view_as
     delete 'impersonation', to: 'impersonations#destroy'
+
+    # Replace a file — find a Work, then non-destructively replace any of its
+    # Blobs (Blob.update appends a new OCFL version, NOID preserved), view each
+    # Blob's version history, and revert to a prior version. File-version content
+    # streaming lives in its own Live controller (file_versions#content).
+    get  'files',          to: 'files#index'
+    get  'files/manage',   to: 'files#manage',   as: :files_manage
+    post 'files/replace',  to: 'files#replace',  as: :files_replace
+    post 'files/rollback', to: 'files#rollback', as: :files_rollback
+    get  'files/:id/versions/:version_id/content', to: 'file_versions#content',
+                                                   as: :file_version_content
   end
 
   get '/downloads/:id', to: 'downloads#show', as: :download

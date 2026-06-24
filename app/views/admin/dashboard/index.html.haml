@@ -60,3 +60,13 @@
       %span.admin-action-card__cta
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
+    = link_to admin_files_path, class: 'admin-action-card admin-action-card--files', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-arrows-rotate{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Replace a file
+      %span.admin-action-card__desc
+        Replace a Work's file with a new version, keeping the same identifier. Nothing is overwritten — prior versions stay in the history, downloadable and revertible.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
