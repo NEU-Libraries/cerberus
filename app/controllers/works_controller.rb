@@ -7,6 +7,7 @@ class WorksController < ApplicationController
   include WorkDeposit
   include WorkBreadcrumbs
   include WorkChangeRequest
+  include UploadStaging
   # The weighted deposit fork's context queries (the depositor's own workspace
   # Collections, a community's publish showcases via ShowcaseFinder) run through
   # the Blacklight SearchBuilder, so this controller needs the catalog config —
@@ -199,13 +200,5 @@ class WorksController < ApplicationController
       return unless AtlasRb::Work.find(params[:id]).in_progress
 
       redirect_to work_path(params[:id]), alert: IN_PROGRESS_NOTICE
-    end
-
-    def stage_upload(file, work_id)
-      dir = File.join(Rails.application.config.x.cerberus.uploads_root, work_id.to_s)
-      FileUtils.mkdir_p(dir)
-      dest = File.join(dir, file.original_filename)
-      FileUtils.cp(file.tempfile.path.presence || file.path, dest)
-      dest
     end
 end

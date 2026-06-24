@@ -12,6 +12,12 @@
 # - everything       → ContentCreationJob (the primary Blob — enrichment
 #                      never gates or blocks it)
 #
+# `include_primary:` controls that last branch. The deposit/loader paths leave
+# it true (the primary Blob is created here). The admin "replace a file" path
+# passes false: the primary bytes are written separately by Blob.update (NOID
+# preserved), so only the type-routed *derivative* refresh is wanted here —
+# never a second ContentCreationJob/Blob.create.
+#
 # No derivative_widths pass through here: deposits get thumbnails only at
 # upload time. Small/medium/large are opt-in download renditions chosen on
 # the metadata page (DepositDerivativesJob), and per policy documents get
@@ -37,11 +43,12 @@ class IngestDispatch < ApplicationService
     application/x-tika-msoffice
   ].freeze
 
-  def initialize(work_id:, staged_path:, original_filename:, idempotency_key:)
+  def initialize(work_id:, staged_path:, original_filename:, idempotency_key:, include_primary: true)
     @work_id = work_id
     @staged_path = staged_path
     @original_filename = original_filename
     @idempotency_key = idempotency_key
+    @include_primary = include_primary
   end
 
   def call
@@ -50,6 +57,8 @@ class IngestDispatch < ApplicationService
     elsif CONVERTIBLE_MIME_TYPES.include?(mime_type)
       PdfRenditionJob.perform_later(@work_id, @staged_path, rendition_key)
     end
+    return unless @include_primary
+
     ContentCreationJob.perform_later(@work_id, @staged_path, @original_filename, @idempotency_key)
   end
 
