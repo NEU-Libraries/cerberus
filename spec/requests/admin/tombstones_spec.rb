@@ -60,10 +60,10 @@ RSpec.describe 'Admin::Tombstones', type: :request do
         expect(response.body).to include('Withdrawn Thesis', 'abc', 'Old Community', 'Restore')
       end
 
-      it 'shows the empty state when nothing is withdrawn' do
+      it 'shows the empty state when nothing is tombstoned' do
         allow(TombstonedItems).to receive(:call).and_return(fake_results)
         get '/admin/tombstones'
-        expect(response.body).to include('Nothing is withdrawn')
+        expect(response.body).to include('Nothing is tombstoned')
       end
     end
 
@@ -92,7 +92,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
       it 'reports a failure when Atlas refuses (e.g. a withdrawn parent)' do
         allow(AtlasRb::Admin::Collection).to receive(:restore).and_return(instance_double(Faraday::Response, success?: false))
         post '/admin/tombstones/abc/restore', params: { type: 'Collection' }
-        expect(flash[:alert]).to include('withdrawn parent')
+        expect(flash[:alert]).to include('tombstoned parent')
       end
     end
   end

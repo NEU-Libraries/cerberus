@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 module Admin
-  # Restore-a-withdrawal surface. The admin-only counterpart to the tombstone
-  # ("Delete") action on the show pages: it lists every withdrawn Work,
-  # Collection and Community, and reverses a withdrawal on request.
+  # Restore-a-tombstone surface. The admin-only counterpart to the tombstone
+  # ("Delete") action on the show pages: it lists every tombstoned Work,
+  # Collection and Community, and reverses a tombstone on request.
   #
   # atlas_rb already ships the backend wiring — AtlasRb::Admin::{Work,Collection,
   # Community}.restore — under its operator-only Admin namespace; this is purely
@@ -27,7 +27,7 @@ module Admin
       'Community'  => AtlasRb::Admin::Community
     }.freeze
 
-    RESTORE_FAILED = 'Restore could not be completed — a withdrawn parent must be ' \
+    RESTORE_FAILED = 'Restore could not be completed — a tombstoned parent must be ' \
                      'restored first. Restore that, then try again.'
 
     def index
@@ -39,7 +39,7 @@ module Admin
       return redirect_to(admin_tombstones_path, alert: 'Unknown resource type — nothing was restored.') if restorer.nil?
 
       if restored?(restorer)
-        redirect_to admin_tombstones_path, notice: 'Withdrawal reversed — the item is live again.'
+        redirect_to admin_tombstones_path, notice: 'Tombstone reversed — the item is live again.'
       else
         redirect_to admin_tombstones_path, alert: RESTORE_FAILED
       end

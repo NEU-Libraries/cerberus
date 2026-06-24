@@ -4,7 +4,7 @@
   %header.admin-registry__head
     %span.admin-registry__title
       %i.fa-solid.fa-trash-can-arrow-up{'aria-hidden' => 'true'}
-      Withdrawn items
+      Tombstoned items
       - if documents.any?
         %span.admin-registry__count= pluralize(documents.size, 'item')
     .admin-registry__head-actions
@@ -14,7 +14,7 @@
 
   .p-3
     %p.text-muted.small.mb-0
-      Every withdrawn (tombstoned) Work, Collection and Community. Restoring reverses the withdrawal — the item becomes discoverable again and its History records the restore. A Collection or Community can only be restored once any withdrawn parent above it is restored.
+      Every tombstoned Work, Collection and Community. Restoring reverses the tombstone — the item becomes discoverable again and its History records the restore. A Collection or Community can only be restored once any tombstoned parent above it is restored.
 
   - if documents.any?
     .table-responsive
@@ -44,6 +44,6 @@
   - else
     .admin-registry__empty
       %i.fa-solid.fa-trash-can-arrow-up.admin-registry__empty-icon{'aria-hidden' => 'true'}
-      %p.mb-1.fw-semibold.text-body Nothing is withdrawn
+      %p.mb-1.fw-semibold.text-body Nothing is tombstoned
       %p.mb-0.small.text-muted
-        When a Work, Collection or Community is deleted, it appears here so it can be restored.
+        When a Work, Collection or Community is tombstoned, it appears here so it can be restored.
