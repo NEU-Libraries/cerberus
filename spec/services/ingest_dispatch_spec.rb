@@ -80,4 +80,26 @@ RSpec.describe IngestDispatch do
     expect(keys.first).not_to eq(idempotency_key)
     expect(keys.first).to match(/\A\h{8}-\h{4}-\h{4}-\h{4}-\h{12}\z/)
   end
+
+  context 'with include_primary: false (the replace path)' do
+    def dispatch_derivatives_only(path, name = File.basename(path))
+      described_class.call(work_id: work_id, staged_path: path.to_s, original_filename: name,
+                           idempotency_key: idempotency_key, include_primary: false)
+    end
+
+    it 'refreshes image derivatives but never creates a second primary Blob' do
+      path = fixtures.join('image.png')
+      expect { dispatch_derivatives_only(path) }
+        .to have_enqueued_job(IiifAssetsJob).with(work_id, path.to_s)
+        .and not_have_enqueued_job(ContentCreationJob)
+    end
+
+    it 'enqueues nothing for an unenriched type (no derivatives, no primary)' do
+      path = fixtures.join('plain.txt')
+      expect { dispatch_derivatives_only(path) }
+        .to not_have_enqueued_job(ContentCreationJob)
+        .and not_have_enqueued_job(IiifAssetsJob)
+        .and not_have_enqueued_job(PdfRenditionJob)
+    end
+  end
 end
