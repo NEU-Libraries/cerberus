@@ -176,6 +176,7 @@ class WorksController < ApplicationController
     def prepare_show_view
       @mods = AtlasRb::Work.mods(params[:id], 'html')
       @files = AtlasRb::Work.assets(params[:id])
+      @scholar = GoogleScholarMetadata.for(work: @work, permissions: @permissions, files: @files)
       # The page-turning viewer mounts only for multipage works: two or
       # more positioned page FileSets (the ordered listing is the signal).
       @multipage = AtlasRb::Work.file_sets(params[:id])
