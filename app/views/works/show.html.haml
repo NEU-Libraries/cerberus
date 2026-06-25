@@ -3,6 +3,8 @@
 - content_for(:container_header) do
   = render 'shared/breadcrumbs'
 
+= render 'scholar_metadata', scholar: @scholar
+
 .container
   .clearfix.pt-1
   .row

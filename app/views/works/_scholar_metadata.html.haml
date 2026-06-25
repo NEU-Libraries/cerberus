@@ -1,0 +1,20 @@
+-# Highwire Press / Google Scholar citation tags in the Work show <head>.
+-# Gated to public, scholarly-genre works (GoogleScholarMetadata#emit?); built
+-# entirely from the indexed Solr fields, no MODS parsing. The site-wide
+-# robots noindex stays as-is — these tags sit ready until production enables
+-# indexing.
+- if scholar.emit?
+  - content_for(:head) do
+    = tag.meta(name: 'citation_title', content: scholar.title)
+    - scholar.authors.each do |author|
+      = tag.meta(name: 'citation_author', content: author)
+    - if scholar.publication_date
+      = tag.meta(name: 'citation_publication_date', content: scholar.publication_date)
+    - if scholar.pdf_blob_noid
+      - pdf_url = download_url(scholar.pdf_blob_noid)
+      = tag.meta(name: 'citation_pdf_url', content: pdf_url)
+      = tag.link(rel: 'alternate', type: 'application/pdf', href: pdf_url, title: scholar.title)
+    - if scholar.abstract
+      = tag.meta(name: 'description', content: scholar.abstract)
+    - if scholar.keywords.any?
+      = tag.meta(name: 'keywords', content: scholar.keywords.join(', '))
