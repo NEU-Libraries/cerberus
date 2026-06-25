@@ -2,8 +2,8 @@
 
 # Extracts a content document's body text and PATCHes it to the Work as derived
 # full text (AtlasRb::Work.set_full_text → Atlas projects it onto the Work's
-# all_text_timv Solr field, powering body-text search + the "Full Text Match"
-# result snippet). The v2 counterpart to v1's pdftotext/Tika indexing — but in
+# dedicated full_text_tsim Solr field, powering body-text search + the "Full Text
+# Match" result snippet). The v2 counterpart to v1's pdftotext/Tika indexing — but in
 # the right layer: Cerberus extracts (it has the tooling + staged bytes + jobs),
 # Atlas stores + indexes (it owns Solr and durability across reindex).
 #

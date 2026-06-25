@@ -47,20 +47,20 @@ describe SolrDocument do
   end
 
   describe 'highlight access (the "Full Text Match" snippet data path)' do
-    # The snippet reads Solr highlight fragments for all_text_timv off the
+    # The snippet reads Solr highlight fragments for full_text_tsim off the
     # document's response; verify the wiring the list component depends on.
     let(:response) do
-      { 'highlighting' => { '1' => { 'all_text_timv' => ['… running <em>Boston</em> on the …'] } } }
+      { 'highlighting' => { '1' => { 'full_text_tsim' => ['… running <em>Boston</em> on the …'] } } }
     end
 
     it 'exposes highlight fragments for a matched field' do
       doc = SolrDocument.new({ id: '1' }, response)
-      expect(doc.has_highlight_field?('all_text_timv')).to be(true)
-      expect(doc.highlight_field('all_text_timv').first).to include('<em>Boston</em>')
+      expect(doc.has_highlight_field?('full_text_tsim')).to be(true)
+      expect(doc.highlight_field('full_text_tsim').first).to include('<em>Boston</em>')
     end
 
     it 'reports no highlight when the body did not match' do
-      expect(SolrDocument.new({ id: '1' }, {}).has_highlight_field?('all_text_timv')).to be(false)
+      expect(SolrDocument.new({ id: '1' }, {}).has_highlight_field?('full_text_tsim')).to be(false)
     end
   end
 

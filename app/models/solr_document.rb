@@ -2,7 +2,7 @@
 
 class SolrDocument
   # Provides highlight_field / has_highlight_field? (used for the "Full Text
-  # Match" result snippet over all_text_timv) — both defined on this base module.
+  # Match" result snippet over full_text_tsim) — both defined on this base module.
   include Blacklight::Solr::Document
 
   # self.unique_key = 'id'
