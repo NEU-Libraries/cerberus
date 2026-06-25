@@ -30,6 +30,8 @@ Rails.application.routes.draw do
   resources :collections, except: [:destroy] do
     member do
       post :tombstone
+      # Bulk metadata export (streamed ZIP) — dedicated Live controller, like sets.
+      get 'export', to: 'collection_exports#show'
     end
   end
   resources :works, except: %i[index destroy] do
@@ -100,6 +102,7 @@ Rails.application.routes.draw do
     end
     member do
       get    'download',                   to: 'set_downloads#show',     as: :download
+      get    'export',                     to: 'set_exports#show',       as: :export
       get    'works_count',                to: 'sets#works_count',       as: :works_count
       post   'collections',                to: 'sets#add_collection',    as: :add_collection
       delete 'collections/:collection_id', to: 'sets#remove_collection', as: :remove_collection
