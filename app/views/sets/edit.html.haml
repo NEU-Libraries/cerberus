@@ -15,6 +15,9 @@
     - if @owned
       %li.nav-item
         %button#sharing-tab.nav-link{'aria-controls' => 'sharing', 'aria-selected' => 'false', 'data-bs-target' => '#sharing', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Sharing
+    - if current_user&.loader_tier?
+      %li.nav-item
+        %button#export-tab.nav-link{'aria-controls' => 'export', 'aria-selected' => 'false', 'data-bs-target' => '#export', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Export
 
   .tab-content.pt-1
     #details.tab-pane.active{'aria-labelledby' => 'details-tab', role: 'tabpanel'}
@@ -22,3 +25,6 @@
     - if @owned
       #sharing.tab-pane{'aria-labelledby' => 'sharing-tab', role: 'tabpanel'}
         = render 'sharing'
+    - if current_user&.loader_tier?
+      #export.tab-pane{'aria-labelledby' => 'export-tab', role: 'tabpanel'}
+        = render 'export', set_id: @set['id']
