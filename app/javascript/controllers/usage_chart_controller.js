@@ -12,9 +12,13 @@ export default class extends Controller {
   }
 
   async connect() {
-    await import("Chart.bundle") // registers window.Chart
-    const { default: Chartkick } = await import("chartkick")
-    if (window.Chart) Chartkick.use(window.Chart)
+    // Both are UMD bundles that assign globals (window.Chart / window.Chartkick)
+    // rather than ESM exports — load Chart.js first so chartkick adopts it.
+    await import("Chart.bundle")
+    await import("chartkick")
+    const Chartkick = window.Chartkick
+    if (!Chartkick) return
+    if (Chartkick.use && window.Chart) Chartkick.use(window.Chart)
 
     const ChartClass = this.kindValue === "column" ? Chartkick.ColumnChart : Chartkick.LineChart
     this.chart = new ChartClass(this.element, this.datasetValue, {
