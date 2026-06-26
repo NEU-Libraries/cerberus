@@ -41,6 +41,16 @@
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
 
+    = link_to admin_impressions_path, class: 'admin-action-card admin-action-card--analytics', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-chart-line{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Usage analytics
+      %span.admin-action-card__desc
+        Repository-wide views and downloads over time — top files and collections, unique visitors, and a human/bot segment toggle, with CSV / Excel export of the tables.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
     = link_to admin_tombstones_path, class: 'admin-action-card admin-action-card--restore', role: 'listitem' do
       %span.admin-action-card__icon
         %i.fa-solid.fa-trash-can-arrow-up{'aria-hidden' => 'true'}

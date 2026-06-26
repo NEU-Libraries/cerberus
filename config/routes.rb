@@ -117,6 +117,11 @@ Rails.application.routes.draw do
     root to: 'dashboard#index'
     resources :loaders, only: [:index, :new, :create, :edit, :update], param: :slug
 
+    # Usage analytics — repository-wide impression rollups (views/downloads),
+    # with CSV/Excel export of the top-N tables (the quarterly-report artifact).
+    get 'impressions',        to: 'impressions#index', as: :impressions
+    get 'impressions/export', to: 'impressions#export', as: :impressions_export
+
     # Re-parent / Move — a self-contained finder: index (find the node) →
     # choose_parent (pick its new parent) → confirm (preview) → move (perform).
     get  'reparent',               to: 'reparent#index'
