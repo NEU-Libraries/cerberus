@@ -20,8 +20,7 @@ class WorksController < ApplicationController
   IN_PROGRESS_NOTICE = 'This work is still being processed and cannot be edited yet.'
   PUBLISH_UNAVAILABLE = 'That publish destination is unavailable. ' \
                         'Please try again or deposit to your workspace.'
-  UNSUPPORTED_AV = 'DRS streams H.264/AAC video and AAC/MP3 audio. Please remux your ' \
-                   'file to those codecs before uploading.'
+  UNSUPPORTED_AV = 'DRS streams H.264/AAC video and AAC/MP3 audio — please convert your file first.'
 
   before_action :authorize_show!, only: [:downloads, :manifest]
   authorize_resource_writes!(extra_edit: %i[metadata update_metadata request_change])
@@ -187,12 +186,7 @@ class WorksController < ApplicationController
       # more positioned page FileSets (the ordered listing is the signal).
       @multipage = AtlasRb::Work.file_sets(params[:id])
                                 .count { |page| page['position'].present? } >= 2
-      # The browser-playable A/V Blob (the master if already MP4/MP3, else the
-      # ingest MP4 rendition). nil until that exists → falls back to the
-      # thumbnail/download (the player appears once the rendition lands).
-      @av_file = @files.find do |file|
-        file[:uri].blank? && MediaRemux::PLAYABLE_CONTAINER_MIMES.include?(file.mime_type.to_s)
-      end
+      @av_file = MediaRemux.playable_file(@files)
       @can_tombstone = current_ability.can?(:tombstone,
                                             solr_doc_from_permissions(@permissions, klass: 'Work'))
       work_breadcrumbs(params[:id])

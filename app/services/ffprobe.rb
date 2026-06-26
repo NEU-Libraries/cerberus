@@ -36,14 +36,34 @@ class Ffprobe
 
   # @return [Boolean] true iff every real media stream is browser-universal.
   def self.safe?(path)
-    descriptors = streams(path)
-    # Exclude cover-art / attached-picture streams (e.g. mjpeg album art in an
-    # MP3) — they're not playable video and must not flunk the gate.
-    video = descriptors.select { |s| s['codec_type'] == 'video' && s.dig('disposition', 'attached_pic').to_i.zero? }
-    audio = descriptors.select { |s| s['codec_type'] == 'audio' }
+    video, audio = media_streams(streams(path))
     return false if video.empty? && audio.empty?
 
-    video.all? { |s| s['codec_name'] == SAFE_VIDEO_CODEC && s['pix_fmt'] == SAFE_VIDEO_PIX_FMT } &&
-      audio.all? { |s| SAFE_AUDIO_CODECS.include?(s['codec_name']) }
+    (video + audio).all? { |stream| safe_stream?(stream) }
+  end
+
+  # Partition into real video (cover-art excluded) and audio streams.
+  def self.media_streams(descriptors)
+    video = descriptors.select { |s| video_stream?(s) }
+    audio = descriptors.select { |s| s['codec_type'] == 'audio' }
+    [video, audio]
+  end
+
+  def self.safe_stream?(stream)
+    stream['codec_type'] == 'video' ? safe_video?(stream) : safe_audio?(stream)
+  end
+
+  # A real video stream — excludes cover-art / attached-picture streams
+  # (e.g. mjpeg album art in an MP3), which mustn't flunk the gate.
+  def self.video_stream?(stream)
+    stream['codec_type'] == 'video' && stream.dig('disposition', 'attached_pic').to_i.zero?
+  end
+
+  def self.safe_video?(stream)
+    stream['codec_name'] == SAFE_VIDEO_CODEC && stream['pix_fmt'] == SAFE_VIDEO_PIX_FMT
+  end
+
+  def self.safe_audio?(stream)
+    SAFE_AUDIO_CODECS.include?(stream['codec_name'])
   end
 end

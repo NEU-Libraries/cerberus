@@ -16,7 +16,14 @@ class MediaRemux
   end
 
   def self.remux_needed?(mime_type)
-    !PLAYABLE_CONTAINER_MIMES.include?(mime_type)
+    PLAYABLE_CONTAINER_MIMES.exclude?(mime_type)
+  end
+
+  # The browser-playable A/V Blob among a work's assets — a Blob (not a Delegate)
+  # in a universal container (the master if already MP4/MP3, else the ingest MP4
+  # rendition). nil until one exists. The work-show player reads this.
+  def self.playable_file(files)
+    files.find { |file| file[:uri].blank? && PLAYABLE_CONTAINER_MIMES.include?(file.mime_type.to_s) }
   end
 
   # Lossless container swap to MP4, moov atom at the front for instant Range
@@ -34,9 +41,9 @@ class MediaRemux
     target_path
   end
 
-  def self.run(*args)
+  def self.run(*)
     _out, err, status = Open3.capture3(
-      'timeout', '--kill-after=10s', TIMEOUT, 'ffmpeg', '-y', '-loglevel', 'error', *args
+      'timeout', '--kill-after=10s', TIMEOUT, 'ffmpeg', '-y', '-loglevel', 'error', *
     )
     raise "ffmpeg failed (#{status.exitstatus}): #{err}" unless status.success?
   end

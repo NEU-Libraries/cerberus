@@ -4,12 +4,12 @@
 # download twin is DownloadsController (attachment, no Range); this one honours
 # HTTP Range so the browser can seek.
 #
-# v2's bytes live in Atlas, which now serves byte ranges (atlas_rb 1.8.2
+# v2's bytes live in Atlas, which serves byte ranges (atlas_rb 1.8.2
 # Blob.content(range:)). Under ActionController::Live the response commits on the
 # first stream write, so the 206 status + Content-Range must be set BEFORE
-# streaming — we compute them from the client's Range + the blob size (rather
-# than relaying Atlas's post-stream headers, which arrive too late) and forward
-# the same Range to Atlas so only the requested slice crosses the wire.
+# streaming — we compute them from the client's Range + the blob size (MediaRange)
+# rather than relaying Atlas's post-stream headers (too late), and forward the
+# same Range to Atlas so only the requested slice crosses the wire.
 class MediaController < ApplicationController
   include ActionController::Live
   include RecordsImpressions
@@ -19,11 +19,11 @@ class MediaController < ApplicationController
 
   def show
     blob = AtlasRb::Blob.find(params[:id])
-    # blob['size'] — the byte size; blob.size is Hash#size (the key count) on a Mash.
-    parsed = parse_range(request.headers['Range'], blob['size'])
-    set_media_headers(blob, parsed)
+    # blob['size'] is the byte size; blob.size is Hash#size (key count) on a Mash.
+    range = MediaRange.parse(request.headers['Range'], blob['size'])
+    set_media_headers(blob, range)
 
-    AtlasRb::Blob.content(params[:id], range: (parsed && request.headers['Range'])) do |chunk|
+    AtlasRb::Blob.content(params[:id], range: range && request.headers['Range']) do |chunk|
       response.stream.write(chunk)
     end
   ensure
@@ -32,39 +32,21 @@ class MediaController < ApplicationController
 
   private
 
-    def set_media_headers(blob, parsed)
+    def set_media_headers(blob, range)
       response.headers['Content-Type'] = blob.mime_type
       response.headers['Content-Disposition'] =
         ActionDispatch::Http::ContentDisposition.format(disposition: 'inline', filename: blob.filename)
       response.headers['Accept-Ranges'] = 'bytes'
-
-      if parsed
-        response.status = 206
-        response.headers['Content-Range'] = "bytes #{parsed[:start]}-#{parsed[:end]}/#{parsed[:total]}"
-        response.headers['Content-Length'] = (parsed[:end] - parsed[:start] + 1).to_s
-      else
-        response.headers['Content-Length'] = blob['size'].to_s if blob['size']
-      end
+      set_length_headers(blob, range)
     end
 
-    # Parse a single HTTP byte range against the known total. Returns nil for
-    # absent/malformed/unsatisfiable ranges (caller then serves the full 200).
-    def parse_range(header, total)
-      return nil unless total.to_i.positive?
-      return nil unless (match = header.to_s.match(/\Abytes=(\d*)-(\d*)\z/))
-
-      start_str, end_str = match[1], match[2]
-      if start_str.empty? # bytes=-SUFFIX (final N bytes)
-        return nil if end_str.empty?
-
-        start = [total - end_str.to_i, 0].max
-        finish = total - 1
-      else
-        start = start_str.to_i
-        finish = end_str.empty? ? total - 1 : [end_str.to_i, total - 1].min
+    def set_length_headers(blob, range)
+      if range
+        response.status = 206
+        response.headers['Content-Range'] = range.content_range
+        response.headers['Content-Length'] = range.length.to_s
+      elsif blob['size']
+        response.headers['Content-Length'] = blob['size'].to_s
       end
-      return nil if start > finish || start >= total
-
-      { start:, end: finish, total: }
     end
 end

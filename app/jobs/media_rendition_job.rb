@@ -38,14 +38,20 @@ class MediaRenditionJob < ApplicationJob
     poster_path = build_poster(work_id, staged_path) if mime.start_with?('video/')
     mp4_path = MediaRemux.to_mp4(staged_path, rendition_path(staged_path)) if MediaRemux.remux_needed?(mime)
 
-    raise WorkNotComplete, "work #{work_id} is still in progress" if AtlasRb::Work.find(work_id).in_progress
-
-    AtlasRb::Blob.create(work_id, mp4_path, File.basename(mp4_path), idempotency_key: rendition_key) if mp4_path
-    # perform_now so the ambient acting NUID carries through (see ApplicationJob).
-    IiifAssetsJob.perform_now(work_id, poster_path) if poster_path
+    attach(work_id, mp4_path, poster_path, rendition_key)
   end
 
   private
+
+    # Attach the rendition + poster once the primary writer has completed (the
+    # WorkNotComplete idiom defers to ContentCreationJob, exactly like PdfRenditionJob).
+    def attach(work_id, mp4_path, poster_path, rendition_key)
+      raise WorkNotComplete, "work #{work_id} is still in progress" if AtlasRb::Work.find(work_id).in_progress
+
+      AtlasRb::Blob.create(work_id, mp4_path, File.basename(mp4_path), idempotency_key: rendition_key) if mp4_path
+      # perform_now so the ambient acting NUID carries through (see ApplicationJob).
+      IiifAssetsJob.perform_now(work_id, poster_path) if poster_path
+    end
 
     def rendition_path(staged_path)
       File.join(File.dirname(staged_path), "#{File.basename(staged_path, '.*')}.mp4")
