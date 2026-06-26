@@ -1,0 +1,49 @@
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-chart-line{'aria-hidden' => 'true'}
+      Usage analytics
+    .admin-registry__head-actions
+      = form_with url: admin_impressions_path, method: :get, class: 'usage-daterange' do
+        = hidden_field_tag :segment, @report.segment
+        %label.usage-daterange__label{for: 'from'} From
+        = date_field_tag :from, @report.range.begin, id: 'from', class: 'usage-daterange__input'
+        %label.usage-daterange__label{for: 'to'} To
+        = date_field_tag :to, @report.range.end, id: 'to', class: 'usage-daterange__input'
+        %button.usage-daterange__apply{type: 'submit'} Apply
+      .usage-toggle{role: 'group', 'aria-label' => 'Traffic segment'}
+        = usage_segment_link(@report, 'human', 'Human')
+        = usage_segment_link(@report, 'all', 'All traffic')
+
+  .admin-registry__body
+    %ul.nav.nav-tabs{'data-controller' => 'tab-hash'}
+      %li.nav-item
+        %button#overview-tab.nav-link.active{'aria-controls' => 'overview', 'aria-selected' => 'true', 'data-bs-target' => '#overview', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Overview
+      %li.nav-item
+        %button#files-tab.nav-link{'aria-controls' => 'files', 'aria-selected' => 'false', 'data-bs-target' => '#files', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Top files
+      %li.nav-item
+        %button#collections-tab.nav-link{'aria-controls' => 'collections', 'aria-selected' => 'false', 'data-bs-target' => '#collections', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Top collections
+
+    .tab-content.pt-3
+      #overview.tab-pane.active{'aria-labelledby' => 'overview-tab', role: 'tabpanel'}
+        %dl.usage-ledger
+          - @report.totals.each do |action, total|
+            .usage-ledger__item{class: "usage-ledger__item--#{action}"}
+              %dt.usage-ledger__label= action.capitalize.pluralize
+              %dd.usage-ledger__figure= number_with_delimiter(total)
+          .usage-ledger__item.usage-ledger__item--visitors
+            %dt.usage-ledger__label Unique visitors · peak day
+            %dd.usage-ledger__figure= number_with_delimiter(@report.unique_visitors_series.values.max || 0)
+
+        %section.usage-chart-block
+          %h2.usage-chart-block__title Views & downloads over time
+          .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'line', 'usage-chart-dataset-value' => usage_timeseries(@report).to_json, 'usage-chart-colors-value' => %w[#2666a6 #18bc9c].to_json}}
+
+        %section.usage-chart-block
+          %h2.usage-chart-block__title Unique visitors over time
+          .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'line', 'usage-chart-dataset-value' => usage_visitors_series(@report).to_json, 'usage-chart-colors-value' => %w[#5d569b].to_json}}
+
+      #files.tab-pane{'aria-labelledby' => 'files-tab', role: 'tabpanel'}
+        = render 'top_table', entries: @report.top_works, empty: 'No file activity in this range.'
+      #collections.tab-pane{'aria-labelledby' => 'collections-tab', role: 'tabpanel'}
+        = render 'top_table', entries: @report.top_containers, empty: 'No container activity in this range.'

@@ -12,6 +12,10 @@ pin "@github/combobox-nav", to: "@github--combobox-nav.js"
 pin "@popperjs/core", to: "@popperjs--core.js"
 pin "bootstrap", to: "bootstrap.js"
 pin "ace-builds", to: "ace-builds.js"
+# Charting for the /admin usage-analytics dashboard. Both ship with the
+# chartkick gem on the asset path; imported only by the dashboard, not preloaded.
+pin "chartkick", to: "chartkick.js"
+pin "Chart.bundle", to: "Chart.bundle.js"
 # IIIF viewer (vendored dist, AGPL-3.0). Dynamically imported by
 # iiif_viewer_controller — never preloaded; only multipage work pages pay.
 pin "tify", to: "tify.js"

@@ -1,0 +1,160 @@
+// ---------------------------------------------------------------------
+// Admin usage-analytics dashboard. Extends the admin-registry / audit-history
+// "archival ledger" register: quiet card-shell (reused), uppercase microcopy,
+// tabular numerals, desaturated tokens. The one signature is the stat ledger —
+// a row of figures with hairline dividers and a per-metric accent underline,
+// not gradient stat cards.
+// ---------------------------------------------------------------------
+
+// Per-metric accent tones (desaturated, matching the existing palette):
+// views = Cerberus navy, downloads = teal-green success, visitors = indigo
+// (the audit-history "reparent" tone).
+$usage-view:     $blue;
+$usage-download: $success;
+$usage-visitor:  #5d569b;
+
+.usage-ledger {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 0 0 1.5rem;
+  border: 1px solid $gray-200;
+  border-radius: 0.4rem;
+  overflow: hidden;
+
+  &__item {
+    flex: 1 1 0;
+    min-width: 9rem;
+    padding: 0.85rem 1.1rem;
+    border-left: 1px solid $gray-200;
+
+    &:first-child { border-left: 0; }
+
+    // Accent underline keyed to the metric's chart colour.
+    --usage-accent: #{$gray-500};
+    &--view     { --usage-accent: #{$usage-view}; }
+    &--download { --usage-accent: #{$usage-download}; }
+    &--visitors { --usage-accent: #{$usage-visitor}; }
+  }
+
+  &__label {
+    margin: 0 0 0.3rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $gray-500;
+  }
+
+  &__figure {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 600;
+    line-height: 1.1;
+    color: $gray-800;
+    font-variant-numeric: tabular-nums;
+    display: inline-block;
+    padding-bottom: 0.2rem;
+    border-bottom: 2px solid var(--usage-accent);
+  }
+}
+
+.usage-chart-block {
+  margin-bottom: 1.5rem;
+
+  &__title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: $gray-500;
+    margin-bottom: 0.6rem;
+  }
+}
+
+// maintainAspectRatio is off (so the chart fills the card width); give the
+// canvas an explicit, restrained height.
+.usage-chart {
+  position: relative;
+  height: 280px;
+}
+
+// Segmented human/bot toggle — two quiet pills, the active one picking up the
+// Cerberus navy (same affordance as .admin-registry-table__edit:hover).
+.usage-toggle {
+  display: inline-flex;
+  border: 1px solid $gray-300;
+  border-radius: 0.3rem;
+  overflow: hidden;
+
+  &__option {
+    padding: 0.25rem 0.7rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: $gray-700;
+    text-decoration: none;
+    background-color: #fff;
+    border-left: 1px solid $gray-300;
+
+    &:first-child { border-left: 0; }
+    &:hover { background-color: $gray-100; }
+
+    &.is-active {
+      background-color: color-mix(in srgb, $blue 10%, white);
+      color: $blue;
+    }
+  }
+}
+
+.usage-daterange {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  &__label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: $gray-500;
+  }
+
+  &__input {
+    padding: 0.15rem 0.4rem;
+    font-size: 0.8rem;
+    border: 1px solid $gray-300;
+    border-radius: 0.25rem;
+    color: $gray-800;
+  }
+
+  &__apply {
+    padding: 0.2rem 0.7rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: $gray-700;
+    background-color: $gray-100;
+    border: 1px solid $gray-300;
+    border-radius: 0.25rem;
+    cursor: pointer;
+
+    &:hover {
+      background-color: color-mix(in srgb, $blue 8%, white);
+      border-color: color-mix(in srgb, $blue 24%, white);
+      color: $blue;
+    }
+  }
+}
+
+// Export toolbar above the top-N tables.
+.usage-export {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+// Right-aligned tabular figures in the top-N tables.
+.usage-num {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

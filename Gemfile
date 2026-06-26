@@ -62,6 +62,7 @@ gem 'bootstrap'
 gem 'bootstrap_form'
 gem 'cancancan'
 gem 'caxlsx' # xlsx writer — loader manifest fixtures now, spreadsheet export later (roo reads)
+gem 'chartkick' # admin usage-analytics charts (importmap-pinned Chart.js); reads pre-bucketed rollups
 gem 'dartsass-rails'
 gem 'devise'
 gem 'devise-i18n'
