@@ -35,6 +35,15 @@ RSpec.describe IngestDispatch do
       .and not_have_enqueued_job(PdfRenditionJob)
   end
 
+  it 'routes audio/video to MediaRenditionJob with the derived rendition key' do
+    allow(Marcel::MimeType).to receive(:for).and_return('video/mp4') # content irrelevant; mime stubbed
+    path = fixtures.join('image.png')
+    expect { dispatch(path) }
+      .to have_enqueued_job(MediaRenditionJob).with(work_id, path.to_s, rendition_key)
+      .and have_enqueued_job(ContentCreationJob)
+      .and not_have_enqueued_job(IiifAssetsJob)
+  end
+
   it 'routes Word documents to PdfRenditionJob with the derived rendition key' do
     path = fixtures.join('example.docx')
     expect { dispatch(path) }

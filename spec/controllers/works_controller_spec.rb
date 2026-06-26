@@ -111,6 +111,18 @@ describe WorksController do
         .and not_have_enqueued_job(IiifAssetsJob)
     end
 
+    it 'rejects an A/V upload outside the safe codec set without creating a work' do
+      allow(Ffprobe).to receive(:available?).and_return(true)
+      allow(Ffprobe).to receive(:safe?).and_return(false)
+      allow(Marcel::MimeType).to receive(:for).and_return('video/quicktime')
+
+      expect(AtlasRb::Work).not_to receive(:create)
+      post :create, params: { binary: fixture_file_upload('image.png', 'video/quicktime'), parent_id: 'c-x' }
+
+      expect(response).to redirect_to(new_work_path)
+      expect(flash[:alert]).to eq(described_class::UNSUPPORTED_AV)
+    end
+
     it 'seeds the work title from the uploaded filename via the structure-safe MODS path' do
       post :create, params: { binary:    fixture_file_upload('image.png', 'image/png'),
                               parent_id: collection.id }
