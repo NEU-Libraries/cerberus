@@ -20,4 +20,11 @@
   &__fallback {
     margin-top: 0.5rem;
   }
+
+  // No poster yet (rendition pending / poster extraction failed): hide video.js's
+  // placeholder poster, whose blank <img> src would otherwise render a broken
+  // image. The video's first frame shows once metadata loads.
+  &--no-poster .vjs-poster {
+    display: none;
+  }
 }

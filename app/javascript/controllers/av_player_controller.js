@@ -9,16 +9,17 @@ export default class extends Controller {
 
   async connect() {
     await import("video-js") // UMD build: registers window.videojs
-    const hasPoster = Boolean(this.mediaTarget.getAttribute("poster"))
+    // With no poster, video.js still renders a <picture><img> whose blank src
+    // resolves to the page URL — a broken image. Flag the no-poster case so CSS
+    // hides .vjs-poster (posterless videos: rendition pending / poster failed).
+    if (!this.mediaTarget.getAttribute("poster")) {
+      this.element.classList.add("av-player--no-poster")
+    }
     this.player = window.videojs(this.mediaTarget, {
       controls: true,
       preload: "metadata",
       fluid: true
     })
-    // With no poster, video.js still renders a <picture><img> whose blank src
-    // resolves to the page URL — a broken image. Hide the poster component then
-    // (posterless videos: rendition pending, or poster extraction failed).
-    if (!hasPoster) this.player.posterImage?.hide()
   }
 
   disconnect() {
