@@ -30,6 +30,21 @@ namespace :reset do
       AtlasRb::Blob.create(work['id'], '/home/cerberus/web/spec/fixtures/files/flower.jpg', 'flower.jpg')
       AtlasRb::Work.complete(work['id'])
 
+      # Audio/video sample so a reset demonstrates the in-browser video.js
+      # player and the seekable Range media endpoint on real seed data. The
+      # clip is already H.264/AAC MP4 (the safe codec set), so no remux is
+      # needed; its poster frame — extracted from the clip — drives both the
+      # catalog thumbnail and the player poster through the usual thumbnail
+      # pipeline, exactly like the image works above. (Moss-covered tree
+      # trunk by Elvis Deane, CC0 1.0 Public Domain Dedication, sourced from
+      # Wikimedia Commons.)
+      av_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-video-mods.xml')
+      av_poster_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/sample-video-poster.jpg')
+      AtlasRb::Work.set_thumbnails(av_work['id'], **ThumbnailCreator.call(base: av_poster_base))
+      AtlasRb::Work.metadata(av_work['id'], { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Blob.create(av_work['id'], '/home/cerberus/web/spec/fixtures/files/sample-video.mp4', 'sample-video.mp4')
+      AtlasRb::Work.complete(av_work['id'])
+
       # Marcom loader fixtures — Communications community → Communications
       # Photo Archive collection → Campus Life (Photographs) collection. The
       # middle collection is what the marcom Loader.root_collection points at;
