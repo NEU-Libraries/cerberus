@@ -19,7 +19,8 @@ class MediaController < ApplicationController
 
   def show
     blob = AtlasRb::Blob.find(params[:id])
-    parsed = parse_range(request.headers['Range'], blob.size)
+    # blob['size'] — the byte size; blob.size is Hash#size (the key count) on a Mash.
+    parsed = parse_range(request.headers['Range'], blob['size'])
     set_media_headers(blob, parsed)
 
     AtlasRb::Blob.content(params[:id], range: (parsed && request.headers['Range'])) do |chunk|
@@ -42,7 +43,7 @@ class MediaController < ApplicationController
         response.headers['Content-Range'] = "bytes #{parsed[:start]}-#{parsed[:end]}/#{parsed[:total]}"
         response.headers['Content-Length'] = (parsed[:end] - parsed[:start] + 1).to_s
       else
-        response.headers['Content-Length'] = blob.size.to_s if blob.size
+        response.headers['Content-Length'] = blob['size'].to_s if blob['size']
       end
     end
 
