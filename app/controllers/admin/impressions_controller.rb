@@ -26,24 +26,24 @@ module Admin
 
     private
 
-    def build_report
-      ImpressionsReport.new(range: parsed_range, segment: params[:segment])
-    end
+      def build_report
+        ImpressionsReport.new(range: parsed_range, segment: params[:segment])
+      end
 
-    def parsed_range
-      from = parse_date(params[:from]) || ImpressionsReport::DEFAULT_DAYS.days.ago.to_date
-      to   = parse_date(params[:to]) || Date.current
-      from..to
-    end
+      def parsed_range
+        from = parse_date(params[:from]) || ImpressionsReport::DEFAULT_DAYS.days.ago.to_date
+        to   = parse_date(params[:to]) || Date.current
+        from..to
+      end
 
-    def parse_date(value)
-      Date.iso8601(value.to_s)
-    rescue ArgumentError
-      nil
-    end
+      def parse_date(value)
+        Date.iso8601(value.to_s)
+      rescue ArgumentError
+        nil
+      end
 
-    def filename(report, ext)
-      "impressions-#{report.range.begin}_#{report.range.end}-#{report.segment}.#{ext}"
-    end
+      def filename(report, ext)
+        "impressions-#{report.range.begin}_#{report.range.end}-#{report.segment}.#{ext}"
+      end
   end
 end

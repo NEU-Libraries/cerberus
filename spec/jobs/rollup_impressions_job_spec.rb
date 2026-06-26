@@ -8,9 +8,9 @@ RSpec.describe RollupImpressionsJob do
 
   # Raw insert bypassing the model's 1-hour throttle so we can seed many rows
   # for one (ip, day) — what the volume rule keys on.
-  def insert_impression(noid:, ip:, ua:, action: 'view', at: Time.current.midday)
-    cols = { noid:, action:, ip_address: ip, user_agent: ua,
-             session_id: 's', referrer: 'direct', created_at: at, updated_at: at }
+  def insert_impression(noid:, ip_address:, user_agent:, action: 'view', recorded_at: Time.current.midday)
+    cols = { noid:, action:, ip_address:, user_agent:,
+             session_id: 's', referrer: 'direct', created_at: recorded_at, updated_at: recorded_at }
     names  = cols.keys.join(', ')
     values = cols.values.map { |v| ActiveRecord::Base.connection.quote(v) }.join(', ')
     ActiveRecord::Base.connection.execute("INSERT INTO impressions (#{names}) VALUES (#{values})")
@@ -22,8 +22,8 @@ RSpec.describe RollupImpressionsJob do
   end
 
   it 'counts human rows and excludes bot user-agents' do
-    insert_impression(noid: 'w1', ip: '10.0.0.1', ua: 'Mozilla/5.0')
-    insert_impression(noid: 'w1', ip: '10.0.0.9', ua: 'Googlebot')
+    insert_impression(noid: 'w1', ip_address: '10.0.0.1', user_agent: 'Mozilla/5.0')
+    insert_impression(noid: 'w1', ip_address: '10.0.0.9', user_agent: 'Googlebot')
 
     described_class.perform_now
 
@@ -35,8 +35,8 @@ RSpec.describe RollupImpressionsJob do
     config.impression_volume_threshold = 2
     allow_ip = config.impression_ip_allowlist.first
 
-    3.times { |i| insert_impression(noid: 'w2', ip: '10.0.0.2', ua: 'Mozilla/5.0', at: today.to_time.midday - i.minutes) }
-    3.times { |i| insert_impression(noid: 'w3', ip: allow_ip,   ua: 'Mozilla/5.0', at: today.to_time.midday - i.minutes) }
+    3.times { |i| insert_impression(noid: 'w2', ip_address: '10.0.0.2', user_agent: 'Mozilla/5.0', recorded_at: today.to_time.midday - i.minutes) }
+    3.times { |i| insert_impression(noid: 'w3', ip_address: allow_ip,   user_agent: 'Mozilla/5.0', recorded_at: today.to_time.midday - i.minutes) }
 
     described_class.perform_now
 
@@ -47,10 +47,10 @@ RSpec.describe RollupImpressionsJob do
   end
 
   it 'materializes per-day distinct human visitors' do
-    insert_impression(noid: 'w1', ip: '10.0.0.1', ua: 'Mozilla/5.0')
-    insert_impression(noid: 'w4', ip: '10.0.0.1', ua: 'Mozilla/5.0', action: 'download')
-    insert_impression(noid: 'w1', ip: '10.0.0.5', ua: 'Mozilla/5.0')
-    insert_impression(noid: 'w1', ip: '10.0.0.9', ua: 'Googlebot')
+    insert_impression(noid: 'w1', ip_address: '10.0.0.1', user_agent: 'Mozilla/5.0')
+    insert_impression(noid: 'w4', ip_address: '10.0.0.1', user_agent: 'Mozilla/5.0', action: 'download')
+    insert_impression(noid: 'w1', ip_address: '10.0.0.5', user_agent: 'Mozilla/5.0')
+    insert_impression(noid: 'w1', ip_address: '10.0.0.9', user_agent: 'Googlebot')
 
     described_class.perform_now
 
@@ -58,7 +58,7 @@ RSpec.describe RollupImpressionsJob do
   end
 
   it 're-derives idempotently across runs' do
-    insert_impression(noid: 'w1', ip: '10.0.0.1', ua: 'Mozilla/5.0')
+    insert_impression(noid: 'w1', ip_address: '10.0.0.1', user_agent: 'Mozilla/5.0')
 
     2.times { described_class.perform_now }
 

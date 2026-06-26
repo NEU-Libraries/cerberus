@@ -52,50 +52,50 @@ class ImpressionsReport
 
   private
 
-  def leaf
-    @segment == :all ? ImpressionCountByDay : ImpressionDailyCount
-  end
-
-  def sum_column
-    @segment == :all ? :impressions : :count
-  end
-
-  def total_desc
-    Arel.sql('SUM(count) DESC')
-  end
-
-  # Top leaf noids by total, filtered to the given Solr resource types.
-  def typed_top(limit:, types:)
-    ranked = leaf.in_range(range).group(:noid)
-                 .order(Arel.sql("SUM(#{sum_column}) DESC")).limit(limit * 5)
-                 .sum(sum_column)
-    docs = resolve(ranked.keys)
-    typed = ranked.keys.select { |noid| types.include?(type_of(docs[noid])) }.first(limit)
-    breakdown = leaf.in_range(range).where(noid: typed).group(:noid, :action).sum(sum_column)
-    rows_for(typed, breakdown, docs)
-  end
-
-  # Build display rows for an ordered noid list + a {[noid, action] => n} breakdown.
-  def rows_for(noids, breakdown, docs = nil)
-    docs ||= resolve(noids)
-    noids.map do |noid|
-      counts = ACTIONS.index_with { |action| breakdown[[noid, action]].to_i }
-      { noid:, doc: docs[noid], counts:, total: counts.values.sum }
+    def leaf
+      @segment == :all ? ImpressionCountByDay : ImpressionDailyCount
     end
-  end
 
-  # noid => SolrDocument (system-wide; no gated discovery — analytics).
-  def resolve(noids)
-    return {} if noids.empty?
+    def sum_column
+      @segment == :all ? :impressions : :count
+    end
 
-    terms = noids.map { |noid| "id-#{noid}" }.join(',')
-    Blacklight.default_index.search(
-      q: '*:*', fq: ["{!terms f=alternate_ids_ssim}#{terms}"],
-      rows: noids.size, fl: "id,alternate_ids_ssim,internal_resource_tesim,#{TITLE_FIELD}"
-    ).documents.index_by { |doc| Array(doc['alternate_ids_ssim']).first&.delete_prefix('id-') }
-  end
+    def total_desc
+      Arel.sql('SUM(count) DESC')
+    end
 
-  def type_of(doc)
-    doc && Array(doc['internal_resource_tesim']).first
-  end
+    # Top leaf noids by total, filtered to the given Solr resource types.
+    def typed_top(limit:, types:)
+      ranked = leaf.in_range(range).group(:noid)
+                   .order(Arel.sql("SUM(#{sum_column}) DESC")).limit(limit * 5)
+                   .sum(sum_column)
+      docs = resolve(ranked.keys)
+      typed = ranked.keys.select { |noid| types.include?(type_of(docs[noid])) }.first(limit)
+      breakdown = leaf.in_range(range).where(noid: typed).group(:noid, :action).sum(sum_column)
+      rows_for(typed, breakdown, docs)
+    end
+
+    # Build display rows for an ordered noid list + a {[noid, action] => n} breakdown.
+    def rows_for(noids, breakdown, docs = nil)
+      docs ||= resolve(noids)
+      noids.map do |noid|
+        counts = ACTIONS.index_with { |action| breakdown[[noid, action]].to_i }
+        { noid:, doc: docs[noid], counts:, total: counts.values.sum }
+      end
+    end
+
+    # noid => SolrDocument (system-wide; no gated discovery — analytics).
+    def resolve(noids)
+      return {} if noids.empty?
+
+      terms = noids.map { |noid| "id-#{noid}" }.join(',')
+      Blacklight.default_index.search(
+        q: '*:*', fq: ["{!terms f=alternate_ids_ssim}#{terms}"],
+        rows: noids.size, fl: "id,alternate_ids_ssim,internal_resource_tesim,#{TITLE_FIELD}"
+      ).documents.index_by { |doc| Array(doc['alternate_ids_ssim']).first&.delete_prefix('id-') }
+    end
+
+    def type_of(doc)
+      doc && Array(doc['internal_resource_tesim']).first
+    end
 end

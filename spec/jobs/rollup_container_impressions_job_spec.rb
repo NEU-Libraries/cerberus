@@ -13,7 +13,7 @@ RSpec.describe RollupContainerImpressionsJob do
     allow(Blacklight.default_index).to receive(:search)
       .and_return(instance_double(Blacklight::Solr::Response, documents: [container_doc]))
     allow(ContainerDescendantsQuery).to receive(:new).with(noid: 'c1', uuid: 'uuid-c1')
-      .and_return(instance_double(ContainerDescendantsQuery, noids: %w[c1 w1 w2]))
+                                                     .and_return(instance_double(ContainerDescendantsQuery, noids: %w[c1 w1 w2]))
 
     ImpressionDailyCount.create!(noid: 'w1', action: 'view',     day: today, count: 5)
     ImpressionDailyCount.create!(noid: 'w2', action: 'view',     day: today, count: 3)

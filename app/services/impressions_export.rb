@@ -29,26 +29,26 @@ class ImpressionsExport
 
   private
 
-  def table_rows
-    rows_for(@report.top_works, 'Work') + rows_for(@report.top_containers, 'Container')
-  end
-
-  def rows_for(entries, kind)
-    entries.map do |entry|
-      [kind, entry[:noid], title(entry),
-       *ImpressionsReport::ACTIONS.map { |action| entry[:counts][action] }, entry[:total]]
+    def table_rows
+      rows_for(@report.top_works, 'Work') + rows_for(@report.top_containers, 'Container')
     end
-  end
 
-  def add_sheet(package, name, entries, kind)
-    package.workbook.add_worksheet(name:) do |sheet|
-      sheet.add_row HEADERS
-      rows_for(entries, kind).each { |row| sheet.add_row row }
+    def rows_for(entries, kind)
+      entries.map do |entry|
+        [kind, entry[:noid], title(entry),
+         *ImpressionsReport::ACTIONS.map { |action| entry[:counts][action] }, entry[:total]]
+      end
     end
-  end
 
-  def title(entry)
-    doc = entry[:doc]
-    (doc && Array(doc[ImpressionsReport::TITLE_FIELD]).first).presence || entry[:noid]
-  end
+    def add_sheet(package, name, entries, kind)
+      package.workbook.add_worksheet(name:) do |sheet|
+        sheet.add_row HEADERS
+        rows_for(entries, kind).each { |row| sheet.add_row row }
+      end
+    end
+
+    def title(entry)
+      doc = entry[:doc]
+      (doc && Array(doc[ImpressionsReport::TITLE_FIELD]).first).presence || entry[:noid]
+    end
 end

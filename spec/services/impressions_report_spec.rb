@@ -33,7 +33,7 @@ RSpec.describe ImpressionsReport do
     )
 
     works = report.top_works
-    expect(works.map { |e| e[:noid] }).to eq(['w1'])
+    expect(works.pluck(:noid)).to eq(['w1'])
     expect(works.first[:counts]).to eq('view' => 10, 'download' => 4)
     expect(works.first[:total]).to eq(14)
   end

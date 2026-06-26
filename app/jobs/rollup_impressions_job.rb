@@ -18,6 +18,14 @@ class RollupImpressionsJob < ApplicationJob
     human = human_scope_sql(conn, window_start)
 
     conn.transaction do
+      rebuild_daily_counts(conn, window_start, human)
+      rebuild_daily_visitors(conn, window_start, human)
+    end
+  end
+
+  private
+
+    def rebuild_daily_counts(conn, window_start, human)
       conn.execute("DELETE FROM impression_daily_counts WHERE day >= #{window_start}::date")
       conn.execute(<<~SQL.squish)
         INSERT INTO impression_daily_counts (noid, action, day, count)
@@ -25,7 +33,9 @@ class RollupImpressionsJob < ApplicationJob
         #{human}
         GROUP BY i.noid, i.action, i.created_at::date
       SQL
+    end
 
+    def rebuild_daily_visitors(conn, window_start, human)
       conn.execute("DELETE FROM impression_daily_visitors WHERE day >= #{window_start}::date")
       conn.execute(<<~SQL.squish)
         INSERT INTO impression_daily_visitors (day, unique_visitors)
@@ -34,34 +44,34 @@ class RollupImpressionsJob < ApplicationJob
         GROUP BY i.created_at::date
       SQL
     end
-  end
 
-  private
+    # Shared FROM/WHERE selecting only human rows in the window: not a known-bot
+    # UA (unknown/absent UA → kept; the volume rule catches abusers), and not a
+    # volume-offending (ip, day) pair unless the IP is allowlisted.
+    def human_scope_sql(conn, window_start)
+      threshold = Integer(Rails.application.config.x.cerberus.impression_volume_threshold)
+      allowlist = Array(Rails.application.config.x.cerberus.impression_ip_allowlist)
+      allow_in  = allowlist.empty? ? "''" : allowlist.map { |ip| conn.quote(ip) }.join(', ')
 
-  # The shared FROM/WHERE that selects only human rows in the window:
-  #  - LEFT JOIN the UA dimension; keep rows whose UA is not a known bot
-  #    (unknown/absent UA → not a bot → kept; the volume rule catches abusers).
-  #  - drop (ip, day) pairs over the volume threshold, UNLESS the IP is allowlisted.
-  def human_scope_sql(conn, window_start)
-    threshold = Integer(Rails.application.config.x.cerberus.impression_volume_threshold)
-    allowlist = Array(Rails.application.config.x.cerberus.impression_ip_allowlist)
-    allow_in  = allowlist.empty? ? "''" : allowlist.map { |ip| conn.quote(ip) }.join(', ')
-
-    <<~SQL.squish
-      FROM impressions i
-      LEFT JOIN user_agents ua ON ua.ua_string = i.user_agent
-      WHERE i.created_at >= #{window_start}
-        AND COALESCE(ua.is_bot, FALSE) = FALSE
-        AND NOT (
-          i.ip_address NOT IN (#{allow_in})
-          AND (i.ip_address, i.created_at::date) IN (
-            SELECT ip_address, created_at::date
-            FROM impressions
-            WHERE created_at >= #{window_start} AND ip_address IS NOT NULL
-            GROUP BY ip_address, created_at::date
-            HAVING count(*) > #{threshold}
+      <<~SQL.squish
+        FROM impressions i
+        LEFT JOIN user_agents ua ON ua.ua_string = i.user_agent
+        WHERE i.created_at >= #{window_start}
+          AND COALESCE(ua.is_bot, FALSE) = FALSE
+          AND NOT (
+            i.ip_address NOT IN (#{allow_in})
+            AND (i.ip_address, i.created_at::date) IN (#{volume_offenders_sql(window_start, threshold)})
           )
-        )
-    SQL
-  end
+      SQL
+    end
+
+    def volume_offenders_sql(window_start, threshold)
+      <<~SQL.squish
+        SELECT ip_address, created_at::date
+        FROM impressions
+        WHERE created_at >= #{window_start} AND ip_address IS NOT NULL
+        GROUP BY ip_address, created_at::date
+        HAVING count(*) > #{threshold}
+      SQL
+    end
 end

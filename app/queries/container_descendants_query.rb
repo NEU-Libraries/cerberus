@@ -33,24 +33,24 @@ class ContainerDescendantsQuery
 
   private
 
-  def container_docs
-    solr(MembershipQuery.descendants_fq(@noid), CONTAINER_TYPES)
-  end
+    def container_docs
+      solr(MembershipQuery.descendants_fq(@noid), CONTAINER_TYPES)
+    end
 
-  def member_work_noids(container_uuids)
-    return [] if container_uuids.empty?
+    def member_work_noids(container_uuids)
+      return [] if container_uuids.empty?
 
-    solr(MembershipQuery.members_fq(container_uuids, include_linked: false), WORK_TYPE)
-      .filter_map { |doc| doc_noid(doc) }
-  end
+      solr(MembershipQuery.members_fq(container_uuids, include_linked: false), WORK_TYPE)
+        .filter_map { |doc| doc_noid(doc) }
+    end
 
-  def doc_noid(doc)
-    Array(doc['alternate_ids_ssim']).first&.delete_prefix('id-')
-  end
+    def doc_noid(doc)
+      Array(doc['alternate_ids_ssim']).first&.delete_prefix('id-')
+    end
 
-  def solr(*filter_queries)
-    Blacklight.default_index.search(
-      q: '*:*', fq: filter_queries, rows: MAX_ROWS, fl: 'id,alternate_ids_ssim'
-    ).documents
-  end
+    def solr(*filter_queries)
+      Blacklight.default_index.search(
+        q: '*:*', fq: filter_queries, rows: MAX_ROWS, fl: 'id,alternate_ids_ssim'
+      ).documents
+    end
 end
