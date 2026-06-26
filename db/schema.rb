@@ -10,10 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_17_180550) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_26_120002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
+  enable_extension "timescaledb"
   enable_extension "uuid-ossp"
 
   create_table "bookmarks", id: :serial, force: :cascade do |t|
@@ -34,6 +35,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_17_180550) do
     t.string "raw"
     t.datetime "updated_at", null: false
     t.index ["raw"], name: "index_groups_on_raw", unique: true
+  end
+
+  create_table "impressions", id: false, force: :cascade do |t|
+    t.string "action", null: false
+    t.datetime "created_at", null: false
+    t.string "ip_address"
+    t.string "noid", null: false
+    t.string "referrer"
+    t.string "session_id"
+    t.datetime "updated_at", null: false
+    t.string "user_agent"
+    t.index ["action", "created_at"], name: "index_impressions_on_action_and_created_at"
+    t.index ["created_at"], name: "impressions_created_at_idx", order: :desc
+    t.index ["noid", "action", "ip_address", "created_at"], name: "idx_on_noid_action_ip_address_created_at_00c1db695b"
+    t.index ["noid", "created_at"], name: "index_impressions_on_noid_and_created_at", order: { created_at: :desc }
   end
 
   create_table "iptc_ingests", force: :cascade do |t|
@@ -131,6 +147,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_17_180550) do
     t.index ["updated_at"], name: "index_sessions_on_updated_at"
   end
 
+  create_table "user_agents", id: false, force: :cascade do |t|
+    t.datetime "classified_at"
+    t.boolean "is_bot", default: false, null: false
+    t.string "ua_string", null: false
+    t.index ["ua_string"], name: "index_user_agents_on_ua_string", unique: true
+  end
+
   create_table "xml_ingests", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "error_message"
@@ -149,4 +172,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_17_180550) do
   add_foreign_key "message_receipts", "messages"
   add_foreign_key "multipage_ingests", "load_reports"
   add_foreign_key "xml_ingests", "load_reports"
+  create_hypertable "impressions", time_column: "created_at", chunk_time_interval: "30 days"
 end
