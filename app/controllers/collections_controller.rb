@@ -6,8 +6,10 @@ class CollectionsController < CatalogController
   include ShowScopedSearch
   include DepositorContext
   include CollectionBreadcrumbs
+  include RecordsImpressions
 
   authorize_resource_writes!
+  after_action :record_view_impression, only: :show
 
   def show
     @collection = AtlasRb::Collection.find(params[:id])

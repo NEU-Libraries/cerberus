@@ -8,6 +8,7 @@ class WorksController < ApplicationController
   include WorkBreadcrumbs
   include WorkChangeRequest
   include UploadStaging
+  include RecordsImpressions
   # The weighted deposit fork's context queries (the depositor's own workspace
   # Collections, a community's publish showcases via ShowcaseFinder) run through
   # the Blacklight SearchBuilder, so this controller needs the catalog config —
@@ -23,6 +24,7 @@ class WorksController < ApplicationController
   before_action :authorize_show!, only: [:downloads, :manifest]
   authorize_resource_writes!(extra_edit: %i[metadata update_metadata request_change])
   before_action :reject_if_in_progress, only: [:edit]
+  after_action :record_view_impression, only: :show
 
   def show
     @work = AtlasRb::Work.find(params[:id])

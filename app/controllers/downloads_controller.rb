@@ -2,8 +2,12 @@
 
 class DownloadsController < ApplicationController
   include ActionController::Live
+  include RecordsImpressions
 
   before_action :authorize_show!
+  # After authorize_show!, so only authorized downloads are recorded; runs
+  # before the Live stream opens (the job resolves blob → Work off-request).
+  before_action :record_download_impression, only: :show
 
   def show
     blob = AtlasRb::Blob.find(params[:id])

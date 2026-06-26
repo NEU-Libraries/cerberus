@@ -4,8 +4,10 @@ class CommunitiesController < CatalogController
   include Thumbable
   include Transformable
   include ShowScopedSearch
+  include RecordsImpressions
 
   authorize_resource_writes!
+  after_action :record_view_impression, only: :show
 
   # Solr membership fields faceted to decide whether a showcase has content
   # (structural children + linked-member edges). See #populated_showcase_ids.
