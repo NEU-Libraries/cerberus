@@ -39,4 +39,20 @@ module WorkDeposit
       staged_path = stage_upload(file, @work.id)
       enqueue_ingest_jobs(file, staged_path)
     end
+
+    # Reject-at-upload gate (called before the Work is created): an A/V file
+    # whose codec is outside the streaming safe set (H.264 8-bit / AAC / MP3)
+    # never enters the repository — depositors normalise before deposit. Wrong
+    # *containers* are fine (remuxed downstream by MediaRenditionJob); only the
+    # codec is gated. No-op when ffmpeg isn't on the image — degrade, never block.
+    def unsupported_av?(file)
+      return false unless file
+
+      path = file.tempfile.path.presence || file.path
+      mime = Marcel::MimeType.for(Pathname.new(path), name: file.original_filename).to_s
+      return false unless mime.start_with?('video/', 'audio/')
+      return false unless Ffprobe.available?
+
+      !Ffprobe.safe?(path)
+    end
 end

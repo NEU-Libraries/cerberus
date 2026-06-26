@@ -61,6 +61,8 @@ class IngestDispatch < ApplicationService
       IiifAssetsJob.perform_later(@work_id, @staged_path)
     elsif CONVERTIBLE_MIME_TYPES.include?(mime_type)
       PdfRenditionJob.perform_later(@work_id, @staged_path, rendition_key)
+    elsif mime_type.start_with?('video/', 'audio/')
+      MediaRenditionJob.perform_later(@work_id, @staged_path, rendition_key)
     end
     FullTextExtractionJob.perform_later(@work_id, @staged_path) if extractable_text?
     return unless @include_primary
