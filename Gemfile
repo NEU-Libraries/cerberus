@@ -80,6 +80,7 @@ gem 'rsolr', '>= 1.0', '< 3'
 gem 'ruby-vips'
 gem 'sass-embedded'
 gem 'solid_queue'
+gem 'timescaledb' # hypertable migration helper + schema dumper for the impressions analytics store
 gem 'zip_kit' # streaming ZIP for bulk set download (no temp file / no whole-archive buffering)
 
 group :development, :test do

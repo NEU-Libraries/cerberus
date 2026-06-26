@@ -441,6 +441,11 @@ GEM
     thor (1.5.0)
     tilt (2.7.0)
     timeout (0.6.1)
+    timescaledb (0.3.3)
+      activerecord
+      activesupport
+      ostruct
+      pg (~> 1.2)
     tsort (0.2.0)
     turbo-rails (2.0.23)
       actionpack (>= 7.1.0)
@@ -523,6 +528,7 @@ DEPENDENCIES
   solid_queue
   sqlite3
   stimulus-rails
+  timescaledb
   turbo-rails
   tzinfo-data
   webdrivers

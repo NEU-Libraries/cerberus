@@ -7,7 +7,19 @@ volumes:
   uploads:
 services:
   db:
-    image: postgres:14
+    # TimescaleDB is a Postgres extension; this image is vanilla Postgres 14
+    # plus the extension available-but-inactive (no CREATE EXTENSION until a
+    # migration runs it, and only in Cerberus's logical DB — Atlas's logical DB
+    # on this shared service is untouched). The non-`ha` image is a true drop-in:
+    # it honors the same PGDATA/entrypoint as postgres:14, so the existing `db`
+    # volume mounts cleanly with no re-init. (The `-ha` image uses a different
+    # data dir/user and would orphan this volume — do not use it here.)
+    image: timescale/timescaledb:2.17.2-pg14
+    # The extension must be preloaded at server start. The image only injects
+    # this into postgresql.conf when it initialises a *fresh* data dir; because
+    # we reuse the existing postgres:14 volume, we pass it as a server flag
+    # instead. Inert for Atlas's logical DB (which never CREATEs the extension).
+    command: postgres -c shared_preload_libraries=timescaledb
     volumes:
       - db:/var/lib/postgresql/data/pgdata
     restart: always

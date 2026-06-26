@@ -46,6 +46,21 @@ module Cerberus
     # its seeded :guest fixture, applying its read-only policy.
     config.x.cerberus.guest_nuid = ENV.fetch('CERBERUS_GUEST_NUID', '000000001')
 
+    # Impressions (analytics) — bot classification + derived-layer rules.
+    # These are read at *derivation* time (never frozen onto a raw row), so
+    # editing them reclassifies all history. Ported from v1's deploy-bundled
+    # config/locales/bots.en.yml; in v2 they are runtime config (an
+    # ops-editable form lands with the Phase 2 derived layer). A user-agent
+    # is a bot when its lowercased string contains any of these substrings.
+    config.x.cerberus.impression_bots = %w[
+      slurp crawl nutch bot lynx spider curl java scrape scrapy
+      archive doi ltx71 wget index linkcheck inspectiontool lighthouse
+    ]
+    # Volume rule + load-balancer/VPN allowlist — defined now, consumed by the
+    # Phase 2 derived human-counts layer (not exercised by raw capture).
+    config.x.cerberus.impression_volume_threshold = 150
+    config.x.cerberus.impression_ip_allowlist     = %w[155.33.16.26]
+
     # Route exceptions through ErrorsController so error pages share the
     # application layout (header, footer, search bar). Rails dispatches
     # by status-code path (/404, /500, etc.) when set to self.routes.
