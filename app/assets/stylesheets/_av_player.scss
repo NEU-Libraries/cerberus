@@ -1,0 +1,23 @@
+// ---------------------------------------------------------------------
+// In-page A/V player chrome. video.js supplies the control bar; this is
+// just the restrained wrapper that sits in the slot the static thumbnail /
+// Tify viewer occupy for other works (mirrors _iiif_viewer.scss's register).
+// ---------------------------------------------------------------------
+
+.av-player {
+  &__media {
+    width: 100%;
+    border-radius: 0.375rem;
+    overflow: hidden;
+  }
+
+  // Audio works don't need a 16:9 box — fluid sizing would leave a tall void,
+  // so pin the audio player to the control-bar height.
+  audio.av-player__media {
+    height: 3rem;
+  }
+
+  &__fallback {
+    margin-top: 0.5rem;
+  }
+}

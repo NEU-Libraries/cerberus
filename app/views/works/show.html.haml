@@ -42,6 +42,11 @@
         = stylesheet_link_tag 'tify', 'data-turbo-track': 'false'
         .iiif-viewer{data: { controller: 'iiif-viewer',
                              'iiif-viewer-url-value': manifest_work_path(@work.id) }}
+      - elsif @av_file
+        -# In-page audio/video player. Like Tify, the skin CSS ships separately
+        -# and video.js arrives via dynamic import, so other pages never pay.
+        = stylesheet_link_tag 'video-js', 'data-turbo-track': 'false'
+        = render partial: 'av_player', locals: { file: @av_file }
       - else
         = render partial: "thumbnail"
     .col-md-6.order-md-2.order-1

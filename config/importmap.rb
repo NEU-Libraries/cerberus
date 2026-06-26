@@ -19,6 +19,9 @@ pin "Chart.bundle", to: "Chart.bundle.js"
 # IIIF viewer (vendored dist, AGPL-3.0). Dynamically imported by
 # iiif_viewer_controller — never preloaded; only multipage work pages pay.
 pin "tify", to: "tify.js"
+# video.js (UMD ~600KB) for the in-page A/V player; dynamically imported by
+# av_player_controller — only A/V work pages fetch it, never preloaded.
+pin "video-js", to: "video-js.js"
 
 pin_all_from "app/javascript/cerberus", under: "cerberus"
 pin_all_from "app/javascript/preview_controllers", under: "preview_controllers"
