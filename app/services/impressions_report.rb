@@ -17,7 +17,7 @@ class ImpressionsReport
 
   def initialize(range: nil, segment: :human)
     @range   = range || (DEFAULT_DAYS.days.ago.to_date..Date.current)
-    @segment = segment.to_sym == :all ? :all : :human
+    @segment = segment.to_s == 'all' ? :all : :human
   end
 
   # { action => grand total } over the range.
