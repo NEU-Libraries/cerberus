@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_26_120002) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_26_130001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -35,6 +35,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_26_120002) do
     t.string "raw"
     t.datetime "updated_at", null: false
     t.index ["raw"], name: "index_groups_on_raw", unique: true
+  end
+
+  create_table "impression_container_daily_counts", id: false, force: :cascade do |t|
+    t.string "action", null: false
+    t.integer "count", default: 0, null: false
+    t.date "day", null: false
+    t.string "noid", null: false
+    t.index ["action", "day"], name: "index_impression_container_daily_counts_on_action_and_day"
+    t.index ["noid", "action", "day"], name: "idx_on_noid_action_day_b8fac752ea", unique: true
+  end
+
+  create_table "impression_daily_counts", id: false, force: :cascade do |t|
+    t.string "action", null: false
+    t.integer "count", default: 0, null: false
+    t.date "day", null: false
+    t.string "noid", null: false
+    t.index ["action", "day"], name: "index_impression_daily_counts_on_action_and_day"
+    t.index ["noid", "action", "day"], name: "index_impression_daily_counts_on_noid_and_action_and_day", unique: true
+  end
+
+  create_table "impression_daily_visitors", id: false, force: :cascade do |t|
+    t.date "day", null: false
+    t.integer "unique_visitors", default: 0, null: false
+    t.index ["day"], name: "index_impression_daily_visitors_on_day", unique: true
   end
 
   create_table "impressions", id: false, force: :cascade do |t|
@@ -173,4 +197,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_26_120002) do
   add_foreign_key "multipage_ingests", "load_reports"
   add_foreign_key "xml_ingests", "load_reports"
   create_hypertable "impressions", time_column: "created_at", chunk_time_interval: "30 days"
+  create_continuous_aggregate("impression_counts_by_day", <<-SQL, materialized_only: true)
+    SELECT impressions.noid,
+      impressions.action,
+      time_bucket('P1D'::interval, impressions.created_at) AS day,
+      count(*) AS impressions
+     FROM impressions
+    GROUP BY impressions.noid, impressions.action, (time_bucket('P1D'::interval, impressions.created_at))
+  SQL
 end
