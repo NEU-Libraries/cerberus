@@ -12,9 +12,10 @@ class CreateImpressionCountsContinuousAggregate < ActiveRecord::Migration[8.1]
   disable_ddl_transaction!
 
   def up
+    # `query` is a positional arg in timescaledb 0.3.3 (not a keyword).
     create_continuous_aggregate(
       :impression_counts_by_day,
-      query: <<~SQL,
+      <<~SQL,
         SELECT noid,
                action,
                time_bucket('1 day', created_at) AS day,
@@ -31,6 +32,6 @@ class CreateImpressionCountsContinuousAggregate < ActiveRecord::Migration[8.1]
   end
 
   def down
-    drop_continuous_aggregate(:impression_counts_by_day)
+    drop_continuous_aggregates(:impression_counts_by_day)
   end
 end
