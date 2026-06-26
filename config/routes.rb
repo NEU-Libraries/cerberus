@@ -176,6 +176,8 @@ Rails.application.routes.draw do
   end
 
   get '/downloads/:id', to: 'downloads#show', as: :download
+  # Inline, Range-capable A/V byte serving for the in-page player (download twin).
+  get '/media/:id',     to: 'media#show',     as: :media
 
   # history — deep diff views reached from the audit-log "View" button.
   # Type-agnostic (the data layer hits Atlas's /resources/:id/* endpoints), so

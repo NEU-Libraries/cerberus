@@ -27,6 +27,14 @@ module RecordsImpressions
       record_impression(blob_id: params[:id], action: 'download')
     end
 
+    # Media endpoint: a ranged request is a stream (seek/playback), a full request
+    # a download — v1's heuristic. The 1-hour (noid, action, ip) throttle dedups
+    # the many ranged requests a single playback session issues.
+    def record_media_impression
+      action = request.headers['Range'].present? ? 'stream' : 'download'
+      record_impression(blob_id: params[:id], action:)
+    end
+
     # Enqueue an impression. Pass either a resolved noid (a view) or a blob_id
     # (a download — resolved to its Work in the job). The request-derived fields
     # are grouped so the job's signature stays small.
