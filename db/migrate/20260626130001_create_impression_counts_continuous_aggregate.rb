@@ -7,6 +7,10 @@
 # separately (it must filter before aggregating, which a CA can't). The
 # timescaledb gem dumps this declaratively into schema.rb so it round-trips.
 class CreateImpressionCountsContinuousAggregate < ActiveRecord::Migration[8.1]
+  # CREATE MATERIALIZED VIEW ... WITH (timescaledb.continuous) and the refresh
+  # policy cannot run inside a transaction block.
+  disable_ddl_transaction!
+
   def up
     create_continuous_aggregate(
       :impression_counts_by_day,
