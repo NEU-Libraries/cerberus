@@ -17,3 +17,15 @@ production:
     class: SessionTrimJob
     queue: background
     schedule: every hour at minute 27
+  rollup_impressions:
+    class: RollupImpressionsJob
+    queue: background
+    schedule: every hour at minute 42
+  rollup_container_impressions:
+    class: RollupContainerImpressionsJob
+    queue: background
+    schedule: every day at 4:10am
+  reclassify_user_agents:
+    class: ReclassifyUserAgentsJob
+    queue: background
+    schedule: every day at 4:00am
