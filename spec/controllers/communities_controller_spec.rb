@@ -78,6 +78,8 @@ describe CommunitiesController do
 
     before do
       AtlasRb::Community.metadata(community.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      # Wait out the Atlas reindex lag so the controller's find never races to nil.
+      wait_for_atlas_visibility(AtlasRb::Community, community.id)
     end
 
     it 'renders the show partial' do
@@ -131,6 +133,7 @@ describe CommunitiesController do
         AtlasRb::Community.metadata(community.id,
                                     { 'permissions' => { 'read' => ['public'], 'edit' => ['editors'] } },
                                     nuid: '000000004')
+        wait_for_atlas_visibility(AtlasRb::Community, community.id)
         sign_in User.new(email: 'ed@example.com', nuid: '000000002', groups: ['editors'])
         get :show, params: { id: community.id }
         expect(response.body).to include(%(href="#{edit_community_path(community.id)}"))
