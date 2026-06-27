@@ -1,19 +1,27 @@
-.impersonation-start.well.p-3.my-3.rounded-3
-  %header.admin-actions__head
-    %span.admin-actions__title
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
       %i.fa-solid.fa-user-secret{'aria-hidden' => 'true'}
       Impersonation
-    %span.admin-actions__subtitle
-      %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
-      Admin-only
+    .admin-registry__head-actions
+      %span.admin-registry__subtitle
+        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+        Admin-only
 
-  %p.impersonation-start__lede
-    Operate as another user. <strong>Act as</strong> attributes any deposits or edits wholly to that user, with your own identity recorded in the audit trail; <strong>View as</strong> is read-only and shows exactly what they can see. A persistent banner marks the session, which ends on an attempted write during View-as (the write is blocked) or after 30 minutes idle.
+  .p-3
+    %p.text-muted.small.mb-3
+      Operate as another user. <strong>Act as</strong> attributes any deposits or edits wholly to that user, with your own identity recorded in the audit trail; <strong>View as</strong> is read-only and shows exactly what they can see. A persistent banner marks the session, which ends on an attempted write during View-as (the write is blocked) or after 30 minutes idle.
 
-  = form_tag admin_act_as_path, method: :post, class: 'impersonation-start__form' do
-    .impersonation-start__field
-      = label_tag :nuid, 'Target NUID', class: 'impersonation-start__label'
-      = text_field_tag :nuid, nil, class: 'form-control impersonation-start__input', placeholder: 'e.g. 000000002', autocomplete: 'off', inputmode: 'numeric'
-    .impersonation-start__actions
-      = submit_tag 'Act as', name: 'mode', class: 'btn btn-danger', formaction: admin_act_as_path
-      = submit_tag 'View as', name: 'mode', class: 'btn btn-warning', formaction: admin_view_as_path
+    = form_tag admin_act_as_path, method: :post,
+               data: { controller: 'impersonation-search',
+                       impersonation_search_url_value: admin_impersonation_recipients_path } do
+      .mb-3.position-relative
+        = label_tag :impersonation_query, 'Target user', class: 'form-label'
+        %input#impersonation_query.form-control{ type: 'text', autocomplete: 'off',
+          placeholder: 'Search by name, or enter a NUID…',
+          data: { impersonation_search_target: 'query', action: 'input->impersonation-search#search' } }
+        = hidden_field_tag :nuid, nil, data: { impersonation_search_target: 'nuid' }
+        .list-group.inbox-typeahead{ hidden: true, data: { impersonation_search_target: 'results' } }
+      .d-flex.gap-2
+        = submit_tag 'Act as', name: 'mode', class: 'btn btn-danger', formaction: admin_act_as_path
+        = submit_tag 'View as', name: 'mode', class: 'btn btn-warning', formaction: admin_view_as_path

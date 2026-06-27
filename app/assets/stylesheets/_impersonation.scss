@@ -127,48 +127,6 @@ $impersonation-tone-view:   #b8801f; // desaturated amber — caution, but read-
   .impersonation-banner { animation: none; }
 }
 
-// ---------------------------------------------------------------------
-// Admin start form — a quiet card in the dashboard register (.well shell),
-// NOT a loud surface. Starting impersonation is deliberate, not urgent.
-// ---------------------------------------------------------------------
-.impersonation-start {
-  &__lede {
-    color: $gray-600;
-    font-size: 0.9rem;
-    line-height: 1.55;
-    max-width: 64ch;
-    margin-bottom: 1rem;
-  }
-
-  &__form {
-    display: flex;
-    align-items: flex-end;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-  }
-
-  &__field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-  }
-
-  &__label {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 600;
-    color: $gray-500;
-  }
-
-  &__input {
-    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    font-variant-numeric: tabular-nums;
-    max-width: 16rem;
-  }
-
-  &__actions {
-    display: flex;
-    gap: 0.5rem;
-  }
-}
+// The admin start form now uses the shared .admin-registry chrome (matching
+// Re-parent / Linked members) and the .inbox-typeahead dropdown for the
+// Target-user picker — no bespoke .impersonation-start styles remain.

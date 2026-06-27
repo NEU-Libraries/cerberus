@@ -165,6 +165,7 @@ Rails.application.routes.draw do
     # Impersonation — a hub action surface (GET) hosting the start form, then
     # begin acting-as (write) or view-as (read-only) for a target NUID; the
     # DELETE (reusing admin_impersonation_path) ends whichever mode is active.
+    get    'impersonation/recipients', to: 'impersonations#recipients', as: :impersonation_recipients
     get    'impersonation', to: 'impersonations#new',              as: :impersonation
     post   'act_as',        to: 'impersonations#create_acting_as', as: :act_as
     post   'view_as',       to: 'impersonations#create_view_as',   as: :view_as

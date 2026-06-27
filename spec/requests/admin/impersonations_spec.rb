@@ -57,12 +57,57 @@ RSpec.describe 'Admin::Impersonations', type: :request do
   end
 
   describe 'GET /admin/impersonation (start surface)' do
-    it 'renders the start form for an admin' do
+    it 'renders the start form for an admin in the shared admin-registry chrome (not a well)' do
       sign_in admin_user
       get admin_impersonation_path
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('Target NUID')
+      expect(response.body).to include('Target user')
+      # Matches the rest of the admin-action UX (Re-parent / Linked members),
+      # not the old .well form-section chrome.
+      expect(response.body).to include('admin-registry')
+      expect(response.body).not_to include('impersonation-start')
+      # Target-user typeahead wired to the admin directory endpoint.
+      expect(response.body).to include('data-controller="impersonation-search"')
+      expect(response.body).to include(admin_impersonation_recipients_path)
+    end
+  end
+
+  describe 'GET /admin/impersonation/recipients (typeahead)' do
+    it 'returns prettified directory matches for an admin' do
+      sign_in admin_user
+      allow(AtlasRb::User).to receive(:search).with('doe', nuid: admin_user.nuid)
+                                              .and_return([{ 'nuid' => '000000002', 'name' => 'Doe, Jane' }])
+
+      get admin_impersonation_recipients_path, params: { q: 'doe' }
+
+      expect(response.parsed_body).to eq([{ 'nuid' => '000000002', 'name' => 'Jane Doe' }])
+    end
+
+    it 'returns [] for a blank query without calling Atlas' do
+      sign_in admin_user
+      allow(AtlasRb::User).to receive(:search)
+
+      get admin_impersonation_recipients_path, params: { q: ' ' }
+
+      expect(response.parsed_body).to eq([])
+      expect(AtlasRb::User).not_to have_received(:search)
+    end
+
+    it 'degrades to [] when Atlas is unreachable' do
+      sign_in admin_user
+      allow(AtlasRb::User).to receive(:search).and_raise(Faraday::ConnectionFailed.new('boom'))
+
+      get admin_impersonation_recipients_path, params: { q: 'doe' }
+
+      expect(response.parsed_body).to eq([])
+    end
+
+    it 'is admin-gated (403 for non-admin staff)' do
+      sign_in staff_user
+      get admin_impersonation_recipients_path, params: { q: 'doe' }
+
+      expect(response).to have_http_status(:forbidden)
     end
   end
 
