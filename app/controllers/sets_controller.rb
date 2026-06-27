@@ -10,6 +10,8 @@
 # authorization boundary for the Set object itself (per-row read/edit);
 # contents visibility rides the standard gated discovery on every query.
 class SetsController < CatalogController
+  include UserDirectorySearchable
+
   include ShowScopedSearch
   include SetRecipe
   include SetSharing
@@ -103,18 +105,10 @@ class SetsController < CatalogController
     render :edit, status: :unprocessable_content
   end
 
-  # Typeahead JSON for the edit_users picker on the Sharing tab — mirrors
-  # MessagesController#recipients. Atlas's directory excludes
-  # guest/anonymous/system roles server-side and caps results at 10.
+  # Typeahead JSON for the edit_users picker on the Sharing tab
+  # (see UserDirectorySearchable).
   def recipients
-    query = params[:q].to_s.strip
-    return render json: [] if query.blank?
-
-    results = AtlasRb::User.search(query, nuid: current_user.nuid)
-    render json: results.map { |user| { nuid: user['nuid'], name: NuidResolver.prettify(user['name']) } }
-  rescue Faraday::Error, JSON::ParserError => e
-    Rails.logger.error("SetsController#recipients: #{e.class} #{e.message}")
-    render json: []
+    render json: user_directory_results
   end
 
   def destroy

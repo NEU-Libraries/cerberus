@@ -5,6 +5,8 @@
 # their session groups (read-time group delivery — see Message.inbox_for),
 # so addressing is also the authorization.
 class MessagesController < ApplicationController
+  include UserDirectorySearchable
+
   before_action :authenticate_user!
   before_action :require_messageable_user
   before_action :set_message, only: %i[show destroy]
@@ -43,17 +45,9 @@ class MessagesController < ApplicationController
     redirect_to messages_path, notice: 'Message dismissed.'
   end
 
-  # Typeahead JSON for the compose form. Atlas's directory excludes
-  # guest/anonymous/system roles server-side and caps results at 10.
+  # Typeahead JSON for the compose form (see UserDirectorySearchable).
   def recipients
-    query = params[:q].to_s.strip
-    return render json: [] if query.blank?
-
-    results = AtlasRb::User.search(query, nuid: current_user.nuid)
-    render json: results.map { |user| { nuid: user['nuid'], name: NuidResolver.prettify(user['name']) } }
-  rescue Faraday::Error, JSON::ParserError => e
-    Rails.logger.error("MessagesController#recipients: #{e.class} #{e.message}")
-    render json: []
+    render json: user_directory_results
   end
 
   private
