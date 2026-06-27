@@ -5,6 +5,23 @@ require 'rails_helper'
 describe CommunitiesController do
   let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', nuid: '000000004') }
 
+  describe 'index' do
+    it 'scopes the listing to Communities only — child Collections do not leak in' do
+      AtlasRb::Community.metadata(community.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      collection = AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml',
+                                              nuid: '000000004')
+      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+
+      get :index
+
+      ids = assigns(:response).documents.map(&:id)
+      expect(ids).to include(community.valkyrie_id)      # the community is listed
+      expect(ids).not_to include(collection.valkyrie_id) # a Collection is not
+    ensure
+      AtlasRb::Collection.tombstone(collection.id) if collection
+    end
+  end
+
   describe 'edit' do
     render_views
 
@@ -183,11 +200,22 @@ describe CommunitiesController do
       sign_in user
     end
 
-    it 'calls AtlasRb::Community.tombstone with the acting user nuid and redirects' do
+    it 'calls AtlasRb::Community.tombstone and reports success on a 2xx' do
       allow(AtlasRb::Community).to receive(:tombstone)
+        .and_return(instance_double(Faraday::Response, success?: true))
       post :tombstone, params: { id: community.id }
       expect(AtlasRb::Community).to have_received(:tombstone).with(community.id)
       expect(subject).to redirect_to(root_path)
+      expect(flash[:notice]).to eq('Community deleted.')
+    end
+
+    it 'reports a 422 live-members refusal without claiming success' do
+      allow(AtlasRb::Community).to receive(:tombstone)
+        .and_return(instance_double(Faraday::Response, success?: false, status: 422))
+      request.env['HTTP_REFERER'] = community_path(community.id)
+      post :tombstone, params: { id: community.id }
+      expect(flash[:notice]).to be_nil
+      expect(flash[:alert]).to match(/live members/)
     end
   end
 

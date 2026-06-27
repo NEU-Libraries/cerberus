@@ -37,8 +37,7 @@ class WorksController < ApplicationController
   end
 
   def tombstone
-    AtlasRb::Work.tombstone(params[:id])
-    redirect_to root_path, notice: 'Work deleted.'
+    perform_tombstone!(AtlasRb::Work.tombstone(params[:id]), type: 'Work')
   end
 
   # IIIF Presentation 3.0 manifest — one Canvas per page FileSet, in page

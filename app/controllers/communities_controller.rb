@@ -13,6 +13,18 @@ class CommunitiesController < CatalogController
   # (structural children + linked-member edges). See #populated_showcase_ids.
   MEMBERSHIP_FIELDS = [MembershipQuery::STRUCTURAL_FIELD, MembershipQuery::LINKED_FIELD].freeze
 
+  # Scope the inherited Blacklight index to Communities only. Without this the
+  # controller inherits CatalogController's unscoped browse, so /communities
+  # lists every resource type (Collections, Works, People) — see
+  # SearchBuilder#scope_to_resource_type. Scoped to :index alone: the :show
+  # page's find_children must still surface child Collections, so it must not be
+  # filtered to Communities.
+  def search_service_context
+    return super unless action_name == 'index'
+
+    super.merge(resource_type_scope: 'Community')
+  end
+
   def show
     @community = AtlasRb::Community.find(params[:id])
     return render_gone(@community) if @community.tombstoned
@@ -27,8 +39,7 @@ class CommunitiesController < CatalogController
   end
 
   def tombstone
-    AtlasRb::Community.tombstone(params[:id])
-    redirect_to root_path, notice: 'Community deleted.'
+    perform_tombstone!(AtlasRb::Community.tombstone(params[:id]), type: 'Community')
   end
 
   def new

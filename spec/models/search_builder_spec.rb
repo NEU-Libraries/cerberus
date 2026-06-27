@@ -154,4 +154,34 @@ RSpec.describe SearchBuilder do
       expect(exclude_fq(scope)).to be_empty
     end
   end
+
+  # Single-type scoping for the /communities and /collections index actions,
+  # flagged via the search-service context
+  # (CommunitiesController/CollectionsController#search_service_context).
+  describe '#scope_to_resource_type' do
+    def type_fq(scope)
+      params = {}
+      described_class.new(scope).scope_to_resource_type(params)
+      Array(params[:fq])
+    end
+
+    it 'appends an internal_resource_tesim filter when the context names a type' do
+      scope = instance_double(Blacklight::SearchService,
+                              blacklight_config: CatalogController.blacklight_config,
+                              context:           { resource_type_scope: 'Community' })
+      expect(type_fq(scope)).to eq(['internal_resource_tesim:Community'])
+    end
+
+    it 'is a no-op when no resource_type_scope is set (e.g. the global catalog index)' do
+      scope = instance_double(Blacklight::SearchService,
+                              blacklight_config: CatalogController.blacklight_config,
+                              context:           { catalog_index: true })
+      expect(type_fq(scope)).to be_empty
+    end
+
+    it 'is a no-op when the scope carries no context' do
+      scope = double('scope', blacklight_config: CatalogController.blacklight_config)
+      expect(type_fq(scope)).to be_empty
+    end
+  end
 end

@@ -11,6 +11,16 @@ class CollectionsController < CatalogController
   authorize_resource_writes!
   after_action :record_view_impression, only: :show
 
+  # Scope the inherited Blacklight index to Collections only (see
+  # CommunitiesController#search_service_context for the rationale and the
+  # :index-only scoping). The :show page's find_children lists child Works, so
+  # it must not be filtered to Collections.
+  def search_service_context
+    return super unless action_name == 'index'
+
+    super.merge(resource_type_scope: 'Collection')
+  end
+
   def show
     @collection = AtlasRb::Collection.find(params[:id])
     return render_gone(@collection) if @collection.tombstoned
@@ -23,8 +33,7 @@ class CollectionsController < CatalogController
   end
 
   def tombstone
-    AtlasRb::Collection.tombstone(params[:id])
-    redirect_to root_path, notice: 'Collection deleted.'
+    perform_tombstone!(AtlasRb::Collection.tombstone(params[:id]), type: 'Collection')
   end
 
   def new

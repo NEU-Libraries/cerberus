@@ -3,7 +3,8 @@
 class SearchBuilder < Blacklight::SearchBuilder
   include Blacklight::Solr::SearchBuilderBehavior
 
-  self.default_processor_chain += [:apply_gated_discovery, :append_extra_filters, :exclude_curation_containers]
+  self.default_processor_chain += [:apply_gated_discovery, :append_extra_filters, :exclude_curation_containers,
+                                   :scope_to_resource_type]
 
   def apply_gated_discovery(solr_parameters)
     # Admins carry the `can :manage, :all` short-circuit in Ability, but that
@@ -63,6 +64,23 @@ class SearchBuilder < Blacklight::SearchBuilder
 
     solr_parameters[:fq] ||= []
     solr_parameters[:fq].push('-featured_bsi:true', '-personal_root_bsi:true')
+  end
+
+  # Constrain a search to a single resource type when the scope's context
+  # carries a `:resource_type_scope` (e.g. the /communities and /collections
+  # index actions, which otherwise inherit CatalogController's unscoped browse
+  # and list every type — see CommunitiesController/CollectionsController#search_service_context).
+  # Threaded through the search-service context, mirroring `catalog_index`, so it
+  # only fires where a controller opts in and never touches the global catalog or
+  # the show-page child listings.
+  def scope_to_resource_type(solr_parameters)
+    return unless scope.respond_to?(:context)
+
+    type = (scope.context || {})[:resource_type_scope]
+    return if type.blank?
+
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << "internal_resource_tesim:#{type}"
   end
 
   private

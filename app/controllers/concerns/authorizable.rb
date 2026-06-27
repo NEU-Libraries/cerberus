@@ -75,6 +75,27 @@ module Authorizable
       render template: 'errors/gone', status: :gone, locals: { record: record }
     end
 
+    # Translate an Atlas tombstone response into the right redirect + flash.
+    #
+    # The tombstone bindings return the raw Faraday::Response (atlas_rb does NOT
+    # raise on the tombstone refusal — RaiseOnResourceError passes a 422 whose
+    # body carries `code: "has_live_children"` straight through). Atlas refuses
+    # with 422 when the resource still has live (non-tombstoned) members, so a
+    # caller that ignores the response (the old `tombstone; redirect notice:` shape)
+    # reports a false "deleted" while the resource stays live. This is guaranteed
+    # for Communities: ShowcaseProvisioner seeds every Community with live
+    # showcase Collections, so its tombstone is always refused.
+    def perform_tombstone!(response, type:)
+      if response.success?
+        redirect_to root_path, notice: "#{type} deleted."
+      elsif response.status == 422
+        redirect_back_or_to(root_path, alert: "#{type} can't be deleted while it still contains live members. " \
+                                              'Withdraw or move them first.')
+      else
+        redirect_back_or_to(root_path, alert: "#{type} could not be deleted.")
+      end
+    end
+
     def authorize_show!
       @permissions = AtlasRb::Resource.permissions(params[:id])
       raise ResourceNotFound if @permissions.nil?

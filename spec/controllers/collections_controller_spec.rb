@@ -152,11 +152,22 @@ describe CollectionsController do
       sign_in user
     end
 
-    it 'calls AtlasRb::Collection.tombstone with the acting user nuid and redirects' do
+    it 'calls AtlasRb::Collection.tombstone and reports success on a 2xx' do
       allow(AtlasRb::Collection).to receive(:tombstone)
+        .and_return(instance_double(Faraday::Response, success?: true))
       post :tombstone, params: { id: collection.id }
       expect(AtlasRb::Collection).to have_received(:tombstone).with(collection.id)
       expect(subject).to redirect_to(root_path)
+      expect(flash[:notice]).to eq('Collection deleted.')
+    end
+
+    it 'reports a 422 live-members refusal without claiming success' do
+      allow(AtlasRb::Collection).to receive(:tombstone)
+        .and_return(instance_double(Faraday::Response, success?: false, status: 422))
+      request.env['HTTP_REFERER'] = collection_path(collection.id)
+      post :tombstone, params: { id: collection.id }
+      expect(flash[:notice]).to be_nil
+      expect(flash[:alert]).to match(/live members/)
     end
   end
 

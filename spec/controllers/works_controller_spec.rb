@@ -496,11 +496,22 @@ describe WorksController do
       sign_in user
     end
 
-    it 'calls AtlasRb::Work.tombstone with the acting user nuid and redirects' do
+    it 'calls AtlasRb::Work.tombstone and reports success on a 2xx' do
       allow(AtlasRb::Work).to receive(:tombstone)
+        .and_return(instance_double(Faraday::Response, success?: true))
       post :tombstone, params: { id: work.id }
       expect(AtlasRb::Work).to have_received(:tombstone).with(work.id)
       expect(subject).to redirect_to(root_path)
+      expect(flash[:notice]).to eq('Work deleted.')
+    end
+
+    it 'reports a 422 live-members refusal without claiming success' do
+      allow(AtlasRb::Work).to receive(:tombstone)
+        .and_return(instance_double(Faraday::Response, success?: false, status: 422))
+      request.env['HTTP_REFERER'] = work_path(work.id)
+      post :tombstone, params: { id: work.id }
+      expect(flash[:notice]).to be_nil
+      expect(flash[:alert]).to match(/live members/)
     end
   end
 
