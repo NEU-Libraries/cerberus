@@ -3,7 +3,14 @@
 Rails.application.routes.draw do
   devise_for :users
 
-  authenticate :user, ->(u) { u.groups&.include?(Permissions::STAFF_EDIT_GROUP) } do
+  # Admins carry the role-based `can :manage, :all` grant but may belong to no
+  # Grouper groups (the admin role is the grant, not group membership — see
+  # Ability). Keying the mount constraint purely on STAFF_EDIT_GROUP therefore
+  # 404'd the jobs dashboard for admins (a Warden constraint miss surfaces as
+  # "No route matches"), even though they outrank the staff-edit group. Admit
+  # the admin role explicitly so both the intended staff-edit members and admins
+  # reach it.
+  authenticate :user, ->(u) { u.admin? || u.groups&.include?(Permissions::STAFF_EDIT_GROUP) } do
     mount MissionControl::Jobs::Engine, at: '/jobs'
   end
 
