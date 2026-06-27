@@ -78,6 +78,9 @@ Rails.application.routes.draw do
   resources :loaders, only: [:index], param: :slug do
     resources :loads, only: [:index, :show, :new, :create, :destroy] do
       member { patch :confirm }
+      # JSON typeahead backing the XML/multipage destination picker — any
+      # collection by title (NOID shown for visual confirmation).
+      collection { get :collection_search }
     end
   end
 

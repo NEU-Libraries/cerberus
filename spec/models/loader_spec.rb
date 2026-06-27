@@ -17,11 +17,29 @@ describe Loader do
       expect(described_class.new(valid_attrs)).to be_valid
     end
 
-    %i[slug display_name group root_collection].each do |attr|
+    %i[slug display_name group].each do |attr|
       it "requires #{attr}" do
         loader = described_class.new(valid_attrs.except(attr))
         expect(loader).not_to be_valid
         expect(loader.errors[attr]).to be_present
+      end
+    end
+
+    describe 'root_collection' do
+      it 'is required for IPTC loaders (the safety rail)' do
+        loader = described_class.new(valid_attrs.except(:root_collection).merge(kind: :iptc))
+        expect(loader).not_to be_valid
+        expect(loader.errors[:root_collection]).to be_present
+      end
+
+      it 'is optional for XML loaders' do
+        loader = described_class.new(valid_attrs.except(:root_collection).merge(kind: :xml))
+        expect(loader).to be_valid
+      end
+
+      it 'is optional for multipage loaders' do
+        loader = described_class.new(valid_attrs.except(:root_collection).merge(kind: :multipage))
+        expect(loader).to be_valid
       end
     end
 
