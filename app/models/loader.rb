@@ -15,7 +15,11 @@ class Loader < ApplicationRecord
             presence:   true,
             uniqueness: true,
             format:     { with: /\A[a-z0-9_-]+\z/, message: 'must be lowercase letters/digits/dashes/underscores only' }
-  validates :display_name, :group, :root_collection, presence: true
+  validates :display_name, :group, presence: true
+  # root_collection is the IPTC safety rail (the deposit picker is boxed to its
+  # children). XML and multipage loaders are librarian-operated and pick any
+  # destination at upload time, so they need no root collection.
+  validates :root_collection, presence: true, if: :iptc?
 
   default_scope { order(:slug) }
 
