@@ -76,7 +76,7 @@
             -# XML / multipage: librarian-trusted — pick any collection by title
             -# (NOID shown for visual confirmation) or paste a NOID directly.
             .position-relative{ data: { controller: 'collection-picker',
-              collection_picker_url_value: loader_loads_collection_search_path(@loader) } }
+              collection_picker_url_value: collection_search_loader_loads_path(@loader) } }
               %input.form-control.admin-registry-form__input--id#load_report_collection_query{ type: 'text',
                 autocomplete: 'off', placeholder: 'Search by collection title, or paste a NOID…',
                 value: @load_report.parent_collection_id,
