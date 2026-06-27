@@ -99,6 +99,12 @@ describe CommunitiesController do
         expect(response).to have_http_status(:ok)
         expect(CGI.unescapeHTML(response.body)).to include('Faculty & Staff')
       end
+
+      it 'labels the synthetic row\'s type pill "People" (a browse-to-many), not "Person"' do
+        get :show, params: { id: community.id }
+        expect(response.body).to include('thumb-type-pill">People')
+        expect(response.body).not_to include('thumb-type-pill">Person')
+      end
     end
 
     context 'Add affordance in the breadcrumb' do

@@ -152,7 +152,10 @@ class CommunitiesController < CatalogController
           'nav_url_ssi'             => community_people_path(community_noid),
           # Public directory affordance — keeps document_status_icons from flagging
           # this synthetic row as private (a lock).
-          'read_access_group_ssim'  => ['public']
+          'read_access_group_ssim'  => ['public'],
+          # Pluralize the type pill to "People" — this is a browse-to-many row,
+          # not an individual Person (SolrDocument#people_browse?).
+          'people_browse_bsi'       => true
         },
         # Carry the live Blacklight response so the synthetic row behaves like a
         # real result: SolrDocument#response defaults to nil, and Blacklight's

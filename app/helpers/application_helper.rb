@@ -14,6 +14,16 @@ module ApplicationHelper
     end
   end
 
+  # The thumbnail type-pill text: "Featured" for curated showcases, "People" for
+  # the synthetic Faculty & Staff browse row (a browse-to-many, not an
+  # individual), otherwise the document's resource type.
+  def pill_label(document)
+    return 'Featured' if document.try(:featured?)
+    return 'People' if document.try(:people_browse?)
+
+    document.klass_type
+  end
+
   FILE_TYPE_ICONS = {
     %r{\Aimage/}                            => 'fa-file-image',
     %r{\Aaudio/}                            => 'fa-file-audio',

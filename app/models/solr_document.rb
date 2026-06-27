@@ -39,6 +39,14 @@ class SolrDocument
     value == true || value.to_s == 'true'
   end
 
+  # The synthetic "Faculty & Staff" community row (CommunitiesController's
+  # faculty_staff_stub) — a browse-to-many affordance, not an individual. Drives
+  # the pluralized "People" thumbnail pill while the row keeps the Person icon.
+  def people_browse?
+    value = self['people_browse_bsi']
+    value == true || value.to_s == 'true'
+  end
+
   # A depositor's personal-root Collection — Atlas flags it personal_root_bsi.
   # A structural container, not content: excluded from the global catalog index
   # and replaced (by the owning Person) in workspace-item breadcrumbs. Solr

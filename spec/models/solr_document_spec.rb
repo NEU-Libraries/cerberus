@@ -46,6 +46,23 @@ describe SolrDocument do
     end
   end
 
+  describe '#people_browse?' do
+    # The synthetic Faculty & Staff community row sets people_browse_bsi to drive
+    # the pluralized "People" type pill. Coerce defensively like featured?.
+    it 'is true for a JSON-boolean people_browse_bsi' do
+      expect(SolrDocument.new(id: '1', people_browse_bsi: true).people_browse?).to be(true)
+    end
+
+    it 'is true for a string "true"' do
+      expect(SolrDocument.new(id: '1', people_browse_bsi: 'true').people_browse?).to be(true)
+    end
+
+    it 'is false when absent or falsey' do
+      expect(SolrDocument.new(id: '1').people_browse?).to be(false)
+      expect(SolrDocument.new(id: '1', people_browse_bsi: false).people_browse?).to be(false)
+    end
+  end
+
   describe 'highlight access (the "Full Text Match" snippet data path)' do
     # The snippet reads Solr highlight fragments for full_text_tsim off the
     # document's response; verify the wiring the list component depends on.
