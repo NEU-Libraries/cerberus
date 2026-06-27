@@ -129,6 +129,17 @@ module Authorizable
       controller_name.classify
     end
 
+    # Set the show-page affordance flags from the already-loaded @permissions,
+    # so the Edit / Delete links render iff the action behind them would be
+    # authorized (the same `:edit` / `:tombstone` gates `authorize_*!` enforce —
+    # no showing a control the user can't use). Keeps each resource controller's
+    # #show under the complexity budget and DRYs the shared computation.
+    def assign_show_abilities!(klass:)
+      doc = solr_doc_from_permissions(@permissions, klass: klass)
+      @can_edit = current_ability.can?(:edit, doc)
+      @can_tombstone = current_ability.can?(:tombstone, doc)
+    end
+
     def solr_doc_from_permissions(permissions, klass: nil)
       SolrDocument.new(
         'read_access_group_ssim'  => permissions.read,

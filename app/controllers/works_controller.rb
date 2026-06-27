@@ -186,8 +186,7 @@ class WorksController < ApplicationController
       @multipage = AtlasRb::Work.file_sets(params[:id])
                                 .count { |page| page['position'].present? } >= 2
       @av_file = MediaRemux.playable_file(@files)
-      @can_tombstone = current_ability.can?(:tombstone,
-                                            solr_doc_from_permissions(@permissions, klass: 'Work'))
+      assign_show_abilities!(klass: 'Work')
       work_breadcrumbs(params[:id])
     end
 

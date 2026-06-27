@@ -33,8 +33,7 @@ class CommunitiesController < CatalogController
     @response = find_children(@community.valkyrie_id, params[:id],
                               exclude_uuids: empty_showcase_uuids(@community.valkyrie_id))
     prepend_faculty_staff_entry(params[:id])
-    @can_tombstone = current_ability.can?(:tombstone,
-                                          solr_doc_from_permissions(@permissions, klass: 'Community'))
+    assign_show_abilities!(klass: 'Community')
     breadcrumbs(params[:id])
   end
 

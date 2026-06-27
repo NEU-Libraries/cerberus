@@ -99,6 +99,23 @@ describe CommunitiesController do
       end
     end
 
+    context 'Edit affordance is gated on the :edit ability' do
+      it 'is hidden from a signed-in user who cannot edit' do
+        sign_in User.new(email: 'viewer@example.com', nuid: '000000005', role: 'standard', groups: [])
+        get :show, params: { id: community.id }
+        expect(response.body).not_to include(%(href="#{edit_community_path(community.id)}"))
+      end
+
+      it 'is shown to a user who can edit' do
+        AtlasRb::Community.metadata(community.id,
+                                    { 'permissions' => { 'read' => ['public'], 'edit' => ['editors'] } },
+                                    nuid: '000000004')
+        sign_in User.new(email: 'ed@example.com', nuid: '000000002', groups: ['editors'])
+        get :show, params: { id: community.id }
+        expect(response.body).to include(%(href="#{edit_community_path(community.id)}"))
+      end
+    end
+
     context 'embedded facet search stays scoped to the show page (ShowScopedSearch)' do
       it 'builds facet/search URLs against the community show action, not the catalog index' do
         get :show, params: { id: community.id }

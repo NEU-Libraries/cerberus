@@ -27,8 +27,7 @@ class CollectionsController < CatalogController
 
     authorize_show!
     @response = find_children(@collection.valkyrie_id, params[:id])
-    @can_tombstone = current_ability.can?(:tombstone,
-                                          solr_doc_from_permissions(@permissions, klass: 'Collection'))
+    assign_show_abilities!(klass: 'Collection')
     collection_breadcrumbs(params[:id])
   end
 

@@ -34,6 +34,22 @@ describe WorksController do
       expect(CGI.unescapeHTML(response.body)).to include(work.title)
     end
 
+    context 'Edit affordance is gated on the :edit ability' do
+      it 'is hidden from a signed-in user who cannot edit' do
+        sign_in User.new(email: 'viewer@example.com', nuid: '000000005', role: 'standard', groups: [])
+        get :show, params: { id: work.id }
+        expect(response.body).not_to include(%(href="#{edit_work_path(work.id)}"))
+      end
+
+      it 'is shown to a user who can edit' do
+        AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'], 'edit' => ['editors'] } },
+                               nuid: '000000004')
+        sign_in User.new(email: 'ed@example.com', nuid: '000000002', groups: ['editors'])
+        get :show, params: { id: work.id }
+        expect(response.body).to include(%(href="#{edit_work_path(work.id)}"))
+      end
+    end
+
     context 'when the work is still in_progress' do
       render_views
 
