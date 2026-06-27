@@ -80,3 +80,23 @@
       %span.admin-action-card__cta
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
+    = link_to admin_loaders_path, class: 'admin-action-card admin-action-card--loaders', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-file-import{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Loader definitions
+      %span.admin-action-card__desc
+        Register and configure batch-ingest loaders — slug, type (IPTC / XML / multipage), the Grouper group that may run it, and the destination collection.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
+    = link_to '/jobs', class: 'admin-action-card admin-action-card--jobs', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-gears{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Background jobs
+      %span.admin-action-card__desc
+        Open the Mission Control dashboard — monitor, retry, and clear queued and failed background jobs across the repository's queues.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}

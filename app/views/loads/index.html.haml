@@ -40,6 +40,9 @@
                 = link_to loader_load_path(@loader, lr), class: 'admin-registry-table__edit' do
                   %i.fa-solid.fa-arrow-right{'aria-hidden' => 'true'}
                   Open
+                = button_to loader_load_path(@loader, lr), method: :delete, class: 'admin-registry-table__delete btn btn-link btn-sm text-danger p-0 ms-3', form: { class: 'd-inline', data: { turbo_confirm: 'Delete this load run? The run record is removed; any Works it already ingested are not affected.' } } do
+                  %i.fa-solid.fa-trash-can.me-1{'aria-hidden' => 'true'}
+                  Delete
   - else
     .admin-registry__empty
       %i.fa-solid.fa-file-import.admin-registry__empty-icon{'aria-hidden' => 'true'}
