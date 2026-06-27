@@ -39,6 +39,8 @@ RSpec.describe 'Multipage loader end-to-end flow', type: :request do
     sign_in admin_user
     allow(XmlValidator).to receive(:call).and_return([])
     allow(AtlasRb::Resource).to receive(:preview).and_return('<dl>rendered</dl>')
+    # Multipage loaders validate the chosen destination resolves to a Collection.
+    allow(AtlasRb::Resource).to receive(:find).with('neu:root').and_return(double(klass: 'Collection'))
     allow(AtlasRb::Work).to receive(:create).and_return(double(id: 'w-new'))
     allow(AtlasRb::Work).to receive(:file_sets).and_return(positioned_listing)
     allow(AtlasRb::Work).to receive(:complete)

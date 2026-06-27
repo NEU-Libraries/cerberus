@@ -33,6 +33,8 @@ RSpec.describe 'XML loader end-to-end flow', type: :request do
     sign_in admin_user
     allow(XmlValidator).to receive(:call).and_return([])
     allow(AtlasRb::Work).to receive(:update)
+    # XML loaders validate the chosen destination resolves to a Collection.
+    allow(AtlasRb::Resource).to receive(:find).with('neu:root').and_return(double(klass: 'Collection'))
   end
 
   after do
