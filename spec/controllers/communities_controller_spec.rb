@@ -86,6 +86,21 @@ describe CommunitiesController do
       expect(CGI.unescapeHTML(response.body)).to include(community.title)
     end
 
+    context 'with affiliated people (synthetic Faculty & Staff row)' do
+      before { allow(controller).to receive(:affiliated_people_count).and_return(1) }
+
+      # Regression: the synthetic row was built as SolrDocument.new(hash) with no
+      # response back-reference, so Blacklight's per-row highlight check
+      # (has_highlight_field? → response['highlighting']) raised
+      # "undefined method `[]' for nil" while rendering the document list. The
+      # row now shares @response, so the page renders.
+      it 'renders the show page with the Faculty & Staff row without a highlight crash' do
+        get :show, params: { id: community.id }
+        expect(response).to have_http_status(:ok)
+        expect(CGI.unescapeHTML(response.body)).to include('Faculty & Staff')
+      end
+    end
+
     context 'Add affordance in the breadcrumb' do
       it 'is hidden from anonymous users (TODO: replace with Ability check)' do
         get :show, params: { id: community.id }

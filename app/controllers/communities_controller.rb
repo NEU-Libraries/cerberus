@@ -144,14 +144,22 @@ class CommunitiesController < CatalogController
     # pill), titled "Faculty & Staff", carrying its own nav_url to the listing.
     def faculty_staff_stub(community_noid)
       SolrDocument.new(
-        'id'                      => "faculty-staff-#{community_noid}",
-        'internal_resource_tesim' => ['Person'],
-        'title_tsim'              => ['Faculty & Staff'],
-        'description_tsim'        => ['Browse faculty and staff by name'],
-        'nav_url_ssi'             => community_people_path(community_noid),
-        # Public directory affordance — keeps document_status_icons from flagging
-        # this synthetic row as private (a lock).
-        'read_access_group_ssim'  => ['public']
+        {
+          'id'                      => "faculty-staff-#{community_noid}",
+          'internal_resource_tesim' => ['Person'],
+          'title_tsim'              => ['Faculty & Staff'],
+          'description_tsim'        => ['Browse faculty and staff by name'],
+          'nav_url_ssi'             => community_people_path(community_noid),
+          # Public directory affordance — keeps document_status_icons from flagging
+          # this synthetic row as private (a lock).
+          'read_access_group_ssim'  => ['public']
+        },
+        # Carry the live Blacklight response so the synthetic row behaves like a
+        # real result: SolrDocument#response defaults to nil, and Blacklight's
+        # per-row highlight check (has_highlight_field? → response['highlighting'])
+        # raises NoMethodError on a nil response. Sharing @response makes the
+        # check see a real (query-less, blank) highlighting section and no-op.
+        @response
       )
     end
 
