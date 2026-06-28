@@ -52,6 +52,8 @@ module Admin
 
       def load_work
         @work = AtlasRb::Resource.find(params[:work_id]) # .resource.title + ancestors
+        raise ResourceNotFound if @work.nil?
+
         @home_noid = Array(@work.resource.ancestors).last&.first
         @linked_noids = Array(AtlasRb::Work.linked_members(params[:work_id]))
         @linked = linked_collections(@linked_noids)

@@ -16,6 +16,8 @@ module WorkDeposit
     # path, unchanged but for where the parent comes from.
     def create_in_workspace(file)
       parent = AtlasRb::Collection.find(params[:workspace_collection_id].presence || params[:parent_id])
+      raise ResourceNotFound if parent.nil?
+
       @work = AtlasRb::Work.create(parent.id, depositor: deposit_attribution(parent))
       finalize_new_work(file)
     end

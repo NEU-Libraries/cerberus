@@ -123,6 +123,8 @@ class SetsController < CatalogController
 
     def load_set
       @set = AtlasRb::Compilation.find(params[:id])
+      raise ResourceNotFound if @set.nil?
+
       # @owned: owner/admin — gates ownership-only UI (Sharing tab, Delete).
       # @can_edit: owner OR a grantee — gates recipe-mutation affordances.
       # Atlas re-checks every write regardless; these only shape the UI.

@@ -27,6 +27,7 @@ class CommunitiesController < CatalogController
 
   def show
     @community = AtlasRb::Community.find(params[:id])
+    raise ResourceNotFound if @community.nil?
     return render_gone(@community) if @community.tombstoned
 
     authorize_show!

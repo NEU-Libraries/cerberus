@@ -38,13 +38,11 @@ class PeopleController < CatalogController
 
   def show
     @person = AtlasRb::Person.find(params[:id], nuid: Current.nuid)
+    raise ResourceNotFound if @person.nil?
+
     @display_name = @person['display_name']
     @response = deposited_works(@person['nuid'])
     build_profile_breadcrumbs
-  rescue JSON::ParserError
-    # Atlas returns an empty 404 body → JSON.parse raises. A public profile
-    # exists only for a curated Person, so an unknown id is a clean 404.
-    render template: 'errors/not_found', status: :not_found, locals: { obj_type: 'person' }
   end
 
   # Keep the embedded search's facet / search-within / pagination links on the

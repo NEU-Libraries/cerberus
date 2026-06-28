@@ -29,6 +29,7 @@ class WorksController < ApplicationController
 
   def show
     @work = AtlasRb::Work.find(params[:id])
+    raise ResourceNotFound if @work.nil?
     return render_gone(@work) if @work.tombstoned
 
     authorize_show!
@@ -66,6 +67,8 @@ class WorksController < ApplicationController
   def new
     @work = Work.new
     @parent = AtlasRb::Collection.find(params[:parent_id]) if params[:parent_id].present?
+    raise ResourceNotFound if params[:parent_id].present? && @parent.nil?
+
     @workspace_collections = workspace_collections
     @publish_targets = publish_targets
   end

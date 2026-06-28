@@ -123,8 +123,10 @@ class LoadsController < ApplicationController
       return true if @loader.iptc?
       return false if parent_id.blank?
 
-      AtlasRb::Resource.find(parent_id).klass == 'Collection'
-    rescue Faraday::Error, JSON::ParserError
+      # find returns nil for a 404 (unknown NOID) and raises ResourceError for
+      # any other non-2xx; either way the destination isn't a usable Collection.
+      AtlasRb::Resource.find(parent_id)&.klass == 'Collection'
+    rescue Faraday::Error, JSON::ParserError, AtlasRb::ResourceError
       false
     end
 

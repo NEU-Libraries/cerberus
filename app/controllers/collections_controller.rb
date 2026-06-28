@@ -23,6 +23,7 @@ class CollectionsController < CatalogController
 
   def show
     @collection = AtlasRb::Collection.find(params[:id])
+    raise ResourceNotFound if @collection.nil?
     return render_gone(@collection) if @collection.tombstoned
 
     authorize_show!

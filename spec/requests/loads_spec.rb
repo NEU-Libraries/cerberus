@@ -359,7 +359,7 @@ RSpec.describe 'Loads', type: :request do
       end
 
       it 're-renders :new with 422 when the destination NOID is unresolvable' do
-        allow(AtlasRb::Resource).to receive(:find).with('bogus').and_raise(JSON::ParserError)
+        allow(AtlasRb::Resource).to receive(:find).with('bogus').and_return(nil) # atlas_rb returns nil for a 404
         post '/loaders/xml/loads',
              params: { load_report: { archive: archive, parent_collection_id: 'bogus' } }
         expect(response).to have_http_status(:unprocessable_content)

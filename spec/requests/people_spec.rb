@@ -111,7 +111,7 @@ RSpec.describe 'People', type: :request do
     end
 
     it '404s a NOID with no curated Person record' do
-      allow(AtlasRb::Person).to receive(:find).and_raise(JSON::ParserError.new('unexpected end of input'))
+      allow(AtlasRb::Person).to receive(:find).and_return(nil) # atlas_rb returns nil for a 404
 
       get '/people/nope9999'
 

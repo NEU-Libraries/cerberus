@@ -24,6 +24,8 @@ class SetExportsController < CatalogController
 
   def show
     set = AtlasRb::Compilation.find(params[:id])
+    raise ResourceNotFound if set.nil?
+
     resolver = SetResolver.new(compilation: set, search_service: search_service)
 
     if resolver.contents_count.zero?

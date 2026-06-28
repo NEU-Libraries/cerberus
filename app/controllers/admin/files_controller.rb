@@ -31,6 +31,8 @@ module Admin
     # derived, not replaced here), each annotated with its version history.
     def manage
       @work = AtlasRb::Work.find(params[:work_id])
+      raise ResourceNotFound if @work.nil?
+
       @blobs = AtlasRb::Work.assets(params[:work_id])
                             .reject { |asset| asset[:uri].present? }
                             .map { |asset| { asset: asset, versions: versions_for(asset.noid) } }

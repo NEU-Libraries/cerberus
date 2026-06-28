@@ -11,7 +11,10 @@ module Admin
     include ActionController::Live
 
     def content
-      apply_download_headers(AtlasRb::Blob.find(params[:id]))
+      blob = AtlasRb::Blob.find(params[:id])
+      raise ResourceNotFound if blob.nil?
+
+      apply_download_headers(blob)
       AtlasRb::Blob.version_content(params[:id], params[:version_id]) { |chunk| response.stream.write(chunk) }
     ensure
       response.stream.close
