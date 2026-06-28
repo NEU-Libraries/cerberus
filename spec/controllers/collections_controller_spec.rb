@@ -54,8 +54,6 @@ describe CollectionsController do
 
     before do
       AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
-      # Wait out the Atlas reindex lag so the controller's find never races to nil.
-      wait_for_atlas_visibility(AtlasRb::Collection, collection.id)
     end
 
     it 'renders the show partial' do
@@ -75,7 +73,6 @@ describe CollectionsController do
         AtlasRb::Collection.metadata(collection.id,
                                      { 'permissions' => { 'read' => ['public'], 'edit' => ['editors'] } },
                                      nuid: '000000004')
-        wait_for_atlas_visibility(AtlasRb::Collection, collection.id)
         sign_in User.new(email: 'ed@example.com', nuid: '000000002', groups: ['editors'])
         get :show, params: { id: collection.id }
         expect(response.body).to include(%(href="#{edit_collection_path(collection.id)}"))
