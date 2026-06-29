@@ -23,4 +23,11 @@ class FeaturedContent
   def self.genre_labels
     GENRES.map(&:first)
   end
+
+  # The Font Awesome icon paired with a genre label, or nil if the label isn't a
+  # known genre. Lets a surface (e.g. the genre landing heading) show the genre's
+  # own icon instead of a generic fallback.
+  def self.icon_for(label)
+    GENRES.find { |genre_label, _icon| genre_label == label }&.last
+  end
 end

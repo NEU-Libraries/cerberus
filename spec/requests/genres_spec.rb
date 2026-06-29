@@ -56,4 +56,20 @@ RSpec.describe 'Genres', type: :request do
       expect(response.body).to include('Featured content in Datasets.')
     end
   end
+
+  # The heading well shows the genre's own icon (matching the homepage gateways),
+  # falling back to the bookmark for the bare browse landing.
+  describe 'heading icon' do
+    it 'renders the genre-specific icon for a known category' do
+      get genre_path(category: 'Datasets')
+
+      expect(response.body).to include('fa-database') # FeaturedContent.icon_for('Datasets')
+    end
+
+    it 'falls back to the bookmark on the bare browse landing' do
+      get genre_path
+
+      expect(response.body).to include('fa-bookmark')
+    end
+  end
 end

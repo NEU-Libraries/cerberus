@@ -5,10 +5,14 @@
 -# sidebar/results row, matching the People landing. The category is named here;
 -# the page shows the works curated into that category's showcases (see
 -# FeaturedCategory), not a genre-facet browse.
+-# Show the genre's own icon (Datasets → fa-database, etc.), matching the homepage
+-# Featured Content gateways; fall back to the bookmark for the bare browse landing
+-# or an unknown category.
+- heading_icon = FeaturedContent.icon_for(@genre) || 'fa-bookmark'
 - content_for(:container_header) do
   .container.p-4.my-3.well.rounded-3
     %h3.mb-1
-      %i.fa-solid.fa-bookmark.text-primary.me-2{ 'aria-hidden' => 'true' }
+      %i.fa-solid.text-primary.me-2{ class: heading_icon, 'aria-hidden' => 'true' }
       = title
     .text-muted.mb-0
       - if @genre.present?
