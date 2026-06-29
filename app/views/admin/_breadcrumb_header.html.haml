@@ -1,0 +1,7 @@
+-# Shared breadcrumb header for admin surfaces. Renders the trail (built in
+-# Admin::BaseController) into :container_header so it spans the full width above
+-# the page — the same per-view pattern the People / genres landings use. Empty
+-# on the hub (dashboard builds no trail), so nothing renders there.
+- if breadcrumb_trail.any?
+  - content_for(:container_header) do
+    = render 'shared/breadcrumbs', show_add: false

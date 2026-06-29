@@ -1,7 +1,4 @@
-.admin-actions.my-3
-  = link_to admin_root_path, class: 'admin-actions__back' do
-    %i.fa-solid.fa-arrow-left-long{'aria-hidden' => 'true'}
-    Back to admin
+= render 'admin/breadcrumb_header'
 
 .admin-registry.my-3
   %header.admin-registry__head

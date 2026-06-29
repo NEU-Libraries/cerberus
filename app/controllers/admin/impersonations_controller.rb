@@ -10,6 +10,8 @@ module Admin
   # On-Behalf-Of header is authorized against the admin role), so this gate
   # is the Cerberus half of a two-sided guarantee, not the only one.
   class ImpersonationsController < BaseController
+    breadcrumb_for 'Impersonation', :admin_impersonation_path
+
     include UserDirectorySearchable
 
     # This controller manages the impersonation session itself, so it is

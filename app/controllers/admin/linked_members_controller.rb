@@ -17,6 +17,8 @@ module Admin
   # binding swallows a rejected 4xx (see the reparent/linked-member error gap
   # report). The acting admin's NUID flows ambiently (Current.nuid).
   class LinkedMembersController < BaseController
+    breadcrumb_for 'Linked members', :admin_linked_members_path
+
     include Blacklight::Configurable
 
     copy_blacklight_config_from(CatalogController)
@@ -28,6 +30,7 @@ module Admin
 
     # Manage panel — the Work's linked collections + an add-a-collection search.
     def manage
+      breadcrumb 'Manage', admin_linked_members_manage_path(work_id: params[:work_id])
       load_work
       @results = ResourceSearch.call(scope: self, query: params[:q], types: %w[Collection]) if params[:q].present?
     end

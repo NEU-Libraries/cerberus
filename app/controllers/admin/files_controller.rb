@@ -22,6 +22,8 @@ module Admin
 
     copy_blacklight_config_from(CatalogController)
 
+    breadcrumb_for 'Replace a file', :admin_files_path
+
     # Step 1 — find the Work.
     def index
       @results = ResourceSearch.call(scope: self, query: params[:q], types: %w[Work]) if params[:q].present?
@@ -30,6 +32,7 @@ module Admin
     # The Work's replaceable Blobs (content assets; Delegates carry a uri and are
     # derived, not replaced here), each annotated with its version history.
     def manage
+      breadcrumb 'Manage files', admin_files_manage_path(work_id: params[:work_id])
       @work = AtlasRb::Work.find(params[:work_id])
       raise ResourceNotFound if @work.nil?
 

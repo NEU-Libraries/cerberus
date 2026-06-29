@@ -17,15 +17,20 @@ module Admin
 
     copy_blacklight_config_from(CatalogController)
 
+    breadcrumb_for 'Manage people', :admin_people_path
+
     before_action :set_person, only: %i[edit update add_affiliation remove_affiliation]
 
     def index
       @people = AtlasRb::Person.list(nuid: Current.nuid)
     end
 
-    def new; end
+    def new
+      breadcrumb 'New', new_admin_person_path
+    end
 
     def edit
+      breadcrumb 'Edit', edit_admin_person_path(@noid)
       load_affiliations
       @results = community_search if params[:q].present?
     end

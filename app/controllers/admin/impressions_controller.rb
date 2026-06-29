@@ -7,6 +7,8 @@ module Admin
   # gated (inherits Admin::BaseController). Reads never touch raw rows — only the
   # human-counts / continuous-aggregate / container rollups (see ImpressionsReport).
   class ImpressionsController < BaseController
+    breadcrumb_for 'Usage analytics', :admin_impressions_path
+
     XLSX_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
     def index

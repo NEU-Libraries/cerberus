@@ -33,12 +33,15 @@ module Admin
     }.freeze
 
     # Step 1 — find the node to move.
+    breadcrumb_for 'Re-parent / Move', :admin_reparent_path
+
     def index
       @results = search_containers if params[:q].present?
     end
 
     # Step 2 — choose the destination parent for the chosen node.
     def choose_parent
+      breadcrumb 'Choose parent', admin_reparent_choose_parent_path
       @node = load_node(params[:node_id])
       @allows_top_level = @node.klass == 'Community'
       return if params[:q].blank?
@@ -54,6 +57,7 @@ module Admin
 
     # Step 3 — preview the move and confirm.
     def confirm
+      breadcrumb 'Confirm', admin_reparent_confirm_path
       set_confirm_ivars
     end
 

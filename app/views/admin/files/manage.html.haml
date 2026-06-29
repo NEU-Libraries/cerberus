@@ -1,8 +1,6 @@
-.admin-actions.my-3
-  = link_to admin_files_path, class: 'admin-actions__back' do
-    %i.fa-solid.fa-arrow-left-long{'aria-hidden' => 'true'}
-    Back to file search
+= render 'admin/breadcrumb_header'
 
+.admin-actions.my-3
   %header.admin-actions__head
     %span.admin-actions__title
       %i.fa-solid.fa-arrows-rotate{'aria-hidden' => 'true'}

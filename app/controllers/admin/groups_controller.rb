@@ -9,6 +9,8 @@ module Admin
   class GroupsController < BaseController
     PER_PAGE = 25
 
+    breadcrumb_for 'Group names', :admin_groups_path
+
     before_action :set_group, only: %i[edit update destroy]
 
     def index
@@ -17,9 +19,12 @@ module Admin
 
     def new
       @group = Group.new
+      breadcrumb 'New', new_admin_group_path
     end
 
-    def edit; end
+    def edit
+      breadcrumb 'Edit', edit_admin_group_path(@group)
+    end
 
     def create
       @group = Group.new(group_params)

@@ -13,6 +13,8 @@ module Admin
   # both passes Atlas's authz and stamps the restore audit event the History tab
   # already renders.
   class TombstonesController < BaseController
+    breadcrumb_for 'Restore a tombstoned item', :admin_tombstones_path
+
     # Borrow CatalogController's Solr config so TombstonedItems' SearchBuilder
     # behaves like the catalog's (same pattern as ReparentController).
     include Blacklight::Configurable
