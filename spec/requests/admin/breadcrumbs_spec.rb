@@ -3,9 +3,11 @@
 require 'rails_helper'
 
 # Every admin surface carries a consistent breadcrumb trail (Administration /
-# <section>), rendered by the `admin` layout from the trail built in
-# Admin::BaseController — replacing the old ad-hoc per-page "Back to admin"
-# links. The hub (dashboard) shows none.
+# <section>), built in Admin::BaseController and rendered per-view into
+# :container_header — replacing the old ad-hoc per-page "Back to admin" links.
+# The hub (dashboard) shows none. Assertions are scoped to the breadcrumb nav
+# (not the page at large) so a stray /admin link elsewhere — e.g. the navbar —
+# can't mask a crumb that should be a link but isn't.
 RSpec.describe 'Admin breadcrumbs', type: :request do
   include Devise::Test::IntegrationHelpers
 
@@ -16,36 +18,54 @@ RSpec.describe 'Admin breadcrumbs', type: :request do
 
   before { sign_in admin_user }
 
+  # [{ text:, href:, active: }, ...] for each crumb in the breadcrumb nav.
+  def crumbs
+    nav = response.parsed_body.at_css('nav[aria-label="breadcrumb"]')
+    return [] unless nav
+
+    nav.css('.breadcrumb-item').map do |li|
+      link = li.at_css('a')
+      { text: li.text.strip, href: link&.[]('href'), active: li['class'].to_s.include?('active') }
+    end
+  end
+
   it 'shows no breadcrumb on the admin hub (you are already there)' do
     get '/admin'
 
     expect(response).to have_http_status(:ok)
-    expect(response.body).not_to include('aria-label="breadcrumb"')
+    expect(crumbs).to be_empty
   end
 
-  it 'trails Administration / <section> on a section page, linking back to the hub' do
-    get '/admin/groups'
+  it 'links Administration back to the hub (not a dead current crumb) on a section page' do
+    get '/admin/people'
 
     expect(response).to have_http_status(:ok)
-    expect(response.body).to include('aria-label="breadcrumb"')
-    expect(response.body).to include(%(href="#{admin_root_path}")) # Administration → hub
-    expect(response.body).to include('Group names')
+    admin_crumb = crumbs.first
+    expect(admin_crumb[:text]).to eq('Administration')
+    expect(admin_crumb[:href]).to eq(admin_root_path) # it is a link…
+    expect(admin_crumb[:active]).to be(false)         # …not the current crumb
+
+    # The section is the current (active, non-link) leaf.
+    expect(crumbs.last).to include(text: 'Manage people', active: true)
+    expect(crumbs.last[:href]).to be_nil
   end
 
-  it 'keeps the section as a back-link and adds a leaf on a sub-page' do
+  it 'keeps Administration and the section as links, with the sub-page as the leaf' do
     get '/admin/groups/new'
 
     expect(response).to have_http_status(:ok)
-    expect(response.body).to include('aria-label="breadcrumb"')
-    expect(response.body).to include(%(href="#{admin_root_path}"))   # Administration link
-    expect(response.body).to include(%(href="#{admin_groups_path}")) # Group names still a link
+    texts = crumbs.pluck(:text)
+    expect(texts).to eq(['Administration', 'Group names', 'New'])
+    expect(crumbs[0]).to include(href: admin_root_path, active: false)   # Administration link
+    expect(crumbs[1]).to include(href: admin_groups_path, active: false) # Group names link
+    expect(crumbs[2]).to include(active: true)                           # New (current)
   end
 
   it 'is rendered on the Replace-a-file surface (previously a bare back-link)' do
     get '/admin/files'
 
     expect(response).to have_http_status(:ok)
-    expect(response.body).to include('aria-label="breadcrumb"')
-    expect(response.body).to include('Replace a file')
+    expect(crumbs.pluck(:text)).to eq(['Administration', 'Replace a file'])
+    expect(crumbs.first).to include(href: admin_root_path, active: false)
   end
 end

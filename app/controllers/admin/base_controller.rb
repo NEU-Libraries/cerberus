@@ -39,7 +39,11 @@ module Admin
       def build_admin_breadcrumbs
         return if is_a?(Admin::DashboardController)
 
-        breadcrumb 'Administration', admin_root_path
+        # `:exact` so the root stays a link on every sub-page — without it, loaf's
+        # default inclusive match treats `/admin` as current on all `/admin/*` paths,
+        # marking "Administration" as the current crumb (a dead-end, not a link back
+        # to the hub). The dashboard is excluded above, so it is never the current page.
+        breadcrumb 'Administration', admin_root_path, match: :exact
         return if breadcrumb_label.blank?
 
         # `:exact` so the section stays a link on its sub-pages (new/edit/manage),
