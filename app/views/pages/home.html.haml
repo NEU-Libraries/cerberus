@@ -12,7 +12,7 @@
 
 %section.my-4{ aria: { labelledby: 'featured-content-heading' } }
   %h2#featured-content-heading.h4.mb-3 Featured Content
-  .row.row-cols-2.row-cols-md-4.g-3
+  .row.row-cols-2.row-cols-md-4.g-2
     - featured_gateways.each do |label, icon, href|
       .col
         = link_to href, class: 'featured-gateway featured-gateway--row' do
@@ -20,7 +20,7 @@
           %span.featured-gateway__label= label
 
 %section.my-4{ aria: { labelledby: 'recently-added-heading' } }
-  %h2#recently-added-heading.h4.mb-3 Recently Added Items
+  %h2#recently-added-heading.h4.mb-1 Recently Added Items
   - if @recent_documents.present?
     -# documents-gallery scopes the shared 170×170 .document-thumbnail sizing
     -# (app/assets/stylesheets/_blacklight_discovery.scss) so these cards match
