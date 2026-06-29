@@ -32,4 +32,28 @@ RSpec.describe 'Genres', type: :request do
       expect(response.body).to include('Browse by category')
     end
   end
+
+  # Regression: switching the view (list/grid) on a category landing used to drop
+  # the `category` param and empty the page. The view-type toggle builds its URL
+  # from search_state.to_h, and Blacklight's permit_search_params strips any param
+  # not in search_state_fields — so `category` must be retained there.
+  describe 'category param retention in the search state' do
+    it 'keeps category in search_state.to_h so view-toggle links preserve the genre' do
+      state = SearchState.new(
+        ActionController::Parameters.new(category: 'Datasets', controller: 'genres', action: 'show'),
+        CatalogController.blacklight_config
+      )
+
+      expect(state.to_h).to include('category' => 'Datasets')
+    end
+
+    it 'still resolves the category after a view switch (no empty page)' do
+      get genre_path(category: 'Datasets', view: 'list')
+
+      expect(response).to have_http_status(:ok)
+      # The category resolved (heading well names it) rather than degrading to the
+      # bare "Browse by category" landing that a dropped param produced.
+      expect(response.body).to include('Featured content in Datasets.')
+    end
+  end
 end

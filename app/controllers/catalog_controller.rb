@@ -9,6 +9,15 @@ class CatalogController < ApplicationController
     config.search_service_class = GatedSearchService
     config.view.gallery(document_component: Blacklight::Gallery::DocumentComponent, icon: Blacklight::Gallery::Icons::GalleryComponent)
 
+    # Retain the genres `category` param in the search state. Blacklight's
+    # permit_search_params strips any param not in search_state_fields, so without
+    # this the view-type toggle (whose URL is url_for(search_state.to_h.merge(view:)))
+    # drops `category` — landing on /genres?view=list with no genre, which renders
+    # an empty category. (Pagination/search survive via GenresController#search_action_url,
+    # which re-merges category; the toggle bypasses that.) Harmless elsewhere — no
+    # other surface sets `category`.
+    config.search_state_fields += %i[category]
+
     # config.track_search_session = false
     config.track_search_session.storage = false
     config.autocomplete_enabled = false
