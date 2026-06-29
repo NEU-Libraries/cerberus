@@ -20,7 +20,7 @@
           %span.featured-gateway__label= label
 
 %section.my-4{ aria: { labelledby: 'recently-added-heading' } }
-  %h2#recently-added-heading.h4.mb-1 Recently Added Items
+  %h2#recently-added-heading.h4.mb-0 Recently Added Items
   - if @recent_documents.present?
     -# documents-gallery scopes the shared 170×170 .document-thumbnail sizing
     -# (app/assets/stylesheets/_blacklight_discovery.scss) so these cards match
