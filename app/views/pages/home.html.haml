@@ -11,11 +11,24 @@
       %a{:href => "https://dsg.neu.edu/services/drs/", :target => "_blank"} DRS resource page
 
 %section.my-4{ aria: { labelledby: 'featured-content-heading' } }
-  %h2#featured-content-heading.h4.mb-1 Featured Content
-  %p.text-secondary.mb-3 Browse the repository by scholarly category, or explore the faculty and staff behind the work.
+  %h2#featured-content-heading.h4.mb-3 Featured Content
   .row.row-cols-2.row-cols-md-4.g-3
     - featured_gateways.each do |label, icon, href|
       .col
-        = link_to href, class: 'featured-gateway' do
+        = link_to href, class: 'featured-gateway featured-gateway--row' do
           %i.fa-solid.fa-fw{ class: icon, aria: { hidden: 'true' } }
           %span.featured-gateway__label= label
+
+%section.my-4{ aria: { labelledby: 'recently-added-heading' } }
+  %h2#recently-added-heading.h4.mb-3 Recently Added Items
+  - if @recent_documents.present?
+    -# documents-gallery scopes the shared 170×170 .document-thumbnail sizing
+    -# (app/assets/stylesheets/_blacklight_discovery.scss) so these cards match
+    -# the catalog gallery view's square thumbnails instead of rendering squashed.
+    .row.row-cols-2.row-cols-md-3.row-cols-lg-4.g-3.documents-gallery
+      - @recent_documents.each_with_index do |doc, i|
+        = render Blacklight::Gallery::DocumentComponent.new(document: document_presenter(doc), counter: i + 1)
+  - else
+    %p.text-secondary.mb-0 No items to show yet.
+
+= render 'shared/downloads_modal'

@@ -34,6 +34,21 @@ a.featured-gateway {
     line-height: 1.3;
   }
 
+  // Row variant — the homepage left column stacks the gateways as full-width
+  // buttons (icon beside label, centered as a group), v1's Featured Content
+  // column. Same chrome and hover promotion; only the axis, padding and icon
+  // scale change so it reads as a list rather than a tile grid.
+  &--row {
+    flex-direction: row;
+    height: auto;
+    padding: 0.7rem 1rem;
+    gap: 0.6rem;
+
+    i {
+      font-size: 1.05rem;
+    }
+  }
+
   &:hover,
   &:focus-visible {
     color: var(--bs-body-color);

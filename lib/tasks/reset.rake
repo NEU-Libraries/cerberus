@@ -45,6 +45,17 @@ namespace :reset do
       AtlasRb::Blob.create(av_work['id'], '/home/cerberus/web/spec/fixtures/files/sample-video.mp4', 'sample-video.mp4')
       AtlasRb::Work.complete(av_work['id'])
 
+      # A fourth public image Work so the homepage "Recently Added Items" grid
+      # shows a full four-up row (as a populated prod system would) rather than
+      # a partial row. Reuses the lake.jpg fixture — visually distinct from the
+      # other three recent Works (field / flower / video poster).
+      lake_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/work-lake-mods.xml')
+      lake_work_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/lake.jpg')
+      AtlasRb::Work.set_thumbnails(lake_work['id'], **ThumbnailCreator.call(base: lake_work_base))
+      AtlasRb::Work.metadata(lake_work['id'], { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Blob.create(lake_work['id'], '/home/cerberus/web/spec/fixtures/files/lake.jpg', 'lake.jpg')
+      AtlasRb::Work.complete(lake_work['id'])
+
       # Marcom loader fixtures — Communications community → Communications
       # Photo Archive collection → Campus Life (Photographs) collection. The
       # middle collection is what the marcom Loader.root_collection points at;
