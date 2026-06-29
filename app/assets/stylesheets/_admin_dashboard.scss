@@ -150,6 +150,7 @@
   &--restore      { --admin-action-color: #138f76; } // teal-deep: bringing back to life
   &--impersonation { --admin-action-color: #a8322a; }
   &--files        { --admin-action-color: #5a5e8c; } // desaturated indigo: versioned content
+  &--groups       { --admin-action-color: #7a5c84; } // desaturated violet: a naming / label affordance
 }
 
 // Back-link on a dedicated admin action surface (e.g. the impersonation

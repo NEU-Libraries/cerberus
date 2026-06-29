@@ -91,6 +91,16 @@
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
 
+    = link_to admin_groups_path, class: 'admin-action-card admin-action-card--groups', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-tags{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Group names
+      %span.admin-action-card__desc
+        Give a Grouper group a friendly display name (raw colon-separated identifier → readable label) shown wherever the group surfaces — inbox recipients, sharing, permissions.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
     = link_to '/jobs', class: 'admin-action-card admin-action-card--jobs', role: 'listitem' do
       %span.admin-action-card__icon
         %i.fa-solid.fa-gears{'aria-hidden' => 'true'}

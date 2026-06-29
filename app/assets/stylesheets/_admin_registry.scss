@@ -98,6 +98,17 @@
       color: $gray-400;
     }
   }
+
+  // Paginator under the registry table — centered with vertical breathing room
+  // (the full-width table makes a left-hugging paginator read as detached).
+  // Scoped to the registry so the catalog's bar-aligned paginator is unaffected.
+  .paginate-section {
+    padding: $spacer 0;
+
+    .pagination {
+      justify-content: center;
+    }
+  }
 }
 
 .admin-registry-table {
