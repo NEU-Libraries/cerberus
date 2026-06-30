@@ -36,7 +36,7 @@
               %code.admin-registry-table__id .zip
               \. Must contain a
               %code.admin-registry-table__id manifest.xlsx
-              naming one MODS XML (Sequence 0) and the page images in order (Sequence 1 and up, Last Item on the final page). The whole archive becomes a single Work with ordered pages; you'll review the full page list before anything runs.
+              listing one or more items. Each item is a MODS XML (Sequence 0) followed by its page images in order (Sequence 1 and up), with Last Item on that item's final page. Every item becomes its own Work with ordered pages; you'll preview the first item before the batch runs.
           - elsif @loader.xml?
             .admin-registry-form__hint
               Accepted formats:
@@ -85,7 +85,7 @@
               .list-group.inbox-typeahead{ hidden: true, data: { collection_picker_target: 'results' } }
             - if @loader.multipage?
               .admin-registry-form__hint
-                Where the new multipage Work lands — any collection.
+                Where the new multipage Works land — any collection.
             - else
               .admin-registry-form__hint
                 Where newly-created Works land — any collection. Rows that update an existing object by PID/NOID ignore this.

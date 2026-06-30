@@ -1,0 +1,12 @@
+/ The items a multipage preview will skip, each with its contract reasons.
+/ The list is capped in MultipagePreview (a sheet may hold thousands); the
+/ batch count conveys the true scale, this names the first handful.
+%ul.small.mb-0
+  - preview.invalid_items.each do |item|
+    %li
+      %span.fw-semibold= item.label
+      %ul.mb-0
+        - item.errors.each do |err|
+          %li= err
+  - if preview.invalid_count > preview.invalid_items.size
+    %li.text-muted= "…and #{preview.invalid_count - preview.invalid_items.size} more."
