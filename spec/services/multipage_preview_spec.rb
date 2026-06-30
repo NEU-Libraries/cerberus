@@ -33,11 +33,9 @@ RSpec.describe MultipagePreview do
   context 'with the good single-item fixture' do
     let(:archive_path) { zip_multipage_fixture('multipage') }
 
-    it 'is ok with one valid item and no skipped items' do
+    it 'is ok and reports one item with its page count' do
       expect(result).to be_ok
       expect(result.item_count).to eq(1)
-      expect(result.valid_count).to eq(1)
-      expect(result.invalid_count).to eq(0)
       expect(result.page_count).to eq(2)
     end
 
@@ -63,19 +61,19 @@ RSpec.describe MultipagePreview do
                               ])
     end
 
-    it 'reports batch totals and shows the first item as the sample' do
+    it 'counts every item but shows only the first as the sample' do
       expect(result).to be_ok
       expect(result.item_count).to eq(2)
-      expect(result.valid_count).to eq(2)
       expect(result.page_count).to eq(3)
       expect(result.first_item.label).to eq('Item A')
       expect(result.first_item.pages.map(&:file_name)).to eq(%w[a1.tif a2.tif])
     end
   end
 
-  context 'when one item is invalid (skip-bad)' do
-    # Item B references a MODS file that is not in the archive — invalid — while
-    # item A is whole. Confirm still runs (skip-bad), surfacing the skipped one.
+  context 'when a later item is invalid (not validated at preview time)' do
+    # Item B references a MODS file that is not in the archive, but the preview
+    # scopes to the first item and never validates B — that is the run-time
+    # job's work, so confirm is still allowed.
     let(:archive_path) do
       build_multipage_archive(
         [
@@ -86,34 +84,19 @@ RSpec.describe MultipagePreview do
       )
     end
 
-    it 'stays ok with one valid item and names the skipped one' do
+    it 'stays ok and reports both items, sampling the first' do
       expect(result).to be_ok
-      expect(result.valid_count).to eq(1)
-      expect(result.invalid_count).to eq(1)
-      expect(result.invalid_items.first.label).to eq('Item B')
-      expect(result.invalid_items.first.errors.join).to include("MODS XML file 'b.mods.xml' was not found")
+      expect(result.item_count).to eq(2)
+      expect(result.first_item.label).to eq('Item A')
     end
   end
 
-  context 'when no item is valid' do
-    let(:archive_path) do
-      build_multipage_archive([multipage_item(mods: 'a.mods.xml', pages: %w[a1.tif], title: 'Item A')],
-                              omit_files: ['a.mods.xml'])
-    end
-
-    it 'is blocked because there is nothing to ingest' do
-      expect(result).to be_blocked
-      expect(result.valid_count).to eq(0)
-      expect(result.invalid_count).to eq(1)
-    end
-  end
-
-  context 'with the no-mods fixture (single invalid item)' do
+  context 'with the no-mods fixture (first item MODS file missing)' do
     let(:archive_path) { zip_multipage_fixture('multipage-no-mods') }
 
-    it 'is blocked on the missing MODS file with no MODS pane' do
-      expect(result).to be_blocked
-      expect(result.invalid_items.map(&:errors).join).to include("MODS XML file 'bdr_43888.mods.xml' was not found")
+    it 'is not blocked but shows no MODS pane for the sample' do
+      expect(result).to be_ok
+      expect(result.item_count).to eq(1)
       expect(result.mods_xml).to be_nil
       expect(result.decorated_html).to be_nil
     end

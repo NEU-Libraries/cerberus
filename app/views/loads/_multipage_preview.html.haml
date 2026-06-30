@@ -1,9 +1,10 @@
 / Multipage loader preview-then-confirm. A manifest concatenates many items
 / (each becomes its own Work); this renders MultipagePreview::Result as a
-/ sanity check — batch totals, any items that will be skipped, and the FIRST
-/ item in detail — so the librarian can confirm they uploaded the right
-/ spreadsheet before anything is minted. Reuses the .admin-registry /
-/ .load-report-overview / .ingest-status chrome — no bespoke CSS.
+/ sanity check — how many items the sheet holds plus the FIRST item in detail
+/ — so the librarian can confirm they uploaded the right spreadsheet before
+/ anything is minted. Per-item validation is the run-time job's work, not the
+/ preview's. Reuses the .admin-registry / .load-report-overview /
+/ .ingest-status chrome — no bespoke CSS.
 .admin-registry.my-3
   %header.admin-registry__head
     %span.admin-registry__title
@@ -27,38 +28,23 @@
       %p.text-muted.small.mb-3
         This archive contains
         %strong= pluralize(preview.item_count, 'item')
-        (#{pluralize(preview.page_count, 'page')}). Each item becomes its own Work. Nothing is created until you confirm; confirming runs the whole batch.
+        (#{pluralize(preview.page_count, 'page')}). Each item becomes its own Work; any item with problems is skipped and noted in the report. Nothing is created until you confirm.
 
-      - if preview.valid_count.zero?
-        .alert.alert-danger.d-flex.gap-2.mb-0
-          %i.fa-solid.fa-circle-exclamation.mt-1{'aria-hidden' => 'true'}
-          %div
-            %p.fw-semibold.mb-1 No item in this spreadsheet is valid, so there is nothing to ingest.
-            = render 'multipage_invalid_items', preview: preview
-      - else
-        - if preview.invalid_count.positive?
-          .alert.alert-warning.d-flex.gap-2
-            %i.fa-solid.fa-triangle-exclamation.mt-1{'aria-hidden' => 'true'}
-            %div
-              %p.fw-semibold.mb-1
-                = "#{pluralize(preview.invalid_count, 'item')} #{preview.invalid_count == 1 ? 'has' : 'have'} problems and will be skipped:"
-              = render 'multipage_invalid_items', preview: preview
-
-        .load-report-overview
-          .load-report-overview__meta
-            %span.load-report-overview__label Mode
+      .load-report-overview
+        .load-report-overview__meta
+          %span.load-report-overview__label Mode
+          %span.load-report-overview__value
+            %span.ingest-status{style: '--ingest-tone: #18bc9c'}
+              %i.fa-solid.fa-layer-group{'aria-hidden' => 'true'}
+              Create multipage Works
+          %span.load-report-overview__label Items
+          %span.load-report-overview__value= preview.item_count
+          %span.load-report-overview__label Pages
+          %span.load-report-overview__value= preview.page_count
+          - if load_report.parent_collection_id.present?
+            %span.load-report-overview__label Destination
             %span.load-report-overview__value
-              %span.ingest-status{style: '--ingest-tone: #18bc9c'}
-                %i.fa-solid.fa-layer-group{'aria-hidden' => 'true'}
-                Create multipage Works
-            %span.load-report-overview__label Items
-            %span.load-report-overview__value= preview.valid_count
-            %span.load-report-overview__label Pages
-            %span.load-report-overview__value= preview.page_count
-            - if load_report.parent_collection_id.present?
-              %span.load-report-overview__label Destination
-              %span.load-report-overview__value
-                %code.admin-registry-table__id= load_report.parent_collection_id
+              %code.admin-registry-table__id= load_report.parent_collection_id
 
     - if preview.ok? && preview.first_item
       - first = preview.first_item

@@ -157,17 +157,18 @@ RSpec.describe 'Multipage loader end-to-end flow', type: :request do
     end
   end
 
-  describe 'an archive with no valid item' do
+  describe 'an archive whose only item is invalid' do
     let(:archive_path) do
       build_multipage_archive([multipage_item(mods: 'a.mods.xml', pages: %w[a1.tif], title: 'Item A')],
                               omit_files: ['a.mods.xml'])
     end
 
-    it 'blocks the preview, and a forced confirm mints nothing' do
+    it 'still offers confirm at preview (per-item validation is deferred), but minting nothing' do
       lr = upload(archive_path)
       get loader_load_path(multipage_loader, lr)
-      expect(response.body).not_to include('Confirm &amp; run')
-      expect(response.body).to include('No item in this spreadsheet is valid')
+      # The preview scopes to the first item; it does not pre-validate the
+      # batch, so confirm is offered. The run-time job rejects the bad item.
+      expect(response.body).to include('Confirm &amp; run')
 
       perform_enqueued_jobs { patch confirm_loader_load_path(multipage_loader, lr) }
 
