@@ -38,7 +38,6 @@ class MultipagePreview < ApplicationService
     @load_report = load_report
   end
 
-  # rubocop:disable Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
   # The early-return guards (no manifest / unparseable / no rows / no items)
   # read as one linear preview flow, mirroring XmlPreview#call.
   def call
@@ -56,15 +55,20 @@ class MultipagePreview < ApplicationService
 
     summarize(archive, items)
   end
-  # rubocop:enable Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
   private
 
     def summarize(archive, items)
       present = archive.basenames
       validated = items.map { |item| [item, MultipageLoader::Contract.call(item: item, present_files: present)] }
-      invalid = validated.reject { |_item, errors| errors.empty? }
+      build_result(archive, items, validated)
+    end
 
+    # rubocop:disable Metrics/MethodLength
+    # The Result carries every field the preview view reads; assembling it is
+    # one flat literal, not branching logic.
+    def build_result(archive, items, validated)
+      invalid = validated.reject { |_item, errors| errors.empty? }
       first = items.first
       mods = read_mods(archive, first)
       mods_errors = mods ? XmlValidator.call(xml: mods) : []
@@ -86,6 +90,7 @@ class MultipagePreview < ApplicationService
         decorated_html:    mods_errors.empty? && mods ? decorated(mods) : nil
       )
     end
+    # rubocop:enable Metrics/MethodLength
 
     def parse_rows(manifest_bytes)
       Tempfile.create(['manifest', '.xlsx']) do |f|

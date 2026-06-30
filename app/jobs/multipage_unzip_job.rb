@@ -60,29 +60,31 @@ class MultipageUnzipJob < ApplicationJob
   private
 
     # Phase 1 (create every row) fully precedes Phase 2 (enqueue), so the
-    # report's whole row set exists before any item/page job runs.
+    # report's whole row set exists before any item/page job runs. A clean item
+    # gets page rows and an item job; an invalid one gets a failed summary row.
     def scaffold_and_fan_out(load_report, items, present_files)
-      valid = items.select do |item|
+      valid = []
+      items.each do |item|
         errors = MultipageLoader::Contract.call(item: item, present_files: present_files)
         if errors.empty?
           create_page_rows(load_report, item)
-          true
+          valid << item
         else
           create_failed_item_row(load_report, item, errors)
-          false
         end
       end
 
-      valid.each do |item|
-        MultipageItemJob.perform_later(
-          load_report.id, item.index, File.basename(item.xml_path),
-          work_idempotency_key: SecureRandom.uuid
-        )
-      end
-
+      valid.each { |item| enqueue_item_job(load_report, item) }
       # Settles the all-invalid report (no item job was enqueued); a no-op in
       # the mixed/valid case while page rows are still pending.
       load_report.maybe_finalize!
+    end
+
+    def enqueue_item_job(load_report, item)
+      MultipageItemJob.perform_later(
+        load_report.id, item.index, File.basename(item.xml_path),
+        work_idempotency_key: SecureRandom.uuid
+      )
     end
 
     def create_page_rows(load_report, item)

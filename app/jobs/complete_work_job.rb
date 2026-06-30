@@ -30,7 +30,7 @@ class CompleteWorkJob < ApplicationJob
       # A page of this item failed — leave the Work in_progress (the
       # stuck-deposit operator flag) rather than complete a Work we can't
       # vouch for. Sibling items are unaffected.
-      return if rows.where(status: :failed).exists?
+      return if rows.exists?(status: :failed)
 
       expected = rows.where.not(sequence: nil).count
       actual   = positioned_page_count(work_pid)

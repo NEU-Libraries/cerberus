@@ -37,7 +37,7 @@ class MultipageItemJob < ApplicationJob
     # Already processed: page rows are created pending with no work_pid, so a
     # work_pid present means a prior attempt minted + stamped (retry after
     # success), and a failed row means a prior attempt rejected the item.
-    return if rows.where.not(work_pid: nil).exists? || rows.where(status: :failed).exists?
+    return if rows.where.not(work_pid: nil).exists? || rows.exists?(status: :failed)
 
     mods_path = File.join(XmlLoader::Paths.extracted_dir(report), mods_basename)
     mods_errors = XmlValidator.call(xml: File.read(mods_path))
@@ -51,7 +51,7 @@ class MultipageItemJob < ApplicationJob
   # cheap for items with many pages, so updated_at is set explicitly.
   def self.fail_item_rows(report, item_index, message)
     report.multipage_ingests.where(item_index: item_index).where.not(status: :failed)
-          .update_all(status: MultipageIngest.statuses[:failed], error_message: message, updated_at: Time.current)
+          .update_all(status: MultipageIngest.statuses[:failed], error_message: message, updated_at: Time.current) # rubocop:disable Rails/SkipsModelValidations
     report.maybe_finalize!
   end
 
@@ -61,7 +61,7 @@ class MultipageItemJob < ApplicationJob
       work_pid = AtlasRb::Work.create(report.parent_collection_id, mods_path,
                                       idempotency_key: work_idempotency_key).id
       page_rows = report.multipage_ingests.where(item_index: item_index).where.not(sequence: nil)
-      page_rows.update_all(work_pid: work_pid, updated_at: Time.current)
+      page_rows.update_all(work_pid: work_pid, updated_at: Time.current) # rubocop:disable Rails/SkipsModelValidations
       page_rows.find_each { |ingest| MultipageIngestJob.perform_later(ingest.id) }
     end
 end
