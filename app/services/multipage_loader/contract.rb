@@ -1,20 +1,22 @@
 # frozen_string_literal: true
 
 module MultipageLoader
-  # Validates parsed manifest rows against the multipage archive contract,
-  # returning user-facing error strings (valid iff empty). This runs in the
-  # preview (advisory) and again in MultipageUnzipJob (the enforcement
-  # point) — a bad archive must be rejected before anything is created in
-  # Atlas, because one bad page invalidates the whole Work.
+  # Validates a single item-block's rows against the multipage archive
+  # contract, returning user-facing error strings (valid iff empty). This runs
+  # per item in the preview (advisory) and again in MultipageUnzipJob (the
+  # enforcement point), so a contract-invalid item is recorded as failed and
+  # skipped before any Work is minted. MODS schema validation is *not* here —
+  # it is per-item network/CPU work the item job owns (see MultipageItemJob).
   #
-  # The contract: exactly one Sequence 0 row naming the Work's MODS XML;
-  # page sequences run 1..n contiguous and unique; Last Item is flagged on
-  # exactly the final page; every referenced file exists in the archive.
+  # The contract, scoped to one item: exactly one Sequence 0 row naming the
+  # item's MODS XML; page sequences run 1..n contiguous and unique; the item
+  # ends in a Last Item flag on its final page; every referenced file exists
+  # in the archive.
   class Contract < ApplicationService
-    # rows: MultipageLoader::Manifest::Row list.
+    # item: a MultipageLoader::Item.
     # present_files: Set of basenames actually present in the archive.
-    def initialize(rows:, present_files:)
-      @rows = rows
+    def initialize(item:, present_files:)
+      @item = item
       @present_files = present_files
     end
 
@@ -34,11 +36,13 @@ module MultipageLoader
       def check_row_shapes
         errors = []
         well_formed = []
-        @rows.each.with_index(1) do |row, n|
+        # Row numbers are item-relative; the item's label (caller-supplied)
+        # locates which item in the sheet a message belongs to.
+        @item.rows.each.with_index(1) do |row, n|
           if row.file_name.blank?
-            errors << "Manifest row #{n}: missing File Name."
+            errors << "Row #{n}: missing File Name."
           elsif row.sequence.nil?
-            errors << "Manifest row #{n} ('#{row.file_name}'): Sequence must be a whole number — " \
+            errors << "Row #{n} ('#{row.file_name}'): Sequence must be a whole number — " \
                       '0 for the MODS row, 1 and up for pages.'
           else
             well_formed << row
@@ -51,19 +55,19 @@ module MultipageLoader
         mods_rows = rows.select(&:mods_row?)
         case mods_rows.size
         when 0
-          ["The manifest must contain exactly one Sequence 0 row carrying the Work's MODS XML — none found."]
+          ['This item must contain exactly one Sequence 0 row carrying the MODS XML — none found.']
         when 1
           return [] if mods_rows.first.xml_path.present?
 
           ['The Sequence 0 row must give the MODS XML File Path.']
         else
-          ["The manifest must contain exactly one Sequence 0 row — found #{mods_rows.size}."]
+          ["This item must contain exactly one Sequence 0 row — found #{mods_rows.size}."]
         end
       end
 
       def page_errors(rows)
         pages = rows.select(&:page?)
-        return ['The manifest has no page rows (Sequence 1 and up).'] if pages.empty?
+        return ['This item has no page rows (Sequence 1 and up).'] if pages.empty?
 
         errors = duplicate_sequence_errors(rows)
         sorted = pages.map(&:sequence).sort
@@ -81,10 +85,14 @@ module MultipageLoader
         end
       end
 
+      # ItemSet closes a block on each Last Item flag, so within a well-formed
+      # item the flag is on the final row and at most one exists. A trailing
+      # block with no flag is an incomplete item; a flag off the highest page
+      # means the librarian flagged the wrong row.
       def last_item_errors(rows)
         pages = rows.select(&:page?)
         flagged = rows.select(&:last_item?)
-        return ["Exactly one row must have Last Item set to TRUE — found #{flagged.size}."] if flagged.size != 1
+        return ['This item has no Last Item flag — its final page must be flagged TRUE.'] if flagged.empty?
         return [] if pages.empty? # the no-pages rule already fired
 
         max = pages.map(&:sequence).max
