@@ -250,11 +250,17 @@ Rack::Attack.blocklist("CN Block") do |req|
   end
 end
 
-Rack::Attack.blocklist("blacklight") do |req|
-  if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
-    if (`cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 6) || ((req.session_options[:id].blank? && req.referrer.blank? && req.env["HTTP_COOKIE"].blank?) || req.env["HTTP_SEC_FETCH_SITE"].blank? || req.region == "China")
-      (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creator") || req.fullpath.include?("rss"))
-    end
+# Rack::Attack.blocklist("blacklight") do |req|
+#   if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+#     if (`cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 6) || ((req.session_options[:id].blank? && req.referrer.blank? && req.env["HTTP_COOKIE"].blank?) || req.env["HTTP_SEC_FETCH_SITE"].blank? || req.region == "China")
+#       (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creator") || req.fullpath.include?("rss"))
+#     end
+#   end
+# end
+
+Rack::Attack.blocklist('blacklight') do |req|
+  Rack::Attack::Allow2Ban.filter(req.fingerprint, maxretry: 30, findtime: 30, bantime: 3600) do
+    (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creator") || req.fullpath.include?("rss")) # what *counts* toward maxretry (second, independent lever)
   end
 end
 
