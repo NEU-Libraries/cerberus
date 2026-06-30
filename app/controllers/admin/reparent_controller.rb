@@ -10,7 +10,7 @@ module Admin
   #   confirm       → preview "move X from A → B"
   #   move          → perform via atlas_rb, then redirect to the node's page
   #
-  # The Atlas re-parent endpoints + atlas_rb bindings (v1.2.0) already exist;
+  # The Atlas re-parent endpoints + atlas_rb bindings already exist;
   # this is purely the Cerberus consumer. The acting admin's NUID flows to Atlas
   # ambiently (config/initializers/atlas_rb.rb wires Current.nuid), which both
   # passes Atlas's authz and stamps the re-parent audit event.

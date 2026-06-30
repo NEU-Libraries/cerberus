@@ -5,8 +5,8 @@ namespace :reset do
   task data: [:clean, 'db:seed:replant'] do
     raise "Wrong env - #{Rails.env} - must be development" unless Rails.env.development? || Rails.env.staging?
 
-    # Seed as the admin fixture (000000004). :system can't author Works per
-    # Atlas's Ability layer (Q7 carve-out only covers Community / Collection);
+    # Seed as the admin fixture (000000004). :system can't author Works —
+    # Atlas's Ability only lets it create Communities / Collections;
     # group-gated roles would hit a chicken-and-egg problem with the
     # freshly-created, ungrouped collection. Admin's wildcard authority is
     # the only fixture that carries the whole seed sequence without prior

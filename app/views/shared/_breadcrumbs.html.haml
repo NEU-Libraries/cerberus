@@ -6,10 +6,10 @@
     -# The "Add a child here" affordance. Suppressed on edit pages via
     -# `show_add: false` (you don't add siblings/children mid-edit).
     -# TODO: replace `user_signed_in?` with a proper Ability check
-    -# (e.g. `can?(:create_child, current_resource)`) once piece 5 /
-    -# acting-as ships the resource-scoped permission rules. Today we
-    -# hide this dropdown from anonymous users to avoid the dead-end
-    -# affordance, but a logged-in user without deposit rights still
+    -# (e.g. `can?(:create_child, current_resource)`) once resource-scoped
+    -# create permissions exist. Today we hide this dropdown from anonymous
+    -# users to avoid the dead-end affordance, but a logged-in user without
+    -# deposit rights still
     -# sees it.
     - if local_assigns.fetch(:show_add, true) && user_signed_in?
       %li.breadcrumb-item

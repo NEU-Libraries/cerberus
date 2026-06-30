@@ -3,9 +3,9 @@
 require 'rails_helper'
 
 # Wiring coverage for the signed-assertion relay — the sole Cerberus→Atlas auth
-# path now that cerberus_token is retired (step C). config/initializers/atlas_rb.rb
-# unconditionally registers atlas_rb's assertion_signing_key / assertion_signing_kid
-# slots (gem >= 1.3.9) from credentials, so every relay request is signed.
+# path. config/initializers/atlas_rb.rb unconditionally registers atlas_rb's
+# assertion_signing_key / assertion_signing_kid slots from credentials, so every
+# relay request is signed.
 #
 # These specs verify Cerberus's substrate — that the initializer wired the
 # callables to credentials and that atlas_rb emits an ES256 assertion matching

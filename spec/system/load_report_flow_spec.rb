@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-# End-to-end batch-flow spec. Exercises the full piece 4 chain:
+# End-to-end batch-flow spec. Exercises the full batch-ingest chain:
 # LoadsController#create → UnzipJob → IptcIngestJob × N →
 # ContentCreationJob.perform_later (mocked) + IiifAssetsJob.perform_later
 # (mocked) → finalize_success → LoadReport.maybe_finalize!.

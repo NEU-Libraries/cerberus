@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
 # Owner-scoped rows for the Add-to-set modal: one Atlas list page, with the
-# optional title typeahead passed through as the server-side `q` filter
-# (Atlas 0.6.60 / atlas_rb 1.3.5 — closed gap report
-# compilations_list_title_filter.md), so pagination always describes the
-# filtered result.
+# optional title typeahead passed through as the server-side `q` filter, so
+# pagination always describes the filtered result.
 class SetPicker
   PER_PAGE = 10
 

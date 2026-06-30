@@ -13,8 +13,8 @@
 # still consult them; the `confirm: :i_understand` sentinel is the friction
 # marker for destructive intent.
 #
-# Relay signing (atlas_rb >= 1.3.9) is the sole Cerberus→Atlas auth path now
-# that cerberus_token is retired. Every request signs a short-lived ES256
+# Relay signing is the sole Cerberus→Atlas auth path. Every request signs a
+# short-lived ES256
 # assertion — `sub` = the acting NUID, `iss=cerberus`, `aud=atlas`, plus a
 # signed `obo` claim when acting-as — with Cerberus's EC private key; Atlas
 # verifies it against the public half it holds under kid `cerberus-2026-06`.

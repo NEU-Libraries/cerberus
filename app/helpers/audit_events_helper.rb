@@ -14,8 +14,8 @@
 module AuditEventsHelper
   # Action descriptor — colour token + Font Awesome icon + display label.
   # Used by the action cell on every event row. Unknown actions fall
-  # through to a neutral "generic" descriptor so a piece-5 action type
-  # the helper hasn't been taught about still renders sensibly.
+  # through to a neutral "generic" descriptor so an action type the helper
+  # hasn't been taught about still renders sensibly.
   ACTION_DESCRIPTORS = {
     'create'        => { tone: 'create',    icon: 'fa-circle-plus',  label: 'Created' },
     'update'        => { tone: 'update',    icon: 'fa-pen',          label: 'Updated' },

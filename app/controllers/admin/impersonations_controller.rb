@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Admin
-  # Start/stop the two impersonation modes (piece 5). Admin-only — the gate
+  # Start/stop the two impersonation modes. Admin-only — the gate
   # is inherited from Admin::BaseController. The session state machine and
   # hydration live in ImpersonationSession (included app-wide via
   # ApplicationController); this controller is just the toggle surface.

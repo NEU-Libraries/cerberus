@@ -163,7 +163,7 @@ class WorksController < ApplicationController
     # left empty server-side, so the resource reads exactly as if the target
     # deposited it). The operating admin's hand is recorded in the AuditEvent
     # (actor = admin, on_behalf_of = target), not stamped on the Work. The
-    # piece-3 proxy radio is hidden while acting-as (see works/new), so this
+    # proxy radio is hidden while acting-as (see works/new), so this
     # branch wins unconditionally and the radio value is irrelevant.
     #
     # Outside acting-as, the deposit form's "upload as" radio governs:

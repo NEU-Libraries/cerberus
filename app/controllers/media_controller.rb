@@ -4,8 +4,8 @@
 # download twin is DownloadsController (attachment, no Range); this one honours
 # HTTP Range so the browser can seek.
 #
-# v2's bytes live in Atlas, which serves byte ranges (atlas_rb 1.8.2
-# Blob.content(range:)). Under ActionController::Live the response commits on the
+# The bytes live in Atlas, which serves byte ranges via Blob.content(range:).
+# Under ActionController::Live the response commits on the
 # first stream write, so the 206 status + Content-Range must be set BEFORE
 # streaming — we compute them from the client's Range + the blob size (MediaRange)
 # rather than relaying Atlas's post-stream headers (too late), and forward the
