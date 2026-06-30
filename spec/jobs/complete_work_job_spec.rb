@@ -70,6 +70,45 @@ RSpec.describe CompleteWorkJob, type: :job do
       expect(AtlasRb::Work).not_to have_received(:complete)
     end
 
+    it 'does nothing for a report that is still in progress' do
+      report = create(:load_report, loader: loader, status: :processing)
+      create(:multipage_ingest, load_report: report, status: :completed, work_pid: 'neu:w1', sequence: 1)
+
+      allow(AtlasRb::Work).to receive(:complete)
+      described_class.perform_now(report.id)
+
+      expect(AtlasRb::Work).not_to have_received(:complete)
+    end
+
+    it 'completes each distinct Work the report minted' do
+      report = create(:load_report, loader: loader, status: :completed)
+      create(:multipage_ingest, load_report: report, status: :completed, item_index: 0, work_pid: 'neu:w1', sequence: 1)
+      create(:multipage_ingest, load_report: report, status: :completed, item_index: 1, work_pid: 'neu:w2', sequence: 1)
+
+      allow(AtlasRb::Work).to receive(:file_sets).with('neu:w1').and_return([page_entry('a1', 1)])
+      allow(AtlasRb::Work).to receive(:file_sets).with('neu:w2').and_return([page_entry('b1', 1)])
+      allow(AtlasRb::Work).to receive(:complete)
+
+      described_class.perform_now(report.id)
+
+      expect(AtlasRb::Work).to have_received(:complete).with('neu:w1')
+      expect(AtlasRb::Work).to have_received(:complete).with('neu:w2')
+    end
+
+    it 'completes a clean Work but leaves a sibling Work with a failed page in_progress' do
+      report = create(:load_report, loader: loader, status: :failed)
+      create(:multipage_ingest, load_report: report, status: :completed, item_index: 0, work_pid: 'neu:w1', sequence: 1)
+      create(:multipage_ingest, load_report: report, status: :failed, item_index: 1, work_pid: 'neu:w2', sequence: 1)
+
+      allow(AtlasRb::Work).to receive(:file_sets).with('neu:w1').and_return([page_entry('a1', 1)])
+      allow(AtlasRb::Work).to receive(:complete)
+
+      described_class.perform_now(report.id)
+
+      expect(AtlasRb::Work).to have_received(:complete).with('neu:w1')
+      expect(AtlasRb::Work).not_to have_received(:complete).with('neu:w2')
+    end
+
     context 'when Atlas disagrees on the page count' do
       it 'leaves the Work incomplete and messages the creator' do
         report = create(:load_report, loader: loader, status: :completed, creator_nuid: '000000003')
