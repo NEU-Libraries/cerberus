@@ -1,29 +1,30 @@
 # frozen_string_literal: true
 
-# Validate-everything-then-mint for the multipage loader.
+# Lightweight, local-only scaffolding step for the multipage loader.
 #
-# Enqueued by LoadsController#confirm once the librarian approves the
-# preview. The whole archive becomes ONE Work, so unlike XmlUnzipJob this
-# is the enforcement point for the full manifest contract: extraction →
-# Contract → XmlValidator all pass before any Atlas call. A forced confirm
-# past a blocked preview therefore still cannot mint anything — the
-# preview is UX, this job is the guarantee.
+# Enqueued by LoadsController#confirm. A manifest concatenates many items;
+# this job does NO Atlas calls — it extracts the archive, parses and groups
+# rows into items (ItemSet), and contract-validates each item locally. For a
+# contract-valid item it creates the item's pending page rows; for an invalid
+# item it records one failed summary row (skip-bad, ingest-valid). It then
+# fans out one MultipageItemJob per valid item — that job owns the per-item
+# Atlas work (MODS validation, Work mint, page fan-out).
 #
-# Page rows are ALL created before any page job is enqueued. That closes
-# the premature-finalize race the XML pipeline tolerates (an early row job
-# observing "no rows outstanding" while siblings are uncreated): the
-# report settles exactly once, which the CompleteWorkJob barrier rides.
+# Keeping every Atlas round-trip out of this job is deliberate: a 1000-item
+# sheet must not become one long network-bound job whose mid-run crash strands
+# half-minted Works. A crash here fails a report that has minted nothing.
 #
-# A crash between Work mint and row creation fails the report and leaves
-# the Work in_progress: true — by design, that flag is the operator
-# visibility for stuck deposits (see /works?in_progress=true).
+# Two-phase fan-out: ALL page rows across ALL items are created before any
+# item job is enqueued, so the report's full row set exists before any row can
+# reach a terminal state — maybe_finalize! never observes a premature
+# empty-outstanding set, and the CompleteWorkJob barrier rides the single
+# status-settle.
 class MultipageUnzipJob < ApplicationJob
   queue_as :default
 
-  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
-  # Linear shape (guard → extract → validate → mint → fan out → rescue)
-  # mirrors XmlUnzipJob and reads as one flow; the extra branches are the
-  # contract/MODS gates that must all precede the Atlas mint.
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  # Linear shape (guard → extract → parse → group → scaffold) mirrors the
+  # other unzip jobs and reads as one flow; the branches are structural gates.
   def perform(load_report_id)
     load_report = LoadReport.find(load_report_id)
     return unless load_report.pending?
@@ -32,9 +33,9 @@ class MultipageUnzipJob < ApplicationJob
 
     extracted = XmlLoader::Paths.extracted_dir(load_report)
     FileUtils.mkdir_p(extracted)
-    extracted_names = Set.new
+    present_files = Set.new
     XmlLoader::Archive.new(XmlLoader::Paths.archive_path(load_report))
-                      .extract_all(extracted) { |basename| extracted_names << basename }
+                      .extract_all(extracted) { |basename| present_files << basename }
 
     manifest_path = File.join(extracted, 'manifest.xlsx')
     unless File.exist?(manifest_path)
@@ -44,51 +45,72 @@ class MultipageUnzipJob < ApplicationJob
     rows = MultipageLoader::Manifest.new(manifest_path).rows
     return structural_failure(load_report, 'The manifest has a header row but no data rows.') if rows.empty?
 
-    errors = MultipageLoader::Contract.call(rows: rows, present_files: extracted_names)
-    return structural_failure(load_report, errors.join(' ')) if errors.any?
+    items = MultipageLoader::ItemSet.call(rows: rows)
+    return structural_failure(load_report, 'The manifest produced no items.') if items.empty?
 
-    mods_path = File.join(extracted, File.basename(rows.find(&:mods_row?).xml_path))
-    mods_errors = XmlValidator.call(xml: File.read(mods_path))
-    return structural_failure(load_report, "Invalid MODS: #{mods_errors.join('; ')}") if mods_errors.any?
-
-    work_pid = mint_work(load_report, mods_path)
-    fan_out(load_report, rows.select(&:page?), work_pid) if work_pid
+    scaffold_and_fan_out(load_report, items, present_files)
   rescue MultipageLoader::Manifest::EmptyError, MultipageLoader::Manifest::HeaderError => e
     structural_failure(load_report, e.message)
   rescue StandardError => e
     Rails.logger.error("MultipageUnzipJob failed for LoadReport #{load_report_id}: #{e.class} #{e.message}")
     LoadReport.find_by(id: load_report_id)&.fail_load
   end
-  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   private
 
-    # The one Work this archive becomes. Mint failure is a structural
-    # failure (this job never retries, mirroring XmlUnzipJob's rescue), so
-    # the idempotency key is single-use.
-    def mint_work(load_report, mods_path)
-      AtlasRb::Work.create(load_report.parent_collection_id, mods_path,
-                           idempotency_key: SecureRandom.uuid).id
-    rescue Faraday::Error => e
-      structural_failure(load_report, "Could not create the Work in Atlas: #{e.message}")
-      nil
+    # Phase 1 (create every row) fully precedes Phase 2 (enqueue), so the
+    # report's whole row set exists before any item/page job runs.
+    def scaffold_and_fan_out(load_report, items, present_files)
+      valid = items.select do |item|
+        errors = MultipageLoader::Contract.call(item: item, present_files: present_files)
+        if errors.empty?
+          create_page_rows(load_report, item)
+          true
+        else
+          create_failed_item_row(load_report, item, errors)
+          false
+        end
+      end
+
+      valid.each do |item|
+        MultipageItemJob.perform_later(
+          load_report.id, item.index, File.basename(item.xml_path),
+          work_idempotency_key: SecureRandom.uuid
+        )
+      end
+
+      # Settles the all-invalid report (no item job was enqueued); a no-op in
+      # the mixed/valid case while page rows are still pending.
+      load_report.maybe_finalize!
     end
 
-    def fan_out(load_report, pages, work_pid)
-      ingests = pages.sort_by(&:sequence).map do |row|
+    def create_page_rows(load_report, item)
+      item.pages.each do |row|
         load_report.multipage_ingests.create!(
+          item_index:      item.index,
           source_filename: row.file_name,
           sequence:        row.sequence,
-          work_pid:        work_pid,
           idempotency_key: SecureRandom.uuid
         )
       end
-      ingests.each { |ingest| MultipageIngestJob.perform_later(ingest.id) }
+    end
+
+    # One failed summary row per skipped item, labelled so the report names
+    # which item failed and why.
+    def create_failed_item_row(load_report, item, errors)
+      load_report.multipage_ingests.create!(
+        item_index:      item.index,
+        source_filename: item.label,
+        status:          :failed,
+        error_message:   errors.join(' '),
+        idempotency_key: SecureRandom.uuid
+      )
     end
 
     # Write a single failed row carrying the manifest-level reason, then
-    # finalize so the report reaches a terminal state — same surface as
-    # XmlUnzipJob's structural failures.
+    # finalize so the report reaches a terminal state — same surface as the
+    # other unzip jobs' structural failures.
     def structural_failure(load_report, message)
       load_report.multipage_ingests.create!(
         source_filename: 'manifest.xlsx',

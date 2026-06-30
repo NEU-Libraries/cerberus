@@ -133,15 +133,18 @@ class LoadReport < ApplicationRecord
       ingest_relations.any? { |rel| rel.completed_with_warnings.exists? }
     end
 
-    # Multipage completion barrier: the one Work behind a multipage report
-    # may only be completed (Atlas flips in_progress *and* builds the
-    # Work-level METS structMap — the preservation record of page order)
-    # once every page row has landed. Riding the status-settle signal gives
-    # exactly-once enqueueing; failed reports never complete their Work,
-    # leaving in_progress=true as the stuck-deposit operator flag.
+    # Multipage completion barrier: each Work behind a multipage report may
+    # only be completed (Atlas flips in_progress *and* builds the Work-level
+    # METS structMap — the preservation record of page order) once all of its
+    # page rows have landed. Riding the status-settle signal gives exactly-once
+    # enqueueing. This fires on *any* terminal status, including `failed`: with
+    # skip-bad ingest a report can be failed because one item failed while
+    # other items succeeded, and those clean Works must still complete —
+    # CompleteWorkJob decides per Work (and leaves a Work with a failed page
+    # in_progress as the stuck-deposit operator flag).
     def enqueue_work_completion!
       return unless loader&.multipage?
-      return unless completed? || completed_with_warnings?
+      return unless terminal?
 
       CompleteWorkJob.perform_later(id)
     end

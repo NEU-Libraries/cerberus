@@ -1,13 +1,12 @@
 # frozen_string_literal: true
 
 # Per-page multipage loader job. One is enqueued per page row by
-# MultipageUnzipJob, after the whole archive has validated and the one
-# shared Work is minted (work_pid rides on the ingest row, so the row id
-# is the only argument).
+# MultipageItemJob, after that item's Work is minted and work_pid is stamped
+# onto the row (so the row id is the only argument).
 #
 # Each page becomes an ordered FileSet (position = the manifest Sequence)
 # holding the page binary as its Blob. Page jobs run in parallel safely —
-# every job touches only its own FileSet.
+# every job touches only its own FileSet, across all items in the load.
 #
 # Retry safety is the design center. The two Atlas writes differ:
 #
