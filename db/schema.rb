@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_27_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_30_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -142,6 +142,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_27_000001) do
     t.text "error_message"
     t.string "file_set_pid"
     t.string "idempotency_key"
+    t.integer "item_index"
     t.bigint "load_report_id", null: false
     t.integer "sequence"
     t.string "source_filename"
@@ -149,7 +150,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_27_000001) do
     t.datetime "updated_at", null: false
     t.text "warnings", default: "[]"
     t.string "work_pid"
-    t.index ["load_report_id", "sequence"], name: "index_multipage_ingests_on_load_report_id_and_sequence", unique: true
+    t.index ["load_report_id", "item_index", "sequence"], name: "idx_on_load_report_id_item_index_sequence_ff91e23197", unique: true
     t.index ["load_report_id"], name: "index_multipage_ingests_on_load_report_id"
   end
 
