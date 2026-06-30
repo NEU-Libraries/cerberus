@@ -34,20 +34,28 @@ RSpec.describe MultipageIngest, type: :model do
     end
   end
 
-  describe 'sequence uniqueness per report' do
-    it 'rejects two rows with the same sequence on one report' do
+  describe 'page-order uniqueness per item' do
+    it 'rejects two rows with the same sequence within one item' do
       report = create(:load_report)
-      create(:multipage_ingest, load_report: report, sequence: 1)
+      create(:multipage_ingest, load_report: report, item_index: 0, sequence: 1)
       expect do
-        create(:multipage_ingest, load_report: report, sequence: 1)
+        create(:multipage_ingest, load_report: report, item_index: 0, sequence: 1)
       end.to raise_error(ActiveRecord::RecordNotUnique)
     end
 
-    it 'allows multiple nil sequences (structural-failure rows)' do
+    it 'allows the same sequence across different items in one report' do
       report = create(:load_report)
-      create(:multipage_ingest, load_report: report, sequence: nil)
+      create(:multipage_ingest, load_report: report, item_index: 0, sequence: 1)
       expect do
-        create(:multipage_ingest, load_report: report, sequence: nil)
+        create(:multipage_ingest, load_report: report, item_index: 1, sequence: 1)
+      end.not_to raise_error
+    end
+
+    it 'allows multiple nil sequences (failed / structural rows)' do
+      report = create(:load_report)
+      create(:multipage_ingest, load_report: report, item_index: nil, sequence: nil)
+      expect do
+        create(:multipage_ingest, load_report: report, item_index: nil, sequence: nil)
       end.not_to raise_error
     end
   end
