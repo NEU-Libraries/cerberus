@@ -138,6 +138,12 @@ Rack::Attack.safelist("safelist IP") do |req|
   Rails.cache.read("safelist #{req.remote_ip}")
 end
 
+Rack::Attack.blocklist('blacklight') do |req|
+  Rack::Attack::Allow2Ban.filter(req.fingerprint, maxretry: 30, findtime: 30, bantime: 3600) do
+    (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creator") || req.fullpath.include?("rss")) # what *counts* toward maxretry (second, independent lever)
+  end
+end
+
 Rack::Attack.blocklist("Bot Wave") do |req|
   req.referrer.blank? && req.env["HTTP_COOKIE"].blank? && (req.env["HTTP_ACCEPT"] == "*/*") && (req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase))
 end
@@ -257,12 +263,6 @@ end
 #     end
 #   end
 # end
-
-Rack::Attack.blocklist('blacklight') do |req|
-  Rack::Attack::Allow2Ban.filter(req.fingerprint, maxretry: 30, findtime: 30, bantime: 3600) do
-    (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creator") || req.fullpath.include?("rss")) # what *counts* toward maxretry (second, independent lever)
-  end
-end
 
 Rack::Attack.blocklist("range fraud") do |request|
   if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
