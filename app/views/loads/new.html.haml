@@ -45,7 +45,7 @@
               %code.admin-registry-table__id .zip
               \. Must contain a
               %code.admin-registry-table__id manifest.xlsx
-              plus the MODS XML files it references. Each row updates an existing object by PID/NOID, or creates a new one from a named content file. You'll preview the first row before the batch runs.
+              plus the MODS XML files it references. Each row updates an existing object by PID, or creates a new one from a named content file. You'll preview the first row before the batch runs.
           - else
             .admin-registry-form__hint
               Accepted formats:
@@ -78,7 +78,7 @@
             .position-relative{ data: { controller: 'collection-picker',
               collection_picker_url_value: collection_search_loader_loads_path(@loader) } }
               %input.form-control.admin-registry-form__input--id#load_report_collection_query{ type: 'text',
-                autocomplete: 'off', placeholder: 'Search by collection title, or paste a NOID…',
+                autocomplete: 'off', placeholder: 'Search by collection title, or paste a PID…',
                 value: @load_report.parent_collection_id,
                 data: { collection_picker_target: 'query', action: 'input->collection-picker#search' } }
               = f.hidden_field :parent_collection_id, data: { collection_picker_target: 'hidden' }
@@ -88,7 +88,7 @@
                 Where the new multipage Works land — any collection.
             - else
               .admin-registry-form__hint
-                Where newly-created Works land — any collection. Rows that update an existing object by PID/NOID ignore this.
+                Where newly-created Works land — any collection. Rows that update an existing object by PID ignore this.
 
       .d-flex.gap-2.align-items-center.mt-4
         = f.submit 'Upload', class: 'btn btn-primary', disabled: (@loader.iptc? && @destinations.empty?)
