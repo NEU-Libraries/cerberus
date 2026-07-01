@@ -49,7 +49,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
     before { sign_in admin_user }
 
     describe 'GET index' do
-      it 'lists each withdrawn item with its title, NUID and a restore action' do
+      it 'lists each withdrawn item with its title, PID and a restore action' do
         allow(TombstonedItems).to receive(:call)
           .and_return(fake_results(tombstoned_doc(noid: 'abc', title: 'Withdrawn Thesis'),
                                    tombstoned_doc(noid: 'xyz', title: 'Old Community', klass: 'Community')))
