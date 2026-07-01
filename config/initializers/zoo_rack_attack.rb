@@ -139,7 +139,7 @@ Rack::Attack.safelist("safelist IP") do |req|
 end
 
 Rack::Attack.blocklist('blacklight') do |req|
-  Rack::Attack::Allow2Ban.filter(req.fingerprint, maxretry: 30, findtime: 30, bantime: 3600) do
+  Rack::Attack::Allow2Ban.filter(req.fingerprint, maxretry: 10, findtime: 10, bantime: 7200) do
     (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creator") || req.fullpath.include?("rss")) # what *counts* toward maxretry (second, independent lever)
   end
 end
