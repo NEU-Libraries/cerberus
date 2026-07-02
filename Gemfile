@@ -53,9 +53,10 @@ gem 'bootsnap', require: false
 # gem "image_processing", "~> 1.2"
 
 # NEU Gems
-# >= 1.3.8 ships the relay-signing transport (ES256 signed assertions that
-# replace the cerberus_token relay); the signed-assertion cutover depends on it.
-gem 'atlas_rb', '>= 1.3.8'
+# >= 1.8.5 ships the per-tier derivative-permission binding
+# (Work.set_derivative_permissions; assets carry `gated`/`permission`) the
+# gated-derivative feature consumes, plus the find-on-410 tombstone fix.
+gem 'atlas_rb', '>= 1.8.5'
 gem 'blacklight', '>= 8.0', '< 9.0'
 gem 'blacklight-gallery'
 gem 'bootstrap'
