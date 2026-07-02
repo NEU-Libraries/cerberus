@@ -4,10 +4,23 @@ services:
     volumes:
     - storage:/home/atlas/storage
   iiif:
+    environment:
+      # Gated-derivative enforcement. The delegate serves open-* identifiers
+      # freely and requires a signed URL / grant cookie for gated-*. It no-ops
+      # until CERBERUS_IIIF_SIGNING_SECRET is set (in .env) — set it identically
+      # here and on web to turn enforcement on.
+      CANTALOUPE_DELEGATE_SCRIPT_ENABLED: 'true'
+      CANTALOUPE_DELEGATE_SCRIPT_PATHNAME: /etc/cantaloupe/delegates.rb
+      CERBERUS_IIIF_SIGNING_SECRET: ${CERBERUS_IIIF_SIGNING_SECRET:-}
     volumes:
       - iiif:/imageroot
+      - ./docker/cantaloupe/delegates.rb:/etc/cantaloupe/delegates.rb:ro
   web:
     build: .
+    environment:
+      # Signs gated-derivative URLs / the zoom grant cookie; must match the iiif
+      # service's value. Enforcement is off until this is set (in .env).
+      CERBERUS_IIIF_SIGNING_SECRET: ${CERBERUS_IIIF_SIGNING_SECRET:-}
     ports:
       - 12345:12345
     volumes:
