@@ -15,6 +15,11 @@ require 'openssl'
 require 'uri'
 
 class CustomDelegate
+  # Cantaloupe sets the per-request context via this accessor before calling any
+  # delegate method (see the bundled delegates.rb.sample); without it the proxy
+  # raises on `context=` and the delegate is skipped (fails open).
+  attr_accessor :context
+
   SECRET = ENV['CERBERUS_IIIF_SIGNING_SECRET'].to_s
 
   # Runs before the source image is accessed. Return true to allow, or a hash
@@ -63,12 +68,16 @@ class CustomDelegate
       expected.bytes.zip(given.bytes).reduce(0) { |acc, (x, y)| acc | (x ^ y) }.zero?
     end
 
+    # The signed path — request_uri is the public, client-facing URI whose path
+    # Cerberus signed over (host-independent, so proxy host-rewrites don't matter).
     def request_path
       URI(context['request_uri'].to_s).path
     end
 
+    # Cantaloupe strips non-IIIF query params (exp/sig) from request_uri but keeps
+    # them in local_uri, so read the credential from there.
     def query_args
-      URI.decode_www_form(URI(context['request_uri'].to_s).query.to_s).to_h
+      URI.decode_www_form(URI(context['local_uri'].to_s).query.to_s).to_h
     rescue StandardError
       {}
     end
