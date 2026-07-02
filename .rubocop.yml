@@ -3,6 +3,11 @@ Naming/AccessorMethodName:
   Exclude:
     # "set_" is the Sets domain noun (set_chip_count etc.), not a writer prefix
     - 'app/helpers/sets_helper.rb'
+Naming/PredicateMethod:
+  Exclude:
+    # Cantaloupe delegate: `authorize` is a fixed Cantaloupe API method name, and
+    # the script follows Cantaloupe conventions rather than app predicate-naming.
+    - 'docker/cantaloupe/delegates.rb'
 Lint/MissingSuper:
   Exclude:
     - 'app/services/**/*'
