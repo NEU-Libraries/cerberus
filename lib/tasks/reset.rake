@@ -14,17 +14,17 @@ namespace :reset do
     # default_nuid resolve to the admin NUID for every call inside.
     Current.set(nuid: '000000004') do
       community = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml')
-      river_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/river.jpg')
+      river_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/river.jpg').open_base
       AtlasRb::Community.set_thumbnails(community['id'], **ThumbnailCreator.call(base: river_base))
       AtlasRb::Community.metadata(community['id'], { 'permissions' => { 'read' => ['public'] } })
 
       collection = AtlasRb::Collection.create(community['id'], '/home/cerberus/web/spec/fixtures/files/collection-mods.xml')
-      field_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/field.jpg')
+      field_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/field.jpg').open_base
       AtlasRb::Collection.set_thumbnails(collection['id'], **ThumbnailCreator.call(base: field_base))
       AtlasRb::Collection.metadata(collection['id'], { 'permissions' => { 'read' => ['public'] } })
 
       work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/work-mods.xml')
-      flower_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/flower.jpg')
+      flower_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/flower.jpg').open_base
       AtlasRb::Work.set_thumbnails(work['id'], **ThumbnailCreator.call(base: flower_base))
       AtlasRb::Work.metadata(work['id'], { 'permissions' => { 'read' => ['public'] } })
       AtlasRb::Blob.create(work['id'], '/home/cerberus/web/spec/fixtures/files/flower.jpg', 'flower.jpg')
@@ -39,7 +39,7 @@ namespace :reset do
       # trunk by Elvis Deane, CC0 1.0 Public Domain Dedication, sourced from
       # Wikimedia Commons.)
       av_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-video-mods.xml')
-      av_poster_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/sample-video-poster.jpg')
+      av_poster_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/sample-video-poster.jpg').open_base
       AtlasRb::Work.set_thumbnails(av_work['id'], **ThumbnailCreator.call(base: av_poster_base))
       AtlasRb::Work.metadata(av_work['id'], { 'permissions' => { 'read' => ['public'] } })
       AtlasRb::Blob.create(av_work['id'], '/home/cerberus/web/spec/fixtures/files/sample-video.mp4', 'sample-video.mp4')
@@ -50,7 +50,7 @@ namespace :reset do
       # a partial row. Reuses the lake.jpg fixture — visually distinct from the
       # other three recent Works (field / flower / video poster).
       lake_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/work-lake-mods.xml')
-      lake_work_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/lake.jpg')
+      lake_work_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/lake.jpg').open_base
       AtlasRb::Work.set_thumbnails(lake_work['id'], **ThumbnailCreator.call(base: lake_work_base))
       AtlasRb::Work.metadata(lake_work['id'], { 'permissions' => { 'read' => ['public'] } })
       AtlasRb::Blob.create(lake_work['id'], '/home/cerberus/web/spec/fixtures/files/lake.jpg', 'lake.jpg')
@@ -75,9 +75,9 @@ namespace :reset do
       # prepended by Atlas's permissions= setter; we only add marcom here.
       marcom_group = 'northeastern:drs:repository:loaders:marcom'
 
-      lake_base   = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/lake.jpg')
-      forest_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/forest.jpg')
-      beach_base  = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/beach.jpg')
+      lake_base   = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/lake.jpg').open_base
+      forest_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/forest.jpg').open_base
+      beach_base  = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/beach.jpg').open_base
 
       communications = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/communications-mods.xml')
       AtlasRb::Community.set_thumbnails(communications['id'], **ThumbnailCreator.call(base: lake_base))
