@@ -128,8 +128,8 @@ class MultipageIngestJob < ApplicationJob
     def persist_page_service!(ingest, staged, verify:)
       return if verify && page_service_present?(ingest)
 
-      base = MasterJp2.call(path: staged)
-      AtlasRb::FileSet.set_iiif_service(ingest.file_set_pid, base)
+      result = MasterJp2.call(path: staged)
+      AtlasRb::FileSet.set_iiif_service(ingest.file_set_pid, result.gated_base)
     rescue Vips::Error => e
       Rails.logger.warn(
         "MultipageIngestJob: unreadable page for FileSet #{ingest.file_set_pid} — IIIF service skipped (#{e.message})"

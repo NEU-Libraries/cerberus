@@ -42,7 +42,9 @@ RSpec.describe 'Multipage loader end-to-end flow', type: :request do
     allow(AtlasRb::FileSet).to receive(:create) { double(id: "fs-#{SecureRandom.hex(4)}") }
     allow(AtlasRb::FileSet).to receive(:update)
     allow(AtlasRb::FileSet).to receive(:set_iiif_service)
-    allow(MasterJp2).to receive(:call).and_return('http://iiif.example/iiif/3/p.jp2')
+    allow(MasterJp2).to receive(:call)
+      .and_return(MasterJp2::Result.new(open_base:  'http://iiif.example/iiif/3/open.jp2',
+                                        gated_base: 'http://iiif.example/iiif/3/p.jp2'))
   end
 
   after do

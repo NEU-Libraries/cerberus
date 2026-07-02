@@ -27,7 +27,9 @@ RSpec.describe MultipageIngestJob, type: :job do
     allow(AtlasRb::FileSet).to receive(:update)
     allow(AtlasRb::FileSet).to receive(:set_iiif_service)
     allow(AtlasRb::Work).to receive(:file_sets).and_return([])
-    allow(MasterJp2).to receive(:call).and_return('https://iiif.test/iiif/3/123.jp2')
+    allow(MasterJp2).to receive(:call)
+      .and_return(MasterJp2::Result.new(open_base:  'https://iiif.test/iiif/3/open.jp2',
+                                        gated_base: 'https://iiif.test/iiif/3/123.jp2'))
     allow(IiifAssetsJob).to receive(:perform_later)
   end
 
