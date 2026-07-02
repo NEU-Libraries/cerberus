@@ -40,18 +40,13 @@ module Cerberus
     # means "same as public".
     config.x.cerberus.iiif_internal_host = ENV.fetch('CERBERUS_IIIF_INTERNAL_HOST', nil)
 
-    # Dual-JP2 gated-derivative model. MasterJp2 mints a capped display JP2
-    # into the open root (served openly for thumbnails/preview) and a
-    # full-resolution JP2 into the gated root (S/M/L downloads + deep-zoom,
-    # served only behind the gated host's authorization delegate). In
-    # development the two roots and hosts collapse to one Cantaloupe; distinct
-    # per-file identifiers keep them from colliding. iiif_signing_secret is the
-    # HMAC secret Cerberus shares with the delegate to sign download URLs and
-    # the zoom grant cookie.
-    config.x.cerberus.open_derivatives_root  = ENV.fetch('CERBERUS_OPEN_DERIVATIVES_ROOT')  { config.x.cerberus.derivatives_root }
-    config.x.cerberus.gated_derivatives_root = ENV.fetch('CERBERUS_GATED_DERIVATIVES_ROOT') { config.x.cerberus.derivatives_root }
-    config.x.cerberus.gated_iiif_host        = ENV.fetch('CERBERUS_GATED_IIIF_HOST', nil)
-    config.x.cerberus.iiif_signing_secret    = ENV.fetch('CERBERUS_IIIF_SIGNING_SECRET', nil)
+    # Gated-derivative model. MasterJp2 writes both the capped display JP2 and
+    # the full-res JP2 to the one derivatives root Cantaloupe reads,
+    # distinguished by an `open-`/`gated-` filename prefix; the gated Cantaloupe
+    # delegate serves `open-*` freely and requires a signed URL / grant cookie
+    # for `gated-*`. iiif_signing_secret is the HMAC secret Cerberus shares with
+    # that delegate (signed download URLs + the zoom grant cookie).
+    config.x.cerberus.iiif_signing_secret = ENV.fetch('CERBERUS_IIIF_SIGNING_SECRET', nil)
 
     # Acting-NUID sentinel for unauthenticated Cerberus traffic. The
     # logged-out path threads this NUID as the acting user, so the signed
