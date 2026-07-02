@@ -76,12 +76,23 @@ class IiifManifest < ApplicationService
 
     def dimensions(service)
       Rails.cache.fetch(['iiif-info', service]) do
-        response = Faraday.get("#{info_base(service)}/info.json")
+        response = Faraday.get(signed_info_url(service))
         response.success? ? JSON.parse(response.body).slice('width', 'height') : nil
       end
     rescue Faraday::Error, JSON::ParserError => e
       Rails.logger.warn("IiifManifest: info.json unavailable for #{service} (#{e.message})")
       nil
+    end
+
+    # Sign the server-side info.json read when enforcement is on, so the gated
+    # delegate serves it; unsigned otherwise (dev without a secret hits the
+    # ungated Cantaloupe). Path-based signature — info_base's internal-host
+    # rewrite leaves the signed path unchanged.
+    def signed_info_url(service)
+      url = "#{info_base(service)}/info.json"
+      return url if Rails.application.config.x.cerberus.iiif_signing_secret.blank?
+
+      IiifSigner.sign_url(url)
     end
 
     # Delegate URIs carry Cantaloupe's PUBLIC host (browsers consume them);

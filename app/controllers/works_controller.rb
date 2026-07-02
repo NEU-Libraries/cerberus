@@ -9,6 +9,7 @@ class WorksController < ApplicationController
   include WorkChangeRequest
   include UploadStaging
   include RecordsImpressions
+  include ZoomViewer
   # The weighted deposit fork's context queries (the depositor's own workspace
   # Collections, a community's publish showcases via ShowcaseFinder) run through
   # the Blacklight SearchBuilder, so this controller needs the catalog config —
@@ -184,11 +185,8 @@ class WorksController < ApplicationController
       @mods = AtlasRb::Work.mods(params[:id], 'html')
       @files = AtlasRb::Work.assets(params[:id], nuid: effective_user&.nuid)
       @scholar = GoogleScholarMetadata.for(work: @work, permissions: @permissions, files: @files)
-      # The page-turning viewer mounts only for multipage works: two or
-      # more positioned page FileSets (the ordered listing is the signal).
-      @multipage = AtlasRb::Work.file_sets(params[:id])
-                                .count { |page| page['position'].present? } >= 2
       @av_file = MediaRemux.playable_file(@files)
+      prepare_zoom_view(params[:id])
       assign_show_abilities!(klass: 'Work')
       work_breadcrumbs(params[:id])
     end

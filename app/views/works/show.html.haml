@@ -37,7 +37,7 @@
             %i.fa-solid.fa-arrow-down.ms-1{'aria-hidden' => 'true'}
   .row
     .col-md-6.order-md-1.order-2
-      - if @multipage
+      - if @multipage && @can_zoom
         -# Page-turning deep-zoom viewer (Tify) over the work's IIIF
         -# manifest, in the slot the static thumbnail occupies for
         -# single-page works. Stylesheet ships separately from

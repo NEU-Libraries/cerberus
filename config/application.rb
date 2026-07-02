@@ -48,6 +48,11 @@ module Cerberus
     # that delegate (signed download URLs + the zoom grant cookie).
     config.x.cerberus.iiif_signing_secret = ENV.fetch('CERBERUS_IIIF_SIGNING_SECRET', nil)
 
+    # Domain for the deep-zoom grant cookie, so the browser sends it to the gated
+    # IIIF host. Unset = host-only (dev: a localhost cookie reaches any port); set
+    # to the shared parent (e.g. `.lib.example.edu`) when IIIF is a sibling subdomain.
+    config.x.cerberus.gated_cookie_domain = ENV.fetch('CERBERUS_GATED_COOKIE_DOMAIN', nil)
+
     # Acting-NUID sentinel for unauthenticated Cerberus traffic. The
     # logged-out path threads this NUID as the acting user, so the signed
     # assertion Cerberus mints carries sub = guest_nuid and Atlas resolves to

@@ -59,4 +59,17 @@ RSpec.describe IiifManifest do
     no_service = described_class.call(work: work, pages: [pages[1]], url: url)
     expect(no_service['items']).to eq([])
   end
+
+  it 'signs the server-side info.json read when a signing secret is configured' do
+    allow(Rails.application.config.x.cerberus).to receive(:iiif_signing_secret).and_return('s3cret')
+    fetched = []
+    allow(Faraday).to receive(:get) do |info_url|
+      fetched << info_url
+      instance_double(Faraday::Response, success?: true, body: { width: 10, height: 20 }.to_json)
+    end
+
+    manifest
+
+    expect(fetched).to all(match(%r{/info\.json\?exp=\d+&sig=\h+\z}))
+  end
 end
