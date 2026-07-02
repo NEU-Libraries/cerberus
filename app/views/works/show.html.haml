@@ -5,6 +5,10 @@
 
 = render 'scholar_metadata', scholar: @scholar
 
+-# Only the assets the viewer may actually fetch — inaccessible gated tiers
+-# are kept out of the card, its modal, and the count.
+- downloads = downloadable_files(@files)
+
 .container
   .clearfix.pt-1
   .row
@@ -27,9 +31,9 @@
           %i.fa-solid.fa-link.text-muted{'aria-hidden' => 'true'}
           %span.text-muted.ms-1 Permanent URL:
           = link_to @work.permanent_url, @work.permanent_url, class: 'ms-1'
-        - if @files.present?
+        - if downloads.present?
           = link_to '#downloads' do
-            %span.text-muted= "Downloads (#{@files.size})"
+            %span.text-muted= "Downloads (#{downloads.size})"
             %i.fa-solid.fa-arrow-down.ms-1{'aria-hidden' => 'true'}
   .row
     .col-md-6.order-md-1.order-2
@@ -57,4 +61,4 @@
 .container
   .row
     .col-md-12
-      = render partial: 'downloads', locals: { files: @files }
+      = render partial: 'downloads', locals: { files: downloads }

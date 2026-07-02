@@ -1,7 +1,8 @@
 %turbo-frame#downloads-modal-frame
-  - if @files.present?
+  - files = downloadable_files(@files)
+  - if files.present?
     %ul.list-group.list-group-flush
-      - @files.each do |file|
+      - files.each do |file|
         = render 'works/download_row', file: file, work_noid: params[:id]
   - else
     .p-4.text-center.text-muted
