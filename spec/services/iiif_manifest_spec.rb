@@ -18,6 +18,9 @@ RSpec.describe IiifManifest do
   end
 
   before do
+    # Default to the ungated case (no signing secret) so these tests don't depend
+    # on the ambient env; the signing test overrides it.
+    allow(Rails.application.config.x.cerberus).to receive(:iiif_signing_secret).and_return(nil)
     allow(Faraday).to receive(:get) do |info_url|
       instance_double(Faraday::Response, success?: true,
                                          body:     { width: 2000, height: 3000, id: info_url }.to_json)
