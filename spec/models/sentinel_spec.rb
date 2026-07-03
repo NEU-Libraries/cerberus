@@ -70,6 +70,30 @@ RSpec.describe Sentinel do
     end
   end
 
+  describe 'container ceiling (tier ⊆ resource_read_groups)' do
+    it 'is skipped when no container read groups are supplied' do
+      expect(Sentinel.new(target_id: 'c', policy: { 'small' => ['public'] })).to be_valid
+    end
+
+    it 'accepts tiers within the container audience' do
+      sentinel = Sentinel.new(target_id: 'c', policy: { 'master' => ['g:arch'] })
+      sentinel.resource_read_groups = %w[g:arch g:staff]
+      expect(sentinel).to be_valid
+    end
+
+    it 'refuses a tier more visible than a restricted container' do
+      sentinel = Sentinel.new(target_id: 'c', policy: { 'small' => ['public'] })
+      sentinel.resource_read_groups = ['g:staff']
+      expect(sentinel).not_to be_valid
+    end
+
+    it 'treats a public container as the universal ceiling' do
+      sentinel = Sentinel.new(target_id: 'c', policy: { 'small' => ['public'], 'master' => ['g:arch'] })
+      sentinel.resource_read_groups = ['public']
+      expect(sentinel).to be_valid
+    end
+  end
+
   describe '#tier_policy' do
     it 'keeps the extended vocabulary and drops stray keys' do
       sentinel = Sentinel.new(target_id: 'c',

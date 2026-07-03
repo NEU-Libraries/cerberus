@@ -59,13 +59,14 @@ class CollectionsController < CatalogController
     handle_metadata_update(klass: 'Collection', resource_key: :collection, keywords: false)
   end
 
-  # Upsert this collection's derivative-access default (Sentinel). Absent-tier
-  # semantics don't apply here — the form submits all four tiers, each Public
-  # (['public']) or Restricted to the picked read groups. The model enforces
-  # monotonicity; an incoherent policy is refused and the tab re-flashes.
+  # Upsert this collection's derivative-access default (Sentinel). The container's
+  # read groups (loaded by the :edit gate) are handed to the record so the model
+  # can refuse a tier more visible than the collection; monotonicity is enforced
+  # too. An incoherent policy is refused and the tab re-flashes.
   def sentinel
     record = Sentinel.find_or_initialize_by(target_id: params[:id])
     record.policy = sentinel_policy_from_params
+    record.resource_read_groups = collection_read_groups
     back = edit_collection_path(params[:id], anchor: 'derivative-access')
 
     if record.save
@@ -80,17 +81,32 @@ class CollectionsController < CatalogController
 
   private
 
-    # Build the per-tier policy from the tab's form: each tier is Public
-    # (['public']) or Restricted to the checked read groups ([] when none).
+    # Build the per-tier policy from the tab's form. Restricted tiers carry their
+    # checked read groups ([] when none). The default ("no added restriction")
+    # mode maps by the collection's own visibility: on a public collection it is
+    # an explicit public tier (['public']); on a private one the tier is omitted
+    # so it inherits the Work's visibility at apply-time — a private collection
+    # can't have a public tier, so claiming one would only be refused.
     def sentinel_policy_from_params
       tier_schema = Sentinel::TIERS.index_with { [:mode, { groups: [] }] }
       permitted = params.fetch(:sentinel, {}).permit(tier_schema)
+      public_collection = collection_read_groups.include?('public')
 
       Sentinel::TIERS.each_with_object({}) do |tier, policy|
         entry = permitted[tier]
         next if entry.blank?
 
-        policy[tier] = entry[:mode] == 'restrict' ? Array(entry[:groups]).compact_blank : ['public']
+        if entry[:mode] == 'restrict'
+          policy[tier] = Array(entry[:groups]).compact_blank
+        elsif public_collection
+          policy[tier] = ['public']
+        end
       end
+    end
+
+    # The collection's own read groups (from the :edit gate's permissions load) —
+    # the ceiling every derivative tier must stay within.
+    def collection_read_groups
+      Array(@permissions&.read)
     end
 end

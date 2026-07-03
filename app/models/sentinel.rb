@@ -21,9 +21,16 @@ class Sentinel < ApplicationRecord
   # never gateable (the open display pipe, public by construction).
   TIERS = (IMAGE_LADDER + INDEPENDENT).freeze
 
+  # The read groups of the Collection/Set this Sentinel defaults for, set by the
+  # authoring controller so the policy can be checked against its container. A
+  # tier can't be more visible than the container it belongs to; nil elsewhere
+  # (create-path / bulk-apply), where this container-relative check is skipped.
+  attr_accessor :resource_read_groups
+
   validates :target_id, presence: true, uniqueness: true
   validate :policy_well_formed
   validate :policy_monotonic
+  validate :policy_within_resource
 
   # The Collection default: apply that Collection's Sentinel to a Work just
   # created under it. No-op when the Collection has no Sentinel, so every create
@@ -69,6 +76,21 @@ class Sentinel < ApplicationRecord
         next if audience_subset?(policy[narrower], policy[wider])
 
         errors.add(:policy, "'#{narrower}' must be at least as restrictive as '#{wider}'")
+      end
+    end
+
+    # A tier can't be more visible than the container it defaults for: each
+    # present tier's audience ⊆ the container's read groups. This keeps the
+    # authored default coherent (Atlas still enforces tier ⊆ the actual Work at
+    # apply-time). Skipped when the container's groups weren't supplied.
+    def policy_within_resource
+      return if resource_read_groups.nil?
+      return unless policy.is_a?(Hash)
+
+      tier_policy.each do |tier, groups|
+        next if audience_subset?(groups, resource_read_groups)
+
+        errors.add(:policy, "'#{tier}' can't be more visible than the collection")
       end
     end
 

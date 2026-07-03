@@ -24,9 +24,14 @@ RSpec.describe 'Collections sentinel', type: :request do
              name: 'Out, Sider', role: 'standard', groups: ['randos'])
   end
 
-  def grant_edit!
-    AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'edit' => [Permissions::STAFF_EDIT_GROUP] } },
-                                 nuid: '000000004')
+  # Grant staff edit and set the collection's own read visibility. The Sentinel
+  # guard checks each tier against this read gate, and the open option's
+  # label/semantics turn on whether it includes 'public'.
+  def set_access!(read:)
+    AtlasRb::Collection.metadata(
+      collection.id,
+      { 'permissions' => { 'read' => read, 'edit' => [Permissions::STAFF_EDIT_GROUP] } }, nuid: '000000004'
+    )
   end
 
   # Small/medium public, large/service reserved to the staff group — a valid
@@ -37,7 +42,7 @@ RSpec.describe 'Collections sentinel', type: :request do
                   service: { mode: 'restrict', groups: [Permissions::STAFF_EDIT_GROUP] } } }
   end
 
-  before { grant_edit! }
+  before { set_access!(read: ['public']) }
 
   describe 'authorization' do
     it 'forbids the unauthenticated and writes nothing' do
@@ -98,6 +103,58 @@ RSpec.describe 'Collections sentinel', type: :request do
       expect { patch sentinel_collection_path(collection.id), params: bad }
         .not_to change(Sentinel, :count)
       expect(flash[:alert]).to be_present
+    end
+  end
+
+  describe 'under a restricted collection' do
+    let(:read_group) { Permissions::STAFF_EDIT_GROUP }
+
+    before do
+      set_access!(read: [read_group])
+      sign_in editor
+    end
+
+    it 'omits a default (inherit) tier so it follows the Work rather than claiming public' do
+      params = { sentinel: { small: { mode: 'public' },
+                             large: { mode: 'restrict', groups: [read_group] } } }
+
+      patch sentinel_collection_path(collection.id), params: params
+
+      # small = the open/inherit option → omitted (inherits the Work at apply-time);
+      # large = restricted to the collection's own read group.
+      expect(Sentinel.find_by(target_id: collection.id).policy).to eq('large' => [read_group])
+    end
+
+    it 'refuses a tier more visible than the restricted collection' do
+      sign_in User.new(email: 'wide@example.com', password: 'password', nuid: '000000002',
+                       name: 'Wide, Reach', role: 'privileged', groups: [read_group, 'g:wide'])
+      params = { sentinel: { large: { mode: 'restrict', groups: ['g:wide'] } } }
+
+      expect { patch sentinel_collection_path(collection.id), params: params }
+        .not_to change(Sentinel, :count)
+      expect(flash[:alert]).to be_present
+    end
+  end
+
+  describe 'the open option + visibility chip (rendered edit page)' do
+    before { sign_in editor }
+
+    it 'labels the open option "Inherit from collection" and chips a restricted collection' do
+      set_access!(read: [Permissions::STAFF_EDIT_GROUP])
+
+      get edit_collection_path(collection.id)
+
+      expect(response.body).to include('Inherit from collection')
+      expect(response.body).to include('fa-lock') # restricted chip
+    end
+
+    it 'keeps the same open-option label but chips a public collection' do
+      set_access!(read: ['public'])
+
+      get edit_collection_path(collection.id)
+
+      expect(response.body).to include('Inherit from collection')
+      expect(response.body).to include('fa-globe') # public chip
     end
   end
 end
