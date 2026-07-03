@@ -102,14 +102,17 @@ class XmlIngestJob < ApplicationJob
       content_path = File.join(XmlLoader::Paths.extracted_dir(ingest.load_report), File.basename(file_name))
       return nil unless File.exist?(content_path)
 
+      collection_id = ingest.load_report.parent_collection_id
       work = with_mods_file(mods) do |path|
-        AtlasRb::Work.create(ingest.load_report.parent_collection_id, path, idempotency_key: ingest.idempotency_key)
+        AtlasRb::Work.create(collection_id, path, idempotency_key: ingest.idempotency_key)
       end
-      ingest.update!(work_pid: work.id)
+      work_id = work.id
+      ingest.update!(work_pid: work_id)
+      Sentinel.apply_default(collection_id, work_id)
 
-      staged = stage_content(work.id, content_path)
-      enqueue_content_jobs(work.id, staged, file_name, ingest.idempotency_key)
-      work.id
+      staged = stage_content(work_id, content_path)
+      enqueue_content_jobs(work_id, staged, file_name, ingest.idempotency_key)
+      work_id
     end
 
     def stage_content(work_pid, content_path)

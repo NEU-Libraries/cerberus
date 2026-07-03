@@ -60,6 +60,7 @@ class MultipageItemJob < ApplicationJob
     def mint_and_fan_out(report, item_index, mods_path, work_idempotency_key)
       work_pid = AtlasRb::Work.create(report.parent_collection_id, mods_path,
                                       idempotency_key: work_idempotency_key).id
+      Sentinel.apply_default(report.parent_collection_id, work_pid)
       page_rows = report.multipage_ingests.where(item_index: item_index).where.not(sequence: nil)
       page_rows.update_all(work_pid: work_pid, updated_at: Time.current) # rubocop:disable Rails/SkipsModelValidations
       page_rows.find_each { |ingest| MultipageIngestJob.perform_later(ingest.id) }

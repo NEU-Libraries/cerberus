@@ -19,7 +19,7 @@ module WorkDeposit
       raise ResourceNotFound if parent.nil?
 
       @work = AtlasRb::Work.create(parent.id, depositor: deposit_attribution(parent))
-      finalize_new_work(file)
+      finalize_new_work(file, parent.id)
     end
 
     # Publish deposit: the Work is homed structurally in the depositor's Person
@@ -29,15 +29,19 @@ module WorkDeposit
     # guarded by WorksController#create (publish_target) before we get here.
     def create_published(file, target)
       @work = AtlasRb::Work.create(target[:root_id], depositor: current_user&.nuid)
-      finalize_new_work(file)
+      finalize_new_work(file, target[:root_id])
       AtlasRb::Work.add_linked_member(@work.id, target[:showcase_id])
     end
 
     # Shared tail of both deposit branches: seed the title via the structure-safe
     # MODS merge (raw mods_xml=, not the flat plain_title= setter — see
-    # save_descriptive!), stage the upload, and enqueue ingest.
-    def finalize_new_work(file)
+    # save_descriptive!), apply the parent Collection's derivative-permission
+    # default (no-op when it has no Sentinel), stage the upload, and enqueue
+    # ingest. The gate is set before derivatives exist; Atlas stores the policy
+    # and applies it when the async renditions arrive.
+    def finalize_new_work(file, collection_id)
       save_descriptive!('Work', @work.id, title: file.original_filename, description: nil)
+      Sentinel.apply_default(collection_id, @work.id)
       staged_path = stage_upload(file, @work.id)
       enqueue_ingest_jobs(file, staged_path)
     end

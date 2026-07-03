@@ -14,6 +14,14 @@ class Sentinel < ApplicationRecord
   validate :policy_well_formed
   validate :policy_monotonic
 
+  # The Collection default: apply that Collection's Sentinel to a Work just
+  # created under it. No-op when the Collection has no Sentinel, so every create
+  # path can call it unconditionally. Acts as the ambient Current principal (the
+  # depositor / loader user), which holds edit rights on the fresh Work.
+  def self.apply_default(collection_id, work_id)
+    find_by(target_id: collection_id)&.apply_to(work_id)
+  end
+
   # Apply this policy to a Work's derivatives via Atlas's per-tier gate.
   def apply_to(work_id, nuid: nil)
     AtlasRb::Work.set_derivative_permissions(work_id, policy: tier_policy, nuid: nuid)
@@ -55,6 +63,7 @@ class Sentinel < ApplicationRecord
     def audience_subset?(inner, outer)
       return true  if Array(outer).include?('public')  # outer = everyone → any inner ⊆
       return false if Array(inner).include?('public')  # inner public, outer not → wider
+
       Array(inner).to_set.subset?(Array(outer).to_set)
     end
 end
