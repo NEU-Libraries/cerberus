@@ -39,6 +39,9 @@ Rails.application.routes.draw do
       post :tombstone
       # Bulk metadata export (streamed ZIP) — dedicated Live controller, like sets.
       get 'export', to: 'collection_exports#show'
+      # The collection's derivative-access default (Sentinel) — the per-tier policy
+      # applied to Works created under it. Edit-gated (see authorize_resource_writes!).
+      patch :sentinel
     end
   end
   resources :works, except: %i[index destroy] do

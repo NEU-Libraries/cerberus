@@ -1,0 +1,41 @@
+-# locals: collection_id (String), sentinel (Sentinel|nil), groups (Array<[id, name]>)
+-#
+-# The Derivative access tab: authors this collection's Sentinel — the per-tier
+-# read-group default applied to Works added under it. Rendered as a resolution
+-# ladder (widest audience at top, narrowest at the bottom) so the monotonicity
+-# rule reads as structure: audience narrows as you descend.
+.py-2.px-1
+  = bootstrap_form_tag(url: sentinel_collection_path(collection_id), method: :patch) do |f|
+    .well.p-3.my-3.rounded-3
+      %h5.pb-1.mb-1 Derivative access default
+      %p.small.text-muted.mb-0
+        Sets the read groups for each image rendition of Works added to this collection. Smaller
+        renditions can stay public while larger ones are reserved to groups — but visibility must
+        narrow as resolution grows, so a rendition can't be more open than a smaller one above it.
+    %ol.derivative-ladder.list-unstyled.my-3{ data: { controller: "derivative-policy" } }
+      - Sentinel::TIERS.each do |tier|
+        - state = derivative_tier_form_state(sentinel, tier)
+        - meta = derivative_tier_meta(tier)
+        %li.derivative-tier
+          .derivative-tier__head
+            %span.derivative-tier__name= meta[:label]
+            %span.derivative-tier__note= meta[:note]
+          .derivative-tier__controls
+            .form-check.form-check-inline
+              %input.form-check-input{ type: "radio", id: "#{tier}-public", name: "sentinel[#{tier}][mode]", value: "public", checked: state[:mode] == "public", data: { action: "change->derivative-policy#toggle" } }
+              %label.form-check-label{ for: "#{tier}-public" } Public
+            .form-check.form-check-inline
+              %input.form-check-input{ type: "radio", id: "#{tier}-restrict", name: "sentinel[#{tier}][mode]", value: "restrict", checked: state[:mode] == "restrict", data: { action: "change->derivative-policy#toggle" } }
+              %label.form-check-label{ for: "#{tier}-restrict" } Restrict to groups
+          .derivative-tier__groups{ class: ("d-none" unless state[:mode] == "restrict") }
+            - if groups.present?
+              - groups.each do |gid, gname|
+                .form-check.form-check-inline
+                  %label.form-check-label.derivative-tier__group
+                    %input.form-check-input{ type: "checkbox", name: "sentinel[#{tier}][groups][]", value: gid, checked: state[:groups].include?(gid) }
+                    %span.derivative-tier__group-name= gname
+            - else
+              %p.small.text-muted.mb-0 You aren't a member of any groups to restrict this tier to.
+    .well.p-3.my-3.rounded-3
+      = f.button "Save default", type: :submit, class: "btn btn-success"
+      = link_to "Cancel", collection_path(collection_id), class: "btn btn-warning"

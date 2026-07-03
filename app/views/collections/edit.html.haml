@@ -11,6 +11,8 @@
     %button#permissions-tab.nav-link{"aria-controls" => "permissions", "aria-selected" => "false", "data-bs-target" => "#permissions", "data-bs-toggle" => "tab", role: "tab", type: "button"} Permissions
   %li.nav-item
     %a.nav-link{href: xml_editor_path(params[:id])} XML
+  %li.nav-item
+    %button#derivative-access-tab.nav-link{"aria-controls" => "derivative-access", "aria-selected" => "false", "data-bs-target" => "#derivative-access", "data-bs-toggle" => "tab", role: "tab", type: "button"} Derivative access
   - if current_user&.loader_tier?
     %li.nav-item
       %button#export-tab.nav-link{"aria-controls" => "export", "aria-selected" => "false", "data-bs-target" => "#export", "data-bs-toggle" => "tab", role: "tab", type: "button"} Export
@@ -47,6 +49,8 @@
           .well.p-3.my-3.rounded-3
             = f.button :submit, class: "btn btn-success"
             = link_to "Cancel", collection_path(params[:id]), class: "btn btn-warning"
+  #derivative-access.tab-pane{"aria-labelledby" => "derivative-access-tab", role: "tabpanel"}
+    = render 'derivative_access', collection_id: params[:id], sentinel: @sentinel, groups: @groups
   - if current_user&.loader_tier?
     #export.tab-pane{"aria-labelledby" => "export-tab", role: "tabpanel"}
       = render 'export', collection_id: params[:id]
