@@ -50,6 +50,11 @@ RSpec.describe 'Impression capture', type: :request do
       allow(AtlasRb::Blob).to receive(:find).with(blob_id)
                                             .and_return(AtlasRb::Mash.new('mime_type' => 'application/pdf', 'filename' => 'scan.pdf'))
       allow(AtlasRb::Blob).to receive(:content).with(blob_id).and_yield('bytes')
+      # The per-blob download gate resolves the containing Work + its assets;
+      # stub an ungated asset so a legitimate download proceeds to enqueue.
+      allow(AtlasRb::Blob).to receive(:work).with(blob_id, nuid: nil).and_return('w-1')
+      allow(AtlasRb::Work).to receive(:assets).with('w-1', nuid: nil)
+                                              .and_return([AtlasRb::Mash.new(noid: blob_id, gated: false)])
     end
 
     it 'enqueues a download impression keyed by the blob id' do
