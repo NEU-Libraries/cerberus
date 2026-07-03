@@ -44,6 +44,40 @@ RSpec.describe Sentinel do
     end
   end
 
+  describe 'the extended image ladder (master is the floor)' do
+    it 'accepts master ⊆ service ⊆ large ⊆ medium ⊆ small' do
+      policy = { 'small' => ['public'], 'medium' => ['public'], 'large' => %w[g:arch g:staff],
+                 'service' => ['g:arch'], 'master' => ['g:arch'] }
+      expect(Sentinel.new(target_id: 'c', policy: policy)).to be_valid
+    end
+
+    it 'rejects master more permissive than service' do
+      policy = { 'service' => ['g:arch'], 'master' => %w[g:arch g:staff] }
+      expect(Sentinel.new(target_id: 'c', policy: policy)).not_to be_valid
+    end
+  end
+
+  describe 'independent media (audio/video/pdf gate on their own)' do
+    it 'accepts any mix regardless of each other' do
+      policy = { 'audio' => ['public'], 'video' => ['g:arch'], 'pdf' => [] }
+      expect(Sentinel.new(target_id: 'c', policy: policy)).to be_valid
+    end
+
+    it 'does not tie independent media to the image ladder' do
+      # master group-gated while audio stays public is fine — different media, no ordering.
+      policy = { 'master' => ['g:arch'], 'audio' => ['public'] }
+      expect(Sentinel.new(target_id: 'c', policy: policy)).to be_valid
+    end
+  end
+
+  describe '#tier_policy' do
+    it 'keeps the extended vocabulary and drops stray keys' do
+      sentinel = Sentinel.new(target_id: 'c',
+                              policy:    { 'master' => ['g:arch'], 'pdf' => ['public'], 'nope' => ['x'] })
+      expect(sentinel.tier_policy).to eq('master' => ['g:arch'], 'pdf' => ['public'])
+    end
+  end
+
   describe '.apply_default' do
     it 'applies the Collection Sentinel to a Work created under it' do
       Sentinel.create!(target_id: 'col-1', policy: { 'large' => ['g:arch'] })

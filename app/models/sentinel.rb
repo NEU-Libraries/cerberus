@@ -6,9 +6,20 @@
 # orchestration: a Collection's Sentinel is the default applied to Works created
 # under it, and a Set's Sentinel is bulk-applied across the Set's Works.
 class Sentinel < ApplicationRecord
-  # Tiers in narrowing-resolution order: `small` (lowest res / widest audience) →
-  # `service` (full-res zoom / narrowest). Monotonicity is checked along this order.
-  TIERS = %w[small medium large service].freeze
+  # The image resolution ladder, in narrowing order: `small` (lowest res / widest
+  # audience) → `master` (full-res source / narrowest). Monotonicity is checked
+  # along this order only — a higher-res image can't be more open than a smaller
+  # one below it, with `master` as the floor.
+  IMAGE_LADDER = %w[small medium large service master].freeze
+
+  # Non-image renditions gate independently — there is no meaningful resolution
+  # ordering between an audio file and a PDF, so no monotonicity ties them.
+  INDEPENDENT = %w[audio video pdf].freeze
+
+  # Every gateable tier. `master` and the independent media reach non-image /
+  # original binaries, which Atlas maps onto the matching assets; thumbnails are
+  # never gateable (the open display pipe, public by construction).
+  TIERS = (IMAGE_LADDER + INDEPENDENT).freeze
 
   validates :target_id, presence: true, uniqueness: true
   validate :policy_well_formed
@@ -44,14 +55,16 @@ class Sentinel < ApplicationRecord
       end
     end
 
-    # Visibility must narrow as resolution grows: each tier's audience ⊆ the
-    # next-lower-res tier's (service ⊆ large ⊆ medium ⊆ small). A permissive
-    # higher-res tier would void a stricter lower one — and the enforcement
-    # side's coarse zoom cookie relies on this ordering.
+    # Visibility must narrow as image resolution grows: each rung's audience ⊆
+    # the next-lower-res rung's (master ⊆ service ⊆ large ⊆ medium ⊆ small). A
+    # permissive higher-res tier would void a stricter lower one — and the
+    # enforcement side's coarse zoom cookie relies on this ordering. Only the
+    # image ladder is ordered; the independent media (audio/video/pdf) are not
+    # tied to it or to each other.
     def policy_monotonic
       return unless policy.is_a?(Hash)
 
-      present = TIERS.select { |tier| policy[tier].is_a?(Array) }
+      present = IMAGE_LADDER.select { |tier| policy[tier].is_a?(Array) }
       present.each_cons(2) do |wider, narrower|
         next if audience_subset?(policy[narrower], policy[wider])
 

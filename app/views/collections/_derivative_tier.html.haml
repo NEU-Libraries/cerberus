@@ -1,0 +1,28 @@
+-# locals: tier (String), sentinel (Sentinel|nil), groups (Array<[id, name]>)
+-#
+-# One tier row in the Derivative access form: Public / Restrict radios and the
+-# group picker revealed under "Restrict to groups". Shared by the image ladder
+-# and the independent-media list so both render identically — only their
+-# grouping and ordering differ.
+- state = derivative_tier_form_state(sentinel, tier)
+- meta = derivative_tier_meta(tier)
+%li.derivative-tier
+  .derivative-tier__head
+    %span.derivative-tier__name= meta[:label]
+    %span.derivative-tier__note= meta[:note]
+  .derivative-tier__controls
+    .form-check.form-check-inline
+      %input.form-check-input{ type: "radio", id: "#{tier}-public", name: "sentinel[#{tier}][mode]", value: "public", checked: state[:mode] == "public", data: { action: "change->derivative-policy#toggle" } }
+      %label.form-check-label{ for: "#{tier}-public" } Public
+    .form-check.form-check-inline
+      %input.form-check-input{ type: "radio", id: "#{tier}-restrict", name: "sentinel[#{tier}][mode]", value: "restrict", checked: state[:mode] == "restrict", data: { action: "change->derivative-policy#toggle" } }
+      %label.form-check-label{ for: "#{tier}-restrict" } Restrict to groups
+  .derivative-tier__groups{ class: ("d-none" unless state[:mode] == "restrict") }
+    - if groups.present?
+      - groups.each do |gid, gname|
+        .form-check.form-check-inline
+          %label.form-check-label.derivative-tier__group
+            %input.form-check-input{ type: "checkbox", name: "sentinel[#{tier}][groups][]", value: gid, checked: state[:groups].include?(gid) }
+            %span.derivative-tier__group-name= gname
+    - else
+      %p.small.text-muted.mb-0 You aren't a member of any groups to restrict this tier to.

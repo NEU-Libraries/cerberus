@@ -7,6 +7,11 @@ RSpec.describe SentinelsHelper do
     it 'returns the label and resolution note for a known tier' do
       expect(helper.derivative_tier_meta('service')).to eq(label: 'Service', note: 'Full-resolution deep-zoom')
     end
+
+    it 'covers the master and independent-media tiers' do
+      expect(helper.derivative_tier_meta('master')).to eq(label: 'Master / original', note: 'Full-resolution source file')
+      expect(helper.derivative_tier_meta('pdf')).to eq(label: 'PDF', note: 'Downloadable PDF rendition')
+    end
   end
 
   describe '#derivative_tier_form_state' do

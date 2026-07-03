@@ -2,13 +2,31 @@
 // Derivative access ladder (Collection → Edit → Derivative access tab)
 //
 // Authors a Sentinel — the per-tier read-group default applied to Works
-// added to the collection. Laid out as a resolution ladder: Small (widest
-// audience) at the top, down to Service / deep-zoom (narrowest) at the
-// bottom, so the monotonicity rule (visibility narrows as resolution grows)
-// reads as vertical structure rather than only as a warning. Same restrained
-// register as the audit ledger — a single quiet left rail groups the tiers,
-// no card candy, no gradients.
+// added to the collection. Split in two: the image renditions are a
+// resolution ladder (Small, widest audience, at the top down to Master,
+// narrowest, at the bottom), so the monotonicity rule reads as vertical
+// structure — a quiet left rail is the resolution axis. The other renditions
+// (audio/video/pdf) gate independently, so they list without a rail. Same
+// restrained register as the audit ledger — no card candy, no gradients.
 // ---------------------------------------------------------------------
+
+// Section eyebrow above each rendition group — the same quiet uppercase
+// micro-label register as a tier's resolution note, so the two groups read as
+// structure without competing with the tier names.
+.derivative-group-heading {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 600;
+  color: $gray-500;
+  margin-bottom: 0.35rem;
+}
+
+// The independent-media group carries no resolution rail (audio/video/pdf don't
+// rank), but shares the ladder's left inset so both groups' rows align.
+.derivative-independent {
+  padding-left: 1rem;
+}
 
 .derivative-ladder {
   position: relative;
