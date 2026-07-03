@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_30_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_02_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -161,6 +161,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_30_000001) do
     t.integer "user_id"
     t.string "user_type"
     t.index ["user_id"], name: "index_searches_on_user_id"
+  end
+
+  create_table "sentinels", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.jsonb "policy", default: {}, null: false
+    t.string "target_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["target_id"], name: "index_sentinels_on_target_id", unique: true
   end
 
   create_table "sessions", force: :cascade do |t|
