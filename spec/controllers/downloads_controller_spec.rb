@@ -18,6 +18,13 @@ describe DownloadsController do
         allow(AtlasRb::Resource).to receive(:permissions).with(noid).and_return(
           AtlasRb::Mash.new('embargo' => '', 'depositor' => [], 'read' => ['public'], 'edit' => [])
         )
+        # The per-blob derivative gate resolves the containing Work and its assets;
+        # stub them ungated so this streaming test isn't coupled to the fresh work's
+        # real visibility (the gate itself is covered in the downloads request spec).
+        allow(AtlasRb::Blob).to receive(:work).and_return(work.id)
+        allow(AtlasRb::Work).to receive(:assets).and_call_original
+        allow(AtlasRb::Work).to receive(:assets).with(work.id, nuid: nil)
+                                                .and_return([AtlasRb::Mash.new(noid: noid, gated: false)])
       end
 
       it 'streams the file with correct headers' do

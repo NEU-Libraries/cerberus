@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
-# View + controller support for the gated image-derivative tiers (S/M/L).
-# Each downloadable asset carries an advisory per-tier read gate
-# (`gated`/`permission`); both the downloads UI (which tiers to show) and
-# DerivativeDownloadsController (whether to authorize a fetch) decide access by
-# projecting that gate onto a SolrDocument and asking the standard :read
-# Ability — one source of truth for the mapping.
+# View + controller support for gated derivatives. Every downloadable asset —
+# image-tier Delegates (S/M/L) and Blobs alike (master / PDF / audio / video) —
+# carries a per-asset read gate (`gated`/`permission`) on the Work's assets
+# payload. The downloads UI (which files to show), DerivativeDownloadsController
+# (whether to authorize a delegate fetch), and DownloadsController (whether to
+# authorize a blob stream) all decide access by projecting that gate onto a
+# SolrDocument and asking the standard :read Ability — one source of truth.
 module DerivativesHelper
   # Public tier (gated: false) → readable by anyone; gated tier → only members
   # of its read groups (permission), which Atlas withholds from guests (nil →
@@ -15,11 +16,11 @@ module DerivativesHelper
     SolrDocument.new('read_access_group_ssim' => read, 'internal_resource_tesim' => 'Work')
   end
 
-  # Blobs carry no per-tier gate (the work's own read gate, already passed to
-  # reach the page, governs them); delegate tiers are checked against theirs.
+  # Can the current viewer read this asset? Blobs (master / PDF / audio / video)
+  # and delegate image tiers both carry `gated`/`permission`, so both project
+  # onto the same :read Ability. An asset with no gate (`gated` falsy) resolves
+  # to public — the safe default for anything Atlas hasn't stamped.
   def derivative_readable?(file)
-    return true if file['uri'].blank?
-
     current_ability.can?(:read, derivative_tier_document(file))
   end
 

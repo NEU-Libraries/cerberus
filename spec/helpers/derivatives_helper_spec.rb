@@ -8,6 +8,7 @@ RSpec.describe DerivativesHelper, type: :helper do
                       gated: gated, permission: permission)
   end
   let(:blob) { AtlasRb::Mash.new(noid: 'b1') }
+  let(:gated_blob) { AtlasRb::Mash.new(noid: 'b2', gated: true, permission: nil) }
 
   before { allow(helper).to receive(:current_ability).and_return(Ability.new(user)) }
 
@@ -15,8 +16,12 @@ RSpec.describe DerivativesHelper, type: :helper do
     context 'as a guest' do
       let(:user) { nil }
 
-      it 'always allows a blob (no per-tier gate)' do
+      it 'allows an ungated blob (public by default)' do
         expect(helper.derivative_readable?(blob)).to be(true)
+      end
+
+      it 'denies a gated blob (permission withheld from guests)' do
+        expect(helper.derivative_readable?(gated_blob)).to be(false)
       end
 
       it 'allows a public tier' do
@@ -44,11 +49,12 @@ RSpec.describe DerivativesHelper, type: :helper do
   describe '#downloadable_files' do
     let(:user) { nil }
 
-    it 'keeps blobs and public tiers, drops inaccessible gated tiers' do
+    it 'keeps ungated blobs and public tiers, drops inaccessible gated assets' do
       public_tier = tier(gated: false, permission: ['public'])
       gated_tier = tier(gated: true, permission: nil)
 
-      expect(helper.downloadable_files([blob, public_tier, gated_tier])).to contain_exactly(blob, public_tier)
+      expect(helper.downloadable_files([blob, gated_blob, public_tier, gated_tier]))
+        .to contain_exactly(blob, public_tier)
     end
   end
 end
