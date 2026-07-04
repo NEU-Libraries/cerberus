@@ -49,10 +49,12 @@ class SearchBuilder < Blacklight::SearchBuilder
     solr_parameters[:fq].concat(@extra_filters)
   end
 
-  # Drop curation/structural container Collections from the *global* catalog
-  # index: genre-showcase ("Featured") Collections and personal roots. Both are
-  # containers, not content — a showcase reads as Featured Content on a Community
-  # show page, a personal root is a depositor's workspace shell — but in general
+  # Drop curation/structural containers from the *global* catalog index:
+  # genre-showcase ("Featured") Collections, personal roots, and the
+  # auto-provisioned "People" Community that structurally parents them
+  # (system_container). None are content — a showcase reads as Featured Content
+  # on a Community show page, a personal root is a depositor's workspace shell,
+  # the People container is Atlas's home for personal roots — but in general
   # search they're just empty-looking folders. Scoped strictly to the catalog
   # index via the search-service context flag (see
   # CatalogController#search_service_context), so the community/collection browse
@@ -63,7 +65,7 @@ class SearchBuilder < Blacklight::SearchBuilder
     return unless (scope.context || {})[:catalog_index]
 
     solr_parameters[:fq] ||= []
-    solr_parameters[:fq].push('-featured_bsi:true', '-personal_root_bsi:true')
+    solr_parameters[:fq].push('-featured_bsi:true', '-personal_root_bsi:true', '-system_container_bsi:true')
   end
 
   # Constrain a search to a single resource type when the scope's context
