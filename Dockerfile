@@ -14,9 +14,6 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get -y autoclean
 
-RUN curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > /usr/local/bin/cc-test-reporter
-RUN chmod +x /usr/local/bin/cc-test-reporter
-
 RUN useradd -ms /bin/bash cerberus
 USER cerberus
 
