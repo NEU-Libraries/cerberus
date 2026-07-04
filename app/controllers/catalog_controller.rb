@@ -365,7 +365,7 @@ class CatalogController < ApplicationController
   # images) or, when there's no custom thumbnail, the type icon itself.
   def thumbnail_media(document)
     icon_class = helpers.document_type_icon(document.klass_type)
-    icon_html  = view_context.content_tag(:i, '', class: "fa-regular #{icon_class} fa-2xl text-black-50")
+    icon_html  = view_context.content_tag(:i, '', class: "fa-solid #{icon_class} fa-2xl text-black-50")
 
     src = document.thumbnail_2x_ssi.presence || document.thumbnail_ssi
     return view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback') if src.blank?
