@@ -131,6 +131,42 @@ RSpec.describe SetResolver do
     end
   end
 
+  describe '#each_content_batch' do
+    def batched_ids(compilation, **opts)
+      ids = []
+      resolver(compilation).each_content_batch(**opts) { |docs| ids.concat(docs.map(&:id)) }
+      ids
+    end
+
+    it 'yields the gated content works of the recipe (collection ∪ added work)' do
+      expect(batched_ids(recipe(collections: [collection_a], works: [work_b])))
+        .to contain_exactly(work_a.valkyrie_id, work_sub.valkyrie_id, work_b.valkyrie_id)
+    end
+
+    it 'pages through in batches, yielding every work across pages' do
+      expect(batched_ids(recipe(collections: [collection_a]), batch: 1))
+        .to contain_exactly(work_a.valkyrie_id, work_sub.valkyrie_id)
+    end
+
+    it 'applies gated discovery — a restricted work is never yielded' do
+      restricted = restricted_work(collection_a.id)
+      expect(batched_ids(recipe(collections: [collection_a]))).not_to include(restricted.valkyrie_id)
+    end
+
+    it 'does not yield at all for an empty recipe' do
+      yielded = false
+      resolver(recipe).each_content_batch { |_docs| yielded = true }
+      expect(yielded).to be(false)
+    end
+
+    it 'yields docs carrying the noid in alternate_ids_ssim (the packer keys folders/files on it)' do
+      docs = []
+      resolver(recipe(works: [work_a])).each_content_batch { |batch| docs.concat(batch) }
+      noids = docs.map { |d| Array(d['alternate_ids_ssim']).first.to_s.delete_prefix('id-') }
+      expect(noids).to include(work_a.id)
+    end
+  end
+
   # --- helpers -------------------------------------------------------------
 
   def nuid = '000000004'

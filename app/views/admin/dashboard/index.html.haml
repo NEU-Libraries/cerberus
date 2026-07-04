@@ -31,12 +31,82 @@
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
 
+    = link_to admin_people_path, class: 'admin-action-card admin-action-card--people', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-users{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Manage people
+      %span.admin-action-card__desc
+        Create Person records by NUID, curate the authoritative display name / title / bio / ORCID, and manage the community affiliations that drive the Faculty & Staff browse.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
+    = link_to admin_impressions_path, class: 'admin-action-card admin-action-card--analytics', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-chart-line{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Usage analytics
+      %span.admin-action-card__desc
+        Repository-wide views and downloads over time — top files and collections, unique visitors, and a human/bot segment toggle, with CSV / Excel export of the tables.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
+    = link_to admin_tombstones_path, class: 'admin-action-card admin-action-card--restore', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-trash-can-arrow-up{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Restore a tombstoned item
+      %span.admin-action-card__desc
+        Review every tombstoned Work, Collection and Community, and reverse a tombstone — the item becomes discoverable again, with the restore recorded in its History.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
     = link_to admin_impersonation_path, class: 'admin-action-card admin-action-card--impersonation', role: 'listitem' do
       %span.admin-action-card__icon
         %i.fa-solid.fa-user-secret{'aria-hidden' => 'true'}
       %span.admin-action-card__title Impersonation
       %span.admin-action-card__desc
         Act as another user (writes attributed to them) or view the repository read-only as they see it. A persistent banner marks the session.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
+    = link_to admin_files_path, class: 'admin-action-card admin-action-card--files', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-arrows-rotate{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Replace a file
+      %span.admin-action-card__desc
+        Replace a Work's file with a new version, keeping the same identifier. Nothing is overwritten — prior versions stay in the history, downloadable and revertible.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
+    = link_to admin_loaders_path, class: 'admin-action-card admin-action-card--loaders', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-file-import{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Loader definitions
+      %span.admin-action-card__desc
+        Register and configure batch-ingest loaders — slug, type (IPTC / XML / multipage), the Grouper group that may run it, and the destination collection.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
+    = link_to admin_groups_path, class: 'admin-action-card admin-action-card--groups', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-tags{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Group names
+      %span.admin-action-card__desc
+        Give a Grouper group a friendly display name (raw colon-separated identifier → readable label) shown wherever the group surfaces — inbox recipients, sharing, permissions.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
+    = link_to '/jobs', class: 'admin-action-card admin-action-card--jobs', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-gears{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Background jobs
+      %span.admin-action-card__desc
+        Open the Mission Control dashboard — monitor, retry, and clear queued and failed background jobs across the repository's queues.
       %span.admin-action-card__cta
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}

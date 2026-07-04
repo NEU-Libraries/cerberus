@@ -1,0 +1,16 @@
+.py-2.px-1
+  %h5.pb-2
+    %i.fa-solid.fa-file-export.text-primary.me-2{'aria-hidden' => 'true'}
+    Export metadata
+  %p.text-muted.small.mb-3
+    Download this collection's records as a spreadsheet manifest (the same format
+    the XML batch loader reads), optionally bundled with each item's MODS XML.
+    Edit offline and re-load to update the records. You only get the items you
+    can see.
+  .d-flex.flex-wrap.gap-2
+    = link_to export_collection_path(collection_id), class: 'btn btn-success' do
+      %i.fa-solid.fa-file-zipper.me-1{'aria-hidden' => 'true'}
+      Manifest + MODS XML
+    = link_to export_collection_path(collection_id, mods: 0), class: 'btn btn-outline-secondary' do
+      %i.fa-solid.fa-table.me-1{'aria-hidden' => 'true'}
+      Manifest only

@@ -33,11 +33,46 @@ module Cerberus
     config.x.cerberus.derivatives_root  = ENV.fetch('CERBERUS_DERIVATIVES_ROOT')  { File.join(config.x.cerberus.data_root, 'images') }
     config.x.cerberus.schema_cache_root = ENV.fetch('CERBERUS_SCHEMA_CACHE_ROOT') { File.join(config.x.cerberus.data_root, 'kataba_cache') }
 
-    # Acting-NUID sentinel for unauthenticated Cerberus traffic. Atlas's
-    # require_auth rejects cerberus-token requests that omit User: NUID; the
-    # logged-out path threads this NUID so Atlas resolves to its seeded :guest
-    # fixture and applies its read-only policy.
+    # Cantaloupe as reachable FROM THE APP CONTAINER, for server-side
+    # info.json reads (IiifManifest dimensions). The public iiif_host is
+    # what browsers (and persisted Delegate URIs) use; in compose the two
+    # differ — the container reaches the sibling service by name. Blank
+    # means "same as public".
+    config.x.cerberus.iiif_internal_host = ENV.fetch('CERBERUS_IIIF_INTERNAL_HOST', nil)
+
+    # Gated-derivative model. MasterJp2 writes both the capped display JP2 and
+    # the full-res JP2 to the one derivatives root Cantaloupe reads,
+    # distinguished by an `open-`/`gated-` filename prefix; the gated Cantaloupe
+    # delegate serves `open-*` freely and requires a signed URL / grant cookie
+    # for `gated-*`. iiif_signing_secret is the HMAC secret Cerberus shares with
+    # that delegate (signed download URLs + the zoom grant cookie).
+    config.x.cerberus.iiif_signing_secret = ENV.fetch('CERBERUS_IIIF_SIGNING_SECRET', nil)
+
+    # Domain for the deep-zoom grant cookie, so the browser sends it to the gated
+    # IIIF host. Unset = host-only (dev: a localhost cookie reaches any port); set
+    # to the shared parent (e.g. `.lib.example.edu`) when IIIF is a sibling subdomain.
+    config.x.cerberus.gated_cookie_domain = ENV.fetch('CERBERUS_GATED_COOKIE_DOMAIN', nil)
+
+    # Acting-NUID sentinel for unauthenticated Cerberus traffic. The
+    # logged-out path threads this NUID as the acting user, so the signed
+    # assertion Cerberus mints carries sub = guest_nuid and Atlas resolves to
+    # its seeded :guest fixture, applying its read-only policy.
     config.x.cerberus.guest_nuid = ENV.fetch('CERBERUS_GUEST_NUID', '000000001')
+
+    # Impressions (analytics) — bot classification + derived-layer rules.
+    # These are read at *derivation* time (never frozen onto a raw row), so
+    # editing them reclassifies all history. Ported from v1's deploy-bundled
+    # config/locales/bots.en.yml; in v2 they are runtime config (an
+    # ops-editable form lands with the Phase 2 derived layer). A user-agent
+    # is a bot when its lowercased string contains any of these substrings.
+    config.x.cerberus.impression_bots = %w[
+      slurp crawl nutch bot lynx spider curl java scrape scrapy
+      archive doi ltx71 wget index linkcheck inspectiontool lighthouse
+    ]
+    # Volume rule + load-balancer/VPN allowlist — defined now, consumed by the
+    # Phase 2 derived human-counts layer (not exercised by raw capture).
+    config.x.cerberus.impression_volume_threshold = 150
+    config.x.cerberus.impression_ip_allowlist     = %w[155.33.16.26]
 
     # Route exceptions through ErrorsController so error pages share the
     # application layout (header, footer, search bar). Rails dispatches

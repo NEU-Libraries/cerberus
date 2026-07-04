@@ -37,7 +37,7 @@ class XmlUnzipJob < ApplicationJob
     rows = XmlLoader::Manifest.new(manifest_path).rows
     return structural_failure(load_report, 'The manifest has a header row but no data rows.') if rows.empty?
 
-    rows.each { |row| enqueue_row(load_report, row) }
+    fan_out(load_report, rows)
   rescue XmlLoader::Manifest::EmptyError, XmlLoader::Manifest::HeaderError => e
     structural_failure(load_report, e.message)
   rescue StandardError => e
@@ -48,12 +48,22 @@ class XmlUnzipJob < ApplicationJob
 
   private
 
-    def enqueue_row(load_report, row)
-      ingest = load_report.xml_ingests.create!(
+    # Two-phase fan-out (mirrors MultipageUnzipJob#fan_out): create every row
+    # before enqueuing any job, so an early row job can't finalize the report
+    # before later rows exist. `rows` is already fully materialized, so this is
+    # a trivial split — only XmlIngest records accumulate, no archive bytes.
+    def fan_out(load_report, rows)
+      ingests = rows.map { |row| create_row(load_report, row) }
+      ingests.zip(rows).each do |ingest, row|
+        XmlIngestJob.perform_later(ingest.id, row.to_h.transform_keys(&:to_s))
+      end
+    end
+
+    def create_row(load_report, row)
+      load_report.xml_ingests.create!(
         source_filename: row.identifier.presence || row.file_name.presence || row.xml_path.to_s,
         idempotency_key: SecureRandom.uuid
       )
-      XmlIngestJob.perform_later(ingest.id, row.to_h.transform_keys(&:to_s))
     end
 
     # Write a single failed row carrying the manifest-level reason, then

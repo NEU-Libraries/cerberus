@@ -7,7 +7,19 @@ volumes:
   uploads:
 services:
   db:
-    image: postgres:14
+    # TimescaleDB is a Postgres extension; this image is vanilla Postgres 14
+    # plus the extension available-but-inactive (no CREATE EXTENSION until a
+    # migration runs it, and only in Cerberus's logical DB — Atlas's logical DB
+    # on this shared service is untouched). The non-`ha` image is a true drop-in:
+    # it honors the same PGDATA/entrypoint as postgres:14, so the existing `db`
+    # volume mounts cleanly with no re-init. (The `-ha` image uses a different
+    # data dir/user and would orphan this volume — do not use it here.)
+    image: timescale/timescaledb:2.17.2-pg14
+    # The extension must be preloaded at server start. The image only injects
+    # this into postgresql.conf when it initialises a *fresh* data dir; because
+    # we reuse the existing postgres:14 volume, we pass it as a server flag
+    # instead. Inert for Atlas's logical DB (which never CREATEs the extension).
+    command: postgres -c shared_preload_libraries=timescaledb
     volumes:
       - db:/var/lib/postgresql/data/pgdata
     restart: always
@@ -21,14 +33,16 @@ services:
     entrypoint: /home/cerberus/web/docker-entrypoint.sh
     environment:
       ATLAS_URL: 'http://atlas:3000/'
-      ATLAS_TOKEN: ${ATLAS_TOKEN}
+      # Container-internal Cantaloupe route for server-side info.json reads
+      # (IiifManifest dimensions); browsers keep using the public iiif_host.
+      CERBERUS_IIIF_INTERNAL_HOST: ${CERBERUS_IIIF_INTERNAL_HOST:-}
     ports:
       - 3000:3000
   atlas:
     image: nakatomi/atlas_web:${ATLAS}
     entrypoint: /home/atlas/web/docker-entrypoint.sh
     environment:
-      RAILS_MASTER_KEY: ${ATLAS_MASTER_KEY}
+      RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
     ports:
       - 3001:3000
   atlas-test:
@@ -36,7 +50,7 @@ services:
     entrypoint: /home/atlas/web/docker-entrypoint.sh
     environment:
       RAILS_ENV: 'test'
-      RAILS_MASTER_KEY: ${ATLAS_MASTER_KEY}
+      RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
     ports:
       - 3002:3000
   iiif:
@@ -48,7 +62,7 @@ services:
       CANTALOUPE_PROCESSOR_SELECTION_STRATEGY: 'ManualSelectionStrategy'
       CANTALOUPE_CACHE_CLIENT_ENABLED: 'true'
   solr:
-    image: nakatomi/blacklight-solr:${ARCH}
+    image: nakatomi/blacklight-solr
     ports:
     - 8983:8983
     volumes:

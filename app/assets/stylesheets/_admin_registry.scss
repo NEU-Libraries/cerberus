@@ -98,6 +98,17 @@
       color: $gray-400;
     }
   }
+
+  // Paginator under the registry table — centered with vertical breathing room
+  // (the full-width table makes a left-hugging paginator read as detached).
+  // Scoped to the registry so the catalog's bar-aligned paginator is unaffected.
+  .paginate-section {
+    padding: $spacer 0;
+
+    .pagination {
+      justify-content: center;
+    }
+  }
 }
 
 .admin-registry-table {
@@ -167,13 +178,24 @@
     color: $gray-700;
     font-size: 0.78rem;
     font-weight: 600;
+    font-family: inherit;
+    line-height: 1.4;
     text-decoration: none;
     white-space: nowrap;
+    cursor: pointer; // also a button (button_to restore)
 
     &:hover {
       background-color: color-mix(in srgb, $blue 8%, white);
       border-color: color-mix(in srgb, $blue 24%, white);
       color: $blue;
+    }
+
+    // Restore is restorative, not navigational — teal-deep, matching the
+    // audit-history "restore" tone, instead of the default navy hover.
+    &--restore:hover {
+      background-color: color-mix(in srgb, #138f76 10%, white);
+      border-color: color-mix(in srgb, #138f76 28%, white);
+      color: #138f76;
     }
 
     .fa-solid { font-size: 0.85em; }

@@ -2,8 +2,8 @@
 
 require 'rails_helper'
 
-# Wiring coverage for the Option-1 ambient-NUID pattern shipped in
-# Cerberus piece 6: config/initializers/atlas_rb.rb registers a
+# Wiring coverage for the ambient-NUID pattern:
+# config/initializers/atlas_rb.rb registers a
 # `default_nuid` provider that reads from `Current.nuid`, and atlas_rb's
 # resource methods fall through to it when `nuid:` is omitted at the
 # call site.

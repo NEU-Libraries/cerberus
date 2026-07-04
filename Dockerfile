@@ -2,7 +2,7 @@ FROM ruby:3.2-slim
 # update the repository sources list
 # and install dependencies
 RUN apt-get update \
-    && apt-get install -y nodejs curl git build-essential libpq-dev libmagic-dev libvips-dev libyaml-dev libimage-exiftool-perl \
+    && apt-get install -y nodejs curl git build-essential libpq-dev libmagic-dev libvips-dev libyaml-dev libimage-exiftool-perl ffmpeg \
     && apt-get -y autoclean
 
 # Headless LibreOffice for Word/PowerPoint → PDF renditions (PdfRenditionJob

@@ -1,0 +1,36 @@
+// The multipage page-turning viewer (Tify) on Work show pages — compact
+// chrome variant. Tify ships a full workspace header (view panels: info,
+// thumbnails, TOC, fulltext, export, help); the DRS register wants page
+// turning + deep zoom only, so the panel-switching chrome is hidden and
+// the scan pane + pagination + zoom controls remain. Selectors are
+// double-classed (.iiif-viewer .tify-*) to outrank tify.css, which loads
+// after application.css on viewer pages.
+.iiif-viewer {
+  // Sized for the show page's left column (the static thumbnail's slot).
+  height: 60vh;
+  min-height: 380px;
+  border: 1px solid $gray-300;
+  border-radius: 0.4rem;
+  overflow: hidden;
+  margin-bottom: 1rem;
+
+  // Compact chrome: hide the duplicate in-viewer title, the mobile
+  // view-toggle, and the panel switchers (Scan/Pages/Info/Export/Help) —
+  // keeping the pagination column (page select, double-page toggle,
+  // prev/next) and Fullscreen. The panel buttons' only stable hook is
+  // their aria-controls suffix (the prefix is a random instance id);
+  // the page-select dropdown's `-dropdown` suffix stays unmatched.
+  // &#{&} self-chains the wrapper class: tify.css's own button rule is
+  // (0,4,0) and loads after application.css, so these need (0,4,1)+.
+  &#{&} {
+    .tify-header-column.-title,
+    .tify-header-button-group.-toggle,
+    .tify-header button[aria-controls$='-scan'],
+    .tify-header button[aria-controls$='-thumbnails'],
+    .tify-header button[aria-controls$='-info'],
+    .tify-header button[aria-controls$='-export'],
+    .tify-header button[aria-controls$='-help'] {
+      display: none;
+    }
+  }
+}

@@ -1,0 +1,53 @@
+= render 'admin/breadcrumb_header'
+
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-tags{'aria-hidden' => 'true'}
+      Group names
+      - if @groups.total_count.positive?
+        %span.admin-registry__count= pluralize(@groups.total_count, 'entry')
+    .admin-registry__head-actions
+      %span.admin-registry__subtitle
+        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+        Admin-only
+      = link_to new_admin_group_path, class: 'btn btn-primary btn-sm' do
+        %i.fa-solid.fa-plus.me-1{'aria-hidden' => 'true'}
+        New group name
+
+  - if @groups.total_count.positive?
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table
+        %thead
+          %tr
+            %th{scope: 'col'} Grouper group
+            %th{scope: 'col'} Display name
+            %th.text-end{scope: 'col'} Actions
+        %tbody
+          - @groups.each do |group|
+            %tr
+              %td
+                %span.admin-registry-table__id= group.raw
+              %td
+                .admin-registry-table__name= group.cosmetic
+              %td.text-end
+                .d-inline-flex.gap-3.align-items-center
+                  = link_to edit_admin_group_path(group), class: 'admin-registry-table__edit' do
+                    %i.fa-solid.fa-pen{'aria-hidden' => 'true'}
+                    Edit
+                  = button_to admin_group_path(group), method: :delete,
+                              class: 'admin-registry-table__edit btn btn-link p-0 text-danger',
+                              form: { class: 'd-inline', data: { turbo_confirm: "Remove the display name for #{group.raw}? It will fall back to the raw group string." } } do
+                    %i.fa-solid.fa-trash-can{'aria-hidden' => 'true'}
+                    Delete
+    %nav.paginate-section{ 'aria-label' => 'Group names pages' }
+      = paginate @groups, theme: 'blacklight'
+  - else
+    .admin-registry__empty
+      %i.fa-solid.fa-tags.admin-registry__empty-icon{'aria-hidden' => 'true'}
+      %p.mb-1.fw-semibold.text-body No group names defined
+      %p.mb-3.small.text-muted
+        A group name maps a Grouper group's raw identifier (e.g. <code class="admin-registry-table__id">northeastern:drs:repository:loaders:marcom</code>) to a friendly label shown wherever the group appears. Without one, the raw string is shown as-is.
+      = link_to new_admin_group_path, class: 'btn btn-primary btn-sm' do
+        %i.fa-solid.fa-plus.me-1{'aria-hidden' => 'true'}
+        Name the first group

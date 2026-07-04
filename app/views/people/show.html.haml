@@ -1,0 +1,28 @@
+-# Breadcrumb + name-plate well ride :container_header so they span the full
+-# main width above the sidebar/results row, matching the People index and the
+-# community/collection/work show pages. The trail (built in the controller)
+-# leads through the person's affiliated community and its ancestors; show_add
+-# suppresses the "add a child" affordance (a person isn't a container parent).
+- content_for(:container_header) do
+  = render 'shared/breadcrumbs', show_add: false
+
+  .container.p-4.my-3.well.rounded-3
+    - if @person['title'].present?
+      .text-muted.text-uppercase.fw-semibold.small.mb-1{ style: 'letter-spacing:.08em' }= @person['title']
+    %h3.mb-0
+      %i.fa-solid.fa-user.text-primary.me-2{ 'aria-hidden' => 'true' }
+      = @display_name
+    - if @person['bio'].present?
+      %p.text-body-secondary.mt-3.mb-0{ style: 'max-width:62ch' }= @person['bio']
+    - if @person['orcid'].present?
+      .mt-3
+        = link_to "https://orcid.org/#{@person['orcid']}", target: '_blank', rel: 'noopener',
+          class: 'd-inline-flex align-items-center gap-1 text-decoration-none small font-monospace' do
+          %i.fa-brands.fa-orcid{ 'aria-hidden' => 'true', style: 'color:#a6ce39' }
+          = @person['orcid']
+
+- if @response.documents.present?
+  - content_for(:sidebar) do
+    = render 'catalog/search_sidebar'
+
+= render 'catalog/search_results'

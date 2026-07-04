@@ -1,0 +1,5 @@
+-# Live-refresh the navbar badge and swap the row's control to "In queue".
+= turbo_stream.update 'download-queue-nav' do
+  = render 'shared/download_queue_badge'
+= turbo_stream.replace "queue-control-#{@blob_noid}" do
+  = render 'works/queue_button', work_noid: @work_noid, blob_noid: @blob_noid

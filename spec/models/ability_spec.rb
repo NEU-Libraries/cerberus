@@ -25,7 +25,7 @@ describe Ability do
       expect(ability).not_to be_able_to(:tombstone, doc)
     end
 
-    it 'allows the proxy_uploader of a Work (Q6 lean)' do
+    it 'allows the proxy_uploader of a Work' do
       doc = SolrDocument.new('internal_resource_tesim' => 'Work',
                              'proxy_uploader_ssi'      => '000000002')
       expect(ability).to be_able_to(:tombstone, doc)

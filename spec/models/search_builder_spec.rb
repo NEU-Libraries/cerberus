@@ -86,4 +86,102 @@ RSpec.describe SearchBuilder do
       end
     end
   end
+
+  # The REAL production scope. Blacklight 8 builds the SearchBuilder with the
+  # SearchService as scope (`search_service.search_builder` → `new(self)`),
+  # which carries the acting user only in its #context (see
+  # CatalogController#search_service_context) — it responds to neither
+  # current_user nor effective_user. This is the scope every container-contents,
+  # set-contents, and catalog-index query actually uses. The doubles above
+  # predate it and masked the gap: gated_user fell through to nil and discovery
+  # silently collapsed to public-only. instance_double verifies the real
+  # interface (context yes, current_user/effective_user no).
+  context 'when the scope is a SearchService (user only in its #context)' do
+    let(:scope) do
+      instance_double(Blacklight::SearchService,
+                      blacklight_config: CatalogController.blacklight_config,
+                      context:           { effective_user: user })
+    end
+
+    context 'and the context user is an admin' do
+      let(:user) { User.new(nuid: '000000004', role: 'admin') }
+
+      it 'short-circuits — admin discovers every resource' do
+        expect(gated_fq).to be_empty
+      end
+    end
+
+    context 'and the context user is a non-admin with groups' do
+      let(:user) do
+        User.new(nuid: '000000002', role: 'privileged',
+                 groups: ['northeastern:drs:repository:staff'])
+      end
+
+      it 'gates to public + the user groups (never public-only)' do
+        expect(gated_fq.size).to eq(1)
+        expect(gated_fq.first).to include('read_access_group_ssim', 'public',
+                                          'northeastern:drs:repository:staff')
+      end
+    end
+  end
+
+  # Curation/structural containers (Featured showcases + personal roots) are
+  # dropped only on the global catalog index, flagged via the search-service
+  # context (CatalogController#search_service_context).
+  describe '#exclude_curation_containers' do
+    def exclude_fq(scope)
+      params = {}
+      described_class.new(scope).exclude_curation_containers(params)
+      Array(params[:fq])
+    end
+
+    it 'drops featured showcases and personal roots when the context flags the global index' do
+      scope = instance_double(Blacklight::SearchService,
+                              blacklight_config: CatalogController.blacklight_config,
+                              context:           { catalog_index: true })
+      expect(exclude_fq(scope)).to include('-featured_bsi:true', '-personal_root_bsi:true')
+    end
+
+    it 'leaves them in a scoped browse (flag off)' do
+      scope = instance_double(Blacklight::SearchService,
+                              blacklight_config: CatalogController.blacklight_config,
+                              context:           { catalog_index: false })
+      expect(exclude_fq(scope)).to be_empty
+    end
+
+    it 'is a no-op when the scope carries no context (e.g. admin finders)' do
+      scope = double('scope', blacklight_config: CatalogController.blacklight_config)
+      expect(exclude_fq(scope)).to be_empty
+    end
+  end
+
+  # Single-type scoping for the /communities and /collections index actions,
+  # flagged via the search-service context
+  # (CommunitiesController/CollectionsController#search_service_context).
+  describe '#scope_to_resource_type' do
+    def type_fq(scope)
+      params = {}
+      described_class.new(scope).scope_to_resource_type(params)
+      Array(params[:fq])
+    end
+
+    it 'appends an internal_resource_tesim filter when the context names a type' do
+      scope = instance_double(Blacklight::SearchService,
+                              blacklight_config: CatalogController.blacklight_config,
+                              context:           { resource_type_scope: 'Community' })
+      expect(type_fq(scope)).to eq(['internal_resource_tesim:Community'])
+    end
+
+    it 'is a no-op when no resource_type_scope is set (e.g. the global catalog index)' do
+      scope = instance_double(Blacklight::SearchService,
+                              blacklight_config: CatalogController.blacklight_config,
+                              context:           { catalog_index: true })
+      expect(type_fq(scope)).to be_empty
+    end
+
+    it 'is a no-op when the scope carries no context' do
+      scope = double('scope', blacklight_config: CatalogController.blacklight_config)
+      expect(type_fq(scope)).to be_empty
+    end
+  end
 end

@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-# End-to-end batch-flow spec. Exercises the full piece 4 chain:
+# End-to-end batch-flow spec. Exercises the full batch-ingest chain:
 # LoadsController#create → UnzipJob → IptcIngestJob × N →
 # ContentCreationJob.perform_later (mocked) + IiifAssetsJob.perform_later
 # (mocked) → finalize_success → LoadReport.maybe_finalize!.
@@ -146,6 +146,25 @@ RSpec.describe 'LoadReport end-to-end batch flow', type: :request do
       lr = LoadReport.last
       expect(lr.iptc_ingests.failed.count).to be > 0
       expect(lr.reload).to be_failed
+    end
+
+    it 'sends exactly one inbox notification despite the mixed completed/failed batch' do
+      # Regression for the premature-finalize flap: with incremental row
+      # creation a fast worker finalized the report early (completed) and again
+      # on convergence (failed), emitting *two* inbox messages for one load.
+      # Two-phase fan-out closes that window — every row exists before any job
+      # runs, so finalization (and the notification) happens exactly once.
+      expect do
+        perform_enqueued_jobs do
+          post '/loaders/marcom/loads',
+               params: { load_report: { archive: archive, parent_collection_id: 'neu:c1' } }
+        end
+      end.to change(Message, :count).by(1)
+
+      expect(LoadReport.last.reload).to be_failed
+      # The single message reflects the true terminal state — we didn't merely
+      # suppress the second message and keep a premature "completed" first one.
+      expect(Message.last.subject).to end_with('failed')
     end
   end
 

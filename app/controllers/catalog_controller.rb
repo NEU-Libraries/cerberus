@@ -9,6 +9,15 @@ class CatalogController < ApplicationController
     config.search_service_class = GatedSearchService
     config.view.gallery(document_component: Blacklight::Gallery::DocumentComponent, icon: Blacklight::Gallery::Icons::GalleryComponent)
 
+    # Retain the genres `category` param in the search state. Blacklight's
+    # permit_search_params strips any param not in search_state_fields, so without
+    # this the view-type toggle (whose URL is url_for(search_state.to_h.merge(view:)))
+    # drops `category` — landing on /genres?view=list with no genre, which renders
+    # an empty category. (Pagination/search survive via GenresController#search_action_url,
+    # which re-merges category; the toggle bypasses that.) Harmless elsewhere — no
+    # other surface sets `category`.
+    config.search_state_fields += %i[category]
+
     # config.track_search_session = false
     config.track_search_session.storage = false
     config.autocomplete_enabled = false
@@ -26,12 +35,16 @@ class CatalogController < ApplicationController
     # config.raw_endpoint.enabled = false
 
     ## Default parameters to send to solr for all search-like requests. See also SearchBuilder#processed_parameters
+    # hl*: body-text highlighting for the "Full Text Match" snippet, over the
+    # dedicated full_text_tsim field Atlas projects from extracted document text.
+    # NOT all_text_timv — that is a catch-all (ACLs, NUIDs, ids, URLs) and would
+    # leak internal data into snippets and match noise tokens.
     config.default_solr_params = {
-      rows: 10,
-      fq:   ['-internal_resource_tesim:FileSet',
-             '-internal_resource_tesim:Blob',
-             '-internal_resource_tesim:Delegate',
-             '-tombstoned_bsi:true']
+      rows: 10, hl: true, 'hl.fl': 'full_text_tsim', 'hl.fragsize': 200,
+      fq: ['-internal_resource_tesim:FileSet',
+           '-internal_resource_tesim:Blob',
+           '-internal_resource_tesim:Delegate',
+           '-tombstoned_bsi:true']
     }
 
     # solr path which will be added to solr base url before the other solr params.
@@ -91,6 +104,24 @@ class CatalogController < ApplicationController
     # :index_range can be an array or range of prefixes that will be used to
     #  create the navigation (note: It is case sensitive when searching values)
 
+    # Cerberus defined facets lead — Type first as the discovery anchor: it is
+    # always populated for any search (Work/Collection/Community) and renders
+    # open (collapse:false), so users always see a facet there to learn the
+    # affordance. Content (the projected media classification) sits directly
+    # beneath it. Both precede the descriptive-metadata facets below.
+    config.add_facet_field 'type_ssim', label: 'Type', collapse: false
+    # Content type (Image/Video/Text/Map/…) projected onto the Work from its
+    # FileSets' Classification by Atlas's ClassificationIndexer. Multivalued —
+    # a mixed-media Work surfaces under each of its formats; values are
+    # display-ready Classification#name strings (no i18n mapping needed).
+    config.add_facet_field 'classification_ssim', label: 'Content'
+    # Genre / scholarly category (Research Publications, Presentations, Datasets,
+    # Technical Reports, Monographs, Theses & Dissertations, …) projected onto the
+    # Work from MODS <genre> by Atlas's GenreIndexer. Multivalued; values are the
+    # genre strings as authored (no i18n mapping needed). Works only — empty for
+    # Collections/Communities and for Works without a genre.
+    config.add_facet_field 'genre_ssim', label: 'Genre'
+
     config.add_facet_field 'format', label: 'Format'
     config.add_facet_field 'pub_date_ssim', label: 'Publication Year', single: true
     config.add_facet_field 'subject_ssim', label: 'Topic', limit: 20, index_range: 'A'..'Z'
@@ -98,9 +129,6 @@ class CatalogController < ApplicationController
     config.add_facet_field 'lc_1letter_ssim', label: 'Call Number'
     config.add_facet_field 'subject_geo_ssim', label: 'Region'
     config.add_facet_field 'subject_era_ssim', label: 'Era'
-
-    # Cerberus defined facets
-    config.add_facet_field 'type_ssim', label: 'Type', collapse: false
 
     config.add_facet_field 'example_pivot_field', label: 'Pivot Field', pivot: %w[format language_ssim],
                                                   collapsing: true
@@ -222,6 +250,26 @@ class CatalogController < ApplicationController
     # config.autocomplete_suggester = 'mySuggester'
   end
 
+  # Plumb the acting user into the search service. Blacklight 8 scopes every
+  # SearchBuilder to the SearchService (not the controller), which exposes no
+  # current_user/effective_user — so without this, SearchBuilder#gated_user is
+  # nil and gated discovery silently collapses to public-only, ignoring group
+  # membership and the admin short-circuit (across container/set contents and
+  # the catalog index alike). `effective_user` honors a view-as session.
+  def search_service_context
+    { current_user: current_user, effective_user: effective_user,
+      catalog_index: catalog_index? }
+  end
+
+  # The global catalog index (/catalog) — vs a scoped browse served by a
+  # subclass show/index (communities, collections, genres, people). Only the
+  # global index drops curation/structural containers — Featured showcases and
+  # personal roots (see SearchBuilder#exclude_curation_containers); scoped
+  # browses keep them.
+  def catalog_index?
+    controller_name == 'catalog' && action_name == 'index'
+  end
+
   # Children listing for a Community/Collection show page.
   #
   # Two modes, switched on whether a keyword query is active:
@@ -245,19 +293,23 @@ class CatalogController < ApplicationController
   #   structural membership field.
   # @param noid [String] the anchor's bare noid, as stored in the descendants'
   #   ancestor chain. Only consulted in subtree mode.
-  def find_children(uuid, noid)
+  # +exclude_uuids+ removes specific children from the result *at query time* (an
+  # fq), so the response's documents AND its facet counts reflect the same set.
+  # Used to hide empty Featured showcases from a community browse without leaving
+  # the Type facet counting them (a Ruby post-filter on the documents would not
+  # touch Solr's facets).
+  def find_children(uuid, noid, exclude_uuids: [])
     return Blacklight::Solr::Response.new({}, {}) if uuid.blank?
 
+    # Direct members (browse), or the whole subtree when a keyword query is active.
     membership = if params[:q].present?
                    subtree_membership_fq(uuid, noid)
                  else
                    MembershipQuery.members_fq([uuid], include_linked: true)
                  end
-
-    builder = search_service.search_builder
-                            .with(search_state)
-                            .with_filters(membership)
-
+    filters = [membership]
+    filters << MembershipQuery.excluding_fq(MembershipQuery.identity_fq(exclude_uuids)) if exclude_uuids.present?
+    builder = search_service.search_builder.with(search_state).with_filters(*filters)
     Blacklight.default_index.search(builder)
   end
 
@@ -266,11 +318,11 @@ class CatalogController < ApplicationController
   # metadata) OR every Work that is a member of — or linked into — the anchor or
   # any of its descendant containers.
   #
-  # Uses the two-step reverse-ancestry recipe documented on
-  # {DescendantResolver} — resolve the descendant containers, then match their
-  # members — but unlike that service this returns the matching containers
-  # themselves *and* threads the live search state through (via the caller's
-  # `.with(search_state)`), which is why it can't reuse `DescendantResolver#call`.
+  # Uses the two-step reverse-ancestry recipe — resolve the descendant
+  # containers, then match their members — but this variant returns the matching
+  # containers themselves *and* threads the live search state through (via the
+  # caller's `.with(search_state)`), which is why it's a bespoke query here
+  # rather than a shared service.
   def subtree_membership_fq(anchor_uuid, anchor_noid)
     member_of = [anchor_uuid, *descendant_container_uuids(anchor_noid)]
     # One FLAT {!bool}: the descendant-containers clause OR each membership
@@ -296,21 +348,33 @@ class CatalogController < ApplicationController
     Blacklight.default_index.search(builder).documents.map(&:id)
   end
 
+  # Type pill overlay — keeps the resource type legible even when a custom
+  # thumbnail replaces the default type icon (mirrors v1). The pill is a sibling
+  # of the thumbnail media (both inside .document-thumbnail, the positioning
+  # context), so the media's img→fallback nextElementSibling onerror swap is
+  # unaffected.
   def iiif_thumbnail(document, *_args)
+    # Pill text via the shared helper: "Featured" for showcases, "People" for the
+    # synthetic Faculty & Staff browse row, otherwise the resource type. Same
+    # restrained, translucent type-pill styling as every tile — not a loud chip.
+    pill = view_context.content_tag(:span, view_context.pill_label(document), class: 'thumb-type-pill')
+    view_context.safe_join([thumbnail_media(document), pill])
+  end
+
+  # The thumbnail image (with a hidden type-icon fallback for broken/missing
+  # images) or, when there's no custom thumbnail, the type icon itself.
+  def thumbnail_media(document)
     icon_class = helpers.document_type_icon(document.klass_type)
-    icon_html  = view_context.content_tag(:i, '', class: "fa-regular #{icon_class} fa-2xl text-black-50")
+    icon_html  = view_context.content_tag(:i, '', class: "fa-solid #{icon_class} fa-2xl text-black-50")
 
     src = document.thumbnail_2x_ssi.presence || document.thumbnail_ssi
-    if src.present?
-      fallback = view_context.content_tag(:span, icon_html,
-                                          class: 'thumbnail-fallback d-none')
-      img = view_context.image_tag(src,
-                                   onerror: "this.classList.add('d-none'); \
-                                             this.nextElementSibling.classList.remove('d-none');")
-      view_context.content_tag(:span, img + fallback, class: 'thumbnail-wrapper')
-    else
-      view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback')
-    end
+    return view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback') if src.blank?
+
+    fallback = view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback d-none')
+    img = view_context.image_tag(src,
+                                 onerror: "this.classList.add('d-none'); \
+                                           this.nextElementSibling.classList.remove('d-none');")
+    view_context.content_tag(:span, img + fallback, class: 'thumbnail-wrapper')
   end
 
   helper_method :iiif_thumbnail if respond_to? :helper_method

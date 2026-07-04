@@ -3,16 +3,34 @@
 class WorksController < ApplicationController
   include Thumbable
   include Transformable
+  include DepositorContext
+  include WorkDeposit
+  include WorkBreadcrumbs
+  include WorkChangeRequest
+  include UploadStaging
+  include RecordsImpressions
+  include ZoomViewer
+  # The weighted deposit fork's context queries (the depositor's own workspace
+  # Collections, a community's publish showcases via ShowcaseFinder) run through
+  # the Blacklight SearchBuilder, so this controller needs the catalog config —
+  # the same wiring Admin::PeopleController uses for its community picker.
+  include Blacklight::Configurable
+
+  copy_blacklight_config_from(CatalogController)
 
   IN_PROGRESS_NOTICE = 'This work is still being processed and cannot be edited yet.'
+  PUBLISH_UNAVAILABLE = 'That publish destination is unavailable. ' \
+                        'Please try again or deposit to your workspace.'
+  UNSUPPORTED_AV = 'DRS streams H.264/AAC video and AAC/MP3 audio — please convert your file first.'
 
-  before_action :authorize_show!, only: [:downloads]
-  before_action :authorize_edit!, only: [:edit, :metadata, :update_metadata]
-  before_action :authorize_tombstone!, only: [:tombstone]
+  before_action :authorize_show!, only: [:downloads, :manifest]
+  authorize_resource_writes!(extra_edit: %i[metadata update_metadata request_change])
   before_action :reject_if_in_progress, only: [:edit]
+  after_action :record_view_impression, only: :show
 
   def show
     @work = AtlasRb::Work.find(params[:id])
+    raise ResourceNotFound if @work.nil?
     return render_gone(@work) if @work.tombstoned
 
     authorize_show!
@@ -21,18 +39,39 @@ class WorksController < ApplicationController
   end
 
   def tombstone
-    AtlasRb::Work.tombstone(params[:id])
-    redirect_to root_path, notice: 'Work deleted.'
+    perform_tombstone!(AtlasRb::Work.tombstone(params[:id]), type: 'Work')
+  end
+
+  # IIIF Presentation 3.0 manifest — one Canvas per page FileSet, in page
+  # order. Read-gated like every other view of the Work; the underlying
+  # Atlas reads are caller-gated too.
+  def manifest
+    work = AtlasRb::Work.find(params[:id])
+    return head :not_found if work.tombstoned
+
+    pages = AtlasRb::Work.file_sets(params[:id])
+    render json: IiifManifest.call(work: work, pages: pages, url: manifest_work_url(params[:id]))
   end
 
   def downloads
-    @files = AtlasRb::Work.assets(params[:id])
+    @files = AtlasRb::Work.assets(params[:id], nuid: effective_user&.nuid)
     render layout: false
   end
 
+  # The weighted deposit fork: the first, equal-weight choice is workspace
+  # (deposit into one of the depositor's own Collections) vs publish (promote
+  # into a community genre showcase). The publish branch is offered only when
+  # the depositor has a curated Person with at least one affiliated community
+  # that has showcases AND a personal-root Collection to structurally home the
+  # work in — see #publish_targets. A parent_id deep-link (from a Collection
+  # breadcrumb) pre-selects that collection in the workspace branch.
   def new
     @work = Work.new
     @parent = AtlasRb::Collection.find(params[:parent_id]) if params[:parent_id].present?
+    raise ResourceNotFound if params[:parent_id].present? && @parent.nil?
+
+    @workspace_collections = workspace_collections
+    @publish_targets = publish_targets
   end
 
   def edit
@@ -45,14 +84,17 @@ class WorksController < ApplicationController
 
   def create
     file = params[:binary]
-    parent = AtlasRb::Collection.find(params[:parent_id])
-    @work = AtlasRb::Work.create(parent.id, depositor: deposit_attribution(parent))
-    # Seed the initial title via the structure-safe MODS merge (raw mods_xml=),
-    # not the flat plain_title= setter — see save_descriptive!.
-    save_descriptive!('Work', @work.id, title: file.original_filename, description: nil)
 
-    staged_path = stage_upload(file, @work.id)
-    enqueue_ingest_jobs(file, staged_path)
+    return redirect_to(new_work_path, alert: UNSUPPORTED_AV) if unsupported_av?(file)
+
+    if params[:deposit_to] == 'publish'
+      target = publish_target
+      return redirect_to(new_work_path, alert: PUBLISH_UNAVAILABLE) unless target
+
+      create_published(file, target)
+    else
+      create_in_workspace(file)
+    end
 
     redirect_to metadata_work_path(@work.id), notice: 'File uploaded — please review the metadata.'
   end
@@ -122,7 +164,7 @@ class WorksController < ApplicationController
     # left empty server-side, so the resource reads exactly as if the target
     # deposited it). The operating admin's hand is recorded in the AuditEvent
     # (actor = admin, on_behalf_of = target), not stamped on the Work. The
-    # piece-3 proxy radio is hidden while acting-as (see works/new), so this
+    # proxy radio is hidden while acting-as (see works/new), so this
     # branch wins unconditionally and the radio value is irrelevant.
     #
     # Outside acting-as, the deposit form's "upload as" radio governs:
@@ -141,10 +183,12 @@ class WorksController < ApplicationController
 
     def prepare_show_view
       @mods = AtlasRb::Work.mods(params[:id], 'html')
-      @files = AtlasRb::Work.assets(params[:id])
-      @can_tombstone = current_ability.can?(:tombstone,
-                                            solr_doc_from_permissions(@permissions, klass: 'Work'))
-      breadcrumbs(params[:id])
+      @files = AtlasRb::Work.assets(params[:id], nuid: effective_user&.nuid)
+      @scholar = GoogleScholarMetadata.for(work: @work, permissions: @permissions, files: @files)
+      @av_file = MediaRemux.playable_file(@files)
+      prepare_zoom_view(params[:id])
+      assign_show_abilities!(klass: 'Work')
+      work_breadcrumbs(params[:id])
     end
 
     # Per-type enrichment routing (thumbnails, PDF renditions) lives in
@@ -162,13 +206,5 @@ class WorksController < ApplicationController
       return unless AtlasRb::Work.find(params[:id]).in_progress
 
       redirect_to work_path(params[:id]), alert: IN_PROGRESS_NOTICE
-    end
-
-    def stage_upload(file, work_id)
-      dir = File.join(Rails.application.config.x.cerberus.uploads_root, work_id.to_s)
-      FileUtils.mkdir_p(dir)
-      dest = File.join(dir, file.original_filename)
-      FileUtils.cp(file.tempfile.path.presence || file.path, dest)
-      dest
     end
 end

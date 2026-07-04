@@ -10,10 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_10_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_02_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
+  enable_extension "timescaledb"
   enable_extension "uuid-ossp"
 
   create_table "bookmarks", id: :serial, force: :cascade do |t|
@@ -34,6 +35,45 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_10_000001) do
     t.string "raw"
     t.datetime "updated_at", null: false
     t.index ["raw"], name: "index_groups_on_raw", unique: true
+  end
+
+  create_table "impression_container_daily_counts", id: false, force: :cascade do |t|
+    t.string "action", null: false
+    t.integer "count", default: 0, null: false
+    t.date "day", null: false
+    t.string "noid", null: false
+    t.index ["action", "day"], name: "index_impression_container_daily_counts_on_action_and_day"
+    t.index ["noid", "action", "day"], name: "idx_on_noid_action_day_b8fac752ea", unique: true
+  end
+
+  create_table "impression_daily_counts", id: false, force: :cascade do |t|
+    t.string "action", null: false
+    t.integer "count", default: 0, null: false
+    t.date "day", null: false
+    t.string "noid", null: false
+    t.index ["action", "day"], name: "index_impression_daily_counts_on_action_and_day"
+    t.index ["noid", "action", "day"], name: "index_impression_daily_counts_on_noid_and_action_and_day", unique: true
+  end
+
+  create_table "impression_daily_visitors", id: false, force: :cascade do |t|
+    t.date "day", null: false
+    t.integer "unique_visitors", default: 0, null: false
+    t.index ["day"], name: "index_impression_daily_visitors_on_day", unique: true
+  end
+
+  create_table "impressions", id: false, force: :cascade do |t|
+    t.string "action", null: false
+    t.datetime "created_at", null: false
+    t.string "ip_address"
+    t.string "noid", null: false
+    t.string "referrer"
+    t.string "session_id"
+    t.datetime "updated_at", null: false
+    t.string "user_agent"
+    t.index ["action", "created_at"], name: "index_impressions_on_action_and_created_at"
+    t.index ["created_at"], name: "impressions_created_at_idx", order: :desc
+    t.index ["noid", "action", "ip_address", "created_at"], name: "idx_on_noid_action_ip_address_created_at_00c1db695b"
+    t.index ["noid", "created_at"], name: "index_impressions_on_noid_and_created_at", order: { created_at: :desc }
   end
 
   create_table "iptc_ingests", force: :cascade do |t|
@@ -67,7 +107,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_10_000001) do
     t.string "display_name", null: false
     t.string "group", null: false
     t.integer "kind", default: 0, null: false
-    t.string "root_collection", null: false
+    t.string "root_collection"
     t.string "slug", null: false
     t.datetime "updated_at", null: false
     t.index ["slug"], name: "index_loaders_on_slug", unique: true
@@ -102,6 +142,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_10_000001) do
     t.text "error_message"
     t.string "file_set_pid"
     t.string "idempotency_key"
+    t.integer "item_index"
     t.bigint "load_report_id", null: false
     t.integer "sequence"
     t.string "source_filename"
@@ -109,7 +150,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_10_000001) do
     t.datetime "updated_at", null: false
     t.text "warnings", default: "[]"
     t.string "work_pid"
-    t.index ["load_report_id", "sequence"], name: "index_multipage_ingests_on_load_report_id_and_sequence", unique: true
+    t.index ["load_report_id", "item_index", "sequence"], name: "idx_on_load_report_id_item_index_sequence_ff91e23197", unique: true
     t.index ["load_report_id"], name: "index_multipage_ingests_on_load_report_id"
   end
 
@@ -120,6 +161,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_10_000001) do
     t.integer "user_id"
     t.string "user_type"
     t.index ["user_id"], name: "index_searches_on_user_id"
+  end
+
+  create_table "sentinels", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.jsonb "policy", default: {}, null: false
+    t.string "target_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["target_id"], name: "index_sentinels_on_target_id", unique: true
+  end
+
+  create_table "sessions", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "data"
+    t.string "session_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["session_id"], name: "index_sessions_on_session_id", unique: true
+    t.index ["updated_at"], name: "index_sessions_on_updated_at"
+  end
+
+  create_table "user_agents", id: false, force: :cascade do |t|
+    t.datetime "classified_at"
+    t.boolean "is_bot", default: false, null: false
+    t.string "ua_string", null: false
+    t.index ["ua_string"], name: "index_user_agents_on_ua_string", unique: true
   end
 
   create_table "xml_ingests", force: :cascade do |t|
@@ -140,4 +205,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_10_000001) do
   add_foreign_key "message_receipts", "messages"
   add_foreign_key "multipage_ingests", "load_reports"
   add_foreign_key "xml_ingests", "load_reports"
+  create_hypertable "impressions", time_column: "created_at", chunk_time_interval: "30 days"
+  create_continuous_aggregate("impression_counts_by_day", <<-SQL, materialized_only: true)
+    SELECT impressions.noid,
+      impressions.action,
+      time_bucket('P1D'::interval, impressions.created_at) AS day,
+      count(*) AS impressions
+     FROM impressions
+    GROUP BY impressions.noid, impressions.action, (time_bucket('P1D'::interval, impressions.created_at))
+  SQL
 end

@@ -1,16 +1,18 @@
 # frozen_string_literal: true
 
 # Resolves a Set's (Compilation's) recipe against Solr: included collections
-# (transitively, via the two-step reverse-ancestry recipe — see
-# {DescendantResolver}), plus individually-added Works, minus set-aside
-# exclusions.
+# (transitively, via a two-step reverse-ancestry recipe — find the descendant
+# containers, then their member Works), plus individually-added Works, minus
+# set-aside exclusions.
 #
 # The recipe arrives as the three noid lists off the AtlasRb::Compilation
 # response (`included_collections` / `included_works` / `excluded_works`);
 # everything else — uuid resolution, descendant lookup, the membership fq —
 # is derived here from gated Solr queries, so a restricted recipe noun is
-# silently invisible to a user who may not discover it (consistent with the
-# step-1 gating note on {DescendantResolver}).
+# silently invisible to a user who may not discover it. (Every step runs
+# through the gated SearchBuilder chain; a future surface may want step 1
+# ungated so a restricted intermediate container doesn't hide permitted Works
+# beneath it — revisit if that need arises.)
 #
 # Not an ApplicationService: there is no single #call product. The resolver
 # is instantiated once per render and read piecemeal — {#contents_fqs} for
@@ -19,8 +21,17 @@
 # provenance lookups, and aside-zone documents the Set page renders around
 # the results. Every Solr round-trip is memoized on the instance.
 class SetResolver
-  # A Set's flat contents are leaf Works (same posture as DescendantResolver).
-  DEFAULT_TYPE_FILTERS = DescendantResolver::DEFAULT_TYPE_FILTERS
+  # A Set's flat contents are leaf Works; intermediate containers are enumerated
+  # during resolution but are not themselves "contents", so they're excluded.
+  DEFAULT_TYPE_FILTERS = [
+    'internal_resource_tesim:Work',
+    '-tombstoned_bsi:true'
+  ].freeze
+
+  # Coarse cap on a single bulk-export pull (see {#each_content_batch}); a
+  # proper cumulative-size cap + async job fallback is deferred (the
+  # bulk-set-download plan), this just bounds a runaway recipe meanwhile.
+  MAX_EXPORT_ROWS = 10_000
 
   # One included collection, with its gated contents tally.
   # +live+ is what the Set currently shows from this collection; +total+ is
@@ -59,6 +70,36 @@ class SetResolver
     return 0 if fqs.nil?
 
     search(*fqs, rows: 0).total
+  end
+
+  # Streams the Set's resolved content Works for bulk export, yielding gated
+  # SolrDocuments in pages. It is the *same* gated contents search the show
+  # page runs ({#contents_fqs}), so a viewer only ever exports what they can
+  # discover — per-member permission gating comes free, exactly as on the
+  # page. No-ops (no yield) when the recipe has no positive clause.
+  #
+  # `fl` is trimmed to what SetZipPacker needs (just the noid, via
+  # alternate_ids). Paged rather than one giant fetch; capped at
+  # {MAX_EXPORT_ROWS} as a coarse runaway guard until the deferred cumulative
+  # size cap + job fallback lands (see the bulk-set-download plan).
+  #
+  # @param batch [Integer] page size
+  # @yieldparam docs [Array<SolrDocument>] one page of content Works
+  # @return [void]
+  def each_content_batch(batch: 200)
+    fqs = contents_fqs
+    return if fqs.nil?
+
+    start = 0
+    loop do
+      docs = search(*fqs, rows: batch, start: start,
+                    fl: 'id,alternate_ids_ssim').documents
+      break if docs.empty?
+
+      yield docs
+      start += docs.size
+      break if start >= MAX_EXPORT_ROWS
+    end
   end
 
   # @return [Array<Chip>] one per included collection the current user can

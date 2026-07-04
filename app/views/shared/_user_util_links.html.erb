@@ -1,16 +1,20 @@
 <ul class="navbar-nav">
-  <%= render_nav_actions do |config, action|%>
+  <%= render_nav_actions do |config, action| %>
     <li class="nav-item"><%= action %></li>
   <% end %>
+
+  <%# Download Queue badge — anon-capable, so it sits outside the auth block;
+      stable container id lets the add action's turbo_stream refresh it live. %>
+  <li class="nav-item" id="download-queue-nav"><%= render 'shared/download_queue_badge' %></li>
 
   <% if has_user_authentication_provider? %>
     <% if current_user %>
       <% if current_user.messageable? %>
         <li class="nav-item">
-          <%= link_to messages_path, class: 'nav-link inbox-nav-link', 'aria-label': inbox_aria_label do %>
+          <%= link_to messages_path, class: 'nav-link nav-count-link', 'aria-label': inbox_aria_label do %>
             <i class="fa-solid fa-envelope" aria-hidden="true"></i>
             <% if unread_messages_count.positive? %>
-              <span class="inbox-nav-link__badge"><%= unread_messages_count %></span>
+              <span class="nav-count-link__badge"><%= unread_messages_count %></span>
             <% end %>
           <% end %>
         </li>
@@ -22,12 +26,21 @@
         <% if current_user.curates_sets? || current_user.admin? %>
           <li class="nav-item d-flex align-items-center">
             <div class="btn-group user-menu">
-              <%= link_to current_user, atlas_user_path, class: 'btn btn-link user-menu-link' %>
+              <%= link_to current_user, atlas_user_path, class: 'btn btn-link user-menu-link pe-1' %>
               <button type="button" class="btn btn-link user-menu-link dropdown-toggle dropdown-toggle-split"
                       data-bs-toggle="dropdown" aria-expanded="false">
                 <span class="visually-hidden">Toggle user menu</span>
               </button>
               <ul class="dropdown-menu dropdown-menu-end">
+                <%# My DRS — the depositor's two-space home; same human-role
+                    floor as Sets (guests/anonymous have no personal space). %>
+                <% if current_user.messageable? %>
+                  <li>
+                    <%= link_to my_drs_path, class: 'dropdown-item' do %>
+                      <i class="fa-solid fa-folder-tree me-2" aria-hidden="true"></i>My DRS
+                    <% end %>
+                  </li>
+                <% end %>
                 <% if current_user.curates_sets? %>
                   <li>
                     <%= link_to sets_path, class: 'dropdown-item' do %>
@@ -68,7 +81,7 @@
         <li class="nav-item">
           <%# switch to dedicated atlas login page? %>
           <%= link_to "Login", atlas_login_path, class: 'nav-link' %>
-          <%# <%= link_to t('blacklight.header_links.login'), new_user_session_path, class: 'nav-link' %>
+          <%#= link_to t('blacklight.header_links.login'), new_user_session_path, class: 'nav-link' %>
         </li>
     <% end %>
   <% end %>

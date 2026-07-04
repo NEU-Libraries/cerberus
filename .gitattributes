@@ -21,3 +21,8 @@ public/ace/** linguist-vendored
 *.otf binary
 *.zip binary
 *.tif binary
+*.mp4 binary
+*.m4a binary
+*.mp3 binary
+*.mov binary
+*.webm binary

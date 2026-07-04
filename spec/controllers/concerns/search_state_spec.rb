@@ -13,5 +13,11 @@ describe SearchState do
 
       expect(search_state.url_for_document(doc)).to eq('/communities/abc123')
     end
+
+    it "returns a synthetic doc's nav_url verbatim, bypassing the model path" do
+      doc = double('SolrDocument', nav_url: '/communities/jm640df/people', klass: Person, to_param: 'x')
+
+      expect(search_state.url_for_document(doc)).to eq('/communities/jm640df/people')
+    end
   end
 end

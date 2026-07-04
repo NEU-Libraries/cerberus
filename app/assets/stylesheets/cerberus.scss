@@ -22,11 +22,14 @@
 //   _search_controls     — sort/per-page/view controls relocated into sidebar
 //   _scoped_search       — "Search this collection/community" header box
 @import 'layout';
+@import 'featured_content';
 @import 'blacklight_discovery';
 @import 'audit_history';
 @import 'history_diff';
+@import 'derivative_access';
 @import 'admin_registry';
 @import 'admin_dashboard';
+@import 'admin_impressions';
 @import 'admin_reparent';
 @import 'admin_linked_members';
 @import 'impersonation';
@@ -40,3 +43,6 @@
 @import 'search_controls';
 @import 'scoped_search';
 @import 'sets';
+@import 'iiif_viewer';
+@import 'av_player';
+@import 'full_text_match';

@@ -54,8 +54,8 @@ class Ability
       doc['depositor_ssi'].present? && doc['depositor_ssi'] == user.nuid
     end
 
-    # Q6 lean: the librarian who proxied the deposit retains tombstone
-    # rights, matching v1's `true_depositor` semantics.
+    # A librarian who proxied a deposit retains tombstone rights on it — the
+    # recorded proxy_uploader keeps authority, not just the on-behalf depositor.
     def proxy_uploader_for_work?(doc, user)
       return false unless doc['internal_resource_tesim'].to_s == 'Work'
       return false if user.nuid.blank?

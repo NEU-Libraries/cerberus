@@ -12,6 +12,17 @@
 # - everything       → ContentCreationJob (the primary Blob — enrichment
 #                      never gates or blocks it)
 #
+# Full text rides alongside, for body-text search + the "Full Text Match"
+# snippet: native PDFs and plain text → FullTextExtractionJob here; Office
+# docs get theirs from the PDF rendition instead (PdfRenditionJob enqueues
+# it on the converted PDF, so soffice runs once).
+#
+# `include_primary:` controls that last branch. The deposit/loader paths leave
+# it true (the primary Blob is created here). The admin "replace a file" path
+# passes false: the primary bytes are written separately by Blob.update (NOID
+# preserved), so only the type-routed *derivative* refresh is wanted here —
+# never a second ContentCreationJob/Blob.create.
+#
 # No derivative_widths pass through here: deposits get thumbnails only at
 # upload time. Small/medium/large are opt-in download renditions chosen on
 # the metadata page (DepositDerivativesJob), and per policy documents get
@@ -37,11 +48,12 @@ class IngestDispatch < ApplicationService
     application/x-tika-msoffice
   ].freeze
 
-  def initialize(work_id:, staged_path:, original_filename:, idempotency_key:)
+  def initialize(work_id:, staged_path:, original_filename:, idempotency_key:, include_primary: true)
     @work_id = work_id
     @staged_path = staged_path
     @original_filename = original_filename
     @idempotency_key = idempotency_key
+    @include_primary = include_primary
   end
 
   def call
@@ -49,11 +61,23 @@ class IngestDispatch < ApplicationService
       IiifAssetsJob.perform_later(@work_id, @staged_path)
     elsif CONVERTIBLE_MIME_TYPES.include?(mime_type)
       PdfRenditionJob.perform_later(@work_id, @staged_path, rendition_key)
+    elsif mime_type.start_with?('video/', 'audio/')
+      MediaRenditionJob.perform_later(@work_id, @staged_path, rendition_key)
     end
+    FullTextExtractionJob.perform_later(@work_id, @staged_path) if extractable_text?
+    return unless @include_primary
+
     ContentCreationJob.perform_later(@work_id, @staged_path, @original_filename, @idempotency_key)
   end
 
   private
+
+    # Direct full-text candidates: native PDFs and plain text. Office docs are
+    # excluded here — their text comes from the PDF rendition (PdfRenditionJob),
+    # so soffice converts once.
+    def extractable_text?
+      mime_type == 'application/pdf' || mime_type.start_with?('text/')
+    end
 
     def mime_type
       @mime_type ||= begin

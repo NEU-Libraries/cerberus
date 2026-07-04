@@ -1,0 +1,97 @@
+// ---------------------------------------------------------------------
+// Derivative access ladder (Collection → Edit → Derivative access tab)
+//
+// Authors a Sentinel — the per-tier read-group default applied to Works
+// added to the collection. Split in two: the image renditions are a
+// resolution ladder (Small, widest audience, at the top down to Master,
+// narrowest, at the bottom), so the monotonicity rule reads as vertical
+// structure — a quiet left rail is the resolution axis. The other renditions
+// (audio/video/pdf) gate independently, so they list without a rail. Same
+// restrained register as the audit ledger — no card candy, no gradients.
+// ---------------------------------------------------------------------
+
+// Section eyebrow above each rendition group — the same quiet uppercase
+// micro-label register as a tier's resolution note, so the two groups read as
+// structure without competing with the tier names.
+.derivative-group-heading {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 600;
+  color: $gray-500;
+  margin-bottom: 0.35rem;
+}
+
+// The independent-media group carries no resolution rail (audio/video/pdf don't
+// rank), but shares the ladder's left inset so both groups' rows align.
+.derivative-independent {
+  padding-left: 1rem;
+}
+
+.derivative-ladder {
+  position: relative;
+  padding-left: 1rem;
+
+  // The resolution axis the tiers hang off — one quiet rail, echoing the
+  // audit history's left stripe.
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 3px;
+    border-radius: 3px;
+    background-color: $gray-300;
+  }
+}
+
+.derivative-tier {
+  padding: 0.85rem 0;
+  border-bottom: 1px solid $gray-200;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  &__head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+  }
+
+  &__name {
+    font-weight: 600;
+    color: $gray-800;
+  }
+
+  // Resolution eyebrow — quiet uppercase micro-label, subordinate to the name.
+  &__note {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 600;
+    color: $gray-500;
+  }
+
+  &__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.25rem;
+    align-items: center;
+  }
+
+  // The group picker, revealed under "Restrict to groups": inset and hairline-
+  // bracketed so it reads as belonging to the restrict choice above it.
+  &__groups {
+    margin-top: 0.5rem;
+    padding: 0.5rem 0 0.15rem 0.9rem;
+    border-left: 2px solid $gray-200;
+  }
+
+  &__group {
+    font-size: 0.9rem;
+    color: $gray-800;
+  }
+}

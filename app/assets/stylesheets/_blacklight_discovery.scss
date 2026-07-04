@@ -1,7 +1,7 @@
 // Blacklight discovery surfaces — anything that styles search-result
-// documents (thumbnails, gallery view, document metadata, work-show
-// dividers). Distinct from search chrome (header, applied-filter,
-// facet cards), which lives in its own partials.
+// documents (thumbnails, gallery view, document metadata). Distinct from
+// search chrome (header, applied-filter, facet cards), which lives in its
+// own partials.
 
 /* Blacklight Gallery Title */
 .gallery-title {
@@ -16,6 +16,7 @@
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
 }
 
@@ -33,11 +34,6 @@
   margin-top: 7px;
 }
 
-.document-thumbnail:has(.thumbnail-fallback:not(.d-none)) {
-  background-color: transparent;
-  border: none;
-}
-
 .thumbnail-fallback {
   display: flex;
   align-items: center;
@@ -47,6 +43,27 @@
   left: 0;
   right: 0;
   bottom: 0;
+}
+
+// Resource-type pill overlaid on result thumbnails (list + grid). Keeps the
+// type legible when a custom thumbnail hides the default type icon (v1 parity).
+// Semi-transparent so it reads over any image; centered along the bottom of
+// .document-thumbnail — the positioning context the img/fallback already use.
+.thumb-type-pill {
+  position: absolute;
+  bottom: 0.4rem; // floats just above the bottom edge, not flush
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  padding: 0.05rem 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: $white;
+  background-color: rgba(154, 159, 162, 0.7);
+  border-radius: 0.2rem;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .document-thumbnail img {
@@ -133,14 +150,6 @@ dl.document-metadata.row {
   margin-bottom: 0.5rem;
 }
 
-.work-show-divider {
-  border: 0;
-  border-top: 1px solid $gray-300;
-  opacity: 1;
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-}
-
 .documents-gallery {
   row-gap: var(--bs-gutter-x);
 
@@ -152,10 +161,6 @@ dl.document-metadata.row {
 
   .thumbnail-fallback svg {
     font-size: 4em;
-  }
-
-  .document-thumbnail:has(.thumbnail-fallback:not(.d-none)) {
-    border: 1px solid rgba(0, 0, 0, 0.2);
   }
 }
 

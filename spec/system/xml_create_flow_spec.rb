@@ -54,6 +54,8 @@ RSpec.describe 'XML loader create-mode flow', type: :request do
     allow(AtlasRb::Work).to receive(:create).and_return(double(id: 'w-created'))
     allow(ContentCreationJob).to receive(:perform_later)
     allow(IiifAssetsJob).to receive(:perform_later)
+    # XML loaders validate the chosen destination resolves to a Collection.
+    allow(AtlasRb::Resource).to receive(:find).with('neu:root').and_return(double(klass: 'Collection'))
     build_create_archive(archive_path)
   end
 

@@ -27,10 +27,9 @@ class User
     role.to_s == 'admin'
   end
 
-  # Role gate for the deposit form's proxy radio (piece 3 of the v2
-  # auth + provenance plan). Group membership still selects *which*
-  # collections the user can deposit into; this only governs whether
-  # the radio surface is rendered.
+  # Role gate for the deposit form's proxy ("upload as") radio. Group membership
+  # still selects *which* collections the user can deposit into; this only
+  # governs whether the radio surface is rendered.
   def privileged?
     role.to_s == 'privileged'
   end

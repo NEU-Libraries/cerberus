@@ -1,6 +1,16 @@
 # frozen_string_literal: true
 
 class LoadsController < ApplicationController
+  # Borrow CatalogController's Solr config so the XML/multipage destination
+  # typeahead's ResourceSearch behaves like the catalog's keyword search (same
+  # qf / search fields). ApplicationController's Blacklight::Controller doesn't
+  # pull this in on its own — mirrors Admin::ReparentController.
+  include Blacklight::Configurable
+
+  copy_blacklight_config_from(CatalogController)
+
+  BAD_DESTINATION_MSG = 'Choose a destination collection (search by title or paste a collection NOID).'
+
   before_action :authenticate_user!
   before_action :set_loader
   before_action :require_loader_role
@@ -20,13 +30,30 @@ class LoadsController < ApplicationController
 
   def new
     @load_report  = LoadReport.new
-    @destinations = load_destinations
+    # IPTC is boxed to its root collection's children (the dropdown). XML and
+    # multipage pick any collection via the client-driven typeahead, so they
+    # need no precomputed destination list.
+    @destinations = @loader.iptc? ? load_destinations : []
+  end
+
+  # JSON typeahead for the XML/multipage destination picker: any collection by
+  # title, gated-discovery aware (an admin sees non-public collections). Returns
+  # `[{ value: <noid>, label: <title> }]`; fail-soft to [] so it never 500s.
+  def collection_search
+    results = ResourceSearch.call(scope: self, query: params[:q], types: %w[Collection])
+    render json: results.documents.map { |doc|
+      { value: doc.to_param, label: Array(doc['title_tsim']).first.presence || '(untitled)' }
+    }
+  rescue Faraday::Error, JSON::ParserError => e
+    Rails.logger.error("LoadsController#collection_search: #{e.class} #{e.message}")
+    render json: []
   end
 
   def create
     archive = params.dig(:load_report, :archive)
     parent  = params.dig(:load_report, :parent_collection_id)
-    return reject_missing_archive(parent) if archive.blank?
+    return rerender_new('Please choose an archive file.', parent) if archive.blank?
+    return rerender_new(BAD_DESTINATION_MSG, parent) unless valid_destination?(parent)
 
     @load_report = create_load_report!(archive, parent)
     save_archive(@load_report, archive)
@@ -40,7 +67,7 @@ class LoadsController < ApplicationController
     # redundant banner would only contradict the body once the poll runs.
     redirect_to loader_load_path(@loader, @load_report)
   rescue ActiveRecord::RecordInvalid
-    @destinations = load_destinations
+    @destinations = @loader.iptc? ? load_destinations : []
     render :new, status: :unprocessable_content
   end
 
@@ -78,11 +105,29 @@ class LoadsController < ApplicationController
       @loader.multipage? ? MultipageUnzipJob : XmlUnzipJob
     end
 
-    def reject_missing_archive(parent_id)
-      flash.now[:alert]  = 'Please choose an archive file.'
-      @load_report       = LoadReport.new(parent_collection_id: parent_id)
-      @destinations      = load_destinations
+    # Re-render the upload form with an inline alert, preserving the chosen
+    # destination. IPTC repopulates its children dropdown; XML/multipage drive
+    # the destination client-side, so they need no precomputed list.
+    def rerender_new(alert, parent_id)
+      flash.now[:alert] = alert
+      @load_report      = LoadReport.new(parent_collection_id: parent_id)
+      @destinations     = @loader.iptc? ? load_destinations : []
       render :new, status: :unprocessable_content
+    end
+
+    # IPTC's destination comes from the children dropdown (already a collection
+    # under the configured root), so it's trusted as-is. XML/multipage accept a
+    # free-typed or typeahead-picked NOID, so resolve it against Atlas and
+    # confirm it's actually a Collection before staging anything.
+    def valid_destination?(parent_id)
+      return true if @loader.iptc?
+      return false if parent_id.blank?
+
+      # find returns nil for a 404 (unknown NOID) and raises ResourceError for
+      # any other non-2xx; either way the destination isn't a usable Collection.
+      AtlasRb::Resource.find(parent_id)&.klass == 'Collection'
+    rescue Faraday::Error, JSON::ParserError, AtlasRb::ResourceError
+      false
     end
 
     def set_loader

@@ -82,7 +82,7 @@ RSpec.describe 'Sets', type: :request do
 
     it 're-renders the form with the Atlas message on a blank title' do
       post '/sets', params: { set: { title: '', description: '' } }
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
 
     it 'updates title and description' do
@@ -98,6 +98,14 @@ RSpec.describe 'Sets', type: :request do
       expect(response).to redirect_to(sets_path)
       get "/sets/#{set['id']}"
       expect(response).to have_http_status(:not_found)
+    end
+
+    it 'breadcrumbs the edit page back to the set' do
+      set = make_set('Crumbed Set')
+      get "/sets/#{set['id']}/edit"
+      expect(response.body).to include('breadcrumb')
+        .and include(set_path(set['id']))
+        .and include('Edit set')
     end
   end
 
@@ -163,6 +171,17 @@ RSpec.describe 'Sets', type: :request do
 
         get '/sets/picker', params: { work_id: lone_work.id }
         expect(response.body).to include("/sets/#{set['id']}/works")
+      end
+
+      it 'marks a work already covered by an included collection as :covered, not addable' do
+        set = make_set('Coverage Set')
+        post "/sets/#{set['id']}/collections", params: { collection_id: collection.id }
+
+        # work_two lives under `collection` (now in the set) but was never added
+        # individually — it should read as already-included, with no add button.
+        get '/sets/picker', params: { work_id: work_two.id }
+        expect(response.body).to include('via a collection it contains')
+        expect(response.body).not_to include("/sets/#{set['id']}/works")
       end
 
       it 'filters rows by title and reports empty matches' do
@@ -297,6 +316,119 @@ RSpec.describe 'Sets', type: :request do
       set = make_set('Private Set')
       get "/sets/#{set['id']}"
       expect(response).to have_http_status(:forbidden)
+    end
+  end
+
+  describe 'sharing (owner-only ACL)' do
+    it 'grants groups, individuals, and public visibility from the Sharing tab' do
+      sign_in curator
+      set = make_set('Shared Set')
+      patch "/sets/#{set['id']}", params: {
+        mass: 'public',
+        set:  { form:        'sharing',
+                permissions: { '1' => { group_id: 'northeastern:drs:repository:staff', ability: 'read' } },
+                edit_users:  ['000000003'] }
+      }
+      expect(response).to redirect_to(set_path(set['id']))
+
+      reloaded = AtlasRb::Compilation.find(set['id'], nuid: nuid)
+      expect(reloaded['read_groups']).to include('public', 'northeastern:drs:repository:staff')
+      expect(reloaded['edit_users']).to include('000000003')
+    end
+
+    it 'notifies a newly-granted individual via the inbox' do
+      sign_in curator
+      set = make_set('Notify Set')
+      expect do
+        patch "/sets/#{set['id']}", params: { set: { form: 'sharing', edit_users: ['000000003'] } }
+      end.to change { Message.where(recipient_nuid: '000000003').count }.by(1)
+      expect(Message.where(recipient_nuid: '000000003').last.body).to include('Notify Set')
+    end
+
+    it 're-saving an unchanged share notifies no one' do
+      sign_in curator
+      set = make_set('Idempotent Share')
+      patch "/sets/#{set['id']}", params: { set: { form: 'sharing', edit_users: ['000000003'] } }
+      expect do
+        patch "/sets/#{set['id']}", params: { set: { form: 'sharing', edit_users: ['000000003'] } }
+      end.not_to(change { Message.where(recipient_nuid: '000000003').count })
+    end
+
+    it 'forbids a non-owner editor from changing sharing' do
+      sign_in curator
+      set = make_set('Editor-Managed Set')
+      AtlasRb::Compilation.update(set['id'],
+                                  permissions: { read: [], edit: [], edit_users: ['000000003'] },
+                                  nuid:        nuid)
+      sign_in other_user
+      patch "/sets/#{set['id']}", params: { set: { form: 'sharing', edit_users: [] } }
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
+
+  describe 'discovery scopes' do
+    it 'lists a set granted to me under Editable / Shared, but not My Sets' do
+      set = make_set('Granted To Editor')
+      AtlasRb::Compilation.update(set['id'],
+                                  permissions: { read: [], edit: [], edit_users: ['000000003'] },
+                                  nuid:        nuid)
+      sign_in other_user
+
+      get '/sets', params: { scope: 'editable' }
+      expect(response.body).to include('Granted To Editor')
+      get '/sets', params: { scope: 'shared' }
+      expect(response.body).to include('Granted To Editor')
+      get '/sets'
+      expect(response.body).not_to include('Granted To Editor')
+    end
+
+    it 'excludes my own sets from the grant-scoped tabs' do
+      sign_in curator
+      make_set('My Own Set')
+      get '/sets', params: { scope: 'editable' }
+      expect(response.body).not_to include('My Own Set')
+      get '/sets'
+      expect(response.body).to include('My Own Set')
+    end
+
+    it 'treats an unknown scope as My Sets' do
+      sign_in curator
+      get '/sets', params: { scope: 'bogus' }
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
+  describe 'the edit_users typeahead' do
+    before { sign_in curator }
+
+    it 'returns an empty array for a blank query' do
+      get '/sets/recipients', params: { q: '' }
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body).to eq([])
+    end
+
+    it 'returns a JSON array for a query' do
+      get '/sets/recipients', params: { q: 'ps' }
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body).to be_an(Array)
+    end
+  end
+
+  describe 'collaboration (editor affordances)' do
+    it 'shows an edit grantee the manage affordances but not the Sharing tab' do
+      set = make_set('Editable Set')
+      AtlasRb::Compilation.update(set['id'],
+                                  permissions: { read: ['public'], edit: [], edit_users: ['000000003'] },
+                                  nuid:        nuid)
+      sign_in other_user
+
+      get "/sets/#{set['id']}"
+      expect(response.body).to include(edit_set_path(set['id']))
+
+      get "/sets/#{set['id']}/edit"
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Details')
+      expect(response.body).not_to include('sharing-tab')
     end
   end
 

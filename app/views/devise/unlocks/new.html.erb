@@ -6,12 +6,12 @@
       <%= render "devise/shared/error_messages", resource: resource %>
 
       <div class="mb-3">
-	<%= f.label :email, class: "form-label" %>
-	<%= f.email_field :email, autofocus: true, autocomplete: 'email', class: 'form-control' %>
+  <%= f.label :email, class: "form-label" %>
+  <%= f.email_field :email, autofocus: true, autocomplete: 'email', class: 'form-control' %>
       </div>
 
       <div class="mb-3">
-	<%= f.submit t('.resend_unlock_instructions'), class: 'btn btn-primary'%>
+  <%= f.submit t('.resend_unlock_instructions'), class: 'btn btn-primary' %>
       </div>
     <% end %>
 

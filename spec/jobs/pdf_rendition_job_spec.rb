@@ -32,6 +32,11 @@ RSpec.describe PdfRenditionJob, type: :job do
     expect(IiifAssetsJob).to have_received(:perform_now).with(work_id, pdf_path)
   end
 
+  it 'enqueues full-text extraction from the rendition PDF (Office text path)' do
+    expect { described_class.new.perform(work_id, staged_path, rendition_key) }
+      .to have_enqueued_job(FullTextExtractionJob).with(work_id, pdf_path)
+  end
+
   it 'skips re-conversion when a previous attempt already produced the rendition' do
     FileUtils.cp(fixtures.join('example.pdf'), pdf_path)
 

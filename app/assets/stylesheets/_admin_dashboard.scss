@@ -147,23 +147,8 @@
   // desaturated brick-red for impersonation (the high-danger surface).
   &--structure    { --admin-action-color: #{$blue}; }
   &--link         { --admin-action-color: #{$success}; }
+  &--restore      { --admin-action-color: #138f76; } // teal-deep: bringing back to life
   &--impersonation { --admin-action-color: #a8322a; }
-}
-
-// Back-link on a dedicated admin action surface (e.g. the impersonation
-// start page) returning to the hub. Quiet, left-aligned, above the card.
-.admin-actions__back {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-bottom: 0.75rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: $gray-600;
-  text-decoration: none;
-
-  &:hover,
-  &:focus-visible { color: $primary; }
-
-  .fa-solid { font-size: 0.9em; }
+  &--files        { --admin-action-color: #5a5e8c; } // desaturated indigo: versioned content
+  &--groups       { --admin-action-color: #7a5c84; } // desaturated violet: a naming / label affordance
 }

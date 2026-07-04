@@ -32,7 +32,7 @@
         Loader type
       = f.select :kind, Loader.kinds.keys.map { |k| [k.upcase, k] }, {}, class: 'form-select'
       .admin-registry-form__hint
-        <strong>IPTC</strong> ingests image archives and builds MODS from embedded IPTC tags. <strong>XML</strong> ingests a <code class="admin-registry-table__id">manifest.xlsx</code> plus per-row MODS files to update existing objects or create new ones. <strong>MULTIPAGE</strong> turns one archive (manifest + MODS + ordered page images) into a single Work with ordered pages.
+        <strong>IPTC</strong> ingests image archives and builds MODS from embedded IPTC tags. <strong>XML</strong> ingests a <code class="admin-registry-table__id">manifest.xlsx</code> plus per-row MODS files to update existing objects or create new ones. <strong>MULTIPAGE</strong> ingests an archive whose <code class="admin-registry-table__id">manifest.xlsx</code> lists one or more items (MODS + ordered page images per item); each item becomes its own Work with ordered pages.
 
   .admin-registry-form__section
     %h3.admin-registry-form__section-title
@@ -40,7 +40,7 @@
       Access
     .admin-registry-form__section-note
       %i.fa-solid.fa-circle-info{'aria-hidden' => 'true'}
-      The two fields below grant access. Members of the Grouper group see this loader and can deposit into the root collection or any of its descendants. Editing these on an existing loader changes who can see it and where they deposit.
+      The two fields below grant access. Members of the Grouper group see this loader. For IPTC, they can deposit into the root collection's children; for XML and MULTIPAGE, they pick any destination collection at upload time. Editing these on an existing loader changes who can see it and where they deposit.
 
     .mb-3
       = f.label :group, 'Grouper group', class: 'admin-registry-form__label' do
@@ -56,7 +56,7 @@
         Root collection PID
       = f.text_field :root_collection, class: 'form-control admin-registry-form__input--id', placeholder: 'neu:6240', autocomplete: 'off'
       .admin-registry-form__hint
-        Atlas Collection PID. The deposit-destination picker queries this collection's children.
+        Atlas Collection PID. <strong>Required for IPTC</strong>, where the deposit-destination picker is boxed to this collection's children (the safety rail for non-librarian operators). <strong>Optional for XML and MULTIPAGE</strong> — those librarian-operated loaders let the operator pick any destination collection at upload time, so this can be left blank.
 
   .d-flex.gap-2.align-items-center.mt-4
     = f.submit class: 'btn btn-primary'

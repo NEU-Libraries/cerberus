@@ -6,8 +6,8 @@ require 'tempfile'
 
 # Live network smoke against the Library of Congress XSD endpoints.
 #
-# Opt-in: every example skips unless RUN_LOC_SMOKE=1. It exists to catch
-# the LoC-specific quirks that broke the XML editor before Kataba 1.1.1:
+# Opt-in: every example skips unless RUN_LOC_SMOKE=1. It exists to catch the
+# LoC-specific quirks in the XML editor's XSD fetching:
 #
 #   * mods-3-N.xsd declared as `http://...` 503s under plain HTTP through
 #     LoC's Cloudflare front; the gem must upgrade to HTTPS.

@@ -1,6 +1,11 @@
 - content_for :head do
   = javascript_import_module_tag "preview_application"
 
+-# Breadcrumb rides :container_header so it spans the full main width above the
+-# editor, matching the Metadata/Permissions edit pages this is a sub-tab of.
+- content_for(:container_header) do
+  = render 'shared/breadcrumbs', show_add: false
+
 %h3.py-3
   Edit raw XML for
   = @resource.title
@@ -8,8 +13,20 @@
 %ul.nav.nav-tabs
   %li.nav-item
     %a.nav-link{"aria-current" => "page", href: public_send("edit_#{@klass.downcase}_path", @resource.id)} Metadata
+  -# Advanced is a Works-only tab (Collections have no advanced fields); link back
+  -# to the edit page's Advanced pane via the tab-hash fragment.
+  - if @klass == 'Work'
+    %li.nav-item
+      %a.nav-link{href: "#{public_send("edit_#{@klass.downcase}_path", @resource.id)}#advanced"} Advanced
   %li.nav-item
     %a.nav-link{href: "#{public_send("edit_#{@klass.downcase}_path", @resource.id)}#permissions"} Permissions
+  -# Move / Delete are Works-only request tabs (containers have no request_change
+  -# route); link back to the edit page's panes via the tab-hash fragment.
+  - if @klass == 'Work'
+    %li.nav-item
+      %a.nav-link{href: "#{public_send("edit_#{@klass.downcase}_path", @resource.id)}#move"} Move
+    %li.nav-item
+      %a.nav-link{href: "#{public_send("edit_#{@klass.downcase}_path", @resource.id)}#delete"} Delete
   %li.nav-item
     %a.nav-link.active{href: "#"} XML
   - if can?(:read, :audit_event)

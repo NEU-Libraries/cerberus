@@ -4,10 +4,11 @@ module Admin
   # Admin CRUD for the Loader registry. Each row defines a per-team
   # loader entry point: its Grouper group (members see this loader),
   # its root_collection (where the picker queries children), and
-  # display name. Destroy is intentionally omitted in this pass —
-  # retiring a loader needs a soft-delete + dangling-LoadReport
-  # decision that's out of scope for piece 4.
+  # display name. Destroy is intentionally omitted — retiring a loader needs a
+  # soft-delete + a decision on dangling LoadReports that isn't handled yet.
   class LoadersController < BaseController
+    breadcrumb_for 'Loader definitions', :admin_loaders_path
+
     before_action :set_loader, only: [:edit, :update]
 
     def index
@@ -16,9 +17,12 @@ module Admin
 
     def new
       @loader = Loader.new
+      breadcrumb 'New', new_admin_loader_path
     end
 
-    def edit; end
+    def edit
+      breadcrumb 'Edit', edit_admin_loader_path(@loader)
+    end
 
     def create
       @loader = Loader.new(loader_params)

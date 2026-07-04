@@ -55,7 +55,7 @@ RSpec.describe 'Messages', type: :request do
 
     it 'shows the navbar unread badge' do
       get '/inbox'
-      expect(response.body).to include('inbox-nav-link__badge')
+      expect(response.body).to include('nav-count-link__badge')
     end
   end
 

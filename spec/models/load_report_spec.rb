@@ -203,12 +203,15 @@ RSpec.describe LoadReport, type: :model do
       expect { report.maybe_finalize! }.to have_enqueued_job(CompleteWorkJob)
     end
 
-    it 'never enqueues when the report settles failed' do
+    it 'still enqueues when the report settles failed (a clean sibling item must complete)' do
+      # Skip-bad ingest: item 0 succeeded, item 1 failed, so the report is
+      # failed overall — but item 0's Work must still be completed, which
+      # CompleteWorkJob decides per Work.
       report = create(:load_report, loader: multipage_loader, status: :processing)
-      create(:multipage_ingest, load_report: report, status: :completed, work_pid: 'neu:w1', sequence: 1)
-      create(:multipage_ingest, load_report: report, status: :failed, work_pid: 'neu:w1', sequence: 2)
+      create(:multipage_ingest, load_report: report, status: :completed, item_index: 0, work_pid: 'neu:w1', sequence: 1)
+      create(:multipage_ingest, load_report: report, status: :failed, item_index: 1, work_pid: 'neu:w2', sequence: 1)
 
-      expect { report.maybe_finalize! }.not_to have_enqueued_job(CompleteWorkJob)
+      expect { report.maybe_finalize! }.to have_enqueued_job(CompleteWorkJob).with(report.id)
     end
 
     it 'never enqueues for non-multipage loaders' do

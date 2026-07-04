@@ -10,11 +10,15 @@
 # authorization boundary for the Set object itself (per-row read/edit);
 # contents visibility rides the standard gated discovery on every query.
 class SetsController < CatalogController
+  include UserDirectorySearchable
+
   include ShowScopedSearch
+  include SetRecipe
+  include SetSharing
 
   before_action :authenticate_user!, except: [:show]
   before_action :require_curator,    except: [:show]
-  before_action :load_set,           except: [:index, :new, :create, :picker]
+  before_action :load_set,           except: [:index, :new, :create, :picker, :recipients]
 
   # A private Set read (or any write) the caller may not perform: Atlas says
   # 403, the user sees the standard forbidden page. Unknown ids surface as
@@ -23,11 +27,20 @@ class SetsController < CatalogController
     render template: 'errors/forbidden', status: :forbidden
   end
 
+  # My Sets (owner-scoped, default) plus the two grant-scoped discovery tabs —
+  # "Shared with me" (read + edit grants) and "Editable by me" (edit grants) —
+  # backed by atlas_rb's `scope:` listing (owned Sets are excluded server-side
+  # from the grant-scoped modes; group membership is resolved by Atlas).
+  SCOPES = %w[shared editable].freeze
+
   def index
-    page = AtlasRb::Compilation.list(page: params[:page].presence)
+    @scope = params[:scope].presence_in(SCOPES)
+    page = AtlasRb::Compilation.list(scope: @scope, page: params[:page].presence)
     # Unlike .find/.create, .list entries arrive wrapped: {"compilation" => {...}}.
     @sets = Array(page['compilations']).pluck('compilation')
     @pagination = page['pagination']
+    # Grant-scoped tabs list other people's Sets, so name each owner.
+    @owner_names = @scope ? NuidResolver.names_for(@sets.pluck('depositor')) : {}
   end
 
   def show
@@ -46,8 +59,9 @@ class SetsController < CatalogController
 
   # The Add-to-set modal's rows, fetched lazily by a turbo-frame when the
   # modal on a Work/Collection show page first opens — host pages cost no
-  # Atlas call until then. Owner-scoped and paginated; each row carries
-  # this item's state in that set (addable / already included / set aside).
+  # Atlas call until then. Owner-scoped and paginated; each row carries this
+  # item's state in that set (addable / already included / covered-by-a-
+  # collection / set aside).
   def picker
     @kind = params[:collection_id].present? ? 'collection' : 'work'
     @noid = params[:collection_id].presence || params[:work_id]
@@ -55,6 +69,7 @@ class SetsController < CatalogController
 
     @q = params[:q].to_s.strip
     @sets, @pagination = SetPicker.call(query: @q, page: params[:page])
+    @covering = picker_covering
     render layout: false
   end
 
@@ -62,7 +77,12 @@ class SetsController < CatalogController
     @set = AtlasRb::Mash.new
   end
 
-  def edit; end
+  # Details tab is open to any editor; the Sharing tab is owner/admin-only
+  # (gated in the view + on the sharing write path).
+  def edit
+    edit_breadcrumbs
+    prepare_sharing_form if @owned
+  end
 
   def create
     set = AtlasRb::Compilation.create(set_params[:title], description: set_params[:description].presence)
@@ -73,7 +93,11 @@ class SetsController < CatalogController
     render :new, status: :unprocessable_content
   end
 
+  # The Details and Sharing tabs are disjoint forms that both PATCH here,
+  # routed on the hidden `set[form]` marker.
   def update
+    return update_sharing if params.dig(:set, :form) == 'sharing'
+
     AtlasRb::Compilation.update(@set['id'], title: set_params[:title], description: set_params[:description])
     redirect_to set_path(@set['id']), notice: 'Set updated.'
   rescue AtlasRb::CompilationError => e
@@ -81,64 +105,41 @@ class SetsController < CatalogController
     render :edit, status: :unprocessable_content
   end
 
+  # Typeahead JSON for the edit_users picker on the Sharing tab
+  # (see UserDirectorySearchable).
+  def recipients
+    render json: user_directory_results
+  end
+
   def destroy
     AtlasRb::Compilation.destroy(@set['id'])
     redirect_to sets_path, notice: 'Set deleted. The works and collections it referenced are untouched.'
   end
 
-  # ---- recipe mutations ----------------------------------------------------
-  # Adds come from show-page affordances elsewhere in the app, so they return
-  # to where the user was; removals and the aside pair live on the Set page.
-
-  def add_collection
-    AtlasRb::Compilation.add_included_collection(@set['id'], params[:collection_id])
-    redirect_back_or_to(
-      set_path(@set['id']),
-      notice: "Collection added to “#{@set['title']}”. The set stays current as the collection changes."
-    )
-  rescue AtlasRb::CompilationError => e
-    redirect_back_or_to(set_path(@set['id']), alert: e.message)
-  end
-
-  def remove_collection
-    AtlasRb::Compilation.remove_included_collection(@set['id'], params[:collection_id])
-    redirect_to set_path(@set['id']),
-                notice: 'Removed from this set. The collection itself is untouched.'
-  end
-
-  def add_work
-    AtlasRb::Compilation.add_included_work(@set['id'], params[:work_id])
-    redirect_back_or_to(set_path(@set['id']), notice: "Added to “#{@set['title']}”.")
-  rescue AtlasRb::CompilationError => e
-    redirect_back_or_to(set_path(@set['id']), alert: e.message)
-  end
-
-  def remove_work
-    AtlasRb::Compilation.remove_included_work(@set['id'], params[:work_id])
-    redirect_to set_path(@set['id']), notice: 'Removed from this set. The work itself is untouched.'
-  end
-
-  # The teaching moment lives in the redirect: the show render reads
-  # flash[:aside] and raises the toast with fresh chip counts and an Undo.
-  def set_aside
-    AtlasRb::Compilation.add_exclusion(@set['id'], params[:work_id])
-    flash[:aside] = { 'work_id' => params[:work_id],
-                      'title'   => params[:title],
-                      'chip'    => params[:chip].presence }
-    redirect_to set_path(@set['id'])
-  end
-
-  def put_back
-    AtlasRb::Compilation.remove_exclusion(@set['id'], params[:work_id])
-    redirect_to set_path(@set['id']), notice: 'Put back into the set.'
-  end
+  # Recipe-mutation actions (add/remove collection + work, set-aside/put-back)
+  # live in the SetRecipe concern; sharing in SetSharing.
 
   private
 
     def load_set
       @set = AtlasRb::Compilation.find(params[:id])
-      # Manage affordances are owner/admin UI; Atlas re-checks every write.
+      raise ResourceNotFound if @set.nil?
+
+      # @owned: owner/admin — gates ownership-only UI (Sharing tab, Delete).
+      # @can_edit: owner OR a grantee — gates recipe-mutation affordances.
+      # Atlas re-checks every write regardless; these only shape the UI.
       @owned = current_user.present? && (current_user.admin? || @set['depositor'] == current_user.nuid)
+      @can_edit = @owned || editor?
+    end
+
+    # An edit grant (individual NUID or one of the caller's groups). Group
+    # membership is the caller's session groups intersected with edit_groups —
+    # the same UI-side check the permissions widget uses (Atlas is the boundary).
+    def editor?
+      return false unless current_user
+      return true if Array(@set['edit_users']).include?(current_user.nuid)
+
+      Array(current_user.groups).intersect?(Array(@set['edit_groups']))
     end
 
     def require_curator
@@ -149,6 +150,24 @@ class SetsController < CatalogController
 
     def set_params
       params.expect(set: [:title, :description])
+    end
+
+    # A Work already resolved into a set via an included collection should read
+    # as included, not addable — so compute its covering container noids once
+    # (empty for collection rows, which only need direct membership).
+    def picker_covering
+      return Set.new unless @kind == 'work'
+
+      SetItemCoverage.call(noid: @noid, search_service: search_service)
+    end
+
+    # Edit-page trail, mirroring ApplicationController#edit_breadcrumb_tail: the
+    # Set links back to its show page (`match: :exact` so loaf doesn't mark it
+    # current on the `/edit` sub-path), then a non-link "Edit set" you-are-here.
+    # A Set has no Atlas ancestry, so there's no tree to walk — just the tail.
+    def edit_breadcrumbs
+      breadcrumb(@set['title'], set_path(@set['id']), match: :exact)
+      breadcrumb('Edit set', edit_set_path(@set['id']))
     end
 
     # The recipe fq layered onto a state-seeded builder — find_children's

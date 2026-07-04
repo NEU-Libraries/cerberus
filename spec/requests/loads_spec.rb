@@ -331,6 +331,9 @@ RSpec.describe 'Loads', type: :request do
       allow(FileUtils).to receive(:cp)
       allow(UnzipJob).to receive(:perform_later)
       allow(XmlUnzipJob).to receive(:perform_later)
+      # XML/multipage validate the free-entered destination resolves to a Collection.
+      allow(AtlasRb::Resource).to receive(:find).with('neu:c1')
+                                                .and_return(OpenStruct.new(klass: 'Collection'))
     end
 
     describe 'POST .../loads' do
@@ -344,6 +347,62 @@ RSpec.describe 'Loads', type: :request do
         expect(UnzipJob).not_to have_received(:perform_later)
         expect(XmlUnzipJob).not_to have_received(:perform_later)
         expect(response).to redirect_to(loader_load_path(xml_loader, lr))
+      end
+
+      it 're-renders :new with 422 when the destination does not resolve to a Collection' do
+        allow(AtlasRb::Resource).to receive(:find).with('neu:work')
+                                                  .and_return(OpenStruct.new(klass: 'Work'))
+        post '/loaders/xml/loads',
+             params: { load_report: { archive: archive, parent_collection_id: 'neu:work' } }
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(LoadReport.count).to eq(0)
+      end
+
+      it 're-renders :new with 422 when the destination NOID is unresolvable' do
+        allow(AtlasRb::Resource).to receive(:find).with('bogus').and_return(nil) # atlas_rb returns nil for a 404
+        post '/loaders/xml/loads',
+             params: { load_report: { archive: archive, parent_collection_id: 'bogus' } }
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(LoadReport.count).to eq(0)
+      end
+
+      it 're-renders :new with 422 when no destination is given' do
+        post '/loaders/xml/loads', params: { load_report: { archive: archive } }
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(LoadReport.count).to eq(0)
+      end
+    end
+
+    describe 'GET .../loads/new' do
+      it 'renders the any-collection typeahead, not a children dropdown' do
+        get '/loaders/xml/loads/new'
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('data-controller="collection-picker"')
+        expect(response.body).to include('Search by collection title')
+      end
+    end
+
+    describe 'GET .../loads/collection_search' do
+      let(:doc) do
+        SolrDocument.new(id: 'neu-uuid-1', 'title_tsim' => ['Theses and Dissertations'])
+      end
+
+      it 'returns matching collections as JSON {value,label}' do
+        allow(doc).to receive(:to_param).and_return('neu:abc123')
+        results = instance_double(Blacklight::Solr::Response, documents: [doc])
+        allow(ResourceSearch).to receive(:call)
+          .with(hash_including(query: 'thes', types: %w[Collection])).and_return(results)
+
+        get '/loaders/xml/loads/collection_search', params: { q: 'thes' }
+        expect(response).to have_http_status(:ok)
+        expect(response.parsed_body).to eq([{ 'value' => 'neu:abc123', 'label' => 'Theses and Dissertations' }])
+      end
+
+      it 'fails soft to [] when Atlas/Solr is unreachable' do
+        allow(ResourceSearch).to receive(:call).and_raise(Faraday::ConnectionFailed, 'down')
+        get '/loaders/xml/loads/collection_search', params: { q: 'thes' }
+        expect(response).to have_http_status(:ok)
+        expect(response.parsed_body).to eq([])
       end
     end
 

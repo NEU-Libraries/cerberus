@@ -36,7 +36,7 @@
               %i.fa-solid{class: (mode_update ? 'fa-pen' : 'fa-plus'), 'aria-hidden' => 'true'}
               = mode_update ? 'Update existing' : 'Create new'
 
-          %span.load-report-overview__label= mode_update ? 'Identifier (NOID)' : 'Content file'
+          %span.load-report-overview__label= mode_update ? 'Identifier (PID)' : 'Content file'
           %span.load-report-overview__value
             %code.admin-registry-table__id= mode_update ? preview.first_row.identifier : preview.first_row.file_name
 

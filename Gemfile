@@ -18,6 +18,10 @@ gem 'sqlite3'
 # Use the Puma web server [https://github.com/puma/puma]
 gem 'puma'
 
+# DB-backed session store (ActiveRecord::SessionStore) — lifts the ~4KB cookie
+# limit app-wide; required by the download queue's growing session payload.
+gem 'activerecord-session_store'
+
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
 gem 'importmap-rails'
 
@@ -26,9 +30,6 @@ gem 'turbo-rails'
 
 # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
 gem 'stimulus-rails'
-
-# Build JSON APIs with ease [https://github.com/rails/jbuilder]
-gem 'jbuilder'
 
 # Use Redis adapter to run Action Cable in production
 # gem "redis", "~> 4.0"
@@ -52,20 +53,21 @@ gem 'bootsnap', require: false
 # gem "image_processing", "~> 1.2"
 
 # NEU Gems
-gem 'active_decorator'
-gem 'atlas_rb'
-gem 'attr_json'
+# >= 1.8.5 ships the per-tier derivative-permission binding
+# (Work.set_derivative_permissions; assets carry `gated`/`permission`) the
+# gated-derivative feature consumes, plus the find-on-410 tombstone fix.
+gem 'atlas_rb', '>= 1.8.5'
 gem 'blacklight', '>= 8.0', '< 9.0'
 gem 'blacklight-gallery'
 gem 'bootstrap'
 gem 'bootstrap_form'
 gem 'cancancan'
 gem 'caxlsx' # xlsx writer — loader manifest fixtures now, spreadsheet export later (roo reads)
+gem 'chartkick' # admin usage-analytics charts (importmap-pinned Chart.js); reads pre-bucketed rollups
 gem 'dartsass-rails'
 gem 'devise'
 gem 'devise-i18n'
 gem 'diffy' # line-diff for the MODS version-history page (wraps system diff)
-gem 'enumerations'
 gem 'haml'
 gem 'kataba', '>= 1.0.3'
 gem 'libreconv'
@@ -77,10 +79,11 @@ gem 'neu-mods'
 gem 'pg'
 gem 'roo'
 gem 'rsolr', '>= 1.0', '< 3'
-gem 'ruby-filemagic'
 gem 'ruby-vips'
 gem 'sass-embedded'
 gem 'solid_queue'
+gem 'timescaledb' # hypertable migration helper + schema dumper for the impressions analytics store
+gem 'zip_kit' # streaming ZIP for bulk set download (no temp file / no whole-archive buffering)
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

@@ -108,6 +108,7 @@ class IptcIngestJob < ApplicationJob
         )
       end
       ingest.update!(work_pid: work.id)
+      Sentinel.apply_default(ingest.load_report.parent_collection_id, work.id)
       work.id
     end
 

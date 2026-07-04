@@ -3,7 +3,14 @@
 Rails.application.routes.draw do
   devise_for :users
 
-  authenticate :user, ->(u) { u.groups&.include?(Permissions::STAFF_EDIT_GROUP) } do
+  # Admins carry the role-based `can :manage, :all` grant but may belong to no
+  # Grouper groups (the admin role is the grant, not group membership — see
+  # Ability). Keying the mount constraint purely on STAFF_EDIT_GROUP therefore
+  # 404'd the jobs dashboard for admins (a Warden constraint miss surfaces as
+  # "No route matches"), even though they outrank the staff-edit group. Admit
+  # the admin role explicitly so both the intended staff-edit members and admins
+  # reach it.
+  authenticate :user, ->(u) { u.admin? || u.groups&.include?(Permissions::STAFF_EDIT_GROUP) } do
     mount MissionControl::Jobs::Engine, at: '/jobs'
   end
 
@@ -15,43 +22,68 @@ Rails.application.routes.draw do
     concerns :searchable
   end
 
-  concern :exportable, Blacklight::Routes::Exportable.new
+  # The Blacklight :exportable concern (catalog#email/#sms) and the bookmarks
+  # resource are intentionally NOT mounted: bookmarks is unused in Cerberus and
+  # the email/sms tool links are stripped from the catalog config
+  # (navbar/document_actions are empty), so these only ever existed as
+  # anonymous, reachable POST send/abuse surfaces (authorization audit G5).
+  resources :solr_documents, only: [:show], path: '/catalog', controller: 'catalog'
 
-  resources :solr_documents, only: [:show], path: '/catalog', controller: 'catalog' do
-    concerns :exportable
-  end
-
-  resources :bookmarks do
-    concerns :exportable
-
-    collection do
-      delete 'clear'
-    end
-  end
-
-  resources :communities do
+  resources :communities, except: [:destroy] do
     member do
       post :tombstone
     end
   end
-  resources :collections do
+  resources :collections, except: [:destroy] do
     member do
       post :tombstone
+      # Bulk metadata export (streamed ZIP) — dedicated Live controller, like sets.
+      get 'export', to: 'collection_exports#show'
+      # The collection's derivative-access default (Sentinel) — the per-tier policy
+      # applied to Works created under it. Edit-gated (see authorize_resource_writes!).
+      patch :sentinel
     end
   end
-  resources :works do
+  resources :works, except: %i[index destroy] do
     member do
       get :downloads
+      get :manifest
       get :metadata
       patch :metadata, action: :update_metadata
       post :tombstone
+      # An editor-submitted request to withdraw or move the work — notifies the
+      # DRS staff inbox (no direct mutation; staff fulfill it with the tombstone
+      # / re-parent tools). Edit-gated via authorize_resource_writes!.
+      post :request_change
     end
   end
+  # People / profile pages. :id is the Person's NOID (opaque, public-safe — the
+  # NUID is never in the URL). /people is a Blacklight browse of Person docs;
+  # /people/:id is a curated profile over a gated depositor_ssi search;
+  # /communities/:community_id/people is the community-scoped Faculty & Staff
+  # browse (Person docs filtered by affiliated_community_ids_ssim).
+  resources :people, only: %i[index show]
+  get 'communities/:community_id/people', to: 'people#index', as: :community_people
+
+  # Genre / category landing — a Featured-Content gateway (homepage) into a single
+  # scholarly category. The genre rides the standard `f[genre_ssim][]` facet param
+  # (so the active filter shows as a constraint chip); this surface just wraps the
+  # gated Blacklight browse in a heading well, matching the People landing.
+  get 'genres', to: 'genres#show', as: :genre
+
+  # My DRS — the depositor's two-space home (workspace vs published). The deposit
+  # fork's destinations, read back: their own collections on one side, their
+  # community-published works on the other.
+  get 'my_drs', to: 'my_drs#index', as: :my_drs
+
   # The bare index is the "My Loaders" interstitial (user-menu entry);
   # everything else on a loader happens through its nested loads.
   resources :loaders, only: [:index], param: :slug do
     resources :loads, only: [:index, :show, :new, :create, :destroy] do
       member { patch :confirm }
+      # JSON typeahead backing the XML/multipage destination picker — any
+      # collection by title (NOID shown for visual confirmation).
+      collection { get :collection_search }
     end
   end
 
@@ -61,14 +93,29 @@ Rails.application.routes.draw do
     collection { get :recipients }
   end
 
+  # Download Queue — a per-session basket of individual files, downloaded later
+  # as one streamed ZIP (reuses the bulk-download streaming tech). Anon-capable.
+  # The zip stream lives on its own controller (ActionController::Live).
+  get    'download_queue',          to: 'download_queue#show',      as: :download_queue
+  post   'download_queue/items',    to: 'download_queue#create',    as: :download_queue_items
+  delete 'download_queue/items',    to: 'download_queue#destroy',   as: :download_queue_item
+  delete 'download_queue',          to: 'download_queue#destroy_all'
+  get    'download_queue/archive',  to: 'queue_downloads#show', as: :download_queue_archive
+
   # Sets — personal curated sets over Atlas Compilations ("Set" is the only
   # word a user ever sees; "Compilation" is the model name on the wire).
   # Recipe mutations are member POST/DELETEs mirroring the atlas_rb binding;
   # `aside` is the set-aside / put-back pair.
   resources :sets do
-    # The lazy-loaded "Add to set…" menu body (Work/Collection show pages).
-    collection { get :picker }
+    # picker: the lazy-loaded "Add to set…" menu body (Work/Collection show
+    # pages). recipients: typeahead JSON for the Sharing tab's edit_users picker.
+    collection do
+      get :picker
+      get :recipients
+    end
     member do
+      get    'download',                   to: 'set_downloads#show',     as: :download
+      get    'export',                     to: 'set_exports#show',       as: :export
       get    'works_count',                to: 'sets#works_count',       as: :works_count
       post   'collections',                to: 'sets#add_collection',    as: :add_collection
       delete 'collections/:collection_id', to: 'sets#remove_collection', as: :remove_collection
@@ -82,6 +129,15 @@ Rails.application.routes.draw do
   namespace :admin do
     root to: 'dashboard#index'
     resources :loaders, only: [:index, :new, :create, :edit, :update], param: :slug
+
+    # Group names — the cosmetic display name for a Grouper group (raw → pretty),
+    # consulted by ApplicationController#pretty_group wherever a group surfaces.
+    resources :groups, only: [:index, :new, :create, :edit, :update, :destroy]
+
+    # Usage analytics — repository-wide impression rollups (views/downloads),
+    # with CSV/Excel export of the top-N tables (the quarterly-report artifact).
+    get 'impressions',        to: 'impressions#index', as: :impressions
+    get 'impressions/export', to: 'impressions#export', as: :impressions_export
 
     # Re-parent / Move — a self-contained finder: index (find the node) →
     # choose_parent (pick its new parent) → confirm (preview) → move (perform).
@@ -97,16 +153,52 @@ Rails.application.routes.draw do
     post   'linked_members/add',    to: 'linked_members#add',     as: :linked_members_add
     delete 'linked_members/remove', to: 'linked_members#remove',  as: :linked_members_remove
 
+    # People — the curatorial Person registry: create a Person by NUID, edit the
+    # authoritative display_name / title / bio / orcid, and manage community
+    # affiliations (the edges that drive the Faculty & Staff browse). Keyed by
+    # NOID (the NUID is staff-facing and stays out of URLs).
+    resources :people, only: %i[index new create edit update], param: :noid do
+      member do
+        post   'affiliations', to: 'people#add_affiliation', as: :add_affiliation
+        delete 'affiliations/:community_id', to: 'people#remove_affiliation', as: :remove_affiliation
+      end
+    end
+
+    # Restore a withdrawal — a registry of every tombstoned Work / Collection /
+    # Community, each with a Restore action (reverses the show-page tombstone via
+    # atlas_rb's operator-only Admin.restore). :id is the resource NOID; the
+    # `type` body param selects the right Admin restorer.
+    resources :tombstones, only: [:index] do
+      member { post :restore }
+    end
+
     # Impersonation — a hub action surface (GET) hosting the start form, then
     # begin acting-as (write) or view-as (read-only) for a target NUID; the
     # DELETE (reusing admin_impersonation_path) ends whichever mode is active.
+    get    'impersonation/recipients', to: 'impersonations#recipients', as: :impersonation_recipients
     get    'impersonation', to: 'impersonations#new',              as: :impersonation
     post   'act_as',        to: 'impersonations#create_acting_as', as: :act_as
     post   'view_as',       to: 'impersonations#create_view_as',   as: :view_as
     delete 'impersonation', to: 'impersonations#destroy'
+
+    # Replace a file — find a Work, then non-destructively replace any of its
+    # Blobs (Blob.update appends a new OCFL version, NOID preserved), view each
+    # Blob's version history, and revert to a prior version. File-version content
+    # streaming lives in its own Live controller (file_versions#content).
+    get  'files',          to: 'files#index'
+    get  'files/manage',   to: 'files#manage',   as: :files_manage
+    post 'files/replace',  to: 'files#replace',  as: :files_replace
+    post 'files/rollback', to: 'files#rollback', as: :files_rollback
+    get  'files/:id/versions/:version_id/content', to: 'file_versions#content',
+                                                   as: :file_version_content
   end
 
   get '/downloads/:id', to: 'downloads#show', as: :download
+  # Gated image-derivative delivery (small/medium/large). Authorizes the tier,
+  # then redirects to a short-lived signed URL on the gated Cantaloupe host.
+  get '/works/:work_id/derivatives/:use', to: 'derivative_downloads#show', as: :derivative_download
+  # Inline, Range-capable A/V byte serving for the in-page player (download twin).
+  get '/media/:id',     to: 'media#show',     as: :media
 
   # history — deep diff views reached from the audit-log "View" button.
   # Type-agnostic (the data layer hits Atlas's /resources/:id/* endpoints), so

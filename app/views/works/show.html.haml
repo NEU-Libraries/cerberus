@@ -3,6 +3,12 @@
 - content_for(:container_header) do
   = render 'shared/breadcrumbs'
 
+= render 'scholar_metadata', scholar: @scholar
+
+-# Only the assets the viewer may actually fetch — inaccessible gated tiers
+-# are kept out of the card, its modal, and the count.
+- downloads = downloadable_files(@files)
+
 .container
   .clearfix.pt-1
   .row
@@ -11,7 +17,7 @@
         %h3= @work.title
         - if user_signed_in?
           .text-end.small.pb-2.flex-shrink-0.text-nowrap
-            - unless @work.in_progress
+            - if @can_edit && !@work.in_progress
               = link_to "Edit", edit_work_path(@work.id), class: "px-2"
             - if @can_tombstone
               = render 'shared/tombstone_modal',
@@ -19,19 +25,34 @@
                        kind:          'work',
                        path:          tombstone_work_path(@work.id),
                        trigger_class: 'px-2'
-      %hr.work-show-divider
+      %hr.section-divider
       .d-flex.justify-content-between.align-items-center.mb-3.small
         %span
           %i.fa-solid.fa-link.text-muted{'aria-hidden' => 'true'}
           %span.text-muted.ms-1 Permanent URL:
           = link_to @work.permanent_url, @work.permanent_url, class: 'ms-1'
-        - if @files.present?
+        - if downloads.present?
           = link_to '#downloads' do
-            %span.text-muted= "Downloads (#{@files.size})"
+            %span.text-muted= "Downloads (#{downloads.size})"
             %i.fa-solid.fa-arrow-down.ms-1{'aria-hidden' => 'true'}
   .row
     .col-md-6.order-md-1.order-2
-      = render partial: "thumbnail"
+      - if @multipage && @can_zoom
+        -# Page-turning deep-zoom viewer (Tify) over the work's IIIF
+        -# manifest, in the slot the static thumbnail occupies for
+        -# single-page works. Stylesheet ships separately from
+        -# application.css and the JS arrives via dynamic import in
+        -# iiif_viewer_controller, so other pages never pay for either.
+        = stylesheet_link_tag 'tify', 'data-turbo-track': 'false'
+        .iiif-viewer{data: { controller: 'iiif-viewer',
+                             'iiif-viewer-url-value': manifest_work_path(@work.id) }}
+      - elsif @av_file
+        -# In-page audio/video player. Like Tify, the skin CSS ships separately
+        -# and video.js arrives via dynamic import, so other pages never pay.
+        = stylesheet_link_tag 'video-js', 'data-turbo-track': 'false'
+        = render partial: 'av_player', locals: { file: @av_file }
+      - else
+        = render partial: "thumbnail"
     .col-md-6.order-md-2.order-1
       = @mods.html_safe
 
@@ -40,4 +61,4 @@
 .container
   .row
     .col-md-12
-      = render partial: 'downloads', locals: { files: @files }
+      = render partial: 'downloads', locals: { files: downloads }

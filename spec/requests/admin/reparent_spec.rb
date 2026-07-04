@@ -69,7 +69,7 @@ RSpec.describe 'Admin::Reparent', type: :request do
         expect(response.body).to include('Re-parent / Move')
       end
 
-      it 'lists matching containers (with their NUID) when q is present' do
+      it 'lists matching containers (with their PID) when q is present' do
         allow(ResourceSearch).to receive(:call)
           .and_return(fake_results(container_doc(noid: 'abc', title: 'Archives Collection')))
         get '/admin/reparent', params: { q: 'arch' }

@@ -1,0 +1,55 @@
+- content_for :page_title, 'Download Queue'
+
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-download{'aria-hidden' => 'true'}
+      Download Queue
+      - if @queue.count.positive?
+        %span.admin-registry__count= pluralize(@queue.count, 'file')
+    - if @queue.count.positive?
+      .admin-registry__head-actions
+        = link_to download_queue_archive_path, class: 'btn btn-primary btn-sm', data: { turbo: false } do
+          %i.fa-solid.fa-file-zipper.me-1{'aria-hidden' => 'true'}
+          Download all
+        = button_to download_queue_path, method: :delete, class: 'btn btn-outline-secondary btn-sm',
+            form: { class: 'd-inline' }, data: { turbo_confirm: 'Clear all files from your download queue?' } do
+          %i.fa-solid.fa-trash-can.me-1{'aria-hidden' => 'true'}
+          Clear queue
+
+  - if @queue.count.positive?
+    -# Files grouped by parent work (mirrors the zip's per-work folders): the
+    -# work names itself once, then its files list beneath it. One borderless
+    -# table on the card's white body — no nested panels.
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table
+        %thead
+          %tr
+            %th{scope: 'col'} Work
+            %th{scope: 'col'} File
+            %th{scope: 'col'} Identifier
+            %th.text-end{scope: 'col'}
+              %span.visually-hidden Remove
+        %tbody
+          - @queue.items.group_by { |item| item['w'] }.each do |work_noid, entries|
+            - entries.each_with_index do |entry, index|
+              %tr
+                %td
+                  - if index.zero?
+                    = link_to (@titles.dig(work_noid, 'title').presence || 'Untitled work'), work_path(work_noid), class: 'admin-registry-table__name fw-semibold'
+                    %span.admin-registry-table__id.ms-2= work_noid
+                %td.admin-registry-table__name= @labels.dig(work_noid, entry['b']).presence || 'File'
+                %td
+                  %span.admin-registry-table__id= entry['b']
+                %td.text-end
+                  - file_label = @labels.dig(work_noid, entry['b']).presence || 'file'
+                  = button_to download_queue_item_path(work_noid: work_noid, blob_noid: entry['b']), method: :delete,
+                      class: 'btn btn-outline-danger btn-sm', form: { class: 'd-inline' },
+                      'aria-label' => "Remove #{file_label} from the queue" do
+                    %i.fa-solid.fa-xmark{'aria-hidden' => 'true'}
+  - else
+    .admin-registry__empty
+      %i.fa-solid.fa-download.admin-registry__empty-icon{'aria-hidden' => 'true'}
+      %p.mb-1.fw-semibold Your download queue is empty.
+      %p.text-muted.small.mb-0
+        Browse to any work and use “Add to queue” on a file to gather it here, then download everything at once.

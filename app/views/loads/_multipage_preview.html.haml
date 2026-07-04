@@ -1,12 +1,10 @@
-/ Multipage loader preview-then-confirm. Renders MultipagePreview::Result —
-/ the WHOLE manifest, validated — so the librarian confirms the one Work and
-/ its page order before anything is minted. Reuses the .admin-registry /
-/ .load-report-overview / .ingest-status chrome (same register as _preview
-/ and the audit-history ledger) — no bespoke CSS.
-/
-/ Unlike the XML preview, the ordered page table renders even when blocked:
-/ the contract errors name sequences, and seeing the order the manifest
-/ actually declared is how a librarian diagnoses a bad-sequence archive.
+/ Multipage loader preview-then-confirm. A manifest concatenates many items
+/ (each becomes its own Work); this renders MultipagePreview::Result as a
+/ sanity check — how many items the sheet holds plus the FIRST item in detail
+/ — so the librarian can confirm they uploaded the right spreadsheet before
+/ anything is minted. Per-item validation is the run-time job's work, not the
+/ preview's. Reuses the .admin-registry / .load-report-overview /
+/ .ingest-status chrome — no bespoke CSS.
 .admin-registry.my-3
   %header.admin-registry__head
     %span.admin-registry__title
@@ -18,19 +16,19 @@
       = link_to loader.display_name, loader_loads_path(loader), class: 'text-decoration-none'
 
   .admin-registry__body
-    - if preview.blocked?
+    - if preview.structural_errors.any?
       .alert.alert-danger.d-flex.gap-2.mb-0
         %i.fa-solid.fa-circle-exclamation.mt-1{'aria-hidden' => 'true'}
         %div
-          %p.fw-semibold.mb-1 This archive can't be processed as a multipage Work.
+          %p.fw-semibold.mb-1 This archive can't be processed as a multipage load.
           %ul.mb-0.small
-            - preview.errors.each do |err|
+            - preview.structural_errors.each do |err|
               %li= err
     - else
       %p.text-muted.small.mb-3
-        This archive becomes
-        %strong one Work
-        with #{pluralize(preview.pages.size, 'ordered page')}. Nothing is created until you confirm; confirming runs the whole batch.
+        This archive contains
+        %strong= pluralize(preview.item_count, 'item')
+        (#{pluralize(preview.page_count, 'page')}). Each item becomes its own Work; any item with problems is skipped and noted in the report. Nothing is created until you confirm.
 
       .load-report-overview
         .load-report-overview__meta
@@ -38,58 +36,62 @@
           %span.load-report-overview__value
             %span.ingest-status{style: '--ingest-tone: #18bc9c'}
               %i.fa-solid.fa-layer-group{'aria-hidden' => 'true'}
-              Create multipage Work
-
-          %span.load-report-overview__label MODS file
-          %span.load-report-overview__value
-            %code.admin-registry-table__id= preview.mods_row.xml_path
-
+              Create multipage Works
+          %span.load-report-overview__label Items
+          %span.load-report-overview__value= preview.item_count
           %span.load-report-overview__label Pages
-          %span.load-report-overview__value= preview.pages.size
-
+          %span.load-report-overview__value= preview.page_count
           - if load_report.parent_collection_id.present?
             %span.load-report-overview__label Destination
             %span.load-report-overview__value
               %code.admin-registry-table__id= load_report.parent_collection_id
 
-    - if preview.pages.any?
-      .table-responsive.mt-3
-        %table.table.table-borderless.admin-registry-table.ingest-table
-          %caption.visually-hidden Pages in the order they will attach to the Work
-          %thead
-            %tr
-              %th{scope: 'col'} Seq
-              %th{scope: 'col'} Page file
-              %th{scope: 'col'} Title
-              %th{scope: 'col'} Last item
-          %tbody
-            - preview.pages.each do |page|
-              %tr
-                %td= page.sequence
-                %td
-                  %code.admin-registry-table__id= page.file_name
-                %td.small= page.title
-                %td
-                  - if page.last_item?
-                    %i.fa-solid.fa-flag-checkered.text-muted{'aria-hidden' => 'true'}
-                    %span.visually-hidden Last item
+    - if preview.ok? && preview.first_item
+      - first = preview.first_item
+      %p.text-muted.small.mt-4.mb-2
+        %i.fa-solid.fa-eye.me-1{'aria-hidden' => 'true'}
+        Sample — first item
+        - if first.label.present?
+          %span.fw-semibold.text-body= first.label
 
-    - if preview.mods_xml.present? && preview.ok?
-      / The Work's MODS, two-up: raw document beside Atlas's rendered HTML
-      / view — same raw-vs-rendered pairing as the XML editor and _preview.
-      .row.g-3.mt-2
-        .col-lg-6
-          %span.load-report-overview__label Raw MODS
-          %pre.border.border-1.rounded-3.bg-light.p-3.small.mt-1.mb-0{style: 'max-height: 26rem; overflow: auto;'}= preview.mods_xml
-        .col-lg-6
-          %span.load-report-overview__label Rendered
-          - if preview.decorated_html.present?
-            .border.border-1.rounded-3.bg-white.p-3.mt-1.mb-0{style: 'max-height: 26rem; overflow: auto;'}
-              = preview.decorated_html.html_safe
-          - else
-            .border.border-1.rounded-3.bg-light.p-3.mt-1.mb-0.text-muted.small
-              %i.fa-solid.fa-eye-slash.me-1{'aria-hidden' => 'true'}
-              The rendered view appears once the MODS validates.
+      - if first.pages.any?
+        .table-responsive
+          %table.table.table-borderless.admin-registry-table.ingest-table
+            %caption.visually-hidden Pages of the first item, in the order they will attach to its Work
+            %thead
+              %tr
+                %th{scope: 'col'} Seq
+                %th{scope: 'col'} Page file
+                %th{scope: 'col'} Title
+                %th{scope: 'col'} Last item
+            %tbody
+              - first.pages.each do |page|
+                %tr
+                  %td= page.sequence
+                  %td
+                    %code.admin-registry-table__id= page.file_name
+                  %td.small= page.title
+                  %td
+                    - if page.last_item?
+                      %i.fa-solid.fa-flag-checkered.text-muted{'aria-hidden' => 'true'}
+                      %span.visually-hidden Last item
+
+      - if preview.mods_xml.present?
+        / The first item's MODS, two-up: raw document beside Atlas's rendered
+        / HTML view — same raw-vs-rendered pairing as the XML editor and _preview.
+        .row.g-3.mt-2
+          .col-lg-6
+            %span.load-report-overview__label Raw MODS
+            %pre.border.border-1.rounded-3.bg-light.p-3.small.mt-1.mb-0{style: 'max-height: 26rem; overflow: auto;'}= preview.mods_xml
+          .col-lg-6
+            %span.load-report-overview__label Rendered
+            - if preview.decorated_html.present?
+              .border.border-1.rounded-3.bg-white.p-3.mt-1.mb-0{style: 'max-height: 26rem; overflow: auto;'}
+                = preview.decorated_html.html_safe
+            - else
+              .border.border-1.rounded-3.bg-light.p-3.mt-1.mb-0.text-muted.small
+                %i.fa-solid.fa-eye-slash.me-1{'aria-hidden' => 'true'}
+                The rendered view appears once the MODS validates.
 
     .d-flex.gap-2.align-items-center.mt-4
       - if preview.ok?

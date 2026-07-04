@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Admin
-  # Start/stop the two impersonation modes (piece 5). Admin-only — the gate
+  # Start/stop the two impersonation modes. Admin-only — the gate
   # is inherited from Admin::BaseController. The session state machine and
   # hydration live in ImpersonationSession (included app-wide via
   # ApplicationController); this controller is just the toggle surface.
@@ -10,6 +10,10 @@ module Admin
   # On-Behalf-Of header is authorized against the admin role), so this gate
   # is the Cerberus half of a two-sided guarantee, not the only one.
   class ImpersonationsController < BaseController
+    breadcrumb_for 'Impersonation', :admin_impersonation_path
+
+    include UserDirectorySearchable
+
     # This controller manages the impersonation session itself, so it is
     # exempt from the view-as write guard — otherwise the banner's Exit
     # (a DELETE) and switching modes (a POST) would trip the guard and end
@@ -27,6 +31,13 @@ module Admin
     # the admin dashboard's Impersonation card, matching the other admin
     # actions (Re-parent, Linked members) which open onto their own page.
     def new; end
+
+    # Typeahead JSON for the Target-user picker (see UserDirectorySearchable).
+    # The directory's role exclusions are apt here too — impersonation targets
+    # real human users, never self/system/anonymous.
+    def recipients
+      render json: user_directory_results
+    end
 
     def create_acting_as
       begin_impersonation(:acting_as)

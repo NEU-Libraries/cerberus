@@ -5,8 +5,8 @@ namespace :reset do
   task data: [:clean, 'db:seed:replant'] do
     raise "Wrong env - #{Rails.env} - must be development" unless Rails.env.development? || Rails.env.staging?
 
-    # Seed as the admin fixture (000000004). :system can't author Works per
-    # Atlas's Ability layer (Q7 carve-out only covers Community / Collection);
+    # Seed as the admin fixture (000000004). :system can't author Works —
+    # Atlas's Ability only lets it create Communities / Collections;
     # group-gated roles would hit a chicken-and-egg problem with the
     # freshly-created, ungrouped collection. Admin's wildcard authority is
     # the only fixture that carries the whole seed sequence without prior
@@ -14,21 +14,47 @@ namespace :reset do
     # default_nuid resolve to the admin NUID for every call inside.
     Current.set(nuid: '000000004') do
       community = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml')
-      river_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/river.jpg')
+      river_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/river.jpg').open_base
       AtlasRb::Community.set_thumbnails(community['id'], **ThumbnailCreator.call(base: river_base))
       AtlasRb::Community.metadata(community['id'], { 'permissions' => { 'read' => ['public'] } })
 
       collection = AtlasRb::Collection.create(community['id'], '/home/cerberus/web/spec/fixtures/files/collection-mods.xml')
-      field_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/field.jpg')
+      field_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/field.jpg').open_base
       AtlasRb::Collection.set_thumbnails(collection['id'], **ThumbnailCreator.call(base: field_base))
       AtlasRb::Collection.metadata(collection['id'], { 'permissions' => { 'read' => ['public'] } })
 
       work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/work-mods.xml')
-      flower_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/flower.jpg')
+      flower_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/flower.jpg').open_base
       AtlasRb::Work.set_thumbnails(work['id'], **ThumbnailCreator.call(base: flower_base))
       AtlasRb::Work.metadata(work['id'], { 'permissions' => { 'read' => ['public'] } })
       AtlasRb::Blob.create(work['id'], '/home/cerberus/web/spec/fixtures/files/flower.jpg', 'flower.jpg')
       AtlasRb::Work.complete(work['id'])
+
+      # Audio/video sample so a reset demonstrates the in-browser video.js
+      # player and the seekable Range media endpoint on real seed data. The
+      # clip is already H.264/AAC MP4 (the safe codec set), so no remux is
+      # needed; its poster frame — extracted from the clip — drives both the
+      # catalog thumbnail and the player poster through the usual thumbnail
+      # pipeline, exactly like the image works above. (Moss-covered tree
+      # trunk by Elvis Deane, CC0 1.0 Public Domain Dedication, sourced from
+      # Wikimedia Commons.)
+      av_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-video-mods.xml')
+      av_poster_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/sample-video-poster.jpg').open_base
+      AtlasRb::Work.set_thumbnails(av_work['id'], **ThumbnailCreator.call(base: av_poster_base))
+      AtlasRb::Work.metadata(av_work['id'], { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Blob.create(av_work['id'], '/home/cerberus/web/spec/fixtures/files/sample-video.mp4', 'sample-video.mp4')
+      AtlasRb::Work.complete(av_work['id'])
+
+      # A fourth public image Work so the homepage "Recently Added Items" grid
+      # shows a full four-up row (as a populated prod system would) rather than
+      # a partial row. Reuses the lake.jpg fixture — visually distinct from the
+      # other three recent Works (field / flower / video poster).
+      lake_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/work-lake-mods.xml')
+      lake_work_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/lake.jpg').open_base
+      AtlasRb::Work.set_thumbnails(lake_work['id'], **ThumbnailCreator.call(base: lake_work_base))
+      AtlasRb::Work.metadata(lake_work['id'], { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Blob.create(lake_work['id'], '/home/cerberus/web/spec/fixtures/files/lake.jpg', 'lake.jpg')
+      AtlasRb::Work.complete(lake_work['id'])
 
       # Marcom loader fixtures — Communications community → Communications
       # Photo Archive collection → Campus Life (Photographs) collection. The
@@ -49,9 +75,9 @@ namespace :reset do
       # prepended by Atlas's permissions= setter; we only add marcom here.
       marcom_group = 'northeastern:drs:repository:loaders:marcom'
 
-      lake_base   = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/lake.jpg')
-      forest_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/forest.jpg')
-      beach_base  = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/beach.jpg')
+      lake_base   = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/lake.jpg').open_base
+      forest_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/forest.jpg').open_base
+      beach_base  = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/beach.jpg').open_base
 
       communications = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/communications-mods.xml')
       AtlasRb::Community.set_thumbnails(communications['id'], **ThumbnailCreator.call(base: lake_base))
@@ -87,6 +113,53 @@ namespace :reset do
         l.group           = 'northeastern:drs:repository:loaders:xml'
         l.root_collection = photo_archive['id']
         l.kind            = :xml
+      end
+
+      # Curated-content demo (the People/showcase conduit): a Library community
+      # under the root, provisioned with its genre showcases, plus a curated
+      # Person (Jane Doe) affiliated to it with one work she's published into the
+      # Datasets showcase. Gives the deposit fork (publish branch), My DRS,
+      # Featured Content, and the Faculty & Staff browse live data to demo.
+      library = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/library-mods.xml')
+      AtlasRb::Community.set_thumbnails(library['id'], **ThumbnailCreator.call(base: river_base))
+      AtlasRb::Community.metadata(library['id'], { 'permissions' => { 'read' => ['public'] } })
+      showcases = ShowcaseProvisioner.call(community_id: library['id'])
+
+      # Jane Doe — a curated Person for the staff fixture user (NUID 000000002,
+      # seeded by Atlas as "Doe, Jane"). 000000002 is the right subject: it's a
+      # seeded, loginable user at the staff/depositor tier (privileged, non-admin),
+      # so a demoer can exercise the publish fork as a regular depositor.
+      # Person.create mints her personal-root Collection (personal_root_id), the
+      # structural home for works she publishes; the affiliation makes the Library
+      # her publish target.
+      jane = AtlasRb::Person.create(nuid: '000000002', display_name: 'Jane Doe',
+                                    title: 'Professor of Marine and Environmental Sciences',
+                                    bio: 'Researches coastal resilience and marine ecosystems.')
+      AtlasRb::Person.add_affiliation(jane['id'], library['id'])
+
+      # A personal workspace collection under Jane's root — what My DRS "My
+      # workspace" lists (the workspace is scoped to the personal-root subtree,
+      # so institutional collections a person created don't bleed in).
+      if jane['personal_root_id'].present?
+        working_files = AtlasRb::Collection.create(jane['personal_root_id'],
+                                                   '/home/cerberus/web/spec/fixtures/files/jane-working-files-mods.xml')
+        AtlasRb::Collection.metadata(working_files['id'], { 'permissions' => { 'read' => ['public'] } })
+      end
+
+      # One published work: homed in Jane's personal root, surfaced into the
+      # Datasets showcase via the linked-member edge (the conduit). This flips
+      # that showcase from hidden-empty to visible in the Library browse and the
+      # homepage Featured Content, and populates Jane's My DRS "Published" space.
+      datasets = showcases['Datasets']
+      if datasets && jane['personal_root_id'].present?
+        jane_work = AtlasRb::Work.create(jane['personal_root_id'],
+                                         '/home/cerberus/web/spec/fixtures/files/library-dataset-mods.xml',
+                                         depositor: jane['nuid'])
+        AtlasRb::Work.set_thumbnails(jane_work['id'], **ThumbnailCreator.call(base: field_base))
+        AtlasRb::Work.metadata(jane_work['id'], { 'permissions' => { 'read' => ['public'] } })
+        AtlasRb::Blob.create(jane_work['id'], '/home/cerberus/web/spec/fixtures/files/field.jpg', 'coastal-survey.jpg')
+        AtlasRb::Work.complete(jane_work['id'])
+        AtlasRb::Work.add_linked_member(jane_work['id'], datasets['id'])
       end
     end
   end

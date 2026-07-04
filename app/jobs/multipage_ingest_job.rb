@@ -1,13 +1,12 @@
 # frozen_string_literal: true
 
 # Per-page multipage loader job. One is enqueued per page row by
-# MultipageUnzipJob, after the whole archive has validated and the one
-# shared Work is minted (work_pid rides on the ingest row, so the row id
-# is the only argument).
+# MultipageItemJob, after that item's Work is minted and work_pid is stamped
+# onto the row (so the row id is the only argument).
 #
 # Each page becomes an ordered FileSet (position = the manifest Sequence)
 # holding the page binary as its Blob. Page jobs run in parallel safely —
-# every job touches only its own FileSet.
+# every job touches only its own FileSet, across all items in the load.
 #
 # Retry safety is the design center. The two Atlas writes differ:
 #
@@ -21,12 +20,12 @@
 #   path makes zero extra reads.
 #
 # Page 1 also seeds the WORK-level thumbnails via the existing
-# IiifAssetsJob (it self-guards on an existing thumbnail). Per-page IIIF
-# derivatives are deliberately absent — they need a FileSet-level
-# derivative endpoint Atlas doesn't expose yet (see the per-FileSet
-# derivatives addendum gap report). ContentCreationJob is never enqueued
-# here: it calls Work.complete, which is CompleteWorkJob's job, exactly
-# once, after every page has landed.
+# IiifAssetsJob (it self-guards on an existing thumbnail). Every page
+# additionally gets its own IIIF image-service pointer (JP2 + the
+# FileSet-level iiif_service PATCH) for manifest assembly — see
+# persist_page_service!. ContentCreationJob is never enqueued here: it
+# calls Work.complete, which is CompleteWorkJob's job, exactly once,
+# after every page has landed.
 class MultipageIngestJob < ApplicationJob
   queue_as :default
 
@@ -59,6 +58,7 @@ class MultipageIngestJob < ApplicationJob
     resumed = ingest.file_set_pid.present?
     ensure_file_set!(ingest)
     attach_blob!(ingest, staged, verify: resumed)
+    persist_page_service!(ingest, staged, verify: resumed)
 
     IiifAssetsJob.perform_later(ingest.work_pid, staged) if ingest.sequence == 1
     finalize_success(ingest)
@@ -115,6 +115,32 @@ class MultipageIngestJob < ApplicationJob
     def file_set_has_content?(ingest)
       entry = AtlasRb::Work.file_sets(ingest.work_pid).find { |fs| fs['noid'] == ingest.file_set_pid }
       entry.present? && entry['assets'].present?
+    end
+
+    # Each page gets its deep-zoom pointer: JP2 into Cantaloupe's volume,
+    # service base PATCHed onto the page FileSet (Role.service_file — the
+    # per-Canvas image service for manifest assembly). Atlas upserts, so a
+    # re-PATCH never duplicates a Delegate; the JP2 mint itself is guarded
+    # on resumed executions (same posture as attach_blob!) because
+    # MasterJp2 mints a fresh identifier per call and regenerating would
+    # orphan the previous file. Unreadable page bytes must not fail the
+    # page — the blob is already attached; the page just won't deep-zoom.
+    def persist_page_service!(ingest, staged, verify:)
+      return if verify && page_service_present?(ingest)
+
+      result = MasterJp2.call(path: staged)
+      AtlasRb::FileSet.set_iiif_service(ingest.file_set_pid, result.gated_base)
+    rescue Vips::Error => e
+      Rails.logger.warn(
+        "MultipageIngestJob: unreadable page for FileSet #{ingest.file_set_pid} — IIIF service skipped (#{e.message})"
+      )
+    end
+
+    # Only consulted on resumed executions. Delegates carry a `uri` in the
+    # listing's polymorphic assets; content Blobs don't.
+    def page_service_present?(ingest)
+      entry = AtlasRb::Work.file_sets(ingest.work_pid).find { |fs| fs['noid'] == ingest.file_set_pid }
+      Array(entry&.[]('assets')).any? { |asset| asset['uri'].present? }
     end
 
     def finalize_success(ingest)

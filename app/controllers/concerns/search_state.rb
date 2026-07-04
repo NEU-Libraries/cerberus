@@ -4,6 +4,10 @@ class SearchState < Blacklight::SearchState
   include Rails.application.routes.url_helpers
 
   def url_for_document(doc, options = {})
+    # A synthetic navigation row (e.g. a community's "Faculty & Staff" entry)
+    # carries its own destination — it has no per-type show route.
+    return doc.nav_url if doc.respond_to?(:nav_url) && doc.nav_url.present?
+
     if doc.respond_to?(:klass) && doc.klass.present?
       # Need to handle collection/system_collection difference
       model_str = ActiveModel::Naming.singular_route_key(doc.klass)

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Acting-as / view-as impersonation (piece 5 of the v2 auth + provenance
-# work). Included into ApplicationController so it governs every request —
+# Acting-as / view-as impersonation. Included into ApplicationController so it
+# governs every request —
 # an impersonating admin browses the whole app, not just an admin surface.
 #
 # Two mutually-exclusive modes, both admin-only:
