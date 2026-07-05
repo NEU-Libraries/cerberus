@@ -76,6 +76,11 @@ Rails.application.routes.draw do
   # community-published works on the other.
   get 'my_drs', to: 'my_drs#index', as: :my_drs
 
+  # Personal-access token lifecycle behind the My DRS "Programmatic access"
+  # section. Singular — a user only ever acts on their own token: create mints
+  # (regenerate = revoke-then-mint), destroy revokes all outstanding tokens.
+  resource :atlas_token, only: %i[create destroy]
+
   # The bare index is the "My Loaders" interstitial (user-menu entry);
   # everything else on a loader happens through its nested loads.
   resources :loaders, only: [:index], param: :slug do

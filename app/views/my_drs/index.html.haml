@@ -99,3 +99,10 @@
           = link_to new_collection_path(parent_id: @personal_root_id), class: 'btn btn-sm btn-outline-secondary' do
             %i.fa-solid.fa-plus.me-1{ 'aria-hidden' => 'true' }
             New collection
+
+-# Programmatic access — a personal-access token for the Atlas API, shown only to
+-# members of the API group. Full-width below the workspace/published split; the
+-# initial (no-token) state, which AtlasTokensController later swaps in place.
+- if current_user&.member_of?(Permissions::API_GROUP)
+  .mt-4
+    = render 'programmatic_access', token: nil, notice: nil
