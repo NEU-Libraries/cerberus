@@ -3,6 +3,17 @@ require "active_support/core_ext/integer/time"
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  # Staging runs behind a TLS-terminating proxy that forwards plain HTTP to Puma.
+  # Without this, Rails sees the request as HTTP: request.base_url is computed as
+  # http://…, but the browser sends an https:// Origin header, so the CSRF Origin
+  # check rejects every non-GET request with a 422 (uploads, logout, token
+  # actions — anything POST/PUT/DELETE). assume_ssl makes Rails treat the request
+  # as HTTPS so base_url becomes https:// and the Origin matches; force_ssl then
+  # marks cookies Secure and sends HSTS. No redirect loop — assume_ssl already
+  # reports https, so force_ssl never has to redirect.
+  config.assume_ssl = true
+  config.force_ssl = true
+
   config.iiif_host = 'https://cerberusv2.library.northeastern.edu/cantaloupe'
 
   # Staging terminates TLS but IIIF derivative URLs minted before the switch
