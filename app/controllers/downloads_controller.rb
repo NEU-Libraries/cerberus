@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class DownloadsController < ApplicationController
-  include ActionController::Live
+  include ProxyUnbuffered
   include RecordsImpressions
   include DerivativesHelper
 

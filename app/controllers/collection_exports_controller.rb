@@ -8,7 +8,7 @@
 # {CollectionContentsResolver} (CatalogController's SearchService), so a viewer
 # only exports the Works they can discover.
 class CollectionExportsController < CatalogController
-  include ActionController::Live
+  include ProxyUnbuffered
   include ZipKit::RailsStreaming
   include LoaderGated
 

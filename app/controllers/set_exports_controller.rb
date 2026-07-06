@@ -14,7 +14,7 @@
 # gated to the loader tier ({LoaderGated}), even for a public Set. A private Set
 # the caller cannot read still 403s at Compilation.find (Atlas is the boundary).
 class SetExportsController < CatalogController
-  include ActionController::Live
+  include ProxyUnbuffered
   include ZipKit::RailsStreaming
   include LoaderGated
 
