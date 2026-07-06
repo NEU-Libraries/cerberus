@@ -14,7 +14,7 @@
 # Compilation.find (Atlas is the boundary). The heavy lifting is in
 # SetZipPacker; this just resolves, guards empty, and opens the stream.
 class SetDownloadsController < CatalogController
-  include ActionController::Live
+  include ProxyUnbuffered
   include ZipKit::RailsStreaming
 
   # A private Set the caller can't read → Atlas 403 → standard forbidden page;

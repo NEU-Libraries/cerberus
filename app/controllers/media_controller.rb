@@ -11,7 +11,7 @@
 # rather than relaying Atlas's post-stream headers (too late), and forward the
 # same Range to Atlas so only the requested slice crosses the wire.
 class MediaController < ApplicationController
-  include ActionController::Live
+  include ProxyUnbuffered
   include RecordsImpressions
 
   before_action :authorize_show!

@@ -43,6 +43,17 @@ RSpec.describe 'Blob downloads', type: :request do
     expect(response.headers['Content-Disposition']).to include('master.tif')
   end
 
+  # The Live stream carries no Content-Length; without this a buffering proxy
+  # (nginx) accumulates and truncates the download. See ProxyUnbuffered.
+  it 'marks the streamed download un-bufferable for the proxy' do
+    stub_asset(gated: false, permission: ['public'], nuid: nil)
+    stub_stream!
+
+    get download_path(blob_id)
+
+    expect(response.headers['X-Accel-Buffering']).to eq('no')
+  end
+
   it 'forbids a gated blob for a guest (permission withheld)' do
     stub_asset(gated: true, permission: nil, nuid: nil)
 

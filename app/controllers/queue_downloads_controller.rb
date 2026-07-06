@@ -6,7 +6,7 @@
 # its per-item permission re-check (QueueZipPacker → Work.assets/Blob.content)
 # carry the same gating as a direct download.
 class QueueDownloadsController < ApplicationController
-  include ActionController::Live
+  include ProxyUnbuffered
   include ZipKit::RailsStreaming
 
   def show

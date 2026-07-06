@@ -8,7 +8,7 @@ module Admin
   # Lives apart from FilesController so Live's stream semantics don't bleed onto
   # the finder/mutation actions.
   class FileVersionsController < BaseController
-    include ActionController::Live
+    include ProxyUnbuffered
 
     def content
       blob = AtlasRb::Blob.find(params[:id])
