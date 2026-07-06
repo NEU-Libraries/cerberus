@@ -1,0 +1,36 @@
+// ---------------------------------------------------------------------
+// My DRS — the depositor's personal landing (published / workspace /
+// programmatic-access cards).
+//
+// The cards share a near-white header strip (the audit-history /
+// admin-registry head tone) rather than a saturated fill band, so they
+// read as part of the same institutional surface as the rest of the
+// app. Only the programmatic-access card carries a left accent rail:
+// it's the credential surface, flagged in the same warning orange as
+// the Cancel affordance so it reads "handle with care".
+// ---------------------------------------------------------------------
+
+.my-drs-card {
+  position: relative;
+
+  // Header strip — shared near-white head tone, not a coloured fill band.
+  &__head {
+    background-color: #f6f8fa;
+    border-bottom: 1px solid $gray-300;
+  }
+
+  // Orange left rail for the credential (programmatic-access) card. The rail
+  // lives on the persistent <turbo-frame> element that *is* this card — not on
+  // inner content that Turbo swaps on token mint/revoke — so it stays put
+  // through every token state (Turbo only replaces the frame's inner HTML).
+  &--api::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: $warning;
+    z-index: 2;
+  }
+}
