@@ -174,4 +174,48 @@ describe Transformable do
       expect(permitted[:permissions][:read]).to eq([])
     end
   end
+
+  describe '#save_descriptive! (optimistic-lock retry)' do
+    before do
+      allow(host).to receive(:sleep) # don't actually back off in specs
+      allow(host).to receive(:write_tmp_xml).and_return('/tmp/merged.xml')
+      allow(AtlasRb::Work).to receive(:mods).and_return('<mods/>')
+      allow(Metadata::MODSMerge).to receive(:call).and_return('<mods>merged</mods>')
+      allow(Metadata::MODSMerge).to receive(:unchanged?).and_return(false)
+    end
+
+    def save
+      host.save_descriptive!('Work', 'w-1', title: 'T', description: 'D', keywords: ['k'])
+    end
+
+    it 'retries on StaleResourceError and succeeds once the conflict clears' do
+      attempts = 0
+      allow(AtlasRb::Work).to receive(:update) do
+        attempts += 1
+        raise AtlasRb::StaleResourceError, 'stale' if attempts < 3
+
+        true
+      end
+
+      save
+
+      expect(attempts).to eq(3)
+    end
+
+    it 're-raises once the bounded retry budget is exhausted' do
+      allow(AtlasRb::Work).to receive(:update).and_raise(AtlasRb::StaleResourceError, 'stale')
+
+      expect { save }.to raise_error(AtlasRb::StaleResourceError)
+      expect(AtlasRb::Work).to have_received(:update).exactly(5).times
+    end
+
+    it 'skips the update entirely on a no-op merge (no write, no retry)' do
+      allow(Metadata::MODSMerge).to receive(:unchanged?).and_return(true)
+      allow(AtlasRb::Work).to receive(:update)
+
+      save
+
+      expect(AtlasRb::Work).not_to have_received(:update)
+    end
+  end
 end
