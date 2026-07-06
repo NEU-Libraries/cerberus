@@ -3,7 +3,15 @@ require "active_support/core_ext/integer/time"
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
-  config.iiif_host = 'http://cerberusv2.library.northeastern.edu/cantaloupe'
+  config.iiif_host = 'https://cerberusv2.library.northeastern.edu/cantaloupe'
+
+  # Staging terminates TLS but IIIF derivative URLs minted before the switch
+  # carry an http:// scheme baked into Solr. Same-origin Cantaloupe means the
+  # browser can transparently upgrade them rather than block them as mixed
+  # content. Dev is plain http (no TLS), so this is deliberately staging-only.
+  config.content_security_policy do |policy|
+    policy.upgrade_insecure_requests true
+  end
 
   # Point Solid Queue at the dedicated `queue` database (see config/database.yml).
   # Without this, Solid Queue falls back to the primary connection, whose schema
