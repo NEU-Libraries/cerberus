@@ -55,6 +55,14 @@ class User
     role.to_s.in?(%w[loader privileged admin])
   end
 
+  # Grouper group membership test. `groups` is the IdP-asserted array carried
+  # on the session-built User (nil for the guest fallback), so wrap in Array
+  # before `include?` — the app-wide idiom, named here so group gates read as
+  # `member_of?(...)` instead of re-typing `Array(...).include?(...)`.
+  def member_of?(raw_group)
+    Array(groups).include?(raw_group)
+  end
+
   def to_s
     pretty_name
   end
