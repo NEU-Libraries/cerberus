@@ -3,49 +3,52 @@
 -# this card in place (reveal-once): the minted token lives only in the response
 -# that reveals it, never in the session or a subsequent page load. `token` is
 -# set only on the mint response; `notice` carries an inline status line.
-= turbo_frame_tag :atlas_token do
-  -# Orange left rail (.my-drs-card--api) flags this as the credential surface —
-  -# the same warning tone as the Cancel affordance, signalling "handle with care".
-  .my-drs-card.my-drs-card--api.bg-white.border.rounded-3.overflow-hidden.shadow-sm
-    .my-drs-card__head.p-3
-      %h5.mb-1
-        %i.fa-solid.fa-terminal.text-secondary.me-2{ 'aria-hidden' => 'true' }
-        Programmatic access
-      %p.small.text-muted.mb-0
-        A personal access token for driving the Atlas API directly — from your own scripts or the command line, without signing in through a browser.
-    .p-3
-      - if notice.present?
-        .alert.alert-info.py-2.px-3.small.mb-3{ role: 'status' }= notice
+-#
+-# The card chrome and its orange left rail (.my-drs-card--api) live on the
+-# turbo-frame *element* rather than an inner div. The frame element persists
+-# across mint/revoke swaps — Turbo only replaces its inner HTML — so the rail,
+-# which flags this as the credential surface (the same warning tone as the
+-# Cancel affordance, "handle with care"), stays put in every token state.
+= turbo_frame_tag :atlas_token, class: 'my-drs-card my-drs-card--api d-block bg-white border rounded-3 overflow-hidden shadow-sm' do
+  .my-drs-card__head.p-3
+    %h5.mb-1
+      %i.fa-solid.fa-terminal.text-secondary.me-2{ 'aria-hidden' => 'true' }
+      Programmatic access
+    %p.small.text-muted.mb-0
+      A personal access token for driving the Atlas API directly — from your own scripts or the command line, without signing in through a browser.
+  .p-3
+    - if notice.present?
+      .alert.alert-info.py-2.px-3.small.mb-3{ role: 'status' }= notice
 
-      - if token.present?
-        .alert.alert-warning.py-2.px-3.small.d-flex.align-items-start.mb-3{ role: 'alert' }
-          %i.fa-solid.fa-triangle-exclamation.me-2.mt-1{ 'aria-hidden' => 'true' }
-          %div
-            %strong.d-block Copy this token now — it won't be shown again.
-            Treat it like a password: it grants full access as you, and expires one week from now.
-        .small.fw-semibold.text-muted.mb-1 Your access token
-        .input-group.mb-3{ data: { controller: 'clipboard', 'clipboard-text-value': token } }
-          %code.form-control.bg-body-tertiary.font-monospace.text-break.user-select-all{ style: 'height: auto; white-space: normal;' }= token
-          %button.btn.btn-outline-secondary{ type: 'button', 'aria-label' => 'Copy access token', data: { action: 'clipboard#copy' } }
-            %i.fa-regular.fa-copy.me-1{ 'aria-hidden' => 'true' }
-            %span{ data: { 'clipboard-target': 'label' } } Copy
-        %p.small.text-muted.mb-1 Then use it as a bearer token — for example, export it for atlas_rb:
-        %pre.bg-body-tertiary.border.rounded-2.p-2.small.mb-3
-          %code= 'export ATLAS_JWT=<your token>'
-        .d-flex.gap-2
-          = button_to atlas_token_path, method: :post, params: { regenerate: true }, class: 'btn btn-sm btn-outline-primary', data: { turbo_confirm: 'Regenerate your token? The current one stops working immediately.' } do
-            %i.fa-solid.fa-rotate.me-1{ 'aria-hidden' => 'true' }
-            Regenerate
-          = button_to atlas_token_path, method: :delete, class: 'btn btn-sm btn-outline-danger', data: { turbo_confirm: 'Revoke all your access tokens? Any scripts using them stop working immediately.' } do
-            %i.fa-solid.fa-ban.me-1{ 'aria-hidden' => 'true' }
-            Revoke all
-      - else
-        %p.small.text-muted.mb-3
-          Generate a token to authenticate as yourself against the Atlas API. Tokens expire after one week; you can revoke them at any time.
-        .d-flex.gap-2
-          = button_to atlas_token_path, method: :post, class: 'btn btn-sm btn-primary' do
-            %i.fa-solid.fa-key.me-1{ 'aria-hidden' => 'true' }
-            Generate token
-          = button_to atlas_token_path, method: :delete, class: 'btn btn-sm btn-outline-secondary', data: { turbo_confirm: 'Revoke all your access tokens? Any scripts using them stop working immediately.' } do
-            %i.fa-solid.fa-ban.me-1{ 'aria-hidden' => 'true' }
-            Revoke all
+    - if token.present?
+      .alert.alert-warning.py-2.px-3.small.d-flex.align-items-start.mb-3{ role: 'alert' }
+        %i.fa-solid.fa-triangle-exclamation.me-2.mt-1{ 'aria-hidden' => 'true' }
+        %div
+          %strong.d-block Copy this token now — it won't be shown again.
+          Treat it like a password: it grants full access as you, and expires one week from now.
+      .small.fw-semibold.text-muted.mb-1 Your access token
+      .input-group.mb-3{ data: { controller: 'clipboard', 'clipboard-text-value': token } }
+        %code.form-control.bg-body-tertiary.font-monospace.text-break.user-select-all{ style: 'height: auto; white-space: normal;' }= token
+        %button.btn.btn-outline-secondary{ type: 'button', 'aria-label' => 'Copy access token', data: { action: 'clipboard#copy' } }
+          %i.fa-regular.fa-copy.me-1{ 'aria-hidden' => 'true' }
+          %span{ data: { 'clipboard-target': 'label' } } Copy
+      %p.small.text-muted.mb-1 Then use it as a bearer token — for example, export it for atlas_rb:
+      %pre.bg-body-tertiary.border.rounded-2.p-2.small.mb-3
+        %code= 'export ATLAS_JWT=<your token>'
+      .d-flex.gap-2
+        = button_to atlas_token_path, method: :post, params: { regenerate: true }, class: 'btn btn-sm btn-outline-primary', data: { turbo_confirm: 'Regenerate your token? The current one stops working immediately.' } do
+          %i.fa-solid.fa-rotate.me-1{ 'aria-hidden' => 'true' }
+          Regenerate
+        = button_to atlas_token_path, method: :delete, class: 'btn btn-sm btn-outline-danger', data: { turbo_confirm: 'Revoke all your access tokens? Any scripts using them stop working immediately.' } do
+          %i.fa-solid.fa-ban.me-1{ 'aria-hidden' => 'true' }
+          Revoke all
+    - else
+      %p.small.text-muted.mb-3
+        Generate a token to authenticate as yourself against the Atlas API. Tokens expire after one week; you can revoke them at any time.
+      .d-flex.gap-2
+        = button_to atlas_token_path, method: :post, class: 'btn btn-sm btn-primary' do
+          %i.fa-solid.fa-key.me-1{ 'aria-hidden' => 'true' }
+          Generate token
+        = button_to atlas_token_path, method: :delete, class: 'btn btn-sm btn-outline-secondary', data: { turbo_confirm: 'Revoke all your access tokens? Any scripts using them stop working immediately.' } do
+          %i.fa-solid.fa-ban.me-1{ 'aria-hidden' => 'true' }
+          Revoke all
