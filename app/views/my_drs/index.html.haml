@@ -18,15 +18,16 @@
 
 .row.g-4
   -# Published — works promoted into community genre showcases, grouped by category.
-  -# Placed first (left) as the outward-facing, professional tier; the teal header
-  -# strip is the one accent carrying the curation-tier signal (workspace vs published).
+  -# Placed first (left) as the outward-facing, professional tier; the teal left
+  -# rail (.my-drs-card--published) is the one accent carrying the curation-tier
+  -# signal (workspace vs published).
   .col-lg-6
-    .bg-white.border.rounded-3.h-100.overflow-hidden.shadow-sm
-      .p-3.bg-success-subtle.border-bottom.border-success-subtle
-        %h5.mb-1.text-success-emphasis
-          %i.fa-solid.fa-graduation-cap.me-2{ 'aria-hidden' => 'true' }
+    .my-drs-card.my-drs-card--published.bg-white.border.rounded-3.h-100.overflow-hidden.shadow-sm
+      .my-drs-card__head.p-3
+        %h5.mb-1
+          %i.fa-solid.fa-graduation-cap.text-success.me-2{ 'aria-hidden' => 'true' }
           Published to my community
-        %p.small.mb-0.text-success-emphasis
+        %p.small.mb-0.text-muted
           Promoted into your community's featured showcases, grouped by category.
       - if @published.present?
         -# Registry ledger (admin-registry-table). The showcase category is promoted
@@ -54,13 +55,14 @@
             Nothing published yet. Choose “Publish to my community” when you deposit a file.
 
   -# Workspace — the depositor's own collections (v1's "User Created Collections").
-  -# Card-shell matches the audit-history register: white body, neutral header
-  -# strip, gray border, subtle shadow.
+  -# Card-shell matches the audit-history register: white body, near-white header
+  -# strip, gray border, subtle shadow, and a neutral gray left rail marking the
+  -# personal (non-promoted) tier.
   .col-lg-6
-    .bg-white.border.rounded-3.h-100.overflow-hidden.shadow-sm.d-flex.flex-column
-      .p-3.bg-body-secondary.border-bottom
+    .my-drs-card.my-drs-card--workspace.bg-white.border.rounded-3.h-100.overflow-hidden.shadow-sm.d-flex.flex-column
+      .my-drs-card__head.p-3
         %h5.mb-1
-          %i.fa-solid.fa-box-archive.me-2{ 'aria-hidden' => 'true' }
+          %i.fa-solid.fa-box-archive.text-secondary.me-2{ 'aria-hidden' => 'true' }
           My workspace
         %p.small.text-muted.mb-0
           Personal collections — discoverable by their own visibility, never promoted.

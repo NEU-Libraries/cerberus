@@ -1,0 +1,45 @@
+// ---------------------------------------------------------------------
+// My DRS — the depositor's personal landing (published / workspace /
+// programmatic-access cards).
+//
+// Each card carries a 4px left accent rail rather than a full-bleed
+// coloured header band: the tier is signalled at the card's edge (like
+// the audit-history rail) while the header itself stays near-white, so
+// these cards read as part of the same institutional surface as the
+// rest of the app instead of standing out as coloured panels. The rail
+// tone is a per-card CSS custom property, so a new tier is one modifier
+// line rather than a new fill class.
+// ---------------------------------------------------------------------
+
+.my-drs-card {
+  position: relative;
+
+  // Left accent rail. Sits above the card's own 1px border (z-index) so the
+  // 4px stripe reads as a solid edge; the card's overflow:hidden + rounded
+  // corners clip it to hug the corner rather than overshoot.
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: var(--my-drs-rail, #{$gray-500});
+    z-index: 2;
+  }
+
+  // Tier tones. Published = the curated, outward-facing tier (success teal);
+  // workspace = the neutral personal tier; programmatic access = the
+  // credential surface, flagged in the same warning orange as the Cancel
+  // affordance so "handle with care" reads consistently across the app.
+  &--published { --my-drs-rail: #{$success}; }
+  &--workspace { --my-drs-rail: #{$gray-500}; }
+  &--api       { --my-drs-rail: #{$warning}; }
+
+  // Header strip — the shared near-white head tone used by the
+  // audit-history and admin-registry ledgers, not a saturated fill band.
+  &__head {
+    background-color: #f6f8fa;
+    border-bottom: 1px solid $gray-300;
+  }
+}

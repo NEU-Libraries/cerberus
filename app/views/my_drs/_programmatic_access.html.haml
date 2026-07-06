@@ -4,10 +4,12 @@
 -# that reveals it, never in the session or a subsequent page load. `token` is
 -# set only on the mint response; `notice` carries an inline status line.
 = turbo_frame_tag :atlas_token do
-  .bg-white.border.rounded-3.overflow-hidden.shadow-sm
-    .p-3.bg-body-secondary.border-bottom
+  -# Orange left rail (.my-drs-card--api) flags this as the credential surface —
+  -# the same warning tone as the Cancel affordance, signalling "handle with care".
+  .my-drs-card.my-drs-card--api.bg-white.border.rounded-3.overflow-hidden.shadow-sm
+    .my-drs-card__head.p-3
       %h5.mb-1
-        %i.fa-solid.fa-terminal.me-2{ 'aria-hidden' => 'true' }
+        %i.fa-solid.fa-terminal.text-secondary.me-2{ 'aria-hidden' => 'true' }
         Programmatic access
       %p.small.text-muted.mb-0
         A personal access token for driving the Atlas API directly — from your own scripts or the command line, without signing in through a browser.
