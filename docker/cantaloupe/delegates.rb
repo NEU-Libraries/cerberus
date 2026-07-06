@@ -37,6 +37,28 @@ class CustomDelegate
     true
   end
 
+  # Cantaloupe invokes these optional hooks through its delegate proxy —
+  # redactions/metadata while processing each image, and the extra_iiif*
+  # variants when building an info.json response. With no method defined the
+  # proxy raises NoMethodError, which it logs as an ERROR per request. We add
+  # nothing to any of them, so return the same no-op defaults the bundled
+  # delegates.rb.sample ships with.
+  def redactions(_options = {})
+    []
+  end
+
+  def metadata(_options = {})
+    nil
+  end
+
+  def extra_iiif2_information_response_keys(_options = {})
+    {}
+  end
+
+  def extra_iiif3_information_response_keys(_options = {})
+    {}
+  end
+
   private
 
     # Signed download URL: ?exp=<ts>&sig=<hmac>, hmac = HMAC(SECRET, "<path>|<exp>").
