@@ -82,12 +82,17 @@ module Transformable # rubocop:disable Metrics/ModuleLength
   # Merge the descriptive fields into the existing MODS and write via the raw,
   # structure-safe update path — preserving every curated node the form does not
   # own, and skipping the write (and a needless OCFL MODS version) on a no-op.
+  # Wrapped in with_stale_retry: right after a deposit the async ingest/derivative
+  # jobs are still finalizing the same Work, so this read→merge→write can lose an
+  # optimistic-lock race; re-reading picks up the current MODS + token.
   def save_descriptive!(klass, id, title:, description:, keywords: nil)
-    xml = AtlasRb.const_get(klass).mods(id, 'xml')
-    merged = Metadata::MODSMerge.call(xml: xml, title: title, abstract: description, keywords: keywords)
-    return if Metadata::MODSMerge.unchanged?(xml, merged)
+    with_stale_retry do
+      xml = AtlasRb.const_get(klass).mods(id, 'xml')
+      merged = Metadata::MODSMerge.call(xml: xml, title: title, abstract: description, keywords: keywords)
+      break if Metadata::MODSMerge.unchanged?(xml, merged)
 
-    AtlasRb.const_get(klass).update(id, write_tmp_xml(merged))
+      AtlasRb.const_get(klass).update(id, write_tmp_xml(merged))
+    end
   end
 
   # Shared #update handler for the Work/Collection/Community Metadata + Permissions
@@ -111,7 +116,7 @@ module Transformable # rubocop:disable Metrics/ModuleLength
 
   def apply_permissions(klass, id, resource_key)
     perms = permission_params(resource_key)
-    AtlasRb.const_get(klass).metadata(id, perms) if perms.present?
+    with_stale_retry { AtlasRb.const_get(klass).metadata(id, perms) } if perms.present?
   end
 
   def apply_descriptive(klass, id, resource_key, keywords, show_path)
@@ -173,11 +178,34 @@ module Transformable # rubocop:disable Metrics/ModuleLength
   # Merge the Advanced-tab fields into the existing MODS via the structure-safe
   # raw update path, skipping the write on a no-op (same spine as save_descriptive!).
   def save_advanced!(klass, id, **fields)
-    xml = AtlasRb.const_get(klass).mods(id, 'xml')
-    merged = Metadata::MODSMerge.call(xml: xml, **fields)
-    return if Metadata::MODSMerge.unchanged?(xml, merged)
+    with_stale_retry do
+      xml = AtlasRb.const_get(klass).mods(id, 'xml')
+      merged = Metadata::MODSMerge.call(xml: xml, **fields)
+      break if Metadata::MODSMerge.unchanged?(xml, merged)
 
-    AtlasRb.const_get(klass).update(id, write_tmp_xml(merged))
+      AtlasRb.const_get(klass).update(id, write_tmp_xml(merged))
+    end
+  end
+
+  # Atlas enforces optimistic locking server-side and raises
+  # AtlasRb::StaleResourceError (HTTP 409) only once its own retry budget is
+  # exhausted. During a deposit the async ingest/derivative jobs are still
+  # finalizing the Work (Work.complete, Delegate PATCHes), so an interactive
+  # metadata/permissions save can lose the race. Re-run the block so each attempt
+  # re-reads the current state and token, backing off briefly between tries.
+  # atlas_rb blesses this pattern via retry_on for jobs; the interactive path
+  # needs its own bounded loop.
+  def with_stale_retry(attempts: 5)
+    tries = 0
+    begin
+      yield
+    rescue AtlasRb::StaleResourceError
+      tries += 1
+      raise if tries >= attempts
+
+      sleep(0.2 * tries)
+      retry
+    end
   end
 
   def clean_keywords(raw)
