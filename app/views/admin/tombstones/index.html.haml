@@ -36,7 +36,7 @@
               %td
                 %span.admin-registry-table__id= doc.to_param
               %td.text-end
-                = button_to restore_admin_tombstone_path(doc.to_param), params: { type: doc.klass_type }, class: 'admin-registry-table__edit admin-registry-table__edit--restore', form: { data: { turbo_confirm: "Restore “#{finder_doc_title(doc)}”? It will be discoverable again." } } do
+                = button_to restore_admin_tombstone_path(doc.to_param), params: { type: doc.klass_type }, class: 'admin-registry-table__edit admin-registry-table__edit--restore', form: { data: { turbo_confirm: "Restore “#{finder_doc_title(doc)}”? It will be discoverable again.", turbo_confirm_title: 'Confirm restore', turbo_confirm_button: 'Restore', turbo_confirm_variant: 'primary' } } do
                   %i.fa-solid.fa-rotate-left{'aria-hidden' => 'true'}
                   Restore
 
