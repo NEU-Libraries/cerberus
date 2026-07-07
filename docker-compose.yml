@@ -67,6 +67,8 @@ services:
     - 8983:8983
     volumes:
     - solr:/var/solr/data/blacklight-core/data
+    environment:
+      SOLR_LOG_LEVEL: 'WARN'
     healthcheck:
       test:
       - CMD
