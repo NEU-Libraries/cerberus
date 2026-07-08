@@ -12,18 +12,20 @@ module WorkBreadcrumbs
 
   private
 
-    # Both branches share the single AtlasRb::Resource.find that yields the
-    # ancestor chain.
-    def work_breadcrumbs(id)
-      result = AtlasRb::Resource.find(id)
-      item = result.resource
+    # Builds the trail from the already-loaded @work rather than re-fetching the
+    # same record: the Work digest carries ancestor_chain and depositor, and the
+    # show action has already resolved @work as a Work (so klass is 'Work').
+    # Mirrors ApplicationController#breadcrumbs(result:), which accepts a
+    # pre-fetched resource for exactly this reason. The +_id+ arg is unused.
+    def work_breadcrumbs(_id = nil)
+      item = @work
       person = personal_root_owner(item)
 
       if person
-        build_personal_work_breadcrumbs(item, result.klass, person)
+        build_personal_work_breadcrumbs(item, 'Work', person)
       else
         Array(item.ancestor_chain).each { |node| add_breadcrumb_for(node['noid'], node['klass'], node['title']) }
-        add_breadcrumb_for(item.id, result.klass, item.title)
+        add_breadcrumb_for(item.id, 'Work', item.title)
       end
     end
 
