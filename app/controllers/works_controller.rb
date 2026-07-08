@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
-class WorksController < ApplicationController
+# Spans the whole Work lifecycle — deposit, show, edit, tombstone, manifest,
+# downloads — as one cohesive controller rather than being split by verb, so it
+# runs past the default class-length budget.
+class WorksController < ApplicationController # rubocop:disable Metrics/ClassLength
   include Thumbable
   include Transformable
   include DepositorContext
@@ -10,6 +13,7 @@ class WorksController < ApplicationController
   include UploadStaging
   include RecordsImpressions
   include ZoomViewer
+  include ParallelAtlasReads
   # The weighted deposit fork's context queries (the depositor's own workspace
   # Collections, a community's publish showcases via ShowcaseFinder) run through
   # the Blacklight SearchBuilder, so this controller needs the catalog config —
@@ -182,13 +186,27 @@ class WorksController < ApplicationController
     end
 
     def prepare_show_view
-      @mods = AtlasRb::Work.mods(params[:id], 'html')
-      @files = AtlasRb::Work.assets(params[:id], nuid: effective_user&.nuid)
+      reads = parallel_show_reads
+      @mods = reads[:mods]
+      @files = reads[:files]
       @scholar = GoogleScholarMetadata.for(work: @work, permissions: @permissions, files: @files)
       @av_file = MediaRemux.playable_file(@files)
-      prepare_zoom_view(params[:id])
+      prepare_zoom_view(params[:id], pages: reads[:file_sets])
       assign_show_abilities!(klass: 'Work')
       work_breadcrumbs(params[:id])
+    end
+
+    # The show page's three independent Atlas reads, run concurrently. mods carries
+    # no nuid (gated by Current.nuid, the real user); assets and file_sets gate on
+    # the effective (view-as) user, resolved here on the request thread because the
+    # workers must not touch ActiveRecord.
+    def parallel_show_reads
+      viewer_nuid = effective_user&.nuid
+      parallel_atlas_reads(
+        mods:      -> { AtlasRb::Work.mods(params[:id], 'html') },
+        files:     -> { AtlasRb::Work.assets(params[:id], nuid: viewer_nuid) },
+        file_sets: -> { AtlasRb::Work.file_sets(params[:id], nuid: viewer_nuid) }
+      )
     end
 
     # Per-type enrichment routing (thumbnails, PDF renditions) lives in
