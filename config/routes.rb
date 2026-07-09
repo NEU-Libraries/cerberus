@@ -50,6 +50,11 @@ Rails.application.routes.draw do
       get :manifest
       get :metadata
       patch :metadata, action: :update_metadata
+      # Add an arbitrary binary to an existing Work: GET renders the upload
+      # form, POST stages the file and queues the attach (AddFileJob). Both are
+      # edit-gated via authorize_resource_writes!'s extra_edit list.
+      get :upload
+      post :upload, action: :add_file
       post :tombstone
       # An editor-submitted request to withdraw or move the work — notifies the
       # DRS staff inbox (no direct mutation; staff fulfill it with the tombstone

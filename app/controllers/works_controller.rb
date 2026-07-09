@@ -28,7 +28,7 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
   UNSUPPORTED_AV = 'DRS streams H.264/AAC video and AAC/MP3 audio — please convert your file first.'
 
   before_action :authorize_show!, only: [:downloads, :manifest]
-  authorize_resource_writes!(extra_edit: %i[metadata update_metadata request_change])
+  authorize_resource_writes!(extra_edit: %i[metadata update_metadata request_change upload add_file])
   before_action :reject_if_in_progress, only: [:edit]
   after_action :record_view_impression, only: :show
 
@@ -129,6 +129,30 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     process_derivative_widths
   end
 
+  # The "Upload File" affordance on the show page: add an arbitrary binary to
+  # this already-complete Work. GET renders the form; #add_file handles the POST.
+  def upload
+    @work = AtlasRb::Work.find(params[:id])
+    raise ResourceNotFound if @work.nil?
+
+    upload_breadcrumbs
+  end
+
+  # Attach the uploaded binary as an additional download. The file is staged to
+  # disk and the Blob create is deferred to AddFileJob so the request returns
+  # immediately (the upload may be multi-GB). Attach-only: no derivative
+  # enrichment, so the Work's thumbnail / viewer / existing files are untouched —
+  # the added file simply appears in the Downloads card once processing finishes.
+  def add_file
+    file = params[:binary]
+    return redirect_to(upload_work_path(params[:id]), alert: 'Choose a file to upload.') if file.blank?
+
+    staged_path = stage_upload(file, params[:id])
+    AddFileJob.perform_later(params[:id], staged_path, file.original_filename, SecureRandom.uuid)
+    redirect_to work_path(params[:id]),
+                notice: 'File uploaded — it will appear in Downloads once processing finishes.'
+  end
+
   private
 
     # Server backstop for the metadata page's opt-in download sizes. The
@@ -224,5 +248,18 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
       return unless AtlasRb::Work.find(params[:id]).in_progress
 
       redirect_to work_path(params[:id]), alert: IN_PROGRESS_NOTICE
+    end
+
+    # Trail for the upload form: the Work's structural ancestors, then the Work
+    # itself as a link back to its show page (match: :exact so loaf doesn't mark
+    # it current on the /upload sub-path), then a final "Upload File" you-are-here
+    # crumb. Mirrors ApplicationController#edit_breadcrumb_tail, differing only in
+    # the tail label — an editor can back out to the Work via the trail.
+    def upload_breadcrumbs
+      Array(@work.ancestor_chain).each do |node|
+        add_breadcrumb_for(node['noid'], node['klass'], node['title'])
+      end
+      breadcrumb(@work.title, work_path(@work.id), match: :exact)
+      breadcrumb('Upload File', upload_work_path(@work.id))
     end
 end
