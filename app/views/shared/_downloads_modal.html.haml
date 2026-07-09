@@ -1,5 +1,8 @@
 .modal#downloadsModal{tabindex: '-1', 'aria-labelledby' => 'downloadsModalLabel', 'aria-hidden' => 'true', data: { controller: 'downloads-modal' }}
-  .modal-dialog.modal-dialog-centered
+  -# Wider than the default dialog so each row's label, filename, size, and
+  -# action buttons sit on one line without crowding (the filename detail makes
+  -# the default ~500px modal cramped).
+  .modal-dialog.modal-dialog-centered.modal-lg
     .modal-content{style: 'min-height: 12rem;'}
       .modal-header
         %h2.modal-title.h5#downloadsModalLabel Downloads
