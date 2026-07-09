@@ -74,7 +74,7 @@ RSpec.describe 'Works upload (add a file)', type: :request do
     it 'renders the upload form' do
       get upload_work_path(work.id)
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('Upload a File')
+      expect(response.body).to include('Upload a file')
     end
 
     it 'stages the upload, queues AddFileJob, and redirects to the work' do
