@@ -28,9 +28,10 @@ RSpec.describe 'Blob downloads', type: :request do
     allow(AtlasRb::Blob).to receive(:content).and_yield('bytes').and_return({})
   end
 
-  def stub_asset(gated:, permission:, nuid:)
+  def stub_asset(gated:, permission:, nuid:, classification: nil)
     allow(AtlasRb::Work).to receive(:assets).with(work_id, nuid: nuid)
-                                            .and_return([AtlasRb::Mash.new(noid: blob_id, gated: gated, permission: permission)])
+                                            .and_return([AtlasRb::Mash.new(noid: blob_id, gated: gated,
+                                                                           permission: permission, classification: classification)])
   end
 
   it 'streams an ungated blob to a guest' do
@@ -52,6 +53,32 @@ RSpec.describe 'Blob downloads', type: :request do
     get download_path(blob_id)
 
     expect(response.headers['X-Accel-Buffering']).to eq('no')
+  end
+
+  # A blob Atlas could not identify (classification "File") is delivered as a
+  # zip generated on the fly — grounded (the UI promises a "Zip File") and inert.
+  it 'wraps a generic (unidentifiable) blob in a zip on the fly' do
+    stub_asset(gated: false, permission: ['public'], nuid: nil, classification: 'File')
+    stub_stream!
+
+    get download_path(blob_id)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.headers['Content-Type']).to eq('application/zip')
+    expect(response.headers['Content-Disposition']).to include('master.zip') # base from blob.filename
+  end
+
+  # The discriminator is the classification, not the label: a typed blob (and,
+  # crucially, a real "Archive" upload — already a zip) streams raw, unwrapped.
+  it 'streams a typed blob raw rather than zipping it' do
+    stub_asset(gated: false, permission: ['public'], nuid: nil, classification: 'Image')
+    stub_stream!
+
+    get download_path(blob_id)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.headers['Content-Type']).to eq('image/tiff')
+    expect(response.headers['Content-Disposition']).to include('master.tif')
   end
 
   it 'forbids a gated blob for a guest (permission withheld)' do

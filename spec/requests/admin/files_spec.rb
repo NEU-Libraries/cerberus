@@ -80,11 +80,13 @@ RSpec.describe 'Admin::Files', type: :request do
                               'mime_type' => 'image/jpeg')
           ]
         )
+        # revision is the contiguous ordinal; version_id is the raw OCFL label,
+        # which skips (v4 for revision 2) after a preservation-envelope bump.
         allow(AtlasRb::Blob).to receive(:versions).with('b1').and_return(
           AtlasRb::Mash.new('versions' => [
-                              { 'version_id' => 'v2', 'created' => '2026-06-24T10:00:00Z',
+                              { 'revision' => 2, 'version_id' => 'v4', 'created' => '2026-06-24T10:00:00Z',
                                 'actor_nuid' => '000000004', 'digest' => 'sha512:aaaa' },
-                              { 'version_id' => 'v1', 'created' => '2026-06-20T09:00:00Z',
+                              { 'revision' => 1, 'version_id' => 'v1', 'created' => '2026-06-20T09:00:00Z',
                                 'actor_nuid' => '000000002', 'digest' => 'sha512:bbbb' }
                             ])
         )
@@ -93,7 +95,18 @@ RSpec.describe 'Admin::Files', type: :request do
       it 'lists replaceable content Blobs with their version history and a replace form' do
         get '/admin/files/manage', params: { work_id: 'w1' }
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include('A Photograph', 'report.pdf', 'b1', 'Replace file', 'v2', 'v1')
+        expect(response.body).to include('A Photograph', 'report.pdf', 'b1', 'Replace file', 'v4', 'v1')
+      end
+
+      it 'headlines the revision ordinal and demotes the raw OCFL version_id to a secondary label' do
+        get '/admin/files/manage', params: { work_id: 'w1' }
+        html = response.parsed_body
+        headlines  = html.css('.admin-registry-table__id').map { |n| n.text.strip }
+        secondary  = html.css('.admin-registry-table__vid').map { |n| n.text.strip }
+        # Revision ordinals lead as the primary chip...
+        expect(headlines).to include('2', '1')
+        # ...while the skipping OCFL labels ride below as secondary/debug.
+        expect(secondary).to eq(%w[v4 v1])
       end
 
       it 'excludes derived Delegates (those with a uri), which are not replaceable' do

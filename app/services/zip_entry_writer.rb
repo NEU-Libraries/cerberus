@@ -1,20 +1,22 @@
 # frozen_string_literal: true
 
-# Shared internals for the streaming-zip packers (SetZipPacker, QueueZipPacker).
-# They differ only in how they enumerate what to pack; this keeps the per-asset
-# write — STORE compression, the labeled consumer-facing naming, manifest
-# accrual, and mid-stream error capture — identical and in one place so they
-# can't drift. Folder layout is the caller's choice (both use the work noid).
+# Shared internals for the streaming-zip packers (SetZipPacker, QueueZipPacker,
+# BlobZipPacker). They differ only in how they enumerate what to pack; this keeps
+# the per-asset write — STORE compression, the labeled consumer-facing naming,
+# manifest accrual, and mid-stream error capture — identical and in one place so
+# they can't drift. Folder is the caller's choice: the set/queue packers group
+# each work's content under its noid; a lone blob passes nil to sit at the root.
 module ZipEntryWriter
   private
 
-    # Stream one content Blob into `<folder>/<labeled-filename>`, chunk-by-chunk
-    # from Atlas (flat memory). STORE, not deflate: DRS payloads (JP2/PDF/images/
-    # curated zips) are already compressed, so deflating burns CPU for ~0 gain —
-    # do NOT switch to write_file/write_deflated_file. A fetch failure mid-stream
-    # is recorded (the archive can't be un-sent once headers are out), not raised.
+    # Stream one content Blob into `<folder>/<labeled-filename>` (or the archive
+    # root when folder is nil), chunk-by-chunk from Atlas (flat memory). STORE,
+    # not deflate: DRS payloads (JP2/PDF/images/curated zips) are already
+    # compressed, so deflating burns CPU for ~0 gain — do NOT switch to
+    # write_file/write_deflated_file. A fetch failure mid-stream is recorded (the
+    # archive can't be un-sent once headers are out), not raised.
     def write_asset(zip, folder, asset, manifest, errors)
-      entry = "#{folder}/#{entry_filename(asset)}"
+      entry = [folder, entry_filename(asset)].compact.join('/')
       zip.write_stored_file(entry) do |sink|
         AtlasRb::Blob.content(asset.noid) { |chunk| sink << chunk }
       end

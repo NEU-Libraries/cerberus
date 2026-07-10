@@ -4,14 +4,14 @@
       %li.breadcrumb-item{class: crumb.current? ? "active" : "" }
         = link_to_unless crumb.current?, crumb.name, crumb.url, (crumb.current? ? {"aria-current" => "page"} : {})
     -# The "Add a child here" affordance. Suppressed on edit pages via
-    -# `show_add: false` (you don't add siblings/children mid-edit).
-    -# TODO: replace `user_signed_in?` with a proper Ability check
-    -# (e.g. `can?(:create_child, current_resource)`) once resource-scoped
-    -# create permissions exist. Today we hide this dropdown from anonymous
-    -# users to avoid the dead-end affordance, but a logged-in user without
-    -# deposit rights still
-    -# sees it.
-    - if local_assigns.fetch(:show_add, true) && user_signed_in?
+    -# `show_add: false` (you don't add siblings/children mid-edit). The Work
+    -# branch ("Upload File") is edit-gated on @can_edit (set by the show page),
+    -# so a viewer who can't edit the work never sees a dead-end affordance. The
+    -# container branches (communities/collections) still gate only on sign-in —
+    -# resource-scoped create permissions don't exist yet, so any signed-in user
+    -# sees those child-create links.
+    - is_container = %w[communities collections].include?(controller_name)
+    - if local_assigns.fetch(:show_add, true) && user_signed_in? && (is_container || @can_edit)
       %li.breadcrumb-item
         .dropdown.breadcrumb-add
           %a.text-decoration-none{"aria-expanded" => "false", "data-bs-toggle" => "dropdown", :type => "button"}
@@ -31,6 +31,6 @@
                 %a.dropdown-item{:href => new_work_path(:parent_id => "#{params[:id]}")} New Work
             - else
               %li
-                %a.dropdown-item{:href => "#"} Upload File
+                %a.dropdown-item{:href => upload_work_path(params[:id])} Upload File
     - if block_given?
       = yield

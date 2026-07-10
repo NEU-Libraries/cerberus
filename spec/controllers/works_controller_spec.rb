@@ -563,14 +563,14 @@ describe WorksController do
     end
   end
 
-  # The personal-root trail is isolated on the private seam (the show stack makes
-  # many Atlas calls; here we stub the two reads work_breadcrumbs makes and assert
-  # which crumbs it builds).
+  # The personal-root trail is isolated on the private seam. work_breadcrumbs reads
+  # the already-loaded @work (it makes no Atlas fetch of its own) plus one
+  # Person.resolve; here we set @work and stub the resolve, then assert the crumbs.
   describe '#work_breadcrumbs (private)' do
     def work_result(parent_noid:, chain:)
-      item = OpenStruct.new(id: 'wnoid', title: 'Coastal Survey', ancestor_chain: chain)
-      allow(AtlasRb::Resource).to receive(:find).with('wnoid').and_return(OpenStruct.new(resource: item, klass: 'Work'))
-      controller.instance_variable_set(:@work, AtlasRb::Mash.new('depositor' => '000000007'))
+      controller.instance_variable_set(:@work,
+                                       AtlasRb::Mash.new('id' => 'wnoid', 'title' => 'Coastal Survey',
+                                                         'depositor' => '000000007', 'ancestor_chain' => chain))
       parent_noid # documents intent; the chain's last node carries it
     end
 

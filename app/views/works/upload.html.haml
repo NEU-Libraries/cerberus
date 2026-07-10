@@ -1,0 +1,25 @@
+- content_for(:page_title) do
+  Upload File
+- content_for(:container_header) do
+  = render 'shared/breadcrumbs', show_add: false
+
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-arrow-up-from-bracket{'aria-hidden' => 'true'}
+      Upload a file
+  .p-3
+    %p.text-muted.small.mb-3
+      Add a file to
+      %strong= @work.title
+      \. It is attached as an additional download and doesn't change the work's thumbnail, viewer, or existing files.
+    = form_with url: upload_work_path(@work.id), method: :post, multipart: true do
+      %label.form-label{for: 'binary'} File
+      %input#binary.form-control{name: 'binary', type: 'file', required: true}
+      %p.form-text
+        One file per upload. It will appear in the work's Downloads once processing finishes.
+      .mt-3
+        %button.btn.btn-primary{type: 'submit'}
+          %i.fa-solid.fa-arrow-up-from-bracket.me-1{'aria-hidden' => 'true'}
+          Upload
+        = link_to 'Cancel', work_path(@work.id), class: 'btn btn-light'
