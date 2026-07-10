@@ -66,9 +66,14 @@
             - versions.each_with_index do |version, i|
               %tr
                 %td
-                  %span.admin-registry-table__id= version['version_id']
+                  -# The contiguous revision ordinal is the headline; the raw OCFL
+                  -# version_id can skip (v1 → v4) when preservation-envelope bumps
+                  -# consume OCFL versions, so it rides below as a secondary/debug label.
+                  %span.admin-registry-table__id= version['revision'] || version['version_id']
                   - if i.zero?
                     %span.badge.rounded-pill.text-bg-light.ms-1 current
+                  - if version['revision'].present? && version['version_id'].present?
+                    .admin-registry-table__vid{title: 'Raw OCFL version label — secondary/debug'}= version['version_id']
                 %td.text-muted.small{style: 'font-variant-numeric: tabular-nums'}= file_version_when(version['created'])
                 %td= file_version_who(version['actor_nuid'])
                 %td= file_version_digest(version['digest'])
