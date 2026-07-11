@@ -9,6 +9,7 @@
     = u.text_field :nuid
     = u.text_field :name
     = u.email_field :email
+    = u.text_field :affiliation, help: 'unscoped-affiliation — a human account label, e.g. "staff" or "student".'
     = u.text_area :groups, rows: 6, help: 'One group identifier per line.'
   .well.p-3.my-3.rounded-3
     = f.submit 'Find or Create + Sign In', class: 'btn btn-success'
