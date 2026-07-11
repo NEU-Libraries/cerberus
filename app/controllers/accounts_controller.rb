@@ -24,6 +24,9 @@ class AccountsController < ApplicationController
     values = AtlasRb::Authentication.login(current_user.nuid, email: email)
     sign_in(User.new(email: values.email, nuid: values.nuid, name: values.name,
                      groups: values.groups, role: values.role, affiliation: values.affiliation))
+    # Carry the selection so atlas_rb signs it as the acct claim on later
+    # requests; set after sign_in so it survives the Warden session update.
+    session[:account_email] = email
     redirect_to my_drs_path, notice: "Switched to #{email}."
   end
 

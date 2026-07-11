@@ -43,6 +43,9 @@ class AtlasController < ApplicationController
         affiliation: user_values.affiliation
       )
       sign_in(user)
+      # A fresh login lands on the preferred account — clear any prior switch so
+      # atlas_rb resolves preferred rather than a stale selection.
+      session.delete(:account_email)
       redirect_to root_path, notice: signed_in_notice(nuid)
     end
 
