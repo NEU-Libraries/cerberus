@@ -16,6 +16,9 @@ class MyDrsController < CatalogController
   def index
     return redirect_to(root_path, alert: 'Sign in to see your DRS.') unless current_user&.nuid
 
+    # The accounts sharing this person's NUID — drives the switcher panel, which
+    # the view renders only when there's more than one.
+    @accounts = account_list
     @workspace_collections = workspace_collections
     @published = published_by_category
     # Drives the "New collection" affordance — present only for a depositor with
@@ -24,6 +27,15 @@ class MyDrsController < CatalogController
   end
 
   private
+
+    # A person's staff/student logins under one NUID. An Atlas hiccup degrades to
+    # an empty list (no panel) rather than a broken My DRS.
+    def account_list
+      AtlasRb::User.accounts(current_user.nuid, nuid: current_user.nuid)['accounts']
+    rescue Faraday::Error, JSON::ParserError => e
+      Rails.logger.error("My DRS account lookup failed for #{current_user.nuid}: #{e.class} #{e.message}")
+      []
+    end
 
     # The depositor's published works grouped by showcase category, as
     # [[label, [work_docs]], ...] in the shared genre vocabulary's order. Only

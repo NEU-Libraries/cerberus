@@ -1,0 +1,74 @@
+-# "Your accounts" — the multi-account switcher, rendered only when the person's
+-# NUID holds more than one account (staff/student logins). Same card shell as the
+-# other My DRS cards; the considered element is the per-account group DIFF vs the
+-# account you're on — the reason to switch, made legible.
+- current_acct = current_account(accounts)
+- current_groups = Array(current_acct && current_acct['groups'])
+
+.my-drs-card.bg-white.border.rounded-3.overflow-hidden.shadow-sm.mb-4
+  .my-drs-card__head.p-3
+    %h5.mb-1
+      %i.fa-solid.fa-id-badge.text-primary.me-2{ 'aria-hidden' => 'true' }
+      Your accounts
+    %p.small.mb-0.text-muted
+      You're signed in with more than one account. Switch to another, or set the one you land on by default.
+  %ul.account-list.list-unstyled.mb-0
+    - accounts.each do |account|
+      - current = account['email'] == current_user.email
+      %li.account-row.p-3{ class: ('account-row--current' if current) }
+        .d-flex.flex-wrap.align-items-start.gap-3
+          .flex-grow-1
+            .d-flex.align-items-center.flex-wrap.gap-2.mb-1
+              %span.account-row__affiliation= (account['affiliation'].presence || 'Account').titleize
+              - if current
+                %span.badge.rounded-pill.text-bg-primary Current
+              - if account['preferred']
+                %span.badge.rounded-pill.bg-body-secondary.text-secondary-emphasis.border
+                  %i.fa-solid.fa-star.me-1{ 'aria-hidden' => 'true' }
+                  Preferred
+            %span.account-row__email.font-monospace= account['email']
+            %p.account-row__meta.small.text-muted.mb-0.mt-1
+              %i.fa-solid.fa-users.me-1{ 'aria-hidden' => 'true' }
+              = pluralize(Array(account['groups']).size, 'group')
+          .account-row__actions.d-flex.flex-column.gap-2.flex-shrink-0
+            - unless current
+              = button_to switch_account_path, method: :post, params: { email: account['email'] }, class: 'btn btn-sm btn-primary' do
+                %i.fa-solid.fa-right-left.me-1{ 'aria-hidden' => 'true' }
+                Switch to this account
+            - unless account['preferred']
+              = button_to prefer_account_path, method: :post, params: { email: account['email'] }, class: 'btn btn-sm btn-outline-secondary' do
+                %i.fa-regular.fa-star.me-1{ 'aria-hidden' => 'true' }
+                Set as default
+        - unless current
+          - diff = account_group_diff(account, current_groups)
+          - if diff[:gained].any? || diff[:lost].any?
+            %details.account-diff.mt-3
+              %summary.account-diff__summary
+                Compared to the account you're using
+                - if diff[:gained].any?
+                  %span.account-diff__delta.account-diff__delta--gain= "+#{diff[:gained].size}"
+                - if diff[:lost].any?
+                  %span.account-diff__delta.account-diff__delta--loss= "−#{diff[:lost].size}"
+              .account-diff__body.mt-2
+                - if diff[:gained].any?
+                  - shown, extra = account_diff_chips(diff[:gained])
+                  .account-diff__group
+                    %p.account-diff__label.mb-1
+                      %i.fa-solid.fa-plus.me-1{ 'aria-hidden' => 'true' }
+                      Access you'd gain
+                    %ul.account-diff__chips.list-unstyled.mb-0
+                      - shown.each do |name|
+                        %li.account-diff__chip.account-diff__chip--gain= name
+                      - if extra.positive?
+                        %li.account-diff__chip.account-diff__chip--more= "+#{extra} more"
+                - if diff[:lost].any?
+                  - shown, extra = account_diff_chips(diff[:lost])
+                  .account-diff__group.mt-2
+                    %p.account-diff__label.mb-1
+                      %i.fa-solid.fa-minus.me-1{ 'aria-hidden' => 'true' }
+                      Access you'd lose
+                    %ul.account-diff__chips.list-unstyled.mb-0
+                      - shown.each do |name|
+                        %li.account-diff__chip.account-diff__chip--loss= name
+                      - if extra.positive?
+                        %li.account-diff__chip.account-diff__chip--more= "+#{extra} more"

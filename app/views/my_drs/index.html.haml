@@ -16,6 +16,11 @@
           %i.fa-solid.fa-plus.me-1{ 'aria-hidden' => 'true' }
           Deposit
 
+-# Multi-account switcher — only for a person whose NUID holds more than one
+-# account. Full-width above the workspace/published split.
+- if @accounts.to_a.size > 1
+  = render 'accounts', accounts: @accounts
+
 .row.g-4
   -# Published — works promoted into community genre showcases, grouped by category.
   -# Placed first (left) as the outward-facing, professional tier; the teal
