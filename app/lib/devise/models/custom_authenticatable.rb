@@ -16,6 +16,8 @@ module Devise
         # Stale sessions effectively treat the user as non-admin until
         # they re-authenticate — which is the correct conservative
         # default; admin access requires a fresh session post-deploy.
+        # rubocop:disable Metrics/ParameterLists -- Devise deserializes the
+        # session array positionally, so this arity mirrors serialize_into_session.
         def serialize_from_session(email, nuid, name, groups, role = nil, affiliation = nil)
           resource = new
           resource.email = email
@@ -26,6 +28,7 @@ module Devise
           resource.affiliation = affiliation
           resource
         end
+        # rubocop:enable Metrics/ParameterLists
 
         # Returns an array with the data from the user that needs to be
         # serialized into the session.

@@ -22,12 +22,13 @@ class AtlasController < ApplicationController
   private
 
     def find_or_create_params
+      u = params[:user]
       {
-        nuid:        params[:user][:nuid],
-        name:        params[:user][:name].presence,
-        email:       params[:user][:email].presence,
-        affiliation: params[:user][:affiliation].presence,
-        groups:      params[:user][:groups].to_s.split("\n").map(&:strip).compact_blank
+        nuid:        u[:nuid],
+        name:        u[:name].presence,
+        email:       u[:email].presence,
+        affiliation: u[:affiliation].presence,
+        groups:      u[:groups].to_s.split("\n").map(&:strip).compact_blank
       }
     end
 

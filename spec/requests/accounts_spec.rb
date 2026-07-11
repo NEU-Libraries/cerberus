@@ -16,7 +16,7 @@ RSpec.describe 'Accounts', type: :request do
 
   let(:accounts) do
     AtlasRb::Mash.new(
-      'nuid' => '000000005',
+      'nuid'     => '000000005',
       'accounts' => [
         { 'email' => 'staff@northeastern.edu', 'affiliation' => 'staff', 'role' => 'standard',
           'groups' => ['northeastern:drs:library:dsg_students'], 'preferred' => true },

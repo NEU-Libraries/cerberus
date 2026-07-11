@@ -50,11 +50,11 @@ class AccountsController < ApplicationController
     end
 
     def my_account_emails
-      AtlasRb::User.accounts(current_user.nuid, nuid: current_user.nuid)['accounts'].map { |a| a['email'] }
+      AtlasRb::User.accounts(current_user.nuid, nuid: current_user.nuid)['accounts'].pluck('email')
     end
 
     def reject(message)
-      redirect_back(fallback_location: my_drs_path, alert: message)
+      redirect_back_or_to(my_drs_path, alert: message)
     end
 
     def atlas_unavailable(error)
