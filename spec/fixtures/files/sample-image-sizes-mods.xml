@@ -2,9 +2,9 @@
 <mods:mods xmlns:drs="https://repository.neu.edu/spec/v1" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:niec="http://repository.neu.edu/schema/niec" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
 
     <mods:titleInfo usage="primary">
-        <mods:title>Rainbow Over the Coast</mods:title>
+        <mods:title>Palm-Lined Tropical Coastline</mods:title>
         <mods:nonSort/></mods:titleInfo>
-    <mods:abstract>A landscape photograph carrying small, medium, and large download renditions, so the download-size picker on the work's metadata can be demonstrated on seed data.</mods:abstract>
+    <mods:abstract>A coastal landscape photograph carrying small, medium, and large download renditions, so the download-size picker on the work's metadata can be demonstrated on seed data.</mods:abstract>
 
     <mods:originInfo>
         <mods:dateCreated keyDate="yes" encoding="w3cdtf">2018-05-04</mods:dateCreated>
@@ -12,8 +12,8 @@
 
     <mods:genre authority="aat" authorityURI="http://vocab.getty.edu/aat/" valueURI="http://vocab.getty.edu/aat/300046300">photographs</mods:genre>
 
-    <mods:subject authority="lcsh" authorityURI="http://id.loc.gov/authorities/subjects" valueURI="http://id.loc.gov/authorities/subjects/sh85111693">
-        <mods:topic>Rainbows</mods:topic>
+    <mods:subject authority="lcsh" authorityURI="http://id.loc.gov/authorities/subjects" valueURI="http://id.loc.gov/authorities/subjects/sh85012681">
+        <mods:topic>Beaches</mods:topic>
     </mods:subject>
 
     <mods:typeOfResource>still image</mods:typeOfResource>

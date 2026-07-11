@@ -213,8 +213,8 @@ namespace :reset do
       # intact (ActiveJob argument serialization would reject them).
       sizes_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-image-sizes-mods.xml')
       AtlasRb::Work.metadata(sizes_work['id'], { 'permissions' => { 'read' => ['public'] } })
-      AtlasRb::Blob.create(sizes_work['id'], '/home/cerberus/web/spec/fixtures/files/rainbow.jpg', 'rainbow.jpg')
-      IiifAssetsJob.perform_now(sizes_work['id'], '/home/cerberus/web/spec/fixtures/files/rainbow.jpg',
+      AtlasRb::Blob.create(sizes_work['id'], '/home/cerberus/web/spec/fixtures/files/beach.jpg', 'beach.jpg')
+      IiifAssetsJob.perform_now(sizes_work['id'], '/home/cerberus/web/spec/fixtures/files/beach.jpg',
                                 derivative_widths: DerivativeCreator::DEFAULT_WIDTHS)
       AtlasRb::Work.complete(sizes_work['id'])
 
@@ -245,10 +245,10 @@ namespace :reset do
       # to demonstrate the restore path. Tombstoning needs a completed Work, so
       # it is built normally and then withdrawn.
       withdrawn_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-withdrawn-mods.xml')
-      withdrawn_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/boat.jpg').open_base
+      withdrawn_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/forest.jpg').open_base
       AtlasRb::Work.set_thumbnails(withdrawn_work['id'], **ThumbnailCreator.call(base: withdrawn_base))
       AtlasRb::Work.metadata(withdrawn_work['id'], { 'permissions' => { 'read' => ['public'] } })
-      AtlasRb::Blob.create(withdrawn_work['id'], '/home/cerberus/web/spec/fixtures/files/boat.jpg', 'boat.jpg')
+      AtlasRb::Blob.create(withdrawn_work['id'], '/home/cerberus/web/spec/fixtures/files/forest.jpg', 'forest.jpg')
       AtlasRb::Work.complete(withdrawn_work['id'])
       AtlasRb::Work.tombstone(withdrawn_work['id'])
     end
