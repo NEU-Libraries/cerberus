@@ -15,10 +15,16 @@ export default class extends Controller {
     if (!this.mediaTarget.getAttribute("poster")) {
       this.element.classList.add("av-player--no-poster")
     }
+    // DRS never serves live streams — everything is video-on-demand. video.js
+    // paints a "LIVE" badge whenever it can't determine a finite duration (e.g.
+    // a byte response without a definitive total), which is always misleading
+    // here. Dropping the live-only controls means the badge can never render.
     this.player = window.videojs(this.mediaTarget, {
       controls: true,
       preload: "metadata",
-      fluid: true
+      fluid: true,
+      liveui: false,
+      controlBar: { liveDisplay: false, seekToLive: false }
     })
   }
 
