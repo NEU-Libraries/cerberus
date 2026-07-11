@@ -25,7 +25,13 @@
               %td
                 %span.badge.text-bg-light.text-uppercase= loader.kind
               %td
-                %span.admin-registry-table__id= link_to loader.root_collection, collection_path(loader.root_collection), class: 'text-decoration-none'
+                -# Only iptc loaders carry a root collection; xml/multipage loaders
+                -# have none, so collection_path(nil) would raise. Render the link
+                -# only when one is set, otherwise a muted placeholder.
+                - if loader.root_collection.present?
+                  %span.admin-registry-table__id= link_to loader.root_collection, collection_path(loader.root_collection), class: 'text-decoration-none'
+                - else
+                  %span.text-muted —
               %td.text-end.text-nowrap
                 = link_to loader_loads_path(loader), class: 'btn btn-sm btn-link text-decoration-none me-2' do
                   %i.fa-solid.fa-clock-rotate-left.me-1{'aria-hidden' => 'true'}
