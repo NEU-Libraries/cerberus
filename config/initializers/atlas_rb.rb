@@ -7,6 +7,10 @@
 # isn't passed at the call site, so call sites need no explicit threading.
 # `default_on_behalf_of` resolves the acting-as / view-as target (populated on
 # `Current.on_behalf_of` during an acting-as session, nil otherwise).
+# `default_account` resolves which of a person's accounts is acting — their
+# email, since a single NUID can hold several staff/student logins each with
+# their own groups. atlas_rb signs it as an `acct` claim so every call acts as
+# the selected account; nil resolves the person's preferred account.
 #
 # AtlasRb::System::* paths (SSO provisioning) deliberately bypass these — they
 # authenticate as the seeded :system fixture, not the ambient user. Admin paths
@@ -25,6 +29,7 @@
 AtlasRb.configure do |config|
   config.default_nuid         = -> { Current.nuid }
   config.default_on_behalf_of = -> { Current.on_behalf_of }
+  config.default_account      = -> { Current.account_email }
 
   config.assertion_signing_key = -> { Rails.application.credentials.cerberus_signing_key }
   config.assertion_signing_kid = -> { Rails.application.credentials.cerberus_signing_kid }

@@ -12,6 +12,12 @@ class Current < ActiveSupport::CurrentAttributes
   # even while impersonating. Sent as atlas_rb's `User:` header.
   attribute :nuid
 
+  # Which of the person's accounts is acting — their email (the account key: a
+  # NUID can hold several staff/student logins, each with its own groups).
+  # Signed as atlas_rb's `acct` claim so every call resolves that account; nil
+  # lets Atlas fall back to the person's preferred account.
+  attribute :account_email
+
   # Acting-as target. Populated only during an acting-as impersonation
   # session; sent as atlas_rb's `On-Behalf-Of:` header so writes are
   # attributed to the target while authorization stays with `nuid`.

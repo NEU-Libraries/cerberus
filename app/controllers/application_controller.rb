@@ -67,6 +67,10 @@ class ApplicationController < ActionController::Base
 
     def set_current_nuid
       Current.nuid = current_user&.nuid || Rails.application.config.x.cerberus.guest_nuid
+      # Which account is acting — email is the account key. nil for the guest
+      # fallback (and single-account users), which lets Atlas resolve the
+      # preferred account; after an account switch this is the chosen account.
+      Current.account_email = current_user&.email
     end
 
     # The identity Cerberus-side writes are attributed to: the acting-as
