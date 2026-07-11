@@ -21,10 +21,11 @@ module ZoomViewer
     end
 
     # The per-page service_file delegate carries the work-level `service:` gate;
-    # the viewer renders only if the effective user may read it.
+    # the viewer renders only if the effective user may read it. Match on the
+    # stable `role` token — `use` is Atlas's human display label ("Service File").
     def zoom_service_readable?(pages)
       service = pages.flat_map { |page| Array(page['assets']) }
-                     .find { |asset| asset['use'].to_s == 'service_file' && asset['uri'].present? }
+                     .find { |asset| asset['role'].to_s == 'service_file' && asset['uri'].present? }
       service.present? && helpers.derivative_readable?(service)
     end
 end
