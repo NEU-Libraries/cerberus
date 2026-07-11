@@ -146,6 +146,15 @@ namespace :reset do
         AtlasRb::Collection.metadata(working_files['id'], { 'permissions' => { 'read' => ['public'] } })
       end
 
+      # A public collection OWNED BY Jane (a named Person), so proxy deposit
+      # ("on behalf of the collection owner") attributes the new Work to
+      # "Jane Doe". A Collection has no depositor kwarg — on_behalf_of is what
+      # stamps its depositor to Jane's NUID rather than the acting admin's.
+      jane_deposits = AtlasRb::Collection.create(library['id'],
+                                                 '/home/cerberus/web/spec/fixtures/files/jane-deposits-mods.xml',
+                                                 on_behalf_of: jane['nuid'])
+      AtlasRb::Collection.metadata(jane_deposits['id'], { 'permissions' => { 'read' => ['public'] } })
+
       # One published work: homed in Jane's personal root, surfaced into the
       # Datasets showcase via the linked-member edge (the conduit). This flips
       # that showcase from hidden-empty to visible in the Library browse and the

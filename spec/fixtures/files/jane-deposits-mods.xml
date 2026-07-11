@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mods:mods xmlns:drs="https://repository.neu.edu/spec/v1" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:niec="http://repository.neu.edu/schema/niec" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+  <mods:titleInfo usage="primary">
+    <mods:title>Jane Doe — Deposited Works</mods:title>
+  <mods:nonSort/></mods:titleInfo>
+  <mods:abstract>
+    A collection owned by the curated Person Jane Doe. Its owner is a named Person, so a privileged depositor can deposit into it on her behalf (proxy deposit) and see the work attributed to "Jane Doe."
+  </mods:abstract>
+  <mods:typeOfResource>mixed material</mods:typeOfResource>
+  <mods:physicalDescription>
+    <mods:form/>
+  </mods:physicalDescription>
+</mods:mods>
