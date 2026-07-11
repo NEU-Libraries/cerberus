@@ -162,6 +162,19 @@ namespace :reset do
         AtlasRb::Work.add_linked_member(jane_work['id'], datasets['id'])
       end
     end
+
+    # Seed usage analytics so /admin/impressions is populated for demos and UAT.
+    # Runs after the object seed has indexed into Solr (it keys on the Works now
+    # present there) and writes only to Cerberus's own analytics tables.
+    ImpressionSeeder.call
+  end
+
+  desc 'Seed representative usage impressions for the Usage Analytics dashboard'
+  task impressions: :environment do
+    raise "Wrong env - #{Rails.env} - must be development" unless Rails.env.development? || Rails.env.staging?
+
+    count = ImpressionSeeder.call
+    puts "Seeded #{count} impressions across the indexed Works."
   end
 
   desc 'Clean Solr and Atlas (AR tables are reset by db:replant)'
