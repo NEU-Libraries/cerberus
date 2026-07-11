@@ -161,6 +161,87 @@ namespace :reset do
         AtlasRb::Work.complete(jane_work['id'])
         AtlasRb::Work.add_linked_member(jane_work['id'], datasets['id'])
       end
+
+      # --- User-guide / UAT fixtures --------------------------------------
+      # Each object below unblocks a specific guide walkthrough a fresh seed
+      # otherwise can't illustrate. All are homed in the Test Collection so a
+      # demoer finds them in one place.
+
+      # Multipage loader (kind: :multipage). Librarian-operated, so it carries
+      # no root collection — it picks a destination at upload time (the reason
+      # My Loaders must tolerate a nil root_collection). Admins see every
+      # loader; giving a non-admin fixture user the loaders:multipage group is
+      # an Atlas Grouper seed.
+      Loader.find_or_create_by!(slug: 'multipage') do |l|
+        l.display_name = 'Multipage Loader'
+        l.group        = 'northeastern:drs:repository:loaders:multipage'
+        l.kind         = :multipage
+      end
+
+      # A multipage Work: one ordered FileSet per page, each with its own IIIF
+      # image service for the P3.0 manifest the Tify viewer reads; page 1 also
+      # drives the Work-level thumbnail. Mirrors MultipageIngestJob's shape.
+      paged_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-multipage-mods.xml')
+      ['multipage/bdr_43889.tif', 'multipage/bdr_43890.tif'].each_with_index do |page, index|
+        page_path = "/home/cerberus/web/spec/fixtures/files/#{page}"
+        file_set  = AtlasRb::FileSet.create(paged_work['id'], 'image', position: index + 1)
+        AtlasRb::FileSet.update(file_set['id'], page_path)
+        page_master = MasterJp2.call(path: page_path)
+        AtlasRb::FileSet.set_iiif_service(file_set['id'], page_master.gated_base)
+        # Page 1's image seeds the Work-level thumbnail (the catalog/gallery tile).
+        if index.zero?
+          AtlasRb::Work.set_thumbnails(paged_work['id'], **ThumbnailCreator.call(base: page_master.open_base))
+        end
+      end
+      AtlasRb::Work.metadata(paged_work['id'], { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Work.complete(paged_work['id'])
+
+      # An image Work carrying small/medium/large download renditions, so the
+      # download-size picker appears. IiifAssetsJob registers thumbnails + the
+      # gated IIIF service and, given derivative_widths, the S/M/L renditions —
+      # the IPTC loader's default-on path. Ratio widths never upscale, so the
+      # source dimensions don't matter; perform_now keeps the Rational widths
+      # intact (ActiveJob argument serialization would reject them).
+      sizes_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-image-sizes-mods.xml')
+      AtlasRb::Work.metadata(sizes_work['id'], { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Blob.create(sizes_work['id'], '/home/cerberus/web/spec/fixtures/files/rainbow.jpg', 'rainbow.jpg')
+      IiifAssetsJob.perform_now(sizes_work['id'], '/home/cerberus/web/spec/fixtures/files/rainbow.jpg',
+                                derivative_widths: DerivativeCreator::DEFAULT_WIDTHS)
+      AtlasRb::Work.complete(sizes_work['id'])
+
+      # A playable audio Work — the only audio fixture, so the audio-player path
+      # can be shown. mp3 is a browser-safe codec, so it streams through the
+      # same Range media endpoint with no remux; audio carries no poster.
+      audio_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-audio-mods.xml')
+      AtlasRb::Work.metadata(audio_work['id'], { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Blob.create(audio_work['id'], '/home/cerberus/web/spec/fixtures/files/sample-audio.mp3', 'sample-audio.mp3')
+      AtlasRb::Work.complete(audio_work['id'])
+
+      # An Office-document Work whose deposit exercises the Word → PDF rendition
+      # + first-page thumbnail enrichment. The docx is staged under uploads_root
+      # because PdfRenditionJob writes its PDF beside the source (the fixture
+      # path directly would clobber the checked-in example.pdf); the job runs
+      # async so soffice's fresh-profile retry can't abort the reset.
+      doc_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-document-mods.xml')
+      AtlasRb::Work.metadata(doc_work['id'], { 'permissions' => { 'read' => ['public'] } })
+      staged_dir = File.join(Rails.application.config.x.cerberus.uploads_root, doc_work['id'])
+      FileUtils.mkdir_p(staged_dir)
+      staged_doc = File.join(staged_dir, 'example.docx')
+      FileUtils.cp('/home/cerberus/web/spec/fixtures/files/example.docx', staged_doc)
+      AtlasRb::Blob.create(doc_work['id'], staged_doc, 'example.docx')
+      AtlasRb::Work.complete(doc_work['id'])
+      PdfRenditionJob.perform_later(doc_work['id'], staged_doc, SecureRandom.uuid)
+
+      # A withdrawn (tombstoned) Work so the admin restore registry has an entry
+      # to demonstrate the restore path. Tombstoning needs a completed Work, so
+      # it is built normally and then withdrawn.
+      withdrawn_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-withdrawn-mods.xml')
+      withdrawn_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/boat.jpg').open_base
+      AtlasRb::Work.set_thumbnails(withdrawn_work['id'], **ThumbnailCreator.call(base: withdrawn_base))
+      AtlasRb::Work.metadata(withdrawn_work['id'], { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Blob.create(withdrawn_work['id'], '/home/cerberus/web/spec/fixtures/files/boat.jpg', 'boat.jpg')
+      AtlasRb::Work.complete(withdrawn_work['id'])
+      AtlasRb::Work.tombstone(withdrawn_work['id'])
     end
 
     # Seed usage analytics so /admin/impressions is populated for demos and UAT.
