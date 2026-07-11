@@ -62,10 +62,10 @@ namespace :reset do
       # the picker in LoadsController#new queries its children (so a future
       # sibling like "Athletics (Photographs)" appears in the dropdown without
       # any code change). Thumbnails use their own distinct placeholder
-      # bases (lake / forest / beach) so the marcom tree doesn't visually
+      # bases (canyon / forest / waterfall) so the marcom tree doesn't visually
       # duplicate the Northeastern University / Test Collection / What's New
       # seeds in the gallery — these are dev/staging fixtures, not
-      # production imagery (lake = public domain, forest = CC0, beach =
+      # production imagery (canyon = public domain, forest = CC0, waterfall =
       # public domain; all sourced from Wikimedia Commons).
       # Marcom Grouper group seeded onto edit_groups at every level of the
       # community → collection tree so the loader-role test user
@@ -75,12 +75,12 @@ namespace :reset do
       # prepended by Atlas's permissions= setter; we only add marcom here.
       marcom_group = 'northeastern:drs:repository:loaders:marcom'
 
-      lake_base   = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/lake.jpg').open_base
-      forest_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/forest.jpg').open_base
-      beach_base  = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/beach.jpg').open_base
+      canyon_base    = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/canyon.jpg').open_base
+      forest_base    = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/forest.jpg').open_base
+      waterfall_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/waterfall.jpg').open_base
 
       communications = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/communications-mods.xml')
-      AtlasRb::Community.set_thumbnails(communications['id'], **ThumbnailCreator.call(base: lake_base))
+      AtlasRb::Community.set_thumbnails(communications['id'], **ThumbnailCreator.call(base: canyon_base))
       AtlasRb::Community.metadata(communications['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [marcom_group] } })
 
       photo_archive = AtlasRb::Collection.create(communications['id'], '/home/cerberus/web/spec/fixtures/files/communications-photo-archive-mods.xml')
@@ -88,7 +88,7 @@ namespace :reset do
       AtlasRb::Collection.metadata(photo_archive['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [marcom_group] } })
 
       campus_life = AtlasRb::Collection.create(photo_archive['id'], '/home/cerberus/web/spec/fixtures/files/campus-life-photographs-mods.xml')
-      AtlasRb::Collection.set_thumbnails(campus_life['id'], **ThumbnailCreator.call(base: beach_base))
+      AtlasRb::Collection.set_thumbnails(campus_life['id'], **ThumbnailCreator.call(base: waterfall_base))
       AtlasRb::Collection.metadata(campus_life['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [marcom_group] } })
 
       # Cerberus-side: the Loader row binding the marcom Grouper group to the
@@ -121,7 +121,8 @@ namespace :reset do
       # Datasets showcase. Gives the deposit fork (publish branch), My DRS,
       # Featured Content, and the Faculty & Staff browse live data to demo.
       library = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/library-mods.xml')
-      AtlasRb::Community.set_thumbnails(library['id'], **ThumbnailCreator.call(base: river_base))
+      mountain_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/mountain.jpg').open_base
+      AtlasRb::Community.set_thumbnails(library['id'], **ThumbnailCreator.call(base: mountain_base))
       AtlasRb::Community.metadata(library['id'], { 'permissions' => { 'read' => ['public'] } })
       showcases = ShowcaseProvisioner.call(community_id: library['id'])
 
@@ -164,9 +165,10 @@ namespace :reset do
         jane_work = AtlasRb::Work.create(jane['personal_root_id'],
                                          '/home/cerberus/web/spec/fixtures/files/library-dataset-mods.xml',
                                          depositor: jane['nuid'])
-        AtlasRb::Work.set_thumbnails(jane_work['id'], **ThumbnailCreator.call(base: field_base))
+        coast_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/coast.jpg').open_base
+        AtlasRb::Work.set_thumbnails(jane_work['id'], **ThumbnailCreator.call(base: coast_base))
         AtlasRb::Work.metadata(jane_work['id'], { 'permissions' => { 'read' => ['public'] } })
-        AtlasRb::Blob.create(jane_work['id'], '/home/cerberus/web/spec/fixtures/files/field.jpg', 'coastal-survey.jpg')
+        AtlasRb::Blob.create(jane_work['id'], '/home/cerberus/web/spec/fixtures/files/coast.jpg', 'coastal-survey.jpg')
         AtlasRb::Work.complete(jane_work['id'])
         AtlasRb::Work.add_linked_member(jane_work['id'], datasets['id'])
       end
@@ -245,10 +247,10 @@ namespace :reset do
       # to demonstrate the restore path. Tombstoning needs a completed Work, so
       # it is built normally and then withdrawn.
       withdrawn_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-withdrawn-mods.xml')
-      withdrawn_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/forest.jpg').open_base
+      withdrawn_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/gorge.jpg').open_base
       AtlasRb::Work.set_thumbnails(withdrawn_work['id'], **ThumbnailCreator.call(base: withdrawn_base))
       AtlasRb::Work.metadata(withdrawn_work['id'], { 'permissions' => { 'read' => ['public'] } })
-      AtlasRb::Blob.create(withdrawn_work['id'], '/home/cerberus/web/spec/fixtures/files/forest.jpg', 'forest.jpg')
+      AtlasRb::Blob.create(withdrawn_work['id'], '/home/cerberus/web/spec/fixtures/files/gorge.jpg', 'gorge.jpg')
       AtlasRb::Work.complete(withdrawn_work['id'])
       AtlasRb::Work.tombstone(withdrawn_work['id'])
     end
