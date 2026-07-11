@@ -40,6 +40,6 @@ class AtlasController < ApplicationController
         role:   user_values.role
       )
       sign_in(user)
-      redirect_to atlas_user_path
+      redirect_to root_path, notice: 'You have successfully signed in.'
     end
 end
