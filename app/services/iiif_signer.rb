@@ -1,21 +1,24 @@
 # frozen_string_literal: true
 
 # Mints the credentials the gated Cantaloupe host's authorization delegate
-# validates: a size-bound signed URL for one-shot downloads, and a time-boxed
-# grant cookie for interactive deep-zoom (whose tile URLs the viewer generates
-# itself, so they cannot be signed individually).
+# validates: a size-bound signed URL for one-shot downloads, and a per-image
+# signed identifier for interactive deep-zoom (whose tile URLs the viewer
+# generates itself, so they cannot be signed individually — but they all share
+# the image's identifier, so a token embedded there rides along on every one).
 #
-# Both are HMAC-SHA256 over the shared secret in
+# All are HMAC-SHA256 over the shared secret in
 # config.x.cerberus.iiif_signing_secret. The signed URL's message is the
 # request PATH — which includes the IIIF size segment — plus the expiry, so a
 # recipient cannot edit the size (e.g. `pct:50` → `max`) without breaking the
-# signature. The cookie is a bare time-boxed pass, safe under the
-# service ⊆ large ⊆ … monotonicity constraint plus unguessable identifiers.
-# The Cantaloupe delegate recomputes both exactly this way — keep the message
-# formats here and in the delegate in lock-step.
+# signature. The identifier token's message is the bare image identifier plus
+# the expiry: it authorizes every derived request for that one image (info.json
+# + all tiles) until it expires, and — being carried in the URL — needs no
+# cookie or credentialed CORS, so it works with IIIF's mandated cross-origin
+# ACAO:*. The Cantaloupe delegate recomputes each exactly this way — keep the
+# message formats here and in the delegate in lock-step.
 module IiifSigner
-  DOWNLOAD_TTL = 5.minutes
-  COOKIE_TTL   = 1.hour
+  DOWNLOAD_TTL   = 5.minutes
+  IDENTIFIER_TTL = 1.hour
 
   class << self
     # @param url [String] a gated IIIF image URL (a Delegate's `uri`).
@@ -26,10 +29,20 @@ module IiifSigner
       "#{url}?exp=#{exp}&sig=#{sig}"
     end
 
-    # @return [String] the grant-cookie value, "<exp>|<hmac>".
-    def grant_cookie(ttl: COOKIE_TTL)
+    # Embeds a time-boxed token in the IIIF identifier itself, so it survives
+    # into every tile URL OpenSeadragon derives from the image service base.
+    #
+    # @param url [String] a gated IIIF image base (`…/iiif/3/gated-<uuid>.jp2`).
+    # @return [String] the base with the identifier rewritten to
+    #   `<exp>~<sig>~gated-<uuid>.jp2` (`~` avoids Cantaloupe's `;` meta-delimiter
+    #   and keeps the identifier slash-free).
+    def sign_identifier(url, ttl: IDENTIFIER_TTL)
+      uri = URI.parse(url)
+      identifier = File.basename(uri.path)
       exp = ttl.from_now.to_i
-      "#{exp}|#{hmac("grant|#{exp}")}"
+      sig = hmac("#{identifier}|#{exp}")
+      uri.path = "#{File.dirname(uri.path)}/#{exp}~#{sig}~#{identifier}"
+      uri.to_s
     end
 
     private

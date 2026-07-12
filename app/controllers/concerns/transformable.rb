@@ -69,13 +69,14 @@ module Transformable # rubocop:disable Metrics/ModuleLength
     true
   end
 
-  # Permission / embargo / thumbnail fields, sent to Atlas's metadata PATCH.
-  # These are NOT MODS and never touch the descriptive document.
+  # Permission / embargo fields, sent to Atlas's metadata PATCH. These are NOT
+  # MODS and never touch the descriptive document. Thumbnails ride the same
+  # edit form but are persisted separately by apply_thumbnail — they are
+  # machine-set Delegate URIs with their own Atlas endpoint, not PATCH fields.
   def permission_params(resource_key)
     permitted = params.require(resource_key).permit(:embargo, permissions: [:group_id, :ability]).to_h
     transform_permissions(permitted, resource_key)
     mass_permissions(permitted)
-    add_thumbnail(permitted)
     permitted
   end
 
@@ -109,6 +110,7 @@ module Transformable # rubocop:disable Metrics/ModuleLength
     end
 
     apply_permissions(klass, id, resource_key)
+    apply_thumbnail(klass, id)
     return redirect_to(show_path) unless descriptive_submitted?(resource_key)
 
     apply_descriptive(klass, id, resource_key, keywords, show_path)

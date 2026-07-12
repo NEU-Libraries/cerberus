@@ -11,25 +11,29 @@ module Devise
         # Recreates a resource from session data.
         #
         # It takes as many params as elements in the array returned in
-        # serialize_into_session. `role` defaults to nil so sessions
-        # serialized before the role attribute existed still deserialize.
+        # serialize_into_session. `role` / `affiliation` default to nil so
+        # sessions serialized before those attributes existed still deserialize.
         # Stale sessions effectively treat the user as non-admin until
         # they re-authenticate — which is the correct conservative
         # default; admin access requires a fresh session post-deploy.
-        def serialize_from_session(email, nuid, name, groups, role = nil)
+        # rubocop:disable Metrics/ParameterLists -- Devise deserializes the
+        # session array positionally, so this arity mirrors serialize_into_session.
+        def serialize_from_session(email, nuid, name, groups, role = nil, affiliation = nil)
           resource = new
           resource.email = email
           resource.nuid = nuid
           resource.name = name
           resource.groups = groups
           resource.role = role
+          resource.affiliation = affiliation
           resource
         end
+        # rubocop:enable Metrics/ParameterLists
 
         # Returns an array with the data from the user that needs to be
         # serialized into the session.
         def serialize_into_session(user)
-          [user.email, user.nuid, user.name, user.groups, user.role]
+          [user.email, user.nuid, user.name, user.groups, user.role, user.affiliation]
         end
       end
     end

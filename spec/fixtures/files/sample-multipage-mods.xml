@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mods:mods xmlns:drs="https://repository.neu.edu/spec/v1" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:niec="http://repository.neu.edu/schema/niec" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+
+    <mods:titleInfo usage="primary">
+        <mods:title>Sample Paged Document</mods:title>
+        <mods:nonSort/></mods:titleInfo>
+    <mods:abstract>A short scanned document of a few pages, included as sample multipage material so the repository's paged (Tify) viewer and per-page deep-zoom can be exercised on seed data.</mods:abstract>
+
+    <mods:originInfo>
+        <mods:dateCreated keyDate="yes" encoding="w3cdtf">1900-01-01</mods:dateCreated>
+    </mods:originInfo>
+
+    <mods:genre authority="aat" authorityURI="http://vocab.getty.edu/aat/" valueURI="http://vocab.getty.edu/aat/300028569">manuscripts (documents)</mods:genre>
+
+    <mods:typeOfResource>text</mods:typeOfResource>
+    <mods:physicalDescription>
+        <mods:form authority="marcform">electronic</mods:form>
+        <mods:extent>2 pages</mods:extent>
+        <mods:digitalOrigin>reformatted digital</mods:digitalOrigin>
+    </mods:physicalDescription>
+
+    <mods:accessCondition type="use and reproduction">This work is dedicated to the public domain under the Creative Commons CC0 1.0 Universal Public Domain Dedication. (https://creativecommons.org/publicdomain/zero/1.0/)</mods:accessCondition>
+    <mods:recordInfo>
+        <mods:recordContentSource>Northeastern University Libraries</mods:recordContentSource>
+        <mods:recordOrigin>Enhanced</mods:recordOrigin>
+        <mods:languageOfCataloging>
+            <mods:languageTerm authority="iso639-2b" authorityURI="http://id.loc.gov/vocabulary/iso639-2" type="text" valueURI="http://id.loc.gov/vocabulary/iso639-2/eng">English</mods:languageTerm>
+        </mods:languageOfCataloging>
+        <mods:recordCreationDate encoding="w3cdtf">1900-01-01</mods:recordCreationDate>
+    </mods:recordInfo>
+
+    <mods:extension displayLabel="scholarly_object">
+        <scholarly_object>
+            <category/>
+            <department/>
+            <degree/>
+            <course_info>
+            </course_info>
+        </scholarly_object>
+    </mods:extension>
+    <mods:extension>
+        <niec:niec/>
+    </mods:extension>
+</mods:mods>

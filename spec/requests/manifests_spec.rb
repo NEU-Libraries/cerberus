@@ -53,7 +53,9 @@ RSpec.describe 'Work IIIF manifests', type: :request do
     expect(body['type']).to eq('Manifest')
     expect(body['id']).to end_with("/works/#{work.id}/manifest")
     services = body['items'].map { |c| c.dig('items', 0, 'items', 0, 'body', 'service', 0, 'id') }
-    expect(services).to eq(['https://iiif.test/iiif/3/p1.jp2', 'https://iiif.test/iiif/3/p2.jp2'])
+    # A deep-zoom token (<exp>~<sig>~) prefixes the identifier when signing is on;
+    # assert page identity + order by the identifier suffix, robust either way.
+    expect(services.map { |id| id[%r{[^/~]+\.jp2\z}] }).to eq(['p1.jp2', 'p2.jp2'])
     expect(body['items'].first).to include('width' => 1500, 'height' => 2200)
   end
 

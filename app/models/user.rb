@@ -8,7 +8,7 @@ class User
 
   define_model_callbacks :validation
 
-  attr_accessor :email, :password, :nuid, :name, :groups, :role
+  attr_accessor :email, :password, :nuid, :name, :groups, :role, :affiliation
 
   devise :custom_authenticatable, authentication_keys: [:email, :password, :nuid, :name, :groups, :role]
 

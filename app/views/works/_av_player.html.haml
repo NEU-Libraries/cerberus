@@ -1,15 +1,19 @@
--# In-page A/V player (video.js). Audio works render an audio-mode player; video
--# gets the poster + a <video> element. The source is the Range-capable /media/:id
--# endpoint (seekable); video.js arrives via dynamic import in av_player_controller,
--# so non-A/V pages never pay for it. file = the browser-playable Blob (master or
--# the ingest MP4 rendition).
+-# In-page A/V player (video.js). Audio and video both mount video.js on the
+-# Range-capable /media/:id endpoint (seekable); video.js arrives via dynamic
+-# import in av_player_controller, so non-A/V pages never pay for it. When the
+-# Work has a poster, audio renders through a <video> element in video.js
+-# audioPosterMode — a bare <audio> element can't show a poster, so this keeps
+-# the still on screen while the sound plays, matching video (and v1). Posterless
+-# audio falls back to a plain <audio> player. file = the browser-playable Blob
+-# (master or the ingest MP4 rendition).
 - audio = file.mime_type.to_s.start_with?('audio/')
-.av-player{data: { controller: 'av-player' }}
-  - if audio
+- poster = @work.preview.presence
+.av-player{data: { controller: 'av-player', 'av-player-audio-poster-value': (audio && poster.present?).to_s }}
+  - if audio && poster.blank?
     %audio.video-js.vjs-default-skin.av-player__media{controls: true, preload: 'metadata', 'data-av-player-target': 'media'}
       %source{src: media_path(file.noid), type: file.mime_type}
   - else
-    %video.video-js.vjs-default-skin.av-player__media{controls: true, preload: 'metadata', playsinline: true, poster: @work.preview.presence, 'data-av-player-target': 'media'}
+    %video.video-js.vjs-default-skin.av-player__media{controls: true, preload: 'metadata', playsinline: true, poster: poster, 'data-av-player-target': 'media'}
       %source{src: media_path(file.noid), type: file.mime_type}
   %p.av-player__fallback.text-muted.small.mb-0
     Trouble playing this file?

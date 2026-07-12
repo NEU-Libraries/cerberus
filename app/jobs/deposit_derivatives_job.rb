@@ -50,10 +50,11 @@ class DepositDerivativesJob < ApplicationJob
 
     # The service_file Delegate's URI is the gated IIIF base itself (no
     # size/region suffix), so it is handed straight to DerivativeCreator.
+    # Match on the stable `role` token — `use` is Atlas's human display label.
     def gated_service_base(work_id)
       AtlasRb::Work.file_sets(work_id)
                    .flat_map { |file_set| Array(file_set['assets']) }
-                   .find { |asset| asset['use'].to_s == 'service_file' && asset['uri'].present? }
+                   .find { |asset| asset['role'].to_s == 'service_file' && asset['uri'].present? }
                    &.dig('uri')
     end
 end

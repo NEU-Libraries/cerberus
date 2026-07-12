@@ -21,6 +21,14 @@ RSpec.describe 'Atlas tokens', type: :request do
              nuid: '000000004', role: 'standard', groups: [])
   end
 
+  # My DRS renders now consult the accounts list; keep these token specs off the
+  # live call by defaulting to a single account (so no switcher panel appears).
+  before do
+    allow(AtlasRb::User).to receive(:accounts).and_return(
+      AtlasRb::Mash.new('nuid' => nil, 'accounts' => [])
+    )
+  end
+
   describe 'authorization' do
     it 'forbids an anonymous visitor from minting' do
       post '/atlas_token'

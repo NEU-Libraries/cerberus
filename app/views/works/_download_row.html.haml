@@ -1,13 +1,17 @@
 -# One downloadable-asset row, shared by the work-show Downloads card
 -# (_downloads) and the Downloads modal frame (downloads). `work_noid` is the
--# parent work; Blob rows (no uri) also get an "Add to queue" control.
+-# parent work. Both Blob rows and derivative (S/M/L) rows get an "Add to queue"
+-# control — keyed on the blob noid, or on the derivative `use` respectively.
 -#
 -# Delegate rows (S/M/L renditions) carry a gated-host URI, so they route
 -# through DerivativeDownloadsController — which authorizes the tier and
--# redirects to a signed URL — rather than linking the URI directly.
+-# redirects to a signed URL — rather than linking the URI directly. They are
+-# always image renditions, so they take the image icon even though the
+-# pointer-only delegate carries no mime type.
 - display_label = file.label.presence || file[:use]
+- icon = file[:uri].present? ? file_type_icon('image/jpeg') : file_type_icon(file.mime_type)
 %li.list-group-item.d-flex.align-items-center
-  %span.fa-regular{class: file_type_icon(file.mime_type), 'aria-hidden' => true}
+  %span.fa-regular{class: icon, 'aria-hidden' => true}
   -# Label, filename, and size read inline on one baseline. The filename
   -# (with extension) is muted like the size and disambiguates rows that
   -# share a generic label (two "Video File" entries, say). Blob rows carry
@@ -22,6 +26,7 @@
     = link_to derivative_download_path(work_noid, file[:use]), class: 'btn btn-outline-primary btn-sm ms-3', 'aria-label' => "Download #{display_label}", target: '_blank', rel: 'noopener' do
       %span.fa-solid.fa-download{'aria-hidden' => true}
       %span.ms-1 Download
+    = render 'works/queue_button', work_noid: work_noid, use: file[:use], label: display_label
   - else
     = link_to download_path(file.noid), class: 'btn btn-outline-primary btn-sm ms-3', 'aria-label' => "Download #{display_label}", data: { turbo: false } do
       %span.fa-solid.fa-download{'aria-hidden' => true}

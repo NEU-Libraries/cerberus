@@ -15,6 +15,7 @@ describe MasterJp2 do
       full = double('Vips::Image', width: 2000, height: 1000, jp2ksave: nil)
       capped = double('Vips::Image capped', jp2ksave: nil)
       allow(full).to receive(:resize).with(0.25).and_return(capped)
+      allow(full).to receive(:colourspace).with(:srgb).and_return(full)
       allow(Vips::Image).to receive(:new_from_file).with(image_path).and_return(full)
 
       result = MasterJp2.call(path: image_path)
@@ -29,6 +30,7 @@ describe MasterJp2 do
       portrait = double('Vips::Image', width: 1000, height: 2000, jp2ksave: nil)
       capped = double('Vips::Image capped', jp2ksave: nil)
       allow(portrait).to receive(:resize).and_return(capped)
+      allow(portrait).to receive(:colourspace).with(:srgb).and_return(portrait)
       allow(Vips::Image).to receive(:new_from_file).with(image_path).and_return(portrait)
 
       MasterJp2.call(path: image_path)
@@ -40,6 +42,7 @@ describe MasterJp2 do
     it 'does not upscale a source already smaller than the open cap' do
       small = double('Vips::Image', width: 300, height: 200, jp2ksave: nil)
       allow(small).to receive(:resize).and_return(small)
+      allow(small).to receive(:colourspace).with(:srgb).and_return(small)
       allow(Vips::Image).to receive(:new_from_file).with(image_path).and_return(small)
 
       MasterJp2.call(path: image_path)
@@ -57,6 +60,7 @@ describe MasterJp2 do
       full = double('Vips::Image', width: 1275, height: 1650, jp2ksave: nil)
       capped = double('Vips::Image capped', jp2ksave: nil)
       allow(full).to receive(:resize).and_return(capped)
+      allow(full).to receive(:colourspace).with(:srgb).and_return(full)
       allow(Vips::Image).to receive(:new_from_file).with(pdf_path, dpi: 150).and_return(full)
 
       result = MasterJp2.call(path: pdf_path)

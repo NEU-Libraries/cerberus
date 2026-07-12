@@ -2,11 +2,17 @@
 
 # Cantaloupe delegate for the DRS gated-derivative model. Serves `open-*`
 # identifiers (thumbnails / preview — the display pipe) freely, and requires a
-# credential for `gated-*` (S/M/L downloads + deep-zoom): either a signed URL
-# (`?exp=&sig=`, HMAC over "<request-path>|<exp>" — Cerberus's
-# IiifSigner.sign_url) or a grant cookie (`iiif_grant=<exp>|<hmac>`, HMAC over
-# "grant|<exp>" — IiifSigner.grant_cookie). Keep these HMAC message formats in
-# lock-step with app/services/iiif_signer.rb.
+# credential for `gated-*`:
+#   - one-shot downloads: a signed URL (`?exp=&sig=`, HMAC over
+#     "<request-path>|<exp>" — IiifSigner.sign_url).
+#   - interactive deep-zoom: a per-image token embedded in the identifier
+#     (`<exp>~<sig>~gated-<uuid>.jp2`, HMAC over "<identifier>|<exp>" —
+#     IiifSigner.sign_identifier). It rides into every tile URL the viewer
+#     derives from the image-service base, so all of them authorize without a
+#     cookie — which is what lets it work cross-origin under IIIF's mandated
+#     ACAO:*. Under ScriptLookupStrategy, `filesystemsource_pathname` strips the
+#     token back to the real `gated-<uuid>.jp2` before resolving.
+# Keep these HMAC message formats in lock-step with app/services/iiif_signer.rb.
 #
 # The shared secret is CERBERUS_IIIF_SIGNING_SECRET; when it is unset the
 # delegate no-ops (serves everything), so a stack without the secret is ungated
@@ -21,20 +27,35 @@ class CustomDelegate
   attr_accessor :context
 
   SECRET = ENV['CERBERUS_IIIF_SIGNING_SECRET'].to_s
+  # The image volume Cantaloupe reads (the compose `iiif` mount). Under
+  # ScriptLookupStrategy the delegate owns resolution, so it joins names here.
+  IMAGE_ROOT = '/imageroot'
 
   # Runs before the source image is accessed. Return true to allow, or a hash
-  # with a status_code to deny. Source resolution stays config-based
-  # (FilesystemSource.BasicLookupStrategy), so no source() override is needed.
+  # with a status_code to deny.
   def pre_authorize(_options = {})
     return true if SECRET.empty?                                   # enforcement off
     return true if context['identifier'].to_s.start_with?('open-') # display pipe
-    return true if valid_signature? || valid_cookie?
+    return true if valid_identifier_token?(context['identifier'].to_s) # deep-zoom
+    return true if valid_signature?                                    # one-shot download
 
     { 'status_code' => 403 }
   end
 
   def authorize(_options = {})
     true
+  end
+
+  # ScriptLookupStrategy resolution: map the IIIF identifier to an absolute file
+  # under IMAGE_ROOT, stripping a deep-zoom token if present. Admits only the
+  # minted open-/gated- JP2 names (uuid-shaped), so a crafted identifier can't
+  # traverse out of the image root. nil ⇒ Cantaloupe reports not-found.
+  def filesystemsource_pathname(_options = {})
+    _, _, real = parse_token(context['identifier'].to_s)
+    name = real || context['identifier'].to_s
+    return unless /\A(open|gated)-[0-9a-f-]+\.jp2\z/.match?(name)
+
+    File.join(IMAGE_ROOT, name)
   end
 
   # Cantaloupe invokes these optional hooks through its delegate proxy —
@@ -71,12 +92,22 @@ class CustomDelegate
       secure_compare(hmac("#{request_path}|#{args['exp']}"), args['sig'])
     end
 
-    # Grant cookie: iiif_grant=<exp>|<hmac>, hmac = HMAC(SECRET, "grant|<exp>").
-    def valid_cookie?
-      exp, sig = (context['cookies'] || {})['iiif_grant'].to_s.split('|', 2)
-      return false if exp.to_s.empty? || sig.to_s.empty? || exp.to_i < Time.now.to_i
+    # Deep-zoom token embedded in the identifier: <exp>~<sig>~gated-<uuid>.jp2,
+    # sig = HMAC(SECRET, "gated-<uuid>.jp2|<exp>"). One token authorizes every
+    # derived request for that one image (info.json + all tiles) until exp.
+    def valid_identifier_token?(identifier)
+      exp, sig, real = parse_token(identifier)
+      return false if real.nil? || exp < Time.now.to_i
 
-      secure_compare(hmac("grant|#{exp}"), sig)
+      secure_compare(hmac("#{real}|#{exp}"), sig)
+    end
+
+    # [exp_i, sig, real_identifier] for a tokenized gated identifier, else nils.
+    # `~` separates the parts (avoids Cantaloupe's `;` meta-delimiter); the real
+    # identifier keeps its own hyphens.
+    def parse_token(identifier)
+      m = /\A(\d+)~(\h{64})~(gated-[0-9a-f-]+\.jp2)\z/.match(identifier)
+      m ? [m[1].to_i, m[2], m[3]] : [nil, nil, nil]
     end
 
     def hmac(message)

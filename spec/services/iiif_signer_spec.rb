@@ -31,12 +31,29 @@ RSpec.describe IiifSigner do
     end
   end
 
-  describe '.grant_cookie' do
-    it 'is a time-boxed "exp|hmac" pass a verifier can recompute' do
-      exp, sig = IiifSigner.grant_cookie.split('|')
+  describe '.sign_identifier' do
+    let(:base) { 'https://gated.example/iiif/3/gated-abc.jp2' }
 
-      expect(sig).to eq(OpenSSL::HMAC.hexdigest('SHA256', secret, "grant|#{exp}"))
+    def parts(signed) = URI.parse(signed).path.split('/').last.split('~', 3)
+
+    it 'rewrites the identifier to <exp>~<sig>~<identifier>, HMAC over "<identifier>|<exp>"' do
+      exp, sig, real = parts(IiifSigner.sign_identifier(base))
+
+      expect(real).to eq('gated-abc.jp2')
+      expect(sig).to eq(OpenSSL::HMAC.hexdigest('SHA256', secret, "gated-abc.jp2|#{exp}"))
       expect(exp.to_i).to be_within(5).of(1.hour.from_now.to_i)
+    end
+
+    it 'preserves host and path prefix so a proxied /cantaloupe base still resolves' do
+      signed = IiifSigner.sign_identifier('https://h.example/cantaloupe/iiif/3/gated-abc.jp2')
+
+      expect(signed).to start_with('https://h.example/cantaloupe/iiif/3/')
+      expect(signed).to end_with('~gated-abc.jp2')
+    end
+
+    it 'honors a custom ttl' do
+      expect(parts(IiifSigner.sign_identifier(base, ttl: 10.minutes)).first.to_i)
+        .to be_within(5).of(10.minutes.from_now.to_i)
     end
   end
 

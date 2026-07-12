@@ -23,7 +23,15 @@ RSpec.describe 'My DRS', type: :request do
   end
 
   context 'signed in' do
-    before { sign_in user }
+    before do
+      sign_in user
+      # My DRS now consults the accounts list; default to a single account so the
+      # switcher panel is absent (the panel spec below overrides this), keeping
+      # these renders off the live accounts call.
+      allow(AtlasRb::User).to receive(:accounts).and_return(
+        AtlasRb::Mash.new('nuid' => '000000004', 'accounts' => [])
+      )
+    end
 
     it 'renders both spaces, empty, for a depositor with no Person or collections' do
       allow(AtlasRb::Person).to receive(:resolve).and_return([])
@@ -60,6 +68,25 @@ RSpec.describe 'My DRS', type: :request do
       expect(response.body).to include('My Working Files') # workspace collection
       expect(response.body).to include('Datasets')         # showcase category heading
       expect(response.body).to include('My Dataset')       # published work under it
+    end
+
+    it 'renders the accounts switcher for a person with more than one account' do
+      allow(AtlasRb::Person).to receive(:resolve).and_return([])
+      allow(AtlasRb::User).to receive(:accounts).and_return(
+        AtlasRb::Mash.new('nuid' => '000000004', 'accounts' => [
+                            { 'email' => 'depositor@example.com', 'affiliation' => 'staff',
+                              'role' => 'standard', 'groups' => %w[g:shared g:staff], 'preferred' => true },
+                            { 'email' => 'depositor@husky.neu.edu', 'affiliation' => 'student',
+                              'role' => 'standard', 'groups' => %w[g:shared g:student], 'preferred' => false }
+                          ])
+      )
+
+      get '/my_drs'
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Your accounts')
+      expect(response.body).to include('depositor@husky.neu.edu')
+      expect(response.body).to include('Switch to this account')
     end
   end
 end

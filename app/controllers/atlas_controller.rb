@@ -22,24 +22,50 @@ class AtlasController < ApplicationController
   private
 
     def find_or_create_params
+      u = params[:user]
       {
-        nuid:   params[:user][:nuid],
-        name:   params[:user][:name].presence,
-        email:  params[:user][:email].presence,
-        groups: params[:user][:groups].to_s.split("\n").map(&:strip).compact_blank
+        nuid:        u[:nuid],
+        name:        u[:name].presence,
+        email:       u[:email].presence,
+        affiliation: u[:affiliation].presence,
+        groups:      u[:groups].to_s.split("\n").map(&:strip).compact_blank
       }
     end
 
     def sign_in_from_atlas(nuid)
       user_values = AtlasRb::Authentication.login(nuid)
       user = User.new(
-        email:  user_values.email,
-        nuid:   user_values.nuid,
-        name:   user_values.name,
-        groups: user_values.groups,
-        role:   user_values.role
+        email:       user_values.email,
+        nuid:        user_values.nuid,
+        name:        user_values.name,
+        groups:      user_values.groups,
+        role:        user_values.role,
+        affiliation: user_values.affiliation
       )
       sign_in(user)
-      redirect_to atlas_user_path
+      # A fresh login lands on the preferred account — clear any prior switch so
+      # atlas_rb resolves preferred rather than a stale selection.
+      session.delete(:account_email)
+      redirect_to root_path, notice: signed_in_notice(nuid)
+    end
+
+    # A person whose NUID holds more than one account lands on their preferred
+    # one (the login above named no account), so nudge them toward My DRS to
+    # switch or set a default; single-account users get the plain confirmation.
+    def signed_in_notice(nuid)
+      if multiple_accounts?(nuid)
+        'You have more than one account. Switch between accounts or set a preferred one from My DRS.'
+      else
+        'You have successfully signed in.'
+      end
+    end
+
+    # nuid is passed explicitly rather than read from Current: set_current_nuid
+    # ran before sign_in, so Current.nuid is still the guest fallback here.
+    def multiple_accounts?(nuid)
+      AtlasRb::User.accounts(nuid, nuid: nuid)['accounts'].size > 1
+    rescue Faraday::Error, JSON::ParserError => e
+      Rails.logger.error("Account lookup failed for #{nuid}: #{e.class} #{e.message}")
+      false
     end
 end

@@ -81,6 +81,12 @@ Rails.application.routes.draw do
   # community-published works on the other.
   get 'my_drs', to: 'my_drs#index', as: :my_drs
 
+  # Self-service account switching for a person whose NUID holds several accounts
+  # (their staff/student logins) — act as another of their accounts, or set the
+  # preferred (default) one. Reached from the My DRS accounts panel.
+  post 'accounts/switch', to: 'accounts#switch', as: :switch_account
+  post 'accounts/prefer', to: 'accounts#prefer', as: :prefer_account
+
   # Personal-access token lifecycle behind the My DRS "Programmatic access"
   # section. Singular — a user only ever acts on their own token: create mints
   # (regenerate = revoke-then-mint), destroy revokes all outstanding tokens.

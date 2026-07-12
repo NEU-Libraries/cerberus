@@ -67,6 +67,11 @@ class ApplicationController < ActionController::Base
 
     def set_current_nuid
       Current.nuid = current_user&.nuid || Rails.application.config.x.cerberus.guest_nuid
+      # Only carry an account selection when the person has explicitly switched to
+      # one (AccountsController stores it in the session). Otherwise nil, so
+      # atlas_rb sends no acct claim and Atlas resolves the preferred account —
+      # the default for everyone who hasn't switched.
+      Current.account_email = session[:account_email]
     end
 
     # The identity Cerberus-side writes are attributed to: the acting-as

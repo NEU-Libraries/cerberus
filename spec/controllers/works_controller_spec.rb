@@ -500,6 +500,39 @@ describe WorksController do
     end
   end
 
+  describe 'update — poster upload (Thumbable)' do
+    let(:user) { User.new(email: 'test@example.com', nuid: '000000004', groups: ['editors']) }
+
+    before do
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      sign_in user
+    end
+
+    # The prior thumbnail path (ThumbnailCreator.call(path:) vs base:) was masked
+    # by a stub and never ran; drive the real update flow so a poster upload
+    # genuinely reaches set_thumbnails. Only MasterJp2's vips/JP2 minting is stubbed.
+    it 'mints the uploaded poster and persists it via set_thumbnails' do
+      allow(MasterJp2).to receive(:call).and_return(MasterJp2::Result.new(open_base: 'BASE', gated_base: 'G'))
+      urls = { thumbnail: 't', thumbnail_2x: 't2', preview: 'p' }
+      allow(ThumbnailCreator).to receive(:call).with(base: 'BASE').and_return(urls)
+      allow(AtlasRb::Work).to receive(:set_thumbnails)
+
+      patch :update, params: { id:        work.id,
+                               work:      { title: work.title },
+                               thumbnail: fixture_file_upload('image.png', 'image/png') }
+
+      expect(AtlasRb::Work).to have_received(:set_thumbnails).with(work.id, **urls)
+    end
+
+    it 'does not touch set_thumbnails when no poster file is attached' do
+      allow(AtlasRb::Work).to receive(:set_thumbnails)
+
+      patch :update, params: { id: work.id, work: { title: work.title } }
+
+      expect(AtlasRb::Work).not_to have_received(:set_thumbnails)
+    end
+  end
+
   describe 'tombstone' do
     let(:user) do
       User.new(email: 'staff@example.com', nuid: '000000002',

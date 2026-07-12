@@ -42,6 +42,24 @@ RSpec.describe 'Download queue', type: :request do
     expect(response.body).to include('Your download queue is empty')
   end
 
+  it 'adds and removes an IIIF derivative rendition by use' do
+    post download_queue_items_path, params: { work_noid: work.id, use: 'Large Image' }
+    get download_queue_path
+    expect(response.body).to include('1 file').and include('Large Image')
+
+    delete download_queue_item_path, params: { work_noid: work.id, use: 'Large Image' }
+    follow_redirect!
+    expect(response.body).to include('Your download queue is empty')
+  end
+
+  it 'keys the derivative row turbo_stream swap on work + slugged use' do
+    post download_queue_items_path,
+         params:  { work_noid: work.id, use: 'Large Image' },
+         headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
+
+    expect(response.body).to include("queue-control-#{work.id}-large-image")
+  end
+
   it 'clears the queue' do
     post download_queue_items_path, params: { work_noid: work.id, blob_noid: 'blob1' }
     delete download_queue_path

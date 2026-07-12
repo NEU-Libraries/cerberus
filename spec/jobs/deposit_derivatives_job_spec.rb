@@ -12,7 +12,7 @@ RSpec.describe DepositDerivativesJob, type: :job do
   before { allow(DerivativeCreationJob).to receive(:perform_now) }
 
   def file_sets_with_service(uri)
-    [AtlasRb::Mash.new(noid: 'fs-1', assets: [AtlasRb::Mash.new(use: 'service_file', uri: uri)])]
+    [AtlasRb::Mash.new(noid: 'fs-1', assets: [AtlasRb::Mash.new(use: 'Service File', role: 'service_file', uri: uri)])]
   end
 
   it 'recovers the gated base from the service_file Delegate and hands off the widths' do

@@ -43,7 +43,9 @@ RSpec.describe QueueZipPacker do
     expect(names).to include('work1/a.jpg', 'work2/c.jpg')
   end
 
-  it 'skips a queued id that resolves to a Delegate (derivative), never fetching it' do
+  it 'skips a BLOB-keyed id that resolves to a Delegate, never fetching content' do
+    # A `'b'` entry is content-only; if its noid resolves to a delegate it is
+    # skipped. (Derivatives are queued as `'d'` entries — see below.)
     items = [{ 'w' => 'work1', 'b' => 'del1' }]
     allow(AtlasRb::Work).to receive(:assets).with('work1', nuid: nil)
                                             .and_return([delegate(noid: 'del1', uri: 'https://iiif.example/large')])
@@ -53,6 +55,33 @@ RSpec.describe QueueZipPacker do
 
     expect(names).to eq(['MANIFEST.txt'])
     expect(AtlasRb::Blob).not_to have_received(:content)
+  end
+
+  it 'packs a queued derivative rendition by fetching its signed IIIF URL' do
+    items = [{ 'w' => 'work1', 'd' => 'Large Image' }]
+    allow(AtlasRb::Work).to receive(:assets).with('work1', nuid: nil).and_return(
+      [delegate(noid: 'del1', uri: 'https://iiif.example/iiif/3/gated-x.jp2/full/pct:75/0/default.jpg')]
+    )
+    allow(IiifSigner).to receive(:sign_url).and_return('https://iiif.example/signed')
+    allow(Faraday).to receive(:get) # no real HTTP; the chunk stream is Faraday's job
+
+    described_class.new(items: items, nuid: nil).pack(zip)
+
+    expect(names).to include('work1/large-image.jpg')
+    expect(Faraday).to have_received(:get).with('https://iiif.example/signed')
+  end
+
+  it 'skips a derivative whose use is not the queued one' do
+    items = [{ 'w' => 'work1', 'd' => 'Large Image' }]
+    allow(AtlasRb::Work).to receive(:assets).with('work1', nuid: nil).and_return(
+      [AtlasRb::Mash.new('noid' => 'd2', 'uri' => 'https://iiif.example/small', 'use' => 'Small Image')]
+    )
+    allow(Faraday).to receive(:get)
+
+    described_class.new(items: items, nuid: nil).pack(zip)
+
+    expect(names).to eq(['MANIFEST.txt'])
+    expect(Faraday).not_to have_received(:get)
   end
 
   it 'records a failed work assets fetch in ERRORS.txt rather than aborting' do
