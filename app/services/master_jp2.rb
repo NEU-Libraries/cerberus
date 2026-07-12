@@ -22,7 +22,13 @@ class MasterJp2 < ApplicationService
   end
 
   def call
-    img = Vips::Image.new_from_file(@path, **load_options)
+    # Normalise to 3-band sRGB before encoding. A 1-band (grayscale) or CMYK
+    # source otherwise yields a JP2 whose header still parses — so info.json
+    # succeeds — but whose codestream Cantaloupe's JP2 processor can't decode,
+    # making every render 501. Archival material is frequently grayscale, so
+    # this guards real deposits, not just seeds. colourspace is a no-op for an
+    # already-sRGB image and preserves any alpha band.
+    img = Vips::Image.new_from_file(@path, **load_options).colourspace(:srgb)
     Result.new(
       open_base:  mint(capped(img), 'open'),
       gated_base: mint(img,         'gated')

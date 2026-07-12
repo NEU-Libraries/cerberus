@@ -222,6 +222,8 @@ namespace :reset do
       # can be shown. mp3 is a browser-safe codec, so it streams through the
       # same Range media endpoint with no remux; audio carries no poster.
       audio_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-audio-mods.xml')
+      audio_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/all_star_trio.jpg').open_base
+      AtlasRb::Work.set_thumbnails(audio_work['id'], **ThumbnailCreator.call(base: audio_base))
       AtlasRb::Work.metadata(audio_work['id'], { 'permissions' => { 'read' => ['public'] } })
       AtlasRb::Blob.create(audio_work['id'], '/home/cerberus/web/spec/fixtures/files/sample-audio.mp3', 'sample-audio.mp3')
       AtlasRb::Work.complete(audio_work['id'])
