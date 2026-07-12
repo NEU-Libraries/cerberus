@@ -14,14 +14,16 @@ class DownloadQueueController < ApplicationController
     @labels = labels_for(work_noids)
   end
 
-  # Add a content Blob (turbo-stream swaps the navbar badge + the row's button).
+  # Add a content Blob or an IIIF derivative rendition (turbo-stream swaps the
+  # navbar badge + the row's button). A derivative passes `use:` (no blob noid),
+  # which doubles as its label in the swapped-in "In queue" state.
   def create
     @queue = DownloadQueue.new(session)
     @work_noid = params[:work_noid].to_s
+    @use = params[:use].to_s.presence
     @blob_noid = params[:blob_noid].to_s
-    @result = @queue.add(@work_noid, @blob_noid)
-
-    flash.now[:alert] = "Your download queue is full (max #{DownloadQueue::MAX})." if @result == :full
+    @result = add_current_item
+    warn_if_full
 
     respond_to do |format|
       format.turbo_stream
@@ -30,7 +32,12 @@ class DownloadQueueController < ApplicationController
   end
 
   def destroy
-    DownloadQueue.new(session).remove(params[:work_noid].to_s, params[:blob_noid].to_s)
+    queue = DownloadQueue.new(session)
+    if params[:use].present?
+      queue.remove_derivative(params[:work_noid].to_s, params[:use].to_s)
+    else
+      queue.remove(params[:work_noid].to_s, params[:blob_noid].to_s)
+    end
     redirect_to download_queue_path, notice: 'Removed from your download queue.'
   end
 
@@ -40,6 +47,15 @@ class DownloadQueueController < ApplicationController
   end
 
   private
+
+    # Add the request's item — a derivative rendition (by use) or a Blob (by noid).
+    def add_current_item
+      @use ? @queue.add_derivative(@work_noid, @use) : @queue.add(@work_noid, @blob_noid)
+    end
+
+    def warn_if_full
+      flash.now[:alert] = "Your download queue is full (max #{DownloadQueue::MAX})." if @result == :full
+    end
 
     # Bare-noid → display title, one batch round-trip (mirrors SetResolver).
     def titles_for(work_noids)

@@ -25,10 +25,44 @@ module ZipEntryWriter
       errors << "#{folder}: #{asset.noid} failed — #{e.class}: #{e.message}"
     end
 
+    # Stream one IIIF derivative rendition (S/M/L) into `<folder>/<use>.jpg`,
+    # chunk-by-chunk over HTTP from its gated Cantaloupe URL. The delegate is
+    # pointer-only (no noid-backed bytes), so sign the URL (path signature,
+    # 5-min TTL) and rewrite its host to the container-internal Cantaloupe — the
+    # packer runs server-side, mirroring IiifManifest's info.json fetch. on_data
+    # streams chunks into the sink (never buffers the whole JPEG); a failure
+    # mid-stream is recorded, not raised (the archive can't be un-sent).
+    def write_derivative(zip, folder, delegate, manifest, errors)
+      entry = [folder, derivative_filename(delegate)].compact.join('/')
+      url = IiifSigner.sign_url(internal_iiif_url(delegate[:uri]))
+      zip.write_stored_file(entry) do |sink|
+        Faraday.get(url) { |req| req.options.on_data = proc { |chunk, _received| sink << chunk } }
+      end
+      manifest << entry
+    rescue Faraday::Error => e
+      errors << "#{folder}: #{delegate[:use]} failed — #{e.class}: #{e.message}"
+    end
+
     # Blob-backed content only — Delegates (the downloadable S/M/L derivatives)
     # are pointer-only and carry a `uri`; Blobs do not.
     def content_blob?(asset)
       asset[:uri].blank?
+    end
+
+    # Derivatives have no filename; name by the slugged use, e.g. "small-image.jpg".
+    def derivative_filename(delegate)
+      "#{delegate[:use].to_s.parameterize.presence || 'derivative'}.jpg"
+    end
+
+    # Delegate URIs carry Cantaloupe's PUBLIC host; the packer runs server-side and
+    # (in compose/staging) reaches Cantaloupe by its internal service name — mirror
+    # IiifManifest#info_base. Only the host changes; the signed path is unaffected.
+    def internal_iiif_url(uri)
+      internal = Rails.application.config.x.cerberus.iiif_internal_host
+      public_host = Rails.application.config.iiif_host
+      return uri if internal.blank? || public_host.blank?
+
+      uri.sub(/\A#{Regexp.escape(public_host)}/, internal)
     end
 
     # Labeled `<prefix><noid>.<ext>` when Atlas serves it, else a neutral

@@ -1,14 +1,20 @@
--# "Add to queue" control for one content Blob, in a stable #queue-control-<noid>
--# wrapper so the add action's turbo_stream can swap it to the in-queue state.
--# Add-only here; removal lives on the queue page.
+-# "Add to queue" control for one downloadable asset, in a stable
+-# #queue-control-<id> wrapper so the add action's turbo_stream can swap it to
+-# the in-queue state. Polymorphic: a content Blob passes `blob_noid:`, an IIIF
+-# derivative rendition passes `use:` (its identity has no blob). Add-only here;
+-# removal lives on the queue page.
+- blob_noid = local_assigns[:blob_noid]
+- use = local_assigns[:use]
 - label = local_assigns[:label].presence || 'this file'
-%span.ms-2{id: "queue-control-#{blob_noid}"}
-  - if download_queue_includes?(work_noid, blob_noid)
+- queued = blob_noid.present? ? download_queue_includes?(work_noid, blob_noid) : download_queue_includes_derivative?(work_noid, use)
+- add_params = blob_noid.present? ? { work_noid: work_noid, blob_noid: blob_noid } : { work_noid: work_noid, use: use }
+%span.ms-2{id: queue_control_id(work_noid, blob_noid: blob_noid, use: use)}
+  - if queued
     %span.btn.btn-outline-success.btn-sm.disabled{'aria-label' => "#{label} is in your download queue"}
       %i.fa-solid.fa-check.me-1{'aria-hidden' => true}
       In queue
   - else
-    = button_to download_queue_items_path(work_noid: work_noid, blob_noid: blob_noid),
+    = button_to download_queue_items_path(add_params),
         class: 'btn btn-outline-secondary btn-sm', form: { class: 'd-inline' },
         'aria-label' => "Add #{label} to download queue" do
       %i.fa-solid.fa-cart-arrow-down.me-1{'aria-hidden' => true}

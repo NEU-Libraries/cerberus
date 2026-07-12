@@ -33,17 +33,25 @@
         %tbody
           - @queue.items.group_by { |item| item['w'] }.each do |work_noid, entries|
             - entries.each_with_index do |entry, index|
+              -# Two kinds of queued item: a content Blob (identified by its noid)
+              -# or an IIIF derivative rendition (identified by its `use`, which is
+              -# also its display label — renditions carry no persistent identifier).
+              - derivative = entry['d'].present?
+              - file_label = derivative ? entry['d'] : (@labels.dig(work_noid, entry['b']).presence || 'File')
+              - remove_params = derivative ? { work_noid: work_noid, use: entry['d'] } : { work_noid: work_noid, blob_noid: entry['b'] }
               %tr
                 %td
                   - if index.zero?
                     = link_to (@titles.dig(work_noid, 'title').presence || 'Untitled work'), work_path(work_noid), class: 'admin-registry-table__name fw-semibold'
                     %span.admin-registry-table__id.ms-2= work_noid
-                %td.admin-registry-table__name= @labels.dig(work_noid, entry['b']).presence || 'File'
+                %td.admin-registry-table__name= file_label
                 %td
-                  %span.admin-registry-table__id= entry['b']
+                  - if derivative
+                    %span.text-muted.small IIIF rendition
+                  - else
+                    %span.admin-registry-table__id= entry['b']
                 %td.text-end
-                  - file_label = @labels.dig(work_noid, entry['b']).presence || 'file'
-                  = button_to download_queue_item_path(work_noid: work_noid, blob_noid: entry['b']), method: :delete,
+                  = button_to download_queue_item_path(remove_params), method: :delete,
                       class: 'btn btn-outline-danger btn-sm', form: { class: 'd-inline' },
                       'aria-label' => "Remove #{file_label} from the queue" do
                     %i.fa-solid.fa-xmark{'aria-hidden' => 'true'}
