@@ -6,6 +6,7 @@ import { Controller } from "@hotwired/stimulus"
 // /media/:id endpoint, so the player seeks via HTTP byte ranges.
 export default class extends Controller {
   static targets = ["media"]
+  static values = { audioPoster: Boolean }
 
   async connect() {
     await import("video-js") // UMD build: registers window.videojs
@@ -19,12 +20,15 @@ export default class extends Controller {
     // paints a "LIVE" badge whenever it can't determine a finite duration (e.g.
     // a byte response without a definitive total), which is always misleading
     // here. Dropping the live-only controls means the badge can never render.
+    // audioPosterMode keeps the poster on screen for a sound recording (a bare
+    // <audio> element can't show one), so audio-with-poster renders like video.
     this.player = window.videojs(this.mediaTarget, {
       controls: true,
       preload: "metadata",
       fluid: true,
       liveui: false,
-      controlBar: { liveDisplay: false, seekToLive: false }
+      controlBar: { liveDisplay: false, seekToLive: false },
+      audioPosterMode: this.audioPosterValue
     })
   }
 
