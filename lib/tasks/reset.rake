@@ -140,21 +140,19 @@ namespace :reset do
 
       # A personal workspace collection under Jane's root — what My DRS "My
       # workspace" lists (the workspace is scoped to the personal-root subtree,
-      # so institutional collections a person created don't bleed in).
+      # so institutional collections a person created don't bleed in). Created
+      # AS Jane (the reset otherwise runs as admin) so Atlas's creator-owns model
+      # stamps her as its depositor: it genuinely belongs to her, in her own
+      # space, and so doubles as the named-Person proxy-deposit target — no
+      # on_behalf_of workaround needed. A Person is authorized to create within
+      # their own personal root.
       if jane['personal_root_id'].present?
-        working_files = AtlasRb::Collection.create(jane['personal_root_id'],
-                                                   '/home/cerberus/web/spec/fixtures/files/jane-working-files-mods.xml')
-        AtlasRb::Collection.metadata(working_files['id'], { 'permissions' => { 'read' => ['public'] } })
+        Current.set(nuid: jane['nuid']) do
+          working_files = AtlasRb::Collection.create(jane['personal_root_id'],
+                                                     '/home/cerberus/web/spec/fixtures/files/jane-working-files-mods.xml')
+          AtlasRb::Collection.metadata(working_files['id'], { 'permissions' => { 'read' => ['public'] } })
+        end
       end
-
-      # A public collection OWNED BY Jane (a named Person), so proxy deposit
-      # ("on behalf of the collection owner") attributes the new Work to
-      # "Jane Doe". A Collection has no depositor kwarg — on_behalf_of is what
-      # stamps its depositor to Jane's NUID rather than the acting admin's.
-      jane_deposits = AtlasRb::Collection.create(library['id'],
-                                                 '/home/cerberus/web/spec/fixtures/files/jane-deposits-mods.xml',
-                                                 on_behalf_of: jane['nuid'])
-      AtlasRb::Collection.metadata(jane_deposits['id'], { 'permissions' => { 'read' => ['public'] } })
 
       # One published work: homed in Jane's personal root, surfaced into the
       # Datasets showcase via the linked-member edge (the conduit). This flips
