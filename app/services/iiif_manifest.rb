@@ -44,8 +44,20 @@ class IiifManifest < ApplicationService
         size = dimensions(service)
         next if size.blank?
 
-        canvas(page, service, size)
+        canvas(page, browser_service(service), size)
       end
+    end
+
+    # The service base the viewer sees. When enforcement is on, embed a per-image
+    # token in the identifier so every tile URL OpenSeadragon derives from this
+    # base authorizes itself — carried in the URL, it needs no cookie or
+    # credentialed CORS and rides IIIF's mandated cross-origin ACAO:*. Unsigned
+    # otherwise (an ungated dev Cantaloupe with no secret). The server-side
+    # dimensions read above stays on the bare service (its own path signature).
+    def browser_service(service)
+      return service if Rails.application.config.x.cerberus.iiif_signing_secret.blank?
+
+      IiifSigner.sign_identifier(service)
     end
 
     def canvas(page, service, size)

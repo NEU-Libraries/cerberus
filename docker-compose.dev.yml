@@ -11,6 +11,10 @@ services:
       # here and on web to turn enforcement on.
       CANTALOUPE_DELEGATE_SCRIPT_ENABLED: 'true'
       CANTALOUPE_DELEGATE_SCRIPT_PATHNAME: /etc/cantaloupe/delegates.rb
+      # Route filesystem resolution through the delegate's
+      # filesystemsource_pathname so it can strip a deep-zoom token from the
+      # identifier (<exp>~<sig>~gated-<uuid>.jp2) back to the real file.
+      CANTALOUPE_FILESYSTEMSOURCE_LOOKUP_STRATEGY: ScriptLookupStrategy
       CERBERUS_IIIF_SIGNING_SECRET: ${CERBERUS_IIIF_SIGNING_SECRET:-}
     volumes:
       - iiif:/imageroot

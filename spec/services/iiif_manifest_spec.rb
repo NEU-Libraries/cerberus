@@ -75,4 +75,14 @@ RSpec.describe IiifManifest do
 
     expect(fetched).to all(match(%r{/info\.json\?exp=\d+&sig=\h+\z}))
   end
+
+  it 'embeds a per-image token in the browser-facing service id when signing is on' do
+    allow(Rails.application.config.x.cerberus).to receive(:iiif_signing_secret).and_return('s3cret')
+
+    body = manifest['items'].first.dig('items', 0, 'items', 0, 'body')
+    service_id = body['service'].first['id']
+
+    expect(service_id).to match(%r{\Ahttps://iiif\.test/iiif/3/\d+~\h{64}~one\.jp2\z})
+    expect(body['id']).to eq("#{service_id}/full/max/0/default.jpg")
+  end
 end
