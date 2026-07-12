@@ -57,15 +57,6 @@ RSpec.describe IiifSigner do
     end
   end
 
-  describe '.grant_cookie' do
-    it 'is a time-boxed "exp|hmac" pass a verifier can recompute' do
-      exp, sig = IiifSigner.grant_cookie.split('|')
-
-      expect(sig).to eq(OpenSSL::HMAC.hexdigest('SHA256', secret, "grant|#{exp}"))
-      expect(exp.to_i).to be_within(5).of(1.hour.from_now.to_i)
-    end
-  end
-
   describe 'without a configured secret' do
     it 'raises rather than minting an unsigned credential' do
       allow(Rails.application.config.x.cerberus).to receive(:iiif_signing_secret).and_return(nil)

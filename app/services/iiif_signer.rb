@@ -18,7 +18,6 @@
 # message formats here and in the delegate in lock-step.
 module IiifSigner
   DOWNLOAD_TTL   = 5.minutes
-  COOKIE_TTL     = 1.hour
   IDENTIFIER_TTL = 1.hour
 
   class << self
@@ -44,12 +43,6 @@ module IiifSigner
       sig = hmac("#{identifier}|#{exp}")
       uri.path = "#{File.dirname(uri.path)}/#{exp}~#{sig}~#{identifier}"
       uri.to_s
-    end
-
-    # @return [String] the grant-cookie value, "<exp>|<hmac>".
-    def grant_cookie(ttl: COOKIE_TTL)
-      exp = ttl.from_now.to_i
-      "#{exp}|#{hmac("grant|#{exp}")}"
     end
 
     private

@@ -1,14 +1,12 @@
-require_relative "boot"
+require_relative 'boot'
 
-require "rails/all"
+require 'rails/all'
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
-if defined?(Rails::Server) && Rails.env.development?
-  require "debug/open_nonstop"
-end
+require 'debug/open_nonstop' if defined?(Rails::Server) && Rails.env.development?
 
 module Cerberus
   class Application < Rails::Application
@@ -43,15 +41,10 @@ module Cerberus
     # Gated-derivative model. MasterJp2 writes both the capped display JP2 and
     # the full-res JP2 to the one derivatives root Cantaloupe reads,
     # distinguished by an `open-`/`gated-` filename prefix; the gated Cantaloupe
-    # delegate serves `open-*` freely and requires a signed URL / grant cookie
-    # for `gated-*`. iiif_signing_secret is the HMAC secret Cerberus shares with
-    # that delegate (signed download URLs + the zoom grant cookie).
+    # delegate serves `open-*` freely and requires a signed credential for
+    # `gated-*`. iiif_signing_secret is the HMAC secret Cerberus shares with that
+    # delegate (signed download URLs + deep-zoom identifier tokens).
     config.x.cerberus.iiif_signing_secret = ENV.fetch('CERBERUS_IIIF_SIGNING_SECRET', nil)
-
-    # Domain for the deep-zoom grant cookie, so the browser sends it to the gated
-    # IIIF host. Unset = host-only (dev: a localhost cookie reaches any port); set
-    # to the shared parent (e.g. `.lib.example.edu`) when IIIF is a sibling subdomain.
-    config.x.cerberus.gated_cookie_domain = ENV.fetch('CERBERUS_GATED_COOKIE_DOMAIN', nil)
 
     # Acting-NUID sentinel for unauthenticated Cerberus traffic. The
     # logged-out path threads this NUID as the acting user, so the signed

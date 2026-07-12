@@ -37,7 +37,7 @@ class CustomDelegate
     return true if SECRET.empty?                                   # enforcement off
     return true if context['identifier'].to_s.start_with?('open-') # display pipe
     return true if valid_identifier_token?(context['identifier'].to_s) # deep-zoom
-    return true if valid_signature? || valid_cookie?                   # download / legacy
+    return true if valid_signature?                                    # one-shot download
 
     { 'status_code' => 403 }
   end
@@ -90,14 +90,6 @@ class CustomDelegate
       return false if args['exp'].to_i < Time.now.to_i
 
       secure_compare(hmac("#{request_path}|#{args['exp']}"), args['sig'])
-    end
-
-    # Grant cookie: iiif_grant=<exp>|<hmac>, hmac = HMAC(SECRET, "grant|<exp>").
-    def valid_cookie?
-      exp, sig = (context['cookies'] || {})['iiif_grant'].to_s.split('|', 2)
-      return false if exp.to_s.empty? || sig.to_s.empty? || exp.to_i < Time.now.to_i
-
-      secure_compare(hmac("grant|#{exp}"), sig)
     end
 
     # Deep-zoom token embedded in the identifier: <exp>~<sig>~gated-<uuid>.jp2,
