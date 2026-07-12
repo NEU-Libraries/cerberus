@@ -17,8 +17,8 @@ RSpec.describe 'works/_av_player', type: :view do
       expect(rendered).to have_no_css('audio')
     end
 
-    it 'flags the audio-poster value so the controller enables audioPosterMode' do
-      expect(rendered).to have_css('video[data-av-player-audio-poster-value="true"]')
+    it 'flags the audio-poster value on the controller element so audioPosterMode is enabled' do
+      expect(rendered).to have_css('.av-player[data-av-player-audio-poster-value="true"]')
     end
   end
 
@@ -36,7 +36,7 @@ RSpec.describe 'works/_av_player', type: :view do
 
     it 'renders a <video> with the poster and leaves audio-poster mode off' do
       expect(rendered).to have_css('video.av-player__media[poster]')
-      expect(rendered).to have_css('video[data-av-player-audio-poster-value="false"]')
+      expect(rendered).to have_css('.av-player[data-av-player-audio-poster-value="false"]')
     end
   end
 end

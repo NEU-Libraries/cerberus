@@ -30,9 +30,30 @@ export default class extends Controller {
       controlBar: { liveDisplay: false, seekToLive: false },
       audioPosterMode: this.audioPosterValue
     })
+    // audioPosterMode mounts a sound recording on a <video> element (to show the
+    // still), which leaves video.js's "Video Player" / "Play Video" labels on
+    // what is audio. video.js re-applies those defaults at several points during
+    // setup, so a one-shot fix gets overwritten — re-assert the audio labels
+    // whenever the player's aria-label changes (the guard keeps it idempotent, so
+    // no loop; the observer is torn down on disconnect).
+    if (this.audioPosterValue) {
+      this.player.ready(() => {
+        this.relabelAsAudio()
+        this.labelObserver = new MutationObserver(() => this.relabelAsAudio())
+        this.labelObserver.observe(this.player.el(), { attributes: true, attributeFilter: ["aria-label"] })
+      })
+    }
+  }
+
+  relabelAsAudio() {
+    const el = this.player.el()
+    if (el.getAttribute("aria-label") !== "Audio Player") el.setAttribute("aria-label", "Audio Player")
+    const bigPlay = this.player.getChild("BigPlayButton")
+    if (bigPlay && bigPlay.controlText() !== "Play") bigPlay.controlText("Play")
   }
 
   disconnect() {
+    this.labelObserver?.disconnect()
     this.player?.dispose?.()
   }
 }
