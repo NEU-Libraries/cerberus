@@ -36,16 +36,16 @@
     %label.form-label.mb-1 Keywords
     - Array(descriptive[:keywords]).each do |kw|
       .input-group.mb-2{ data: { 'keyword-list-target': 'row' } }
-        %input.form-control{ type: 'text', name: "#{f.object_name}[keywords][]", value: kw, 'aria-label': 'Keyword' }
+        %input.form-control{ type: 'text', name: "#{f.object_name}[keywords][]", value: kw, 'aria-label': 'Keyword', data: { action: 'input->keyword-list#syncRequired' } }
         %button.btn.btn-danger{ type: 'button', 'aria-label': 'Remove keyword', data: { action: 'click->keyword-list#remove' } }
           %i.fa-solid.fa-minus{ 'aria-hidden': 'true' }
     %template{ data: { 'keyword-list-target': 'template' } }
       .input-group.mb-2
-        %input.form-control{ type: 'text', name: "#{f.object_name}[keywords][]", 'aria-label': 'Keyword' }
+        %input.form-control{ type: 'text', name: "#{f.object_name}[keywords][]", 'aria-label': 'Keyword', data: { action: 'input->keyword-list#syncRequired' } }
         %button.btn.btn-danger{ type: 'button', 'aria-label': 'Remove keyword', data: { action: 'click->keyword-list#remove' } }
           %i.fa-solid.fa-minus{ 'aria-hidden': 'true' }
     .input-group.mb-1
-      %input.form-control{ type: 'text', name: "#{f.object_name}[keywords][]", placeholder: 'Add a keyword…', 'aria-label': 'Add a keyword', data: { 'keyword-list-target': 'entry', action: 'keydown->keyword-list#addOnEnter' } }
+      %input.form-control{ type: 'text', name: "#{f.object_name}[keywords][]", placeholder: 'Add a keyword…', 'aria-label': 'Add a keyword', data: { 'keyword-list-target': 'entry', action: 'keydown->keyword-list#addOnEnter input->keyword-list#syncRequired' } }
       %button.btn.btn-success{ type: 'button', 'aria-label': 'Add keyword', data: { action: 'click->keyword-list#add' } }
         %i.fa-solid.fa-plus{ 'aria-hidden': 'true' }
     .form-text.text-muted Press + to add a keyword. At least one is required.
