@@ -32,6 +32,16 @@ module IiifSigner
     # Embeds a time-boxed token in the IIIF identifier itself, so it survives
     # into every tile URL OpenSeadragon derives from the image service base.
     #
+    # The expiry is quantized to a `ttl`-sized window aligned to the epoch, so
+    # every view within that window mints a byte-identical identifier — and thus
+    # a stable Cantaloupe derivative-cache key. A fresh wall-clock `exp` per call
+    # would give each page load a unique identifier, defeating that cache and
+    # re-decoding every tile cold on every reload. Rounding up to the window
+    # *after* next keeps the token valid for [ttl, 2*ttl), so one minted anywhere
+    # in a window always has at least `ttl` left and tiles never 403 mid-view
+    # near a boundary. The delegate reads whatever `exp` it is handed, so its
+    # HMAC message ("<identifier>|<exp>") is unchanged.
+    #
     # @param url [String] a gated IIIF image base (`…/iiif/3/gated-<uuid>.jp2`).
     # @return [String] the base with the identifier rewritten to
     #   `<exp>~<sig>~gated-<uuid>.jp2` (`~` avoids Cantaloupe's `;` meta-delimiter
@@ -39,7 +49,8 @@ module IiifSigner
     def sign_identifier(url, ttl: IDENTIFIER_TTL)
       uri = URI.parse(url)
       identifier = File.basename(uri.path)
-      exp = ttl.from_now.to_i
+      window = ttl.to_i
+      exp = ((Time.now.to_i / window) + 2) * window
       sig = hmac("#{identifier}|#{exp}")
       uri.path = "#{File.dirname(uri.path)}/#{exp}~#{sig}~#{identifier}"
       uri.to_s
