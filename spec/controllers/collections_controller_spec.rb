@@ -204,6 +204,16 @@ describe CollectionsController do
     ensure
       AtlasRb::Collection.tombstone(created_id) if created_id
     end
+
+    it 'rejects a blank title without minting a collection' do
+      allow(AtlasRb::Collection).to receive(:create)
+
+      post :create, params: { parent_id: community.id, collection: { title: '', description: 'Y' } }
+
+      expect(AtlasRb::Collection).not_to have_received(:create)
+      expect(flash[:alert]).to eq('Please provide a title.')
+      expect(response).to redirect_to(new_collection_path(parent_id: community.id))
+    end
   end
 
   # The personal-workspace trail is isolated on the private seam (the show stack

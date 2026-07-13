@@ -55,6 +55,11 @@ class CommunitiesController < CatalogController
 
   def create
     permitted = params.require(:community).permit(:title, :description).to_h
+    # Guard before minting: a blank title would otherwise produce an untitled
+    # resource (MODSMerge leaves a blank title untouched) and still provision
+    # showcases against that orphan. Client-side `required` is the first line;
+    # this is the backstop (JS off / direct POST).
+    return redirect_to(new_community_path(parent_id: params[:parent_id])) if title_missing?(permitted)
 
     c = AtlasRb::Community.create(params[:parent_id])
     save_descriptive!('Community', c.id, title: permitted['title'], description: permitted['description'])
