@@ -104,7 +104,11 @@ class MultipageIngestJob < ApplicationJob
       return if ingest.blob_attached_at.present?
       return ingest.update!(blob_attached_at: Time.current) if verify && file_set_has_content?(ingest)
 
-      AtlasRb::FileSet.update(ingest.file_set_pid, staged)
+      # Record the manifest's page filename on the Blob. The binary PATCHes as
+      # octet-stream carrying no name, so without this Atlas mints an
+      # extensionless placeholder (master_<token>) that surfaces in the
+      # download box — pass source_filename so the page keeps its real name.
+      AtlasRb::FileSet.update(ingest.file_set_pid, staged, original_filename: ingest.source_filename)
       ingest.update!(blob_attached_at: Time.current)
     end
 

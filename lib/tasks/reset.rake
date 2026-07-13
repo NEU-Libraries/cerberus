@@ -194,7 +194,7 @@ namespace :reset do
       ['multipage/bdr_43889.tif', 'multipage/bdr_43890.tif'].each_with_index do |page, index|
         page_path = "/home/cerberus/web/spec/fixtures/files/#{page}"
         file_set  = AtlasRb::FileSet.create(paged_work['id'], 'image', position: index + 1)
-        AtlasRb::FileSet.update(file_set['id'], page_path)
+        AtlasRb::FileSet.update(file_set['id'], page_path, original_filename: File.basename(page))
         page_master = MasterJp2.call(path: page_path)
         AtlasRb::FileSet.set_iiif_service(file_set['id'], page_master.gated_base)
         # Page 1's image seeds the Work-level thumbnail (the catalog/gallery tile).

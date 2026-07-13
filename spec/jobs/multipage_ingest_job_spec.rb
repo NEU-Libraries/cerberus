@@ -39,7 +39,8 @@ RSpec.describe MultipageIngestJob, type: :job do
 
       expect(AtlasRb::FileSet).to have_received(:create)
         .with('w-1', 'image', position: 2, idempotency_key: 'idem-2')
-      expect(AtlasRb::FileSet).to have_received(:update).with('fs-2', staged_path)
+      expect(AtlasRb::FileSet).to have_received(:update)
+        .with('fs-2', staged_path, original_filename: 'page2.tif')
       expect(FileUtils).to have_received(:mv).with(extracted_path, staged_path)
     end
 
@@ -105,7 +106,8 @@ RSpec.describe MultipageIngestJob, type: :job do
       described_class.new.perform(ingest.id)
 
       expect(AtlasRb::FileSet).not_to have_received(:create)
-      expect(AtlasRb::FileSet).to have_received(:update).with('fs-2', staged_path)
+      expect(AtlasRb::FileSet).to have_received(:update)
+        .with('fs-2', staged_path, original_filename: 'page2.tif')
     end
 
     it 'skips both Atlas writes when both stamps are present' do
@@ -164,7 +166,8 @@ RSpec.describe MultipageIngestJob, type: :job do
 
         described_class.new.perform(ingest.id)
 
-        expect(AtlasRb::FileSet).to have_received(:update).with('fs-2', staged_path).once
+        expect(AtlasRb::FileSet).to have_received(:update)
+          .with('fs-2', staged_path, original_filename: 'page2.tif').once
       end
     end
 
@@ -175,7 +178,8 @@ RSpec.describe MultipageIngestJob, type: :job do
       described_class.new.perform(ingest.id)
 
       expect(FileUtils).not_to have_received(:mv)
-      expect(AtlasRb::FileSet).to have_received(:update).with('fs-2', staged_path)
+      expect(AtlasRb::FileSet).to have_received(:update)
+        .with('fs-2', staged_path, original_filename: 'page2.tif')
     end
   end
 
