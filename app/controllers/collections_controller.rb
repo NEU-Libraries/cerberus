@@ -50,6 +50,11 @@ class CollectionsController < CatalogController
 
   def create
     permitted = params.expect(collection: [:title, :description]).to_h
+    # Guard before minting: a blank title would otherwise produce an untitled
+    # Collection (MODSMerge leaves a blank title untouched). Client-side
+    # `required` is the first line; this is the backstop.
+    return redirect_to(new_collection_path(parent_id: params[:parent_id])) if title_missing?(permitted)
+
     c = AtlasRb::Collection.create(params[:parent_id])
     save_descriptive!('Collection', c.id, title: permitted['title'], description: permitted['description'])
     redirect_to collection_path(c.id)

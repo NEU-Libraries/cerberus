@@ -69,6 +69,17 @@ module Transformable # rubocop:disable Metrics/ModuleLength
     true
   end
 
+  # Create-path title guard (containers): flashes and returns true when the
+  # permitted params carry no title, so the controller can redirect back before
+  # minting an Atlas resource — a blank title otherwise yields a silently
+  # untitled object (MODSMerge leaves a blank title untouched).
+  def title_missing?(permitted)
+    return false if permitted['title'].present?
+
+    flash[:alert] = 'Please provide a title.'
+    true
+  end
+
   # Permission / embargo fields, sent to Atlas's metadata PATCH. These are NOT
   # MODS and never touch the descriptive document. Thumbnails ride the same
   # edit form but are persisted separately by apply_thumbnail — they are

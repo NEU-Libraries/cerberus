@@ -287,6 +287,18 @@ describe CommunitiesController do
       expect(ShowcaseProvisioner).to have_received(:call).with(community_id: 'newcomm')
       expect(response).to redirect_to(community_path('newcomm'))
     end
+
+    it 'rejects a blank title without minting a community or provisioning showcases' do
+      allow(AtlasRb::Community).to receive(:create)
+      allow(ShowcaseProvisioner).to receive(:call)
+
+      post :create, params: { community: { title: '', description: 'Y' } }
+
+      expect(AtlasRb::Community).not_to have_received(:create)
+      expect(ShowcaseProvisioner).not_to have_received(:call)
+      expect(flash[:alert]).to eq('Please provide a title.')
+      expect(response).to redirect_to(new_community_path)
+    end
   end
 
   # The v1-faithful hide-if-empty gate. Excluding empties at query time (vs a
