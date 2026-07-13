@@ -18,7 +18,7 @@
 # message formats here and in the delegate in lock-step.
 module IiifSigner
   DOWNLOAD_TTL   = 5.minutes
-  IDENTIFIER_TTL = 1.hour
+  IDENTIFIER_TTL = 1.day
 
   class << self
     # @param url [String] a gated IIIF image URL (a Delegate's `uri`).

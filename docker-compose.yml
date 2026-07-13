@@ -66,7 +66,7 @@ services:
       # disk instead of re-decoding the source JP2 on every request (the client
       # cache above only sets browser Cache-Control headers — no server effect).
       # The info cache is on by default. Persisted to the iiif-cache volume so it
-      # survives container recreation. Gated deep-zoom identifiers rotate ~hourly
+      # survives container recreation. Gated deep-zoom identifiers rotate ~daily
       # (IiifSigner quantizes their expiry to a stable window), so their cache
       # entries orphan over time — the finite TTL plus the background worker reap
       # them; lower the TTL if the cache volume grows too large.

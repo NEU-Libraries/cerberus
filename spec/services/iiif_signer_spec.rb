@@ -44,7 +44,7 @@ RSpec.describe IiifSigner do
     end
 
     it 'quantizes exp to a ttl-sized epoch-aligned window valid for [ttl, 2*ttl)' do
-      window = 1.hour.to_i
+      window = 1.day.to_i
       exp = parts(IiifSigner.sign_identifier(base)).first.to_i
 
       # Aligned to the window so repeated views land on the same value, and
