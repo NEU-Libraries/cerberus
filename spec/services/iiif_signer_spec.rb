@@ -41,7 +41,22 @@ RSpec.describe IiifSigner do
 
       expect(real).to eq('gated-abc.jp2')
       expect(sig).to eq(OpenSSL::HMAC.hexdigest('SHA256', secret, "gated-abc.jp2|#{exp}"))
-      expect(exp.to_i).to be_within(5).of(1.hour.from_now.to_i)
+    end
+
+    it 'quantizes exp to a ttl-sized epoch-aligned window valid for [ttl, 2*ttl)' do
+      window = 1.hour.to_i
+      exp = parts(IiifSigner.sign_identifier(base)).first.to_i
+
+      # Aligned to the window so repeated views land on the same value, and
+      # always at least `ttl` in the future so a token never expires mid-view.
+      expect(exp % window).to eq(0)
+      expect(exp - Time.now.to_i).to be_between(window - 5, 2 * window)
+    end
+
+    it 'mints a byte-identical identifier for repeated views in the same window' do
+      # The stable cache key that lets Cantaloupe serve cached tiles across
+      # reloads instead of re-decoding the source each time.
+      expect(IiifSigner.sign_identifier(base)).to eq(IiifSigner.sign_identifier(base))
     end
 
     it 'preserves host and path prefix so a proxied /cantaloupe base still resolves' do
@@ -51,9 +66,12 @@ RSpec.describe IiifSigner do
       expect(signed).to end_with('~gated-abc.jp2')
     end
 
-    it 'honors a custom ttl' do
-      expect(parts(IiifSigner.sign_identifier(base, ttl: 10.minutes)).first.to_i)
-        .to be_within(5).of(10.minutes.from_now.to_i)
+    it 'honors a custom ttl as the quantization window' do
+      window = 10.minutes.to_i
+      exp = parts(IiifSigner.sign_identifier(base, ttl: 10.minutes)).first.to_i
+
+      expect(exp % window).to eq(0)
+      expect(exp - Time.now.to_i).to be_between(window - 5, 2 * window)
     end
   end
 

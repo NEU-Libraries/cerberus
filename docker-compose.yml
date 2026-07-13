@@ -4,6 +4,7 @@ volumes:
   db:
   storage:
   iiif:
+  iiif-cache:
   uploads:
 services:
   db:
@@ -61,6 +62,21 @@ services:
       CANTALOUPE_PROCESSOR_MANUALSELECTIONSTRATEGY_JP2: 'OpenJpegProcessor'
       CANTALOUPE_PROCESSOR_SELECTION_STRATEGY: 'ManualSelectionStrategy'
       CANTALOUPE_CACHE_CLIENT_ENABLED: 'true'
+      # Server-side derivative cache: re-serve processed tiles/derivatives from
+      # disk instead of re-decoding the source JP2 on every request (the client
+      # cache above only sets browser Cache-Control headers — no server effect).
+      # The info cache is on by default. Persisted to the iiif-cache volume so it
+      # survives container recreation. Gated deep-zoom identifiers rotate ~hourly
+      # (IiifSigner quantizes their expiry to a stable window), so their cache
+      # entries orphan over time — the finite TTL plus the background worker reap
+      # them; lower the TTL if the cache volume grows too large.
+      CANTALOUPE_CACHE_SERVER_DERIVATIVE_ENABLED: 'true'
+      CANTALOUPE_CACHE_SERVER_DERIVATIVE: 'FilesystemCache'
+      CANTALOUPE_FILESYSTEMCACHE_PATHNAME: /var/cache/cantaloupe
+      CANTALOUPE_CACHE_SERVER_DERIVATIVE_TTL_SECONDS: '2592000'
+      CANTALOUPE_CACHE_SERVER_WORKER_ENABLED: 'true'
+    volumes:
+      - iiif-cache:/var/cache/cantaloupe
   solr:
     image: nakatomi/blacklight-solr
     ports:
