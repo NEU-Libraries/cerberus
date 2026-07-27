@@ -25,6 +25,8 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
   IN_PROGRESS_NOTICE = 'This work is still being processed and cannot be edited yet.'
   PUBLISH_UNAVAILABLE = 'That publish destination is unavailable. ' \
                         'Please try again or deposit to your workspace.'
+  PUBLISH_LINK_FAILED = "File uploaded — please review the metadata. It couldn't be added to the " \
+                        'community showcase; contact DRS staff if this persists.'
   UNSUPPORTED_AV = 'DRS streams H.264/AAC video and AAC/MP3 audio — please convert your file first.'
 
   before_action :authorize_show!, only: [:downloads, :manifest]
@@ -100,7 +102,8 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
       create_in_workspace(file)
     end
 
-    redirect_to metadata_work_path(@work.id), notice: 'File uploaded — please review the metadata.'
+    notice = @publish_link_failed ? PUBLISH_LINK_FAILED : 'File uploaded — please review the metadata.'
+    redirect_to metadata_work_path(@work.id), notice: notice
   end
 
   # Metadata + Permissions tabs are separate forms that both PATCH here with
