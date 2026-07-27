@@ -69,7 +69,7 @@ gem 'devise'
 gem 'devise-i18n'
 gem 'diffy' # line-diff for the MODS version-history page (wraps system diff)
 gem 'haml'
-gem 'kataba', '>= 1.0.3'
+gem 'kataba', '>= 1.1.2'
 gem 'libreconv'
 gem 'loaf'
 gem 'mini_exiftool'
