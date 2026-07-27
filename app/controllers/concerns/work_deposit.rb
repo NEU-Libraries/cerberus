@@ -27,10 +27,24 @@ module WorkDeposit
     # surfaced into the chosen community genre showcase via a linked-member edge
     # (the conduit). The +target+ ({ root_id:, showcase_id: }) is resolved and
     # guarded by WorksController#create (publish_target) before we get here.
+    #
+    # The showcase link is the one part of this Atlas doesn't yet let a plain
+    # depositor do (see the showcase_publish_permission_gap report) — every
+    # non-admin gets AtlasRb::ForbiddenError here today. That's caught locally
+    # rather than left to the app-wide rescue_from: by this point the Work is
+    # already created and homed in the depositor's own space (untouched by the
+    # failure), so the deposit itself succeeded — only the promotional showcase
+    # surfacing didn't. @publish_link_failed lets #create pick a flash that says
+    # so, instead of either a false "published" notice or a 403 page that hides
+    # a Work the depositor can already see in their workspace.
     def create_published(file, target)
       @work = AtlasRb::Work.create(target[:root_id], depositor: current_user&.nuid)
       finalize_new_work(file, target[:root_id])
       AtlasRb::Work.add_linked_member(@work.id, target[:showcase_id])
+    rescue AtlasRb::ForbiddenError => e
+      Rails.logger.warn("[publish] add_linked_member forbidden for work #{@work.id} " \
+                        "-> #{target[:showcase_id]}: #{e.message}")
+      @publish_link_failed = true
     end
 
     # Shared tail of both deposit branches: seed the title via the structure-safe

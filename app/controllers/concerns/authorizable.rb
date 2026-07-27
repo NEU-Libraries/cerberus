@@ -49,6 +49,16 @@ module Authorizable
       render template: 'errors/forbidden', status: :forbidden
     end
 
+    # Atlas is the real authorization boundary; Cerberus's own gates are UX/
+    # defense-in-depth (see Ability's class comment). When the two diverge —
+    # Cerberus's gate said yes, Atlas's said no — the write never happened, so
+    # this is a plain 403, not a 500: the same friendly page CanCan::AccessDenied
+    # renders, rather than the default Rails exception trace (which, unhandled,
+    # leaks the request's params dump and file paths to the end user).
+    rescue_from AtlasRb::ForbiddenError do
+      render template: 'errors/forbidden', status: :forbidden
+    end
+
     # Two flavours of "resource doesn't exist" land here:
     #
     #   1. `AtlasRb::Resource.find` (and its Work/Collection/Community

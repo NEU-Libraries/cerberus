@@ -225,6 +225,25 @@ describe WorksController do
         AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
       end
 
+      it 'publish branch still saves the work when Atlas forbids the showcase link (Atlas gap)' do
+        person = AtlasRb::Mash.new('nuid' => user.nuid, 'personal_root_id' => collection.id,
+                                   'affiliated_community_ids' => ['comm1'])
+        allow(AtlasRb::Person).to receive(:resolve).and_return([person])
+        allow(ShowcaseFinder).to receive(:call).and_return('showcasenoid')
+        allow(AtlasRb::Work).to receive(:add_linked_member).and_raise(AtlasRb::ForbiddenError.new('forbidden'))
+        allow(AtlasRb::Work).to receive(:create).and_call_original
+
+        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+                                deposit_to: 'publish', publish_community_id: 'comm1',
+                                publish_genre: 'Datasets' }
+
+        expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
+        expect(response).to redirect_to(metadata_work_path(assigns(:work).id))
+        expect(flash[:notice]).to eq(described_class::PUBLISH_LINK_FAILED)
+      ensure
+        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
       it 'publish branch degrades to the form when no personal root is available (Atlas gap)' do
         allow(AtlasRb::Person).to receive(:resolve).and_return([]) # no Person → no root
         allow(AtlasRb::Work).to receive(:create).and_call_original
