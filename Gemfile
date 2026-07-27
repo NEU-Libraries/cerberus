@@ -56,7 +56,7 @@ gem 'bootsnap', require: false
 # >= 1.8.5 ships the per-tier derivative-permission binding
 # (Work.set_derivative_permissions; assets carry `gated`/`permission`) the
 # gated-derivative feature consumes, plus the find-on-410 tombstone fix.
-gem 'atlas_rb', '>= 1.8.5'
+gem 'atlas_rb', '>= 1.9.1'
 gem 'blacklight', '>= 8.0', '< 9.0'
 gem 'blacklight-gallery'
 gem 'bootstrap'
