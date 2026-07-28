@@ -66,6 +66,13 @@
   pointer-events: none;
 }
 
+// Embargoed override — opaque $danger, not the translucent gray every other
+// pill state uses. Downloads being withheld is the one fact worth reading at
+// a glance rather than blending into the thumbnail.
+.thumb-type-pill--embargoed {
+  background-color: $danger;
+}
+
 .document-thumbnail img {
   position: absolute;
   margin: auto;

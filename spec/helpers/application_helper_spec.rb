@@ -126,4 +126,45 @@ describe ApplicationHelper do
                                           'a_linked_member_of_ssim' => ['id-uuid-here'])).to be_nil
     end
   end
+
+  describe '#pill_label' do
+    it 'labels an embargoed document "Embargoed" ahead of Featured/People/type' do
+      doc = SolrDocument.new(id: '1', internal_resource_tesim: ['Work'], featured_bsi: true,
+                             embargo_release_date_dtsi: (Date.current + 30).to_s)
+      expect(helper.pill_label(doc)).to eq('Embargoed')
+    end
+
+    it 'labels a featured document "Featured" when not embargoed' do
+      doc = SolrDocument.new(id: '1', internal_resource_tesim: ['Collection'], featured_bsi: true)
+      expect(helper.pill_label(doc)).to eq('Featured')
+    end
+
+    it 'labels the synthetic Faculty & Staff row "People"' do
+      doc = SolrDocument.new(id: '1', internal_resource_tesim: ['Community'], people_browse_bsi: true)
+      expect(helper.pill_label(doc)).to eq('People')
+    end
+
+    it 'falls back to the resource type' do
+      doc = SolrDocument.new(id: '1', internal_resource_tesim: ['Collection'])
+      expect(helper.pill_label(doc)).to eq('Collection')
+    end
+  end
+
+  describe '#embargo_notice' do
+    it 'renders the release date for an embargoed document' do
+      doc = SolrDocument.new(id: '1', embargo_release_date_dtsi: '2028-07-16')
+      html = helper.embargo_notice(doc)
+      expect(html).to include('Contents available July 16, 2028')
+      expect(html).to include('text-danger')
+    end
+
+    it 'renders nothing for a non-embargoed document' do
+      expect(helper.embargo_notice(SolrDocument.new(id: '1'))).to be_nil
+    end
+
+    it 'renders nothing once the embargo has lapsed' do
+      doc = SolrDocument.new(id: '1', embargo_release_date_dtsi: (Date.current - 1).to_s)
+      expect(helper.embargo_notice(doc)).to be_nil
+    end
+  end
 end

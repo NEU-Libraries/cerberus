@@ -354,10 +354,13 @@ class CatalogController < ApplicationController
   # context), so the media's img→fallback nextElementSibling onerror swap is
   # unaffected.
   def iiif_thumbnail(document, *_args)
-    # Pill text via the shared helper: "Featured" for showcases, "People" for the
-    # synthetic Faculty & Staff browse row, otherwise the resource type. Same
-    # restrained, translucent type-pill styling as every tile — not a loud chip.
-    pill = view_context.content_tag(:span, view_context.pill_label(document), class: 'thumb-type-pill')
+    # Pill text via the shared helper: "Embargoed" first, then "Featured" for
+    # showcases, "People" for the synthetic Faculty & Staff browse row,
+    # otherwise the resource type. Embargoed gets the opaque red variant —
+    # the one pill state worth reading at a glance over the translucent
+    # default every other tile uses.
+    pill_class = document.try(:embargoed?) ? 'thumb-type-pill thumb-type-pill--embargoed' : 'thumb-type-pill'
+    pill = view_context.content_tag(:span, view_context.pill_label(document), class: pill_class)
     view_context.safe_join([thumbnail_media(document), pill])
   end
 

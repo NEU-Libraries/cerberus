@@ -61,6 +61,25 @@ describe WorksController do
         expect(response.body).not_to match(%r{>\s*Edit\s*</a>})
       end
     end
+
+    it 'does not show the embargo banner when there is no embargo' do
+      get :show, params: { id: work.id }
+      expect(response.body).not_to include('under embargo')
+    end
+
+    context 'when the work is under an active embargo' do
+      before do
+        AtlasRb::Work.metadata(work.id,
+                               { 'permissions' => { 'read' => ['public'], 'embargo' => (Date.current + 30).to_s } },
+                               nuid: '000000004')
+      end
+
+      it 'shows the embargo banner with the release date, for any viewer' do
+        get :show, params: { id: work.id }
+        expect(response.body).to include('under embargo')
+        expect(response.body).to include((Date.current + 30).strftime('%B %-d, %Y'))
+      end
+    end
   end
 
   describe 'downloads' do
@@ -75,6 +94,38 @@ describe WorksController do
       expect(response).to render_template('works/downloads')
       expect(response).not_to render_template(layout: 'application')
       expect(response.body).to include('downloads-modal-frame')
+    end
+
+    context 'when the work is under an active embargo' do
+      before do
+        AtlasRb::Work.metadata(work.id,
+                               { 'permissions' => { 'read' => ['public'], 'embargo' => (Date.current + 30).to_s } },
+                               nuid: '000000004')
+        AtlasRb::Blob.create(work.id, '/home/cerberus/web/spec/fixtures/files/image.png', 'image.png', nuid: '000000004')
+      end
+
+      it 'withholds downloads from a guest' do
+        get :downloads, params: { id: work.id }
+        expect(response.body).to include('No downloads available.')
+      end
+
+      it 'withholds downloads from a signed-in non-staff user' do
+        sign_in User.new(email: 'viewer@example.com', nuid: '000000005', role: 'standard', groups: ['editors'])
+        get :downloads, params: { id: work.id }
+        expect(response.body).to include('No downloads available.')
+      end
+
+      it 'allows downloads for a staff (grouper) member' do
+        sign_in User.new(email: 'staff@example.com', nuid: '000000002', groups: [Permissions::STAFF_EDIT_GROUP])
+        get :downloads, params: { id: work.id }
+        expect(response.body).not_to include('No downloads available.')
+      end
+
+      it 'allows downloads for an Admin' do
+        sign_in User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin')
+        get :downloads, params: { id: work.id }
+        expect(response.body).not_to include('No downloads available.')
+      end
     end
   end
 
