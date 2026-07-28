@@ -76,7 +76,10 @@ class DownloadsController < ApplicationController
     # the work-level gate already passed, and a blob absent from the assets list
     # is an edge case, not a gate to bypass. The resolved entry is memoized
     # (@derivative_asset) so show can branch zip-vs-raw off its classification
-    # without a second assets fetch.
+    # without a second assets fetch. An active embargo on the containing Work
+    # withholds this Blob regardless of its own gate, unless the effective user
+    # can bypass it — a second Atlas round-trip (the Blob's own permissions,
+    # fetched by authorize_show!, don't carry the Work's embargo).
     def authorize_derivative_read!
       work_id = AtlasRb::Blob.work(params[:id], nuid: effective_user&.nuid)
       return if work_id.blank?
@@ -85,6 +88,7 @@ class DownloadsController < ApplicationController
                                        .find { |a| a['noid'] == params[:id] }
       return if @derivative_asset.nil?
 
+      deny_if_embargoed!(work_id)
       authorize! :read, derivative_tier_document(@derivative_asset)
     end
 end

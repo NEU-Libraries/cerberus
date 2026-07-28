@@ -8,7 +8,12 @@ RSpec.describe 'Derivative downloads', type: :request do
   let(:work_id) { 'w-1' }
   let(:uri) { 'https://gated.example/iiif/3/abc.jp2/full/pct:75/0/default.jpg' }
 
-  before { allow(Rails.application.config.x.cerberus).to receive(:iiif_signing_secret).and_return('s3cret') }
+  before do
+    allow(Rails.application.config.x.cerberus).to receive(:iiif_signing_secret).and_return('s3cret')
+    # The embargo gate reads the Work's own permissions; default unembargoed,
+    # overridden per example in the "under an active embargo" context below.
+    allow(AtlasRb::Resource).to receive(:permissions).with(work_id).and_return(AtlasRb::Mash.new('embargo' => ''))
+  end
 
   def stub_tier(gated:, permission:, nuid:, use: 'large_image')
     allow(AtlasRb::Work).to receive(:assets).with(work_id, nuid: nuid)
@@ -57,5 +62,33 @@ RSpec.describe 'Derivative downloads', type: :request do
     get derivative_download_path(work_id, 'nonexistent')
 
     expect(response).to have_http_status(:not_found)
+  end
+
+  context 'under an active embargo' do
+    before do
+      allow(AtlasRb::Resource).to receive(:permissions).with(work_id)
+                                                       .and_return(AtlasRb::Mash.new('embargo' => (Date.current + 30).to_s))
+    end
+
+    it 'forbids an otherwise-public tier for a guest' do
+      stub_tier(gated: false, permission: ['public'], nuid: nil)
+      get derivative_download_path(work_id, 'large_image')
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it 'allows a member of the staff grouper group' do
+      sign_in User.new(email: 's@x.edu', password: 'password', nuid: '000000002',
+                       groups: [Permissions::STAFF_EDIT_GROUP])
+      stub_tier(gated: false, permission: ['public'], nuid: '000000002')
+      get derivative_download_path(work_id, 'large_image')
+      expect(response).to have_http_status(:found)
+    end
+
+    it 'allows an Admin' do
+      sign_in User.new(email: 'a@x.edu', password: 'password', nuid: '000000004', groups: [], role: 'admin')
+      stub_tier(gated: false, permission: ['public'], nuid: '000000004')
+      get derivative_download_path(work_id, 'large_image')
+      expect(response).to have_http_status(:found)
+    end
   end
 end

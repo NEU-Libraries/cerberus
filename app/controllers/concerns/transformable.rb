@@ -37,11 +37,7 @@ module Transformable # rubocop:disable Metrics/ModuleLength
   def form_preparation(raw_permissions)
     @groups = pretty_user_permissions(current_user&.groups)
     @public = raw_permissions&.read&.include?('public')
-    @embargo = begin
-      Date.parse(raw_permissions&.embargo.to_s).to_s
-    rescue Date::Error, TypeError
-      ''
-    end
+    @embargo = Embargo.release_date(raw_permissions&.embargo).to_s
     @permissions = pretty_resource_permissions(raw_permissions)
   end
 

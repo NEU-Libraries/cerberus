@@ -63,6 +63,14 @@ class User
     Array(groups).include?(raw_group)
   end
 
+  # The only carve-out from an active embargo's download withholding: DRS
+  # staff (grouper) or an Atlas Admin. Distinct from STAFF_EDIT_GROUP's usual
+  # role (an always-on edit group) — here it's read-side, standing in for
+  # "someone who can confirm this restriction is intentional."
+  def can_bypass_embargo?
+    admin? || member_of?(Permissions::STAFF_EDIT_GROUP)
+  end
+
   def to_s
     pretty_name
   end
