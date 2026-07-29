@@ -7,4 +7,9 @@ module Permissions
   # may mint a personal-access JWT to drive the Atlas API directly. Purely a
   # Cerberus-side policy on who sees the feature; Atlas doesn't check this group.
   API_GROUP = 'northeastern:drs:repository:api'
+
+  # The group half of the devolved-admin tier's :privileged-role + group pair
+  # (see User#admin_delegate?). Mirrors the matching Atlas-side constant in
+  # Atlas's own Permissions concern — both sides gate on the same identifier.
+  ADMIN_GROUP = 'northeastern:drs:repository:admin'
 end

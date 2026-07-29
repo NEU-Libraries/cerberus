@@ -3,11 +3,16 @@
 module Admin
   # Streams the bytes of a *prior* version of a Blob (the "download the superseded
   # file" half of the replace surface). The version-pinned twin of
-  # DownloadsController#show — admin-gated via BaseController, and chunked through
-  # ActionController::Live so a large superseded file is never buffered in memory.
-  # Lives apart from FilesController so Live's stream semantics don't bleed onto
-  # the finder/mutation actions.
+  # DownloadsController#show — chunked through ActionController::Live so a large
+  # superseded file is never buffered in memory. Reachable by :admin and by the
+  # devolved-admin tier (User#admin_delegate?), matching FilesController's gate —
+  # this is the other half of the same "replace a file" surface. Lives apart from
+  # FilesController so Live's stream semantics don't bleed onto the
+  # finder/mutation actions.
   class FileVersionsController < BaseController
+    skip_before_action :require_admin
+    before_action :require_admin_or_delegate
+
     include ProxyUnbuffered
 
     def content

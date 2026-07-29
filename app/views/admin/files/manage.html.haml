@@ -6,8 +6,12 @@
       %i.fa-solid.fa-arrows-rotate{'aria-hidden' => 'true'}
       Replace a file
     %span.admin-actions__subtitle
-      %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
-      Admin-only
+      - if current_user&.admin?
+        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+        Admin-only
+      - else
+        %i.fa-solid.fa-user-shield{'aria-hidden' => 'true'}
+        Delegated admin access
 
   %p.admin-actions__lede
     Replacing a file in

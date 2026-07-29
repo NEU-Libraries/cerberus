@@ -3,10 +3,15 @@
 require 'csv'
 
 module Admin
-  # Repository-wide usage analytics over the derived impression rollups. Admin-
-  # gated (inherits Admin::BaseController). Reads never touch raw rows — only the
-  # human-counts / continuous-aggregate / container rollups (see ImpressionsReport).
+  # Repository-wide usage analytics over the derived impression rollups.
+  # Reachable by :admin and by the devolved-admin tier (User#admin_delegate?) —
+  # purely local reads (ImpressionsReport, Cerberus's own TimescaleDB rollups),
+  # no Atlas dependency either way. Reads never touch raw rows — only the
+  # human-counts / continuous-aggregate / container rollups.
   class ImpressionsController < BaseController
+    skip_before_action :require_admin
+    before_action :require_admin_or_delegate
+
     breadcrumb_for 'Usage analytics', :admin_impressions_path
 
     XLSX_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'

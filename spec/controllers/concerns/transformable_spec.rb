@@ -69,7 +69,7 @@ describe Transformable do
 
   describe '#form_preparation' do
     before do
-      host.current_user = double('User', groups: ['librarians'])
+      host.current_user = double('User', groups: ['librarians'], admin?: false, admin_delegate?: false)
     end
 
     it 'parses a valid embargo date and assigns flags / permissions' do
@@ -95,6 +95,30 @@ describe Transformable do
 
       expect(host.instance_variable_get(:@embargo)).to eq('')
       expect(host.instance_variable_get(:@public)).to be_falsey
+    end
+  end
+
+  describe '#groups_for_permissions_picker' do
+    it "scopes to the acting user's own groups for a non-admin, non-delegate user" do
+      host.current_user = double('User', groups: %w[librarians curators], admin?: false, admin_delegate?: false)
+
+      expect(host.groups_for_permissions_picker).to eq([['librarians', 'Pretty(librarians)'],
+                                                        ['curators', 'Pretty(curators)']])
+    end
+
+    it 'returns the full Group registry for an :admin (fixes the empty-picker gap for admins with no personal groups)' do
+      Group.create!(raw: 'northeastern:drs:repository:zzz', cosmetic: 'Alpha')
+      host.current_user = double('User', groups: [], admin?: true, admin_delegate?: false)
+
+      expect(host.groups_for_permissions_picker).to eq([['northeastern:drs:repository:zzz', 'Alpha']])
+    end
+
+    it 'returns the full Group registry for a devolved-admin delegate' do
+      Group.create!(raw: 'northeastern:drs:repository:zzz', cosmetic: 'Alpha')
+      host.current_user = double('User', groups: ['northeastern:drs:repository:admin'], admin?: false,
+                                          admin_delegate?: true)
+
+      expect(host.groups_for_permissions_picker).to eq([['northeastern:drs:repository:zzz', 'Alpha']])
     end
   end
 

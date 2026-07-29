@@ -13,10 +13,19 @@ RSpec.describe 'Admin::Files', type: :request do
     User.new(email: 'admin@example.com', password: 'password',
              nuid: '000000004', name: 'User, Admin', role: 'admin')
   end
+  # :privileged, but not in the admin group — the negative control that role
+  # alone is not sufficient for the devolved tier.
   let(:staff_user) do
     User.new(email: 'staff@example.com', password: 'password',
-             nuid: '000000002', name: 'Doe, Jane', role: 'privileged',
+             nuid: '000000006', name: 'Williams, Susan', role: 'privileged',
              groups: ['northeastern:drs:repository:staff'])
+  end
+  # :privileged + the admin group jointly — the devolved-admin tier (stock
+  # pilot user 000000002). Replace-a-file is one of the five devolved surfaces.
+  let(:delegate_user) do
+    User.new(email: 'delegate@example.com', password: 'password',
+             nuid: '000000002', name: 'Doe, Jane', role: 'privileged',
+             groups: ['northeastern:drs:repository:staff', 'northeastern:drs:repository:admin'])
   end
 
   def doc(noid:, title:, klass: 'Work')
@@ -53,6 +62,39 @@ RSpec.describe 'Admin::Files', type: :request do
         get '/admin/files'
         expect(response).to redirect_to(new_user_session_path)
       end
+    end
+  end
+
+  describe 'as a devolved-admin delegate' do
+    before { sign_in delegate_user }
+
+    it 'reaches the finder' do
+      get '/admin/files'
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'sees replaceable Blobs with version history, same as an admin' do
+      allow(AtlasRb::Work).to receive(:find).with('w1').and_return(OpenStruct.new(title: 'A Photograph'))
+      allow(AtlasRb::Work).to receive(:assets).with('w1').and_return(
+        [AtlasRb::Mash.new('noid' => 'b1', 'label' => 'report.pdf', 'use' => 'content',
+                           'mime_type' => 'application/pdf', 'size' => 1234)]
+      )
+      allow(AtlasRb::Blob).to receive(:versions).with('b1').and_return(
+        AtlasRb::Mash.new('versions' => [{ 'revision' => 1, 'version_id' => 'v1',
+                                          'created' => '2026-06-20T09:00:00Z',
+                                          'actor_nuid' => '000000002', 'digest' => 'sha512:bbbb' }])
+      )
+
+      get '/admin/files/manage', params: { work_id: 'w1' }
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('A Photograph', 'report.pdf', 'v1')
+    end
+
+    it 'replaces a file end-to-end, same as an admin' do
+      expect do
+        post '/admin/files/replace', params: { work_id: 'w1', blob_noid: 'b1', binary: upload }
+      end.to have_enqueued_job(FileReplacementJob)
+      expect(response).to redirect_to(admin_files_manage_path(work_id: 'w1'))
     end
   end
 

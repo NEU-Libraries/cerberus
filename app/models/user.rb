@@ -55,6 +55,16 @@ class User
     role.to_s.in?(%w[loader privileged admin])
   end
 
+  # The devolved-admin tier: :privileged role + the admin group, jointly —
+  # neither alone is sufficient (mirrors the Atlas-side Ability's identical
+  # pairing). Grants a named subset of Admin::BaseController surfaces below
+  # the full :admin role's blanket access; call sites combine this with
+  # admin? (`admin? || admin_delegate?`) since :admin always short-circuits
+  # and this predicate only covers the narrower non-admin case.
+  def admin_delegate?
+    privileged? && member_of?(Permissions::ADMIN_GROUP)
+  end
+
   # Grouper group membership test. `groups` is the IdP-asserted array carried
   # on the session-built User (nil for the guest fallback), so wrap in Array
   # before `include?` — the app-wide idiom, named here so group gates read as

@@ -14,10 +14,19 @@ RSpec.describe 'Admin::Tombstones', type: :request do
     User.new(email: 'admin@example.com', password: 'password',
              nuid: '000000004', name: 'User, Admin', role: 'admin')
   end
+  # :privileged, but not in the admin group.
   let(:staff_user) do
     User.new(email: 'staff@example.com', password: 'password',
-             nuid: '000000002', name: 'Doe, Jane', role: 'privileged',
+             nuid: '000000006', name: 'Williams, Susan', role: 'privileged',
              groups: [Permissions::STAFF_EDIT_GROUP])
+  end
+  # :privileged + the admin group jointly — the devolved-admin tier (stock
+  # pilot user 000000002). Restore-a-tombstone is NOT one of the five
+  # devolved surfaces; stays :admin-only.
+  let(:delegate_user) do
+    User.new(email: 'delegate@example.com', password: 'password',
+             nuid: '000000002', name: 'Doe, Jane', role: 'privileged',
+             groups: [Permissions::STAFF_EDIT_GROUP, Permissions::ADMIN_GROUP])
   end
 
   def tombstoned_doc(noid:, title:, klass: 'Work')
@@ -35,6 +44,12 @@ RSpec.describe 'Admin::Tombstones', type: :request do
   describe 'admin gate' do
     it 'forbids :privileged staff' do
       sign_in staff_user
+      get '/admin/tombstones'
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it 'forbids a devolved-admin delegate (this surface stays :admin-only)' do
+      sign_in delegate_user
       get '/admin/tombstones'
       expect(response).to have_http_status(:forbidden)
     end

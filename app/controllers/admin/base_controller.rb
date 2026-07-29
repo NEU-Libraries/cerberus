@@ -3,8 +3,15 @@
 module Admin
   # Shared base for admin-only surfaces. Anything mounted under
   # /admin/* should inherit from this so the role gate stays
-  # consistent. :admin role is the only tier that passes —
-  # :privileged is staff capability, not admin.
+  # consistent and fail-closed by default: only :admin passes here.
+  #
+  # A handful of subclasses (the devolved-admin surfaces — see
+  # User#admin_delegate?) opt into a broader gate by swapping
+  # `require_admin` for `require_admin_or_delegate` via
+  # `skip_before_action :require_admin` + `before_action
+  # :require_admin_or_delegate`. That's a per-controller override, not a
+  # change here — this class stays admin-only so a new /admin/* controller
+  # is admin-only unless it deliberately opts out.
   #
   # It also owns the shared breadcrumb trail (Administration / <section>). A
   # subclass declares its section via `breadcrumb_for` (label + index path
@@ -32,6 +39,17 @@ module Admin
 
       def require_admin
         return if current_user&.admin?
+
+        render template: 'errors/forbidden', status: :forbidden, layout: 'application'
+      end
+
+      # The devolved-admin tier's gate — :admin, or :privileged + the admin
+      # group jointly (User#admin_delegate?). Opt-in only: subclasses that
+      # need it skip `require_admin` and add this before_action instead: the
+      # class-level default above stays strict so a new /admin/* controller
+      # is admin-only unless it deliberately broadens.
+      def require_admin_or_delegate
+        return if current_user&.admin? || current_user&.admin_delegate?
 
         render template: 'errors/forbidden', status: :forbidden, layout: 'application'
       end

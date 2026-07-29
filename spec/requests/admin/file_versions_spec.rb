@@ -3,9 +3,16 @@
 require 'rails_helper'
 
 # Admin file-version content streaming — the "download a superseded version"
-# half of the replace surface. The gate is stub-free (it short-circuits before
-# the action body); the streaming happy-path runs against the live test Atlas,
-# the same way DownloadsController's spec does, to avoid stubbing inside the
+# half of the replace surface. Devolved: :admin and the devolved-admin tier
+# (User#admin_delegate?) both pass Cerberus's gate; Atlas's own `:read, Blob`
+# check (BlobsController#version_content) is already open to any authenticated
+# non-system/non-anonymous role via the unconditional `can :read, Resource`
+# floor (Blob < Resource) — see the retraction note in
+# atlas_admin_delegation_authorization.md — so the streaming action itself
+# needed no Atlas change, only the Cerberus-side gate broadening. The gate is
+# stub-free (it short-circuits before the action body); the streaming
+# happy-path runs against the live test Atlas, the same way
+# DownloadsController's spec does, to avoid stubbing inside the
 # ActionController::Live worker thread.
 RSpec.describe 'Admin::FileVersions', type: :request do
   include Devise::Test::IntegrationHelpers
@@ -14,14 +21,23 @@ RSpec.describe 'Admin::FileVersions', type: :request do
     User.new(email: 'admin@example.com', password: 'password',
              nuid: '000000004', name: 'User, Admin', role: 'admin')
   end
+  # :privileged, but not in the admin group — the negative control that role
+  # alone is not sufficient for the devolved tier.
   let(:staff_user) do
     User.new(email: 'staff@example.com', password: 'password',
-             nuid: '000000002', name: 'Doe, Jane', role: 'privileged',
+             nuid: '000000006', name: 'Williams, Susan', role: 'privileged',
              groups: ['northeastern:drs:repository:staff'])
+  end
+  # :privileged + the admin group jointly — the devolved-admin tier (stock
+  # pilot user 000000002).
+  let(:delegate_user) do
+    User.new(email: 'delegate@example.com', password: 'password',
+             nuid: '000000002', name: 'Doe, Jane', role: 'privileged',
+             groups: ['northeastern:drs:repository:staff', 'northeastern:drs:repository:admin'])
   end
 
   describe 'admin gate' do
-    it 'forbids :privileged staff' do
+    it 'forbids :privileged staff without the admin group' do
       sign_in staff_user
       get '/admin/files/b1/versions/v1/content'
       expect(response).to have_http_status(:forbidden)
@@ -55,6 +71,19 @@ RSpec.describe 'Admin::FileVersions', type: :request do
       # The version label is suffixed onto the basename; the parens get
       # percent-encoded by ContentDisposition, so assert on the bare label.
       expect(response.headers['Content-Disposition']).to include('attachment', version_id)
+    end
+
+    context 'as a devolved-admin delegate' do
+      before { sign_in delegate_user }
+
+      it 'streams the version, same as an admin' do
+        version_id = AtlasRb::Blob.versions(noid, nuid: '000000004')['versions'].last['version_id']
+
+        get "/admin/files/#{noid}/versions/#{version_id}/content"
+
+        expect(response).to have_http_status(:ok)
+        expect(response.headers['Content-Type']).to eq('image/png')
+      end
     end
   end
 end

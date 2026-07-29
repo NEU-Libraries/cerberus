@@ -1,11 +1,14 @@
 # frozen_string_literal: true
 
 module Admin
-  # Admin CRUD for Group display names — the cosmetic label paired with a
-  # Grouper group's raw colon-separated identifier. A row renames the group
+  # CRUD for Group display names — the cosmetic label paired with a Grouper
+  # group's raw colon-separated identifier. A row renames the group
   # everywhere ApplicationController#pretty_group resolves it; deleting a row is
   # safe (pretty_group falls back to the raw string), so unlike the Loader
-  # registry this surface keeps destroy.
+  # registry this surface keeps destroy. :admin-only — deliberately kept out
+  # of the devolved-admin tier (librarian call: naming/renaming groups
+  # system-wide stays a full-admin action even though it has no Atlas
+  # dependency either way).
   class GroupsController < BaseController
     PER_PAGE = 25
 

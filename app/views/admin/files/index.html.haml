@@ -7,8 +7,12 @@
       Replace a file
     .admin-registry__head-actions
       %span.admin-registry__subtitle
-        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
-        Admin-only
+        - if current_user&.admin?
+          %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+          Admin-only
+        - else
+          %i.fa-solid.fa-user-shield{'aria-hidden' => 'true'}
+          Delegated admin access
 
   .p-3
     %p.text-muted.small.mb-3

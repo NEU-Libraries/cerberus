@@ -58,7 +58,7 @@
                     <% end %>
                   </li>
                 <% end %>
-                <% if current_user.admin? %>
+                <% if current_user.admin? || current_user.admin_delegate? %>
                   <li>
                     <%= link_to admin_root_path, class: 'dropdown-item' do %>
                       <i class="fa-solid fa-screwdriver-wrench me-2" aria-hidden="true"></i>Admin
