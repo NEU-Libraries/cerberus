@@ -35,10 +35,25 @@ module Transformable # rubocop:disable Metrics/ModuleLength
   end
 
   def form_preparation(raw_permissions)
-    @groups = pretty_user_permissions(current_user&.groups)
+    @groups = groups_for_permissions_picker
     @public = raw_permissions&.read&.include?('public')
     @embargo = Embargo.release_date(raw_permissions&.embargo).to_s
     @permissions = pretty_resource_permissions(raw_permissions)
+  end
+
+  # The "add a group" dropdown's candidate list. An :admin or a devolved-admin
+  # delegate (User#admin_delegate?) needs the full known-group registry to do
+  # system-wide arbitrary permission adjustment — otherwise, scoped to the
+  # acting user's own Grouper memberships (the everyday case: you can only
+  # grant a group you're yourself in). Fixes a latent gap for full admins too:
+  # an :admin with no personal Grouper groups (a legitimate shape — the role
+  # itself is the grant) previously saw an empty picker.
+  def groups_for_permissions_picker
+    if current_user&.admin? || current_user&.admin_delegate?
+      Group.for_select
+    else
+      pretty_user_permissions(current_user&.groups)
+    end
   end
 
   # Descriptive (MODS) fields the simple Metadata form owns; symbol-keyed for

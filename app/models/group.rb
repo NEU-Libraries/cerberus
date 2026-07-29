@@ -15,4 +15,15 @@ class Group < ApplicationRecord
   validates :cosmetic, presence: true
 
   default_scope { order(:raw) }
+
+  # The full known-group registry as [raw, cosmetic] pairs, for the
+  # Permissions-tab "add a group" picker's admin/admin_delegate branch (see
+  # Transformable#form_preparation) — system-wide arbitrary permission
+  # adjustment needs every named group, not just the acting user's own
+  # memberships. Ordered by cosmetic (human-readable) name rather than the
+  # default raw-identifier order — reads better across ~75 rows in a
+  # dropdown than colon-separated identifier order.
+  def self.for_select
+    reorder(:cosmetic).pluck(:raw, :cosmetic)
+  end
 end

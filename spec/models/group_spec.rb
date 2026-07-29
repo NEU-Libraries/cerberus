@@ -32,4 +32,18 @@ RSpec.describe Group, type: :model do
       expect(described_class.find_by(raw: 'nope')).to be_nil
     end
   end
+
+  describe '.for_select' do
+    before do
+      described_class.create!(raw: 'northeastern:drs:repository:zzz', cosmetic: 'Alpha Group')
+      described_class.create!(raw: 'northeastern:drs:repository:aaa', cosmetic: 'Beta Group')
+    end
+
+    it 'returns [raw, cosmetic] pairs ordered by cosmetic name, not raw' do
+      expect(described_class.for_select).to eq(
+        [['northeastern:drs:repository:zzz', 'Alpha Group'],
+         ['northeastern:drs:repository:aaa', 'Beta Group']]
+      )
+    end
+  end
 end
