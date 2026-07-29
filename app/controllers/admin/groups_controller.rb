@@ -5,13 +5,11 @@ module Admin
   # group's raw colon-separated identifier. A row renames the group
   # everywhere ApplicationController#pretty_group resolves it; deleting a row is
   # safe (pretty_group falls back to the raw string), so unlike the Loader
-  # registry this surface keeps destroy. Reachable by :admin and by the
-  # devolved-admin tier (User#admin_delegate?) — purely local ActiveRecord
-  # CRUD, no Atlas dependency either way.
+  # registry this surface keeps destroy. :admin-only — deliberately kept out
+  # of the devolved-admin tier (librarian call: naming/renaming groups
+  # system-wide stays a full-admin action even though it has no Atlas
+  # dependency either way).
   class GroupsController < BaseController
-    skip_before_action :require_admin
-    before_action :require_admin_or_delegate
-
     PER_PAGE = 25
 
     breadcrumb_for 'Group names', :admin_groups_path

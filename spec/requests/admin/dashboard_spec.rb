@@ -106,8 +106,8 @@ RSpec.describe 'Admin::Dashboard', type: :request do
       get '/admin'
 
       expect(response.body).to include(admin_reparent_path, admin_impersonation_path,
-                                       admin_files_path, admin_groups_path, admin_impressions_path)
-      expect(response.body).not_to include(admin_linked_members_path)
+                                       admin_files_path, admin_impressions_path)
+      expect(response.body).not_to include(admin_linked_members_path, admin_groups_path)
       expect(response.body).to include('Delegated admin access')
       expect(response.body).not_to include('Admin-only')
     end
