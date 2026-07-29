@@ -1,15 +1,26 @@
 # frozen_string_literal: true
 
 module Admin
-  # Start/stop the two impersonation modes. Admin-only — the gate
-  # is inherited from Admin::BaseController. The session state machine and
+  # Start/stop the two impersonation modes. The session state machine and
   # hydration live in ImpersonationSession (included app-wide via
   # ApplicationController); this controller is just the toggle surface.
   #
-  # Acting-as is additionally admin-gated server-side at Atlas (the
-  # On-Behalf-Of header is authorized against the admin role), so this gate
-  # is the Cerberus half of a two-sided guarantee, not the only one.
+  # Two different gates, not one: every action except create_acting_as is
+  # reachable by :admin or the devolved-admin tier (User#admin_delegate?) —
+  # view-as, recipients typeahead, destroy. create_acting_as (act-as) keeps
+  # the inherited strict require_admin — act-as stays :admin-only even for a
+  # delegate who cleared the broader gate to get here, matching the view
+  # (_start.html.haml), which only renders the "Act as" control for a full
+  # admin. Acting-as is additionally admin-gated server-side at Atlas (the
+  # On-Behalf-Of header is authorized against the admin role) — defense in
+  # depth, not the only backstop. Atlas's own devolved-admin grant
+  # (apply_admin_delegate_abilities) opens `:create AuditEvent` for the
+  # session-start emit that view-as also needs, but does not touch
+  # On-Behalf-Of / acting-as at all.
   class ImpersonationsController < BaseController
+    skip_before_action :require_admin, except: [:create_acting_as]
+    before_action :require_admin_or_delegate, except: [:create_acting_as]
+
     breadcrumb_for 'Impersonation', :admin_impersonation_path
 
     include UserDirectorySearchable

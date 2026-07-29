@@ -9,10 +9,19 @@ RSpec.describe 'Admin::Loaders', type: :request do
     User.new(email: 'admin@example.com', password: 'password',
              nuid: '000000004', name: 'User, Admin', role: 'admin')
   end
+  # :privileged, but not in the admin group.
   let(:staff_user) do
     User.new(email: 'staff@example.com', password: 'password',
-             nuid: '000000002', name: 'Doe, Jane', role: 'privileged',
+             nuid: '000000006', name: 'Williams, Susan', role: 'privileged',
              groups: ['northeastern:drs:repository:staff'])
+  end
+  # :privileged + the admin group jointly — the devolved-admin tier (stock
+  # pilot user 000000002). Loader definitions is NOT one of the five
+  # devolved surfaces; stays :admin-only.
+  let(:delegate_user) do
+    User.new(email: 'delegate@example.com', password: 'password',
+             nuid: '000000002', name: 'Doe, Jane', role: 'privileged',
+             groups: ['northeastern:drs:repository:staff', 'northeastern:drs:repository:admin'])
   end
   let(:marcom_user) do
     User.new(email: 'marcom@example.com', password: 'password',
@@ -62,6 +71,15 @@ RSpec.describe 'Admin::Loaders', type: :request do
         post '/admin/loaders', params: valid_params
         expect(response).to have_http_status(:forbidden)
         expect(Loader.count).to eq(0)
+      end
+    end
+
+    context 'as a devolved-admin delegate (this surface stays :admin-only)' do
+      before { sign_in delegate_user }
+
+      it 'rejects GET /admin/loaders with 403' do
+        get '/admin/loaders'
+        expect(response).to have_http_status(:forbidden)
       end
     end
 

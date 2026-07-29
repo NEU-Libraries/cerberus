@@ -9,17 +9,26 @@ RSpec.describe 'Admin::Groups', type: :request do
     User.new(email: 'admin@example.com', password: 'password',
              nuid: '000000004', name: 'User, Admin', role: 'admin')
   end
+  # :privileged, but not in the admin group — the negative control that role
+  # alone is not sufficient for the devolved tier.
   let(:staff_user) do
     User.new(email: 'staff@example.com', password: 'password',
-             nuid: '000000002', name: 'Doe, Jane', role: 'privileged',
+             nuid: '000000006', name: 'Williams, Susan', role: 'privileged',
              groups: ['northeastern:drs:repository:staff'])
+  end
+  # :privileged + the admin group jointly — the devolved-admin tier (stock
+  # pilot user 000000002). Group names is one of the five devolved surfaces.
+  let(:delegate_user) do
+    User.new(email: 'delegate@example.com', password: 'password',
+             nuid: '000000002', name: 'Doe, Jane', role: 'privileged',
+             groups: ['northeastern:drs:repository:staff', 'northeastern:drs:repository:admin'])
   end
 
   let(:valid_params) do
     { group: { raw: 'northeastern:drs:repository:loaders:marcom', cosmetic: 'Marketing and Communications' } }
   end
 
-  describe 'authorization gate (admin-only)' do
+  describe 'authorization gate' do
     context 'as :admin' do
       before { sign_in admin_user }
 
@@ -34,7 +43,21 @@ RSpec.describe 'Admin::Groups', type: :request do
       end
     end
 
-    context 'as :privileged staff' do
+    context 'as a devolved-admin delegate' do
+      before { sign_in delegate_user }
+
+      it 'allows GET /admin/groups' do
+        get '/admin/groups'
+        expect(response).to have_http_status(:ok)
+      end
+
+      it 'allows full CRUD, same as an admin' do
+        expect { post '/admin/groups', params: valid_params }.to change(Group, :count).by(1)
+        expect(response).to redirect_to(admin_groups_path)
+      end
+    end
+
+    context 'as :privileged staff without the admin group' do
       before { sign_in staff_user }
 
       it 'rejects GET /admin/groups with 403' do

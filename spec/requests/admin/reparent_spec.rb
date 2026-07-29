@@ -13,10 +13,19 @@ RSpec.describe 'Admin::Reparent', type: :request do
     User.new(email: 'admin@example.com', password: 'password',
              nuid: '000000004', name: 'User, Admin', role: 'admin')
   end
+  # :privileged, but not in the admin group — the negative control that role
+  # alone is not sufficient for the devolved tier.
   let(:staff_user) do
     User.new(email: 'staff@example.com', password: 'password',
-             nuid: '000000002', name: 'Doe, Jane', role: 'privileged',
+             nuid: '000000006', name: 'Williams, Susan', role: 'privileged',
              groups: ['northeastern:drs:repository:staff'])
+  end
+  # :privileged + the admin group jointly — the devolved-admin tier (stock
+  # pilot user 000000002). Re-parent is one of the five devolved surfaces.
+  let(:delegate_user) do
+    User.new(email: 'delegate@example.com', password: 'password',
+             nuid: '000000002', name: 'Doe, Jane', role: 'privileged',
+             groups: ['northeastern:drs:repository:staff', 'northeastern:drs:repository:admin'])
   end
 
   def container_doc(noid:, title:, klass: 'Collection')
@@ -56,6 +65,29 @@ RSpec.describe 'Admin::Reparent', type: :request do
         get '/admin/reparent'
         expect(response).to redirect_to(new_user_session_path)
       end
+    end
+  end
+
+  describe 'as a devolved-admin delegate' do
+    before { sign_in delegate_user }
+
+    it 'reaches the finder (the gate passes for :privileged + admin group)' do
+      get '/admin/reparent'
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Re-parent / Move')
+    end
+
+    it 'completes a move end-to-end, same as an admin' do
+      allow(AtlasRb::Resource).to receive(:find).with('node')
+                                                .and_return(atlas_node(noid: 'node', klass: 'Collection', title: 'Node Collection'))
+      allow(AtlasRb::Resource).to receive(:find).with('par')
+                                                .and_return(atlas_node(noid: 'par', klass: 'Community', title: 'Parent Community'))
+      expect(AtlasRb::Collection).to receive(:reparent).with('node', 'par')
+                                                       .and_return(OpenStruct.new(id: 'node'))
+
+      post '/admin/reparent/move', params: { node_id: 'node', parent_id: 'par' }
+
+      expect(response).to redirect_to(collection_path('node'))
     end
   end
 

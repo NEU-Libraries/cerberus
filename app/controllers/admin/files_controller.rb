@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 module Admin
-  # Replace-a-file surface. Admin-only, non-destructive: replacing a Work's Blob
-  # appends a new OCFL version (Blob.update) while preserving the Blob NOID, so
-  # prior versions stay retrievable. A finder→manage workflow mirroring
+  # Replace-a-file surface. Non-destructive: replacing a Work's Blob appends a
+  # new OCFL version (Blob.update) while preserving the Blob NOID, so prior
+  # versions stay retrievable. A finder→manage workflow mirroring
   # LinkedMembersController:
   #
   #   index    → search for the Work
@@ -11,12 +11,20 @@ module Admin
   #   replace  → stage the upload, queue FileReplacementJob, back to manage
   #   rollback → reinstate a prior version (Blob.rollback), refresh derivatives
   #
+  # Reachable by :admin and by the devolved-admin tier (User#admin_delegate?) —
+  # Atlas's Blob :update/:rollback are already open to :privileged unscoped,
+  # and :read_versions (the manage view's version-history listing) is granted
+  # to the same :privileged + admin-group pair via apply_admin_delegate_abilities.
+  #
   # Version-content streaming (download a superseded version) lives in
   # FileVersionsController, which is ActionController::Live; keeping it separate
   # means the finder/mutation actions here aren't forced into stream semantics.
-  # The acting admin's NUID flows ambiently (Current.nuid), auto-propagating to
+  # The acting user's NUID flows ambiently (Current.nuid), auto-propagating to
   # the enqueued jobs.
   class FilesController < BaseController
+    skip_before_action :require_admin
+    before_action :require_admin_or_delegate
+
     include Blacklight::Configurable
     include UploadStaging
 

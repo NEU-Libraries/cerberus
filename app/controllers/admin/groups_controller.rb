@@ -1,12 +1,17 @@
 # frozen_string_literal: true
 
 module Admin
-  # Admin CRUD for Group display names — the cosmetic label paired with a
-  # Grouper group's raw colon-separated identifier. A row renames the group
+  # CRUD for Group display names — the cosmetic label paired with a Grouper
+  # group's raw colon-separated identifier. A row renames the group
   # everywhere ApplicationController#pretty_group resolves it; deleting a row is
   # safe (pretty_group falls back to the raw string), so unlike the Loader
-  # registry this surface keeps destroy.
+  # registry this surface keeps destroy. Reachable by :admin and by the
+  # devolved-admin tier (User#admin_delegate?) — purely local ActiveRecord
+  # CRUD, no Atlas dependency either way.
   class GroupsController < BaseController
+    skip_before_action :require_admin
+    before_action :require_admin_or_delegate
+
     PER_PAGE = 25
 
     breadcrumb_for 'Group names', :admin_groups_path

@@ -12,10 +12,19 @@ RSpec.describe 'Admin::LinkedMembers', type: :request do
     User.new(email: 'admin@example.com', password: 'password',
              nuid: '000000004', name: 'User, Admin', role: 'admin')
   end
+  # :privileged, but not in the admin group.
   let(:staff_user) do
     User.new(email: 'staff@example.com', password: 'password',
-             nuid: '000000002', name: 'Doe, Jane', role: 'privileged',
+             nuid: '000000006', name: 'Williams, Susan', role: 'privileged',
              groups: ['northeastern:drs:repository:staff'])
+  end
+  # :privileged + the admin group jointly — the devolved-admin tier (stock
+  # pilot user 000000002). Linked members is NOT one of the five devolved
+  # surfaces; stays :admin-only.
+  let(:delegate_user) do
+    User.new(email: 'delegate@example.com', password: 'password',
+             nuid: '000000002', name: 'Doe, Jane', role: 'privileged',
+             groups: ['northeastern:drs:repository:staff', 'northeastern:drs:repository:admin'])
   end
 
   def doc(noid:, title:, klass: 'Collection')
@@ -48,6 +57,15 @@ RSpec.describe 'Admin::LinkedMembers', type: :request do
         post '/admin/linked_members/add', params: { work_id: 'w', collection_id: 'c' }
         expect(response).to have_http_status(:forbidden)
         delete '/admin/linked_members/remove', params: { work_id: 'w', collection_id: 'c' }
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    context 'as a devolved-admin delegate (this surface stays :admin-only)' do
+      before { sign_in delegate_user }
+
+      it 'forbids every action' do
+        get '/admin/linked_members'
         expect(response).to have_http_status(:forbidden)
       end
     end

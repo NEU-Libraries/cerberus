@@ -6,7 +6,11 @@
       %i.fa-solid.fa-plus{'aria-hidden' => 'true'}
       New group name
     %span.admin-registry__subtitle
-      %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
-      Admin-only
+      - if current_user&.admin?
+        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+        Admin-only
+      - else
+        %i.fa-solid.fa-user-shield{'aria-hidden' => 'true'}
+        Delegated admin access
   .admin-registry__body
     = render 'form'

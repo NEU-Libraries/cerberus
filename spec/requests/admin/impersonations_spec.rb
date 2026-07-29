@@ -3,9 +3,11 @@
 require 'rails_helper'
 
 # Admin::ImpersonationsController — the start/stop toggle for acting-as and
-# view-as. Admin-only gate inherited from Admin::BaseController (mirrors the
-# authz matrix in dashboard_spec.rb). The state-machine details live in
-# spec/controllers/concerns/impersonation_session_spec.rb; this covers the
+# view-as. Two different gates, not one: view-as/recipients/destroy are
+# devolved (User#admin_delegate? passes, mirrors the authz matrix in
+# dashboard_spec.rb), while act-as (create_acting_as) stays strictly
+# :admin-only regardless of the coarse gate. The state-machine details live
+# in spec/controllers/concerns/impersonation_session_spec.rb; this covers the
 # HTTP surface: the gate, hydration, session effects, and redirects.
 RSpec.describe 'Admin::Impersonations', type: :request do
   include Devise::Test::IntegrationHelpers
@@ -14,10 +16,20 @@ RSpec.describe 'Admin::Impersonations', type: :request do
     User.new(email: 'admin@example.com', password: 'password',
              nuid: '000000004', name: 'User, Admin', role: 'admin')
   end
+  # :privileged, but not in the admin group — the negative control that role
+  # alone is not sufficient for the devolved tier.
   let(:staff_user) do
     User.new(email: 'staff@example.com', password: 'password',
-             nuid: '000000002', name: 'Doe, Jane', role: 'privileged',
+             nuid: '000000006', name: 'Williams, Susan', role: 'privileged',
              groups: ['northeastern:drs:repository:staff'])
+  end
+  # :privileged + the admin group jointly — the devolved-admin tier (stock
+  # pilot user 000000002). View-as (not act-as) is one of the five devolved
+  # surfaces.
+  let(:delegate_user) do
+    User.new(email: 'delegate@example.com', password: 'password',
+             nuid: '000000002', name: 'Doe, Jane', role: 'privileged',
+             groups: ['northeastern:drs:repository:staff', 'northeastern:drs:repository:admin'])
   end
 
   # Target hydration: GET /user via AtlasRb::Authentication.login.
@@ -28,8 +40,8 @@ RSpec.describe 'Admin::Impersonations', type: :request do
     )
   end
 
-  describe 'authorization gate (admin-only)' do
-    context 'as :privileged staff' do
+  describe 'authorization gate' do
+    context 'as :privileged staff without the admin group' do
       before { sign_in staff_user }
 
       it 'rejects POST /admin/act_as with 403' do
@@ -45,6 +57,31 @@ RSpec.describe 'Admin::Impersonations', type: :request do
       it 'rejects GET /admin/impersonation (start surface) with 403' do
         get admin_impersonation_path
         expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    context 'as a devolved-admin delegate' do
+      before { sign_in delegate_user }
+
+      it 'still rejects POST /admin/act_as with 403 (act-as stays :admin-only)' do
+        post admin_act_as_path, params: { nuid: '000000002' }
+        expect(response).to have_http_status(:forbidden)
+      end
+
+      it 'allows POST /admin/view_as' do
+        stub_target('000000003', name: 'Loader, Marcom', role: 'loader',
+                                 groups: ['northeastern:drs:repository:loaders:marcom'])
+        allow(AtlasRb::AuditEvent).to receive(:emit)
+
+        post admin_view_as_path, params: { nuid: '000000003' }
+
+        expect(response).to redirect_to(root_path)
+        expect(session[:view_as_nuid]).to eq('000000003')
+      end
+
+      it 'allows GET /admin/impersonation (start surface)' do
+        get admin_impersonation_path
+        expect(response).to have_http_status(:ok)
       end
     end
 
@@ -70,6 +107,19 @@ RSpec.describe 'Admin::Impersonations', type: :request do
       # Target-user typeahead wired to the admin directory endpoint.
       expect(response.body).to include('data-controller="impersonation-search"')
       expect(response.body).to include(admin_impersonation_recipients_path)
+      # Full admin: both modes offered.
+      expect(response.body).to include('value="Act as"', 'value="View as"', 'Admin-only')
+    end
+
+    it 'renders View-as only (no Act-as control) for a devolved-admin delegate' do
+      sign_in delegate_user
+      get admin_impersonation_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('value="View as"')
+      expect(response.body).not_to include('value="Act as"')
+      expect(response.body).to include('Delegated admin access')
+      expect(response.body).not_to include('Admin-only')
     end
   end
 
@@ -103,11 +153,21 @@ RSpec.describe 'Admin::Impersonations', type: :request do
       expect(response.parsed_body).to eq([])
     end
 
-    it 'is admin-gated (403 for non-admin staff)' do
+    it 'rejects :privileged staff without the admin group with 403' do
       sign_in staff_user
       get admin_impersonation_recipients_path, params: { q: 'doe' }
 
       expect(response).to have_http_status(:forbidden)
+    end
+
+    it 'allows a devolved-admin delegate' do
+      sign_in delegate_user
+      allow(AtlasRb::User).to receive(:search).with('doe', nuid: delegate_user.nuid)
+                                              .and_return([{ 'nuid' => '000000003', 'name' => 'Marcom, Loader' }])
+
+      get admin_impersonation_recipients_path, params: { q: 'doe' }
+
+      expect(response).to have_http_status(:ok)
     end
   end
 
@@ -243,6 +303,48 @@ RSpec.describe 'Admin::Impersonations', type: :request do
         expect(flash[:notice]).to match(/Impersonation ended/)
         expect(flash[:alert]).to be_blank
       end
+    end
+  end
+
+  describe 'as a devolved-admin delegate' do
+    before do
+      sign_in delegate_user
+      allow(AtlasRb::AuditEvent).to receive(:emit)
+    end
+
+    it 'starts a view-as session, same as an admin' do
+      stub_target('000000003', name: 'Loader, Marcom', role: 'loader',
+                               groups: ['northeastern:drs:repository:loaders:marcom'])
+
+      post admin_view_as_path, params: { nuid: '000000003' }
+
+      expect(session[:view_as_nuid]).to eq('000000003')
+      expect(response).to redirect_to(root_path)
+      expect(AtlasRb::AuditEvent).to have_received(:emit).with(
+        hash_including(action: 'impersonation_started', actor_nuid: delegate_user.nuid,
+                       on_behalf_of_nuid: '000000003', mode: 'view_as')
+      )
+    end
+
+    it 'never starts an acting-as session, even with a valid target (act-as stays :admin-only)' do
+      stub_target('000000003')
+
+      post admin_act_as_path, params: { nuid: '000000003' }
+
+      expect(response).to have_http_status(:forbidden)
+      expect(session[:acting_as_nuid]).to be_blank
+      expect(AtlasRb::AuditEvent).not_to have_received(:emit)
+    end
+
+    it 'ends an active view-as session via DELETE' do
+      stub_target('000000003')
+      post admin_view_as_path, params: { nuid: '000000003' }
+      expect(session[:view_as_nuid]).to eq('000000003')
+
+      delete admin_impersonation_path
+
+      expect(session[:view_as_nuid]).to be_blank
+      expect(flash[:notice]).to match(/Impersonation ended/)
     end
   end
 end

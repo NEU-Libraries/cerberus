@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 module Admin
-  # Re-parent / Move surface. A self-contained, admin-only finder for moving a
-  # Collection or Community to a new structural parent:
+  # Re-parent / Move surface. A self-contained finder for moving a Collection
+  # or Community to a new structural parent, reachable by :admin and by the
+  # devolved-admin tier (User#admin_delegate?):
   #
   #   index         → search for the node to move
   #   choose_parent → search for its new parent (valid types only; self +
@@ -10,11 +11,16 @@ module Admin
   #   confirm       → preview "move X from A → B"
   #   move          → perform via atlas_rb, then redirect to the node's page
   #
-  # The Atlas re-parent endpoints + atlas_rb bindings already exist;
-  # this is purely the Cerberus consumer. The acting admin's NUID flows to Atlas
+  # The Atlas re-parent endpoints + atlas_rb bindings already exist; this is
+  # purely the Cerberus consumer. The acting user's NUID flows to Atlas
   # ambiently (config/initializers/atlas_rb.rb wires Current.nuid), which both
-  # passes Atlas's authz and stamps the re-parent audit event.
+  # passes Atlas's authz (Atlas's own Ability grants :reparent to :admin and,
+  # separately, to the same :privileged + admin-group pair — see
+  # apply_admin_delegate_abilities) and stamps the re-parent audit event.
   class ReparentController < BaseController
+    skip_before_action :require_admin
+    before_action :require_admin_or_delegate
+
     # Borrow CatalogController's Solr config (search fields / qf) so the finder's
     # ContainerSearch keyword query behaves like the catalog's. Configurable
     # supplies copy_blacklight_config_from (same pattern Blacklight's own

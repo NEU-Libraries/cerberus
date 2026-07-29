@@ -8,8 +8,12 @@
     .admin-registry__head-actions
       = render 'steps', step: 2
       %span.admin-registry__subtitle
-        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
-        Admin-only
+        - if current_user&.admin?
+          %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+          Admin-only
+        - else
+          %i.fa-solid.fa-user-shield{'aria-hidden' => 'true'}
+          Delegated admin access
 
   .p-3
     .reparent-node-summary
