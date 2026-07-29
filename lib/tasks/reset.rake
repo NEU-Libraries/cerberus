@@ -294,10 +294,22 @@ namespace :reset do
                                            nuid: '000000015', name: 'No-Groups Standard User (DRS Fixture)',
                                            affiliation: 'staff', groups: [])
 
+      # Each shape below gets its own base image, distinct from every other
+      # thumbnail in this task (including gorge/mountain/coast/beach above),
+      # so the gallery/permissions-picker views don't show the same tile
+      # twice. All four are US-government or public-domain-dedicated works
+      # sourced via Flickr: cliff.jpg (Devil's Slide Hiking Trail, Pacifica,
+      # by John William Hammond, Public Domain Mark 1.0), marsh.jpg (Salt
+      # marsh landscape, US Fish & Wildlife Service Northeast Region, US
+      # government work), valley.jpg (Hood River Valley Orchards, Oregon, by
+      # Bonnie Moreland, Public Domain Mark 1.0), and dunes.jpg (Dune Ridge,
+      # Great Sand Dunes National Park, by Patrick Myers/NPS, US government
+      # work).
+
       # A: self-managed private space — read AND edit gated to archives staff,
       # the only fixture pair above with no public read at all.
       archives_community = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/archives-community-mods.xml')
-      archives_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/gorge.jpg').open_base
+      archives_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/cliff.jpg').open_base
       AtlasRb::Community.set_thumbnails(archives_community['id'], **ThumbnailCreator.call(base: archives_base))
       AtlasRb::Community.metadata(archives_community['id'], { 'permissions' => { 'read' => [archives_group], 'edit' => [archives_group] } })
 
@@ -307,7 +319,7 @@ namespace :reset do
 
       # B: edit-gate-only, a second unit beyond marcom — read stays public.
       public_safety = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/public-safety-community-mods.xml')
-      public_safety_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/mountain.jpg').open_base
+      public_safety_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/marsh.jpg').open_base
       AtlasRb::Community.set_thumbnails(public_safety['id'], **ThumbnailCreator.call(base: public_safety_base))
       AtlasRb::Community.metadata(public_safety['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [nupd_media_group] } })
 
@@ -319,7 +331,7 @@ namespace :reset do
       # Collection, so removing one in the permissions UI strips only that
       # group's editors, not the other's.
       school_of_law = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/school-of-law-community-mods.xml')
-      law_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/coast.jpg').open_base
+      law_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/valley.jpg').open_base
       AtlasRb::Community.set_thumbnails(school_of_law['id'], **ThumbnailCreator.call(base: law_base))
       AtlasRb::Community.metadata(school_of_law['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [law_library_group, crrj_group] } })
 
@@ -329,7 +341,7 @@ namespace :reset do
 
       # D: read-gate-only, the mirror of B — edit stays staff-only.
       licensed_resources = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/licensed-resources-community-mods.xml')
-      licensed_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/beach.jpg').open_base
+      licensed_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/dunes.jpg').open_base
       AtlasRb::Community.set_thumbnails(licensed_resources['id'], **ThumbnailCreator.call(base: licensed_base))
       AtlasRb::Community.metadata(licensed_resources['id'], { 'permissions' => { 'read' => [l2_group] } })
 
