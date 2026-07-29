@@ -51,6 +51,17 @@ describe CatalogController do
       expect(html).to include('>Featured</span>')
       expect(html).not_to include('thumb-type-pill--featured')
     end
+
+    it 'labels an embargoed work "Embargoed" in the red pill variant, ahead of Featured' do
+      get :index
+      doc = SolrDocument.new('id' => 'w1', 'internal_resource_tesim' => ['Work'], 'featured_bsi' => true,
+                             'embargo_release_date_dtsi' => (Date.current + 30).to_s)
+
+      html = controller.view_context.iiif_thumbnail(doc)
+
+      expect(html).to include('>Embargoed</span>')
+      expect(html).to include('thumb-type-pill--embargoed')
+    end
   end
 
   describe 'facets' do

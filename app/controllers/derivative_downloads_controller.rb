@@ -16,6 +16,7 @@ class DerivativeDownloadsController < ApplicationController
                             .find { |asset| asset['use'] == params[:use] && asset['uri'].present? }
     raise Authorizable::ResourceNotFound if delegate.nil?
 
+    deny_if_embargoed!(params[:work_id])
     authorize! :read, derivative_tier_document(delegate)
     redirect_to IiifSigner.sign_url(delegate['uri']), allow_other_host: true, status: :found
   end

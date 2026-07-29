@@ -18,6 +18,12 @@ RSpec.describe 'Blob downloads', type: :request do
     allow(AtlasRb::Resource).to receive(:permissions).with(blob_id).and_return(
       AtlasRb::Mash.new('embargo' => '', 'depositor' => [], 'read' => ['public'], 'edit' => [])
     )
+    # The embargo gate re-reads the Work's own permissions (not the Blob's, which
+    # authorize_show! already fetched above) — default unembargoed; overridden per
+    # example in the "under an active embargo" context below.
+    allow(AtlasRb::Resource).to receive(:permissions).with(work_id).and_return(
+      AtlasRb::Mash.new('embargo' => '')
+    )
     allow(AtlasRb::Blob).to receive(:work).and_return(work_id)
   end
 
@@ -119,6 +125,56 @@ RSpec.describe 'Blob downloads', type: :request do
 
   it 'fails open (streams) when the containing work is unresolvable' do
     allow(AtlasRb::Blob).to receive(:work).and_return(nil)
+    stub_stream!
+
+    get download_path(blob_id)
+
+    expect(response).to have_http_status(:ok)
+  end
+
+  context 'under an active embargo' do
+    before do
+      allow(AtlasRb::Resource).to receive(:permissions).with(work_id).and_return(
+        AtlasRb::Mash.new('embargo' => (Date.current + 30).to_s)
+      )
+    end
+
+    it 'forbids an otherwise-public blob for a guest' do
+      stub_asset(gated: false, permission: ['public'], nuid: nil)
+      get download_path(blob_id)
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it 'forbids an otherwise-public blob for a signed-in non-staff user' do
+      sign_in User.new(email: 'o@x.edu', password: 'password', nuid: '000000005', groups: ['editors'])
+      stub_asset(gated: false, permission: ['public'], nuid: '000000005')
+      get download_path(blob_id)
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it 'allows a member of the staff grouper group' do
+      sign_in User.new(email: 's@x.edu', password: 'password', nuid: '000000002',
+                       groups: [Permissions::STAFF_EDIT_GROUP])
+      stub_asset(gated: false, permission: ['public'], nuid: '000000002')
+      stub_stream!
+      get download_path(blob_id)
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'allows an Admin' do
+      sign_in User.new(email: 'a@x.edu', password: 'password', nuid: '000000004', groups: [], role: 'admin')
+      stub_asset(gated: false, permission: ['public'], nuid: '000000004')
+      stub_stream!
+      get download_path(blob_id)
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
+  it 'allows a guest once a past embargo has lapsed' do
+    allow(AtlasRb::Resource).to receive(:permissions).with(work_id).and_return(
+      AtlasRb::Mash.new('embargo' => (Date.current - 1).to_s)
+    )
+    stub_asset(gated: false, permission: ['public'], nuid: nil)
     stub_stream!
 
     get download_path(blob_id)

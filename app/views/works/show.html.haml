@@ -6,11 +6,20 @@
 = render 'scholar_metadata', scholar: @scholar
 
 -# Only the assets the viewer may actually fetch — inaccessible gated tiers
--# are kept out of the card, its modal, and the count.
-- downloads = downloadable_files(@files)
+-# and, while under embargo, every tier (unless the viewer can bypass it) are
+-# kept out of the card, its modal, and the count.
+- downloads = downloadable_files(@files, embargo_date: @permissions&.embargo)
+- embargo_date = Embargo.release_date(@permissions&.embargo)
 
 .container
   .clearfix.pt-1
+  - if embargo_date&.future?
+    .row
+      .col-12
+        %p.text-danger.small.mb-2
+          %i.fa-solid.fa-clock.me-1{'aria-hidden' => 'true'}
+          This item is under embargo and its content will be available for download and viewing on
+          = "#{embargo_date.strftime('%B %-d, %Y')}."
   .row
     .col-12
       .d-flex.flex-column.flex-md-row.justify-content-md-between.align-items-md-end

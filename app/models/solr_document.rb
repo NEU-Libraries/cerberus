@@ -25,6 +25,9 @@ class SolrDocument
   # Destination for a synthetic navigation row (e.g. a community's "Faculty &
   # Staff" entry), which has no per-type show route. url_for_document honours it.
   attribute :nav_url, Blacklight::Types::String, 'nav_url_ssi'
+  # A Work's embargo release date, as Atlas's indexer projects it. Drives the
+  # red "Embargoed" thumbnail pill and the list/gallery release-date notice.
+  attribute :embargo_release_date, Blacklight::Types::String, 'embargo_release_date_dtsi'
 
   def klass
     klass_type.presence&.constantize
@@ -54,6 +57,14 @@ class SolrDocument
   def personal_root?
     value = self['personal_root_bsi']
     value == true || value.to_s == 'true'
+  end
+
+  # Under an active (still-future) embargo — Embargo.active? is the same test
+  # the Downloads gate and the show-page banner use, so the pill only reads
+  # "Embargoed" while it's actually still withheld, not forever once a date
+  # is present.
+  def embargoed?
+    Embargo.active?(embargo_release_date)
   end
 
   def to_param

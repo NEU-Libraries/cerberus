@@ -81,9 +81,11 @@ class MetadataExportPacker
       [noid, xml_path, nil, embargoed(doc), embargo_date(doc)]
     end
 
+    # embargoed_bsi is boolean-as-string (Atlas's _bsi convention, matching
+    # TombstoneIndexer/FeaturedIndexer) — compare against the string, not `true`.
     def embargoed(doc)
       'true' if Array(doc['embargo_release_date_dtsi']).first.present? ||
-                Array(doc['embargoed_bsi']).first == true
+                Array(doc['embargoed_bsi']).first.to_s == 'true'
     end
 
     def embargo_date(doc)

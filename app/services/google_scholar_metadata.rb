@@ -81,14 +81,7 @@ class GoogleScholarMetadata
       Array(@doc['genre_ssim']).intersect?(SCHOLAR_GENRES)
     end
 
-    # Embargoed iff a release date is set and still in the future (mirrors
-    # Transformable#form_preparation's read of the same field).
     def embargoed?
-      date = @permissions&.embargo
-      return false if date.blank?
-
-      Date.parse(date.to_s) > Date.current
-    rescue ArgumentError
-      false
+      Embargo.active?(@permissions&.embargo)
     end
 end

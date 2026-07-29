@@ -14,14 +14,30 @@ module ApplicationHelper
     end
   end
 
-  # The thumbnail type-pill text: "Featured" for curated showcases, "People" for
-  # the synthetic Faculty & Staff browse row (a browse-to-many, not an
-  # individual), otherwise the document's resource type.
+  # The thumbnail type-pill text: "Embargoed" takes priority over every other
+  # label — a viewer needs to know downloads are withheld before anything
+  # else the pill might say. Otherwise "Featured" for curated showcases,
+  # "People" for the synthetic Faculty & Staff browse row (a browse-to-many,
+  # not an individual), else the document's resource type.
   def pill_label(document)
+    return 'Embargoed' if document.try(:embargoed?)
     return 'Featured' if document.try(:featured?)
     return 'People' if document.try(:people_browse?)
 
     document.klass_type
+  end
+
+  # "Contents available <date>" — the compact list/gallery-view companion to
+  # the show page's embargo banner. Plain (not iconed): the row's status icons
+  # already use fa-lock for "not public," a different axis than embargo, so
+  # reusing an icon here would blur the two.
+  def embargo_notice(document)
+    return unless document.try(:embargoed?)
+
+    date = Embargo.release_date(document.try(:embargo_release_date))
+    return if date.blank?
+
+    content_tag(:span, "Contents available #{date.strftime('%B %-d, %Y')}", class: 'text-danger small me-2')
   end
 
   FILE_TYPE_ICONS = {

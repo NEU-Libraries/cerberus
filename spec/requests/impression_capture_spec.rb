@@ -55,6 +55,9 @@ RSpec.describe 'Impression capture', type: :request do
       allow(AtlasRb::Blob).to receive(:work).with(blob_id, nuid: nil).and_return('w-1')
       allow(AtlasRb::Work).to receive(:assets).with('w-1', nuid: nil)
                                               .and_return([AtlasRb::Mash.new(noid: blob_id, gated: false)])
+      # The embargo gate separately re-reads the Work's own permissions (not the
+      # Blob's) — stub it unembargoed so the legitimate download proceeds.
+      allow(AtlasRb::Resource).to receive(:permissions).with('w-1').and_return(AtlasRb::Mash.new('embargo' => ''))
     end
 
     it 'enqueues a download impression keyed by the blob id' do

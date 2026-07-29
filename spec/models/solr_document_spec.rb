@@ -81,6 +81,22 @@ describe SolrDocument do
     end
   end
 
+  describe '#embargoed?' do
+    it 'is true for a future embargo_release_date_dtsi' do
+      doc = SolrDocument.new(id: '1', embargo_release_date_dtsi: (Date.current + 30).to_s)
+      expect(doc.embargoed?).to be(true)
+    end
+
+    it 'is false for a past embargo_release_date_dtsi' do
+      doc = SolrDocument.new(id: '1', embargo_release_date_dtsi: (Date.current - 1).to_s)
+      expect(doc.embargoed?).to be(false)
+    end
+
+    it 'is false when absent' do
+      expect(SolrDocument.new(id: '1').embargoed?).to be(false)
+    end
+  end
+
   describe '#personal_root?' do
     it 'is true for a JSON-boolean or string personal_root_bsi' do
       expect(SolrDocument.new(id: '1', personal_root_bsi: true).personal_root?).to be(true)

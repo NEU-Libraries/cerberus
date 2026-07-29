@@ -93,6 +93,43 @@ RSpec.describe MetadataExportPacker do
     end
   end
 
+  # Atlas's `_bsi` convention is boolean-as-string (matching TombstoneIndexer/
+  # FeaturedIndexer), so `embargoed_bsi` arrives as the STRING 'true'/'false',
+  # never a real boolean — the "Embargoed?" column must key off that shape.
+  context 'embargo columns' do
+    let(:docs) do
+      Class.new do
+        def initialize(rows) = @rows = rows
+        def each_content_batch(**) = yield @rows
+      end.new([
+                { 'alternate_ids_ssim' => ['id-aaa111'], 'embargo_release_date_dtsi' => '2028-07-16' },
+                { 'alternate_ids_ssim' => ['id-bbb222'], 'embargoed_bsi' => 'true' },
+                { 'alternate_ids_ssim' => ['id-ccc333'] }
+              ])
+    end
+    let(:entries) { pack_to_entries(include_mods: false) }
+
+    def row_for(entries, identifier)
+      manifest_rows(entries.fetch('manifest.xlsx')).find { |r| r.identifier == identifier }
+    end
+
+    it 'marks a row embargoed via the release date field' do
+      row = row_for(entries, 'aaa111')
+      expect(row.embargoed?).to be(true)
+      expect(row.embargo_date).to eq('2028-07-16')
+    end
+
+    it 'marks a row embargoed via the boolean-as-string embargoed_bsi' do
+      expect(row_for(entries, 'bbb222').embargoed?).to be(true)
+    end
+
+    it 'leaves a non-embargoed row blank' do
+      row = row_for(entries, 'ccc333')
+      expect(row.embargoed?).to be(false)
+      expect(row.embargo_date).to be_nil
+    end
+  end
+
   context 'when a MODS fetch fails mid-stream' do
     before do
       allow(AtlasRb::Work).to receive(:mods).with('aaa111', anything)

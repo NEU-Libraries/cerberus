@@ -1,5 +1,5 @@
 %turbo-frame#downloads-modal-frame
-  - files = downloadable_files(@files)
+  - files = downloadable_files(@files, embargo_date: @permissions&.embargo)
   - if files.present?
     %ul.list-group.list-group-flush
       - files.each do |file|
