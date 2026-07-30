@@ -77,4 +77,79 @@ RSpec.describe 'Admin::Impressions', type: :request do
       expect(response.media_type).to eq('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     end
   end
+
+  describe 'item picker' do
+    before { sign_in admin_user }
+
+    def container_doc(noid:, title:, klass: 'Collection')
+      SolrDocument.new('id'                      => "uuid-#{noid}",
+                       'alternate_ids_tesim'     => ["id-#{noid}"],
+                       'internal_resource_tesim' => klass,
+                       'title_tsim'              => [title])
+    end
+
+    it 'shows matching results for a search query' do
+      allow(ResourceSearch).to receive(:call)
+        .and_return(instance_double(Blacklight::Solr::Response, documents: [container_doc(noid: 'w1', title: 'Sample Work', klass: 'Work')]))
+
+      get '/admin/impressions', params: { q: 'Sample' }
+
+      expect(response.body).to include('Sample Work', 'Scope')
+    end
+
+    it 'scopes the dashboard to a picked Work and shows the chip' do
+      get '/admin/impressions', params: { item_noid: 'w1', item_uuid: 'uuid-w1', item_klass: 'Work', item_title: 'Sample Work' }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Scoped to: Work: Sample Work')
+      expect(response.body).not_to include('Top collections')
+    end
+
+    it 'scopes to a picked Collection and keeps the Top collections tab' do
+      allow(ContainerDescendantsQuery).to receive(:new).with(noid: 'c1', uuid: 'uuid-c1')
+                                                       .and_return(instance_double(ContainerDescendantsQuery, noids: ['c1'], work_noids: [], container_noids: ['c1']))
+
+      get '/admin/impressions', params: { item_noid: 'c1', item_uuid: 'uuid-c1', item_klass: 'Collection', item_title: 'Sample Collection' }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Scoped to: Collection: Sample Collection')
+      expect(response.body).to include('Top collections')
+    end
+  end
+
+  describe 'facet picker' do
+    before { sign_in admin_user }
+
+    it 'facets by Content type via the canonical params and hides Top collections' do
+      allow(FacetedWorkNoids).to receive(:call).with(type: 'content', value: 'Image').and_return([])
+
+      get '/admin/impressions', params: { facet_type: 'content', facet_value: 'Image' }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Faceted by: Content: Image')
+      expect(response.body).not_to include('Top collections')
+    end
+
+    it 'facets by Featured Content via the packed select param' do
+      allow(FacetedWorkNoids).to receive(:call).with(type: 'featured', value: 'Datasets').and_return([])
+
+      get '/admin/impressions', params: { facet: 'featured::Datasets' }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Faceted by: Featured Content: Datasets')
+    end
+
+    it 'combines an item scope with a facet, hiding Top collections even for a Collection' do
+      allow(ContainerDescendantsQuery).to receive(:new).with(noid: 'c1', uuid: 'uuid-c1')
+                                                       .and_return(instance_double(ContainerDescendantsQuery, noids: ['c1'], work_noids: [], container_noids: ['c1']))
+      allow(FacetedWorkNoids).to receive(:call).with(type: 'content', value: 'Image').and_return([])
+
+      get '/admin/impressions', params: { item_noid: 'c1', item_uuid: 'uuid-c1', item_klass: 'Collection',
+                                          item_title: 'Sample Collection', facet_type: 'content', facet_value: 'Image' }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Scoped to: Collection: Sample Collection', 'Faceted by: Content: Image')
+      expect(response.body).not_to include('Top collections')
+    end
+  end
 end

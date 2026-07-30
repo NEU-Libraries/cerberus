@@ -53,6 +53,62 @@ RSpec.describe ImpressionsReport do
     all_report.series('view')
   end
 
+  it 'is unscoped without a scope, and show_collections_tab? defaults true' do
+    expect(report.scoped?).to be false
+    expect(report.show_collections_tab?).to be true
+  end
+
+  describe 'when scoped to a single Work (no sub-collections)' do
+    let(:scope) do
+      instance_double(ImpressionScope, active?: true, overview_noids: ['w1'], top_works_noids: ['w1'],
+                                       top_containers_noids: nil, show_collections_tab?: false)
+    end
+
+    subject(:scoped_report) { described_class.new(range:, segment: :human, scope:) }
+
+    it 'restricts totals/series to the scope noid set (c1 excluded)' do
+      expect(scoped_report.totals).to eq('view' => 10, 'download' => 4)
+    end
+
+    it 'restricts top_works ranking to the scope' do
+      allow(scoped_report).to receive(:resolve).and_return('w1' => typed_doc('Work'))
+      expect(scoped_report.top_works.pluck(:noid)).to eq(['w1'])
+    end
+
+    it 'returns no top_containers when the scope hides that tab' do
+      expect(scoped_report.top_containers).to eq([])
+    end
+
+    it 'computes unique visitors live via ScopedVisitorsQuery instead of the repo-wide rollup' do
+      expect(ImpressionDailyVisitor).not_to receive(:series)
+      expect(ScopedVisitorsQuery).to receive(:new).with(range:, segment: :human, noids: ['w1'])
+                                                  .and_return(instance_double(ScopedVisitorsQuery, series: { Date.current => 2 }))
+
+      expect(scoped_report.unique_visitors_series).to eq(Date.current => 2)
+    end
+
+    it 'delegates show_collections_tab? to the scope' do
+      expect(scoped_report.show_collections_tab?).to be false
+    end
+  end
+
+  describe 'when scoped to a container (collections tab applies)' do
+    let(:scope) do
+      instance_double(ImpressionScope, active?: true, overview_noids: ['c1'], top_works_noids: [],
+                                       top_containers_noids: ['c1'], show_collections_tab?: true)
+    end
+
+    subject(:scoped_report) { described_class.new(range:, segment: :human, scope:) }
+
+    it 'restricts top_containers ranking to the scope containers' do
+      allow(scoped_report).to receive(:resolve).and_return('c1' => typed_doc('Collection'))
+
+      top = scoped_report.top_containers
+      expect(top.first[:noid]).to eq('c1')
+      expect(top.first[:total]).to eq(120)
+    end
+  end
+
   def typed_doc(type)
     doc = instance_double(SolrDocument)
     allow(doc).to receive(:[]).with('internal_resource_tesim').and_return([type])

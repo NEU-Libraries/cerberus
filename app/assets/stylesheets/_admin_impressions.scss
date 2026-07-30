@@ -145,6 +145,88 @@ $usage-visitor:  #5d569b;
   }
 }
 
+// Scope picker: the item typeahead + Content/Featured-Content facet, and the
+// active-scope chips they produce. Reuses the shared admin finder search/
+// results partials (reparent's), so only the scope-specific bits live here.
+.usage-scope {
+  &__active {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  // Same tinted-blue "active" language as .usage-toggle__option.is-active —
+  // a scope/facet chip is the same kind of state, just removable.
+  &__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.3rem 0.25rem 0.6rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: $blue;
+    background-color: color-mix(in srgb, $blue 10%, white);
+    border: 1px solid color-mix(in srgb, $blue 24%, white);
+    border-radius: 1rem;
+  }
+
+  &__chip-clear {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem;
+    color: inherit;
+    opacity: 0.6;
+
+    &:hover { opacity: 1; }
+  }
+
+  &__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  &__item-picker {
+    flex: 1 1 20rem;
+  }
+
+  &__facet-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  &__facet-select {
+    padding: 0.15rem 0.4rem;
+    font-size: 0.8rem;
+    border: 1px solid $gray-300;
+    border-radius: 0.25rem;
+    color: $gray-800;
+  }
+
+  // Same visual language as .usage-daterange__apply — "Filter" and "Apply"
+  // are the same kind of action (submit a GET form that narrows the report).
+  &__facet-apply {
+    padding: 0.2rem 0.7rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: $gray-700;
+    background-color: $gray-100;
+    border: 1px solid $gray-300;
+    border-radius: 0.25rem;
+    cursor: pointer;
+
+    &:hover {
+      background-color: color-mix(in srgb, $blue 8%, white);
+      border-color: color-mix(in srgb, $blue 24%, white);
+      color: $blue;
+    }
+  }
+}
+
 // Export toolbar above the top-N tables.
 .usage-export {
   display: flex;
