@@ -15,9 +15,15 @@ module ContainerAnalyticsHelper
 
   # The container's own edit path (Collection or Community), always anchored
   # back to the Analytics tab.
+  #
+  # The fragment is appended as a string rather than handed to url_for's
+  # :anchor option because +params+ is usually request.query_parameters, a
+  # HashWithIndifferentAccess — merging :anchor into one stringifies the key,
+  # and url_for honors only the symbol, so the anchor would silently come out
+  # as a literal "anchor=analytics" query param and the tab would be lost.
   def container_analytics_path(klass, noid, params = {})
     path_helper = klass == 'Community' ? :edit_community_path : :edit_collection_path
-    public_send(path_helper, noid, params.merge(anchor: 'analytics'))
+    "#{public_send(path_helper, noid, params)}#analytics"
   end
 
   # Hidden-field params a GET form must carry to avoid clobbering whatever it

@@ -94,6 +94,16 @@ describe CollectionsController do
         expect(response.body).not_to include(foreign_collection.id)
       end
 
+      # Every URL this tab emits must carry the #analytics fragment, or the
+      # round trip drops the viewer back on the default (Metadata) tab.
+      it 'anchors the item-lookup form and result links back to the Analytics tab' do
+        get :edit, params: { id: collection.id, q: sub_collection.title }
+
+        expect(response.body).to match(%r{<form[^>]*action="[^"]*/edit#analytics"})
+        expect(response.body).to match(/href="[^"]*analytics_item_noid=[^"]*#analytics"/)
+        expect(response.body).not_to include('anchor=analytics')
+      end
+
       it 'honors an in-subtree drill-down and shows the "Scoped to" chip' do
         get :edit, params: { id: collection.id, analytics_item_noid: sub_collection.id,
                              analytics_item_uuid: sub_collection.valkyrie_id, analytics_item_klass: 'Collection',
@@ -124,6 +134,7 @@ describe CollectionsController do
 
         expect(clear_href).to be_present
         expect(clear_href).not_to include('analytics_item_noid')
+        expect(clear_href).to end_with('#analytics')
       end
 
       it 'renders the Composition tab scoped to this collection\'s own subtree' do
