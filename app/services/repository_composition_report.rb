@@ -29,10 +29,17 @@ class RepositoryCompositionReport
 
   # @return [Hash{String => Integer}] counts for ENTITY_TYPES, 0 for any
   #   type with no documents (rather than a missing key).
+  #
+  # `internal_resource_tesim` is a tokenized *text* field (the "tesim" Hydra
+  # suffix), not a string field like classification_ssim — Solr facets a
+  # text field over its lowercased indexed tokens ("work", "collection", ...),
+  # even though `fq: 'internal_resource_tesim:Work'` filter queries still
+  # match case-insensitively (the query analyzer lowercases too). Facet
+  # lookups need the downcased key; filter queries don't.
   def entity_counts
     @entity_counts ||= begin
       facet = SolrFacetValues.call(field: 'internal_resource_tesim').to_h
-      ENTITY_TYPES.index_with { |type| facet[type].to_i }
+      ENTITY_TYPES.index_with { |type| facet[type.downcase].to_i }
     end
   end
 

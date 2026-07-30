@@ -158,7 +158,7 @@ RSpec.describe 'Admin::Impressions', type: :request do
 
     it 'always renders, ignoring the date range/segment/scope, with entity counts and a classification chart' do
       allow(SolrFacetValues).to receive(:call).with(field: 'internal_resource_tesim')
-                                              .and_return([['Community', 5], ['Collection', 10], ['Work', 200], ['Person', 8]])
+                                              .and_return([['community', 5], ['collection', 10], ['work', 200], ['person', 8]])
       allow(Blacklight.default_index).to receive(:search)
         .with(hash_including(fq: ['internal_resource_tesim:Work', 'read_access_group_ssim:public']))
         .and_return(instance_double(Blacklight::Solr::Response, total: 150))

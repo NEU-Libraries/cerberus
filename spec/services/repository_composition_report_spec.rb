@@ -7,8 +7,11 @@ RSpec.describe RepositoryCompositionReport do
 
   describe '#entity_counts' do
     it 'maps the internal_resource_tesim facet onto the tracked entity types, defaulting missing ones to 0' do
+      # internal_resource_tesim is a tokenized text field — Solr facets it
+      # over lowercased terms ("work", not "Work"), confirmed against a real
+      # Solr instance. entity_counts must downcase its lookup to match.
       allow(SolrFacetValues).to receive(:call).with(field: 'internal_resource_tesim')
-                                              .and_return([['Work', 500], ['Collection', 40], ['FileSet', 2000]])
+                                              .and_return([['work', 500], ['collection', 40], ['fileset', 2000]])
 
       expect(report.entity_counts).to eq('Community' => 0, 'Collection' => 40, 'Work' => 500, 'Person' => 0)
     end
@@ -24,7 +27,7 @@ RSpec.describe RepositoryCompositionReport do
   describe '#work_visibility' do
     before do
       allow(SolrFacetValues).to receive(:call).with(field: 'internal_resource_tesim')
-                                              .and_return([['Work', 100]])
+                                              .and_return([['work', 100]])
     end
 
     it 'derives private as the remainder after a public-only count query' do
