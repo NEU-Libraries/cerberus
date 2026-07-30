@@ -50,4 +50,26 @@ RSpec.describe ContainerDescendantsQuery do
       expect(query.noids).to contain_exactly('c1', 'sub', 'w')
     end
   end
+
+  describe '#container_uuids and #subtree_fq' do
+    it 'lists its own uuid plus every descendant container uuid' do
+      sub = instance_double(SolrDocument, id: 'uuid-sub')
+      allow(Blacklight.default_index).to receive(:search)
+        .and_return(instance_double(Blacklight::Solr::Response, documents: [sub]))
+
+      expect(described_class.new(noid: 'c1', uuid: 'uuid-c1').container_uuids)
+        .to contain_exactly('uuid-c1', 'uuid-sub')
+    end
+
+    it 'builds an fq ORing self-or-descendant-container identity with structural membership of that set' do
+      allow(Blacklight.default_index).to receive(:search)
+        .and_return(instance_double(Blacklight::Solr::Response, documents: []))
+
+      fq = described_class.new(noid: 'c1', uuid: 'uuid-c1').subtree_fq
+
+      expect(fq).to include('{!terms f=id}uuid-c1')
+      expect(fq).to include('{!terms f=a_member_of_ssi}id-uuid-c1')
+      expect(fq).not_to include('a_linked_member_of_ssim') # structural only, no linked overlay
+    end
+  end
 end

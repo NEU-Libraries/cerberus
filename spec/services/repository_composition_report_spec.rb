@@ -10,7 +10,7 @@ RSpec.describe RepositoryCompositionReport do
       # internal_resource_tesim is a tokenized text field — Solr facets it
       # over lowercased terms ("work", not "Work"), confirmed against a real
       # Solr instance. entity_counts must downcase its lookup to match.
-      allow(SolrFacetValues).to receive(:call).with(field: 'internal_resource_tesim')
+      allow(SolrFacetValues).to receive(:call).with(field: 'internal_resource_tesim', extra_fq: [])
                                               .and_return([['work', 500], ['collection', 40], ['fileset', 2000]])
 
       expect(report.entity_counts).to eq('Community' => 0, 'Collection' => 40, 'Work' => 500, 'Person' => 0)
@@ -22,11 +22,20 @@ RSpec.describe RepositoryCompositionReport do
       report.entity_counts
       report.entity_counts
     end
+
+    it 'passes scope_fq through as an extra_fq entry, unscoped by default' do
+      scoped = described_class.new(scope_fq: '{!terms f=id}uuid-1')
+
+      expect(SolrFacetValues).to receive(:call)
+        .with(field: 'internal_resource_tesim', extra_fq: ['{!terms f=id}uuid-1']).and_return([])
+
+      scoped.entity_counts
+    end
   end
 
   describe '#work_visibility' do
     before do
-      allow(SolrFacetValues).to receive(:call).with(field: 'internal_resource_tesim')
+      allow(SolrFacetValues).to receive(:call).with(field: 'internal_resource_tesim', extra_fq: [])
                                               .and_return([['work', 100]])
     end
 
@@ -45,6 +54,20 @@ RSpec.describe RepositoryCompositionReport do
       report.work_visibility
       report.work_visibility
     end
+
+    it 'ANDs scope_fq onto the public-only count query when given' do
+      allow(SolrFacetValues).to receive(:call).with(field:    'internal_resource_tesim',
+                                                    extra_fq: ['{!terms f=id}uuid-1'])
+                                              .and_return([['work', 100]])
+      scoped = described_class.new(scope_fq: '{!terms f=id}uuid-1')
+
+      expect(Blacklight.default_index).to receive(:search)
+        .with(hash_including(fq: ['internal_resource_tesim:Work', 'read_access_group_ssim:public',
+                                  '{!terms f=id}uuid-1']))
+        .and_return(instance_double(Blacklight::Solr::Response, total: 60))
+
+      scoped.work_visibility
+    end
   end
 
   describe '#classification_counts' do
@@ -54,6 +77,16 @@ RSpec.describe RepositoryCompositionReport do
         .and_return([['Image', 12], ['Text', 3]])
 
       expect(report.classification_counts).to eq([['Image', 12], ['Text', 3]])
+    end
+
+    it 'ANDs scope_fq onto the Work-scoped facet query when given' do
+      scoped = described_class.new(scope_fq: '{!terms f=id}uuid-1')
+
+      expect(SolrFacetValues).to receive(:call)
+        .with(field: 'classification_ssim', extra_fq: ['internal_resource_tesim:Work', '{!terms f=id}uuid-1'])
+        .and_return([])
+
+      scoped.classification_counts
     end
   end
 end

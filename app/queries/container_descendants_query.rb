@@ -43,6 +43,25 @@ class ContainerDescendantsQuery
     @work_noids ||= member_work_noids([@uuid, *descendant_containers.map(&:id)])
   end
 
+  # @return [Array<String>] this container's own uuid + every descendant
+  #   container's uuid (no Works) — the Solr `id` values behind #subtree_fq.
+  def container_uuids
+    [@uuid, *descendant_containers.map(&:id)].uniq
+  end
+
+  # @return [String] a Solr fq matching this container, every descendant
+  #   container, and every Work structurally homed anywhere in the subtree —
+  #   for constraining an arbitrary search/facet to "within this section of
+  #   the tree" (the Collection/Community edit page's Analytics tab item
+  #   lookup + composition), without materializing the full member list the
+  #   way #noids does. Structural home only (include_linked: false), same
+  #   attribution rule as the rest of this class.
+  def subtree_fq
+    uuids = container_uuids
+    MembershipQuery.any_of([MembershipQuery.identity_fq(uuids),
+                            *MembershipQuery.member_clauses(uuids, include_linked: false)])
+  end
+
   private
 
     # Memoized so container_noids/work_noids/noids share one Solr round-trip

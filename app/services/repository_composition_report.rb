@@ -3,11 +3,11 @@
 # Repository-wide composition/inventory stats for the Usage Analytics
 # dashboard's "Composition" tab — v1 had a flat table of entity counts + a
 # file-type breakdown; this is the v2-data-shape equivalent in substance,
-# not a literal port (see the two gaps noted below). Always repo-wide:
+# not a literal port (see the two gaps noted below). Otherwise repo-wide:
 # unlike the rest of the dashboard, composition isn't a traffic metric, so
-# it ignores the date range, segment, and any active item/facet scope —
-# there is no "composition of the last 90 days" or "composition of this
-# one Work."
+# it ignores the date range and segment regardless of scope_fq — there is
+# no "composition of the last 90 days," only "composition of this subtree
+# (or the whole repository)."
 #
 # Un-gated (system-wide Blacklight.default_index.search, no SearchBuilder),
 # the same posture as ContainerDescendantsQuery / ImpressionsReport /
@@ -27,6 +27,18 @@
 class RepositoryCompositionReport
   ENTITY_TYPES = %w[Community Collection Work Person].freeze
 
+  # @param scope_fq [String, nil] an additional raw fq fragment (e.g.
+  #   {ContainerDescendantsQuery#subtree_fq}) restricting every count below to
+  #   one container's subtree — nil (default) is unscoped, the repo-wide
+  #   behavior the admin dashboard's Composition tab has always had. Person
+  #   docs sit outside the structural containment tree subtree_fq matches, so
+  #   a scoped entity_counts always reads 0 Person regardless of container —
+  #   correct for a Collection (Person never belongs to one), a minor,
+  #   accepted undercount for a Community.
+  def initialize(scope_fq: nil)
+    @scope_fq = scope_fq
+  end
+
   # @return [Hash{String => Integer}] counts for ENTITY_TYPES, 0 for any
   #   type with no documents (rather than a missing key).
   #
@@ -38,7 +50,7 @@ class RepositoryCompositionReport
   # lookups need the downcased key; filter queries don't.
   def entity_counts
     @entity_counts ||= begin
-      facet = SolrFacetValues.call(field: 'internal_resource_tesim').to_h
+      facet = SolrFacetValues.call(field: 'internal_resource_tesim', extra_fq: scope_filters).to_h
       ENTITY_TYPES.index_with { |type| facet[type.downcase].to_i }
     end
   end
@@ -49,7 +61,8 @@ class RepositoryCompositionReport
   # discoverable and counts as public here, matching v1's inventory framing.
   def work_visibility
     @work_visibility ||= begin
-      public_count = count(filters: ['internal_resource_tesim:Work', 'read_access_group_ssim:public'])
+      public_count = count(filters: ['internal_resource_tesim:Work', 'read_access_group_ssim:public',
+                                     *scope_filters])
       { public: public_count, private: entity_counts['Work'] - public_count }
     end
   end
@@ -59,11 +72,16 @@ class RepositoryCompositionReport
   #   under every classification it holds, so these don't sum to the Work
   #   total in entity_counts.
   def classification_counts
-    @classification_counts ||= SolrFacetValues.call(field:    'classification_ssim',
-                                                    extra_fq: ['internal_resource_tesim:Work'])
+    @classification_counts ||= SolrFacetValues.call(
+      field: 'classification_ssim', extra_fq: ['internal_resource_tesim:Work', *scope_filters]
+    )
   end
 
   private
+
+    def scope_filters
+      Array(@scope_fq)
+    end
 
     def count(filters:)
       Blacklight.default_index.search(q: '*:*', fq: filters, rows: 0).total
