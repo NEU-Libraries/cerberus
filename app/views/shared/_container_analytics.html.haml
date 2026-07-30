@@ -71,9 +71,8 @@
       #analytics-collections.tab-pane{'aria-labelledby' => 'analytics-collections-tab', role: 'tabpanel'}
         = render 'shared/container_analytics_top_table', entries: @analytics.top_containers, empty: 'No container activity in this range.'
     #analytics-composition.tab-pane{'aria-labelledby' => 'analytics-composition-tab', role: 'tabpanel'}
-      %p.text-muted.small.mb-3
-        Composition of this #{base_klass.downcase}'s own subtree — not affected by the item lookup or facet above.
-      = render 'admin/impressions/composition', composition: @analytics_composition
+      = render 'admin/impressions/composition', composition: @analytics_composition,
+                                                scope_description: "This #{base_klass.downcase}'s own subtree"
 
   - if current_user&.admin? || current_user&.admin_delegate?
     .mt-3

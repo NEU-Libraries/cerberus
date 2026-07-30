@@ -1,8 +1,9 @@
 - entity = composition.entity_counts
 - visibility = composition.work_visibility
+- scope_description ||= 'Repository-wide'
 
 %p.text-muted.small.mb-3
-  Repository-wide counts — not affected by the date range, segment, or the item/facet scope above.
+  #{scope_description} counts — not affected by the date range, segment, or the item/facet scope above.
 
 %dl.usage-ledger
   .usage-ledger__item.usage-ledger__item--communities
