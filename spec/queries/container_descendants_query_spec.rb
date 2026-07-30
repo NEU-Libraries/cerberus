@@ -26,4 +26,28 @@ RSpec.describe ContainerDescendantsQuery do
 
     expect(described_class.new(noid: 'c1', uuid: 'uuid-c1').noids).to eq(['c1'])
   end
+
+  describe '#container_noids and #work_noids' do
+    it 'splits the container-only and work-only noids, sharing one descendant-container Solr call' do
+      sub  = instance_double(SolrDocument, id: 'uuid-sub')
+      work = instance_double(SolrDocument, id: 'uuid-w')
+      allow(sub).to receive(:[]).with('alternate_ids_ssim').and_return(['id-sub'])
+      allow(work).to receive(:[]).with('alternate_ids_ssim').and_return(['id-w'])
+
+      expect(Blacklight.default_index).to receive(:search).once.and_return(
+        instance_double(Blacklight::Solr::Response, documents: [sub])
+      )
+      expect(Blacklight.default_index).to receive(:search).once.and_return(
+        instance_double(Blacklight::Solr::Response, documents: [work])
+      )
+
+      query = described_class.new(noid: 'c1', uuid: 'uuid-c1')
+
+      expect(query.container_noids).to contain_exactly('c1', 'sub')
+      expect(query.work_noids).to contain_exactly('w')
+      # A third call (#noids) would raise on the mocked expectations above if
+      # the descendant-container lookup weren't memoized.
+      expect(query.noids).to contain_exactly('c1', 'sub', 'w')
+    end
+  end
 end

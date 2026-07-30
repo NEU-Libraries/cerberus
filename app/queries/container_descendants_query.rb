@@ -22,19 +22,33 @@ class ContainerDescendantsQuery
     @uuid = uuid
   end
 
-  # @return [Array<String>] the container's own noid + all descendant noids.
+  # @return [Array<String>] the container's own noid + all descendant noids
+  #   (containers and works alike).
   def noids
-    descendant_containers = container_docs
-    container_uuids = descendant_containers.map(&:id)
-    container_noids = descendant_containers.filter_map { |doc| doc_noid(doc) }
+    (container_noids + work_noids).uniq
+  end
 
-    ([@noid] + container_noids + member_work_noids([@uuid, *container_uuids])).uniq
+  # @return [Array<String>] the container's own noid + every descendant
+  #   Collection/Community noid (no Works).
+  def container_noids
+    [@noid, *descendant_containers.filter_map { |doc| doc_noid(doc) }].uniq
+  end
+
+  # @return [Array<String>] every Work noid structurally homed under this
+  #   container or any descendant container (no Collections/Communities).
+  # Memoized alongside descendant_containers — ImpressionScope calls
+  # container_noids/work_noids/noids on the same instance for different
+  # report metrics, so each real query behind them runs at most once.
+  def work_noids
+    @work_noids ||= member_work_noids([@uuid, *descendant_containers.map(&:id)])
   end
 
   private
 
-    def container_docs
-      solr(MembershipQuery.descendants_fq(@noid), CONTAINER_TYPES)
+    # Memoized so container_noids/work_noids/noids share one Solr round-trip
+    # for the descendant-container lookup, however many are called.
+    def descendant_containers
+      @descendant_containers ||= solr(MembershipQuery.descendants_fq(@noid), CONTAINER_TYPES)
     end
 
     def member_work_noids(container_uuids)
