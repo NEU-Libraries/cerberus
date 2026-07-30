@@ -4,7 +4,10 @@
 
 .py-2.px-1
   %p.text-muted.small.mb-3
-    Views, downloads, and visitors for everything under this #{base_klass.downcase} — the #{base_klass.downcase} itself and every descendant Work. Last #{ImpressionsReport::DEFAULT_DAYS} days, human traffic only.
+    - if drilled
+      Views, downloads, and visitors for #{@analytics_effective_item[:title]} — one #{@analytics_effective_item[:klass].downcase} within this #{base_klass.downcase}. Last #{ImpressionsReport::DEFAULT_DAYS} days, human traffic only.
+    - else
+      Views, downloads, and visitors for everything under this #{base_klass.downcase} — the #{base_klass.downcase} itself and every descendant Work. Last #{ImpressionsReport::DEFAULT_DAYS} days, human traffic only.
 
   .usage-scope.mb-3
     - if drilled || @analytics.scope.facet_active?
