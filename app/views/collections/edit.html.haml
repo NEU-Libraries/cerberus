@@ -60,4 +60,4 @@
     #history.tab-pane{"aria-labelledby" => "history-tab", role: "tabpanel"}
       = render 'audit_events/history', resource_id: params[:id]
   #analytics.tab-pane{"aria-labelledby" => "analytics-tab", role: "tabpanel"}
-    = render 'shared/container_analytics', report: @analytics, noid: @collection.id, uuid: @collection.valkyrie_id, klass: 'Collection', title: @collection.title
+    = render 'shared/container_analytics'

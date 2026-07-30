@@ -1,0 +1,29 @@
+- entries ||= []
+- if entries.any?
+  .table-responsive
+    %table.table.table-borderless.admin-registry-table
+      %thead
+        %tr
+          %th{scope: 'col'} Title
+          %th{scope: 'col'} Type
+          %th{scope: 'col'} PID
+          %th.text-end{scope: 'col'} Views
+          %th.text-end{scope: 'col'} Downloads
+          %th.text-end{scope: 'col'} Total
+      %tbody
+        - entries.each do |entry|
+          %tr
+            %td
+              .admin-registry-table__name= entry[:doc] ? finder_doc_title(entry[:doc]) : '(unresolved)'
+            %td
+              - if entry[:doc]
+                = finder_type_chip(Array(entry[:doc]['internal_resource_tesim']).first)
+            %td
+              %span.admin-registry-table__id= entry[:noid]
+            %td.text-end.usage-num= number_with_delimiter(entry[:counts]['view'])
+            %td.text-end.usage-num= number_with_delimiter(entry[:counts]['download'])
+            %td.text-end.usage-num= number_with_delimiter(entry[:total])
+- else
+  .admin-registry__empty
+    %i.fa-solid.fa-chart-simple.admin-registry__empty-icon{'aria-hidden' => 'true'}
+    %p.mb-0.small.text-muted= empty

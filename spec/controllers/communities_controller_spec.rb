@@ -94,6 +94,58 @@ describe CommunitiesController do
         expect(response.body).to include('Open in Usage Analytics')
       end
     end
+
+    context 'analytics tab item lookup, facet, and composition' do
+      let!(:sub_collection) do
+        c = AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004')
+        AtlasRb::Collection.metadata(c.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+        c
+      end
+      let!(:other_community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', nuid: '000000004') }
+      # Same MODS fixture (and thus identical title) as sub_collection, but
+      # homed under an entirely different Community — the containment check
+      # must exclude it on subtree membership, not title.
+      let!(:foreign_collection) do
+        c = AtlasRb::Collection.create(other_community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004')
+        AtlasRb::Collection.metadata(c.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+        c
+      end
+
+      it 'finds an in-subtree child collection via item lookup but not a same-titled resource outside the subtree' do
+        get :edit, params: { id: community.id, q: sub_collection.title }
+
+        expect(response.body).to include(sub_collection.id, 'Scope')
+        expect(response.body).not_to include(foreign_collection.id)
+      end
+
+      it 'honors an in-subtree drill-down and shows the "Scoped to" chip' do
+        get :edit, params: { id: community.id, analytics_item_noid: sub_collection.id,
+                             analytics_item_uuid: sub_collection.valkyrie_id, analytics_item_klass: 'Collection',
+                             analytics_item_title: sub_collection.title }
+
+        expect(response.body).to include("Scoped to: Collection: #{sub_collection.title}")
+      end
+
+      it 'ignores a hand-crafted drill-down param pointing outside the subtree (the containment boundary)' do
+        get :edit, params: { id: community.id, analytics_item_noid: foreign_collection.id,
+                             analytics_item_uuid: foreign_collection.valkyrie_id, analytics_item_klass: 'Collection',
+                             analytics_item_title: foreign_collection.title }
+
+        expect(response.body).not_to include('Scoped to:')
+      end
+
+      it 'facets by content type and shows the "Faceted by" chip' do
+        get :edit, params: { id: community.id, analytics_facet_type: 'content', analytics_facet_value: 'Image' }
+
+        expect(response.body).to include('Faceted by: Content: Image')
+      end
+
+      it 'renders the Composition tab scoped to this community\'s own subtree' do
+        get :edit, params: { id: community.id }
+
+        expect(response.body).to include('Composition', 'Faculty', 'Staff', 'Public works', 'Private works')
+      end
+    end
   end
 
   describe 'show' do

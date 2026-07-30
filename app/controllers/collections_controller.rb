@@ -46,7 +46,7 @@ class CollectionsController < CatalogController
     form_preparation(@permissions)
     load_descriptive!('Collection')
     @sentinel = Sentinel.find_by(target_id: params[:id])
-    @analytics = build_container_analytics(@collection, 'Collection')
+    load_container_analytics(@collection, 'Collection')
     collection_breadcrumbs(params[:id], editing: true)
   end
 
