@@ -10,47 +10,9 @@
   Edit raw XML for
   = @resource.title
 
--# This row mirrors the tab set of the edit page it is a sub-tab of
--# (works/collections/communities edit.html.haml) so the XML editor isn't a dead
--# end — each entry links back to the corresponding pane via its tab-hash
--# fragment. Both the membership AND the order differ per class, so they are
--# spelled out per class below. Adding a tab to an edit page means adding it
--# here too; the two lists drift silently otherwise, since nothing couples them.
-- edit_path = public_send("edit_#{@klass.downcase}_path", @resource.id)
-- container = @klass.in?(%w[Collection Community])
-%ul.nav.nav-tabs
-  %li.nav-item
-    %a.nav-link{"aria-current" => "page", href: edit_path} Metadata
-  -# Advanced is a Works-only tab (containers have no advanced fields).
-  - if @klass == 'Work'
-    %li.nav-item
-      %a.nav-link{href: "#{edit_path}#advanced"} Advanced
-  %li.nav-item
-    %a.nav-link{href: "#{edit_path}#permissions"} Permissions
-  -# Move / Delete are Works-only request tabs (containers have no
-  -# request_change route).
-  - if @klass == 'Work'
-    %li.nav-item
-      %a.nav-link{href: "#{edit_path}#move"} Move
-    %li.nav-item
-      %a.nav-link{href: "#{edit_path}#delete"} Delete
-  %li.nav-item
-    %a.nav-link.active{href: "#"} XML
-  -# Derivative access / Export are Collection-only (a Sentinel is a Collection
-  -# default; Export is additionally loader-gated, matching the edit page).
-  - if @klass == 'Collection'
-    %li.nav-item
-      %a.nav-link{href: "#{edit_path}#derivative-access"} Derivative access
-    - if current_user&.loader_tier?
-      %li.nav-item
-        %a.nav-link{href: "#{edit_path}#export"} Export
-  - if can?(:read, :audit_event)
-    %li.nav-item
-      %a.nav-link{href: "#{edit_path}#history"} History
-  -# Analytics is container-only — a Work has no subtree to report on.
-  - if container
-    %li.nav-item
-      %a.nav-link{href: "#{edit_path}#analytics"} Analytics
+-# The XML editor is a standalone page rather than one of the edit page's panes,
+-# so its row links back to those panes — `active: 'xml'` selects that form.
+= render 'shared/edit_tabs', klass: @klass, id: @resource.id, active: 'xml'
 
 %br
 

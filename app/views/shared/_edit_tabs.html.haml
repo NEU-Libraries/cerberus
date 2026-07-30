@@ -1,0 +1,26 @@
+-# The resource-edit tab row, from the one declaration in EditTabsHelper::TABS.
+-# Rendered two ways off `active`:
+-#   active: nil    → this page owns the panes (the edit view): pane tabs are
+-#                    Bootstrap tab buttons and the row drives them via tab-hash.
+-#   active: '<key>' → a standalone sub-page (the XML editor): pane tabs become
+-#                    links back to the edit page's pane, and `active` is the
+-#                    inert current tab.
+-# @param klass [String] 'Work' | 'Collection' | 'Community'
+-# @param id [String] the resource noid
+-# @param active [String, nil] key of the standalone tab being viewed
+- keys = edit_tab_keys(klass)
+- edit_path = public_send("edit_#{klass.downcase}_path", id)
+-# The first visible pane tab is the one Bootstrap opens by default.
+- default_key = keys.find { |key| !key.in?(EditTabsHelper::STANDALONE) }
+%ul.nav.nav-tabs{data: (active ? {} : { controller: 'tab-hash' })}
+  - keys.each do |key|
+    %li.nav-item
+      - if key == active
+        %a.nav-link.active{"aria-current" => "page", href: "#"}= edit_tab_label(key)
+      - elsif key.in?(EditTabsHelper::STANDALONE)
+        %a.nav-link{href: edit_tab_standalone_path(key, id)}= edit_tab_label(key)
+      - elsif active
+        %a.nav-link{href: "#{edit_path}##{key}"}= edit_tab_label(key)
+      - else
+        - opens_by_default = key == default_key
+        %button.nav-link{id: "#{key}-tab", class: ("active" if opens_by_default), "aria-controls" => key, "aria-selected" => opens_by_default.to_s, "data-bs-target" => "##{key}", "data-bs-toggle" => "tab", role: "tab", type: "button"}= edit_tab_label(key)
