@@ -152,4 +152,23 @@ RSpec.describe 'Admin::Impressions', type: :request do
       expect(response.body).not_to include('Top collections')
     end
   end
+
+  describe 'Composition tab' do
+    before { sign_in admin_user }
+
+    it 'always renders, ignoring the date range/segment/scope, with entity counts and a classification chart' do
+      allow(SolrFacetValues).to receive(:call).with(field: 'internal_resource_tesim')
+                                              .and_return([['Community', 5], ['Collection', 10], ['Work', 200], ['Person', 8]])
+      allow(Blacklight.default_index).to receive(:search)
+        .with(hash_including(fq: ['internal_resource_tesim:Work', 'read_access_group_ssim:public']))
+        .and_return(instance_double(Blacklight::Solr::Response, total: 150))
+      allow(SolrFacetValues).to receive(:call).with(field: 'classification_ssim', extra_fq: ['internal_resource_tesim:Work'])
+                                              .and_return([['Image', 90], ['Text', 60]])
+
+      get '/admin/impressions', params: { segment: 'all', item_noid: 'w1', item_uuid: 'uuid-w1', item_klass: 'Work', item_title: 'X' }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Composition', 'Faculty', 'Staff', 'Public works', 'Private works')
+    end
+  end
 end

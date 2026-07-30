@@ -33,6 +33,7 @@ module Admin
     def index
       @report = build_report
       @item_results = search_items if params[:q].present?
+      @composition = RepositoryCompositionReport.new
     end
 
     # CSV / Excel of the top-N tables (the quarterly-report artifact). Format

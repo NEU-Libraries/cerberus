@@ -8,6 +8,14 @@ module Admin
     ITEM_PARAMS  = %w[item_noid item_uuid item_klass item_title].freeze
     FACET_PARAMS = %w[facet facet_type facet_value].freeze
 
+    # Themed color cycle for the Composition tab's classification pie chart.
+    # Leads with the dashboard's already-established view/download/visitor
+    # hues (so the typically-largest categories — Image/Text — land on
+    # colors an admin has already seen elsewhere on this page), then extends
+    # into the rest of the Cerberus palette for the long tail. Chartkick
+    # repeats the array if there are more slices than colors.
+    COMPOSITION_COLORS = %w[#2666a6 #18bc9c #5d569b #6f42c1 #fd7e14 #e83e8c #3498db #20c997 #f39c12].freeze
+
     # Per-action series as a chartkick multi-series array (string day keys).
     def usage_timeseries(report)
       ImpressionsReport::ACTIONS.map do |action|
@@ -87,6 +95,10 @@ module Admin
       return nil unless scope&.facet_active?
 
       "#{scope.facet_type}::#{scope.facet_value}"
+    end
+
+    def usage_composition_colors
+      COMPOSITION_COLORS
     end
   end
 end

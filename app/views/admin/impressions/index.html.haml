@@ -29,6 +29,8 @@
       - if @report.show_collections_tab?
         %li.nav-item
           %button#collections-tab.nav-link{'aria-controls' => 'collections', 'aria-selected' => 'false', 'data-bs-target' => '#collections', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Top collections
+      %li.nav-item
+        %button#composition-tab.nav-link{'aria-controls' => 'composition', 'aria-selected' => 'false', 'data-bs-target' => '#composition', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Composition
 
     .tab-content.pt-3
       #overview.tab-pane.active{'aria-labelledby' => 'overview-tab', role: 'tabpanel'}
@@ -54,3 +56,5 @@
       - if @report.show_collections_tab?
         #collections.tab-pane{'aria-labelledby' => 'collections-tab', role: 'tabpanel'}
           = render 'top_table', entries: @report.top_containers, empty: 'No container activity in this range.'
+      #composition.tab-pane{'aria-labelledby' => 'composition-tab', role: 'tabpanel'}
+        = render 'composition', composition: @composition

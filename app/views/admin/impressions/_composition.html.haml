@@ -1,0 +1,36 @@
+- entity = composition.entity_counts
+- visibility = composition.work_visibility
+
+%p.text-muted.small.mb-3
+  Repository-wide counts — not affected by the date range, segment, or the item/facet scope above.
+
+%dl.usage-ledger
+  .usage-ledger__item.usage-ledger__item--communities
+    %dt.usage-ledger__label Communities
+    %dd.usage-ledger__figure= number_with_delimiter(entity['Community'])
+  .usage-ledger__item.usage-ledger__item--collections
+    %dt.usage-ledger__label Collections
+    %dd.usage-ledger__figure= number_with_delimiter(entity['Collection'])
+  .usage-ledger__item.usage-ledger__item--works
+    %dt.usage-ledger__label Works
+    %dd.usage-ledger__figure= number_with_delimiter(entity['Work'])
+  .usage-ledger__item.usage-ledger__item--people
+    %dt.usage-ledger__label Faculty & Staff
+    %dd.usage-ledger__figure= number_with_delimiter(entity['Person'])
+
+%dl.usage-ledger
+  .usage-ledger__item.usage-ledger__item--public
+    %dt.usage-ledger__label Public works
+    %dd.usage-ledger__figure= number_with_delimiter(visibility[:public])
+  .usage-ledger__item.usage-ledger__item--private
+    %dt.usage-ledger__label Private works
+    %dd.usage-ledger__figure= number_with_delimiter(visibility[:private])
+
+%section.usage-chart-block
+  %h2.usage-chart-block__title Content by type
+  - if composition.classification_counts.any?
+    .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'pie', 'usage-chart-dataset-value' => composition.classification_counts.to_json, 'usage-chart-colors-value' => usage_composition_colors.to_json}}
+  - else
+    .admin-registry__empty
+      %i.fa-solid.fa-chart-simple.admin-registry__empty-icon{'aria-hidden' => 'true'}
+      %p.text-muted.mb-0 No classified content yet.

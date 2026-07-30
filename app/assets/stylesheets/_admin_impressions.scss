@@ -8,10 +8,19 @@
 
 // Per-metric accent tones (desaturated, matching the existing palette):
 // views = Cerberus navy, downloads = teal-green success, visitors = indigo
-// (the audit-history "reparent" tone).
+// (the audit-history "reparent" tone). Composition tab reuses the same
+// ledger with its own set — communities/collections/works/people trace the
+// structural-home hierarchy top to bottom; public/private mirrors the
+// open/restricted register used elsewhere (success = open, orange = gated).
 $usage-view:     $blue;
 $usage-download: $success;
 $usage-visitor:  #5d569b;
+$usage-communities: $teal;
+$usage-collections: $cyan;
+$usage-works:       $indigo;
+$usage-people:      $purple;
+$usage-public:      $success;
+$usage-private:     $orange;
 
 .usage-ledger {
   display: flex;
@@ -32,9 +41,15 @@ $usage-visitor:  #5d569b;
 
     // Accent underline keyed to the metric's chart colour.
     --usage-accent: #{$gray-500};
-    &--view     { --usage-accent: #{$usage-view}; }
-    &--download { --usage-accent: #{$usage-download}; }
-    &--visitors { --usage-accent: #{$usage-visitor}; }
+    &--view        { --usage-accent: #{$usage-view}; }
+    &--download    { --usage-accent: #{$usage-download}; }
+    &--visitors    { --usage-accent: #{$usage-visitor}; }
+    &--communities { --usage-accent: #{$usage-communities}; }
+    &--collections { --usage-accent: #{$usage-collections}; }
+    &--works       { --usage-accent: #{$usage-works}; }
+    &--people      { --usage-accent: #{$usage-people}; }
+    &--public      { --usage-accent: #{$usage-public}; }
+    &--private     { --usage-accent: #{$usage-private}; }
   }
 
   &__label {
