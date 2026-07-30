@@ -66,7 +66,7 @@ RSpec.describe 'Atlas tokens', type: :request do
     end
 
     it 'mints a token and reveals it once' do
-      allow(AtlasRb::System::Token).to receive(:mint).with(nuid: '000000002').and_return('jwt.abc.123')
+      allow(AtlasRb::System::Token).to receive(:mint).with(nuid: '000000002', read_only: true).and_return('jwt.abc.123')
 
       post '/atlas_token'
 
@@ -76,10 +76,10 @@ RSpec.describe 'Atlas tokens', type: :request do
     end
 
     it 'regenerate revokes outstanding tokens before minting' do
-      allow(AtlasRb::System::Token).to receive(:mint).with(nuid: '000000002').and_return('jwt.new.999')
+      allow(AtlasRb::System::Token).to receive(:mint).with(nuid: '000000002', read_only: true).and_return('jwt.new.999')
 
       expect(AtlasRb::System::Token).to receive(:revoke).with(nuid: '000000002').ordered
-      expect(AtlasRb::System::Token).to receive(:mint).with(nuid: '000000002').ordered.and_return('jwt.new.999')
+      expect(AtlasRb::System::Token).to receive(:mint).with(nuid: '000000002', read_only: true).ordered.and_return('jwt.new.999')
 
       post '/atlas_token', params: { regenerate: true }
 

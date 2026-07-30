@@ -2,8 +2,11 @@
 
 # Personal-access token lifecycle for the My DRS "Programmatic access" section.
 # A signed-in member of the API group mints / regenerates / revokes the 1-week
-# JWT they export as ATLAS_JWT to drive the Atlas API headless (atlas_rb's
-# BYO-JWT mode).
+# read-only JWT they export as ATLAS_JWT to drive the Atlas API headless
+# (atlas_rb's BYO-JWT mode). Minted read-only: this UI hands a bearer
+# credential to the user's own scripts/shell, which is more exposure than a
+# browser session, so it is structurally barred from mutating the repository
+# regardless of what the underlying NUID could otherwise do.
 #
 # Minting a token for an NUID is a "become anyone" operation — which is why
 # Atlas :system-gates it — so Cerberus only ever mints for the *real* signed-in
@@ -17,7 +20,7 @@ class AtlasTokensController < ApplicationController
   # tokens (jti rotation) so the freshly-minted one is the only valid credential.
   def create
     AtlasRb::System::Token.revoke(nuid: current_user.nuid) if params[:regenerate].present?
-    token = AtlasRb::System::Token.mint(nuid: current_user.nuid)
+    token = AtlasRb::System::Token.mint(nuid: current_user.nuid, read_only: true)
 
     render_section(token:  token,
                    notice: token ? nil : "We couldn't mint a token for your account.")

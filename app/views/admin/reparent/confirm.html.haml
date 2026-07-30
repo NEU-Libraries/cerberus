@@ -35,19 +35,16 @@
         %i.fa-solid.fa-arrow-right-long.reparent-preview__arrow{'aria-hidden' => 'true'}
         .reparent-preview__endpoint
           %span.reparent-preview__caption To
-          - if @destination
-            = finder_type_chip(@destination.klass)
-            %span.reparent-preview__title= @destination.resource.title
-            %span.admin-registry-table__id= @destination.resource.id
-          - else
-            %span.reparent-preview__title Top level
+          = finder_type_chip(@destination.klass)
+          %span.reparent-preview__title= @destination.resource.title
+          %span.admin-registry-table__id= @destination.resource.id
 
     %p.text-muted.small.mt-3.mb-3
       Moving re-orders the structural tree and re-flows the breadcrumb and contents of every container beneath this one. Permissions are not changed.
 
     = form_with url: admin_reparent_move_path, method: :post, class: 'reparent-confirm-form' do
       = hidden_field_tag :node_id, @node.resource.id
-      = hidden_field_tag :parent_id, (@destination&.resource&.id)
+      = hidden_field_tag :parent_id, @destination.resource.id
       = button_tag class: 'btn btn-primary' do
         %i.fa-solid.fa-check.me-1{'aria-hidden' => 'true'}
         Confirm move

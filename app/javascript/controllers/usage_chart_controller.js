@@ -9,6 +9,7 @@ export default class extends Controller {
     kind: { type: String, default: "line" },
     dataset: { type: Array, default: [] },
     colors: { type: Array, default: [] },
+    stacked: { type: Boolean, default: false },
   }
 
   async connect() {
@@ -20,16 +21,26 @@ export default class extends Controller {
     if (!Chartkick) return
     if (Chartkick.use && window.Chart) Chartkick.use(window.Chart)
 
-    const ChartClass = this.kindValue === "column" ? Chartkick.ColumnChart : Chartkick.LineChart
-    this.chart = new ChartClass(this.element, this.datasetValue, {
-      colors: this.colorsValue,
-      points: false,
-      curve: false,
-      library: {
-        maintainAspectRatio: false,
-        plugins: { legend: { display: this.datasetValue.length > 1, position: "bottom" } },
-      },
-    })
+    const chartClasses = { column: Chartkick.ColumnChart, pie: Chartkick.PieChart, line: Chartkick.LineChart }
+    const ChartClass = chartClasses[this.kindValue] || Chartkick.LineChart
+
+    // A pie chart's "series" is one flat label/value list, not per-series lines —
+    // its legend should always show (the slice labels), and points/curve are
+    // line-chart-only options that don't apply.
+    const options = this.kindValue === "pie"
+      ? { colors: this.colorsValue, library: { maintainAspectRatio: false, plugins: { legend: { display: true, position: "right" } } } }
+      : {
+          colors: this.colorsValue,
+          points: false,
+          curve: false,
+          stacked: this.stackedValue,
+          library: {
+            maintainAspectRatio: false,
+            plugins: { legend: { display: this.datasetValue.length > 1, position: "bottom" } },
+          },
+        }
+
+    this.chart = new ChartClass(this.element, this.datasetValue, options)
   }
 
   disconnect() {

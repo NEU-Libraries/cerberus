@@ -1,15 +1,19 @@
 # frozen_string_literal: true
 
 module Admin
-  # Re-parent / Move surface. A self-contained finder for moving a Collection
-  # or Community to a new structural parent, reachable by :admin and by the
-  # devolved-admin tier (User#admin_delegate?):
+  # Re-parent / Move surface. A self-contained finder for moving a Work,
+  # Collection, or Community to a new structural parent, reachable by :admin
+  # and by the devolved-admin tier (User#admin_delegate?):
   #
   #   index         → search for the node to move
   #   choose_parent → search for its new parent (valid types only; self +
   #                   descendants excluded so a cycle can't be picked)
   #   confirm       → preview "move X from A → B"
   #   move          → perform via atlas_rb, then redirect to the node's page
+  #
+  # The DRS tree has no floating top level, so every step requires a real
+  # destination parent — there is no "move to top / no parent" option for any
+  # node class (the top of the tree is fixed, not a place things get moved to).
   #
   # The Atlas re-parent endpoints + atlas_rb bindings already exist; this is
   # purely the Cerberus consumer. The acting user's NUID flows to Atlas
@@ -30,10 +34,11 @@ module Admin
 
     copy_blacklight_config_from(CatalogController)
 
-    # node class => container classes it may be re-parented under. Works are not
-    # offered here (this surface is containers-only); Communities may also go to
-    # the top of the tree (handled as a blank parent_id, not a candidate row).
+    # node class => container classes it may be re-parented under. Works nest
+    # only under Collections (Atlas rejects anything else as an invalid parent
+    # type); Collections and Communities nest under containers as before.
     ALLOWED_PARENTS = {
+      'Work'       => %w[Collection],
       'Collection' => %w[Community Collection],
       'Community'  => %w[Community]
     }.freeze
@@ -49,7 +54,7 @@ module Admin
     def choose_parent
       breadcrumb 'Choose parent', admin_reparent_choose_parent_path
       @node = load_node(params[:node_id])
-      @allows_top_level = @node.klass == 'Community'
+      @allowed_parent_label = allowed_parent_label(@node.klass)
       return if params[:q].blank?
 
       @results = ResourceSearch.call(
@@ -61,16 +66,20 @@ module Admin
       )
     end
 
-    # Step 3 — preview the move and confirm.
+    # Step 3 — preview the move and confirm. A destination is mandatory —
+    # redirect back to choose_parent rather than preview a "no parent" move.
     def confirm
+      return redirect_to_choose_parent if params[:parent_id].blank?
+
       breadcrumb 'Confirm', admin_reparent_confirm_path
       set_confirm_ivars
     end
 
-    # Perform the move.
+    # Perform the move. Same mandatory-destination guard as confirm.
     def move
       node = load_node(params[:node_id])
       parent_id = params[:parent_id].presence
+      return redirect_to_choose_parent(node) if parent_id.nil?
 
       if reparent(node, parent_id)
         redirect_to node_path(node),
@@ -92,11 +101,12 @@ module Admin
       end
 
       def search_containers
-        ResourceSearch.call(scope: self, query: params[:q])
+        ResourceSearch.call(scope: self, query: params[:q], types: ALLOWED_PARENTS.keys)
       end
 
       def reparent(node, parent_id)
         case node.klass
+        when 'Work'       then AtlasRb::Work.reparent(node.resource.id, parent_id)
         when 'Collection' then AtlasRb::Collection.reparent(node.resource.id, parent_id)
         when 'Community'  then AtlasRb::Community.reparent(node.resource.id, parent_id)
         end
@@ -105,7 +115,19 @@ module Admin
       def set_confirm_ivars
         @node = load_node(params[:node_id])
         @current_parent = immediate_parent(@node)
-        @destination = params[:parent_id].present? ? load_node(params[:parent_id]) : nil
+        @destination = load_node(params[:parent_id])
+      end
+
+      # Human-readable list of the container types a node of this class may be
+      # moved under, e.g. "Community or Collection" / "Collection".
+      def allowed_parent_label(klass)
+        ALLOWED_PARENTS.fetch(klass, []).to_sentence(two_words_connector: ' or ', last_word_connector: ', or ')
+      end
+
+      def redirect_to_choose_parent(node = nil)
+        node ||= load_node(params[:node_id])
+        redirect_to admin_reparent_choose_parent_path(node_id: node.resource.id),
+                    alert: 'Choose a destination — every node in the DRS tree must have a parent.'
       end
 
       # The node's current immediate parent, as a lightweight display object

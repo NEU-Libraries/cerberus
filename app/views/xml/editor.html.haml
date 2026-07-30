@@ -10,28 +10,9 @@
   Edit raw XML for
   = @resource.title
 
-%ul.nav.nav-tabs
-  %li.nav-item
-    %a.nav-link{"aria-current" => "page", href: public_send("edit_#{@klass.downcase}_path", @resource.id)} Metadata
-  -# Advanced is a Works-only tab (Collections have no advanced fields); link back
-  -# to the edit page's Advanced pane via the tab-hash fragment.
-  - if @klass == 'Work'
-    %li.nav-item
-      %a.nav-link{href: "#{public_send("edit_#{@klass.downcase}_path", @resource.id)}#advanced"} Advanced
-  %li.nav-item
-    %a.nav-link{href: "#{public_send("edit_#{@klass.downcase}_path", @resource.id)}#permissions"} Permissions
-  -# Move / Delete are Works-only request tabs (containers have no request_change
-  -# route); link back to the edit page's panes via the tab-hash fragment.
-  - if @klass == 'Work'
-    %li.nav-item
-      %a.nav-link{href: "#{public_send("edit_#{@klass.downcase}_path", @resource.id)}#move"} Move
-    %li.nav-item
-      %a.nav-link{href: "#{public_send("edit_#{@klass.downcase}_path", @resource.id)}#delete"} Delete
-  %li.nav-item
-    %a.nav-link.active{href: "#"} XML
-  - if can?(:read, :audit_event)
-    %li.nav-item
-      %a.nav-link{href: "#{public_send("edit_#{@klass.downcase}_path", @resource.id)}#history"} History
+-# The XML editor is a standalone page rather than one of the edit page's panes,
+-# so its row links back to those panes — `active: 'xml'` selects that form.
+= render 'shared/edit_tabs', klass: @klass, id: @resource.id, active: 'xml'
 
 %br
 

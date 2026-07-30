@@ -15,7 +15,7 @@
       %i.fa-solid.fa-terminal.text-secondary.me-2{ 'aria-hidden' => 'true' }
       Programmatic access
     %p.small.text-muted.mb-0
-      A personal access token for driving the Atlas API directly — from your own scripts or the command line, without signing in through a browser.
+      A read-only personal access token for driving the Atlas API directly — from your own scripts or the command line, without signing in through a browser.
   .p-3
     - if notice.present?
       .alert.alert-info.py-2.px-3.small.mb-3{ role: 'status' }= notice
@@ -25,7 +25,7 @@
         %i.fa-solid.fa-triangle-exclamation.me-2.mt-1{ 'aria-hidden' => 'true' }
         %div
           %strong.d-block Copy this token now — it won't be shown again.
-          Treat it like a password: it grants full access as you, and expires one week from now.
+          Treat it like a password: it grants read-only access as you, and expires one week from now.
       .small.fw-semibold.text-muted.mb-1 Your access token
       .input-group.mb-3{ data: { controller: 'clipboard', 'clipboard-text-value': token } }
         %code.form-control.bg-body-tertiary.font-monospace.text-break.user-select-all{ style: 'height: auto; white-space: normal;' }= token
@@ -44,7 +44,7 @@
           Revoke all
     - else
       %p.small.text-muted.mb-3
-        Generate a token to authenticate as yourself against the Atlas API. Tokens expire after one week; you can revoke them at any time.
+        Generate a read-only token to authenticate as yourself against the Atlas API. Tokens expire after one week; you can revoke them at any time.
       .d-flex.gap-2
         = button_to atlas_token_path, method: :post, class: 'btn btn-sm btn-primary' do
           %i.fa-solid.fa-key.me-1{ 'aria-hidden' => 'true' }

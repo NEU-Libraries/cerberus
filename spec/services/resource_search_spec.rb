@@ -35,6 +35,16 @@ RSpec.describe ResourceSearch do
       expect(filters).not_to include(a_string_matching(/\A-id:/))
       expect(filters).not_to include(a_string_matching(/ancestor_ids_ssim/))
     end
+
+    it 'ANDs in an arbitrary within_fq fragment when given one' do
+      filters = described_class.new(scope: scope, query: 'x', within_fq: '{!terms f=id}uuid-1').filters
+      expect(filters).to include('{!terms f=id}uuid-1')
+    end
+
+    it 'omits within_fq when not given' do
+      filters = described_class.new(scope: scope, query: 'x').filters
+      expect(filters).not_to include(a_string_matching(/terms f=id/))
+    end
   end
 
   describe '#call' do

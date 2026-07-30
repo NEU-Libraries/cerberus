@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 # Keyword search over repository resources of given internal_resource types
-# (Works, Collections, Communities) for the admin finders — the re-parent flow
-# searches containers; the linked-members flow searches Works then Collections.
+# (Works, Collections, Communities) for the admin finders — the re-parent
+# flow's node step searches all three (anything can be moved), its
+# destination step narrows to whatever ALLOWED_PARENTS permits for that node's
+# class; the linked-members flow searches Works then Collections.
 # Uses the same `Blacklight.default_index.search(builder)` idiom as the other
 # Solr service objects, but instead of resolving a subtree it answers "which
 # resources of these types match what the admin typed?".
@@ -30,13 +32,19 @@ class ResourceSearch < ApplicationService
   # @param exclude_subtree_noid [String, nil] noid of the node being moved —
   #   excludes every container whose `ancestor_ids_ssim` contains it (its
   #   descendants).
-  def initialize(scope:, query: nil, types: %w[Collection Community],
-                 exclude_node_uuid: nil, exclude_subtree_noid: nil)
+  # @param within_fq [String, nil] an additional raw fq fragment ANDed onto the
+  #   search (e.g. {ContainerDescendantsQuery#subtree_fq}) — for finders that
+  #   must stay contained to one container's own subtree (the Collection/
+  #   Community edit page's Analytics-tab item lookup), rather than the
+  #   repo-wide candidate set the re-parent/linked-member finders search.
+  def initialize(scope:, query: nil, types: %w[Collection Community], # rubocop:disable Metrics/ParameterLists
+                 exclude_node_uuid: nil, exclude_subtree_noid: nil, within_fq: nil)
     @scope = scope
     @query = query
     @types = Array(types)
     @exclude_node_uuid = exclude_node_uuid
     @exclude_subtree_noid = exclude_subtree_noid
+    @within_fq = within_fq
     super()
   end
 
@@ -58,6 +66,7 @@ class ResourceSearch < ApplicationService
     fq = ["internal_resource_tesim:(#{@types.join(' OR ')})", '-tombstoned_bsi:true']
     fq << "-id:\"#{@exclude_node_uuid}\"" if @exclude_node_uuid.present?
     fq << "-ancestor_ids_ssim:\"#{@exclude_subtree_noid}\"" if @exclude_subtree_noid.present?
+    fq << @within_fq if @within_fq.present?
     fq
   end
 

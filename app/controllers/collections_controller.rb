@@ -7,6 +7,7 @@ class CollectionsController < CatalogController
   include DepositorContext
   include CollectionBreadcrumbs
   include RecordsImpressions
+  include ContainerAnalytics
 
   authorize_resource_writes!(extra_edit: %i[sentinel])
   after_action :record_view_impression, only: :show
@@ -45,6 +46,7 @@ class CollectionsController < CatalogController
     form_preparation(@permissions)
     load_descriptive!('Collection')
     @sentinel = Sentinel.find_by(target_id: params[:id])
+    load_container_analytics(@collection, 'Collection')
     collection_breadcrumbs(params[:id], editing: true)
   end
 

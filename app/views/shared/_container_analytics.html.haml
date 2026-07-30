@@ -1,0 +1,86 @@
+- base_klass = @analytics_base_item[:klass]
+- noid = @analytics_base_item[:noid]
+- drilled = container_analytics_drilled?(@analytics_base_item, @analytics_effective_item)
+
+.py-2.px-1
+  %p.text-muted.small.mb-3
+    = container_analytics_scope_blurb(@analytics, @analytics_base_item, @analytics_effective_item)
+
+  .usage-scope.mb-3
+    - if drilled || @analytics.scope.facet_active?
+      .usage-scope__active
+        - if drilled
+          %span.usage-scope__chip
+            %i.fa-solid.fa-thumbtack.me-1{'aria-hidden' => 'true'}
+            Scoped to: #{@analytics.scope.item_label}
+            = link_to container_analytics_clear_item_path(base_klass, noid), class: 'usage-scope__chip-clear', 'aria-label' => 'Clear item scope' do
+              %i.fa-solid.fa-xmark{'aria-hidden' => 'true'}
+        - if @analytics.scope.facet_active?
+          %span.usage-scope__chip
+            %i.fa-solid.fa-filter.me-1{'aria-hidden' => 'true'}
+            Faceted by: #{@analytics.scope.facet_label}
+            = link_to container_analytics_clear_facet_path(base_klass, noid), class: 'usage-scope__chip-clear', 'aria-label' => 'Clear facet' do
+              %i.fa-solid.fa-xmark{'aria-hidden' => 'true'}
+
+    .usage-scope__controls{data: {controller: 'preserve-hash-form', action: 'submit->preserve-hash-form#submit'}}
+      .usage-scope__item-picker
+        = render 'admin/finder/search_form', url: container_analytics_path(base_klass, noid), q: params[:q], hidden: container_analytics_preserved_params, placeholder: "Look up a Work or Collection within this #{base_klass.downcase}…"
+
+      = form_with url: container_analytics_path(base_klass, noid), method: :get, class: 'usage-scope__facet-form' do
+        - container_analytics_preserved_params('analytics_facet', 'analytics_facet_type', 'analytics_facet_value').each do |key, value|
+          = hidden_field_tag key, value
+        = select_tag :analytics_facet, grouped_options_for_select(@analytics_facet_groups, container_analytics_selected_facet_value(@analytics)), include_blank: 'Facet by…', class: 'form-select usage-scope__facet-select'
+        %button.usage-scope__facet-apply{type: 'submit'} Filter
+
+    - if @analytics_item_results
+      = render 'admin/finder/results', results: @analytics_item_results, select_label: 'Scope', select_url: ->(doc) { container_analytics_item_select_url(base_klass, noid, doc) }
+
+  %ul.nav.nav-tabs.mb-0{role: 'tablist'}
+    %li.nav-item
+      %button#analytics-overview-tab.nav-link.active{'aria-controls' => 'analytics-overview', 'aria-selected' => 'true', 'data-bs-target' => '#analytics-overview', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Overview
+    %li.nav-item
+      %button#analytics-files-tab.nav-link{'aria-controls' => 'analytics-files', 'aria-selected' => 'false', 'data-bs-target' => '#analytics-files', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Top files
+    - if @analytics.scope.show_collections_tab?
+      %li.nav-item
+        %button#analytics-collections-tab.nav-link{'aria-controls' => 'analytics-collections', 'aria-selected' => 'false', 'data-bs-target' => '#analytics-collections', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Top collections
+    %li.nav-item
+      %button#analytics-composition-tab.nav-link{'aria-controls' => 'analytics-composition', 'aria-selected' => 'false', 'data-bs-target' => '#analytics-composition', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Composition
+
+  .tab-content.pt-3
+    #analytics-overview.tab-pane.active{'aria-labelledby' => 'analytics-overview-tab', role: 'tabpanel'}
+      %dl.usage-ledger
+        - @analytics.totals.each do |action, total|
+          .usage-ledger__item{class: "usage-ledger__item--#{action}"}
+            %dt.usage-ledger__label= action.capitalize.pluralize
+            %dd.usage-ledger__figure= number_with_delimiter(total)
+        .usage-ledger__item.usage-ledger__item--visitors
+          %dt.usage-ledger__label Unique visitors · peak day
+          %dd.usage-ledger__figure= number_with_delimiter(@analytics.unique_visitors_series.values.max || 0)
+
+      -# Columns, not lines: the daily series carry no key for a zero-activity
+      -# day, so a line interpolates straight through the gaps — at one
+      -# container's volume that renders as disconnected floating segments.
+      -# Stacking views onto downloads also makes the bar height read as total
+      -# activity for the day.
+      %section.usage-chart-block
+        %h2.usage-chart-block__title Views & downloads over time
+        .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-stacked-value' => 'true', 'usage-chart-dataset-value' => usage_timeseries(@analytics).to_json, 'usage-chart-colors-value' => %w[#2666a6 #18bc9c].to_json}}
+
+      %section.usage-chart-block
+        %h2.usage-chart-block__title Unique visitors over time
+        .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-dataset-value' => usage_visitors_series(@analytics).to_json, 'usage-chart-colors-value' => %w[#5d569b].to_json}}
+
+    #analytics-files.tab-pane{'aria-labelledby' => 'analytics-files-tab', role: 'tabpanel'}
+      = render 'shared/container_analytics_top_table', entries: @analytics.top_works, empty: 'No file activity in this range.'
+    - if @analytics.scope.show_collections_tab?
+      #analytics-collections.tab-pane{'aria-labelledby' => 'analytics-collections-tab', role: 'tabpanel'}
+        = render 'shared/container_analytics_top_table', entries: @analytics.top_containers, empty: 'No container activity in this range.'
+    #analytics-composition.tab-pane{'aria-labelledby' => 'analytics-composition-tab', role: 'tabpanel'}
+      = render 'admin/impressions/composition', composition: @analytics_composition,
+                                                scope_description: "This #{base_klass.downcase}'s own subtree"
+
+  - if current_user&.admin? || current_user&.admin_delegate?
+    .mt-3
+      = link_to admin_impressions_path(open_in_usage_analytics_params(@analytics_effective_item, @analytics)), class: 'btn btn-sm btn-outline-primary' do
+        %i.fa-solid.fa-chart-line.me-1{'aria-hidden' => 'true'}
+        Open in Usage Analytics

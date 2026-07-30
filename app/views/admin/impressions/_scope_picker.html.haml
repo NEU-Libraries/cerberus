@@ -1,0 +1,28 @@
+.usage-scope.mb-3
+  - if @report.scoped?
+    .usage-scope__active
+      - if @report.scope.item_label
+        %span.usage-scope__chip
+          %i.fa-solid.fa-thumbtack.me-1{'aria-hidden' => 'true'}
+          Scoped to: #{@report.scope.item_label}
+          = link_to usage_clear_item_path, class: 'usage-scope__chip-clear', 'aria-label' => 'Clear item scope' do
+            %i.fa-solid.fa-xmark{'aria-hidden' => 'true'}
+      - if @report.scope.facet_label
+        %span.usage-scope__chip
+          %i.fa-solid.fa-filter.me-1{'aria-hidden' => 'true'}
+          Faceted by: #{@report.scope.facet_label}
+          = link_to usage_clear_facet_path, class: 'usage-scope__chip-clear', 'aria-label' => 'Clear facet' do
+            %i.fa-solid.fa-xmark{'aria-hidden' => 'true'}
+
+  .usage-scope__controls
+    .usage-scope__item-picker
+      = render 'admin/finder/search_form', url: admin_impressions_path, q: params[:q], hidden: usage_preserved_params, placeholder: 'Scope to a Work, Collection, or Community…'
+
+    = form_with url: admin_impressions_path, method: :get, class: 'usage-scope__facet-form' do
+      - usage_preserved_params('facet', 'facet_type', 'facet_value').each do |key, value|
+        = hidden_field_tag key, value
+      = select_tag :facet, grouped_options_for_select(usage_facet_groups, usage_selected_facet_value(@report)), include_blank: 'Facet by…', class: 'form-select usage-scope__facet-select'
+      %button.usage-scope__facet-apply{type: 'submit'} Filter
+
+  - if @item_results
+    = render 'admin/finder/results', results: @item_results, select_label: 'Scope', select_url: ->(doc) { usage_item_select_url(doc) }
