@@ -22,7 +22,7 @@
             = link_to container_analytics_clear_facet_path(base_klass, noid), class: 'usage-scope__chip-clear', 'aria-label' => 'Clear facet' do
               %i.fa-solid.fa-xmark{'aria-hidden' => 'true'}
 
-    .usage-scope__controls
+    .usage-scope__controls{data: {controller: 'preserve-hash-form', action: 'submit->preserve-hash-form#submit'}}
       .usage-scope__item-picker
         = render 'admin/finder/search_form', url: container_analytics_path(base_klass, noid), q: params[:q], hidden: container_analytics_preserved_params, placeholder: "Look up a Work or Collection within this #{base_klass.downcase}…"
 
