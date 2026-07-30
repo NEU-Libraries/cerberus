@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
 module Admin
-  # View helpers for the usage-analytics dashboard: chartkick-ready datasets,
-  # the segment toggle, export links, and the item-picker / facet scoping UI.
-  # Kept out of the controller (thin) and the report (data-only).
+  # View helpers for the /admin usage-analytics dashboard itself: the
+  # segment toggle, export links, and the item-picker / facet scoping UI.
+  # Chartkick dataset formatting lives in UsageChartsHelper (shared with the
+  # Collection/Community edit pages' Analytics tab). Kept out of the
+  # controller (thin) and the report (data-only).
   module ImpressionsHelper
     ITEM_PARAMS  = %w[item_noid item_uuid item_klass item_title].freeze
     FACET_PARAMS = %w[facet facet_type facet_value].freeze
@@ -15,17 +17,6 @@ module Admin
     # into the rest of the Cerberus palette for the long tail. Chartkick
     # repeats the array if there are more slices than colors.
     COMPOSITION_COLORS = %w[#2666a6 #18bc9c #5d569b #6f42c1 #fd7e14 #e83e8c #3498db #20c997 #f39c12].freeze
-
-    # Per-action series as a chartkick multi-series array (string day keys).
-    def usage_timeseries(report)
-      ImpressionsReport::ACTIONS.map do |action|
-        { name: action.capitalize, data: report.series(action).transform_keys(&:to_s) }
-      end
-    end
-
-    def usage_visitors_series(report)
-      [{ name: 'Unique visitors', data: report.unique_visitors_series.transform_keys(&:to_s) }]
-    end
 
     # A segment-toggle option that preserves every other active param
     # (date range, item scope, facet) via the full current query string.

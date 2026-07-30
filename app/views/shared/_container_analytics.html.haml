@@ -1,0 +1,25 @@
+.py-2.px-1
+  %p.text-muted.small.mb-3
+    Views, downloads, and visitors for everything under this #{klass.downcase} — the #{klass.downcase} itself and every descendant Work. Last #{ImpressionsReport::DEFAULT_DAYS} days, human traffic only.
+
+  %dl.usage-ledger
+    - report.totals.each do |action, total|
+      .usage-ledger__item{class: "usage-ledger__item--#{action}"}
+        %dt.usage-ledger__label= action.capitalize.pluralize
+        %dd.usage-ledger__figure= number_with_delimiter(total)
+    .usage-ledger__item.usage-ledger__item--visitors
+      %dt.usage-ledger__label Unique visitors · peak day
+      %dd.usage-ledger__figure= number_with_delimiter(report.unique_visitors_series.values.max || 0)
+
+  %section.usage-chart-block
+    %h2.usage-chart-block__title Views & downloads over time
+    .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'line', 'usage-chart-dataset-value' => usage_timeseries(report).to_json, 'usage-chart-colors-value' => %w[#2666a6 #18bc9c].to_json}}
+
+  %section.usage-chart-block
+    %h2.usage-chart-block__title Unique visitors over time
+    .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'line', 'usage-chart-dataset-value' => usage_visitors_series(report).to_json, 'usage-chart-colors-value' => %w[#5d569b].to_json}}
+
+  - if current_user&.admin? || current_user&.admin_delegate?
+    = link_to admin_impressions_path(item_noid: noid, item_uuid: uuid, item_klass: klass, item_title: title), class: 'btn btn-sm btn-outline-primary' do
+      %i.fa-solid.fa-chart-line.me-1{'aria-hidden' => 'true'}
+      Open in Usage Analytics

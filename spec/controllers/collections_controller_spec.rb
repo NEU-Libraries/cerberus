@@ -47,6 +47,29 @@ describe CollectionsController do
         expect(response.body).not_to include('Audit log')
       end
     end
+
+    context 'analytics tab' do
+      let(:admin_user) do
+        User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin')
+      end
+
+      it 'renders the Analytics tab, scoped to this collection, for any editor with edit rights' do
+        get :edit, params: { id: collection.id }
+        expect(response.body).to match(/<button[^>]*id="analytics-tab"/)
+        expect(response.body).to include('Views', 'Downloads', 'Unique visitors')
+      end
+
+      it 'does not show the "Open in Usage Analytics" drill-down link to a non-admin editor (it leads to an admin-only page)' do
+        get :edit, params: { id: collection.id }
+        expect(response.body).not_to include('Open in Usage Analytics')
+      end
+
+      it 'shows the "Open in Usage Analytics" drill-down link to an admin' do
+        sign_in admin_user
+        get :edit, params: { id: collection.id }
+        expect(response.body).to include('Open in Usage Analytics')
+      end
+    end
   end
 
   describe 'show' do

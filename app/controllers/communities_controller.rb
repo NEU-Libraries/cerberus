@@ -5,6 +5,7 @@ class CommunitiesController < CatalogController
   include Transformable
   include ShowScopedSearch
   include RecordsImpressions
+  include ContainerAnalytics
 
   authorize_resource_writes!
   after_action :record_view_impression, only: :show
@@ -50,6 +51,7 @@ class CommunitiesController < CatalogController
     @community = AtlasRb::Community.find(params[:id])
     form_preparation(@permissions)
     load_descriptive!('Community')
+    @analytics = build_container_analytics(@community, 'Community')
     breadcrumbs(params[:id], editing: true)
   end
 
