@@ -13,6 +13,30 @@ module ContainerAnalyticsHelper
   ITEM_PARAMS  = %w[analytics_item_noid analytics_item_uuid analytics_item_klass analytics_item_title].freeze
   FACET_PARAMS = %w[analytics_facet analytics_facet_type analytics_facet_value].freeze
 
+  # Whether a drill-down to a descendant item is active, rather than the base
+  # container's own scope.
+  def container_analytics_drilled?(base_item, effective_item)
+    effective_item[:noid].to_s != base_item[:noid].to_s
+  end
+
+  # The Analytics tab's intro sentence. Three shapes, because a fixed one
+  # overclaims: "everything under this collection" sitting directly above
+  # figures for a single drilled-into Work, or above facet-narrowed figures,
+  # contradicts what the reader is looking at.
+  def container_analytics_scope_blurb(report, base_item, effective_item)
+    container = base_item[:klass].downcase
+    subject =
+      if container_analytics_drilled?(base_item, effective_item)
+        "#{effective_item[:title]} — one #{effective_item[:klass].downcase} within this #{container}"
+      elsif report.scope.facet_active?
+        "the Works under this #{container} matching the facet below"
+      else
+        "everything under this #{container} — the #{container} itself and every descendant Work"
+      end
+    "Views, downloads, and visitors for #{subject}. " \
+      "Last #{ImpressionsReport::DEFAULT_DAYS} days, human traffic only."
+  end
+
   # The container's own edit path (Collection or Community), always anchored
   # back to the Analytics tab.
   #

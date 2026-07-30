@@ -43,13 +43,17 @@
             %dt.usage-ledger__label Unique visitors · peak day
             %dd.usage-ledger__figure= number_with_delimiter(@report.unique_visitors_series.values.max || 0)
 
+        -# Columns, not lines: the daily series carry no key for a zero-activity
+        -# day, so a line interpolates straight through the gaps — obvious as
+        -# disconnected floating segments once scoped to one item. Stacking
+        -# views onto downloads makes the bar height read as total activity.
         %section.usage-chart-block
           %h2.usage-chart-block__title Views & downloads over time
-          .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'line', 'usage-chart-dataset-value' => usage_timeseries(@report).to_json, 'usage-chart-colors-value' => %w[#2666a6 #18bc9c].to_json}}
+          .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-stacked-value' => 'true', 'usage-chart-dataset-value' => usage_timeseries(@report).to_json, 'usage-chart-colors-value' => %w[#2666a6 #18bc9c].to_json}}
 
         %section.usage-chart-block
           %h2.usage-chart-block__title Unique visitors over time
-          .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'line', 'usage-chart-dataset-value' => usage_visitors_series(@report).to_json, 'usage-chart-colors-value' => %w[#5d569b].to_json}}
+          .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-dataset-value' => usage_visitors_series(@report).to_json, 'usage-chart-colors-value' => %w[#5d569b].to_json}}
 
       #files.tab-pane{'aria-labelledby' => 'files-tab', role: 'tabpanel'}
         = render 'top_table', entries: @report.top_works, empty: 'No file activity in this range.'

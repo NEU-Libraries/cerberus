@@ -9,6 +9,7 @@ export default class extends Controller {
     kind: { type: String, default: "line" },
     dataset: { type: Array, default: [] },
     colors: { type: Array, default: [] },
+    stacked: { type: Boolean, default: false },
   }
 
   async connect() {
@@ -32,6 +33,7 @@ export default class extends Controller {
           colors: this.colorsValue,
           points: false,
           curve: false,
+          stacked: this.stackedValue,
           library: {
             maintainAspectRatio: false,
             plugins: { legend: { display: this.datasetValue.length > 1, position: "bottom" } },
