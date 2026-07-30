@@ -122,18 +122,27 @@ RSpec.describe 'Admin::Reparent', type: :request do
         expect(response.body).to include('Node Collection', 'Parent Community', 'par')
       end
 
-      it 'offers the top-level option for a Community' do
-        allow(AtlasRb::Resource).to receive(:find)
-          .and_return(atlas_node(noid: 'comm', klass: 'Community', title: 'A Community'))
-        get '/admin/reparent/choose_parent', params: { node_id: 'comm' }
-        expect(response.body).to include('Move to the top level')
+      it 'never offers a top-level / no-parent option, for any node class' do
+        %w[Community Collection Work].each do |klass|
+          allow(AtlasRb::Resource).to receive(:find)
+            .and_return(atlas_node(noid: 'node', klass: klass, title: "A #{klass}"))
+          get '/admin/reparent/choose_parent', params: { node_id: 'node' }
+          expect(response.body).not_to include('Move to the top level')
+          expect(response.body).not_to include('no parent')
+        end
       end
 
-      it 'does not offer top-level for a Collection' do
+      it 'restricts destination candidates to Collections for a Work' do
         allow(AtlasRb::Resource).to receive(:find)
-          .and_return(atlas_node(noid: 'coll', klass: 'Collection', title: 'A Collection'))
-        get '/admin/reparent/choose_parent', params: { node_id: 'coll' }
-        expect(response.body).not_to include('Move to the top level')
+          .and_return(atlas_node(noid: 'wk', klass: 'Work', title: 'A Work'))
+        expect(ResourceSearch).to receive(:call)
+          .with(hash_including(types: %w[Collection]))
+          .and_return(fake_results)
+
+        get '/admin/reparent/choose_parent', params: { node_id: 'wk', q: 'coll' }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('Collection')
       end
     end
 
@@ -148,6 +157,16 @@ RSpec.describe 'Admin::Reparent', type: :request do
 
         expect(response).to have_http_status(:ok)
         expect(response.body).to include('Confirm move', 'Node Collection', 'Parent Community')
+      end
+
+      it 'redirects back to choose_parent when no destination was given' do
+        allow(AtlasRb::Resource).to receive(:find).with('node')
+                                                  .and_return(atlas_node(noid: 'node', title: 'Node Collection'))
+
+        get '/admin/reparent/confirm', params: { node_id: 'node' }
+
+        expect(response).to redirect_to(admin_reparent_choose_parent_path(node_id: 'node'))
+        expect(flash[:alert]).to include('must have a parent')
       end
     end
 
@@ -176,6 +195,25 @@ RSpec.describe 'Admin::Reparent', type: :request do
 
         expect(response).to have_http_status(:unprocessable_content)
         expect(response.body).to include('Move could not be completed')
+      end
+
+      it 'redirects back to choose_parent instead of promoting the node to the top level' do
+        post '/admin/reparent/move', params: { node_id: 'node' }
+
+        expect(response).to redirect_to(admin_reparent_choose_parent_path(node_id: 'node'))
+        expect(flash[:alert]).to include('must have a parent')
+      end
+
+      it 'reparents a Work via AtlasRb::Work.reparent' do
+        allow(AtlasRb::Resource).to receive(:find).with('wk')
+                                                  .and_return(atlas_node(noid: 'wk', klass: 'Work', title: 'A Work'))
+        expect(AtlasRb::Work).to receive(:reparent).with('wk', 'par')
+                                                   .and_return(OpenStruct.new(id: 'wk'))
+
+        post '/admin/reparent/move', params: { node_id: 'wk', parent_id: 'par' }
+
+        expect(response).to redirect_to(work_path('wk'))
+        expect(flash[:notice]).to include('A Work')
       end
     end
   end

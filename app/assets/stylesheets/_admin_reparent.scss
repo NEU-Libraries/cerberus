@@ -78,20 +78,6 @@
   }
 }
 
-// Top-of-tree escape hatch (Communities only).
-.reparent-top-level {
-  margin-top: 0.85rem;
-
-  &__link {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: $blue;
-    text-decoration: none;
-
-    &:hover { text-decoration: underline; }
-  }
-}
-
 .reparent-back {
   font-size: 0.82rem;
   color: $gray-600;

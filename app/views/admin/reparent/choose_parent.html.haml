@@ -24,16 +24,10 @@
 
     %p.text-muted.small.mt-3.mb-3
       Search for the
-      = @node.klass == 'Community' ? 'Community' : 'Community or Collection'
+      = @allowed_parent_label
       to move it under. The current location and any sub-containers are excluded automatically.
 
     = render 'admin/finder/search_form', url: admin_reparent_choose_parent_path, q: params[:q], hidden: { node_id: @node.resource.id, node_uuid: params[:node_uuid] }, placeholder: 'Search for the new parent…'
-
-    - if @allows_top_level
-      .reparent-top-level
-        = link_to admin_reparent_confirm_path(node_id: @node.resource.id), class: 'reparent-top-level__link' do
-          %i.fa-solid.fa-arrow-up-from-bracket.me-1{'aria-hidden' => 'true'}
-          Move to the top level (no parent)
 
   - if @results
     = render 'admin/finder/results', results: @results, select_label: 'Select', select_url: ->(doc) { admin_reparent_confirm_path(node_id: @node.resource.id, parent_id: doc.to_param) }

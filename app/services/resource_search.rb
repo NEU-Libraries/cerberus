@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 # Keyword search over repository resources of given internal_resource types
-# (Works, Collections, Communities) for the admin finders — the re-parent flow
-# searches containers; the linked-members flow searches Works then Collections.
+# (Works, Collections, Communities) for the admin finders — the re-parent
+# flow's node step searches all three (anything can be moved), its
+# destination step narrows to whatever ALLOWED_PARENTS permits for that node's
+# class; the linked-members flow searches Works then Collections.
 # Uses the same `Blacklight.default_index.search(builder)` idiom as the other
 # Solr service objects, but instead of resolving a subtree it answers "which
 # resources of these types match what the admin typed?".
