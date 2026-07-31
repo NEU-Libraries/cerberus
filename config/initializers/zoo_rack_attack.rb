@@ -118,6 +118,10 @@ Rack::Attack.safelist("robots txt") do |req|
   req.fullpath.end_with?("robots.txt")
 end
 
+Rack::Attack.safelist("homepage") do |req|
+  req.fullpath == "/"
+end
+
 Rack::Attack.safelist("logging in") do |req|
   req.fullpath.include?("/users/")
 end
