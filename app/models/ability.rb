@@ -26,13 +26,23 @@ class Ability
         public_document?(doc) || groups_can_read?(doc, user)
       end
       can :edit, SolrDocument do |doc|
-        groups_can_edit?(doc, user)
+        edit_equivalent?(doc, user)
       end
       can :tombstone, SolrDocument do |doc|
-        groups_can_edit?(doc, user) ||
-          depositor_for_work?(doc, user) ||
-          proxy_uploader_for_work?(doc, user)
+        edit_equivalent?(doc, user) || proxy_uploader?(doc, user)
       end
+    end
+
+    # An ACL match OR ownership. Ownership has to count separately because it
+    # isn't represented in the ACL: a personal root and everything beneath it
+    # carries `edit: [repository:staff]` with the owner recorded only as
+    # `depositor`, so a non-staff depositor would otherwise be locked out of
+    # their own workspace. Mirrors Atlas's edit-equivalent grant — divergence
+    # here means Cerberus hides an Edit link for a write Atlas would allow.
+    # :restore is deliberately not one of these verbs; reversing a tombstone is
+    # an operator action, not an owner one.
+    def edit_equivalent?(doc, user)
+      groups_can_edit?(doc, user) || depositor?(doc, user)
     end
 
     def public_document?(doc)
@@ -47,8 +57,12 @@ class Ability
       Array(doc['edit_access_group_ssim']).intersect?(Array(user.groups))
     end
 
-    def depositor_for_work?(doc, user)
-      return false unless doc['internal_resource_tesim'].to_s == 'Work'
+    # Not Work-scoped: a depositor owns their Collections too, and the whole
+    # workspace subtree inherits their NUID (creators copy parent.permissions,
+    # which carries depositor). A Collection they own is theirs to edit and,
+    # once empty, to withdraw — Atlas refuses the tombstone while live children
+    # remain, so emptiness needs no check here.
+    def depositor?(doc, user)
       return false if user.nuid.blank?
 
       doc['depositor_ssi'].present? && doc['depositor_ssi'] == user.nuid
@@ -56,7 +70,7 @@ class Ability
 
     # A librarian who proxied a deposit retains tombstone rights on it — the
     # recorded proxy_uploader keeps authority, not just the on-behalf depositor.
-    def proxy_uploader_for_work?(doc, user)
+    def proxy_uploader?(doc, user)
       return false unless doc['internal_resource_tesim'].to_s == 'Work'
       return false if user.nuid.blank?
 

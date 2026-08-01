@@ -7,6 +7,46 @@ describe Ability do
   let(:user) { User.new(email: 'u@example.com', nuid: '000000002', groups: ['editors']) }
   subject(:ability) { described_class.new(user) }
 
+  describe ':edit' do
+    it 'allows users with edit-group access' do
+      doc = SolrDocument.new('edit_access_group_ssim' => ['editors'])
+      expect(ability).to be_able_to(:edit, doc)
+    end
+
+    # The workspace case: a personal root and everything under it carries
+    # `edit: [repository:staff]` with the owner recorded only as depositor, so
+    # a non-staff depositor has no ACL match on their own material. Atlas grants
+    # this; if Cerberus didn't, it would hide an Edit link for a write Atlas
+    # would allow.
+    it 'allows the depositor even with no edit-group match' do
+      doc = SolrDocument.new('internal_resource_tesim' => 'Work',
+                             'edit_access_group_ssim'  => ['northeastern:drs:repository:staff'],
+                             'depositor_ssi'           => '000000002')
+      expect(ability).to be_able_to(:edit, doc)
+    end
+
+    it 'allows the depositor of a Collection' do
+      doc = SolrDocument.new('internal_resource_tesim' => 'Collection',
+                             'depositor_ssi'           => '000000002')
+      expect(ability).to be_able_to(:edit, doc)
+    end
+
+    it 'denies a stranger with neither an ACL match nor ownership' do
+      doc = SolrDocument.new('internal_resource_tesim' => 'Work',
+                             'edit_access_group_ssim'  => ['others'],
+                             'depositor_ssi'           => '999999999')
+      expect(ability).not_to be_able_to(:edit, doc)
+    end
+
+    # Proxy uploading carries tombstone rights, not edit rights.
+    it 'denies a proxy_uploader who is not the depositor' do
+      doc = SolrDocument.new('internal_resource_tesim' => 'Work',
+                             'proxy_uploader_ssi'      => '000000002',
+                             'depositor_ssi'           => '999999999')
+      expect(ability).not_to be_able_to(:edit, doc)
+    end
+  end
+
   describe ':tombstone' do
     it 'allows users with edit-group access' do
       doc = SolrDocument.new('edit_access_group_ssim' => ['editors'])
@@ -43,10 +83,14 @@ describe Ability do
       expect(ability).not_to be_able_to(:tombstone, doc)
     end
 
-    it 'ignores depositor matches on Communities and Collections' do
+    # Depositor ownership is not Work-scoped: the whole workspace subtree
+    # inherits the owner's NUID, so a Collection they deposited is theirs to
+    # withdraw. Atlas refuses the tombstone while live children remain, which
+    # is where "only if empty" is enforced.
+    it 'honours depositor matches on Collections' do
       doc = SolrDocument.new('internal_resource_tesim' => 'Collection',
                              'depositor_ssi'           => '000000002')
-      expect(ability).not_to be_able_to(:tombstone, doc)
+      expect(ability).to be_able_to(:tombstone, doc)
     end
 
     it 'denies anonymous users' do
