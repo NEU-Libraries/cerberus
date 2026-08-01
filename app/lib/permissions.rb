@@ -23,4 +23,25 @@ module Permissions
   # would, under the depositor-implies-edit rule, quietly hand whoever created
   # the container (or ran the seed) edit rights over it.
   UNOWNED_NUID = '000000099'
+
+  # One group grant as the permissions editor renders it
+  # (shared/_group_permissions). `ability` is the wire token Atlas expects
+  # ('read' / 'edit'), not the human label, so a row round-trips through the
+  # form without a label-to-token translation step.
+  #
+  # `revocable` mirrors Atlas's grant-removal rule: a group grant may only be
+  # withdrawn by a member of that group (operators excepted), and Atlas merges a
+  # non-member's attempted removal back in rather than refusing the write. A row
+  # the acting user cannot revoke is therefore rendered without the controls that
+  # would silently attempt it — the same reasoning that hides STAFF_EDIT_GROUP
+  # rather than dangling a dead delete control.
+  GrantRow = Struct.new(:group_id, :label, :ability, :revocable, keyword_init: true) do
+    def revocable?
+      !!revocable
+    end
+
+    def ability_label
+      ability == 'edit' ? 'Manage' : 'View'
+    end
+  end
 end

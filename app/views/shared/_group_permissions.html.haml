@@ -8,24 +8,68 @@
 -# group + ability into a new committed row. The entry row also submits (index
 -# "new"), so a selection made but not "+"-ed is not lost; blank entries are
 -# skipped server-side (form_group_permissions ignores rows without a group_id).
+-#
+-# A grant the acting user may not withdraw (Permissions::GrantRow#revocable?)
+-# renders as a locked, read-only row instead. Unlike the repository staff group
+-# — which is filtered out of the list entirely — a grant naming someone else's
+-# group is information the depositor needs, since it says who can reach their
+-# material. So the row stays visible and loses its controls, rather than
+-# vanishing.
 %h5.pb-2 Group Permissions
-- @permissions.each.with_index(1) do |group, index|
+- @permissions.each.with_index(1) do |grant, index|
+  -# Locked rows keep the "row" target even though nothing in them is
+  -# interactive: the Stimulus controller seeds its next index from
+  -# rowTargets.length, and these indices are positional over ALL rows, so
+  -# dropping the target would let a JS-added row collide with an existing one.
+  -# Nothing can fire #remove on them, as they render no button.
   .row.py-1{ id: "group-list_#{index}", data: { "group-permissions-target": "row" } }
-    .col-sm-auto.form-text Group
-    .col-sm
-      %select.form-select.form-select-sm.groups{ "aria-label" => "Group", name: "#{resource}[permissions][#{index}][group_id]" }
-        %option{ value: group[0], selected: "selected" } #{group[1]}
-        - @groups.each do |user_group|
-          - unless user_group[0] == group[0]
-            %option{ value: user_group[0] } #{user_group[1]}
-    .col-sm-auto.form-text Ability
-    .col-sm-2
-      %select.form-select.form-select-sm.ability{ "aria-label" => "Ability", name: "#{resource}[permissions][#{index}][ability]" }
-        %option{ value: "read", selected: group[2] == "View" } View
-        %option{ value: "edit", selected: group[2] == "Manage" } Manage
-    .col-sm-2
-      %button.btn.btn-danger.form-control.btn-sm{ type: "button", "aria-label" => "Remove group", data: { action: "click->group-permissions#remove" } }
-        %i.fa-solid.fa-minus{ "aria-hidden" => "true" }
+    - if grant.revocable?
+      .col-sm-auto.form-text Group
+      .col-sm
+        %select.form-select.form-select-sm.groups{ "aria-label" => "Group", name: "#{resource}[permissions][#{index}][group_id]" }
+          %option{ value: grant.group_id, selected: "selected" } #{grant.label}
+          - @groups.each do |user_group|
+            - unless user_group[0] == grant.group_id
+              %option{ value: user_group[0] } #{user_group[1]}
+      .col-sm-auto.form-text Ability
+      .col-sm-2
+        %select.form-select.form-select-sm.ability{ "aria-label" => "Ability", name: "#{resource}[permissions][#{index}][ability]" }
+          %option{ value: "read", selected: grant.ability == "read" } View
+          %option{ value: "edit", selected: grant.ability == "edit" } Manage
+      .col-sm-2
+        %button.btn.btn-danger.form-control.btn-sm{ type: "button", "aria-label" => "Remove group", data: { action: "click->group-permissions#remove" } }
+          %i.fa-solid.fa-minus{ "aria-hidden" => "true" }
+    - else
+      -# The ability is withheld alongside the group, not just the remove button.
+      -# The ACL is written as a whole-list replace, so flipping a locked row's
+      -# ability drops the grant on one axis and adds it on the other, and the
+      -# merge-back then restores the original — an attempt to demote a group
+      -# would instead leave it holding both View and Manage.
+      .col-sm-auto.form-text Group
+      .col-sm
+        -# form-control-plaintext gives a read-only value the vertical padding and
+        -# line height of the .form-select-sm above it, so the row keeps the grid's
+        -# height instead of collapsing to bare text. It zeroes horizontal padding
+        -# (built to align with a label, not a bordered control), hence ps-2 to
+        -# land the value under the select's text.
+        .form-control-plaintext.form-control-sm.ps-2= grant.label
+        -# Submitted as displayed rather than omitted. Omitting would lean on the
+        -# merge-back, which fails open when Atlas's copy of the user's groups is
+        -# more generous than the session's: it would accept the removal and
+        -# silently drop a grant this form showed as locked.
+        = hidden_field_tag "#{resource}[permissions][#{index}][group_id]", grant.group_id, id: nil
+      .col-sm-auto.form-text Ability
+      .col-sm-2
+        .form-control-plaintext.form-control-sm.ps-2= grant.ability_label
+        = hidden_field_tag "#{resource}[permissions][#{index}][ability]", grant.ability, id: nil
+      -# The state marker sits in the column the remove button occupies on every
+      -# other row, because that column answers "what can I do to this grant?".
+      -# Visible text rather than an icon-with-tooltip: a locked row has nothing
+      -# focusable in it, so a tooltip would be unreachable by keyboard.
+      .col-sm-2
+        .form-control-plaintext.form-control-sm.text-body-secondary
+          %i.fa-solid.fa-lock.me-1{ "aria-hidden" => "true" }
+          Locked
 
 %template{ data: { "group-permissions-target": "template" } }
   .row.py-1
@@ -60,3 +104,8 @@
     %button.btn.btn-success.form-control.btn-sm{ type: "button", "aria-label" => "Add group", data: { action: "click->group-permissions#add" } }
       %i.fa-solid.fa-plus{ "aria-hidden" => "true" }
 .form-text.text-muted Press + to add a group permission.
+-# Grouped with the hint above rather than injected after the locked row, so the
+-# grant rows and the entry row stay one uninterrupted stack.
+- if @permissions.any? { |grant| !grant.revocable? }
+  .form-text.text-muted
+    Some groups above were granted access by someone else. Only a member of that group — or an administrator — can remove it.

@@ -20,10 +20,27 @@ module Transformable # rubocop:disable Metrics/ModuleLength
 
     perms.read&.delete('public')
     perms.edit&.delete(Permissions::STAFF_EDIT_GROUP)
-    perms.slice('read', 'edit').flat_map do |key, values|
-      permission = key == 'read' ? 'View' : 'Manage'
-      Array(values).map { |value| [value, pretty_group(value), permission] }
+    perms.slice('read', 'edit').flat_map do |ability, values|
+      Array(values).map do |group|
+        Permissions::GrantRow.new(group_id: group, label: pretty_group(group),
+                                  ability: ability, revocable: revocable_grant?(group))
+      end
     end
+  end
+
+  # Whether the acting user may withdraw a grant naming `group` — the view-side
+  # mirror of the Atlas rule that only a member of a group may remove its grant.
+  # Reads `current_user`, NOT `effective_user`: the acting NUID Atlas resolves
+  # its own actor from is signed from `Current.nuid`, which is the authenticated
+  # user, so consulting the view-as target here would lock rows against a
+  # different principal than the one the write is evaluated as. A nil user has no
+  # membership to appeal to and stays conservative, matching how Atlas treats an
+  # actor-less caller. The `public` token never reaches here — it is stripped
+  # above and driven by the separate General Permissions control.
+  def revocable_grant?(group)
+    return true if current_user&.admin? || current_user&.admin_delegate?
+
+    current_user&.member_of?(group) || false
   end
 
   def pretty_user_permissions(groups)

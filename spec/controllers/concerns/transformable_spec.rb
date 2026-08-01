@@ -20,12 +20,26 @@ describe Transformable do
 
   let(:host) { host_class.new }
 
+  # The concern reads member_of? / admin? / admin_delegate? off current_user, so
+  # each example states only the group list and the tier it cares about.
+  def user_double(groups: [], admin: false, delegate: false)
+    instance_double(User, groups: groups, admin?: admin, admin_delegate?: delegate).tap do |user|
+      allow(user).to receive(:member_of?) { |group| groups.include?(group) }
+    end
+  end
+
+  def row(group_id, ability, revocable)
+    Permissions::GrantRow.new(group_id: group_id, label: "Pretty(#{group_id})",
+                              ability: ability, revocable: revocable)
+  end
+
   describe '#pretty_resource_permissions' do
     it 'returns [] for blank input' do
       expect(host.pretty_resource_permissions(nil)).to eq([])
     end
 
-    it 'strips public/staff sentinels and maps the rest with permission labels' do
+    it 'strips public/staff sentinels and maps the rest to GrantRows' do
+      host.current_user = user_double(groups: %w[librarians curators])
       perms = AtlasRb::Mash.new(
         'read' => %w[public librarians],
         'edit' => [Permissions::STAFF_EDIT_GROUP, 'curators']
@@ -33,10 +47,47 @@ describe Transformable do
 
       result = host.pretty_resource_permissions(perms)
 
-      expect(result).to contain_exactly(
-        ['librarians', 'Pretty(librarians)', 'View'],
-        ['curators',   'Pretty(curators)',   'Manage']
-      )
+      expect(result).to contain_exactly(row('librarians', 'read', true), row('curators', 'edit', true))
+      expect(result.map(&:ability_label)).to contain_exactly('View', 'Manage')
+    end
+
+    # Rule mirrored from Atlas: a grant may only be withdrawn by a member of the
+    # group it names, so a grant for someone else's group renders locked.
+    it 'marks a grant for a group the user is not in as non-revocable' do
+      host.current_user = user_double(groups: ['librarians'])
+      perms = AtlasRb::Mash.new('read' => %w[librarians curators], 'edit' => [])
+
+      expect(host.pretty_resource_permissions(perms))
+        .to contain_exactly(row('librarians', 'read', true), row('curators', 'read', false))
+    end
+
+    it 'treats membership as per-group, not per-axis' do
+      host.current_user = user_double(groups: ['curators'])
+      perms = AtlasRb::Mash.new('read' => ['curators'], 'edit' => ['curators'])
+
+      expect(host.pretty_resource_permissions(perms).map(&:revocable?)).to eq([true, true])
+    end
+
+    it 'makes every grant revocable for an :admin' do
+      host.current_user = user_double(groups: [], admin: true)
+      perms = AtlasRb::Mash.new('read' => ['curators'], 'edit' => ['editors'])
+
+      expect(host.pretty_resource_permissions(perms).map(&:revocable?)).to eq([true, true])
+    end
+
+    it 'makes every grant revocable for a devolved-admin delegate' do
+      host.current_user = user_double(groups: [], delegate: true)
+      perms = AtlasRb::Mash.new('read' => ['curators'], 'edit' => ['editors'])
+
+      expect(host.pretty_resource_permissions(perms).map(&:revocable?)).to eq([true, true])
+    end
+
+    # A caller with no user has no membership to appeal to; Atlas treats an
+    # actor-less write the same conservative way.
+    it 'revokes nothing when there is no acting user' do
+      perms = AtlasRb::Mash.new('read' => ['curators'], 'edit' => [])
+
+      expect(host.pretty_resource_permissions(perms).map(&:revocable?)).to eq([false])
     end
   end
 
@@ -70,7 +121,7 @@ describe Transformable do
 
   describe '#form_preparation' do
     before do
-      host.current_user = double('User', groups: ['librarians'], admin?: false, admin_delegate?: false)
+      host.current_user = user_double(groups: ['librarians'])
     end
 
     it 'parses a valid embargo date and assigns flags / permissions' do
@@ -101,7 +152,7 @@ describe Transformable do
 
   describe '#groups_for_permissions_picker' do
     it "scopes to the acting user's own groups for a non-admin, non-delegate user" do
-      host.current_user = double('User', groups: %w[librarians curators], admin?: false, admin_delegate?: false)
+      host.current_user = user_double(groups: %w[librarians curators])
 
       expect(host.groups_for_permissions_picker).to eq([['librarians', 'Pretty(librarians)'],
                                                         ['curators', 'Pretty(curators)']])
@@ -109,15 +160,14 @@ describe Transformable do
 
     it 'returns the full Group registry for an :admin (fixes the empty-picker gap for admins with no personal groups)' do
       Group.create!(raw: 'northeastern:drs:repository:zzz', cosmetic: 'Alpha')
-      host.current_user = double('User', groups: [], admin?: true, admin_delegate?: false)
+      host.current_user = user_double(groups: [], admin: true)
 
       expect(host.groups_for_permissions_picker).to eq([['northeastern:drs:repository:zzz', 'Alpha']])
     end
 
     it 'returns the full Group registry for a devolved-admin delegate' do
       Group.create!(raw: 'northeastern:drs:repository:zzz', cosmetic: 'Alpha')
-      host.current_user = double('User', groups: ['northeastern:drs:repository:admin'], admin?: false,
-                                          admin_delegate?: true)
+      host.current_user = user_double(groups: [Permissions::ADMIN_GROUP], delegate: true)
 
       expect(host.groups_for_permissions_picker).to eq([['northeastern:drs:repository:zzz', 'Alpha']])
     end
