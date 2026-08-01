@@ -44,4 +44,27 @@ module Permissions
       ability == 'edit' ? 'Manage' : 'View'
     end
   end
+
+  # The portion of `inner`'s audience that is also visible under `outer` —
+  # clamping a resource so it can never be more visible than its container.
+  # `public` is the universal set on either side: under a public container
+  # nothing needs clamping, and a public resource clamps to exactly the
+  # container's audience.
+  #
+  # Mirrors Atlas's TierVisibility.audience_intersect, which does this on the
+  # derivative-tier axis. Expressed here too because the cascade is Cerberus
+  # workflow: Atlas validates each write against the parent but does not clamp,
+  # so the caller decides what the narrowed value should be.
+  #
+  # Note that disjoint audiences intersect to `[]` — fully private. That is the
+  # honest answer (the two audiences share no one), but it means narrowing a
+  # container to a group makes a child readable only by some *other* group
+  # private rather than re-pointing it, which is worth saying out loud wherever
+  # this is surfaced to a person.
+  def self.audience_intersect(inner, outer)
+    return Array(inner) if Array(outer).include?('public')
+    return Array(outer) if Array(inner).include?('public')
+
+    Array(inner) & Array(outer)
+  end
 end
