@@ -110,11 +110,23 @@ RSpec.describe 'Sets', type: :request do
   end
 
   describe 'recipe + show page' do
-    let!(:community)  { public_container(AtlasRb::Community, nil) }
-    let!(:collection) { public_container(AtlasRb::Collection, community.id) }
-    let!(:work_one)   { public_work(collection.id) }
-    let!(:work_two)   { public_work(collection.id) }
-    let!(:lone_work)  { public_work(public_container(AtlasRb::Collection, community.id).id) }
+    # Built once for the group: examples here mutate the Set's recipe, never the
+    # material it points at, so rebuilding this hierarchy per example only added
+    # six more Atlas resources per example to the shared test store. The `let`
+    # wrappers keep examples reading `collection` rather than `@collection`.
+    before(:all) do
+      @community  = public_container(AtlasRb::Community, nil)
+      @collection = public_container(AtlasRb::Collection, @community.id)
+      @work_one   = public_work(@collection.id)
+      @work_two   = public_work(@collection.id)
+      @lone_work  = public_work(public_container(AtlasRb::Collection, @community.id).id)
+    end
+
+    let(:community)  { @community }
+    let(:collection) { @collection }
+    let(:work_one)   { @work_one }
+    let(:work_two)   { @work_two }
+    let(:lone_work)  { @lone_work }
 
     before { sign_in curator }
 
