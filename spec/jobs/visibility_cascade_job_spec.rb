@@ -22,7 +22,8 @@ RSpec.describe VisibilityCascadeJob do
 
   def run(read_groups: ['northeastern:drs:library:archives'])
     Current.set(nuid: actor) do
-      described_class.perform_now(noid: 'top', uuid: 'uuid-top', read_groups: read_groups)
+      described_class.perform_now(noid: 'top', uuid: 'uuid-top',
+                                  permissions: { 'read' => read_groups })
     end
   end
 
@@ -80,10 +81,10 @@ RSpec.describe VisibilityCascadeJob do
       run
 
       expect(AtlasRb::Work).to have_received(:metadata).with(
-        'w1', 'permissions' => { 'embargo'    => '2030-01-15T00:00:00+00:00',
-                                 'read'       => ['northeastern:drs:library:archives'],
-                                 'edit'       => %w[groupA groupB],
-                                 'edit_users' => ['000000077'] }
+        'w1', { 'permissions' => { 'embargo'    => '2030-01-15T00:00:00+00:00',
+                                   'read'       => ['northeastern:drs:library:archives'],
+                                   'edit'       => %w[groupA groupB],
+                                   'edit_users' => ['000000077'] } }
       )
     end
 
@@ -97,6 +98,39 @@ RSpec.describe VisibilityCascadeJob do
       sent = nil
       expect(AtlasRb::Work).to have_received(:metadata) { |_noid, payload| sent = payload }
       expect(sent['permissions'].keys).to contain_exactly('embargo', 'read', 'edit', 'edit_users')
+    end
+  end
+
+  # The container is written from what was submitted, not from what is stored,
+  # so an edit-group or embargo change made in the same submit survives. A
+  # round-trip would silently discard it.
+  describe 'the container itself' do
+    it 'takes the submitted envelope verbatim, without re-reading the stored one' do
+      stub_targets(target('top', 'Collection'))
+      allow(AtlasRb::Resource).to receive(:permissions)
+      allow(AtlasRb::Collection).to receive(:metadata)
+
+      submitted = { 'read' => ['northeastern:drs:library:archives'], 'edit' => ['newgroup'], 'embargo' => '' }
+      Current.set(nuid: actor) do
+        described_class.perform_now(noid: 'top', uuid: 'uuid-top', permissions: submitted)
+      end
+
+      expect(AtlasRb::Collection).to have_received(:metadata).with('top', { 'permissions' => submitted })
+      expect(AtlasRb::Resource).not_to have_received(:permissions)
+    end
+
+    # The report speaks to what ELSE changed, so the container is tallied
+    # separately — otherwise the completion message claims one more item than
+    # the confirmation promised.
+    it 'is not counted among the items it reports narrowing' do
+      stub_targets(target('w1'), target('top', 'Collection'))
+      allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: ['public']))
+      allow(AtlasRb::Work).to receive(:metadata)
+      allow(AtlasRb::Collection).to receive(:metadata)
+
+      run
+
+      expect(Message.last.body).to include('1 item narrowed')
     end
   end
 

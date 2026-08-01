@@ -21,14 +21,18 @@ class VisibilityCascadeJob < ApplicationJob
 
   # @param noid [String] the container being narrowed.
   # @param uuid [String] its Solr id, for the subtree lookup.
-  # @param read_groups [Array<String>] the audience it is being narrowed to.
-  def perform(noid:, uuid:, read_groups:)
+  # @param permissions [Hash] the container's whole submitted ACL envelope. The
+  #   container is written from this verbatim, so an edit-group or embargo
+  #   change made in the same submit rides along; descendants are clamped
+  #   against its `read` rather than taking a copy of it.
+  def perform(noid:, uuid:, permissions:)
     actor = Current.nuid
-    tally = { narrowed: 0, unchanged: 0 }
+    tally = { narrowed: 0, unchanged: 0, container: 0 }
     failures = []
+    read_groups = Array(permissions['read'])
 
     NarrowingTargets.new(noid: noid, uuid: uuid).each do |target|
-      tally[apply(target, read_groups)] += 1
+      tally[target.noid == noid ? write_container(target, permissions) : apply(target, read_groups)] += 1
     # Let a lock conflict escape to retry_on rather than recording it as a
     # failure — it is transient, and the job is idempotent, so re-running the
     # whole cascade costs only the writes it already made being skipped.
@@ -43,6 +47,23 @@ class VisibilityCascadeJob < ApplicationJob
 
   private
 
+    # The container itself, written last and taken verbatim from what was
+    # submitted — the person editing it said exactly what they wanted, and by
+    # this point every descendant is already within it. Deliberately not
+    # clamped: clamping against its own new audience would be a no-op, and
+    # round-tripping the stored envelope would silently drop the edit-group or
+    # embargo edits made in the same submit.
+    #
+    # Tallied separately from the descendants: the report speaks to what else
+    # changed ("the items inside it"), and the person already knows they
+    # restricted the container — they just asked for it.
+    #
+    # @return [Symbol]
+    def write_container(target, permissions)
+      target.atlas_class.metadata(target.noid, { 'permissions' => permissions })
+      :container
+    end
+
     # @return [Symbol] :narrowed or :unchanged
     def apply(target, container_read)
       current = AtlasRb::Resource.permissions(target.noid)
@@ -51,7 +72,7 @@ class VisibilityCascadeJob < ApplicationJob
       clamped = Permissions.audience_intersect(Array(current.read), container_read)
       return :unchanged if clamped.sort == Array(current.read).sort
 
-      target.atlas_class.metadata(target.noid, 'permissions' => envelope(current, clamped))
+      target.atlas_class.metadata(target.noid, { 'permissions' => envelope(current, clamped) })
       :narrowed
     end
 

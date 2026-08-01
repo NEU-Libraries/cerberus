@@ -250,6 +250,65 @@ describe Transformable do
     end
   end
 
+  # Taking audience away from a Collection is handed to the cascade rather than
+  # written here, because the container has to be written last. Works and
+  # Communities never take this branch.
+  describe '#apply_permissions when the submit narrows a Collection' do
+    before do
+      host.params = ActionController::Parameters.new(
+        id: 'c-1', collection: { permissions: { '1' => { 'group_id' => 'curators', 'ability' => 'read' } } }
+      )
+      host.instance_variable_set(:@permissions, AtlasRb::Mash.new('read' => ['public']))
+      host.current_user = user_double(groups: ['curators'])
+      allow(AtlasRb::Collection).to receive(:metadata)
+    end
+
+    it 'skips its own write and reports what the cascade will do' do
+      allow(NarrowingRequest).to receive(:call).and_return(
+        NarrowingRequest::Outcome.new(status: :dispatched, message: 'Restricting this collection.')
+      )
+
+      host.apply_permissions('Collection', 'c-1', :collection)
+
+      expect(AtlasRb::Collection).not_to have_received(:metadata)
+      expect(host.flash[:notice]).to eq('Restricting this collection.')
+    end
+
+    # A refusal must not fall through: narrowing the container while its
+    # descendants stay put is the leak this whole feature exists to close.
+    it 'skips its own write on a refusal too, and alerts' do
+      allow(NarrowingRequest).to receive(:call).and_return(
+        NarrowingRequest::Outcome.new(status: :refused, message: 'Ask DRS staff.')
+      )
+
+      host.apply_permissions('Collection', 'c-1', :collection)
+
+      expect(AtlasRb::Collection).not_to have_received(:metadata)
+      expect(host.flash[:alert]).to eq('Ask DRS staff.')
+    end
+
+    it 'writes normally when the change is not a narrowing' do
+      allow(NarrowingRequest).to receive(:call).and_return(NarrowingRequest::Outcome.new(status: :not_narrowing))
+
+      host.apply_permissions('Collection', 'c-1', :collection)
+
+      expect(AtlasRb::Collection).to have_received(:metadata)
+    end
+
+    it 'never consults the cascade for a Work' do
+      allow(NarrowingRequest).to receive(:call)
+      allow(AtlasRb::Work).to receive(:metadata)
+      host.params = ActionController::Parameters.new(
+        id: 'w-1', work: { permissions: { '1' => { 'group_id' => 'curators', 'ability' => 'read' } } }
+      )
+
+      host.apply_permissions('Work', 'w-1', :work)
+
+      expect(NarrowingRequest).not_to have_received(:call)
+      expect(AtlasRb::Work).to have_received(:metadata)
+    end
+  end
+
   # A refused ACL write is a 422, not an authorization failure, and it runs
   # before the descriptive save — so it reports rather than raising, or the
   # title/abstract edits in the same submit would be discarded with it.

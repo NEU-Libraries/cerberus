@@ -67,4 +67,25 @@ module Permissions
 
     Array(inner) & Array(outer)
   end
+
+  # Whether everyone who can see `inner` can also see `outer` — `public` being
+  # the universal audience on either side. Conservative-correct without
+  # resolving Grouper membership: two different group names count as different
+  # audiences even if their memberships happen to overlap.
+  def self.audience_subset?(inner, outer)
+    return true  if Array(outer).include?('public')
+    return false if Array(inner).include?('public')
+
+    Array(inner).to_set.subset?(Array(outer).to_set)
+  end
+
+  # Whether moving from `current` to `submitted` takes audience away.
+  #
+  # Phrased as "current is no longer contained by what was submitted", which is
+  # what makes a same-size swap count as a narrowing too: replacing one group
+  # with another removes access for the outgoing group, so descendants that were
+  # reachable only through it have to be reconsidered.
+  def self.narrowing?(current:, submitted:)
+    !audience_subset?(current, submitted)
+  end
 end

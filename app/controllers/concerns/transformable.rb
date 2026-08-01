@@ -195,10 +195,30 @@ module Transformable # rubocop:disable Metrics/ModuleLength
   def apply_permissions(klass, id, resource_key)
     perms = permission_params(resource_key)
     return if perms.blank?
+    return if narrowing_handed_off?(klass, perms)
 
     with_stale_retry { AtlasRb.const_get(klass).metadata(id, perms) }
   rescue AtlasRb::PermissionsError => e
     flash[:alert] = PERMISSIONS_REFUSED.fetch(e.code, e.message)
+  end
+
+  # Taking audience away from a Collection has to reach everything inside it,
+  # and the container is written LAST, so this save is skipped entirely and the
+  # whole change is handed to the cascade. Returns true when that happened —
+  # including when it was refused, since a refusal must not fall through to the
+  # ordinary write.
+  #
+  # Collections only. Works have nothing beneath them to strip, and Communities
+  # are deliberately out of scope for the cascade.
+  def narrowing_handed_off?(klass, perms)
+    return false unless klass == 'Collection'
+
+    outcome = NarrowingRequest.call(noid: params[:id], current_read: Array(@permissions&.read),
+                                    permissions: perms[:permissions] || {}, actor: current_user)
+    return false unless outcome.handled?
+
+    flash[outcome.dispatched? ? :notice : :alert] = outcome.message
+    true
   end
 
   def apply_descriptive(klass, id, resource_key, keywords, show_path)
