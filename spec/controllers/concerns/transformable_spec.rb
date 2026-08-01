@@ -309,6 +309,36 @@ describe Transformable do
     end
   end
 
+  # There is no cascade for a Community, so letting one narrow would leave every
+  # collection inside it more visible than its container. The form offers no
+  # Private option; this is the backstop for JS-off or a hand-made request.
+  describe '#apply_permissions when the submit narrows a Community' do
+    before { allow(AtlasRb::Community).to receive(:metadata) }
+
+    it 'refuses the write and points at the administrators' do
+      host.params = ActionController::Parameters.new(
+        id: 'm-1', community: { permissions: { '1' => { 'group_id' => 'curators', 'ability' => 'read' } } }
+      )
+      host.instance_variable_set(:@permissions, AtlasRb::Mash.new('read' => ['public']))
+
+      host.apply_permissions('Community', 'm-1', :community)
+
+      expect(AtlasRb::Community).not_to have_received(:metadata)
+      expect(host.flash[:alert]).to eq(Transformable::COMMUNITY_NARROWING_REFUSED)
+    end
+
+    # Widening a community is unconstrained — descendants keep their own
+    # narrower ACLs and containment still holds — so it must save normally.
+    it 'lets a widening through' do
+      host.params = ActionController::Parameters.new(id: 'm-1', mass: 'public', community: { permissions: {} })
+      host.instance_variable_set(:@permissions, AtlasRb::Mash.new('read' => []))
+
+      host.apply_permissions('Community', 'm-1', :community)
+
+      expect(AtlasRb::Community).to have_received(:metadata)
+    end
+  end
+
   # A refused ACL write is a 422, not an authorization failure, and it runs
   # before the descriptive save — so it reports rather than raising, or the
   # title/abstract edits in the same submit would be discarded with it.

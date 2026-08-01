@@ -8,8 +8,9 @@ class CollectionsController < CatalogController
   include CollectionBreadcrumbs
   include RecordsImpressions
   include ContainerAnalytics
+  include ContainerRestrictionRequest
 
-  authorize_resource_writes!(extra_edit: %i[sentinel])
+  authorize_resource_writes!(extra_edit: %i[sentinel request_restriction])
   after_action :record_view_impression, only: :show
 
   # Scope the inherited Blacklight index to Collections only (see
@@ -47,7 +48,12 @@ class CollectionsController < CatalogController
     # How much a narrowing here would touch, for the form's confirmation. The
     # count is a property of the subtree rather than of the audience being
     # chosen, so it resolves once on load instead of on every change.
-    @narrowing_affected = NarrowingImpact.new(noid: @collection.id, uuid: @collection.valkyrie_id).count
+    impact = NarrowingImpact.new(noid: @collection.id, uuid: @collection.valkyrie_id)
+    @narrowing_affected = impact.count
+    # Whether this user could run the cascade themselves. Decided here so the
+    # form offers the "ask an administrator" route instead of letting them
+    # choose Private and bounce off a refusal.
+    @narrowing_allowed = NarrowingPolicy.call(impact: impact, actor: current_user).allowed?
     form_preparation(@permissions, resource: @collection)
     load_descriptive!('Collection')
     @sentinel = Sentinel.find_by(target_id: params[:id])

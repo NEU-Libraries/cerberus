@@ -46,7 +46,7 @@ module WorkChangeRequest
                '', %(Work: “#{work.title}”), work_url(params[:id])]
       lines += ['', "#{action == 'move' ? 'Requested destination' : 'Note'}: #{note}"] if note.present?
 
-      Message.create(
+      Message.create!(
         sender_nuid:     attributed_nuid,
         recipient_group: Permissions::STAFF_EDIT_GROUP,
         subject:         %(Request to #{action} “#{work.title}”),

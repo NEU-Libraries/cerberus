@@ -15,6 +15,12 @@ module Transformable # rubocop:disable Metrics/ModuleLength
                                    'container public first.'
   }.freeze
 
+  # Communities have no cascade, so restricting one would leave every collection
+  # inside it more visible than its container. The edit form routes this to an
+  # administrator instead; this is the message when the form is bypassed.
+  COMMUNITY_NARROWING_REFUSED = 'Restricting a community needs DRS administrators — it does not reach the ' \
+                                'collections inside it. Nothing has been changed.'
+
   def pretty_resource_permissions(perms)
     return [] if perms.blank?
 
@@ -215,16 +221,31 @@ module Transformable # rubocop:disable Metrics/ModuleLength
   # including when it was refused, since a refusal must not fall through to the
   # ordinary write.
   #
-  # Collections only. Works have nothing beneath them to strip, and Communities
-  # are deliberately out of scope for the cascade.
+  # Works have nothing beneath them to strip, so they never take this branch.
+  # Communities do, but only to be refused: no cascade exists for them, so
+  # letting one narrow would leave every collection inside it more visible than
+  # its container — the leak this whole path closes.
   def narrowing_handed_off?(klass, perms)
-    return false unless klass == 'Collection'
+    return false if klass == 'Work'
+    return community_narrowing_refused?(perms) if klass == 'Community'
 
     outcome = NarrowingRequest.call(noid: params[:id], current_read: Array(@permissions&.read),
                                     permissions: perms[:permissions] || {}, actor: current_user)
     return false unless outcome.handled?
 
     flash[outcome.dispatched? ? :notice : :alert] = outcome.message
+    true
+  end
+
+  # A server-side backstop for the Community form, which offers no Private
+  # option. Reaching here means JS-off or a hand-made request, so it refuses
+  # rather than writing — and only for an actual narrowing, since widening a
+  # community is unconstrained and needs no cascade.
+  def community_narrowing_refused?(perms)
+    submitted = Array(perms.dig(:permissions, :read))
+    return false unless Permissions.narrowing?(current: Array(@permissions&.read), submitted: submitted)
+
+    flash[:alert] = COMMUNITY_NARROWING_REFUSED
     true
   end
 

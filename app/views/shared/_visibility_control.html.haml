@@ -10,13 +10,30 @@
 -# read to the group rows alone — the shape that once let a private save silently
 -# stay public.
 %h5.pb-2 General Permissions
-- if @public_allowed
+-# Private is withheld when this user can't carry the narrowing out — a
+-# community (no cascade exists for one) or a collection holding other people's
+-# material. Same standing rule as the parent-is-private branch below: don't
+-# offer a choice that is then denied. The request form is the route instead.
+-# @narrowing_allowed is unset for Works, which have nothing to cascade to.
+- locked_public = @public && @narrowing_allowed == false
+- if @public_allowed && !locked_public
   %select.form-select.form-select-sm#mass{ name: 'mass', 'aria-label' => 'General permissions' }
     %option{ value: 'public', selected: @public ? 'selected' : nil } Public
     %option{ value: 'private', selected: @public ? nil : 'selected' } Private
   %ul.small.pt-2
     %li Setting to 'public' will allow anyone accessing the site to see your item.
     %li Setting to 'private' will only allow groups that are explicitly chosen to see your item.
+- elsif locked_public
+  = hidden_field_tag 'mass', 'public'
+  .form-text.pt-1
+    %i.fa-solid.fa-globe.me-1{ 'aria-hidden' => 'true' }
+    %span.fw-semibold Public
+  %p.small.text-muted.pt-2.mb-3
+    - if resource == 'community'
+      Restricting a community doesn't reach the collections inside it, so DRS administrators handle it.
+    - else
+      Restricting this collection would restrict other people's material, so DRS administrators handle it.
+    = "Use “Ask to restrict this #{resource}” below."
 - else
   - parent_kind = (@visibility_parent['klass'].presence || 'parent').downcase
   = hidden_field_tag 'mass', 'private'

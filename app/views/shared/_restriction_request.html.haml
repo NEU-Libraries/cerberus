@@ -1,0 +1,24 @@
+-# locals: resource (String) — 'collection' or 'community'.
+-#
+-# The way out of a refused narrowing. Rendered when the acting user cannot run
+-# the cascade themselves: on a community, where no cascade exists for anyone,
+-# and on a collection holding other people's material. Shape follows the Work
+-# edit page's move/withdraw requests — a note, a submit, and a Message.
+.py-2.px-1
+  %h5.pb-2 Restricted access
+  %p.text-muted.small.mb-3
+    - if resource == 'community'
+      Restricting a community also has to restrict every collection inside it, so DRS administrators handle it.
+    - else
+      This collection holds material deposited by other people, so DRS administrators handle restricting it.
+    Your request goes to their inbox — they will follow up with you there.
+  = form_with url: public_send("request_restriction_#{resource}_path", params[:id]), method: :post do
+    .well.p-3.my-3.rounded-3
+      %label.form-label{ for: 'restriction_note' } Who should still be able to see it?
+      %textarea.form-control#restriction_note{ name: 'request_note', rows: 3, required: true,
+        placeholder: 'Name the groups that should keep access, or say "nobody" to make it private.' }
+      .mt-3
+        %button.btn.btn-primary{ type: 'submit' }
+          %i.fa-solid.fa-lock.me-1{ 'aria-hidden' => 'true' }
+          = "Ask to restrict this #{resource}"
+        = link_to 'Cancel', public_send("#{resource}_path", params[:id]), class: 'btn btn-light'

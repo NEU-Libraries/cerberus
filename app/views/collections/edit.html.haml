@@ -35,6 +35,8 @@
           .well.p-3.my-3.rounded-3
             = f.button :submit, class: "btn btn-success"
             = link_to "Cancel", collection_path(params[:id]), class: "btn btn-warning"
+    - unless @narrowing_allowed
+      = render 'shared/restriction_request', resource: 'collection'
   #derivative-access.tab-pane{"aria-labelledby" => "derivative-access-tab", role: "tabpanel"}
     = render 'derivative_access', collection_id: params[:id], sentinel: @sentinel, groups: @groups, public_collection: @public
   - if edit_tab_visible?('export')

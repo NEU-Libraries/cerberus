@@ -44,6 +44,10 @@ Rails.application.routes.draw do
     resources :collections, only: %i[new create]
     member do
       post :tombstone
+      # Ask DRS administrators to restrict this community. The form offers no
+      # Private option — narrowing a community does not reach what is inside it
+      # — so this is the only route. Edit-gated via authorize_resource_writes!.
+      post :request_restriction
     end
   end
   resources :collections, except: %i[new create destroy], shallow: true do
@@ -56,6 +60,9 @@ Rails.application.routes.draw do
       # The collection's derivative-access default (Sentinel) — the per-tier policy
       # applied to Works created under it. Edit-gated (see authorize_resource_writes!).
       patch :sentinel
+      # Ask DRS administrators to restrict this collection, for an editor whose
+      # own narrowing was refused (NarrowingPolicy). Edit-gated.
+      post :request_restriction
     end
   end
   resources :works, except: %i[index new create destroy] do

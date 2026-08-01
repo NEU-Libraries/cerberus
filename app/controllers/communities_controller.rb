@@ -6,8 +6,9 @@ class CommunitiesController < CatalogController
   include ShowScopedSearch
   include RecordsImpressions
   include ContainerAnalytics
+  include ContainerRestrictionRequest
 
-  authorize_resource_writes!
+  authorize_resource_writes!(extra_edit: %i[request_restriction])
   after_action :record_view_impression, only: :show
 
   # Solr membership fields faceted to decide whether a showcase has content
@@ -50,6 +51,9 @@ class CommunitiesController < CatalogController
 
   def edit
     @community = AtlasRb::Community.find(params[:id])
+    # No cascade exists for a community, so nobody may narrow one here — not
+    # even an admin. The form withholds Private and offers the request instead.
+    @narrowing_allowed = false
     form_preparation(@permissions, resource: @community)
     load_descriptive!('Community')
     load_container_analytics(@community, 'Community')
