@@ -1,0 +1,37 @@
+-# locals: resource (String) — 'work' / 'collection' / 'community', for the copy.
+-#
+-# The Public/Private control, shared by the Work / Collection / Community edit
+-# forms and the deposit metadata step.
+-#
+-# Atlas refuses a resource more visible than its container, so when the parent
+-# is private the choice is not offered at all rather than offered and rejected.
+-# A hidden `mass` still rides along in that branch: mass_permissions only writes
+-# the read ACL definitively when the param is PRESENT, and an absent one leaves
+-# read to the group rows alone — the shape that once let a private save silently
+-# stay public.
+%h5.pb-2 General Permissions
+- if @public_allowed
+  %select.form-select.form-select-sm#mass{ name: 'mass', 'aria-label' => 'General permissions' }
+    %option{ value: 'public', selected: @public ? 'selected' : nil } Public
+    %option{ value: 'private', selected: @public ? nil : 'selected' } Private
+  %ul.small.pt-2
+    %li Setting to 'public' will allow anyone accessing the site to see your item.
+    %li Setting to 'private' will only allow groups that are explicitly chosen to see your item.
+- else
+  - parent_kind = (@visibility_parent['klass'].presence || 'parent').downcase
+  = hidden_field_tag 'mass', 'private'
+  -# Same visibility vocabulary My DRS uses for its collection rows, so the two
+  -# surfaces read as one idea rather than two treatments of it.
+  .form-text.pt-1
+    - if @public
+      %i.fa-solid.fa-globe.me-1{ 'aria-hidden' => 'true' }
+      %span.fw-semibold Public
+    - else
+      %i.fa-solid.fa-lock.me-1{ 'aria-hidden' => 'true' }
+      %span.fw-semibold Private
+  %p.small.text-muted.pt-2.mb-0
+    = "“#{@visibility_parent['title']}” is private, so this #{resource} can't be made public."
+    - if @public
+      = "This #{resource} is public and will become private when you save."
+    - else
+      = "Make the #{parent_kind} public first to change this."

@@ -82,7 +82,7 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
 
   def edit
     @work = AtlasRb::Work.find(params[:id])
-    form_preparation(@permissions)
+    form_preparation(@permissions, resource: @work)
     load_descriptive!('Work')
     load_advanced!('Work')
     breadcrumbs(params[:id], editing: true)
@@ -118,7 +118,7 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     @work = AtlasRb::Work.find(params[:id])
     # Gates the opt-in Image Derivatives section (nil for non-image deposits).
     @image_probe = StagedImageProbe.call(work_id: params[:id])
-    form_preparation(@permissions)
+    form_preparation(@permissions, resource: @work)
     load_descriptive!('Work')
   end
 

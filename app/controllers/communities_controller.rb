@@ -49,7 +49,7 @@ class CommunitiesController < CatalogController
 
   def edit
     @community = AtlasRb::Community.find(params[:id])
-    form_preparation(@permissions)
+    form_preparation(@permissions, resource: @community)
     load_descriptive!('Community')
     load_container_analytics(@community, 'Community')
     breadcrumbs(params[:id], editing: true)

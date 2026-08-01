@@ -34,11 +34,32 @@ module Transformable # rubocop:disable Metrics/ModuleLength
     end
   end
 
-  def form_preparation(raw_permissions)
+  def form_preparation(raw_permissions, resource: nil)
     @groups = groups_for_permissions_picker
     @public = raw_permissions&.read&.include?('public')
     @embargo = Embargo.release_date(raw_permissions&.embargo).to_s
     @permissions = pretty_resource_permissions(raw_permissions)
+    assign_visibility_ceiling(resource)
+  end
+
+  # Decide whether the Public option may be offered. Atlas refuses a resource
+  # more visible than its container (a 422 carrying `visibility_exceeds_parent`,
+  # surfaced as AtlasRb::PermissionsError), so offering Public under a private
+  # parent would only produce an error the depositor can't act on.
+  # @visibility_parent names the blocking container so the form can say which
+  # one is in the way. A root with no parent is unconstrained, as is a caller
+  # that doesn't supply the resource.
+  def assign_visibility_ceiling(resource)
+    @public_allowed = true
+    parent = Array(resource&.ancestor_chain).last
+    return if parent.blank?
+    return if Array(AtlasRb::Resource.permissions(parent['noid'])&.read).include?('public')
+
+    @public_allowed = false
+    @visibility_parent = parent
+  rescue Faraday::Error, JSON::ParserError
+    # A parent lookup failure must not block the form — Atlas still enforces.
+    @public_allowed = true
   end
 
   # The "add a group" dropdown's candidate list. An :admin or a devolved-admin

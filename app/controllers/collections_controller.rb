@@ -43,7 +43,7 @@ class CollectionsController < CatalogController
 
   def edit
     @collection = AtlasRb::Collection.find(params[:id])
-    form_preparation(@permissions)
+    form_preparation(@permissions, resource: @collection)
     load_descriptive!('Collection')
     @sentinel = Sentinel.find_by(target_id: params[:id])
     load_container_analytics(@collection, 'Collection')
