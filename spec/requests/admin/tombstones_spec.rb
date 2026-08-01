@@ -21,8 +21,9 @@ RSpec.describe 'Admin::Tombstones', type: :request do
              groups: [Permissions::STAFF_EDIT_GROUP])
   end
   # :privileged + the admin group jointly — the devolved-admin tier (stock
-  # pilot user 000000002). Restore-a-tombstone is NOT one of the five
-  # devolved surfaces; stays :admin-only.
+  # pilot user 000000002). Restore-a-tombstone is one of the devolved
+  # surfaces: restoring is an operator-level lifecycle action, granted to the
+  # delegate tier alongside :reparent rather than to edit rights.
   let(:delegate_user) do
     User.new(email: 'delegate@example.com', password: 'password',
              nuid: '000000002', name: 'Doe, Jane', role: 'privileged',
@@ -48,10 +49,15 @@ RSpec.describe 'Admin::Tombstones', type: :request do
       expect(response).to have_http_status(:forbidden)
     end
 
-    it 'forbids a devolved-admin delegate (this surface stays :admin-only)' do
+    # The delegate tier gets restore because Atlas grants it :restore
+    # (apply_admin_delegate_abilities); gating Cerberus tighter would make that
+    # grant unreachable. :privileged alone still does not — the admin group is
+    # the other half of the pair.
+    it 'admits a devolved-admin delegate' do
       sign_in delegate_user
+      allow(TombstonedItems).to receive(:call).and_return(fake_results)
       get '/admin/tombstones'
-      expect(response).to have_http_status(:forbidden)
+      expect(response).to have_http_status(:ok)
     end
 
     it 'redirects the unauthenticated to sign in' do
