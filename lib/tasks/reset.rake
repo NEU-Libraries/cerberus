@@ -1,20 +1,18 @@
 # frozen_string_literal: true
 
 namespace :reset do
-  # Institutional containers belong to nobody in particular: the anonymous NUID
-  # stands in as depositor so the tree is reachable only through Grouper, the
-  # way the v1 hierarchy worked. Attributing it to whoever ran the seed would,
-  # under the depositor-implies-edit rule, silently hand that person edit over
-  # the entire repository — and would mask the rule in tests, since the seeding
-  # admin passes every gate on the wildcard anyway.
-  #
-  # Authorization is a separate axis: the task still ACTS as the admin fixture
-  # (see the Current.set below); this only changes who is recorded.
-  UNOWNED = '000000099'
-
   desc 'Clean database and repopulate with sample data'
   task data: [:clean, 'db:seed:replant'] do
     raise "Wrong env - #{Rails.env} - must be development" unless Rails.env.development? || Rails.env.staging?
+
+    # Institutional containers belong to nobody in particular — see
+    # Permissions::UNOWNED_NUID for the reasoning, and ShowcaseProvisioner for
+    # the other caller. Authorization is a separate axis: the task still ACTS as
+    # the admin fixture (see the Current.set below); this only records who owns
+    # it. Read inside the task body, not at namespace level: rake files are
+    # loaded before app constants are autoloadable, so a top-level reference
+    # raises NameError before any task can run.
+    unowned = Permissions::UNOWNED_NUID
 
     # Seed as the admin fixture (000000004). :system can't author Works —
     # Atlas's Ability only lets it create Communities / Collections;
@@ -24,12 +22,12 @@ namespace :reset do
     # ACL setup. The Current.set block makes atlas_rb's configured
     # default_nuid resolve to the admin NUID for every call inside.
     Current.set(nuid: '000000004') do
-      community = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', depositor: UNOWNED)
+      community = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', depositor: unowned)
       river_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/river.jpg').open_base
       AtlasRb::Community.set_thumbnails(community['id'], **ThumbnailCreator.call(base: river_base))
       AtlasRb::Community.metadata(community['id'], { 'permissions' => { 'read' => ['public'] } })
 
-      collection = AtlasRb::Collection.create(community['id'], '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', depositor: UNOWNED)
+      collection = AtlasRb::Collection.create(community['id'], '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', depositor: unowned)
       field_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/field.jpg').open_base
       AtlasRb::Collection.set_thumbnails(collection['id'], **ThumbnailCreator.call(base: field_base))
       AtlasRb::Collection.metadata(collection['id'], { 'permissions' => { 'read' => ['public'] } })
@@ -90,15 +88,15 @@ namespace :reset do
       forest_base    = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/forest.jpg').open_base
       waterfall_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/waterfall.jpg').open_base
 
-      communications = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/communications-mods.xml', depositor: UNOWNED)
+      communications = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/communications-mods.xml', depositor: unowned)
       AtlasRb::Community.set_thumbnails(communications['id'], **ThumbnailCreator.call(base: canyon_base))
       AtlasRb::Community.metadata(communications['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [marcom_group] } })
 
-      photo_archive = AtlasRb::Collection.create(communications['id'], '/home/cerberus/web/spec/fixtures/files/communications-photo-archive-mods.xml', depositor: UNOWNED)
+      photo_archive = AtlasRb::Collection.create(communications['id'], '/home/cerberus/web/spec/fixtures/files/communications-photo-archive-mods.xml', depositor: unowned)
       AtlasRb::Collection.set_thumbnails(photo_archive['id'], **ThumbnailCreator.call(base: forest_base))
       AtlasRb::Collection.metadata(photo_archive['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [marcom_group] } })
 
-      campus_life = AtlasRb::Collection.create(photo_archive['id'], '/home/cerberus/web/spec/fixtures/files/campus-life-photographs-mods.xml', depositor: UNOWNED)
+      campus_life = AtlasRb::Collection.create(photo_archive['id'], '/home/cerberus/web/spec/fixtures/files/campus-life-photographs-mods.xml', depositor: unowned)
       AtlasRb::Collection.set_thumbnails(campus_life['id'], **ThumbnailCreator.call(base: waterfall_base))
       AtlasRb::Collection.metadata(campus_life['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [marcom_group] } })
 
@@ -131,7 +129,7 @@ namespace :reset do
       # Person (Jane Doe) affiliated to it with one work she's published into the
       # Datasets showcase. Gives the deposit fork (publish branch), My DRS,
       # Featured Content, and the Faculty & Staff browse live data to demo.
-      library = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/library-mods.xml', depositor: UNOWNED)
+      library = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/library-mods.xml', depositor: unowned)
       mountain_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/mountain.jpg').open_base
       AtlasRb::Community.set_thumbnails(library['id'], **ThumbnailCreator.call(base: mountain_base))
       AtlasRb::Community.metadata(library['id'], { 'permissions' => { 'read' => ['public'] } })
@@ -319,44 +317,44 @@ namespace :reset do
 
       # A: self-managed private space — read AND edit gated to archives staff,
       # the only fixture pair above with no public read at all.
-      archives_community = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/archives-community-mods.xml', depositor: UNOWNED)
+      archives_community = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/archives-community-mods.xml', depositor: unowned)
       archives_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/cliff.jpg').open_base
       AtlasRb::Community.set_thumbnails(archives_community['id'], **ThumbnailCreator.call(base: archives_base))
       AtlasRb::Community.metadata(archives_community['id'], { 'permissions' => { 'read' => [archives_group], 'edit' => [archives_group] } })
 
-      reading_room = AtlasRb::Collection.create(archives_community['id'], '/home/cerberus/web/spec/fixtures/files/archives-reading-room-mods.xml', depositor: UNOWNED)
+      reading_room = AtlasRb::Collection.create(archives_community['id'], '/home/cerberus/web/spec/fixtures/files/archives-reading-room-mods.xml', depositor: unowned)
       AtlasRb::Collection.set_thumbnails(reading_room['id'], **ThumbnailCreator.call(base: archives_base))
       AtlasRb::Collection.metadata(reading_room['id'], { 'permissions' => { 'read' => [archives_group], 'edit' => [archives_group] } })
 
       # B: edit-gate-only, a second unit beyond marcom — read stays public.
-      public_safety = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/public-safety-community-mods.xml', depositor: UNOWNED)
+      public_safety = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/public-safety-community-mods.xml', depositor: unowned)
       public_safety_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/marsh.jpg').open_base
       AtlasRb::Community.set_thumbnails(public_safety['id'], **ThumbnailCreator.call(base: public_safety_base))
       AtlasRb::Community.metadata(public_safety['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [nupd_media_group] } })
 
-      nupd_media = AtlasRb::Collection.create(public_safety['id'], '/home/cerberus/web/spec/fixtures/files/nupd-incident-media-mods.xml', depositor: UNOWNED)
+      nupd_media = AtlasRb::Collection.create(public_safety['id'], '/home/cerberus/web/spec/fixtures/files/nupd-incident-media-mods.xml', depositor: unowned)
       AtlasRb::Collection.set_thumbnails(nupd_media['id'], **ThumbnailCreator.call(base: public_safety_base))
       AtlasRb::Collection.metadata(nupd_media['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [nupd_media_group] } })
 
       # C: multi-group edit — two independent groups both granted edit on one
       # Collection, so removing one in the permissions UI strips only that
       # group's editors, not the other's.
-      school_of_law = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/school-of-law-community-mods.xml', depositor: UNOWNED)
+      school_of_law = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/school-of-law-community-mods.xml', depositor: unowned)
       law_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/valley.jpg').open_base
       AtlasRb::Community.set_thumbnails(school_of_law['id'], **ThumbnailCreator.call(base: law_base))
       AtlasRb::Community.metadata(school_of_law['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [law_library_group, crrj_group] } })
 
-      law_crrj_collection = AtlasRb::Collection.create(school_of_law['id'], '/home/cerberus/web/spec/fixtures/files/law-crrj-collection-mods.xml', depositor: UNOWNED)
+      law_crrj_collection = AtlasRb::Collection.create(school_of_law['id'], '/home/cerberus/web/spec/fixtures/files/law-crrj-collection-mods.xml', depositor: unowned)
       AtlasRb::Collection.set_thumbnails(law_crrj_collection['id'], **ThumbnailCreator.call(base: law_base))
       AtlasRb::Collection.metadata(law_crrj_collection['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [law_library_group, crrj_group] } })
 
       # D: read-gate-only, the mirror of B — edit stays staff-only.
-      licensed_resources = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/licensed-resources-community-mods.xml', depositor: UNOWNED)
+      licensed_resources = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/licensed-resources-community-mods.xml', depositor: unowned)
       licensed_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/dunes.jpg').open_base
       AtlasRb::Community.set_thumbnails(licensed_resources['id'], **ThumbnailCreator.call(base: licensed_base))
       AtlasRb::Community.metadata(licensed_resources['id'], { 'permissions' => { 'read' => [l2_group] } })
 
-      l2_archive = AtlasRb::Collection.create(licensed_resources['id'], '/home/cerberus/web/spec/fixtures/files/l2-dataset-archive-mods.xml', depositor: UNOWNED)
+      l2_archive = AtlasRb::Collection.create(licensed_resources['id'], '/home/cerberus/web/spec/fixtures/files/l2-dataset-archive-mods.xml', depositor: unowned)
       AtlasRb::Collection.set_thumbnails(l2_archive['id'], **ThumbnailCreator.call(base: licensed_base))
       AtlasRb::Collection.metadata(l2_archive['id'], { 'permissions' => { 'read' => [l2_group] } })
     end
