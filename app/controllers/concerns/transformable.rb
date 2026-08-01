@@ -10,9 +10,9 @@ module Transformable # rubocop:disable Metrics/ModuleLength
   # error code. An unrecognised code falls back to Atlas's own message, so a new
   # invariant still says something true rather than nothing.
   PERMISSIONS_REFUSED = {
-    'visibility_exceeds_parent' =>
-      "Visibility wasn't changed — an item can't be more visible than the collection or " \
-      'community it sits in. Make the container public first.'
+    'visibility_exceeds_parent' => "Visibility wasn't changed — an item can't be more visible " \
+                                   'than the collection or community it sits in. Make the ' \
+                                   'container public first.'
   }.freeze
 
   def pretty_resource_permissions(perms)

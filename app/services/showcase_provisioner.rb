@@ -25,12 +25,18 @@ class ShowcaseProvisioner < ApplicationService
 
   private
 
+    # AtlasRb::Error covers the typed refusals as well as transport faults —
+    # notably a 403 from the container-create gate, which reaches this path as
+    # an exception rather than the empty envelope an untyped binding returned.
+    # Catching only Faraday/JSON would let it abort the whole provisioning run,
+    # and with it the community create that triggered it.
     def provision(label)
       showcase = AtlasRb::Collection.create(@community_id, featured: true)
       set_title(showcase.id, label)
       showcase
-    rescue Faraday::Error, JSON::ParserError => e
-      Rails.logger.warn("[showcase provisioning] #{label} under #{@community_id} failed: #{e.message}")
+    rescue AtlasRb::Error, Faraday::Error, JSON::ParserError => e
+      Rails.logger.warn("[showcase provisioning] #{label} under #{@community_id} failed: " \
+                        "#{e.class}: #{e.message}")
       nil
     end
 
