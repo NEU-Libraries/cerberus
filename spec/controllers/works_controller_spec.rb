@@ -13,6 +13,15 @@ describe WorksController do
     AtlasRb::Work.find(created.id, nuid: '000000004')
   end
 
+  # Atlas refuses a resource more visible than its container, so a Work can only
+  # be made public once the Collection and Community above it already are.
+  # Widening runs top-down (the inverse of a narrowing cascade, which must run
+  # bottom-up to keep the invariant true at every step).
+  def publicize_ancestry!
+    AtlasRb::Community.metadata(community.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+    AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+  end
+
   def stub_work_in_progress(work)
     in_progress = AtlasRb::Work.find(work.id, nuid: '000000004')
     in_progress['in_progress'] = true
@@ -23,6 +32,7 @@ describe WorksController do
     render_views
 
     before do
+      publicize_ancestry!
       AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
     end
 

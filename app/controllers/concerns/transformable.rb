@@ -6,6 +6,15 @@
 module Transformable # rubocop:disable Metrics/ModuleLength
   extend ActiveSupport::Concern
 
+  # Atlas's ACL invariants, phrased for the depositor and keyed on the envelope's
+  # error code. An unrecognised code falls back to Atlas's own message, so a new
+  # invariant still says something true rather than nothing.
+  PERMISSIONS_REFUSED = {
+    'visibility_exceeds_parent' =>
+      "Visibility wasn't changed — an item can't be more visible than the collection or " \
+      'community it sits in. Make the container public first.'
+  }.freeze
+
   def pretty_resource_permissions(perms)
     return [] if perms.blank?
 
@@ -159,9 +168,20 @@ module Transformable # rubocop:disable Metrics/ModuleLength
     apply_descriptive(klass, id, resource_key, keywords, show_path)
   end
 
+  # A refused ACL write is a 422, not a 403 — the caller may hold full edit
+  # rights and still trip an invariant. Report it and carry on rather than
+  # bouncing the whole submit: this runs BEFORE the descriptive save, so raising
+  # would discard title/abstract edits that are independent and perfectly valid.
+  # The form suppresses the offending choice up front (shared/_visibility_control),
+  # so reaching here means JS-off, tampering, or the container narrowing between
+  # page load and submit.
   def apply_permissions(klass, id, resource_key)
     perms = permission_params(resource_key)
-    with_stale_retry { AtlasRb.const_get(klass).metadata(id, perms) } if perms.present?
+    return if perms.blank?
+
+    with_stale_retry { AtlasRb.const_get(klass).metadata(id, perms) }
+  rescue AtlasRb::PermissionsError => e
+    flash[:alert] = PERMISSIONS_REFUSED.fetch(e.code, e.message)
   end
 
   def apply_descriptive(klass, id, resource_key, keywords, show_path)

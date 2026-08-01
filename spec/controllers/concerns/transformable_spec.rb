@@ -14,6 +14,7 @@ describe Transformable do
       # the unit under test is isolated to the Transformable methods.
       def pretty_group(raw_group) = "Pretty(#{raw_group})"
       def add_thumbnail(_permitted); end
+      def flash = @flash ||= {}
     end
   end
 
@@ -196,6 +197,34 @@ describe Transformable do
       host.mass_permissions(permitted)
 
       expect(permitted[:permissions][:read]).to eq([])
+    end
+  end
+
+  # A refused ACL write is a 422, not an authorization failure, and it runs
+  # before the descriptive save — so it reports rather than raising, or the
+  # title/abstract edits in the same submit would be discarded with it.
+  describe '#apply_permissions when Atlas refuses the ACL' do
+    before do
+      host.params = ActionController::Parameters.new(
+        work: { permissions: { '1' => { 'group_id' => 'curators', 'ability' => 'read' } } }
+      )
+    end
+
+    it 'flashes the invariant in the depositor’s language rather than raising' do
+      allow(AtlasRb::Work).to receive(:metadata)
+        .and_raise(AtlasRb::PermissionsError.new('nope', code: 'visibility_exceeds_parent'))
+
+      expect { host.apply_permissions('Work', 'w-1', :work) }.not_to raise_error
+      expect(host.flash[:alert]).to eq(Transformable::PERMISSIONS_REFUSED['visibility_exceeds_parent'])
+    end
+
+    it 'falls back to Atlas’s own message for a code Cerberus doesn’t map yet' do
+      allow(AtlasRb::Work).to receive(:metadata)
+        .and_raise(AtlasRb::PermissionsError.new('some new invariant', code: 'not_yet_mapped'))
+
+      host.apply_permissions('Work', 'w-1', :work)
+
+      expect(host.flash[:alert]).to eq('some new invariant')
     end
   end
 
