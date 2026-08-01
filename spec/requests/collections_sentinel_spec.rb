@@ -28,6 +28,11 @@ RSpec.describe 'Collections sentinel', type: :request do
   # guard checks each tier against this read gate, and the open option's
   # label/semantics turn on whether it includes 'public'.
   def set_access!(read:)
+    # Atlas refuses a resource more visible than its container, and a root
+    # Community starts with an empty read audience — so the Community must carry
+    # at least what we're about to give the Collection, whether that's `public`
+    # or a restricted group. Widening runs top-down.
+    AtlasRb::Community.metadata(community.id, { 'permissions' => { 'read' => read } }, nuid: '000000004')
     AtlasRb::Collection.metadata(
       collection.id,
       { 'permissions' => { 'read' => read, 'edit' => [Permissions::STAFF_EDIT_GROUP] } }, nuid: '000000004'

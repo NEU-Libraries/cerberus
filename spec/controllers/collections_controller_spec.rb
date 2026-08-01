@@ -73,6 +73,7 @@ describe CollectionsController do
 
     context 'analytics tab item lookup, facet, and composition' do
       let!(:sub_collection) do
+        publicize_ancestry!(community: community, collection: collection)
         c = AtlasRb::Collection.create(collection.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004')
         AtlasRb::Collection.metadata(c.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
         c
@@ -82,6 +83,7 @@ describe CollectionsController do
       # homed under an entirely different Community — the containment check
       # must exclude it on subtree membership, not title.
       let!(:foreign_collection) do
+        publicize_ancestry!(community: other_community)
         c = AtlasRb::Collection.create(other_community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004')
         AtlasRb::Collection.metadata(c.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
         c
@@ -149,6 +151,7 @@ describe CollectionsController do
     render_views
 
     before do
+      publicize_ancestry!(community: community)
       AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
     end
 
@@ -211,6 +214,9 @@ describe CollectionsController do
         AtlasRb::Collection.metadata(c.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
         c
       end
+      # The Work is two tiers down, so every container above it has to be public
+      # before it can be — the enclosing `before` widens community + collection,
+      # and sub_collection widens itself above.
       let!(:work) do
         w = AtlasRb::Work.create(sub_collection.id,
                                  '/home/cerberus/web/spec/fixtures/files/work-mods.xml', nuid: '000000004')
