@@ -45,6 +45,7 @@ class CommunitiesController < CatalogController
 
   def new
     @community = OpenStruct.new
+    @create_path = child_create_path('communities')
   end
 
   def edit
@@ -61,9 +62,9 @@ class CommunitiesController < CatalogController
     # resource (MODSMerge leaves a blank title untouched) and still provision
     # showcases against that orphan. Client-side `required` is the first line;
     # this is the backstop (JS off / direct POST).
-    return redirect_to(new_community_path(parent_id: params[:parent_id])) if title_missing?(permitted)
+    return redirect_to(new_child_path('community')) if title_missing?(permitted)
 
-    c = AtlasRb::Community.create(params[:parent_id])
+    c = AtlasRb::Community.create(@destination_id)
     save_descriptive!('Community', c.id, title: permitted['title'], description: permitted['description'])
     ShowcaseProvisioner.call(community_id: c.id)
     redirect_to community_path(c.id)

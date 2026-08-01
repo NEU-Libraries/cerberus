@@ -79,29 +79,53 @@ RSpec.describe 'Authorization gates', type: :request do
     end
   end
 
-  # G3 — create requires authentication (Cerberus has no :create ability; Atlas
-  # enforces role/parent rights, so the Cerberus gate is authn for a clean
-  # sign-in redirect rather than a raw Atlas error).
-  describe 'POST #create (authentication required)' do
+  # G3 — creating a child is a write to its container, so it takes :edit on the
+  # DESTINATION, not merely a signed-in session. The destination is a route
+  # segment, so no request shape reaches these actions without one.
+  #
+  # This block previously asserted the opposite — that any authenticated caller
+  # could create anywhere — which is the hole it now covers: a signed-in user
+  # with no rights on the container was able to create Collections and Works
+  # inside it.
+  describe 'POST #create (edit on the destination)' do
     it 'redirects the unauthenticated to sign in (works)' do
-      post works_path, params: { parent_id: collection.id }
+      post collection_works_path(collection.id)
       expect(response).to redirect_to(new_user_session_path)
     end
 
     it 'redirects the unauthenticated to sign in (collections)' do
-      post collections_path, params: { parent_id: community.id, collection: { title: 'X', description: 'Y' } }
+      post community_collections_path(community.id), params: { collection: { title: 'X', description: 'Y' } }
       expect(response).to redirect_to(new_user_session_path)
     end
 
     it 'redirects the unauthenticated to sign in (communities)' do
-      post communities_path, params: { parent_id: community.id, community: { title: 'X', description: 'Y' } }
+      post community_communities_path(community.id), params: { community: { title: 'X', description: 'Y' } }
       expect(response).to redirect_to(new_user_session_path)
     end
 
-    it 'lets an authenticated user past the auth gate (collections)' do
+    it 'forbids an authenticated user with no edit rights on the destination' do
+      sign_in outsider
+      expect(AtlasRb::Collection).not_to receive(:create)
+
+      post community_collections_path(community.id), params: { collection: { title: 'X', description: 'Y' } }
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it 'forbids the same user on the GET form, not just the write' do
+      sign_in outsider
+      get new_community_collection_path(community.id)
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it 'admits an editor who holds edit on the destination' do
+      grant_edit!('Community', community.id)
       sign_in editor
-      post collections_path, params: { parent_id: community.id, collection: { title: 'New Col', description: 'D' } }
+
+      post community_collections_path(community.id), params: { collection: { title: 'New Col', description: 'D' } }
+
       expect(response).not_to redirect_to(new_user_session_path)
+      expect(response).not_to have_http_status(:forbidden)
     end
   end
 

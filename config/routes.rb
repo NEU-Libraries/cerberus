@@ -29,12 +29,26 @@ Rails.application.routes.draw do
   # anonymous, reachable POST send/abuse surfaces (authorization audit G5).
   resources :solr_documents, only: [:show], path: '/catalog', controller: 'catalog'
 
-  resources :communities, except: [:destroy] do
+  # Creating a child is nested under its destination; everything else stays flat
+  # (`shallow: true`). The parent is a route SEGMENT rather than an optional
+  # `?parent_id=`, so a create can't reach the controller without one — which is
+  # what lets the :edit gate key on the destination and never be skipped. It also
+  # keeps "where does this go?" out of the forms entirely: you say it by
+  # navigating to the container you mean.
+  # No unparented create for either container: a Collection must have a parent
+  # (Atlas raises on a nil one), and a root Community is a seed-time concern, not
+  # something the UI offers. Dropping the top-level new/create removes the
+  # parentless route rather than patching the links that reached it.
+  resources :communities, except: %i[new create destroy], shallow: true do
+    resources :communities, only: %i[new create]
+    resources :collections, only: %i[new create]
     member do
       post :tombstone
     end
   end
-  resources :collections, except: [:destroy] do
+  resources :collections, except: %i[new create destroy], shallow: true do
+    resources :collections, only: %i[new create]
+    resources :works,       only: %i[new create]
     member do
       post :tombstone
       # Bulk metadata export (streamed ZIP) — dedicated Live controller, like sets.
@@ -44,7 +58,7 @@ Rails.application.routes.draw do
       patch :sentinel
     end
   end
-  resources :works, except: %i[index destroy] do
+  resources :works, except: %i[index new create destroy] do
     member do
       get :downloads
       get :manifest

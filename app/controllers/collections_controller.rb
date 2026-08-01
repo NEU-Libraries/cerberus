@@ -39,6 +39,7 @@ class CollectionsController < CatalogController
 
   def new
     @collection = OpenStruct.new
+    @create_path = child_create_path('collections')
   end
 
   def edit
@@ -55,9 +56,9 @@ class CollectionsController < CatalogController
     # Guard before minting: a blank title would otherwise produce an untitled
     # Collection (MODSMerge leaves a blank title untouched). Client-side
     # `required` is the first line; this is the backstop.
-    return redirect_to(new_collection_path(parent_id: params[:parent_id])) if title_missing?(permitted)
+    return redirect_to(new_child_path('collection')) if title_missing?(permitted)
 
-    c = AtlasRb::Collection.create(params[:parent_id])
+    c = AtlasRb::Collection.create(@destination_id)
     save_descriptive!('Collection', c.id, title: permitted['title'], description: permitted['description'])
     redirect_to collection_path(c.id)
   end

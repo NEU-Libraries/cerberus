@@ -11,10 +11,14 @@
           My DRS
         %p.text-muted.mb-0
           Your personal workspace and what you've published to your community.
-      .ms-md-3
-        = link_to new_work_path, class: 'btn btn-primary' do
-          %i.fa-solid.fa-plus.me-1{ 'aria-hidden' => 'true' }
-          Deposit
+      -# Deposits into the personal root, which is also the one destination that
+      -# offers promotion to a community showcase. No root means no destination,
+      -# so no button: that depositor works through a collection's Add menu.
+      - if @personal_root_id.present?
+        .ms-md-3
+          = link_to new_collection_work_path(@personal_root_id), class: 'btn btn-primary' do
+            %i.fa-solid.fa-plus.me-1{ 'aria-hidden' => 'true' }
+            Deposit
 
 -# Multi-account switcher — only for a person whose NUID holds more than one
 -# account. Full-width above the workspace/published split.
@@ -103,7 +107,7 @@
       -# the "add" affordance sits below the rows rather than lost in the header strip.
       - if @personal_root_id.present?
         .p-3.border-top.mt-auto.d-flex.justify-content-end
-          = link_to new_collection_path(parent_id: @personal_root_id), class: 'btn btn-sm btn-outline-secondary' do
+          = link_to new_collection_collection_path(@personal_root_id), class: 'btn btn-sm btn-outline-secondary' do
             %i.fa-solid.fa-plus.me-1{ 'aria-hidden' => 'true' }
             New collection
 

@@ -311,12 +311,12 @@ describe CommunitiesController do
     before { sign_in user }
 
     it 'assigns a open struct to community' do
-      get :new
+      get :new, params: { community_id: community.id }
       expect(assigns(:community)).to be_a(OpenStruct)
     end
 
     it 'renders the new partial' do
-      get :new
+      get :new, params: { community_id: community.id }
       expect(response).to render_template('communities/new')
     end
   end
@@ -362,7 +362,8 @@ describe CommunitiesController do
       # here so this test doesn't mint real showcase collections per run.
       allow(ShowcaseProvisioner).to receive(:call)
 
-      post :create, params: { community: { title: 'BrandNewCommunity', description: 'CommunityAbstract' } }
+      post :create, params: { community_id: community.id,
+                              community:    { title: 'BrandNewCommunity', description: 'CommunityAbstract' } }
 
       created_id = response.location.split('/').last
       created = AtlasRb::Community.find(created_id)
@@ -373,26 +374,30 @@ describe CommunitiesController do
     end
 
     it 'provisions the new community with genre showcases' do
+      # Force the parent fixture before stubbing create — the `let` is lazy, and
+      # a blanket stub would otherwise swallow the fixture's own creation too.
+      parent = community
       allow(AtlasRb::Community).to receive(:create).and_return(AtlasRb::Mash.new('id' => 'newcomm'))
       allow_any_instance_of(described_class).to receive(:save_descriptive!) # no MODS writes
       allow(ShowcaseProvisioner).to receive(:call)
 
-      post :create, params: { community: { title: 'X', description: 'Y' } }
+      post :create, params: { community_id: parent.id, community: { title: 'X', description: 'Y' } }
 
       expect(ShowcaseProvisioner).to have_received(:call).with(community_id: 'newcomm')
       expect(response).to redirect_to(community_path('newcomm'))
     end
 
     it 'rejects a blank title without minting a community or provisioning showcases' do
+      parent = community
       allow(AtlasRb::Community).to receive(:create)
       allow(ShowcaseProvisioner).to receive(:call)
 
-      post :create, params: { community: { title: '', description: 'Y' } }
+      post :create, params: { community_id: parent.id, community: { title: '', description: 'Y' } }
 
       expect(AtlasRb::Community).not_to have_received(:create)
       expect(ShowcaseProvisioner).not_to have_received(:call)
       expect(flash[:alert]).to eq('Please provide a title.')
-      expect(response).to redirect_to(new_community_path)
+      expect(response).to redirect_to(new_community_community_path(parent.id))
     end
   end
 

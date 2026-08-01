@@ -22,10 +22,12 @@ module Authorizable
     # can't silently ship a write that's gated only at the GET form.
     #
     # Three gates, matching the policy:
-    #   - authentication on the create surface (new/create). Cerberus has
-    #     no :create ability — the role/parent decision is Atlas's — so
-    #     this is the UX/defense-in-depth gate: a logged-out caller is
-    #     redirected to sign in rather than bounced by an Atlas error.
+    #   - the :edit ability on the DESTINATION for the create surface
+    #     (new/create). Creating a child is a write to its container, so the
+    #     right question is "may you edit the thing you're adding to?" — Atlas
+    #     asks the same one (:create_child against the resolved parent). The
+    #     destination is a route segment, so it is always present; there is no
+    #     shape of the request that reaches these actions ungated.
     #   - the :edit ability on BOTH the edit form and the write that
     #     follows (edit/update), closing the "form gated, write open" gap.
     #   - the tombstone gate on tombstone.
@@ -37,9 +39,10 @@ module Authorizable
       # so the lexical-scope cop can't see them — that indirection is the whole
       # point of the macro.
       # rubocop:disable Rails/LexicallyScopedActionFilter
-      before_action :authenticate_user!,   only: %i[new create]
-      before_action :authorize_edit!,      only: %i[edit update] + Array(extra_edit)
-      before_action :authorize_tombstone!, only: %i[tombstone]
+      before_action :authenticate_user!,       only: %i[new create]
+      before_action :authorize_destination!,   only: %i[new create]
+      before_action :authorize_edit!,          only: %i[edit update] + Array(extra_edit)
+      before_action :authorize_tombstone!,     only: %i[tombstone]
       # rubocop:enable Rails/LexicallyScopedActionFilter
     end
   end
@@ -115,6 +118,40 @@ module Authorizable
 
     def authorize_edit!
       authorize_edit_for!(params[:id])
+    end
+
+    # The create gate: :edit on the destination container, which the nested
+    # route supplies as :collection_id or :community_id depending on which
+    # parent type the child hangs from. Leaves @destination_id for the action,
+    # so it doesn't re-derive which segment carried the parent.
+    def authorize_destination!
+      @destination_id = params[:collection_id].presence || params[:community_id].presence
+      raise ResourceNotFound if @destination_id.blank?
+
+      authorize_edit_for!(@destination_id)
+    end
+
+    # The nested `new` path for +child+ under the destination this request came
+    # in on — for bouncing a rejected create back to its own form. A Collection
+    # can hang from either container, so the helper name depends on which
+    # segment carried the parent.
+    def new_child_path(child)
+      if params[:community_id].present?
+        public_send(:"new_community_#{child}_path", params[:community_id])
+      else
+        public_send(:"new_collection_#{child}_path", params[:collection_id])
+      end
+    end
+
+    # The matching POST target, for the form the `new` action renders. Same
+    # parent-type split as {#new_child_path}; +children+ is the plural segment
+    # ("collections" / "communities" / "works").
+    def child_create_path(children)
+      if params[:community_id].present?
+        public_send(:"community_#{children}_path", params[:community_id])
+      else
+        public_send(:"collection_#{children}_path", params[:collection_id])
+      end
     end
 
     # The :edit gate keyed on an explicit id rather than params[:id], so

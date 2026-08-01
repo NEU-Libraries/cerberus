@@ -19,14 +19,14 @@
           %ul.dropdown-menu{"aria-labelledby" => "dropdownMenuButton1"}
             - if controller_name == "communities"
               %li
-                %a.dropdown-item{:href => new_community_path(:parent_id => "#{params[:id]}")} New Community
+                %a.dropdown-item{:href => new_community_community_path(params[:id])} New Community
               %li
-                %a.dropdown-item{:href => new_collection_path(:parent_id => "#{params[:id]}")} New Collection
+                %a.dropdown-item{:href => new_community_collection_path(params[:id])} New Collection
             - elsif controller_name == "collections"
               %li
-                %a.dropdown-item{:href => new_collection_path(:parent_id => "#{params[:id]}")} New Collection
+                %a.dropdown-item{:href => new_collection_collection_path(params[:id])} New Collection
               %li
-                %a.dropdown-item{:href => new_work_path(:parent_id => "#{params[:id]}")} New Work
+                %a.dropdown-item{:href => new_collection_work_path(params[:id])} New Work
             - else
               %li
                 %a.dropdown-item{:href => upload_work_path(params[:id])} Upload File
