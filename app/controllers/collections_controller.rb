@@ -44,6 +44,10 @@ class CollectionsController < CatalogController
 
   def edit
     @collection = AtlasRb::Collection.find(params[:id])
+    # How much a narrowing here would touch, for the form's confirmation. The
+    # count is a property of the subtree rather than of the audience being
+    # chosen, so it resolves once on load instead of on every change.
+    @narrowing_affected = NarrowingImpact.new(noid: @collection.id, uuid: @collection.valkyrie_id).count
     form_preparation(@permissions, resource: @collection)
     load_descriptive!('Collection')
     @sentinel = Sentinel.find_by(target_id: params[:id])

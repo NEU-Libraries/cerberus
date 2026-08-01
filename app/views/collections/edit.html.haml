@@ -17,8 +17,16 @@
           = f.button :submit, class: "btn btn-success"
           = link_to "Cancel", collection_path(params[:id]), class: "btn btn-warning"
   #permissions.tab-pane{"aria-labelledby" => "permissions-tab", role: "tabpanel"}
-    .py-2.px-1{ data: { controller: "group-permissions", "group-permissions-resource-value": "collection" } }
-      = bootstrap_form_tag(url: collection_path(params[:id]), method: :patch, multipart: true) do |f|
+    -# narrowing-confirm watches this pane and puts a confirmation in front of a
+    -# save that would take audience away: the change cascades to everything
+    -# inside, and widening the collection again does not bring it back.
+    .py-2.px-1{ data: { controller: "group-permissions narrowing-confirm",
+                        "group-permissions-resource-value": "collection",
+                        "narrowing-confirm-initial-value": Array(@read_groups).to_json,
+                        "narrowing-confirm-affected-value": @narrowing_affected,
+                        action: "change->narrowing-confirm#update click->narrowing-confirm#updateSoon" } }
+      = bootstrap_form_tag(url: collection_path(params[:id]), method: :patch, multipart: true,
+                           data: { "narrowing-confirm-target": "form" }) do |f|
         .row
           .col-sm
             = render 'shared/visibility_control', resource: 'collection'

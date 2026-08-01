@@ -64,6 +64,13 @@ module Transformable # rubocop:disable Metrics/ModuleLength
     @groups = groups_for_permissions_picker
     @public = raw_permissions&.read&.include?('public')
     @embargo = Embargo.release_date(raw_permissions&.embargo).to_s
+    # Snapshot the read audience before anything else touches it. This line is
+    # load-bearing twice over: the next one REPLACES @permissions (the Atlas
+    # envelope the authorization gate loaded) with the form's row objects, and
+    # pretty_resource_permissions mutates the envelope's read list in place to
+    # strip the public sentinel — so a view wanting the audience as submitted
+    # has no way back to it afterwards.
+    @read_groups = Array(raw_permissions&.read).dup
     @permissions = pretty_resource_permissions(raw_permissions)
     assign_visibility_ceiling(resource)
   end
