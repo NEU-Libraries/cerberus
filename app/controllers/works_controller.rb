@@ -74,6 +74,10 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     @parent = AtlasRb::Collection.find(@destination_id)
     raise ResourceNotFound if @parent.nil?
 
+    # The POST target for the form this renders. Without it form_tag falls back
+    # to the current URL — /collections/:id/works/new, which routes nowhere for
+    # POST — and the deposit 404s on submit.
+    @create_path = child_create_path('works')
     @publish_targets = publish_offered? ? publish_targets : {}
   end
 
