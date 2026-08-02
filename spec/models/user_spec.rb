@@ -3,6 +3,26 @@
 require 'rails_helper'
 
 describe User do
+  # Namae only understands person-shaped names. A blank result used to hide the
+  # whole navbar user block — Log Out included — so an account named after a
+  # role could not sign out at all.
+  describe '#pretty_name' do
+    it 'reorders a person-shaped name' do
+      expect(described_class.new(name: 'Doe, Jane').pretty_name).to eq('Jane Doe')
+    end
+
+    it 'falls back to the raw name when it is not person-shaped' do
+      user = described_class.new(name: 'Law Library Staffer (DRS Fixture)')
+
+      expect(user.pretty_name).to eq('Law Library Staffer (DRS Fixture)')
+      expect(user.to_s).to be_present
+    end
+
+    it 'is blank only when there is no name at all' do
+      expect(described_class.new(name: nil).pretty_name).to eq('')
+    end
+  end
+
   describe '#can_bypass_embargo?' do
     it 'is true for an Atlas admin' do
       user = described_class.new(nuid: '000000004', groups: [], role: 'admin')
