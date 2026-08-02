@@ -27,7 +27,10 @@
         - if user_signed_in?
           .text-end.small.pb-2.flex-shrink-0.text-nowrap
             - if @can_edit && !@work.in_progress
-              = link_to "Edit", edit_work_path(@work.id), class: "px-2"
+              -# Full reload rather than a Turbo visit: the edit page picks its active
+              -# tab from the URL fragment after the document loads, so a Turbo swap can
+              -# show the previous pane for a frame before tab-hash corrects it.
+              = link_to "Edit", edit_work_path(@work.id), class: "px-2", data: { turbo: false }
             - if @can_tombstone
               = render 'shared/tombstone_modal',
                        id:            @work.id,
