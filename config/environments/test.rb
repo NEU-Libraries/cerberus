@@ -36,7 +36,6 @@ Rails.application.configure do
   config.action_controller.allow_forgery_protection = false
 
   # Store uploaded files on the local file system in a temporary directory.
-  config.active_storage.service = :test
 
   # Tests assert on the queue with ActiveJob::TestHelper / have_enqueued_job;
   # don't actually run jobs.
