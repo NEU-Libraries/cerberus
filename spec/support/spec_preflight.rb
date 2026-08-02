@@ -58,7 +58,7 @@ module SpecPreflight
       Usually this is a worktree with no config/master.key. Copy it in — it is
       gitignored, so it will not stage:
 
-        cp #{Rails.root.parent}/cerberus/config/master.key #{Rails.root}/config/master.key
+        cp #{Rails.root.parent.join('cerberus/config/master.key')} #{Rails.root.join('config/master.key')}
 
       In CI, set RAILS_MASTER_KEY instead.
     MSG

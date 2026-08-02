@@ -74,18 +74,24 @@ RSpec.describe 'Environment smoke', :smoke, type: :request do
   def read_public = { 'permissions' => { 'read' => ['public'] } }
 
   # A public Work needs public containers above it: Atlas refuses a resource
-  # more visible than its parent, so the community and collection are widened
-  # on the way down.
+  # more visible than its parent, so each tier is widened on the way down.
   def public_work
-    community = AtlasRb::Community.create(nil, mods('community'), nuid: nuid)
-    AtlasRb::Community.metadata(community.id, read_public, nuid: nuid)
-
-    collection = AtlasRb::Collection.create(community.id, mods('collection'), nuid: nuid)
-    AtlasRb::Collection.metadata(collection.id, read_public, nuid: nuid)
-
+    collection = public_collection(public_community.id)
     work = AtlasRb::Work.create(collection.id, mods('work'), nuid: nuid)
     AtlasRb::Work.complete(work.id, nuid: nuid)
     AtlasRb::Work.metadata(work.id, read_public, nuid: nuid)
     work
+  end
+
+  def public_community
+    community = AtlasRb::Community.create(nil, mods('community'), nuid: nuid)
+    AtlasRb::Community.metadata(community.id, read_public, nuid: nuid)
+    community
+  end
+
+  def public_collection(parent_id)
+    collection = AtlasRb::Collection.create(parent_id, mods('collection'), nuid: nuid)
+    AtlasRb::Collection.metadata(collection.id, read_public, nuid: nuid)
+    collection
   end
 end
