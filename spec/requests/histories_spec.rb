@@ -116,6 +116,54 @@ RSpec.describe 'Histories', type: :request do
       expect(response.body).to include('No permission changes recorded')
     end
 
+    # Atlas carries the embargo in the same permissions snapshot as the grant
+    # slots. It renders as its own prose row rather than an identifier pill, and
+    # only when a snapshot actually mentions one — the row must not appear on the
+    # events written before Atlas audited the key.
+    it 'renders an embargo being set as a prose date row' do
+      events = [perm_event(at:     '2026-05-26T12:00:00Z',
+                           before: { 'read' => ['staff'], 'embargo' => nil },
+                           after:  { 'read' => ['staff'], 'embargo' => '2027-12-31T00:00:00+00:00' })]
+      allow(AtlasRb::Resource).to receive(:history).and_return(history_mash(events))
+
+      get rights_history_path(resource_id)
+      expect(response.body).to include('Embargo')
+      expect(response.body).to include('None')
+      expect(response.body).to include('rights-diff__date--added">December 31, 2027')
+    end
+
+    it 'strikes through an embargo being lifted' do
+      events = [perm_event(at:     '2026-05-26T12:00:00Z',
+                           before: { 'read' => ['staff'], 'embargo' => '2027-12-31T00:00:00+00:00' },
+                           after:  { 'read' => ['staff'], 'embargo' => nil })]
+      allow(AtlasRb::Resource).to receive(:history).and_return(history_mash(events))
+
+      get rights_history_path(resource_id)
+      expect(response.body).to include('rights-diff__date--removed">December 31, 2027')
+    end
+
+    it 'omits the embargo row entirely when the snapshot never mentions one' do
+      events = [perm_event(at: '2026-05-26T12:00:00Z',
+                           before: { 'read' => ['staff'] }, after: { 'read' => %w[public staff] })]
+      allow(AtlasRb::Resource).to receive(:history).and_return(history_mash(events))
+
+      get rights_history_path(resource_id)
+      expect(response.body).not_to include('rights-diff__date')
+      expect(response.body).not_to include('>Embargo<')
+    end
+
+    it 'shows an unchanged embargo untinted alongside a grant that did move' do
+      embargo = '2027-12-31T00:00:00+00:00'
+      events  = [perm_event(at:     '2026-05-26T12:00:00Z',
+                            before: { 'read' => ['staff'], 'embargo' => embargo },
+                            after:  { 'read' => %w[public staff], 'embargo' => embargo })]
+      allow(AtlasRb::Resource).to receive(:history).and_return(history_mash(events))
+
+      get rights_history_path(resource_id)
+      expect(response.body).to include('December 31, 2027')
+      expect(response.body).not_to include('rights-diff__date--')
+    end
+
     it 'isolates the ?at deep-linked event on its own page (one event per page)' do
       events = Array.new(25) { |i| perm_event(at: format('2026-05-%02dT00:00:00Z', i + 1), before: {}, after: { 'read' => ["g#{i}"] }) }
       allow(AtlasRb::Resource).to receive(:history).and_return(history_mash(events))
