@@ -284,24 +284,33 @@ namespace :reset do
       crrj_group        = 'northeastern:drs:school_of_law:crrj:staff'
       l2_group          = 'northeastern:drs:library:licensed_resources:l2'
 
-      AtlasRb::System::User.find_or_create(email: 'archives.reader.fixture@northeastern.edu',
-                                           nuid: '000000010', name: 'Archives Reader (DRS Fixture)',
-                                           affiliation: 'staff', groups: [archives_group])
-      AtlasRb::System::User.find_or_create(email: 'nupd.media.fixture@northeastern.edu',
-                                           nuid: '000000011', name: 'NUPD Media Staffer (DRS Fixture)',
-                                           affiliation: 'staff', groups: [nupd_media_group])
-      AtlasRb::System::User.find_or_create(email: 'law.library.fixture@northeastern.edu',
-                                           nuid: '000000012', name: 'Law Library Staffer (DRS Fixture)',
-                                           affiliation: 'staff', groups: [law_library_group])
-      AtlasRb::System::User.find_or_create(email: 'crrj.staff.fixture@northeastern.edu',
-                                           nuid: '000000013', name: 'CRRJ Staffer (DRS Fixture)',
-                                           affiliation: 'staff', groups: [crrj_group])
-      AtlasRb::System::User.find_or_create(email: 'l2.reader.fixture@northeastern.edu',
-                                           nuid: '000000014', name: 'Licensed Resources Reader (DRS Fixture)',
-                                           affiliation: 'staff', groups: [l2_group])
-      AtlasRb::System::User.find_or_create(email: 'standard.fixture@northeastern.edu',
-                                           nuid: '000000015', name: 'No-Groups Standard User (DRS Fixture)',
-                                           affiliation: 'staff', groups: [])
+      # One roster drives both halves of each fixture: the loginable user here,
+      # and the Person (with its personal root) further down. They have to stay
+      # in step — a user without a Person gets an empty My DRS — so they are
+      # written from the same list rather than two parallel blocks that can
+      # drift apart.
+      group_fixtures = [
+        { nuid: '000000010', email: 'archives.reader.fixture@northeastern.edu',
+          name: 'Archives Reader (DRS Fixture)', group: archives_group },
+        { nuid: '000000011', email: 'nupd.media.fixture@northeastern.edu',
+          name: 'NUPD Media Staffer (DRS Fixture)', group: nupd_media_group },
+        { nuid: '000000012', email: 'law.library.fixture@northeastern.edu',
+          name: 'Law Library Staffer (DRS Fixture)', group: law_library_group },
+        { nuid: '000000013', email: 'crrj.staff.fixture@northeastern.edu',
+          name: 'CRRJ Staffer (DRS Fixture)', group: crrj_group },
+        { nuid: '000000014', email: 'l2.reader.fixture@northeastern.edu',
+          name: 'Licensed Resources Reader (DRS Fixture)', group: l2_group },
+        # No group, and below no affiliation either — the control for what a
+        # plain depositor sees: a workspace, but no publish-to-my-community fork.
+        { nuid: '000000015', email: 'standard.fixture@northeastern.edu',
+          name: 'No-Groups Standard User (DRS Fixture)', group: nil }
+      ]
+
+      group_fixtures.each do |fixture|
+        AtlasRb::System::User.find_or_create(email: fixture[:email], nuid: fixture[:nuid],
+                                             name: fixture[:name], affiliation: 'staff',
+                                             groups: [fixture[:group]].compact)
+      end
 
       # Each shape below gets its own base image, distinct from every other
       # thumbnail in this task (including gorge/mountain/coast/beach above),
@@ -357,6 +366,26 @@ namespace :reset do
       l2_archive = AtlasRb::Collection.create(licensed_resources['id'], '/home/cerberus/web/spec/fixtures/files/l2-dataset-archive-mods.xml', depositor: unowned)
       AtlasRb::Collection.set_thumbnails(l2_archive['id'], **ThumbnailCreator.call(base: licensed_base))
       AtlasRb::Collection.metadata(l2_archive['id'], { 'permissions' => { 'read' => [l2_group] } })
+
+      # The Person half of each group fixture. My DRS resolves the depositor's
+      # workspace and publish target through Person#personal_root_id
+      # (DepositorContext#deposit_person), so a loginable user with no Person
+      # lands on an empty My DRS and can't exercise it at all — Person.create is
+      # what mints that personal root.
+      #
+      # Down here rather than beside the users because affiliation needs the
+      # communities built above. Each fixture is affiliated with the community
+      # its own Grouper group gates, which is what turns "publish to my
+      # community" into a real choice instead of an empty one.
+      affiliations = { archives_group => archives_community, nupd_media_group => public_safety,
+                       law_library_group => school_of_law, crrj_group => school_of_law,
+                       l2_group => licensed_resources }
+
+      group_fixtures.each do |fixture|
+        person = AtlasRb::Person.create(nuid: fixture[:nuid], display_name: fixture[:name])
+        home = affiliations[fixture[:group]]
+        AtlasRb::Person.add_affiliation(person['id'], home['id']) if home
+      end
     end
 
     # Seed usage analytics so /admin/impressions is populated for demos and UAT.
