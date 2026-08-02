@@ -17,14 +17,34 @@ require 'rails_helper'
 #       ├── work_b            (home)
 #       └── work_c            (home)
 RSpec.describe SetResolver do
-  let!(:community)      { public_community }
-  let!(:collection_a)   { public_collection(community.id) }
-  let!(:collection_b)   { public_collection(community.id) }
-  let!(:sub_collection) { public_collection(collection_a.id) }
-  let!(:work_a)         { public_work(collection_a.id) }
-  let!(:work_sub)       { public_work(sub_collection.id) }
-  let!(:work_b)         { public_work(collection_b.id) }
-  let!(:work_c)         { public_work(collection_b.id) }
+  # Built once for the whole group, not per example. Every example reads this
+  # hierarchy and none mutates it — the one example that links work_b into
+  # collection_a reverses itself in an `after` — so per-example construction
+  # bought nothing and cost eight Atlas resources times every example in the
+  # file, all of them landing in the shared test store and index.
+  #
+  # The `let` wrappers below keep examples reading `community` / `work_a` rather
+  # than `@community` / `@work_a`: a before(:all) ivar is the only way to share
+  # state across examples, but it should not leak into how each example reads.
+  before(:all) do
+    @community      = public_community
+    @collection_a   = public_collection(@community.id)
+    @collection_b   = public_collection(@community.id)
+    @sub_collection = public_collection(@collection_a.id)
+    @work_a         = public_work(@collection_a.id)
+    @work_sub       = public_work(@sub_collection.id)
+    @work_b         = public_work(@collection_b.id)
+    @work_c         = public_work(@collection_b.id)
+  end
+
+  let(:community)      { @community }
+  let(:collection_a)   { @collection_a }
+  let(:collection_b)   { @collection_b }
+  let(:sub_collection) { @sub_collection }
+  let(:work_a)         { @work_a }
+  let(:work_sub)       { @work_sub }
+  let(:work_b)         { @work_b }
+  let(:work_c)         { @work_c }
 
   let(:user) { nil }
   let(:search_service) do

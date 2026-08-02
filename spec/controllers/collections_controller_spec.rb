@@ -73,6 +73,7 @@ describe CollectionsController do
 
     context 'analytics tab item lookup, facet, and composition' do
       let!(:sub_collection) do
+        publicize_ancestry!(community: community, collection: collection)
         c = AtlasRb::Collection.create(collection.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004')
         AtlasRb::Collection.metadata(c.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
         c
@@ -82,6 +83,7 @@ describe CollectionsController do
       # homed under an entirely different Community — the containment check
       # must exclude it on subtree membership, not title.
       let!(:foreign_collection) do
+        publicize_ancestry!(community: other_community)
         c = AtlasRb::Collection.create(other_community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004')
         AtlasRb::Collection.metadata(c.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
         c
@@ -149,6 +151,7 @@ describe CollectionsController do
     render_views
 
     before do
+      publicize_ancestry!(community: community)
       AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
     end
 
@@ -211,6 +214,9 @@ describe CollectionsController do
         AtlasRb::Collection.metadata(c.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
         c
       end
+      # The Work is two tiers down, so every container above it has to be public
+      # before it can be — the enclosing `before` widens community + collection,
+      # and sub_collection widens itself above.
       let!(:work) do
         w = AtlasRb::Work.create(sub_collection.id,
                                  '/home/cerberus/web/spec/fixtures/files/work-mods.xml', nuid: '000000004')
@@ -243,13 +249,20 @@ describe CollectionsController do
     before { sign_in user }
 
     it 'assigns a open struct to collection' do
-      get :new
+      get :new, params: { community_id: community.id }
       expect(assigns(:collection)).to be_a(OpenStruct)
     end
 
     it 'renders the new partial' do
-      get :new
+      get :new, params: { community_id: community.id }
       expect(response).to render_template('collections/new')
+    end
+
+    # A Collection hangs from either container type, so the form has to post
+    # back to whichever segment carried the parent.
+    it 'targets the nested create path for the destination it was opened from' do
+      get :new, params: { collection_id: collection.id }
+      expect(assigns(:create_path)).to eq(collection_collections_path(collection.id))
     end
   end
 
@@ -290,8 +303,8 @@ describe CollectionsController do
     before { sign_in user }
 
     it 'seeds the new collection title + description via the structure-safe MODS merge (not plain_title=)' do
-      post :create, params: { parent_id:  community.id,
-                              collection: { title: 'BrandNewCollection', description: 'CollectionAbstract' } }
+      post :create, params: { community_id: community.id,
+                              collection:   { title: 'BrandNewCollection', description: 'CollectionAbstract' } }
 
       created_id = response.location.split('/').last
       created = AtlasRb::Collection.find(created_id)
@@ -304,11 +317,19 @@ describe CollectionsController do
     it 'rejects a blank title without minting a collection' do
       allow(AtlasRb::Collection).to receive(:create)
 
-      post :create, params: { parent_id: community.id, collection: { title: '', description: 'Y' } }
+      post :create, params: { community_id: community.id, collection: { title: '', description: 'Y' } }
 
       expect(AtlasRb::Collection).not_to have_received(:create)
       expect(flash[:alert]).to eq('Please provide a title.')
-      expect(response).to redirect_to(new_collection_path(parent_id: community.id))
+      expect(response).to redirect_to(new_community_collection_path(community.id))
+    end
+
+    # The destination is a route segment, so there is no request shape that
+    # reaches create without one. (GET /collections still routes — that's the
+    # index; only the unparented POST is gone.)
+    it 'has no unparented create route' do
+      expect { Rails.application.routes.recognize_path('/collections', method: :post) }
+        .to raise_error(ActionController::RoutingError)
     end
   end
 

@@ -1,7 +1,8 @@
 %h3 Create a new Collection
 
-= bootstrap_form_tag url: '/collections' do |f|
-  = f.hidden_field :parent_id, value: params[:parent_id]
+-# The destination is the nested route's parent segment (@create_path), not a
+-# form field — you say where a Collection goes by navigating there.
+= bootstrap_form_tag url: @create_path do |f|
   = bootstrap_fields_for :collection do |c|
     = c.text_field :title, required: true
     = c.text_area :description, rows: 10

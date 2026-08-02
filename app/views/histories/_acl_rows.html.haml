@@ -1,0 +1,19 @@
+-# Row set for a resource-ACL permissions event: who can read/edit, plus the
+-# embargo that qualifies it. Rendered into the Rights diff grid's tbody.
+- AuditEventsHelper::ACL_DIFF_KEYS.each do |key|
+  - removed = Array(before[key]) - Array(after[key])
+  - added   = Array(after[key]) - Array(before[key])
+  %tr{class: ('rights-diff__row--changed' if removed.any? || added.any?)}
+    %th{scope: 'row'}= acl_level_label(key)
+    %td= acl_grant_pills(before[key], marked: removed, state: 'removed')
+    %td= acl_grant_pills(after[key], marked: added, state: 'added')
+-# Embargo rides in the same permissions snapshot as the grant slots but is a
+-# scalar date, so it gets a prose row of its own rather than being diffed as a
+-# one-element set of identifiers. Rendered last: the grant rows answer "who can
+-# reach this", the embargo answers "from when", a qualifier on them.
+- if embargo_recorded?(before, after)
+  - embargo_moved = embargo_changed?(before, after)
+  %tr{class: ('rights-diff__row--changed' if embargo_moved)}
+    %th{scope: 'row'}= acl_level_label(AuditEventsHelper::EMBARGO_KEY)
+    %td= embargo_diff_cell(before[AuditEventsHelper::EMBARGO_KEY], state: ('removed' if embargo_moved))
+    %td= embargo_diff_cell(after[AuditEventsHelper::EMBARGO_KEY], state: ('added' if embargo_moved))

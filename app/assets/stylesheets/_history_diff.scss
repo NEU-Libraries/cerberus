@@ -144,9 +144,34 @@
     }
   }
 
-  // Empty ACL slot — a muted em-dash placeholder.
+  // Empty ACL slot — a muted em-dash placeholder. Also carries the embargo
+  // row's "None", where a word beats a dash: the question that row answers is
+  // "was anything withheld", and "—" would read as missing data instead of no.
   &__empty {
     color: $gray-400;
+  }
+
+  // Embargo release date — the one non-grant row in the diff. Deliberately NOT
+  // a pill: the rows above are monospace identifier chips because a group name
+  // is a token you could look up, and a date is not. Breaking the pill rhythm
+  // is the signal that this row answers a different question ("from when")
+  // than the ones above it ("who"). Tones are the pills' own, so gained/lost
+  // still read the same way down the column.
+  &__date {
+    font-size: 0.82rem;
+    color: $gray-800;
+
+    // Gained — teal-green. Carries a little extra weight to hold its own
+    // against three rows of bordered chips; colour alone reads as incidental.
+    &--added {
+      color: color-mix(in srgb, $audit-tone-create 78%, black);
+      font-weight: 600;
+    }
+    // Lifted — mauve + strikethrough, matching the lost-grant pill exactly.
+    &--removed {
+      color: color-mix(in srgb, $audit-tone-unlink 72%, black);
+      text-decoration: line-through;
+    }
   }
 
   // Previous/Next event walker (one change per page), sitting below the card.

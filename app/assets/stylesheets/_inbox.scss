@@ -54,8 +54,13 @@
   font-variant-numeric: tabular-nums;
 }
 
+// Sits directly under the registry head, where the old .well had a rule to
+// separate it from the body — the hairline replaces that <hr>.
 .inbox-message__meta {
   font-size: 0.9rem;
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.85rem;
+  border-bottom: 1px solid $gray-200;
 }
 
 // Reading measure for the body; simple_format paragraphs inherit it.

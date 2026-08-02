@@ -5,14 +5,23 @@ module Admin
   # ("Delete") action on the show pages: it lists every tombstoned Work,
   # Collection and Community, and reverses a tombstone on request.
   #
+  # Reachable by :admin and by the devolved-admin tier (User#admin_delegate?).
+  # Restoring is an operator-level lifecycle action, so it sits with :reparent
+  # rather than with edit rights: Atlas grants :restore to :admin and, separately,
+  # to the same :privileged + admin-group pair (apply_admin_delegate_abilities),
+  # and deliberately withholds it from group-ACL editors and depositors.
+  #
   # atlas_rb already ships the backend wiring — AtlasRb::Admin::{Work,Collection,
   # Community}.restore — under its operator-only Admin namespace; this is purely
   # the Cerberus consumer. Restore is reversible (re-tombstone), so unlike the
-  # Admin destroy path it needs no confirm marker. The acting admin's NUID flows
+  # Admin destroy path it needs no confirm marker. The acting user's NUID flows
   # to Atlas ambiently (config/initializers/atlas_rb.rb wires Current.nuid), which
   # both passes Atlas's authz and stamps the restore audit event the History tab
   # already renders.
   class TombstonesController < BaseController
+    skip_before_action :require_admin
+    before_action :require_admin_or_delegate
+
     breadcrumb_for 'Restore a tombstoned item', :admin_tombstones_path
 
     # Borrow CatalogController's Solr config so TombstonedItems' SearchBuilder

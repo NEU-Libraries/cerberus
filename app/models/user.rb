@@ -12,11 +12,15 @@ class User
 
   devise :custom_authenticatable, authentication_keys: [:email, :password, :nuid, :name, :groups, :role]
 
+  # Namae only understands person-shaped names. A descriptive or organisational
+  # one ("Law Library Staffer") parses to nothing, and returning '' for it used
+  # to blank the whole user block in the navbar — taking Log Out with it, so the
+  # only way out was to clear the session by hand. Fall back to the raw name.
   def pretty_name
     names = Namae.parse(name)[0]
-    return "#{names.given} #{names.family}" if names.present?
+    parsed = "#{names&.given} #{names&.family}".strip
 
-    ''
+    parsed.presence || name.to_s
   end
 
   # Atlas-side role mirror. Matches the Atlas Ability layer plan's

@@ -19,10 +19,17 @@ module SetSharing
       @edit_user_grants = Array(@set['edit_users']).map { |nuid| { nuid: nuid, name: NuidResolver.name_for(nuid) } }
     end
 
-    # [group_id, label, 'View'|'Manage'] rows for the shared permissions widget.
+    # Permissions::GrantRow rows for the shared permissions widget. Every row is
+    # revocable: a Set's ACL is written through Compilation.update, which does not
+    # pass the resource guard that restricts grant removal to a group's own
+    # members, and update_sharing already limits the whole tab to the Set's owner.
     def group_permission_rows(read_groups)
-      read_groups.reject { |group| group == 'public' }.map { |group| [group, pretty_group(group), 'View'] } +
-        Array(@set['edit_groups']).map { |group| [group, pretty_group(group), 'Manage'] }
+      rows = read_groups.reject { |group| group == 'public' }.map { |group| [group, 'read'] } +
+             Array(@set['edit_groups']).map { |group| [group, 'edit'] }
+      rows.map do |group, ability|
+        Permissions::GrantRow.new(group_id: group, label: pretty_group(group),
+                                  ability: ability, revocable: true)
+      end
     end
 
     def update_sharing

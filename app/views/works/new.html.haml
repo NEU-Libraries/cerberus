@@ -1,4 +1,6 @@
-= form_tag('/works', multipart: true, class: 'deposit-form my-3', data: (@parent ? {} : { controller: 'deposit-fork', 'deposit-fork-genres-value': @publish_targets.transform_values { |target| target[:genres] } })) do |f|
+-# The destination is the route's parent segment, so this form only asks what to
+-# deposit — and, from the depositor's own root, whether to also promote it.
+= form_tag(@create_path, multipart: true, class: 'deposit-form my-3', data: (@publish_targets.present? ? { controller: 'deposit-promotion', 'deposit-promotion-genres-value': @publish_targets.transform_values { |target| target[:genres] } } : {})) do |f|
 
   .deposit-form__panel
     %header.deposit-form__head
@@ -7,74 +9,38 @@
         %span.deposit-form__title Deposit
 
     .deposit-form__body
-      - if @parent
-        -# Deep-link from a collection breadcrumb: the destination is already
-        -# chosen, so skip the workspace/publish fork and deposit straight into
-        -# this collection. parent_id rides as a hidden field; WorksController's
-        -# create_in_workspace homes the Work here (create#deposit_to is absent,
-        -# so the workspace branch runs and falls back to parent_id).
-        = hidden_field_tag 'parent_id', @parent.id
-        .deposit-form__field
-          %span.deposit-form__field-label Depositing into
-          .well.p-3.rounded-3
-            .deposit-form__radio-title
-              %i.fa-solid.fa-folder-open{'aria-hidden' => 'true'}
-              = @parent.title
-            .deposit-form__radio-desc.mt-1
-              The new work will be added to this collection.
-      - else
-        -# The weighted fork. The publish card only appears when the depositor has
-        -# a curated Person with affiliated communities that have showcases AND a
-        -# personal root to home published works in (WorksController#publish_targets);
-        -# otherwise this is a single-option workspace deposit.
+      .deposit-form__field
+        %span.deposit-form__field-label Depositing into
+        .well.p-3.rounded-3
+          .deposit-form__radio-title
+            %i.fa-solid.fa-folder-open{'aria-hidden' => 'true'}
+            = @parent.title
+          .deposit-form__radio-desc.mt-1
+            The new work will be added to this collection.
+
+      -# Promotion — an optional extra act, not a destination. Offered only from
+      -# the depositor's own personal root (WorksController#publish_offered?),
+      -# which is what keeps a promoted Work in their own space.
+      - if @publish_targets.present?
         %fieldset.deposit-form__field
-          %legend.deposit-form__field-label Where should this go?
-          .deposit-form__radio-grid
-            %label.deposit-form__radio{for: 'deposit_to_workspace'}
-              = radio_button_tag 'deposit_to', 'workspace', true, class: 'deposit-form__radio-input', id: 'deposit_to_workspace', data: { action: 'deposit-fork#choose' }
-              .deposit-form__radio-body
-                .deposit-form__radio-title
-                  %i.fa-solid.fa-box-archive{'aria-hidden' => 'true'}
-                  My workspace
-                .deposit-form__radio-desc
-                  A personal collection — drafts, working files. Discoverable by its own visibility; never promoted to a community showcase.
-            - if @publish_targets.present?
-              %label.deposit-form__radio{for: 'deposit_to_publish'}
-                = radio_button_tag 'deposit_to', 'publish', false, class: 'deposit-form__radio-input', id: 'deposit_to_publish', data: { action: 'deposit-fork#choose' }
-                .deposit-form__radio-body
-                  .deposit-form__radio-title
-                    %i.fa-solid.fa-graduation-cap{'aria-hidden' => 'true'}
-                    Publish to my community
-                  .deposit-form__radio-desc
-                    Promote into your community's featured showcase for a category — a deliberate, public act.
-
-        -# Workspace branch — deposit into one of the depositor's own collections.
-        .deposit-form__field{data: { 'deposit-fork-target' => 'workspaceBranch' }}
-          - if @workspace_collections.present?
-            %label.deposit-form__field-label{for: 'workspace_collection_id'} Collection
-            %select.form-select#workspace_collection_id{name: 'workspace_collection_id'}
-              - @workspace_collections.each do |coll|
-                %option{value: coll.to_param}= Array(coll['title_tsim']).first
-            %p.deposit-form__field-hint
-              Discoverable by its own visibility. You can publish it to a community later from My DRS.
-          - else
-            %p.deposit-form__field-hint
-              You don't have any collections yet —
-              = link_to 'create one', new_collection_path
-              to deposit into.
-
-        -# Publish branch — promote into a community genre showcase (linked-member edge).
-        - if @publish_targets.present?
-          .deposit-form__field.d-none{data: { 'deposit-fork-target' => 'publishBranch' }}
+          %label.deposit-form__radio{for: 'publish'}
+            = check_box_tag 'publish', '1', false, class: 'deposit-form__radio-input', id: 'publish', data: { action: 'deposit-promotion#toggle' }
+            .deposit-form__radio-body
+              .deposit-form__radio-title
+                %i.fa-solid.fa-graduation-cap{'aria-hidden' => 'true'}
+                Also promote to a community showcase
+              .deposit-form__radio-desc
+                Surfaces this work in your community's featured showcase for a category — a deliberate, public act. It still lives here.
+          .mt-3.d-none{data: { 'deposit-promotion-target' => 'fields' }}
             - if @publish_targets.size > 1
               %label.deposit-form__field-label{for: 'publish_community_id'} Community
-              %select.form-select#publish_community_id{name: 'publish_community_id', data: { 'deposit-fork-target' => 'community', action: 'deposit-fork#communityChanged' }}
+              %select.form-select#publish_community_id{name: 'publish_community_id', data: { 'deposit-promotion-target' => 'community', action: 'deposit-promotion#communityChanged' }}
                 - @publish_targets.each do |noid, target|
                   %option{value: noid}= target[:name]
             - else
               = hidden_field_tag 'publish_community_id', @publish_targets.keys.first
             %label.deposit-form__field-label.mt-3{for: 'publish_genre'} Category
-            %select.form-select#publish_genre{name: 'publish_genre', data: { 'deposit-fork-target' => 'genre' }}
+            %select.form-select#publish_genre{name: 'publish_genre', data: { 'deposit-promotion-target' => 'genre' }}
               -# Populated by Stimulus from the genres value; the first community's
               -# genres are rendered here as a no-JS fallback.
               - @publish_targets.values.first[:genres].each_key do |label|

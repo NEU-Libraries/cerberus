@@ -8,8 +8,9 @@ class CollectionsController < CatalogController
   include CollectionBreadcrumbs
   include RecordsImpressions
   include ContainerAnalytics
+  include ContainerRestrictionRequest
 
-  authorize_resource_writes!(extra_edit: %i[sentinel])
+  authorize_resource_writes!(extra_edit: %i[sentinel request_restriction])
   after_action :record_view_impression, only: :show
 
   # Scope the inherited Blacklight index to Collections only (see
@@ -39,11 +40,21 @@ class CollectionsController < CatalogController
 
   def new
     @collection = OpenStruct.new
+    @create_path = child_create_path('collections')
   end
 
   def edit
     @collection = AtlasRb::Collection.find(params[:id])
-    form_preparation(@permissions)
+    # How much a narrowing here would touch, for the form's confirmation. The
+    # count is a property of the subtree rather than of the audience being
+    # chosen, so it resolves once on load instead of on every change.
+    impact = NarrowingImpact.new(noid: @collection.id, uuid: @collection.valkyrie_id)
+    @narrowing_affected = impact.count
+    # Whether this user could run the cascade themselves. Decided here so the
+    # form offers the "ask an administrator" route instead of letting them
+    # choose Private and bounce off a refusal.
+    @narrowing_allowed = NarrowingPolicy.call(impact: impact, actor: current_user).allowed?
+    form_preparation(@permissions, resource: @collection)
     load_descriptive!('Collection')
     @sentinel = Sentinel.find_by(target_id: params[:id])
     load_container_analytics(@collection, 'Collection')
@@ -55,9 +66,9 @@ class CollectionsController < CatalogController
     # Guard before minting: a blank title would otherwise produce an untitled
     # Collection (MODSMerge leaves a blank title untouched). Client-side
     # `required` is the first line; this is the backstop.
-    return redirect_to(new_collection_path(parent_id: params[:parent_id])) if title_missing?(permitted)
+    return redirect_to(new_child_path('collection')) if title_missing?(permitted)
 
-    c = AtlasRb::Collection.create(params[:parent_id])
+    c = AtlasRb::Collection.create(@destination_id)
     save_descriptive!('Collection', c.id, title: permitted['title'], description: permitted['description'])
     redirect_to collection_path(c.id)
   end

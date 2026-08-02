@@ -48,7 +48,11 @@ rescue ActiveRecord::PendingMigrationError => e
   abort e.to_s.strip
 end
 RSpec.configure do |config|
+  # The lock is taken BEFORE the reset, not after: the reset is the destructive
+  # step, so acquiring afterwards would let a second run wipe the first run's
+  # store before discovering it should not have started.
   config.before(:suite) do
+    ExclusiveRunLock.acquire!
     AtlasRb::Reset.clean
   end
 

@@ -53,10 +53,15 @@ gem 'bootsnap', require: false
 # gem "image_processing", "~> 1.2"
 
 # NEU Gems
-# >= 1.8.5 ships the per-tier derivative-permission binding
-# (Work.set_derivative_permissions; assets carry `gated`/`permission`) the
-# gated-derivative feature consumes, plus the find-on-410 tombstone fix.
-gem 'atlas_rb', '>= 1.9.1'
+# >= 1.9.3 is a floor, not a preference: it typed the two signals Atlas's
+# parent-scoped authorization emits — PermissionsError for an ACL write that
+# would make a resource more visible than its container, and ForbiddenError on
+# a container-create the caller has no edit rights for. Under an older binding
+# both pass through as untranslated bodies, so the write silently no-ops and
+# the UI reports success. It also adds `depositor:` to Collection.create /
+# Community.create, which reset.rake needs to attribute the institutional tree
+# to the anonymous NUID rather than to whoever ran the seed.
+gem 'atlas_rb', '>= 1.9.3'
 gem 'blacklight', '>= 8.0', '< 9.0'
 gem 'blacklight-gallery'
 gem 'bootstrap'

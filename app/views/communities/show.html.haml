@@ -22,7 +22,10 @@
           - if user_signed_in?
             .float-end
               - if @can_edit
-                = link_to "Edit", edit_community_path(@community.id), class: "px-3"
+                -# Full reload rather than a Turbo visit: the edit page picks its active
+                -# tab from the URL fragment after the document loads, so a Turbo swap can
+                -# show the previous pane for a frame before tab-hash corrects it.
+                = link_to "Edit", edit_community_path(@community.id), class: "px-3", data: { turbo: false }
               - if @can_tombstone && @response.documents.empty?
                 = render 'shared/tombstone_modal',
                          id:   @community.id,

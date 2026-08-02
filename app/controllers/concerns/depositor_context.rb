@@ -66,24 +66,23 @@ module DepositorContext
       end
     end
 
-    # Resolve the publish destination from the submitted community + genre:
-    # { root_id:, showcase_id: }, or nil when it can't be honoured. Guards every
-    # leg — the depositor must have a Person with a personal_root_id, the chosen
-    # community must be one they're affiliated with, and a showcase must exist
-    # for the chosen genre there (gated, so a showcase they can't see is nil).
-    def publish_target
+    # Resolve the showcase to promote into from the submitted community + genre,
+    # or nil when it can't be honoured: the depositor must have a curated Person,
+    # the chosen community must be one they're affiliated with, and a showcase
+    # must exist for that genre there (gated, so one they can't see reads nil).
+    #
+    # Only a showcase — placement is the route's business, so this no longer
+    # resolves a structural home. The caller checks separately that the
+    # destination is the depositor's own root before offering promotion at all.
+    def publish_showcase_id
       person = deposit_person
-      root_id = person && person['personal_root_id'].presence
-      return nil if root_id.blank?
+      return nil if person.blank?
 
       community_noid = params[:publish_community_id].to_s
       return nil unless Array(person['affiliated_community_ids']).map(&:to_s).include?(community_noid)
 
-      showcase_id = ShowcaseFinder.call(scope: self, community_noid: community_noid,
-                                        genre_label: params[:publish_genre])
-      return nil if showcase_id.blank?
-
-      { root_id: root_id, showcase_id: showcase_id }
+      ShowcaseFinder.call(scope: self, community_noid: community_noid,
+                          genre_label: params[:publish_genre])
     end
 
     # A community's title for the publish picker, degrading to its NOID if the

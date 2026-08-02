@@ -13,6 +13,10 @@ describe WorksController do
     AtlasRb::Work.find(created.id, nuid: '000000004')
   end
 
+  # Widen the containers above the Work before making it public — see
+  # VisibilityFixtures (spec/support).
+  def publicize_chain! = publicize_ancestry!(community: community, collection: collection)
+
   def stub_work_in_progress(work)
     in_progress = AtlasRb::Work.find(work.id, nuid: '000000004')
     in_progress['in_progress'] = true
@@ -23,6 +27,7 @@ describe WorksController do
     render_views
 
     before do
+      publicize_chain!
       AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
     end
 
@@ -86,6 +91,7 @@ describe WorksController do
     render_views
 
     before do
+      publicize_chain!
       AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
     end
 
@@ -139,8 +145,8 @@ describe WorksController do
 
     it 'enqueues both jobs and redirects to the metadata page' do
       expect do
-        post :create, params: { binary:    fixture_file_upload('image.png', 'image/png'),
-                                parent_id: collection.id }
+        post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+                                collection_id: collection.id }
       end.to have_enqueued_job(IiifAssetsJob)
         .and have_enqueued_job(ContentCreationJob)
         .with(anything, anything, 'image.png', a_string_matching(uuid_re))
@@ -150,8 +156,8 @@ describe WorksController do
 
     it 'does not enqueue any enrichment job for unenriched uploads' do
       expect do
-        post :create, params: { binary:    fixture_file_upload('plain.txt', 'text/plain'),
-                                parent_id: collection.id }
+        post :create, params: { binary:        fixture_file_upload('plain.txt', 'text/plain'),
+                                collection_id: collection.id }
       end.to have_enqueued_job(ContentCreationJob)
         .with(anything, anything, 'plain.txt', a_string_matching(uuid_re))
         .and not_have_enqueued_job(IiifAssetsJob)
@@ -160,8 +166,8 @@ describe WorksController do
 
     it 'routes PDF uploads to IiifAssetsJob for first-page thumbnails' do
       expect do
-        post :create, params: { binary:    fixture_file_upload('example.pdf', 'application/pdf'),
-                                parent_id: collection.id }
+        post :create, params: { binary:        fixture_file_upload('example.pdf', 'application/pdf'),
+                                collection_id: collection.id }
       end.to have_enqueued_job(IiifAssetsJob)
         .and have_enqueued_job(ContentCreationJob)
         .and not_have_enqueued_job(PdfRenditionJob)
@@ -170,8 +176,8 @@ describe WorksController do
     it 'routes Word uploads to PdfRenditionJob with a derived rendition key' do
       docx_mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
       expect do
-        post :create, params: { binary:    fixture_file_upload('example.docx', docx_mime),
-                                parent_id: collection.id }
+        post :create, params: { binary:        fixture_file_upload('example.docx', docx_mime),
+                                collection_id: collection.id }
       end.to have_enqueued_job(PdfRenditionJob)
         .with(anything, anything, a_string_matching(uuid_re))
         .and have_enqueued_job(ContentCreationJob)
@@ -184,15 +190,16 @@ describe WorksController do
       allow(Marcel::MimeType).to receive(:for).and_return('video/quicktime')
 
       expect(AtlasRb::Work).not_to receive(:create)
-      post :create, params: { binary: fixture_file_upload('image.png', 'video/quicktime'), parent_id: 'c-x' }
+      post :create, params: { binary:        fixture_file_upload('image.png', 'video/quicktime'),
+                              collection_id: collection.id }
 
-      expect(response).to redirect_to(new_work_path)
+      expect(response).to redirect_to(new_collection_work_path(collection.id))
       expect(flash[:alert]).to eq(described_class::UNSUPPORTED_AV)
     end
 
     it 'seeds the work title from the uploaded filename via the structure-safe MODS path' do
-      post :create, params: { binary:    fixture_file_upload('image.png', 'image/png'),
-                              parent_id: collection.id }
+      post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+                              collection_id: collection.id }
       work_id = assigns(:work).id
       expect(AtlasRb::Work.find(work_id).title).to eq('image.png')
     ensure
@@ -203,8 +210,8 @@ describe WorksController do
       it 'explicitly attributes to the acting user when upload_as is missing (default)' do
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params: { binary:    fixture_file_upload('image.png', 'image/png'),
-                                parent_id: collection.id }
+        post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+                                collection_id: collection.id }
 
         expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
       end
@@ -212,9 +219,9 @@ describe WorksController do
       it 'explicitly attributes to the acting user when upload_as is "myself"' do
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params: { binary:    fixture_file_upload('image.png', 'image/png'),
-                                parent_id: collection.id,
-                                upload_as: 'myself' }
+        post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+                                collection_id: collection.id,
+                                upload_as:     'myself' }
 
         expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
       end
@@ -222,9 +229,9 @@ describe WorksController do
       it 'forwards the parent collection depositor when upload_as is "proxy"' do
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params: { binary:    fixture_file_upload('image.png', 'image/png'),
-                                parent_id: collection.id,
-                                upload_as: 'proxy' }
+        post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+                                collection_id: collection.id,
+                                upload_as:     'proxy' }
 
         expect(AtlasRb::Work).to have_received(:create)
           .with(collection.id, depositor: collection['depositor'])
@@ -236,38 +243,36 @@ describe WorksController do
         # the operating admin. (proxy_uploader-empty is enforced Atlas-side.)
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params:  { binary:    fixture_file_upload('image.png', 'image/png'),
-                                 parent_id: collection.id,
-                                 upload_as: 'myself' },
+        post :create, params:  { binary:        fixture_file_upload('image.png', 'image/png'),
+                                 collection_id: collection.id,
+                                 upload_as:     'myself' },
                       session: { acting_as_nuid: '000000002' }
 
         expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: '000000002')
       end
     end
 
-    context 'weighted deposit fork' do
-      it 'workspace branch deposits into the picked collection' do
-        allow(AtlasRb::Work).to receive(:create).and_call_original
-
-        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
-                                deposit_to: 'workspace', workspace_collection_id: collection.id }
-
-        expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
-      ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
-      end
-
-      it 'publish branch homes the work in the personal root and links it into the showcase' do
-        person = AtlasRb::Mash.new('nuid' => user.nuid, 'personal_root_id' => collection.id,
+    # Placement comes from the route; promotion is an orthogonal flag on top of
+    # it. The Work therefore lands in the destination either way — promotion
+    # never relocates it, and a promotion that can't be honoured leaves the
+    # deposit standing.
+    context 'promotion to a community showcase' do
+      # publish_offered? requires the destination to BE the depositor's own root.
+      def stub_person_rooted_at(collection_id)
+        person = AtlasRb::Mash.new('nuid' => user.nuid, 'personal_root_id' => collection_id,
                                    'affiliated_community_ids' => ['comm1'])
         allow(AtlasRb::Person).to receive(:resolve).and_return([person])
+      end
+
+      it 'links the work into the showcase while leaving it in the destination' do
+        stub_person_rooted_at(collection.id)
         allow(ShowcaseFinder).to receive(:call).and_return('showcasenoid')
         allow(AtlasRb::System::Work).to receive(:add_linked_member)
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
         post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
-                                deposit_to: 'publish', publish_community_id: 'comm1',
-                                publish_genre: 'Datasets' }
+                                collection_id: collection.id, publish: '1',
+                                publish_community_id: 'comm1', publish_genre: 'Datasets' }
 
         expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
         expect(AtlasRb::System::Work).to have_received(:add_linked_member)
@@ -277,17 +282,15 @@ describe WorksController do
         AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
       end
 
-      it 'publish branch still saves the work when Atlas forbids the showcase link (scoping safety net)' do
-        person = AtlasRb::Mash.new('nuid' => user.nuid, 'personal_root_id' => collection.id,
-                                   'affiliated_community_ids' => ['comm1'])
-        allow(AtlasRb::Person).to receive(:resolve).and_return([person])
+      it 'still saves the work when Atlas forbids the showcase link (scoping safety net)' do
+        stub_person_rooted_at(collection.id)
         allow(ShowcaseFinder).to receive(:call).and_return('showcasenoid')
         allow(AtlasRb::System::Work).to receive(:add_linked_member).and_raise(AtlasRb::ForbiddenError.new('forbidden'))
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
         post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
-                                deposit_to: 'publish', publish_community_id: 'comm1',
-                                publish_genre: 'Datasets' }
+                                collection_id: collection.id, publish: '1',
+                                publish_community_id: 'comm1', publish_genre: 'Datasets' }
 
         expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
         expect(response).to redirect_to(metadata_work_path(assigns(:work).id))
@@ -296,17 +299,39 @@ describe WorksController do
         AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
       end
 
-      it 'publish branch degrades to the form when no personal root is available (Atlas gap)' do
-        allow(AtlasRb::Person).to receive(:resolve).and_return([]) # no Person → no root
+      # Promotion is only on offer from the depositor's own root, so a forged
+      # request from anywhere else deposits normally and promotes nothing —
+      # that is what stops a Work being promoted out of a collection that
+      # isn't the depositor's.
+      it 'deposits but does not promote when the destination is not the depositor’s root' do
+        stub_person_rooted_at('some-other-root')
+        allow(AtlasRb::System::Work).to receive(:add_linked_member)
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
         post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
-                                deposit_to: 'publish', publish_community_id: 'comm1',
-                                publish_genre: 'Datasets' }
+                                collection_id: collection.id, publish: '1',
+                                publish_community_id: 'comm1', publish_genre: 'Datasets' }
 
-        expect(AtlasRb::Work).not_to have_received(:create)
-        expect(response).to redirect_to(new_work_path)
-        expect(flash[:alert]).to be_present
+        expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
+        expect(AtlasRb::System::Work).not_to have_received(:add_linked_member)
+        expect(flash[:notice]).to eq(described_class::PUBLISH_LINK_FAILED)
+      ensure
+        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
+      it 'deposits without promoting when the box is unticked' do
+        stub_person_rooted_at(collection.id)
+        allow(AtlasRb::System::Work).to receive(:add_linked_member)
+        allow(AtlasRb::Work).to receive(:create).and_call_original
+
+        post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+                                collection_id: collection.id }
+
+        expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
+        expect(AtlasRb::System::Work).not_to have_received(:add_linked_member)
+        expect(flash[:notice]).to eq('File uploaded — please review the metadata.')
+      ensure
+        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
       end
     end
   end
@@ -318,33 +343,52 @@ describe WorksController do
     before { sign_in user }
 
     it 'presents the interface to upload a file' do
-      get :new
+      get :new, params: { collection_id: collection.id }
       expect(response).to render_template('works/new')
     end
 
-    context 'with publish targets' do
+    context 'promotion offer' do
       render_views
 
       let(:user) { User.new(email: 'dep@example.com', nuid: '000000004', role: 'standard', groups: []) }
 
-      before { sign_in user }
-
-      it 'renders the publish card with the community picker and its showcase genres' do
-        person = AtlasRb::Mash.new('nuid' => '000000004', 'personal_root_id' => 'root1',
-                                   'affiliated_community_ids' => %w[comm1 comm2])
-        allow(AtlasRb::Person).to receive(:resolve).and_return([person])
+      before do
+        sign_in user
         allow(ShowcaseFinder).to receive(:call).and_return('Datasets' => 'dsnoid')
+        # Pass through by default: the fixture chain looks up real containers,
+        # and a purely `.with`-constrained stub would reject those calls.
+        allow(AtlasRb::Community).to receive(:find).and_call_original
         allow(AtlasRb::Community).to receive(:find).with('comm1')
                                                    .and_return(AtlasRb::Mash.new('title' => 'My Community'))
         allow(AtlasRb::Community).to receive(:find).with('comm2')
                                                    .and_return(AtlasRb::Mash.new('title' => 'Other Community'))
+      end
 
-        get :new
+      def stub_person_rooted_at(collection_id)
+        person = AtlasRb::Mash.new('nuid' => '000000004', 'personal_root_id' => collection_id,
+                                   'affiliated_community_ids' => %w[comm1 comm2])
+        allow(AtlasRb::Person).to receive(:resolve).and_return([person])
+      end
 
-        expect(response.body).to include('Publish to my community')
+      it 'offers promotion with the community picker and genres from the depositor’s own root' do
+        stub_person_rooted_at(collection.id)
+
+        get :new, params: { collection_id: collection.id }
+
+        expect(response.body).to include('Also promote to a community showcase')
         expect(response.body).to include('My Community') # community picker (size > 1)
         expect(response.body).to include('Other Community')
         expect(response.body).to include('Datasets') # showcase genre option
+      end
+
+      # Anywhere but the depositor's own root, promotion isn't on the table —
+      # that restriction is what keeps a promoted Work in their own space.
+      it 'does not offer promotion from a collection that is not the depositor’s root' do
+        stub_person_rooted_at('some-other-root')
+
+        get :new, params: { collection_id: collection.id }
+
+        expect(response.body).not_to include('Also promote to a community showcase')
       end
     end
   end
@@ -639,6 +683,7 @@ describe WorksController do
     render_views
 
     before do
+      publicize_chain!
       AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
       tombstoned = AtlasRb::Work.find(work.id, nuid: '000000004')
       tombstoned['tombstoned'] = true

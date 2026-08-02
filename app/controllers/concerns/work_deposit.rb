@@ -10,43 +10,40 @@ module WorkDeposit
 
   private
 
-    # Workspace deposit: the Work lives structurally in one of the depositor's
-    # own Collections (the picked one, or a parent_id deep-link). Public-but-
-    # unpromoted — never wired into a community showcase. The original deposit
-    # path, unchanged but for where the parent comes from.
-    def create_in_workspace(file)
-      parent = AtlasRb::Collection.find(params[:workspace_collection_id].presence || params[:parent_id])
+    # Deposit into the container the route named. There is only one destination
+    # path now: the Work lives where the depositor navigated, and nothing later
+    # in the request moves it.
+    def create_at_destination(file)
+      parent = AtlasRb::Collection.find(@destination_id)
       raise ResourceNotFound if parent.nil?
 
       @work = AtlasRb::Work.create(parent.id, depositor: deposit_attribution(parent))
       finalize_new_work(file, parent.id)
     end
 
-    # Publish deposit: the Work is homed structurally in the depositor's Person
-    # personal-root Collection (so it stays in *their* space, never moved), then
-    # surfaced into the chosen community genre showcase via a linked-member edge
-    # (the conduit). The +target+ ({ root_id:, showcase_id: }) is resolved and
-    # guarded by WorksController#create (publish_target) before we get here.
+    # Additionally surface the new Work in a community genre showcase, via a
+    # linked-member edge. Promotion is orthogonal to placement: the Work's
+    # structural home is wherever it was just deposited and is untouched here.
+    # The form only offers this when the destination is the depositor's own
+    # personal root (WorksController#publish_offered?), so a promoted Work still
+    # sits in their own space — the property the old publish branch got by
+    # relocating the Work, now got by restricting where you can promote from.
     #
     # The showcase link is a :system-attributed write (AtlasRb::System::Work),
     # not a call the depositor's own credential could make — Atlas scopes
     # :system's grant to a featured Collection on one side and, on the other,
     # to a Work whose depositor matches the asserted on_behalf_of NUID. The
-    # rescue below is a safety net for that scoping (a misconfigured showcase,
-    # or an on_behalf_of/depositor mismatch), not the expected path: by the
-    # time it can fire, the Work is already created and homed in the
-    # depositor's own space (untouched by the failure), so the deposit itself
-    # succeeded — only the promotional showcase surfacing didn't.
-    # @publish_link_failed lets #create pick a flash that says so, instead of
-    # either a false "published" notice or a 403 page that hides a Work the
-    # depositor can already see in their workspace.
-    def create_published(file, target)
-      @work = AtlasRb::Work.create(target[:root_id], depositor: current_user&.nuid)
-      finalize_new_work(file, target[:root_id])
-      AtlasRb::System::Work.add_linked_member(@work.id, target[:showcase_id], on_behalf_of: current_user&.nuid)
+    # rescue is a safety net for that scoping (a misconfigured showcase, or an
+    # on_behalf_of/depositor mismatch), not the expected path: the Work is
+    # already deposited and intact by the time it can fire, so only the
+    # promotion failed. @publish_link_failed lets #create say exactly that,
+    # rather than a false "published" notice or a 403 page hiding a Work the
+    # depositor can already see.
+    def promote_to_showcase(showcase_id)
+      AtlasRb::System::Work.add_linked_member(@work.id, showcase_id, on_behalf_of: current_user&.nuid)
     rescue AtlasRb::ForbiddenError => e
       Rails.logger.warn("[publish] add_linked_member forbidden for work #{@work.id} " \
-                        "-> #{target[:showcase_id]}: #{e.message}")
+                        "-> #{showcase_id}: #{e.message}")
       @publish_link_failed = true
     end
 

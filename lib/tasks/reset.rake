@@ -5,6 +5,15 @@ namespace :reset do
   task data: [:clean, 'db:seed:replant'] do
     raise "Wrong env - #{Rails.env} - must be development" unless Rails.env.development? || Rails.env.staging?
 
+    # Institutional containers belong to nobody in particular — see
+    # Permissions::UNOWNED_NUID for the reasoning, and ShowcaseProvisioner for
+    # the other caller. Authorization is a separate axis: the task still ACTS as
+    # the admin fixture (see the Current.set below); this only records who owns
+    # it. Read inside the task body, not at namespace level: rake files are
+    # loaded before app constants are autoloadable, so a top-level reference
+    # raises NameError before any task can run.
+    unowned = Permissions::UNOWNED_NUID
+
     # Seed as the admin fixture (000000004). :system can't author Works —
     # Atlas's Ability only lets it create Communities / Collections;
     # group-gated roles would hit a chicken-and-egg problem with the
@@ -13,12 +22,12 @@ namespace :reset do
     # ACL setup. The Current.set block makes atlas_rb's configured
     # default_nuid resolve to the admin NUID for every call inside.
     Current.set(nuid: '000000004') do
-      community = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml')
+      community = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', depositor: unowned)
       river_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/river.jpg').open_base
       AtlasRb::Community.set_thumbnails(community['id'], **ThumbnailCreator.call(base: river_base))
       AtlasRb::Community.metadata(community['id'], { 'permissions' => { 'read' => ['public'] } })
 
-      collection = AtlasRb::Collection.create(community['id'], '/home/cerberus/web/spec/fixtures/files/collection-mods.xml')
+      collection = AtlasRb::Collection.create(community['id'], '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', depositor: unowned)
       field_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/field.jpg').open_base
       AtlasRb::Collection.set_thumbnails(collection['id'], **ThumbnailCreator.call(base: field_base))
       AtlasRb::Collection.metadata(collection['id'], { 'permissions' => { 'read' => ['public'] } })
@@ -79,15 +88,15 @@ namespace :reset do
       forest_base    = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/forest.jpg').open_base
       waterfall_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/waterfall.jpg').open_base
 
-      communications = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/communications-mods.xml')
+      communications = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/communications-mods.xml', depositor: unowned)
       AtlasRb::Community.set_thumbnails(communications['id'], **ThumbnailCreator.call(base: canyon_base))
       AtlasRb::Community.metadata(communications['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [marcom_group] } })
 
-      photo_archive = AtlasRb::Collection.create(communications['id'], '/home/cerberus/web/spec/fixtures/files/communications-photo-archive-mods.xml')
+      photo_archive = AtlasRb::Collection.create(communications['id'], '/home/cerberus/web/spec/fixtures/files/communications-photo-archive-mods.xml', depositor: unowned)
       AtlasRb::Collection.set_thumbnails(photo_archive['id'], **ThumbnailCreator.call(base: forest_base))
       AtlasRb::Collection.metadata(photo_archive['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [marcom_group] } })
 
-      campus_life = AtlasRb::Collection.create(photo_archive['id'], '/home/cerberus/web/spec/fixtures/files/campus-life-photographs-mods.xml')
+      campus_life = AtlasRb::Collection.create(photo_archive['id'], '/home/cerberus/web/spec/fixtures/files/campus-life-photographs-mods.xml', depositor: unowned)
       AtlasRb::Collection.set_thumbnails(campus_life['id'], **ThumbnailCreator.call(base: waterfall_base))
       AtlasRb::Collection.metadata(campus_life['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [marcom_group] } })
 
@@ -120,7 +129,7 @@ namespace :reset do
       # Person (Jane Doe) affiliated to it with one work she's published into the
       # Datasets showcase. Gives the deposit fork (publish branch), My DRS,
       # Featured Content, and the Faculty & Staff browse live data to demo.
-      library = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/library-mods.xml')
+      library = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/library-mods.xml', depositor: unowned)
       mountain_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/mountain.jpg').open_base
       AtlasRb::Community.set_thumbnails(library['id'], **ThumbnailCreator.call(base: mountain_base))
       AtlasRb::Community.metadata(library['id'], { 'permissions' => { 'read' => ['public'] } })
@@ -275,24 +284,33 @@ namespace :reset do
       crrj_group        = 'northeastern:drs:school_of_law:crrj:staff'
       l2_group          = 'northeastern:drs:library:licensed_resources:l2'
 
-      AtlasRb::System::User.find_or_create(email: 'archives.reader.fixture@northeastern.edu',
-                                           nuid: '000000010', name: 'Archives Reader (DRS Fixture)',
-                                           affiliation: 'staff', groups: [archives_group])
-      AtlasRb::System::User.find_or_create(email: 'nupd.media.fixture@northeastern.edu',
-                                           nuid: '000000011', name: 'NUPD Media Staffer (DRS Fixture)',
-                                           affiliation: 'staff', groups: [nupd_media_group])
-      AtlasRb::System::User.find_or_create(email: 'law.library.fixture@northeastern.edu',
-                                           nuid: '000000012', name: 'Law Library Staffer (DRS Fixture)',
-                                           affiliation: 'staff', groups: [law_library_group])
-      AtlasRb::System::User.find_or_create(email: 'crrj.staff.fixture@northeastern.edu',
-                                           nuid: '000000013', name: 'CRRJ Staffer (DRS Fixture)',
-                                           affiliation: 'staff', groups: [crrj_group])
-      AtlasRb::System::User.find_or_create(email: 'l2.reader.fixture@northeastern.edu',
-                                           nuid: '000000014', name: 'Licensed Resources Reader (DRS Fixture)',
-                                           affiliation: 'staff', groups: [l2_group])
-      AtlasRb::System::User.find_or_create(email: 'standard.fixture@northeastern.edu',
-                                           nuid: '000000015', name: 'No-Groups Standard User (DRS Fixture)',
-                                           affiliation: 'staff', groups: [])
+      # One roster drives both halves of each fixture: the loginable user here,
+      # and the Person (with its personal root) further down. They have to stay
+      # in step — a user without a Person gets an empty My DRS — so they are
+      # written from the same list rather than two parallel blocks that can
+      # drift apart.
+      group_fixtures = [
+        { nuid: '000000010', email: 'archives.reader.fixture@northeastern.edu',
+          name: 'Archives Reader (DRS Fixture)', group: archives_group },
+        { nuid: '000000011', email: 'nupd.media.fixture@northeastern.edu',
+          name: 'NUPD Media Staffer (DRS Fixture)', group: nupd_media_group },
+        { nuid: '000000012', email: 'law.library.fixture@northeastern.edu',
+          name: 'Law Library Staffer (DRS Fixture)', group: law_library_group },
+        { nuid: '000000013', email: 'crrj.staff.fixture@northeastern.edu',
+          name: 'CRRJ Staffer (DRS Fixture)', group: crrj_group },
+        { nuid: '000000014', email: 'l2.reader.fixture@northeastern.edu',
+          name: 'Licensed Resources Reader (DRS Fixture)', group: l2_group },
+        # No group, and below no affiliation either — the control for what a
+        # plain depositor sees: a workspace, but no publish-to-my-community fork.
+        { nuid: '000000015', email: 'standard.fixture@northeastern.edu',
+          name: 'No-Groups Standard User (DRS Fixture)', group: nil }
+      ]
+
+      group_fixtures.each do |fixture|
+        AtlasRb::System::User.find_or_create(email: fixture[:email], nuid: fixture[:nuid],
+                                             name: fixture[:name], affiliation: 'staff',
+                                             groups: [fixture[:group]].compact)
+      end
 
       # Each shape below gets its own base image, distinct from every other
       # thumbnail in this task (including gorge/mountain/coast/beach above),
@@ -308,46 +326,66 @@ namespace :reset do
 
       # A: self-managed private space — read AND edit gated to archives staff,
       # the only fixture pair above with no public read at all.
-      archives_community = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/archives-community-mods.xml')
+      archives_community = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/archives-community-mods.xml', depositor: unowned)
       archives_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/cliff.jpg').open_base
       AtlasRb::Community.set_thumbnails(archives_community['id'], **ThumbnailCreator.call(base: archives_base))
       AtlasRb::Community.metadata(archives_community['id'], { 'permissions' => { 'read' => [archives_group], 'edit' => [archives_group] } })
 
-      reading_room = AtlasRb::Collection.create(archives_community['id'], '/home/cerberus/web/spec/fixtures/files/archives-reading-room-mods.xml')
+      reading_room = AtlasRb::Collection.create(archives_community['id'], '/home/cerberus/web/spec/fixtures/files/archives-reading-room-mods.xml', depositor: unowned)
       AtlasRb::Collection.set_thumbnails(reading_room['id'], **ThumbnailCreator.call(base: archives_base))
       AtlasRb::Collection.metadata(reading_room['id'], { 'permissions' => { 'read' => [archives_group], 'edit' => [archives_group] } })
 
       # B: edit-gate-only, a second unit beyond marcom — read stays public.
-      public_safety = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/public-safety-community-mods.xml')
+      public_safety = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/public-safety-community-mods.xml', depositor: unowned)
       public_safety_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/marsh.jpg').open_base
       AtlasRb::Community.set_thumbnails(public_safety['id'], **ThumbnailCreator.call(base: public_safety_base))
       AtlasRb::Community.metadata(public_safety['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [nupd_media_group] } })
 
-      nupd_media = AtlasRb::Collection.create(public_safety['id'], '/home/cerberus/web/spec/fixtures/files/nupd-incident-media-mods.xml')
+      nupd_media = AtlasRb::Collection.create(public_safety['id'], '/home/cerberus/web/spec/fixtures/files/nupd-incident-media-mods.xml', depositor: unowned)
       AtlasRb::Collection.set_thumbnails(nupd_media['id'], **ThumbnailCreator.call(base: public_safety_base))
       AtlasRb::Collection.metadata(nupd_media['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [nupd_media_group] } })
 
       # C: multi-group edit — two independent groups both granted edit on one
       # Collection, so removing one in the permissions UI strips only that
       # group's editors, not the other's.
-      school_of_law = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/school-of-law-community-mods.xml')
+      school_of_law = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/school-of-law-community-mods.xml', depositor: unowned)
       law_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/valley.jpg').open_base
       AtlasRb::Community.set_thumbnails(school_of_law['id'], **ThumbnailCreator.call(base: law_base))
       AtlasRb::Community.metadata(school_of_law['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [law_library_group, crrj_group] } })
 
-      law_crrj_collection = AtlasRb::Collection.create(school_of_law['id'], '/home/cerberus/web/spec/fixtures/files/law-crrj-collection-mods.xml')
+      law_crrj_collection = AtlasRb::Collection.create(school_of_law['id'], '/home/cerberus/web/spec/fixtures/files/law-crrj-collection-mods.xml', depositor: unowned)
       AtlasRb::Collection.set_thumbnails(law_crrj_collection['id'], **ThumbnailCreator.call(base: law_base))
       AtlasRb::Collection.metadata(law_crrj_collection['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [law_library_group, crrj_group] } })
 
       # D: read-gate-only, the mirror of B — edit stays staff-only.
-      licensed_resources = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/licensed-resources-community-mods.xml')
+      licensed_resources = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/licensed-resources-community-mods.xml', depositor: unowned)
       licensed_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/dunes.jpg').open_base
       AtlasRb::Community.set_thumbnails(licensed_resources['id'], **ThumbnailCreator.call(base: licensed_base))
       AtlasRb::Community.metadata(licensed_resources['id'], { 'permissions' => { 'read' => [l2_group] } })
 
-      l2_archive = AtlasRb::Collection.create(licensed_resources['id'], '/home/cerberus/web/spec/fixtures/files/l2-dataset-archive-mods.xml')
+      l2_archive = AtlasRb::Collection.create(licensed_resources['id'], '/home/cerberus/web/spec/fixtures/files/l2-dataset-archive-mods.xml', depositor: unowned)
       AtlasRb::Collection.set_thumbnails(l2_archive['id'], **ThumbnailCreator.call(base: licensed_base))
       AtlasRb::Collection.metadata(l2_archive['id'], { 'permissions' => { 'read' => [l2_group] } })
+
+      # The Person half of each group fixture. My DRS resolves the depositor's
+      # workspace and publish target through Person#personal_root_id
+      # (DepositorContext#deposit_person), so a loginable user with no Person
+      # lands on an empty My DRS and can't exercise it at all — Person.create is
+      # what mints that personal root.
+      #
+      # Down here rather than beside the users because affiliation needs the
+      # communities built above. Each fixture is affiliated with the community
+      # its own Grouper group gates, which is what turns "publish to my
+      # community" into a real choice instead of an empty one.
+      affiliations = { archives_group => archives_community, nupd_media_group => public_safety,
+                       law_library_group => school_of_law, crrj_group => school_of_law,
+                       l2_group => licensed_resources }
+
+      group_fixtures.each do |fixture|
+        person = AtlasRb::Person.create(nuid: fixture[:nuid], display_name: fixture[:name])
+        home = affiliations[fixture[:group]]
+        AtlasRb::Person.add_affiliation(person['id'], home['id']) if home
+      end
     end
 
     # Seed usage analytics so /admin/impressions is populated for demos and UAT.

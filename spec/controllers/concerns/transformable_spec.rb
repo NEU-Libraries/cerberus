@@ -14,17 +14,32 @@ describe Transformable do
       # the unit under test is isolated to the Transformable methods.
       def pretty_group(raw_group) = "Pretty(#{raw_group})"
       def add_thumbnail(_permitted); end
+      def flash = @flash ||= {}
     end
   end
 
   let(:host) { host_class.new }
+
+  # The concern reads member_of? / admin? / admin_delegate? off current_user, so
+  # each example states only the group list and the tier it cares about.
+  def user_double(groups: [], admin: false, delegate: false)
+    instance_double(User, groups: groups, admin?: admin, admin_delegate?: delegate).tap do |user|
+      allow(user).to receive(:member_of?) { |group| groups.include?(group) }
+    end
+  end
+
+  def row(group_id, ability, revocable)
+    Permissions::GrantRow.new(group_id: group_id, label: "Pretty(#{group_id})",
+                              ability: ability, revocable: revocable)
+  end
 
   describe '#pretty_resource_permissions' do
     it 'returns [] for blank input' do
       expect(host.pretty_resource_permissions(nil)).to eq([])
     end
 
-    it 'strips public/staff sentinels and maps the rest with permission labels' do
+    it 'strips public/staff sentinels and maps the rest to GrantRows' do
+      host.current_user = user_double(groups: %w[librarians curators])
       perms = AtlasRb::Mash.new(
         'read' => %w[public librarians],
         'edit' => [Permissions::STAFF_EDIT_GROUP, 'curators']
@@ -32,10 +47,47 @@ describe Transformable do
 
       result = host.pretty_resource_permissions(perms)
 
-      expect(result).to contain_exactly(
-        ['librarians', 'Pretty(librarians)', 'View'],
-        ['curators',   'Pretty(curators)',   'Manage']
-      )
+      expect(result).to contain_exactly(row('librarians', 'read', true), row('curators', 'edit', true))
+      expect(result.map(&:ability_label)).to contain_exactly('View', 'Manage')
+    end
+
+    # Rule mirrored from Atlas: a grant may only be withdrawn by a member of the
+    # group it names, so a grant for someone else's group renders locked.
+    it 'marks a grant for a group the user is not in as non-revocable' do
+      host.current_user = user_double(groups: ['librarians'])
+      perms = AtlasRb::Mash.new('read' => %w[librarians curators], 'edit' => [])
+
+      expect(host.pretty_resource_permissions(perms))
+        .to contain_exactly(row('librarians', 'read', true), row('curators', 'read', false))
+    end
+
+    it 'treats membership as per-group, not per-axis' do
+      host.current_user = user_double(groups: ['curators'])
+      perms = AtlasRb::Mash.new('read' => ['curators'], 'edit' => ['curators'])
+
+      expect(host.pretty_resource_permissions(perms).map(&:revocable?)).to eq([true, true])
+    end
+
+    it 'makes every grant revocable for an :admin' do
+      host.current_user = user_double(groups: [], admin: true)
+      perms = AtlasRb::Mash.new('read' => ['curators'], 'edit' => ['editors'])
+
+      expect(host.pretty_resource_permissions(perms).map(&:revocable?)).to eq([true, true])
+    end
+
+    it 'makes every grant revocable for a devolved-admin delegate' do
+      host.current_user = user_double(groups: [], delegate: true)
+      perms = AtlasRb::Mash.new('read' => ['curators'], 'edit' => ['editors'])
+
+      expect(host.pretty_resource_permissions(perms).map(&:revocable?)).to eq([true, true])
+    end
+
+    # A caller with no user has no membership to appeal to; Atlas treats an
+    # actor-less write the same conservative way.
+    it 'revokes nothing when there is no acting user' do
+      perms = AtlasRb::Mash.new('read' => ['curators'], 'edit' => [])
+
+      expect(host.pretty_resource_permissions(perms).map(&:revocable?)).to eq([false])
     end
   end
 
@@ -69,7 +121,7 @@ describe Transformable do
 
   describe '#form_preparation' do
     before do
-      host.current_user = double('User', groups: ['librarians'], admin?: false, admin_delegate?: false)
+      host.current_user = user_double(groups: ['librarians'])
     end
 
     it 'parses a valid embargo date and assigns flags / permissions' do
@@ -100,7 +152,7 @@ describe Transformable do
 
   describe '#groups_for_permissions_picker' do
     it "scopes to the acting user's own groups for a non-admin, non-delegate user" do
-      host.current_user = double('User', groups: %w[librarians curators], admin?: false, admin_delegate?: false)
+      host.current_user = user_double(groups: %w[librarians curators])
 
       expect(host.groups_for_permissions_picker).to eq([['librarians', 'Pretty(librarians)'],
                                                         ['curators', 'Pretty(curators)']])
@@ -108,15 +160,14 @@ describe Transformable do
 
     it 'returns the full Group registry for an :admin (fixes the empty-picker gap for admins with no personal groups)' do
       Group.create!(raw: 'northeastern:drs:repository:zzz', cosmetic: 'Alpha')
-      host.current_user = double('User', groups: [], admin?: true, admin_delegate?: false)
+      host.current_user = user_double(groups: [], admin: true)
 
       expect(host.groups_for_permissions_picker).to eq([['northeastern:drs:repository:zzz', 'Alpha']])
     end
 
     it 'returns the full Group registry for a devolved-admin delegate' do
       Group.create!(raw: 'northeastern:drs:repository:zzz', cosmetic: 'Alpha')
-      host.current_user = double('User', groups: ['northeastern:drs:repository:admin'], admin?: false,
-                                          admin_delegate?: true)
+      host.current_user = user_double(groups: [Permissions::ADMIN_GROUP], delegate: true)
 
       expect(host.groups_for_permissions_picker).to eq([['northeastern:drs:repository:zzz', 'Alpha']])
     end
@@ -196,6 +247,123 @@ describe Transformable do
       host.mass_permissions(permitted)
 
       expect(permitted[:permissions][:read]).to eq([])
+    end
+  end
+
+  # Taking audience away from a Collection is handed to the cascade rather than
+  # written here, because the container has to be written last. Works and
+  # Communities never take this branch.
+  describe '#apply_permissions when the submit narrows a Collection' do
+    before do
+      host.params = ActionController::Parameters.new(
+        id: 'c-1', collection: { permissions: { '1' => { 'group_id' => 'curators', 'ability' => 'read' } } }
+      )
+      host.instance_variable_set(:@permissions, AtlasRb::Mash.new('read' => ['public']))
+      host.current_user = user_double(groups: ['curators'])
+      allow(AtlasRb::Collection).to receive(:metadata)
+    end
+
+    it 'skips its own write and reports what the cascade will do' do
+      allow(NarrowingRequest).to receive(:call).and_return(
+        NarrowingRequest::Outcome.new(status: :dispatched, message: 'Restricting this collection.')
+      )
+
+      host.apply_permissions('Collection', 'c-1', :collection)
+
+      expect(AtlasRb::Collection).not_to have_received(:metadata)
+      expect(host.flash[:notice]).to eq('Restricting this collection.')
+    end
+
+    # A refusal must not fall through: narrowing the container while its
+    # descendants stay put is the leak this whole feature exists to close.
+    it 'skips its own write on a refusal too, and alerts' do
+      allow(NarrowingRequest).to receive(:call).and_return(
+        NarrowingRequest::Outcome.new(status: :refused, message: 'Ask DRS staff.')
+      )
+
+      host.apply_permissions('Collection', 'c-1', :collection)
+
+      expect(AtlasRb::Collection).not_to have_received(:metadata)
+      expect(host.flash[:alert]).to eq('Ask DRS staff.')
+    end
+
+    it 'writes normally when the change is not a narrowing' do
+      allow(NarrowingRequest).to receive(:call).and_return(NarrowingRequest::Outcome.new(status: :not_narrowing))
+
+      host.apply_permissions('Collection', 'c-1', :collection)
+
+      expect(AtlasRb::Collection).to have_received(:metadata)
+    end
+
+    it 'never consults the cascade for a Work' do
+      allow(NarrowingRequest).to receive(:call)
+      allow(AtlasRb::Work).to receive(:metadata)
+      host.params = ActionController::Parameters.new(
+        id: 'w-1', work: { permissions: { '1' => { 'group_id' => 'curators', 'ability' => 'read' } } }
+      )
+
+      host.apply_permissions('Work', 'w-1', :work)
+
+      expect(NarrowingRequest).not_to have_received(:call)
+      expect(AtlasRb::Work).to have_received(:metadata)
+    end
+  end
+
+  # There is no cascade for a Community, so letting one narrow would leave every
+  # collection inside it more visible than its container. The form offers no
+  # Private option; this is the backstop for JS-off or a hand-made request.
+  describe '#apply_permissions when the submit narrows a Community' do
+    before { allow(AtlasRb::Community).to receive(:metadata) }
+
+    it 'refuses the write and points at the administrators' do
+      host.params = ActionController::Parameters.new(
+        id: 'm-1', community: { permissions: { '1' => { 'group_id' => 'curators', 'ability' => 'read' } } }
+      )
+      host.instance_variable_set(:@permissions, AtlasRb::Mash.new('read' => ['public']))
+
+      host.apply_permissions('Community', 'm-1', :community)
+
+      expect(AtlasRb::Community).not_to have_received(:metadata)
+      expect(host.flash[:alert]).to eq(Transformable::COMMUNITY_NARROWING_REFUSED)
+    end
+
+    # Widening a community is unconstrained — descendants keep their own
+    # narrower ACLs and containment still holds — so it must save normally.
+    it 'lets a widening through' do
+      host.params = ActionController::Parameters.new(id: 'm-1', mass: 'public', community: { permissions: {} })
+      host.instance_variable_set(:@permissions, AtlasRb::Mash.new('read' => []))
+
+      host.apply_permissions('Community', 'm-1', :community)
+
+      expect(AtlasRb::Community).to have_received(:metadata)
+    end
+  end
+
+  # A refused ACL write is a 422, not an authorization failure, and it runs
+  # before the descriptive save — so it reports rather than raising, or the
+  # title/abstract edits in the same submit would be discarded with it.
+  describe '#apply_permissions when Atlas refuses the ACL' do
+    before do
+      host.params = ActionController::Parameters.new(
+        work: { permissions: { '1' => { 'group_id' => 'curators', 'ability' => 'read' } } }
+      )
+    end
+
+    it 'flashes the invariant in the depositor’s language rather than raising' do
+      allow(AtlasRb::Work).to receive(:metadata)
+        .and_raise(AtlasRb::PermissionsError.new('nope', code: 'visibility_exceeds_parent'))
+
+      expect { host.apply_permissions('Work', 'w-1', :work) }.not_to raise_error
+      expect(host.flash[:alert]).to eq(Transformable::PERMISSIONS_REFUSED['visibility_exceeds_parent'])
+    end
+
+    it 'falls back to Atlas’s own message for a code Cerberus doesn’t map yet' do
+      allow(AtlasRb::Work).to receive(:metadata)
+        .and_raise(AtlasRb::PermissionsError.new('some new invariant', code: 'not_yet_mapped'))
+
+      host.apply_permissions('Work', 'w-1', :work)
+
+      expect(host.flash[:alert]).to eq('some new invariant')
     end
   end
 

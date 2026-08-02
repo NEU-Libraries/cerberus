@@ -14,9 +14,15 @@ describe CommunitiesController do
 
       get :index
 
-      ids = assigns(:response).documents.map(&:id)
-      expect(ids).to include(community.valkyrie_id)      # the community is listed
-      expect(ids).not_to include(collection.valkyrie_id) # a Collection is not
+      # Assert the type invariant rather than this community's presence on the
+      # first page: the specs share one Atlas test backend, so the number of
+      # public Communities grows with the suite and a positional check would be
+      # order-dependent. "Nothing but Communities" is the actual subject here
+      # and holds on any page.
+      docs = assigns(:response).documents
+      expect(docs).not_to be_empty
+      expect(docs.flat_map { |d| Array(d['internal_resource_tesim']) }.uniq).to eq(['Community'])
+      expect(docs.map(&:id)).not_to include(collection.valkyrie_id)
     ensure
       AtlasRb::Collection.tombstone(collection.id) if collection
     end
@@ -97,6 +103,7 @@ describe CommunitiesController do
 
     context 'analytics tab item lookup, facet, and composition' do
       let!(:sub_collection) do
+        publicize_ancestry!(community: community)
         c = AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004')
         AtlasRb::Collection.metadata(c.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
         c
@@ -106,6 +113,7 @@ describe CommunitiesController do
       # homed under an entirely different Community — the containment check
       # must exclude it on subtree membership, not title.
       let!(:foreign_collection) do
+        publicize_ancestry!(community: other_community)
         c = AtlasRb::Collection.create(other_community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004')
         AtlasRb::Collection.metadata(c.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
         c
@@ -182,14 +190,26 @@ describe CommunitiesController do
       end
     end
 
-    context 'Add affordance in the breadcrumb' do
-      it 'is hidden from anonymous users (TODO: replace with Ability check)' do
+    # You may only add a child to a container you can edit — Atlas enforces the
+    # same rule on the write (:create_child against the destination), so an
+    # ungated affordance would lead only to a 403.
+    context 'Add affordance in the breadcrumb is gated on the :edit ability' do
+      it 'is hidden from anonymous users' do
         get :show, params: { id: community.id }
         expect(response.body).not_to include('breadcrumb-add')
       end
 
-      it 'is rendered for signed-in users' do
-        sign_in User.new(email: 'staff@example.com', nuid: '000000002', groups: ['editors'])
+      it 'is hidden from a signed-in user who cannot edit the community' do
+        sign_in User.new(email: 'viewer@example.com', nuid: '000000005', role: 'standard', groups: [])
+        get :show, params: { id: community.id }
+        expect(response.body).not_to include('breadcrumb-add')
+      end
+
+      it 'is rendered for a user who can edit the community' do
+        AtlasRb::Community.metadata(community.id,
+                                    { 'permissions' => { 'read' => ['public'], 'edit' => ['editors'] } },
+                                    nuid: '000000004')
+        sign_in User.new(email: 'ed@example.com', nuid: '000000002', groups: ['editors'])
         get :show, params: { id: community.id }
         expect(response.body).to include('breadcrumb-add')
       end
@@ -291,12 +311,12 @@ describe CommunitiesController do
     before { sign_in user }
 
     it 'assigns a open struct to community' do
-      get :new
+      get :new, params: { community_id: community.id }
       expect(assigns(:community)).to be_a(OpenStruct)
     end
 
     it 'renders the new partial' do
-      get :new
+      get :new, params: { community_id: community.id }
       expect(response).to render_template('communities/new')
     end
   end
@@ -342,7 +362,8 @@ describe CommunitiesController do
       # here so this test doesn't mint real showcase collections per run.
       allow(ShowcaseProvisioner).to receive(:call)
 
-      post :create, params: { community: { title: 'BrandNewCommunity', description: 'CommunityAbstract' } }
+      post :create, params: { community_id: community.id,
+                              community:    { title: 'BrandNewCommunity', description: 'CommunityAbstract' } }
 
       created_id = response.location.split('/').last
       created = AtlasRb::Community.find(created_id)
@@ -353,26 +374,30 @@ describe CommunitiesController do
     end
 
     it 'provisions the new community with genre showcases' do
+      # Force the parent fixture before stubbing create — the `let` is lazy, and
+      # a blanket stub would otherwise swallow the fixture's own creation too.
+      parent = community
       allow(AtlasRb::Community).to receive(:create).and_return(AtlasRb::Mash.new('id' => 'newcomm'))
       allow_any_instance_of(described_class).to receive(:save_descriptive!) # no MODS writes
       allow(ShowcaseProvisioner).to receive(:call)
 
-      post :create, params: { community: { title: 'X', description: 'Y' } }
+      post :create, params: { community_id: parent.id, community: { title: 'X', description: 'Y' } }
 
       expect(ShowcaseProvisioner).to have_received(:call).with(community_id: 'newcomm')
       expect(response).to redirect_to(community_path('newcomm'))
     end
 
     it 'rejects a blank title without minting a community or provisioning showcases' do
+      parent = community
       allow(AtlasRb::Community).to receive(:create)
       allow(ShowcaseProvisioner).to receive(:call)
 
-      post :create, params: { community: { title: '', description: 'Y' } }
+      post :create, params: { community_id: parent.id, community: { title: '', description: 'Y' } }
 
       expect(AtlasRb::Community).not_to have_received(:create)
       expect(ShowcaseProvisioner).not_to have_received(:call)
       expect(flash[:alert]).to eq('Please provide a title.')
-      expect(response).to redirect_to(new_community_path)
+      expect(response).to redirect_to(new_community_community_path(parent.id))
     end
   end
 

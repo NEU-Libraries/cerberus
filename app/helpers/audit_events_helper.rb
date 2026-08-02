@@ -40,9 +40,18 @@ module AuditEventsHelper
     'session'     => 'Session'
   }.freeze
 
-  # ACL grant slots diffed for a permissions-change summary; mirrors Atlas's
-  # AUDITED_ACL_KEYS so the before/after snapshots line up key-for-key.
+  # ACL *grant* slots diffed for a permissions-change summary. A subset of
+  # Atlas's AUDITED_ACL_KEYS: that snapshot also carries `embargo`, but every
+  # renderer here treats a key's value as a set of group tokens, and an embargo
+  # is a scalar date. Diffing it as a one-element set would print an ISO
+  # timestamp inside a monospace identifier pill, so it gets its own row and its
+  # own formatting (see EMBARGO_KEY).
   ACL_DIFF_KEYS = %w[read edit edit_users].freeze
+
+  # The embargo slot in the same permissions snapshot. A rights decision a human
+  # makes and revises — withholding downloads until a chosen date — so it belongs
+  # in the rights diff, just not in the grant-pill register.
+  EMBARGO_KEY = 'embargo'
 
   # Permission audit actions that carry a viewable before/after ACL snapshot:
   # the initial grant at creation (`create`, emitted by Atlas's service objects)
@@ -57,7 +66,29 @@ module AuditEventsHelper
   ACL_LEVEL_LABELS = {
     'read'       => 'Read',
     'edit'       => 'Edit',
-    'edit_users' => 'Edit users'
+    'edit_users' => 'Edit users',
+    'embargo'    => 'Embargo'
+  }.freeze
+
+  # Atlas tags a per-rendition gate change with this `source`. It rides the same
+  # `permissions` change_type as an ACL edit, but its before/after are a sparse
+  # { tier => [read groups] } map rather than the ACL envelope — so both the
+  # audit-log summary and the Rights page have to tell the two apart before
+  # reading either one.
+  DERIVATIVE_PERMISSIONS_SOURCE = 'derivative_permissions'
+
+  # Prose labels for the download tiers. The vocabulary and its narrowing order
+  # come from Sentinel::TIERS, which is where Cerberus authors these policies —
+  # naming the ladder twice would let the two drift.
+  TIER_LABELS = {
+    'small'   => 'Small image',
+    'medium'  => 'Medium image',
+    'large'   => 'Large image',
+    'service' => 'Service (deep zoom)',
+    'master'  => 'Master (original)',
+    'audio'   => 'Audio',
+    'video'   => 'Video',
+    'pdf'     => 'PDF'
   }.freeze
 
   def audit_event_action(event_action)
@@ -239,6 +270,56 @@ module AuditEventsHelper
     end, ' ')
   end
 
+  # Whether a snapshot pair says anything at all about an embargo. Two cases
+  # answer no, and both must keep the row off the page: events written before
+  # Atlas audited the key carry neither side, and the great majority of ACL
+  # edits never touch an embargo. Showing "None → None" on those would add a
+  # row to every historical entry that reads as a change and is not one.
+  def embargo_recorded?(before, after)
+    before[EMBARGO_KEY].present? || after[EMBARGO_KEY].present?
+  end
+
+  # Whether the embargo actually moved. Compared through `presence` because
+  # "no embargo" reaches us as nil, '', or an absent key depending on how the
+  # resource was created and when the event was written — all the same fact.
+  def embargo_changed?(before, after)
+    before[EMBARGO_KEY].presence != after[EMBARGO_KEY].presence
+  end
+
+  # One side of the embargo diff, as prose for the expanded Rights page. Tinted
+  # with the same tone tokens as the grant pills, but rendered as plain text: a
+  # date is a value, not an identifier, and the monospace chip register is
+  # reserved for things you could paste into a lookup.
+  def embargo_diff_cell(value, state: nil)
+    date = embargo_date(value)
+    return content_tag(:span, 'None', class: 'rights-diff__empty') if date.nil?
+
+    classes = ['rights-diff__date']
+    classes << "rights-diff__date--#{state}" if state.present?
+    content_tag(:span, date.strftime('%B %-d, %Y'), class: classes.join(' '))
+  end
+
+  # Whether a permissions event describes the per-rendition download gate rather
+  # than the resource ACL. The two share a change_type and an action, so the
+  # payload's `source` is the only thing that distinguishes them.
+  def derivative_permissions_payload?(payload)
+    payload['source'] == DERIVATIVE_PERMISSIONS_SOURCE
+  end
+
+  # The tiers worth a row for one rendition-gate event: those either side of the
+  # diff mentions, in Sentinel's narrowing order. The stored policy is sparse —
+  # only gated tiers appear — so listing all eight would bury the change under
+  # empty rows. Unknown tiers sort last rather than vanishing, so a vocabulary
+  # Atlas grows before Cerberus does still shows up.
+  def derivative_tier_rows(before, after)
+    (before.keys | after.keys).sort_by { |tier| Sentinel::TIERS.index(tier) || Sentinel::TIERS.length }
+  end
+
+  # Prose label for a download tier, falling back to the raw token.
+  def tier_label(tier)
+    TIER_LABELS.fetch(tier.to_s) { tier.to_s.humanize }
+  end
+
   # Human one-liner derived from the event payload, by action. Returns a muted
   # span or nil. Shapes mirror what Atlas emits: update → { fields: [...] } |
   # { source: 'mods' } | { before:, after: } (ACL); reparent → { to: noid };
@@ -276,17 +357,51 @@ module AuditEventsHelper
       "#{prefix} #{target}" if target.present?
     end
 
+    # `source` is matched exactly, not merely for presence: Atlas uses the slot
+    # for several unrelated things on an `update` row, and treating any of them
+    # as the MODS marker labelled a rendition-gate change "MODS document".
     def update_payload_summary(payload)
-      if payload['fields'].present? then payload['fields'].join(', ')
-      elsif payload['source'].present? then 'MODS document'
-      elsif payload['before'] || payload['after']
-        acl_diff_summary(payload['before'] || {}, payload['after'] || {})
-      end
+      return payload['fields'].join(', ') if payload['fields'].present?
+      return 'MODS document'              if payload['source'] == 'mods'
+      return if payload['before'].nil? && payload['after'].nil?
+
+      permissions_diff_summary(payload)
+    end
+
+    # Both permission shapes land here; `source` picks which vocabulary to read
+    # the before/after through.
+    def permissions_diff_summary(payload)
+      before = payload['before'] || {}
+      after  = payload['after']  || {}
+      return tier_diff_summary(before, after) if derivative_permissions_payload?(payload)
+
+      acl_diff_summary(before, after)
+    end
+
+    # Per-tier +added / −removed summary for a rendition-gate change, e.g.
+    # "large −public +staff". Same grammar as the ACL clauses it sits beside in
+    # the log, since both are group grants moving on and off a slot.
+    def tier_diff_summary(before, after)
+      derivative_tier_rows(before, after).filter_map do |tier|
+        added   = Array(after[tier]) - Array(before[tier])
+        removed = Array(before[tier]) - Array(after[tier])
+        next if added.empty? && removed.empty?
+
+        changes = removed.map { |g| "−#{g}" } + added.map { |g| "+#{g}" }
+        "#{tier} #{changes.join(' ')}"
+      end.join(' · ').presence
     end
 
     # Per-grant +added / −removed summary across the audited ACL keys, e.g.
-    # "read +public · edit −staff +editors". Empty when nothing actually moved.
+    # "read +public · edit −staff +editors", with the embargo transition
+    # appended when it moved. Empty when nothing actually moved.
     def acl_diff_summary(before, after)
+      clauses = grant_diff_clauses(before, after)
+      clauses << embargo_summary_clause(before, after) if embargo_changed?(before, after)
+      clauses.join(' · ').presence
+    end
+
+    def grant_diff_clauses(before, after)
       ACL_DIFF_KEYS.filter_map do |key|
         added   = Array(after[key]) - Array(before[key])
         removed = Array(before[key]) - Array(after[key])
@@ -294,7 +409,28 @@ module AuditEventsHelper
 
         changes = removed.map { |g| "−#{g}" } + added.map { |g| "+#{g}" }
         "#{key.tr('_', ' ')} #{changes.join(' ')}"
-      end.join(' · ').presence
+      end
+    end
+
+    # Compact "embargo none → 2027-12-31" for the audit-log row. ISO dates here
+    # rather than the Rights page's prose form — this clause shares a dense table
+    # cell with grant tokens, where a spelled-out month would crowd them out.
+    def embargo_summary_clause(before, after)
+      "embargo #{embargo_summary_value(before[EMBARGO_KEY])} → #{embargo_summary_value(after[EMBARGO_KEY])}"
+    end
+
+    def embargo_summary_value(value)
+      embargo_date(value)&.iso8601 || 'none'
+    end
+
+    # The payload is a remote snapshot, so a blank or unparseable date degrades
+    # to "no embargo" rather than raising mid-table.
+    def embargo_date(value)
+      return if value.blank?
+
+      Date.parse(value.to_s)
+    rescue ArgumentError, TypeError
+      nil
     end
 end
 # rubocop:enable Metrics/ModuleLength

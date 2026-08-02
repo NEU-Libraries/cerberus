@@ -1,6 +1,26 @@
 require_relative 'boot'
 
-require 'rails/all'
+# Not `rails/all`. Active Storage's vips shim calls `Vips.block_untrusted(true)`
+# at load, which disables libvips' unfuzzed loaders — pdfload among them — and
+# MasterJp2 renders PDF cover pages through vips directly. Loading a framework
+# nothing here uses would cost that capability for a safety property that only
+# matters for untrusted uploads Active Storage would be handling.
+#
+# Action Text and Action Mailbox come out with it: both depend on Active Storage,
+# and neither is used (no rich-text attributes, no ApplicationMailbox). Everything
+# else `rails/all` loads is kept, Action Cable included — app/channels still
+# defines the default connection and channel.
+require 'rails'
+
+%w[
+  active_record/railtie
+  action_controller/railtie
+  action_view/railtie
+  action_mailer/railtie
+  active_job/railtie
+  action_cable/engine
+  rails/test_unit/railtie
+].each { |railtie| require railtie }
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.

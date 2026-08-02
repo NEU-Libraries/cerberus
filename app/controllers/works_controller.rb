@@ -23,8 +23,9 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
   copy_blacklight_config_from(CatalogController)
 
   IN_PROGRESS_NOTICE = 'This work is still being processed and cannot be edited yet.'
-  PUBLISH_UNAVAILABLE = 'That publish destination is unavailable. ' \
-                        'Please try again or deposit to your workspace.'
+  # Covers both promotion failures — an unresolvable showcase and a refused
+  # link. Either way the deposit itself succeeded, which is what the depositor
+  # needs to know; the distinction only matters in the log.
   PUBLISH_LINK_FAILED = "File uploaded — please review the metadata. It couldn't be added to the " \
                         'community showcase; contact DRS staff if this persists.'
   UNSUPPORTED_AV = 'DRS streams H.264/AAC video and AAC/MP3 audio — please convert your file first.'
@@ -64,25 +65,25 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     render layout: false
   end
 
-  # The weighted deposit fork: the first, equal-weight choice is workspace
-  # (deposit into one of the depositor's own Collections) vs publish (promote
-  # into a community genre showcase). The publish branch is offered only when
-  # the depositor has a curated Person with at least one affiliated community
-  # that has showcases AND a personal-root Collection to structurally home the
-  # work in — see #publish_targets. A parent_id deep-link (from a Collection
-  # breadcrumb) pre-selects that collection in the workspace branch.
+  # The form asks what to deposit, never where: the destination is the route's
+  # parent segment, already resolved and :edit-gated by authorize_destination!.
+  # Its one option is promotion into a community genre showcase, offered only
+  # from the depositor's own personal root — see #publish_offered?.
   def new
     @work = Work.new
-    @parent = AtlasRb::Collection.find(params[:parent_id]) if params[:parent_id].present?
-    raise ResourceNotFound if params[:parent_id].present? && @parent.nil?
+    @parent = AtlasRb::Collection.find(@destination_id)
+    raise ResourceNotFound if @parent.nil?
 
-    @workspace_collections = workspace_collections
-    @publish_targets = publish_targets
+    # The POST target for the form this renders. Without it form_tag falls back
+    # to the current URL — /collections/:id/works/new, which routes nowhere for
+    # POST — and the deposit 404s on submit.
+    @create_path = child_create_path('works')
+    @publish_targets = publish_offered? ? publish_targets : {}
   end
 
   def edit
     @work = AtlasRb::Work.find(params[:id])
-    form_preparation(@permissions)
+    form_preparation(@permissions, resource: @work)
     load_descriptive!('Work')
     load_advanced!('Work')
     breadcrumbs(params[:id], editing: true)
@@ -91,16 +92,10 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
   def create
     file = params[:binary]
 
-    return redirect_to(new_work_path, alert: UNSUPPORTED_AV) if unsupported_av?(file)
+    return redirect_to(new_child_path('work'), alert: UNSUPPORTED_AV) if unsupported_av?(file)
 
-    if params[:deposit_to] == 'publish'
-      target = publish_target
-      return redirect_to(new_work_path, alert: PUBLISH_UNAVAILABLE) unless target
-
-      create_published(file, target)
-    else
-      create_in_workspace(file)
-    end
+    create_at_destination(file)
+    promote_if_requested
 
     notice = @publish_link_failed ? PUBLISH_LINK_FAILED : 'File uploaded — please review the metadata.'
     redirect_to metadata_work_path(@work.id), notice: notice
@@ -118,7 +113,7 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     @work = AtlasRb::Work.find(params[:id])
     # Gates the opt-in Image Derivatives section (nil for non-image deposits).
     @image_probe = StagedImageProbe.call(work_id: params[:id])
-    form_preparation(@permissions)
+    form_preparation(@permissions, resource: @work)
     load_descriptive!('Work')
   end
 
@@ -157,6 +152,29 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
   end
 
   private
+
+    # Promotion is offered only when the destination IS the depositor's own
+    # personal root. That is what keeps a promoted Work in the depositor's own
+    # space now that the route, not the publish branch, decides placement — and
+    # it keys on the destination rather than on which button you arrived by, so
+    # it can't be sidestepped by typing a URL.
+    def publish_offered?
+      root = deposit_person&.[]('personal_root_id').presence
+      root.present? && root.to_s == @destination_id.to_s
+    end
+
+    # Add the showcase edge when the form asked for one. A promotion that can't
+    # be honoured leaves the deposit standing and flags the flash — the Work
+    # already exists and is correctly placed, so there is nothing to roll back.
+    def promote_if_requested
+      return unless ActiveModel::Type::Boolean.new.cast(params[:publish])
+      return @publish_link_failed = true unless publish_offered?
+
+      showcase_id = publish_showcase_id
+      return @publish_link_failed = true if showcase_id.blank?
+
+      promote_to_showcase(showcase_id)
+    end
 
     # Server backstop for the metadata page's opt-in download sizes. The
     # Stimulus controller is the primary enforcement, so a violation here

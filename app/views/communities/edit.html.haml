@@ -22,19 +22,13 @@
       = bootstrap_form_tag(url: community_path(params[:id]), method: :patch, multipart: true) do |f|
         .row
           .col-sm
-            %h5.pb-2
-              General Permissions
-            %select.form-select.form-select-sm#mass{name: "mass", "aria-label" => "Default select example"}
-              %option{value: "public", selected: @public ? "selected" : nil} Public
-              %option{value: "private", selected: @public ? nil : "selected"} Private
-            %ul.small.pt-2
-              %li Setting to 'public' will allow anyone accessing the site to see your item.
-              %li Setting to 'private' will only allow groups that are explicitly chosen to see your item.
+            = render 'shared/visibility_control', resource: 'community'
         = render 'shared/group_permissions', resource: 'community'
         %div
           .well.p-3.my-3.rounded-3
             = f.button :submit, class: "btn btn-success"
             = link_to "Cancel", community_path(params[:id]), class: "btn btn-warning"
+    = render 'shared/restriction_request', resource: 'community'
   - if edit_tab_visible?('history')
     #history.tab-pane{"aria-labelledby" => "history-tab", role: "tabpanel"}
       = render 'audit_events/history', resource_id: params[:id]

@@ -22,6 +22,7 @@ describe CatalogController do
     end
 
     it 'excludes featured showcase Collections from the global index but keeps ordinary ones' do
+      publicize_ancestry!(community: community)
       featured = AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml',
                                             featured: true, nuid: '000000004')
       AtlasRb::Collection.metadata(featured.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')

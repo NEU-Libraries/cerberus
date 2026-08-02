@@ -6,8 +6,9 @@ class CommunitiesController < CatalogController
   include ShowScopedSearch
   include RecordsImpressions
   include ContainerAnalytics
+  include ContainerRestrictionRequest
 
-  authorize_resource_writes!
+  authorize_resource_writes!(extra_edit: %i[request_restriction])
   after_action :record_view_impression, only: :show
 
   # Solr membership fields faceted to decide whether a showcase has content
@@ -45,11 +46,15 @@ class CommunitiesController < CatalogController
 
   def new
     @community = OpenStruct.new
+    @create_path = child_create_path('communities')
   end
 
   def edit
     @community = AtlasRb::Community.find(params[:id])
-    form_preparation(@permissions)
+    # No cascade exists for a community, so nobody may narrow one here — not
+    # even an admin. The form withholds Private and offers the request instead.
+    @narrowing_allowed = false
+    form_preparation(@permissions, resource: @community)
     load_descriptive!('Community')
     load_container_analytics(@community, 'Community')
     breadcrumbs(params[:id], editing: true)
@@ -61,9 +66,9 @@ class CommunitiesController < CatalogController
     # resource (MODSMerge leaves a blank title untouched) and still provision
     # showcases against that orphan. Client-side `required` is the first line;
     # this is the backstop (JS off / direct POST).
-    return redirect_to(new_community_path(parent_id: params[:parent_id])) if title_missing?(permitted)
+    return redirect_to(new_child_path('community')) if title_missing?(permitted)
 
-    c = AtlasRb::Community.create(params[:parent_id])
+    c = AtlasRb::Community.create(@destination_id)
     save_descriptive!('Community', c.id, title: permitted['title'], description: permitted['description'])
     ShowcaseProvisioner.call(community_id: c.id)
     redirect_to community_path(c.id)

@@ -3,15 +3,13 @@
     - breadcrumb_trail do |crumb|
       %li.breadcrumb-item{class: crumb.current? ? "active" : "" }
         = link_to_unless crumb.current?, crumb.name, crumb.url, (crumb.current? ? {"aria-current" => "page"} : {})
-    -# The "Add a child here" affordance. Suppressed on edit pages via
-    -# `show_add: false` (you don't add siblings/children mid-edit). The Work
-    -# branch ("Upload File") is edit-gated on @can_edit (set by the show page),
-    -# so a viewer who can't edit the work never sees a dead-end affordance. The
-    -# container branches (communities/collections) still gate only on sign-in —
-    -# resource-scoped create permissions don't exist yet, so any signed-in user
-    -# sees those child-create links.
-    - is_container = %w[communities collections].include?(controller_name)
-    - if local_assigns.fetch(:show_add, true) && user_signed_in? && (is_container || @can_edit)
+    -# The "Add a child here" affordance, gated on @can_edit (set by the show
+    -# page) for every branch — you may only add a child to a container you can
+    -# edit. Atlas enforces the same rule on the write (:create_child, resolved
+    -# against the destination), so an ungated link leads only to a 403.
+    -# Suppressed on edit pages via `show_add: false`: you don't add
+    -# siblings/children mid-edit.
+    - if local_assigns.fetch(:show_add, true) && user_signed_in? && @can_edit
       %li.breadcrumb-item
         .dropdown.breadcrumb-add
           %a.text-decoration-none{"aria-expanded" => "false", "data-bs-toggle" => "dropdown", :type => "button"}
@@ -21,14 +19,14 @@
           %ul.dropdown-menu{"aria-labelledby" => "dropdownMenuButton1"}
             - if controller_name == "communities"
               %li
-                %a.dropdown-item{:href => new_community_path(:parent_id => "#{params[:id]}")} New Community
+                %a.dropdown-item{:href => new_community_community_path(params[:id])} New Community
               %li
-                %a.dropdown-item{:href => new_collection_path(:parent_id => "#{params[:id]}")} New Collection
+                %a.dropdown-item{:href => new_community_collection_path(params[:id])} New Collection
             - elsif controller_name == "collections"
               %li
-                %a.dropdown-item{:href => new_collection_path(:parent_id => "#{params[:id]}")} New Collection
+                %a.dropdown-item{:href => new_collection_collection_path(params[:id])} New Collection
               %li
-                %a.dropdown-item{:href => new_work_path(:parent_id => "#{params[:id]}")} New Work
+                %a.dropdown-item{:href => new_collection_work_path(params[:id])} New Work
             - else
               %li
                 %a.dropdown-item{:href => upload_work_path(params[:id])} Upload File

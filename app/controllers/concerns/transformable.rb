@@ -6,15 +6,47 @@
 module Transformable # rubocop:disable Metrics/ModuleLength
   extend ActiveSupport::Concern
 
+  # Atlas's ACL invariants, phrased for the depositor and keyed on the envelope's
+  # error code. An unrecognised code falls back to Atlas's own message, so a new
+  # invariant still says something true rather than nothing.
+  PERMISSIONS_REFUSED = {
+    'visibility_exceeds_parent' => "Visibility wasn't changed — an item can't be more visible " \
+                                   'than the collection or community it sits in. Make the ' \
+                                   'container public first.'
+  }.freeze
+
+  # Communities have no cascade, so restricting one would leave every collection
+  # inside it more visible than its container. The edit form routes this to an
+  # administrator instead; this is the message when the form is bypassed.
+  COMMUNITY_NARROWING_REFUSED = 'Restricting a community needs DRS administrators — it does not reach the ' \
+                                'collections inside it. Nothing has been changed.'
+
   def pretty_resource_permissions(perms)
     return [] if perms.blank?
 
     perms.read&.delete('public')
     perms.edit&.delete(Permissions::STAFF_EDIT_GROUP)
-    perms.slice('read', 'edit').flat_map do |key, values|
-      permission = key == 'read' ? 'View' : 'Manage'
-      Array(values).map { |value| [value, pretty_group(value), permission] }
+    perms.slice('read', 'edit').flat_map do |ability, values|
+      Array(values).map do |group|
+        Permissions::GrantRow.new(group_id: group, label: pretty_group(group),
+                                  ability: ability, revocable: revocable_grant?(group))
+      end
     end
+  end
+
+  # Whether the acting user may withdraw a grant naming `group` — the view-side
+  # mirror of the Atlas rule that only a member of a group may remove its grant.
+  # Reads `current_user`, NOT `effective_user`: the acting NUID Atlas resolves
+  # its own actor from is signed from `Current.nuid`, which is the authenticated
+  # user, so consulting the view-as target here would lock rows against a
+  # different principal than the one the write is evaluated as. A nil user has no
+  # membership to appeal to and stays conservative, matching how Atlas treats an
+  # actor-less caller. The `public` token never reaches here — it is stripped
+  # above and driven by the separate General Permissions control.
+  def revocable_grant?(group)
+    return true if current_user&.admin? || current_user&.admin_delegate?
+
+    current_user&.member_of?(group) || false
   end
 
   def pretty_user_permissions(groups)
@@ -34,11 +66,39 @@ module Transformable # rubocop:disable Metrics/ModuleLength
     end
   end
 
-  def form_preparation(raw_permissions)
+  def form_preparation(raw_permissions, resource: nil)
     @groups = groups_for_permissions_picker
     @public = raw_permissions&.read&.include?('public')
     @embargo = Embargo.release_date(raw_permissions&.embargo).to_s
+    # Snapshot the read audience before anything else touches it. This line is
+    # load-bearing twice over: the next one REPLACES @permissions (the Atlas
+    # envelope the authorization gate loaded) with the form's row objects, and
+    # pretty_resource_permissions mutates the envelope's read list in place to
+    # strip the public sentinel — so a view wanting the audience as submitted
+    # has no way back to it afterwards.
+    @read_groups = Array(raw_permissions&.read).dup
     @permissions = pretty_resource_permissions(raw_permissions)
+    assign_visibility_ceiling(resource)
+  end
+
+  # Decide whether the Public option may be offered. Atlas refuses a resource
+  # more visible than its container (a 422 carrying `visibility_exceeds_parent`,
+  # surfaced as AtlasRb::PermissionsError), so offering Public under a private
+  # parent would only produce an error the depositor can't act on.
+  # @visibility_parent names the blocking container so the form can say which
+  # one is in the way. A root with no parent is unconstrained, as is a caller
+  # that doesn't supply the resource.
+  def assign_visibility_ceiling(resource)
+    @public_allowed = true
+    parent = Array(resource&.ancestor_chain).last
+    return if parent.blank?
+    return if Array(AtlasRb::Resource.permissions(parent['noid'])&.read).include?('public')
+
+    @public_allowed = false
+    @visibility_parent = parent
+  rescue Faraday::Error, JSON::ParserError
+    # A parent lookup failure must not block the form — Atlas still enforces.
+    @public_allowed = true
   end
 
   # The "add a group" dropdown's candidate list. An :admin or a devolved-admin
@@ -138,9 +198,55 @@ module Transformable # rubocop:disable Metrics/ModuleLength
     apply_descriptive(klass, id, resource_key, keywords, show_path)
   end
 
+  # A refused ACL write is a 422, not a 403 — the caller may hold full edit
+  # rights and still trip an invariant. Report it and carry on rather than
+  # bouncing the whole submit: this runs BEFORE the descriptive save, so raising
+  # would discard title/abstract edits that are independent and perfectly valid.
+  # The form suppresses the offending choice up front (shared/_visibility_control),
+  # so reaching here means JS-off, tampering, or the container narrowing between
+  # page load and submit.
   def apply_permissions(klass, id, resource_key)
     perms = permission_params(resource_key)
-    with_stale_retry { AtlasRb.const_get(klass).metadata(id, perms) } if perms.present?
+    return if perms.blank?
+    return if narrowing_handed_off?(klass, perms)
+
+    with_stale_retry { AtlasRb.const_get(klass).metadata(id, perms) }
+  rescue AtlasRb::PermissionsError => e
+    flash[:alert] = PERMISSIONS_REFUSED.fetch(e.code, e.message)
+  end
+
+  # Taking audience away from a Collection has to reach everything inside it,
+  # and the container is written LAST, so this save is skipped entirely and the
+  # whole change is handed to the cascade. Returns true when that happened —
+  # including when it was refused, since a refusal must not fall through to the
+  # ordinary write.
+  #
+  # Works have nothing beneath them to strip, so they never take this branch.
+  # Communities do, but only to be refused: no cascade exists for them, so
+  # letting one narrow would leave every collection inside it more visible than
+  # its container — the leak this whole path closes.
+  def narrowing_handed_off?(klass, perms)
+    return false if klass == 'Work'
+    return community_narrowing_refused?(perms) if klass == 'Community'
+
+    outcome = NarrowingRequest.call(noid: params[:id], current_read: Array(@permissions&.read),
+                                    permissions: perms[:permissions] || {}, actor: current_user)
+    return false unless outcome.handled?
+
+    flash[outcome.dispatched? ? :notice : :alert] = outcome.message
+    true
+  end
+
+  # A server-side backstop for the Community form, which offers no Private
+  # option. Reaching here means JS-off or a hand-made request, so it refuses
+  # rather than writing — and only for an actual narrowing, since widening a
+  # community is unconstrained and needs no cascade.
+  def community_narrowing_refused?(perms)
+    submitted = Array(perms.dig(:permissions, :read))
+    return false unless Permissions.narrowing?(current: Array(@permissions&.read), submitted: submitted)
+
+    flash[:alert] = COMMUNITY_NARROWING_REFUSED
+    true
   end
 
   def apply_descriptive(klass, id, resource_key, keywords, show_path)

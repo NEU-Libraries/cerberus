@@ -52,20 +52,21 @@
                 %span.rights-diff__provenance-id= event['note'].to_s.split.last
             - when 'initial'
               %p.rights-diff__provenance Initial grant
+            - when AuditEventsHelper::DERIVATIVE_PERMISSIONS_SOURCE
+              %p.rights-diff__provenance Per-rendition download permissions
+            -# Two shapes share this change_type. An ACL edit diffs the resource's
+            -# access levels; a rendition-gate edit diffs a sparse tier => groups
+            -# map. Same two-column grid and the same grant pills either way — only
+            -# the row set and the first column's heading differ.
+            - rendition_gate = derivative_permissions_payload?(payload)
             %table.rights-diff__grid
               %thead
                 %tr
-                  %th{scope: 'col'} Access
+                  %th{scope: 'col'}= rendition_gate ? 'Rendition' : 'Access'
                   %th{scope: 'col'} Before
                   %th{scope: 'col'} After
               %tbody
-                - AuditEventsHelper::ACL_DIFF_KEYS.each do |key|
-                  - removed = Array(before[key]) - Array(after[key])
-                  - added   = Array(after[key]) - Array(before[key])
-                  %tr{class: ('rights-diff__row--changed' if removed.any? || added.any?)}
-                    %th{scope: 'row'}= acl_level_label(key)
-                    %td= acl_grant_pills(before[key], marked: removed, state: 'removed')
-                    %td= acl_grant_pills(after[key], marked: added, state: 'added')
+                = render(rendition_gate ? 'tier_rows' : 'acl_rows', before: before, after: after)
 
   -# Walker sits below the card, controls clustered toward the centre rather
   -# than pinned to the corners. Newer (left) / Older (right) name the time
