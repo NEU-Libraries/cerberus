@@ -5,8 +5,12 @@
     %span.admin-registry__title
       %i.fa-solid.fa-tags{'aria-hidden' => 'true'}
       Group names
-      - if @groups.total_count.positive?
-        %span.admin-registry__count= pluralize(@groups.total_count, 'entry')
+      - if @total.positive?
+        %span.admin-registry__count
+          - if @query.present?
+            = "#{@groups.total_count} of #{pluralize(@total, 'entry')}"
+          - else
+            = pluralize(@total, 'entry')
     .admin-registry__head-actions
       %span.admin-registry__subtitle
         %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
@@ -14,6 +18,11 @@
       = link_to new_admin_group_path, class: 'btn btn-primary btn-sm' do
         %i.fa-solid.fa-plus.me-1{'aria-hidden' => 'true'}
         New group name
+
+  - if @total.positive?
+    .p-3.pb-0
+      = render 'admin/finder/search_form', url: admin_groups_path, q: @query, hidden: {},
+                                           placeholder: 'Search by group identifier or display name…'
 
   - if @groups.total_count.positive?
     .table-responsive
@@ -42,6 +51,14 @@
                     Delete
     %nav.paginate-section{ 'aria-label' => 'Group names pages' }
       = paginate @groups, theme: 'blacklight'
+  - elsif @query.present?
+    .admin-registry__empty
+      %i.fa-solid.fa-magnifying-glass.admin-registry__empty-icon{'aria-hidden' => 'true'}
+      %p.mb-3.fw-semibold.text-body
+        = "No group names match “#{@query}”"
+      = link_to admin_groups_path, class: 'btn btn-outline-secondary btn-sm' do
+        %i.fa-solid.fa-xmark.me-1{'aria-hidden' => 'true'}
+        Clear search
   - else
     .admin-registry__empty
       %i.fa-solid.fa-tags.admin-registry__empty-icon{'aria-hidden' => 'true'}
