@@ -70,6 +70,27 @@ module AuditEventsHelper
     'embargo'    => 'Embargo'
   }.freeze
 
+  # Atlas tags a per-rendition gate change with this `source`. It rides the same
+  # `permissions` change_type as an ACL edit, but its before/after are a sparse
+  # { tier => [read groups] } map rather than the ACL envelope — so both the
+  # audit-log summary and the Rights page have to tell the two apart before
+  # reading either one.
+  DERIVATIVE_PERMISSIONS_SOURCE = 'derivative_permissions'
+
+  # Prose labels for the download tiers. The vocabulary and its narrowing order
+  # come from Sentinel::TIERS, which is where Cerberus authors these policies —
+  # naming the ladder twice would let the two drift.
+  TIER_LABELS = {
+    'small'   => 'Small image',
+    'medium'  => 'Medium image',
+    'large'   => 'Large image',
+    'service' => 'Service (deep zoom)',
+    'master'  => 'Master (original)',
+    'audio'   => 'Audio',
+    'video'   => 'Video',
+    'pdf'     => 'PDF'
+  }.freeze
+
   def audit_event_action(event_action)
     ACTION_DESCRIPTORS.fetch(event_action.to_s) do
       GENERIC_ACTION.merge(label: event_action.to_s.humanize)
@@ -278,6 +299,27 @@ module AuditEventsHelper
     content_tag(:span, date.strftime('%B %-d, %Y'), class: classes.join(' '))
   end
 
+  # Whether a permissions event describes the per-rendition download gate rather
+  # than the resource ACL. The two share a change_type and an action, so the
+  # payload's `source` is the only thing that distinguishes them.
+  def derivative_permissions_payload?(payload)
+    payload['source'] == DERIVATIVE_PERMISSIONS_SOURCE
+  end
+
+  # The tiers worth a row for one rendition-gate event: those either side of the
+  # diff mentions, in Sentinel's narrowing order. The stored policy is sparse —
+  # only gated tiers appear — so listing all eight would bury the change under
+  # empty rows. Unknown tiers sort last rather than vanishing, so a vocabulary
+  # Atlas grows before Cerberus does still shows up.
+  def derivative_tier_rows(before, after)
+    (before.keys | after.keys).sort_by { |tier| Sentinel::TIERS.index(tier) || Sentinel::TIERS.length }
+  end
+
+  # Prose label for a download tier, falling back to the raw token.
+  def tier_label(tier)
+    TIER_LABELS.fetch(tier.to_s) { tier.to_s.humanize }
+  end
+
   # Human one-liner derived from the event payload, by action. Returns a muted
   # span or nil. Shapes mirror what Atlas emits: update → { fields: [...] } |
   # { source: 'mods' } | { before:, after: } (ACL); reparent → { to: noid };
@@ -315,12 +357,39 @@ module AuditEventsHelper
       "#{prefix} #{target}" if target.present?
     end
 
+    # `source` is matched exactly, not merely for presence: Atlas uses the slot
+    # for several unrelated things on an `update` row, and treating any of them
+    # as the MODS marker labelled a rendition-gate change "MODS document".
     def update_payload_summary(payload)
-      if payload['fields'].present? then payload['fields'].join(', ')
-      elsif payload['source'].present? then 'MODS document'
-      elsif payload['before'] || payload['after']
-        acl_diff_summary(payload['before'] || {}, payload['after'] || {})
-      end
+      return payload['fields'].join(', ') if payload['fields'].present?
+      return 'MODS document'              if payload['source'] == 'mods'
+      return if payload['before'].nil? && payload['after'].nil?
+
+      permissions_diff_summary(payload)
+    end
+
+    # Both permission shapes land here; `source` picks which vocabulary to read
+    # the before/after through.
+    def permissions_diff_summary(payload)
+      before = payload['before'] || {}
+      after  = payload['after']  || {}
+      return tier_diff_summary(before, after) if derivative_permissions_payload?(payload)
+
+      acl_diff_summary(before, after)
+    end
+
+    # Per-tier +added / −removed summary for a rendition-gate change, e.g.
+    # "large −public +staff". Same grammar as the ACL clauses it sits beside in
+    # the log, since both are group grants moving on and off a slot.
+    def tier_diff_summary(before, after)
+      derivative_tier_rows(before, after).filter_map do |tier|
+        added   = Array(after[tier]) - Array(before[tier])
+        removed = Array(before[tier]) - Array(after[tier])
+        next if added.empty? && removed.empty?
+
+        changes = removed.map { |g| "−#{g}" } + added.map { |g| "+#{g}" }
+        "#{tier} #{changes.join(' ')}"
+      end.join(' · ').presence
     end
 
     # Per-grant +added / −removed summary across the audited ACL keys, e.g.

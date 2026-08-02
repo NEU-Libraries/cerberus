@@ -52,31 +52,21 @@
                 %span.rights-diff__provenance-id= event['note'].to_s.split.last
             - when 'initial'
               %p.rights-diff__provenance Initial grant
+            - when AuditEventsHelper::DERIVATIVE_PERMISSIONS_SOURCE
+              %p.rights-diff__provenance Per-rendition download permissions
+            -# Two shapes share this change_type. An ACL edit diffs the resource's
+            -# access levels; a rendition-gate edit diffs a sparse tier => groups
+            -# map. Same two-column grid and the same grant pills either way — only
+            -# the row set and the first column's heading differ.
+            - rendition_gate = derivative_permissions_payload?(payload)
             %table.rights-diff__grid
               %thead
                 %tr
-                  %th{scope: 'col'} Access
+                  %th{scope: 'col'}= rendition_gate ? 'Rendition' : 'Access'
                   %th{scope: 'col'} Before
                   %th{scope: 'col'} After
               %tbody
-                - AuditEventsHelper::ACL_DIFF_KEYS.each do |key|
-                  - removed = Array(before[key]) - Array(after[key])
-                  - added   = Array(after[key]) - Array(before[key])
-                  %tr{class: ('rights-diff__row--changed' if removed.any? || added.any?)}
-                    %th{scope: 'row'}= acl_level_label(key)
-                    %td= acl_grant_pills(before[key], marked: removed, state: 'removed')
-                    %td= acl_grant_pills(after[key], marked: added, state: 'added')
-                -# Embargo rides in the same permissions snapshot as the grant
-                -# slots but is a scalar date, so it gets a prose row of its own
-                -# rather than being diffed as a one-element set of identifiers.
-                -# Rendered last: the grant rows answer "who can reach this", the
-                -# embargo answers "from when", which reads as a qualifier on them.
-                - if embargo_recorded?(before, after)
-                  - embargo_moved = embargo_changed?(before, after)
-                  %tr{class: ('rights-diff__row--changed' if embargo_moved)}
-                    %th{scope: 'row'}= acl_level_label(AuditEventsHelper::EMBARGO_KEY)
-                    %td= embargo_diff_cell(before[AuditEventsHelper::EMBARGO_KEY], state: ('removed' if embargo_moved))
-                    %td= embargo_diff_cell(after[AuditEventsHelper::EMBARGO_KEY], state: ('added' if embargo_moved))
+                = render(rendition_gate ? 'tier_rows' : 'acl_rows', before: before, after: after)
 
   -# Walker sits below the card, controls clustered toward the centre rather
   -# than pinned to the corners. Newer (left) / Older (right) name the time

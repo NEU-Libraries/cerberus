@@ -149,4 +149,76 @@ RSpec.describe AuditEventsHelper, type: :helper do
       end
     end
   end
+
+  # Atlas emits the per-rendition download gate as a `permissions` update too,
+  # separated from an ACL edit only by payload `source`. Its before/after are a
+  # sparse tier => read-groups map, not the ACL envelope.
+  describe 'derivative (per-rendition) permission events' do
+    def tier_event(before, after)
+      event(action: 'update', change_type: 'permissions',
+            payload: { 'before' => before, 'after' => after,
+                       'source' => 'derivative_permissions' })
+    end
+
+    describe '#derivative_permissions_payload?' do
+      it 'distinguishes a rendition-gate payload from an ACL one' do
+        expect(helper.derivative_permissions_payload?({ 'source' => 'derivative_permissions' })).to be(true)
+        expect(helper.derivative_permissions_payload?({ 'source' => 'mods' })).to be(false)
+        expect(helper.derivative_permissions_payload?({ 'before' => {}, 'after' => {} })).to be(false)
+      end
+    end
+
+    describe '#derivative_tier_rows' do
+      it 'lists only the tiers a side mentions, in narrowing order' do
+        rows = helper.derivative_tier_rows({ 'large' => [] }, { 'small' => [], 'master' => [] })
+        expect(rows).to eq(%w[small large master])
+      end
+
+      it 'sorts a tier it has not been taught about last rather than dropping it' do
+        rows = helper.derivative_tier_rows({}, { 'hologram' => [], 'small' => [] })
+        expect(rows).to eq(%w[small hologram])
+      end
+    end
+
+    describe '#tier_label' do
+      it 'gives the ladder prose names' do
+        expect(helper.tier_label('service')).to eq('Service (deep zoom)')
+        expect(helper.tier_label('master')).to eq('Master (original)')
+      end
+
+      it 'falls back to the raw token for an unknown tier' do
+        expect(helper.tier_label('hologram')).to eq('Hologram')
+      end
+    end
+
+    describe 'the audit-log one-liner' do
+      it 'summarises the tier grants that moved' do
+        text = helper.audit_event_payload_summary(
+          tier_event({ 'large' => %w[public] }, { 'large' => %w[staff] })
+        )
+        expect(text).to include('large −public +staff')
+      end
+
+      # The bug this replaced: `source` was matched for presence, so any source
+      # that was not MODS still rendered as "MODS document".
+      it 'does not mistake a rendition-gate change for a MODS edit' do
+        text = helper.audit_event_payload_summary(
+          tier_event({ 'large' => %w[public] }, { 'large' => %w[staff] })
+        )
+        expect(text).not_to include('MODS document')
+      end
+
+      it 'still labels a genuine MODS update' do
+        text = helper.audit_event_payload_summary(
+          event(action: 'update', change_type: 'metadata', payload: { 'source' => 'mods' })
+        )
+        expect(text).to include('MODS document')
+      end
+
+      it 'reports a newly gated tier' do
+        text = helper.audit_event_payload_summary(tier_event({}, { 'master' => %w[staff] }))
+        expect(text).to include('master +staff')
+      end
+    end
+  end
 end

@@ -1,0 +1,19 @@
+-# Row set for a per-rendition download-gate event (Atlas `source:
+-# derivative_permissions`). The policy is a sparse tier => read-groups map, so
+-# only the tiers one side or the other names get a row — in Sentinel's
+-# narrowing order, widest audience first, so the ladder reads top to bottom the
+-# way the monotonicity rule is written. Reuses the ACL grant pills: a tier's
+-# value is a group list like any other, and giving it a second visual language
+-# would imply a difference that isn't there.
+- rows = derivative_tier_rows(before, after)
+- if rows.empty?
+  %tr
+    %td.rights-diff__empty{colspan: 3} No rendition gates recorded
+- else
+  - rows.each do |tier|
+    - removed = Array(before[tier]) - Array(after[tier])
+    - added   = Array(after[tier]) - Array(before[tier])
+    %tr{class: ('rights-diff__row--changed' if removed.any? || added.any?)}
+      %th{scope: 'row'}= tier_label(tier)
+      %td= acl_grant_pills(before[tier], marked: removed, state: 'removed')
+      %td= acl_grant_pills(after[tier], marked: added, state: 'added')
