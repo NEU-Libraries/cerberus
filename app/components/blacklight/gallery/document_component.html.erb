@@ -12,7 +12,11 @@
         <%= render Blacklight::Gallery::DocumentTitleComponent.new(presenter: @presenter, counter: @counter) %>
         <div class="text-center">
           <%= helpers.embargo_notice(@document) %>
-          <% if @document.klass == Work %>
+          <%# Mirrors the list view: an embargo empties the downloads modal, so
+              the button is suppressed for viewers the embargo applies to. See
+              Blacklight::DocumentComponent's template for the reasoning. %>
+          <% if @document.klass == Work &&
+                !helpers.embargo_withholds?(@document.try(:embargo_release_date)) %>
             <button type="button"
                     class="btn btn-sm btn-link text-decoration-none p-0 me-2"
                     data-bs-toggle="modal"

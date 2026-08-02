@@ -41,7 +41,14 @@
 
       <div class="text-end">
         <%= helpers.embargo_notice(@document) %>
-        <% if @document.klass == Work %>
+        <%# An embargo withholds every download, so the modal this opens would
+            list nothing. The adjacent notice already says why, and the release
+            date is indexed — so the button can be suppressed from the result
+            list without the per-Work Atlas read that judging an arbitrary
+            empty modal would need. Staff and admins bypass the embargo and
+            keep the button, since their modal does have files. %>
+        <% if @document.klass == Work &&
+              !helpers.embargo_withholds?(@document.try(:embargo_release_date)) %>
           <button type="button"
                   class="btn btn-sm btn-link text-decoration-none p-0 me-2"
                   data-bs-toggle="modal"
