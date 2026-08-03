@@ -271,9 +271,17 @@ namespace :reset do
       # is relative so the fixture never quietly expires into an unembargoed
       # work; end-of-next-year keeps the "December 31" shape the guide pictures.
       # Read and embargo go in ONE envelope — a metadata write that omits a key
-      # erases it. No thumbnail: this task mints thumbnails from raster sources
-      # and the content here is a PDF.
+      # erases it.
+      #
+      # An embargo withholds the CONTENT, not the preview: a thumbnail is
+      # generated here as it is for every other Work. A first page too sensitive
+      # to show should not be the first page, and those rare items get their
+      # thumbnail replaced by hand. This is also the repository's only
+      # PDF-primary Work, so its first page is what proves a PDF previews by
+      # page one. MasterJp2 rasterizes PDFs, so the source needs no conversion.
       embargoed_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-embargoed-mods.xml')
+      embargoed_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/example.pdf').open_base
+      AtlasRb::Work.set_thumbnails(embargoed_work['id'], **ThumbnailCreator.call(base: embargoed_base))
       AtlasRb::Work.metadata(embargoed_work['id'],
                              { 'permissions' => { 'read'    => ['public'],
                                                   'embargo' => 1.year.from_now.end_of_year.to_date.to_s } })
@@ -390,11 +398,40 @@ namespace :reset do
       # the request-a-change controls on the Move and Delete tabs. Seeding this
       # under the persona's own name would silently break the flow it exists to
       # demonstrate.
+      #
+      # It also carries the small/medium/large renditions, so the tier policy
+      # below has real assets to gate. IiifAssetsJob mints the thumbnails from
+      # the same marsh.jpg the collection uses, which is why there is no
+      # set_thumbnails call here: the job's own thumbnail pass covers it, and
+      # a prior thumbnail would make the job skip as already-done.
       nupd_work = AtlasRb::Work.create(nupd_media['id'], '/home/cerberus/web/spec/fixtures/files/nupd-incident-photo-mods.xml', depositor: unowned)
-      AtlasRb::Work.set_thumbnails(nupd_work['id'], **ThumbnailCreator.call(base: public_safety_base))
       AtlasRb::Work.metadata(nupd_work['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [nupd_media_group] } })
       AtlasRb::Blob.create(nupd_work['id'], '/home/cerberus/web/spec/fixtures/files/marsh.jpg', 'marsh.jpg')
+      IiifAssetsJob.perform_now(nupd_work['id'], '/home/cerberus/web/spec/fixtures/files/marsh.jpg',
+                                derivative_widths: DerivativeCreator::DEFAULT_WIDTHS)
       AtlasRb::Work.complete(nupd_work['id'])
+
+      # The only seeded derivative-access default, so the Collection's
+      # Derivative access tab has a policy to read and a Work below it carries
+      # the resulting per-rendition audit entry — the one row in the audit
+      # history whose first column reads "Rendition".
+      #
+      # The shape is the realistic one for incident photography: anyone may take
+      # the small and medium copies, while the full-resolution image, the
+      # deep-zoom service and the original file stay with the unit. Visibility
+      # narrows as resolution grows, which is the ordering Sentinel enforces.
+      #
+      # Applied to the Work explicitly because reset seeds through
+      # AtlasRb::Work.create, which does not run the deposit path's
+      # Sentinel.apply_default. A Work deposited here through the UI inherits
+      # the same policy on its own.
+      Sentinel.create!(target_id: nupd_media['id'],
+                       policy:    { 'small'   => ['public'],
+                                    'medium'  => ['public'],
+                                    'large'   => [nupd_media_group],
+                                    'service' => [nupd_media_group],
+                                    'master'  => [nupd_media_group] })
+      Sentinel.apply_default(nupd_media['id'], nupd_work['id'])
 
       # C: multi-group edit — two independent groups both granted edit on one
       # Collection, so removing one in the permissions UI strips only that
