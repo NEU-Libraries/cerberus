@@ -109,6 +109,46 @@ RSpec.describe 'Collections sentinel', type: :request do
         .not_to change(Sentinel, :count)
       expect(flash[:alert]).to be_present
     end
+
+    # A refusal used to redirect, which threw away every selection the curator
+    # had made and dropped them on the first tab — so a ladder they got subtly
+    # wrong had to be rebuilt from memory, on a page that no longer showed it.
+    context 'when the policy is refused' do
+      let(:bad) do
+        { sentinel: { small: { mode: 'restrict', groups: [Permissions::STAFF_EDIT_GROUP] },
+                      medium: { mode: 'public' }, large: { mode: 'public' }, service: { mode: 'public' } } }
+      end
+
+      it 'answers 422 and re-renders the edit page rather than redirecting' do
+        patch sentinel_collection_path(collection.id), params: bad
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response).to render_template('collections/edit')
+      end
+
+      # HAML emits attributes in alphabetical order, so these match on that
+      # order rather than the order the templates write them in.
+      it 'holds the submitted selections, not the stored ones' do
+        patch sentinel_collection_path(collection.id), params: bad
+
+        # small was submitted as Restrict; nothing is stored, so a re-read of the
+        # database would show it as the open option instead.
+        expect(response.body).to match(/<input checked[^>]*id="small-restrict"/)
+        expect(response.body).to match(
+          /<input checked[^>]*name="sentinel\[small\]\[groups\]\[\]"[^>]*value="#{Regexp.escape(Permissions::STAFF_EDIT_GROUP)}"/
+        )
+      end
+
+      # Turbo follows a redirect with fetch, and the Fetch spec drops the
+      # fragment from the resolved URL — so the tab has to be chosen on the
+      # server, not carried in the Location header.
+      it 'opens the Derivative access pane, not the first one' do
+        patch sentinel_collection_path(collection.id), params: bad
+
+        expect(response.body).to match(/class="tab-pane active" id="derivative-access"/)
+        expect(response.body).to match(/class="tab-pane" id="metadata"/)
+      end
+    end
   end
 
   describe 'under a restricted collection' do

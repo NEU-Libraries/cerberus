@@ -3,10 +3,14 @@
 
 %h3.py-3 Edit Collection
 
-= render 'shared/edit_tabs', klass: 'Collection', id: params[:id], active: nil
+-# @open_tab is set by an action that re-renders this page and has to land the
+-# reader back on the pane they were working in — a rejected Derivative access
+-# save. Nil on an ordinary edit, which opens the first pane.
+- open_tab = edit_tab_open_key('Collection', open: @open_tab)
+= render 'shared/edit_tabs', klass: 'Collection', id: params[:id], active: nil, open: open_tab
 
 .tab-content
-  #metadata.tab-pane.active{"aria-labelledby" => "metadata-tab", role: "tabpanel"}
+  #metadata.tab-pane{class: ('active' if open_tab == 'metadata'), "aria-labelledby" => "metadata-tab", role: "tabpanel"}
     .py-2.px-1
       = bootstrap_form_tag(url: collection_path(params[:id]), method: :patch, multipart: true) do |f|
         %label.form-label{:for => "thumbnail"} Thumbnail
@@ -37,7 +41,7 @@
             = link_to "Cancel", collection_path(params[:id]), class: "btn btn-warning"
     - unless @narrowing_allowed
       = render 'shared/restriction_request', resource: 'collection'
-  #derivative-access.tab-pane{"aria-labelledby" => "derivative-access-tab", role: "tabpanel"}
+  #derivative-access.tab-pane{class: ('active' if open_tab == 'derivative-access'), "aria-labelledby" => "derivative-access-tab", role: "tabpanel"}
     = render 'derivative_access', collection_id: params[:id], sentinel: @sentinel, groups: @groups, public_collection: @public
   - if edit_tab_visible?('export')
     #export.tab-pane{"aria-labelledby" => "export-tab", role: "tabpanel"}
