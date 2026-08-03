@@ -176,13 +176,36 @@ module AuditEventsHelper
   # on-behalf-of is null on the overwhelming majority of rows, so a dedicated
   # column was pure horizontal tax. Actor + target are the same kind of fact.
   def audit_event_who(event)
-    actor = audit_event_nuid(event['actor_nuid'])
+    actor = audit_event_actor(event['actor_nuid'])
     return actor if event['on_behalf_of_nuid'].blank?
 
     on_behalf = content_tag(:span, class: 'audit-event__on-behalf') do
-      safe_join(['for ', audit_event_nuid(event['on_behalf_of_nuid'])])
+      safe_join(['for ', audit_event_actor(event['on_behalf_of_nuid'])])
     end
     content_tag(:div, safe_join([actor, on_behalf]), class: 'audit-event__who')
+  end
+
+  # Name above its NUID chip, mirroring the inbox sender cell. A ledger that
+  # answers "who did this" with `000000003` answers it only for a reader who
+  # can read NUIDs; the name carries the meaning, and the chip keeps the
+  # identifier to hand for a ticket. Falls back to the bare chip when the NUID
+  # doesn't resolve — the system and anonymous principals have no directory
+  # entry, and a departed user must not blank the column.
+  #
+  # Each call is a Rails.cache read. The history view primes a page's NUIDs
+  # with one NuidResolver.names_for batch, so these are hits rather than a
+  # request per row.
+  def audit_event_actor(nuid)
+    chip = audit_event_nuid(nuid)
+    return chip if nuid.blank?
+
+    name = NuidResolver.name_for(nuid)
+    # The resolver echoes the NUID back when the directory has no entry — the
+    # anonymous and system principals, and departed users. Rendering that as a
+    # name would print the same digits twice, once bare and once chipped.
+    return chip if name.blank? || name == nuid
+
+    safe_join([content_tag(:span, name, class: 'audit-event__actor'), chip])
   end
 
   # The per-row "View" affordance in the audit log — the bridge from the

@@ -35,7 +35,7 @@ class DerivativeDownloadsController < ApplicationController
     def download_url_for(delegate)
       "#{IiifSigner.sign_url(delegate['uri'])}&response-content-disposition=" \
         "#{CGI.escape(ActionDispatch::Http::ContentDisposition.format(disposition: 'attachment',
-                                                                      filename: derivative_filename(delegate)))}"
+                                                                      filename:    derivative_filename(delegate)))}"
     end
 
     # Mirrors the master row's `master_<noid>.jpg`: the tier, then the work, so
