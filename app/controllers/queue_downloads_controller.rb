@@ -4,7 +4,9 @@
 # ActionController::Live streams every action (same reason as
 # SetDownloadsController / DownloadsController). Anon-capable — the queue and
 # its per-item permission re-check (QueueZipPacker → Work.assets/Blob.content)
-# carry the same gating as a direct download.
+# carry the same READ gating as a direct download. Read is not the whole gate:
+# an embargoed Work is readable on purpose, so the packer also needs the
+# caller's bypass right to decide whether withheld content may be included.
 class QueueDownloadsController < ApplicationController
   include ProxyUnbuffered
   include ZipKit::RailsStreaming
@@ -13,11 +15,17 @@ class QueueDownloadsController < ApplicationController
     queue = DownloadQueue.new(session)
     return redirect_to(download_queue_path, alert: 'Your download queue is empty.') if queue.empty?
 
-    packer = QueueZipPacker.new(items: queue.items, nuid: current_user&.nuid)
+    packer = QueueZipPacker.new(items: queue.items, nuid: current_user&.nuid,
+                                bypass_embargo: bypass_embargo?)
     zip_kit_stream(filename: zip_filename) { |zip| packer.pack(zip) }
   end
 
   private
+
+    # The CALLER's right — see SetDownloadsController for why that matters.
+    def bypass_embargo?
+      current_user.present? && current_user.can_bypass_embargo?
+    end
 
     def zip_filename
       "download-queue-#{Time.current.strftime('%Y%m%d')}.zip"

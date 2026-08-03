@@ -18,6 +18,40 @@ RSpec.describe QueueZipPacker do
 
   def names = zip.entries.map(&:name)
 
+  # The embargo check costs one permissions read per distinct work. Unembargoed
+  # by default, so the packing examples below stay about packing.
+  before do
+    allow(AtlasRb::Resource).to receive(:permissions).and_return(AtlasRb::Mash.new('embargo' => ''))
+  end
+
+  # Work.assets re-checks READ, and an embargoed Work is readable on purpose —
+  # so its assets come back and would be packed without this.
+  context 'when a queued work is under an active embargo' do
+    let(:items) { [{ 'w' => 'work1', 'b' => 'blobA' }] }
+
+    before do
+      allow(AtlasRb::Resource).to receive(:permissions)
+        .with('work1').and_return(AtlasRb::Mash.new('embargo' => (Date.current + 30).to_s))
+      allow(AtlasRb::Work).to receive(:assets)
+        .and_return([blob(noid: 'blobA', filename: 'pdf_blobA.pdf', mime_type: 'application/pdf')])
+    end
+
+    it 'packs none of its bytes for a caller who cannot bypass' do
+      described_class.new(items: items, nuid: nil).pack(zip)
+      expect(names).not_to include('work1/pdf_blobA.pdf')
+    end
+
+    it 'names it as withheld rather than dropping it silently' do
+      described_class.new(items: items, nuid: nil).pack(zip)
+      expect(zip.entries.map(&:name)).to include('ERRORS.txt')
+    end
+
+    it 'packs it for a caller who may bypass' do
+      described_class.new(items: items, nuid: '000000006', bypass_embargo: true).pack(zip)
+      expect(names).to include('work1/pdf_blobA.pdf')
+    end
+  end
+
   it 'packs only the queued blobs of a work, into its noid folder, with labeled names' do
     items = [{ 'w' => 'work1', 'b' => 'blobA' }] # blobB is NOT queued
     allow(AtlasRb::Work).to receive(:assets).with('work1', nuid: '000000002').and_return(

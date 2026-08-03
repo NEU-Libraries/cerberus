@@ -13,8 +13,10 @@
 class MediaController < ApplicationController
   include ProxyUnbuffered
   include RecordsImpressions
+  include DerivativesHelper
 
   before_action :authorize_show!
+  before_action :deny_if_work_embargoed!, only: :show
   before_action :record_media_impression, only: :show
 
   def show
@@ -31,6 +33,22 @@ class MediaController < ApplicationController
   end
 
   private
+
+    # Streaming IS consumption for A/V, so an embargo has to reach this route as
+    # well as the download twin — withholding the Downloads section while serving
+    # the bytes here withholds nothing. `authorize_show!` cannot stand in for it:
+    # an embargoed Work is deliberately READABLE (its metadata stays public), so
+    # the read gate passes and only this check refuses.
+    #
+    # The route is addressed by Blob, and a Blob's own permissions do not carry
+    # the containing Work's embargo, so the Work has to be resolved first —
+    # the same second round-trip DownloadsController makes.
+    def deny_if_work_embargoed!
+      work_id = AtlasRb::Blob.work(params[:id], nuid: effective_user&.nuid)
+      return if work_id.blank?
+
+      deny_if_embargoed!(work_id)
+    end
 
     def set_media_headers(blob, range)
       response.headers['Content-Type'] = blob.mime_type
