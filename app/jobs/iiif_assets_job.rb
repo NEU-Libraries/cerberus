@@ -15,12 +15,14 @@
 #   content FileSet. It is the deep-zoom source AND the anchor from which
 #   DepositDerivativesJob later recovers the base for opt-in S/M/L.
 # - Small/medium/large: DOWNLOAD RENDITIONS off the GATED base, generated
-#   only when the caller passes `derivative_widths:`. IPTC ingest passes
-#   per-image widths (its `widths_for` — v1-parity sizing). The single-file
-#   deposit flow chooses sizes on the metadata page AFTER this job has run,
-#   via DepositDerivativesJob (which recovers the gated base from the
-#   service_file Delegate this job set). Callers that pass nothing (deposit,
+#   when the caller passes `derivative_widths:`. IPTC ingest passes per-image
+#   widths (its `widths_for` — v1-parity sizing). The single-file deposit flow
+#   chooses sizes on the metadata page AFTER this job has run, via
+#   DepositDerivativesJob (which recovers the gated base from the service_file
+#   Delegate this job set). Callers that pass nothing at seed time (deposit,
 #   XML loader, multipage page 1) get thumbnails + service only here.
+#   On a `refresh:` the widths come from the Work itself instead — see
+#   #existing_widths.
 class IiifAssetsJob < ApplicationJob
   queue_as :default
 
@@ -51,12 +53,24 @@ class IiifAssetsJob < ApplicationJob
     # the FileSet (StaleObjectError → 500 → Delegates not persisted).
     ThumbnailCreationJob.perform_now(work_id, result.open_base)
     persist_service!(work_id, result.gated_base)
-    return if derivative_widths.nil?
 
-    DerivativeCreationJob.perform_now(work_id, result.gated_base, widths: derivative_widths)
+    widths = derivative_widths || (refresh ? existing_widths(work_id) : nil)
+    return if widths.nil?
+
+    DerivativeCreationJob.perform_now(work_id, result.gated_base, widths: widths)
   end
 
   private
+
+    # A replace passes no widths: the sizes were chosen once, at deposit, and
+    # only the Work's stored rendition URIs still record them. Reading them back
+    # keeps the download renditions in step with everything else the refresh
+    # rebuilds. Left out, the thumbnail, the deep zoom and the displayed image
+    # all move to the new bytes while every sized download goes on serving the
+    # superseded picture.
+    def existing_widths(work_id)
+      DerivativeCreator.existing_widths(AtlasRb::Work.assets(work_id))
+    end
 
     # The gated full-res base rides a service_file Delegate on the (single)
     # content FileSet, so DepositDerivativesJob can recover it for deferred
