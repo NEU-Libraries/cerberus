@@ -35,6 +35,18 @@ RSpec.describe 'Download queue', type: :request do
     expect(response.body).to include('1 file')
   end
 
+  # The queue's whole purpose is gathering across several records, so the
+  # second *distinct* add is the case that matters. Every other example here
+  # adds one item, which a queue that silently keeps only the latest would
+  # still pass.
+  it 'accumulates distinct files across requests' do
+    post download_queue_items_path, params: { work_noid: work.id, blob_noid: 'blob1' }
+    post download_queue_items_path, params: { work_noid: work.id, blob_noid: 'blob2' }
+
+    get download_queue_path
+    expect(response.body).to include('2 files')
+  end
+
   it 'removes a file' do
     post download_queue_items_path, params: { work_noid: work.id, blob_noid: 'blob1' }
     delete download_queue_item_path, params: { work_noid: work.id, blob_noid: 'blob1' }
