@@ -157,6 +157,12 @@ RSpec.describe 'Authorization gates', type: :request do
     describe 'PUT /xml/update (persists raw MODS to any id — was unauthenticated)' do
       let(:raw_xml) { '<mods><titleInfo><title>Edited via XML</title></titleInfo></mods>' }
 
+      # These examples draw one distinction: admitted or denied. Save refuses
+      # XML that does not validate, and this minimal fixture does not, so the
+      # validator is stubbed out — otherwise an admitted request answers 422 and
+      # stops being distinguishable from a refused one.
+      before { allow(XmlValidator).to receive(:call).and_return([]) }
+
       it 'redirects the unauthenticated to sign in (no write)' do
         put '/xml/update', params: { resource_id: work.id, raw_xml: raw_xml }
         expect(response).to redirect_to(new_user_session_path)
@@ -172,6 +178,17 @@ RSpec.describe 'Authorization gates', type: :request do
         sign_in editor
         put '/xml/update', params: { resource_id: work.id, raw_xml: raw_xml }
         expect(response).to redirect_to(work_path(work.id))
+      end
+
+      # The gate runs before validation, so a non-editor learns nothing about
+      # the document they submitted — same 403 whether it parses or not.
+      it 'forbids a non-editor before it looks at the XML' do
+        allow(XmlValidator).to receive(:call).and_return(['Opening and ending tag mismatch'])
+        sign_in outsider
+
+        put '/xml/update', params: { resource_id: work.id, raw_xml: '<mods><titleInfo></oops>' }
+
+        expect(response).to have_http_status(:forbidden)
       end
     end
   end
