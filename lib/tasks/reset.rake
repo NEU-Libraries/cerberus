@@ -252,6 +252,44 @@ namespace :reset do
       AtlasRb::Work.complete(doc_work['id'])
       PdfRenditionJob.perform_later(doc_work['id'], staged_doc, SecureRandom.uuid)
 
+      # The PowerPoint half of the same path. The document guide names Word
+      # *and* PowerPoint, so seeding only the docx left half of it unwalkable.
+      # Staged under uploads_root for the same reason as the docx above.
+      pres_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-presentation-mods.xml')
+      AtlasRb::Work.metadata(pres_work['id'], { 'permissions' => { 'read' => ['public'] } })
+      staged_pres_dir = File.join(Rails.application.config.x.cerberus.uploads_root, pres_work['id'])
+      FileUtils.mkdir_p(staged_pres_dir)
+      staged_pres = File.join(staged_pres_dir, 'example.pptx')
+      FileUtils.cp('/home/cerberus/web/spec/fixtures/files/example.pptx', staged_pres)
+      AtlasRb::Blob.create(pres_work['id'], staged_pres, 'example.pptx')
+      AtlasRb::Work.complete(pres_work['id'])
+      PdfRenditionJob.perform_later(pres_work['id'], staged_pres, SecureRandom.uuid)
+
+      # An embargoed Work, so the withheld-content presentation has something to
+      # show: the red pill in the result list, the release-date banner, and a
+      # suppressed Downloads section for anyone outside staff. The release date
+      # is relative so the fixture never quietly expires into an unembargoed
+      # work; end-of-next-year keeps the "December 31" shape the guide pictures.
+      # Read and embargo go in ONE envelope — a metadata write that omits a key
+      # erases it. No thumbnail: this task mints thumbnails from raster sources
+      # and the content here is a PDF.
+      embargoed_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-embargoed-mods.xml')
+      AtlasRb::Work.metadata(embargoed_work['id'],
+                             { 'permissions' => { 'read'    => ['public'],
+                                                  'embargo' => 1.year.from_now.end_of_year.to_date.to_s } })
+      AtlasRb::Blob.create(embargoed_work['id'], '/home/cerberus/web/spec/fixtures/files/example.pdf', 'example.pdf')
+      AtlasRb::Work.complete(embargoed_work['id'])
+
+      # Populate three more Featured Content categories beyond Datasets. A
+      # curated landing page with nothing on it renders no facet panel at all,
+      # so a reader following the guide's "narrow it with the facets" step has
+      # nothing to act on — and the guide led with the emptiest category.
+      { 'Presentations' => pres_work, 'Technical Reports' => doc_work,
+        'Monographs' => paged_work }.each do |label, member|
+        target = showcases[label]
+        AtlasRb::Work.add_linked_member(member['id'], target['id']) if target
+      end
+
       # A withdrawn (tombstoned) Work so the admin restore registry has an entry
       # to demonstrate the restore path. Tombstoning needs a completed Work, so
       # it is built normally and then withdrawn.
@@ -344,6 +382,19 @@ namespace :reset do
       nupd_media = AtlasRb::Collection.create(public_safety['id'], '/home/cerberus/web/spec/fixtures/files/nupd-incident-media-mods.xml', depositor: unowned)
       AtlasRb::Collection.set_thumbnails(nupd_media['id'], **ThumbnailCreator.call(base: public_safety_base))
       AtlasRb::Collection.metadata(nupd_media['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [nupd_media_group] } })
+
+      # A Work inside that collection, deposited as UNOWNED so 000000011 reaches
+      # it purely through the group's edit grant and is not its depositor. That
+      # distinction is the whole fixture: a depositor withdraws their own work
+      # directly from its show page, so only a non-depositor editor ever sees
+      # the request-a-change controls on the Move and Delete tabs. Seeding this
+      # under the persona's own name would silently break the flow it exists to
+      # demonstrate.
+      nupd_work = AtlasRb::Work.create(nupd_media['id'], '/home/cerberus/web/spec/fixtures/files/nupd-incident-photo-mods.xml', depositor: unowned)
+      AtlasRb::Work.set_thumbnails(nupd_work['id'], **ThumbnailCreator.call(base: public_safety_base))
+      AtlasRb::Work.metadata(nupd_work['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [nupd_media_group] } })
+      AtlasRb::Blob.create(nupd_work['id'], '/home/cerberus/web/spec/fixtures/files/marsh.jpg', 'marsh.jpg')
+      AtlasRb::Work.complete(nupd_work['id'])
 
       # C: multi-group edit — two independent groups both granted edit on one
       # Collection, so removing one in the permissions UI strips only that
