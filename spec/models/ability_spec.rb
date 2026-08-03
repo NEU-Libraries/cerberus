@@ -115,6 +115,32 @@ describe Ability do
       doc = SolrDocument.new('read_access_group_ssim' => ['curators'])
       expect(ability).not_to be_able_to(:read, doc)
     end
+
+    # Edit-equivalence grants read. Both cases below are reachable from the
+    # permissions form in one save, and both used to leave the person holding
+    # the Edit page while the object itself returned 403.
+    it 'allows the depositor of a private document with no group rows at all' do
+      doc = SolrDocument.new('depositor_ssi' => '000000002')
+      expect(ability).to be_able_to(:read, doc)
+    end
+
+    it 'allows a group granted edit but not read' do
+      doc = SolrDocument.new('read_access_group_ssim' => ['curators'],
+                             'edit_access_group_ssim' => ['editors'])
+      expect(ability).to be_able_to(:read, doc)
+    end
+
+    it 'still denies a stranger with neither ownership nor any group match' do
+      doc = SolrDocument.new('read_access_group_ssim' => ['curators'],
+                             'edit_access_group_ssim' => ['curators'],
+                             'depositor_ssi'          => '000000099')
+      expect(ability).not_to be_able_to(:read, doc)
+    end
+
+    it 'still denies anonymous users a private document' do
+      anon = described_class.new(nil)
+      expect(anon).not_to be_able_to(:read, SolrDocument.new('depositor_ssi' => '000000002'))
+    end
   end
 
   # Admin wildcard short-circuit — mirrors Atlas's `can :manage, :all` for

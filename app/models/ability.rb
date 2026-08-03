@@ -22,8 +22,17 @@ class Ability
   private
 
     def apply_group_abilities(user)
+      # Edit-equivalence grants read as well: anyone entitled to change an
+      # object is entitled to look at it. Without this the read ACL alone
+      # decides, and two ordinary states lock a person out of their own
+      # material — a depositor who sets their collection Private with no group
+      # rows, and a group granted Manage but not View. Both kept the Edit page
+      # and got a 403 on the object itself. This can't widen disclosure: it only
+      # admits people who could already alter the thing. Atlas says the same of
+      # Sets ("edit implies read") and its read floor admits any authenticated
+      # principal, so nothing here outruns what the backend will serve.
       can :read, SolrDocument do |doc|
-        public_document?(doc) || groups_can_read?(doc, user)
+        public_document?(doc) || groups_can_read?(doc, user) || edit_equivalent?(doc, user)
       end
       can :edit, SolrDocument do |doc|
         edit_equivalent?(doc, user)
