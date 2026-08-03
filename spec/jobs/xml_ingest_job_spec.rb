@@ -74,13 +74,15 @@ RSpec.describe XmlIngestJob, type: :job do
       described_class.new.perform(ingest.id, create_row)
       expect(ContentCreationJob).to have_received(:perform_later)
         .with('w-new', File.join(uploads_root, 'w-new', 'pic.tif'), 'pic.tif', 'idem-1')
-      expect(IiifAssetsJob).to have_received(:perform_later).with('w-new', File.join(uploads_root, 'w-new', 'pic.tif'))
+      expect(IiifAssetsJob).to have_received(:perform_later)
+        .with('w-new', File.join(uploads_root, 'w-new', 'pic.tif'), refresh: false)
     end
 
     it 'routes PDF content to IiifAssetsJob for first-page thumbnails' do
       allow(Marcel::MimeType).to receive(:for).and_return('application/pdf')
       described_class.new.perform(ingest.id, create_row)
-      expect(IiifAssetsJob).to have_received(:perform_later).with('w-new', File.join(uploads_root, 'w-new', 'pic.tif'))
+      expect(IiifAssetsJob).to have_received(:perform_later)
+        .with('w-new', File.join(uploads_root, 'w-new', 'pic.tif'), refresh: false)
       expect(ContentCreationJob).to have_received(:perform_later)
     end
 

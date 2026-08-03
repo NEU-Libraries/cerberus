@@ -58,7 +58,7 @@ class IngestDispatch < ApplicationService
 
   def call
     if mime_type.start_with?('image/') || mime_type == 'application/pdf'
-      IiifAssetsJob.perform_later(@work_id, @staged_path)
+      IiifAssetsJob.perform_later(@work_id, @staged_path, refresh: refreshing?)
     elsif CONVERTIBLE_MIME_TYPES.include?(mime_type)
       PdfRenditionJob.perform_later(@work_id, @staged_path, rendition_key)
     elsif mime_type.start_with?('video/', 'audio/')
@@ -71,6 +71,14 @@ class IngestDispatch < ApplicationService
   end
 
   private
+
+    # The two conditions coincide by construction: the only callers that skip
+    # the primary Blob are replace and rollback, and both are re-deriving the
+    # assets of a Work that already has them. A separate flag would be a second
+    # name for the same fact.
+    def refreshing?
+      !@include_primary
+    end
 
     # Direct full-text candidates: native PDFs and plain text. Office docs are
     # excluded here — their text comes from the PDF rendition (PdfRenditionJob),

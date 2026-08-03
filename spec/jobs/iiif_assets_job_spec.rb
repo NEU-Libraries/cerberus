@@ -58,6 +58,19 @@ RSpec.describe IiifAssetsJob, type: :job do
     expect(AtlasRb::FileSet).not_to have_received(:set_iiif_service)
   end
 
+  # The replace and rollback paths re-derive a Work that by definition already
+  # has a thumbnail, so the idempotency guard above would skip exactly the work
+  # they exist to do.
+  it 're-derives despite an existing thumbnail when refreshing' do
+    allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: 'already'))
+    allow(MasterJp2).to receive(:call).with(path: source_path).and_return(result)
+
+    described_class.new.perform(work_id, source_path, refresh: true)
+
+    expect(ThumbnailCreationJob).to have_received(:perform_now).with(work_id, open_base)
+    expect(AtlasRb::FileSet).to have_received(:set_iiif_service).with('fs-1', gated_base)
+  end
+
   it 'discards with a warning when vips cannot read the source (broken/encrypted PDF)' do
     allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: nil))
     allow(MasterJp2).to receive(:call).and_raise(Vips::Error, 'unsupported file format')

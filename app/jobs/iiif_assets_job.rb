@@ -34,8 +34,15 @@ class IiifAssetsJob < ApplicationJob
     )
   end
 
-  def perform(work_id, source_path, derivative_widths: nil)
-    return if AtlasRb::Work.find(work_id).thumbnail.present?
+  # `refresh:` distinguishes "seed the assets" from "re-derive them". The
+  # existing-thumbnail guard makes a *deposit* idempotent under Solid Queue
+  # retries, but it reads as "already done" on a Work whose bytes have since
+  # been replaced — where a thumbnail is always present and is precisely what
+  # must change. Left unguarded there, the job returned immediately and the
+  # page kept showing the superseded image while the download served the new
+  # one, which is indistinguishable from the replace having failed.
+  def perform(work_id, source_path, derivative_widths: nil, refresh: false)
+    return if !refresh && AtlasRb::Work.find(work_id).thumbnail.present?
     return unless File.exist?(source_path)
 
     result = MasterJp2.call(path: source_path)

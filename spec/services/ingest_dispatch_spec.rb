@@ -22,7 +22,7 @@ RSpec.describe IngestDispatch do
   it 'routes images to IiifAssetsJob plus the primary ContentCreationJob' do
     path = fixtures.join('image.png')
     expect { dispatch(path) }
-      .to have_enqueued_job(IiifAssetsJob).with(work_id, path.to_s)
+      .to have_enqueued_job(IiifAssetsJob).with(work_id, path.to_s, refresh: false)
       .and have_enqueued_job(ContentCreationJob).with(work_id, path.to_s, 'image.png', idempotency_key)
       .and not_have_enqueued_job(PdfRenditionJob)
   end
@@ -30,7 +30,7 @@ RSpec.describe IngestDispatch do
   it 'routes PDFs to IiifAssetsJob (first-page thumbnails)' do
     path = fixtures.join('example.pdf')
     expect { dispatch(path) }
-      .to have_enqueued_job(IiifAssetsJob).with(work_id, path.to_s)
+      .to have_enqueued_job(IiifAssetsJob).with(work_id, path.to_s, refresh: false)
       .and have_enqueued_job(ContentCreationJob)
       .and not_have_enqueued_job(PdfRenditionJob)
   end
@@ -116,10 +116,14 @@ RSpec.describe IngestDispatch do
                            idempotency_key: idempotency_key, include_primary: false)
     end
 
+    # `refresh: true` is the load-bearing half. Asserting only that the job is
+    # enqueued passes just as well against a job that returns immediately
+    # because the Work already has a thumbnail — which is every Work reaching
+    # this path.
     it 'refreshes image derivatives but never creates a second primary Blob' do
       path = fixtures.join('image.png')
       expect { dispatch_derivatives_only(path) }
-        .to have_enqueued_job(IiifAssetsJob).with(work_id, path.to_s)
+        .to have_enqueued_job(IiifAssetsJob).with(work_id, path.to_s, refresh: true)
         .and not_have_enqueued_job(ContentCreationJob)
     end
 
