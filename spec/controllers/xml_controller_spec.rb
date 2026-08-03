@@ -92,10 +92,61 @@ describe XmlController do
     end
   end
 
+  # Save re-runs the validator and refuses on failure. It used to write whatever
+  # it was handed: malformed MODS was accepted with no error and no flash, and
+  # stored TRUNCATED at the parse error — every element after it silently
+  # discarded, and recorded in the audit log as an ordinary metadata update.
+  # Nothing forces a curator through Validate first, so the destructive path has
+  # to check for itself.
+  #
+  # `raw_xml` is a minimal stub rather than schema-valid MODS, so these examples
+  # stub the validator, as the `validate` examples above do.
   describe 'update' do
-    it 'redirects' do
-      put :update, params: { resource_id: work.id, raw_xml: raw_xml }
-      expect(response).to redirect_to(work_path(work.id))
+    let(:malformed_xml) { '<mods><titleInfo></oops>' }
+
+    context 'when the submitted XML is valid' do
+      before { allow(XmlValidator).to receive(:call).and_return([]) }
+
+      it 'redirects' do
+        put :update, params: { resource_id: work.id, raw_xml: raw_xml }
+        expect(response).to redirect_to(work_path(work.id))
+      end
+    end
+
+    context 'when the submitted XML is invalid' do
+      # Render for real: the point of the refusal is that the curator SEES why,
+      # and a template-name assertion alone would pass on an unrendered alert.
+      render_views
+
+      before { allow(XmlValidator).to receive(:call).and_return(['Opening and ending tag mismatch']) }
+
+      it 'does not write anything to Atlas' do
+        # Reference the fixture before the stub: AtlasRb::Work.create issues its
+        # own update to attach the MODS, which the stub would otherwise absorb.
+        resource_id = work.id
+        allow(AtlasRb::Work).to receive(:update)
+
+        put :update, params: { resource_id: resource_id, raw_xml: malformed_xml }
+
+        expect(AtlasRb::Work).not_to have_received(:update)
+      end
+
+      it 're-renders the editor with the errors, and refuses the request' do
+        put :update, params: { resource_id: work.id, raw_xml: malformed_xml }
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response).to render_template(:editor)
+        expect(response.body).to include('Not saved')
+        expect(response.body).to include('Opening and ending tag mismatch')
+      end
+
+      # A refusal that reverts the textarea to the stored document throws away
+      # the work that prompted the save — nearly as bad as the truncation.
+      it "keeps the curator's own submission in the editor" do
+        put :update, params: { resource_id: work.id, raw_xml: malformed_xml }
+
+        expect(assigns(:raw_xml)).to eq(malformed_xml)
+      end
     end
   end
 end
