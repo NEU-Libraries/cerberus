@@ -11,18 +11,33 @@
 -# stay public.
 %h5.pb-2 General Permissions
 -# Private is withheld when this user can't carry the narrowing out — a
--# community (no cascade exists for one) or a collection holding other people's
--# material. Same standing rule as the parent-is-private branch below: don't
--# offer a choice that is then denied. The request form is the route instead.
+-# community (admin-only, since it does not reach the contents) or a collection
+-# holding other people's material. Same standing rule as the parent-is-private
+-# branch below: don't offer a choice that is then denied. The request form is
+-# the route instead.
 -# @narrowing_allowed is unset for Works, which have nothing to cascade to.
 - locked_public = @public && @narrowing_allowed == false
 - if @public_allowed && !locked_public
   %select.form-select.form-select-sm#mass{ name: 'mass', 'aria-label' => 'General permissions' }
     %option{ value: 'public', selected: @public ? 'selected' : nil } Public
     %option{ value: 'private', selected: @public ? nil : 'selected' } Private
-  %ul.small.pt-2
-    %li Setting to 'public' will allow anyone accessing the site to see your item.
-    %li Setting to 'private' will only allow groups that are explicitly chosen to see your item.
+  -# A community is the one container whose Private does NOT reach its contents:
+  -# it hides this community's own page, while every collection and work inside
+  -# stays as readable and as searchable as before. Saying "only chosen groups
+  -# can see your item" here would be false, so the community gets its own copy.
+  - if resource == 'community'
+    %ul.small.pt-2
+      %li Setting to 'public' will allow anyone accessing the site to see this community.
+      %li
+        Setting to 'private' hides this community's own page from everyone outside the groups you
+        choose. It does not restrict the collections inside it.
+      %li.text-muted
+        Those collections, and the works in them, stay visible and keep appearing in search.
+        Restrict each one separately if you need that.
+  - else
+    %ul.small.pt-2
+      %li Setting to 'public' will allow anyone accessing the site to see your item.
+      %li Setting to 'private' will only allow groups that are explicitly chosen to see your item.
 - elsif locked_public
   = hidden_field_tag 'mass', 'public'
   .form-text.pt-1
@@ -30,8 +45,8 @@
     %span.fw-semibold Public
   %p.small.text-muted.pt-2.mb-3
     - if resource == 'community'
-      Restricting a community doesn't reach the collections inside it — each one has to be restricted
-      too, so DRS administrators handle it.
+      Restricting a community hides only its own page, never the collections inside it, so DRS
+      administrators handle that change.
     - else
       Restricting this collection would restrict other people's material, so DRS administrators handle it.
     = "Use “Ask to restrict this #{resource}” below."

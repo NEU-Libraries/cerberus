@@ -52,6 +52,45 @@ describe CommunitiesController do
       expect(response.body).not_to include('breadcrumb-add') # Add dropdown suppressed on edit
     end
 
+    # Private on a community reaches that object and nothing else: its own page
+    # goes dark while every collection inside stays readable and searchable.
+    # Only an admin is offered it, and the copy has to say what it does not do —
+    # the generic "only chosen groups can see your item" line would be false.
+    context 'the Private option' do
+      let(:admin_user) do
+        User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin')
+      end
+
+      # The control is only withheld from a community that is currently public —
+      # an already-private one shows the select so it can be widened again. So
+      # the fixture has to be public for this to test anything.
+      before { publicize_ancestry!(community: community) }
+
+      it 'offers Private to an admin, saying it does not restrict the collections inside' do
+        sign_in admin_user
+
+        get :edit, params: { id: community.id }
+
+        expect(response.body).to match(/<option[^>]*value="private"/)
+        expect(response.body).to include('It does not restrict the collections inside it')
+      end
+
+      it 'does not offer an admin the form that asks an administrator' do
+        sign_in admin_user
+
+        get :edit, params: { id: community.id }
+
+        expect(response.body).not_to include('Ask to restrict this community')
+      end
+
+      it 'withholds Private from a non-admin editor and offers the request instead' do
+        get :edit, params: { id: community.id }
+
+        expect(response.body).not_to match(/<option[^>]*value="private"/)
+        expect(response.body).to include('Ask to restrict this community')
+      end
+    end
+
     context 'audit history tab' do
       let(:history_envelope) do
         AtlasRb::Mash.new('resource_id' => community.id, 'events' => [])

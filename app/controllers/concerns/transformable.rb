@@ -222,9 +222,8 @@ module Transformable # rubocop:disable Metrics/ModuleLength
   # ordinary write.
   #
   # Works have nothing beneath them to strip, so they never take this branch.
-  # Communities do, but only to be refused: no cascade exists for them, so
-  # letting one narrow would leave every collection inside it more visible than
-  # its container — the leak this whole path closes.
+  # Communities do, but they never cascade: narrowing one changes that object
+  # alone and deliberately leaves its collections as visible as they were.
   def narrowing_handed_off?(klass, perms)
     return false if klass == 'Work'
     return community_narrowing_refused?(perms) if klass == 'Community'
@@ -237,13 +236,15 @@ module Transformable # rubocop:disable Metrics/ModuleLength
     true
   end
 
-  # A server-side backstop for the Community form, which offers no Private
-  # option. Reaching here means JS-off or a hand-made request, so it refuses
-  # rather than writing — and only for an actual narrowing, since widening a
-  # community is unconstrained and needs no cascade.
+  # A server-side backstop for the Community form, which offers Private to
+  # administrators only. An admin's narrowing is written the ordinary way, with
+  # no cascade — the community's own object changes and nothing below it does.
+  # Anyone else reaching a narrowing here is JS-off or a hand-made request, so
+  # it refuses rather than writing. Widening is unconstrained for everyone.
   def community_narrowing_refused?(perms)
     submitted = Array(perms.dig(:permissions, :read))
     return false unless Permissions.narrowing?(current: Array(@permissions&.read), submitted: submitted)
+    return false if current_user&.admin?
 
     flash[:alert] = COMMUNITY_NARROWING_REFUSED
     true

@@ -309,9 +309,10 @@ describe Transformable do
     end
   end
 
-  # There is no cascade for a Community, so letting one narrow would leave every
-  # collection inside it more visible than its container. The form offers no
-  # Private option; this is the backstop for JS-off or a hand-made request.
+  # Narrowing a Community changes that object alone — no cascade reaches the
+  # collections inside, which stay as visible as they were. Only an admin is
+  # offered it; for everyone else this is the backstop behind a form that does
+  # not show the option, catching JS-off and hand-made requests.
   describe '#apply_permissions when the submit narrows a Community' do
     before { allow(AtlasRb::Community).to receive(:metadata) }
 
@@ -325,6 +326,36 @@ describe Transformable do
 
       expect(AtlasRb::Community).not_to have_received(:metadata)
       expect(host.flash[:alert]).to eq(Transformable::COMMUNITY_NARROWING_REFUSED)
+    end
+
+    it 'refuses a group-ACL editor, who is not an admin' do
+      host.current_user = user_double(groups: ['curators'])
+      host.params = ActionController::Parameters.new(
+        id: 'm-1', community: { permissions: { '1' => { 'group_id' => 'curators', 'ability' => 'read' } } }
+      )
+      host.instance_variable_set(:@permissions, AtlasRb::Mash.new('read' => ['public']))
+
+      host.apply_permissions('Community', 'm-1', :community)
+
+      expect(AtlasRb::Community).not_to have_received(:metadata)
+    end
+
+    # The admin path writes the ordinary way. Nothing is handed to
+    # NarrowingRequest, because a community has no cascade to hand it to — the
+    # shallowness is the behaviour, not an omission.
+    it 'lets an admin narrow the community object, without a cascade' do
+      allow(NarrowingRequest).to receive(:call)
+      host.current_user = user_double(admin: true)
+      host.params = ActionController::Parameters.new(
+        id: 'm-1', community: { permissions: { '1' => { 'group_id' => 'curators', 'ability' => 'read' } } }
+      )
+      host.instance_variable_set(:@permissions, AtlasRb::Mash.new('read' => ['public']))
+
+      host.apply_permissions('Community', 'm-1', :community)
+
+      expect(AtlasRb::Community).to have_received(:metadata)
+      expect(NarrowingRequest).not_to have_received(:call)
+      expect(host.flash[:alert]).to be_nil
     end
 
     # Widening a community is unconstrained — descendants keep their own

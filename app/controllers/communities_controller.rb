@@ -51,9 +51,13 @@ class CommunitiesController < CatalogController
 
   def edit
     @community = AtlasRb::Community.find(params[:id])
-    # No cascade exists for a community, so nobody may narrow one here — not
-    # even an admin. The form withholds Private and offers the request instead.
-    @narrowing_allowed = false
+    # A community narrows its OWN object only. No cascade reaches the
+    # collections inside, which stay exactly as visible and as searchable as
+    # they were. That shallowness is the point — it holds a community's landing
+    # page back without touching its contents — but it is a sharp enough tool to
+    # be admin-only, and the form has to say what it does and does not do.
+    # Everyone else gets the request form instead.
+    @narrowing_allowed = current_user&.admin? || false
     form_preparation(@permissions, resource: @community)
     load_descriptive!('Community')
     load_container_analytics(@community, 'Community')

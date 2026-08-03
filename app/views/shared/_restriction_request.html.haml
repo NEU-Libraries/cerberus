@@ -1,15 +1,15 @@
 -# locals: resource (String) — 'collection' or 'community'.
 -#
--# The way out of a refused narrowing. Rendered when the acting user cannot run
--# the cascade themselves: on a community, where no cascade exists for anyone,
--# and on a collection holding other people's material. Shape follows the Work
--# edit page's move/withdraw requests — a note, a submit, and a Message.
+-# The way out of a refused narrowing. Rendered when the acting user cannot make
+-# the change themselves: on a community, which only an administrator may
+-# restrict, and on a collection holding other people's material. Shape follows
+-# the Work edit page's move/withdraw requests — a note, a submit, and a Message.
 .py-2.px-1
   %h5.pb-2 Restricted access
   %p.text-muted.small.mb-3
     - if resource == 'community'
-      Restricting a community doesn't reach the collections inside it — each one has to be restricted
-      too, so DRS administrators handle it.
+      Restricting a community hides only its own page, never the collections inside it, so DRS
+      administrators handle that change.
     - else
       This collection holds material deposited by other people, so DRS administrators handle restricting it.
     Your request goes to their inbox — they will follow up with you there.
