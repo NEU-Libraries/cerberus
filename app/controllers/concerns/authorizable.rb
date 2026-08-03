@@ -3,14 +3,13 @@
 module Authorizable
   extend ActiveSupport::Concern
 
-  # Raised by the `authorize_*!` helpers when AtlasRb returns a nil
-  # permissions envelope — Atlas's `/resources/:id/permissions` returns
-  # a 200 with no `"resource"` key for unknown IDs, so atlas_rb's
-  # pass-through unwrapping yields nil rather than raising. Translating
-  # that into an explicit sentinel here means the same rescue_from path
-  # handles both the JSON::ParserError shape (from `Resource.find`'s
-  # empty-body 404) and the nil-permissions shape (from the downloads /
-  # before_action route).
+  # Raised by the `authorize_*!` helpers when AtlasRb hands back nothing for an
+  # id. Two reads produce that: `/resources/:id/permissions` answers 200 with no
+  # `"resource"` key for an unknown id, and the guarded read bindings return nil
+  # on a 404. Neither raises by itself, so an unguarded unwrap trips a
+  # NoMethodError on the nil somewhere downstream of the actual cause.
+  # Translating both into one sentinel puts them on the same rescue_from path as
+  # the write-side AtlasRb::NotFoundError.
   class ResourceNotFound < StandardError; end
 
   class_methods do
@@ -62,20 +61,24 @@ module Authorizable
       render template: 'errors/forbidden', status: :forbidden
     end
 
-    # Two flavours of "resource doesn't exist" land here:
+    # Three shapes of "resource doesn't exist" land here, because reads and
+    # writes report a missing id differently:
     #
-    #   1. `AtlasRb::Resource.find` (and its Work/Collection/Community
-    #      siblings) call JSON.parse on Atlas's empty 404 body and the
-    #      parser raises `unexpected end of input`.
-    #   2. `AtlasRb::Resource.permissions` returns nil for unknown IDs;
-    #      the `authorize_*!` helpers below raise `ResourceNotFound`
-    #      in that case so we don't trip a `NoMethodError` on the nil.
+    #   1. `AtlasRb::NotFoundError` — a WRITE against a stale id. The guarded
+    #      write bindings raise rather than return, since a caller that asked
+    #      to change something and silently got nil is the worse outcome.
+    #   2. `ResourceNotFound` — a READ that came back empty. The guarded read
+    #      bindings return nil on a 404, and `permissions` returns nil for an
+    #      unknown id, so the `authorize_*!` helpers raise this sentinel.
+    #   3. `JSON::ParserError` — the pre-guard shape, from a binding that still
+    #      parses a response body without consulting the status. Only the
+    #      `/user` authentication reads are left on that path; keep this until
+    #      they are guarded too, or a stale id there becomes a 500.
     #
-    # Both shapes render the same friendly 404 page rather than the
-    # default Rails exception trace, with the singularized controller
-    # name giving the template a sensible `obj_type` default
-    # ("work" / "collection" / "community" / "download" / etc.).
-    rescue_from JSON::ParserError, ResourceNotFound do
+    # All three render the same friendly 404 page rather than the default Rails
+    # exception trace, with the singularized controller name giving the template
+    # a sensible `obj_type` default ("work" / "collection" / "download" / etc.).
+    rescue_from AtlasRb::NotFoundError, JSON::ParserError, ResourceNotFound do
       render template: 'errors/not_found',
              status:   :not_found,
              locals:   { obj_type: controller_name.singularize }

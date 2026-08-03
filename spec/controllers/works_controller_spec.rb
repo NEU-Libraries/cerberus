@@ -710,6 +710,20 @@ describe WorksController do
       # resource-aware rather than the generic "page" default.
       expect(CGI.unescapeHTML(response.body)).to include('the work you requested was not found')
     end
+
+    # A read against a missing id comes back nil; a WRITE raises
+    # AtlasRb::NotFoundError instead, because a caller that asked to change
+    # something and silently got nil is the worse outcome. Both belong on the
+    # same 404 page — without the write shape in the rescue list it renders a
+    # Rails 500, params dump and all.
+    it 'renders the same 404 when a write raises AtlasRb::NotFoundError' do
+      allow(AtlasRb::Work).to receive(:find).and_raise(AtlasRb::NotFoundError, 'GET /works/x → 404')
+
+      get :show, params: { id: 'does-not-exist-1234' }
+
+      expect(response).to have_http_status(:not_found)
+      expect(response).to render_template('errors/not_found')
+    end
   end
 
   # The personal-root trail is isolated on the private seam. work_breadcrumbs reads

@@ -47,6 +47,19 @@ RSpec.describe XmlIngestJob, type: :job do
       expect(ingest).to be_completed
     end
 
+    # A row pointing at an id this repository doesn't hold is the ordinary
+    # hand-built-manifest mistake, and must read as that rather than as three
+    # exhausted attempts and an exception class.
+    it 'fails the row once, naming the identifier, when the object does not exist' do
+      allow(AtlasRb::Work).to receive(:update).and_raise(AtlasRb::NotFoundError, 'PATCH /works/noid-9 → 404')
+
+      described_class.new.perform(ingest.id, update_row)
+
+      expect(ingest.reload).to be_failed
+      expect(ingest.error_message).to eq("No object with identifier 'noid-9' exists in this repository.")
+      expect(ingest.error_message).not_to include('attempts')
+    end
+
     it 'does not create a new Work' do
       expect(AtlasRb::Work).not_to receive(:create)
       described_class.new.perform(ingest.id, update_row)
