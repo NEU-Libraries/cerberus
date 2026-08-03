@@ -18,6 +18,31 @@ class DerivativeDownloadsController < ApplicationController
 
     deny_if_embargoed!(params[:work_id])
     authorize! :read, derivative_tier_document(delegate)
-    redirect_to IiifSigner.sign_url(delegate['uri']), allow_other_host: true, status: :found
+    redirect_to download_url_for(delegate), allow_other_host: true, status: :found
   end
+
+  private
+
+    # A control labelled Download has to download. The redirect lands on
+    # Cantaloupe, so the browser obeys *its* headers, not ours: a `download`
+    # attribute on the link is ignored across origins, and without a disposition
+    # the JPEG simply renders in a new tab — leaving the master row saving a file
+    # and the size rows opening a viewer, from one list, under one word.
+    #
+    # Cantaloupe reads `response-content-disposition`, and appending it after
+    # signing is safe because the HMAC covers the request PATH only (see
+    # IiifSigner) — the query string is not part of the message.
+    def download_url_for(delegate)
+      "#{IiifSigner.sign_url(delegate['uri'])}&response-content-disposition=" \
+        "#{CGI.escape(ActionDispatch::Http::ContentDisposition.format(disposition: 'attachment',
+                                                                      filename: derivative_filename(delegate)))}"
+    end
+
+    # Mirrors the master row's `master_<noid>.jpg`: the tier, then the work, so
+    # three tiers of three works don't collide in one Downloads folder. The
+    # tier slug matches the zip entry names ZipEntryWriter writes.
+    def derivative_filename(delegate)
+      slug = delegate['use'].to_s.parameterize.presence || 'derivative'
+      "#{slug}_#{params[:work_id]}.jpg"
+    end
 end
