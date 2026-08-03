@@ -39,6 +39,30 @@ describe WorksController do
       expect(CGI.unescapeHTML(response.body)).to include(work.title)
     end
 
+    # The preview is the largest thing on the page and carried no alt at all,
+    # so a screen reader announced an unlabelled image. Nothing in the
+    # repository describes what a preview depicts, so it is named by its work.
+    context 'the preview image' do
+      it 'names the work it previews' do
+        AtlasRb::Work.set_thumbnails(work.id, thumbnail: 't', thumbnail_2x: 't2',
+                                              preview: 'http://example.com/preview.jpg')
+
+        get :show, params: { id: work.id }
+
+        # The fixture title carries an apostrophe, which HAML escapes.
+        expect(CGI.unescapeHTML(response.body)).to include(%(alt="Preview of #{work.title}"))
+      end
+
+      # The no-preview placeholder is a decorative icon, already aria-hidden —
+      # it must not gain an announced label in its place.
+      it 'renders the placeholder with nothing to announce when there is no preview' do
+        get :show, params: { id: work.id }
+
+        expect(response.body).not_to include('alt="Preview of')
+        expect(response.body).to include('fa-regular fa-image')
+      end
+    end
+
     context 'Edit affordance is gated on the :edit ability' do
       it 'is hidden from a signed-in user who cannot edit' do
         sign_in User.new(email: 'viewer@example.com', nuid: '000000005', role: 'standard', groups: [])
