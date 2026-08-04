@@ -2,10 +2,16 @@
 
 require 'rails_helper'
 
-# Admin People registry: create Person records by NUID, edit display_name /
-# title / bio / orcid, and add/remove community affiliations. atlas_rb and the
-# community search are stubbed — these exercise the Cerberus controller/view
-# wiring (and the admin gate), not Atlas or Solr.
+# Admin People registry: create Person records by NUID, edit display_name / bio
+# / orcid, and add/remove community affiliations. atlas_rb and the community
+# search are stubbed — these exercise the Cerberus controller/view wiring (and
+# the admin gate), not Atlas or Solr.
+#
+# The create and update examples submit every field the form submits, not just
+# the one under assertion. The controller splats its permitted params into an
+# atlas_rb keyword signature, and verify_partial_doubles checks a stubbed call
+# against the real signature — so a permitted key the gem has dropped fails here
+# only if the request actually carries it.
 RSpec.describe 'Admin::People', type: :request do
   include Devise::Test::IntegrationHelpers
 
@@ -30,7 +36,7 @@ RSpec.describe 'Admin::People', type: :request do
 
   let(:person) do
     { 'id' => 'cz8wbpk', 'nuid' => '000000004', 'display_name' => 'David Cliff',
-      'title' => 'Developer', 'bio' => 'Builds the DRS.', 'orcid' => '0000-0002-1825-0097',
+      'bio' => 'Builds the DRS.', 'orcid' => '0000-0002-1825-0097',
       'affiliated_community_ids' => ['jm640df'] }
   end
 
@@ -84,7 +90,9 @@ RSpec.describe 'Admin::People', type: :request do
           .with(hash_including(nuid: '000000009', display_name: 'New Person'))
           .and_return({ 'id' => 'new1234', 'display_name' => 'New Person' })
 
-        post admin_people_path, params: { person: { nuid: '000000009', display_name: 'New Person' } }
+        post admin_people_path, params: { person: { nuid: '000000009', display_name: 'New Person',
+                                                    bio: 'Joined this week.',
+                                                    orcid: '0000-0002-1825-0097' } }
 
         expect(response).to redirect_to(edit_admin_person_path('new1234'))
       end
@@ -123,7 +131,9 @@ RSpec.describe 'Admin::People', type: :request do
         expect(AtlasRb::Person).to receive(:update)
           .with('cz8wbpk', hash_including(display_name: 'David C.')).and_return(person)
 
-        patch admin_person_path('cz8wbpk'), params: { person: { display_name: 'David C.' } }
+        patch admin_person_path('cz8wbpk'),
+              params: { person: { display_name: 'David C.', bio: 'Builds the DRS.',
+                                  orcid: '0000-0002-1825-0097' } }
 
         expect(response).to redirect_to(edit_admin_person_path('cz8wbpk'))
       end

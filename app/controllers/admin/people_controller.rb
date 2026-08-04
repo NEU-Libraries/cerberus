@@ -2,8 +2,8 @@
 
 module Admin
   # Curatorial Person registry (admin-only, via Admin::BaseController). Librarians
-  # create Person records by NUID, edit the authoritative display_name / title /
-  # bio / orcid, and manage community affiliations — the edges that drive the
+  # create Person records by NUID, edit the authoritative display_name / bio /
+  # orcid, and manage community affiliations — the edges that drive the
   # Faculty & Staff browse. All persistence goes through atlas_rb; the acting
   # principal is the signed-in admin (Current.nuid). The NUID is staff-facing
   # (shown here, on an admin-gated surface) but never enters a URL — Persons are
@@ -94,12 +94,16 @@ module Admin
         ResourceSearch.call(scope: self, query: params[:q], types: %w[Community])
       end
 
+      # Each permitted key is splatted into an atlas_rb keyword signature, so the
+      # list is a contract with the gem, not just a mass-assignment filter: a key
+      # the binding does not declare raises ArgumentError rather than being
+      # ignored.
       def create_params
-        params.require(:person).permit(:nuid, :display_name, :title, :bio, :orcid).to_h.symbolize_keys
+        params.require(:person).permit(:nuid, :display_name, :bio, :orcid).to_h.symbolize_keys
       end
 
       def update_params
-        params.require(:person).permit(:display_name, :title, :bio, :orcid).to_h.symbolize_keys
+        params.require(:person).permit(:display_name, :bio, :orcid).to_h.symbolize_keys
       end
   end
 end

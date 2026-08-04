@@ -11,8 +11,8 @@
 #   index — a gated Blacklight search over Person docs. Scoped to a community's
 #           affiliated People when reached via /communities/:community_id/people
 #           (the Faculty & Staff browse); global at /people otherwise.
-#   show  — one person's profile: the curated header (display_name / title /
-#           bio / orcid) over a gated faceted search of the works they deposited
+#   show  — one person's profile: the curated header (display_name / bio /
+#           orcid) over a gated faceted search of the works they deposited
 #           (depositor_ssi:<nuid>, the nuid resolved server-side from the Person).
 #
 # Inherits CatalogController for the gated search_service. search_action_url is

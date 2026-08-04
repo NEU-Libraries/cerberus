@@ -12,8 +12,6 @@
   = render 'shared/breadcrumbs', show_add: false
 
   .container.p-4.my-3.well.rounded-3
-    - if @person['title'].present?
-      .text-muted.text-uppercase.fw-semibold.small.mb-1{ style: 'letter-spacing:.08em' }= @person['title']
     %h3.mb-0
       %i.fa-solid.fa-user.text-primary.me-2{ 'aria-hidden' => 'true' }
       = @display_name

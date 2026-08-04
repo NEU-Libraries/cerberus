@@ -143,7 +143,6 @@ namespace :reset do
       # structural home for works she publishes; the affiliation makes the Library
       # her publish target.
       jane = AtlasRb::Person.create(nuid: '000000002', display_name: 'Jane Doe',
-                                    title: 'Professor of Marine and Environmental Sciences',
                                     bio: 'Researches coastal resilience and marine ecosystems.')
       AtlasRb::Person.add_affiliation(jane['id'], library['id'])
 

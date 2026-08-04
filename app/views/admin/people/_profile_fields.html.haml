@@ -1,16 +1,10 @@
--# Title / bio / orcid — shared by new and edit. `pv` is the current-value source
+-# Bio / orcid — shared by new and edit. `pv` is the current-value source
 -# (the submitted params on a re-render, or the @person Mash on edit); both
 -# support indifferent string access.
 .admin-registry-form__section
   %h3.admin-registry-form__section-title
     %i.fa-solid.fa-address-card{'aria-hidden' => 'true'}
     Profile
-  .mb-3
-    = f.label :title, class: 'admin-registry-form__label' do
-      %i.fa-solid.fa-briefcase{'aria-hidden' => 'true'}
-      Title
-    = f.text_field :title, value: pv['title'], class: 'form-control', autocomplete: 'off'
-    .admin-registry-form__hint Role or position — e.g. "Professor of Political Science".
   .mb-3
     = f.label :bio, class: 'admin-registry-form__label' do
       %i.fa-solid.fa-align-left{'aria-hidden' => 'true'}
