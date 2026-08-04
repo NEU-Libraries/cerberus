@@ -25,7 +25,7 @@
             %th{scope: 'col'} Type
             %th{scope: 'col'} Grouper group
             %th{scope: 'col'} Root collection
-            %th{scope: 'col'}
+            %th.text-end{scope: 'col'} Actions
         %tbody
           - @loaders.each do |loader|
             %tr
@@ -40,9 +40,17 @@
               %td
                 %span.admin-registry-table__id= loader.root_collection
               %td.text-end
-                = link_to edit_admin_loader_path(loader), class: 'admin-registry-table__edit' do
-                  %i.fa-solid.fa-pen{'aria-hidden' => 'true'}
-                  Edit
+                .d-inline-flex.gap-3.align-items-center
+                  = link_to edit_admin_loader_path(loader), class: 'admin-registry-table__edit' do
+                    %i.fa-solid.fa-pen{'aria-hidden' => 'true'}
+                    Edit
+                  -# Offered on every row; a loader that has run refuses the delete
+                  -# and says why, rather than being hidden with no explanation.
+                  = button_to admin_loader_path(loader), method: :delete,
+                              class: 'admin-registry-table__edit btn btn-link p-0 text-danger',
+                              form: { class: 'd-inline', data: { turbo_confirm: "Delete the loader '#{loader.slug}'? Its members lose this upload route. A loader that has already run cannot be deleted." } } do
+                    %i.fa-solid.fa-trash-can{'aria-hidden' => 'true'}
+                    Delete
   - else
     .admin-registry__empty
       %i.fa-solid.fa-layer-group.admin-registry__empty-icon{'aria-hidden' => 'true'}

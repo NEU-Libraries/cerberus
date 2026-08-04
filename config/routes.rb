@@ -165,7 +165,8 @@ Rails.application.routes.draw do
 
   namespace :admin do
     root to: 'dashboard#index'
-    resources :loaders, only: [:index, :new, :create, :edit, :update], param: :slug
+    # Destroy is refused for a loader that has run — see LoadersController.
+    resources :loaders, only: [:index, :new, :create, :edit, :update, :destroy], param: :slug
 
     # Group names — the cosmetic display name for a Grouper group (raw → pretty),
     # consulted by ApplicationController#pretty_group wherever a group surfaces.
