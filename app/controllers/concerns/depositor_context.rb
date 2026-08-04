@@ -31,12 +31,15 @@ module DepositorContext
     # curated Person) ⇒ no personal workspace. Featured showcases are excluded;
     # ungated (own private collections must stay visible). The root subtree is
     # inherently the person's own, so depositor scoping is unnecessary here.
+    #
+    # Newest first, over Valkyrie's own record timestamp — a depositor reaches
+    # for the collection they just made.
     def workspace_collections(rows: 200)
       root = deposit_person&.[]('personal_root_id').presence
       return [] unless root
 
       Blacklight.default_index.search(
-        q: '*:*', rows: rows, sort: 'system_create_dtsi desc',
+        q: '*:*', rows: rows, sort: 'created_at_dtsi desc',
         fq: ['internal_resource_tesim:Collection',
              %(ancestor_ids_ssim:"#{root.to_s.gsub(/["\\]/, '')}"),
              '-featured_bsi:true', '-tombstoned_bsi:true']

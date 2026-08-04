@@ -24,11 +24,13 @@ class TombstonedItems < ApplicationService
   end
 
   # @return [Blacklight::Solr::Response] the tombstoned resource documents,
-  #   ordered by title (no withdrawal timestamp is indexed to sort on).
+  #   ordered by title (no withdrawal timestamp is indexed to sort on). The sort
+  #   field is Atlas's sort-only `title_ssi`, not the multi-valued `title_tsim`
+  #   the registry displays — Solr sorts on a single-valued field only.
   def call
     builder = TombstonedSearchBuilder.new(@scope)
                                      .with(q: '*:*', per_page: PER_PAGE, page: @page)
-                                     .merge(sort: 'title_si asc')
+                                     .merge(sort: 'title_ssi asc')
     Blacklight.default_index.search(builder)
   end
 end

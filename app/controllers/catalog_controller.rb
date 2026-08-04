@@ -229,14 +229,26 @@ class CatalogController < ApplicationController
     # end
 
     # "sort results by" select (pulldown)
-    # label in pulldown is followed by the name of the Solr field to sort by and
-    # whether the sort is ascending or descending (it must be asc or desc
-    # except in the relevancy case). Add the sort: option to configure a
-    # custom Blacklight url parameter value separate from the Solr sort fields.
-    config.add_sort_field 'relevance', sort: 'score desc, pub_date_si desc, title_si asc', label: 'relevance'
-    config.add_sort_field 'year-desc', sort: 'pub_date_si desc, title_si asc', label: 'year'
-    config.add_sort_field 'author', sort: 'author_si asc, title_si asc', label: 'author'
-    config.add_sort_field 'title_si asc, pub_date_si desc', label: 'title'
+    #
+    # Every clause must name a field Atlas indexes as single-valued: Solr sorts
+    # on a single-valued field only, and it does not error on a field no
+    # document carries — it finds the value missing everywhere and returns
+    # index order, so a sort naming an unindexed field silently does nothing.
+    # `title_ssi`, `creator_ssi` and `date_ssi` are Atlas's SortIndexer fields,
+    # projected for sorting alone and never displayed; `created_at_dtsi` is
+    # Valkyrie's own record timestamp. Title breaks each name tie so a sort is
+    # deterministic across pages.
+    #
+    # date_ssi and created_at_dtsi are deliberately separate options: date_ssi
+    # is the MODS origin date (when the thing itself was made), created_at_dtsi
+    # is when the repository made the record. For an archival scan a reader
+    # wants the first.
+    config.add_sort_field 'relevance', sort: 'score desc, created_at_dtsi desc', label: 'relevance'
+    config.add_sort_field 'title', sort: 'title_ssi asc', label: 'title'
+    config.add_sort_field 'creator', sort: 'creator_ssi asc, title_ssi asc', label: 'creator (A-Z)'
+    config.add_sort_field 'creator-desc', sort: 'creator_ssi desc, title_ssi asc', label: 'creator (Z-A)'
+    config.add_sort_field 'date-created', sort: 'date_ssi desc, title_ssi asc', label: 'date created'
+    config.add_sort_field 'date-added', sort: 'created_at_dtsi desc, title_ssi asc', label: 'date added'
 
     # If there are more than this many search results, no spelling ("did you
     # mean") suggestion is offered.
