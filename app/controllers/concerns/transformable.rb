@@ -358,18 +358,21 @@ module Transformable # rubocop:disable Metrics/ModuleLength
     permitted[:permissions][:embargo] = params[resource_key][:permissions][:embargo]
   end
 
-  # Apply the Public/Private visibility toggle to the read ACL. Always sets
-  # `read` definitively when `mass` is present: 'public' becomes `['public']`;
-  # private becomes the explicit group-read list minus the public sentinel —
-  # which is `[]` when there are no group grants. The earlier version only
-  # *deleted* 'public' from an existing read array, so a Private save with no
-  # group grants produced no `read` key at all, Atlas left read unchanged, and
-  # the item silently stayed public (a disclosure bug).
+  # Apply the Public/Private visibility toggle to the read ACL. `read` is always
+  # set definitively when `mass` is present, including to `[]` — omitting the key
+  # leaves Atlas's stored read untouched, so a Private save with no group grants
+  # would silently keep the item public.
+  #
+  # Public keeps the group grants alongside the sentinel rather than replacing
+  # them. They grant nothing extra while the item is public, but they are what a
+  # later flip to Private falls back to, so dropping them here would revoke a
+  # grant the curator made in the very submit that added it. Sets compose their
+  # read ACL the same way — see SetSharing#build_permissions.
   def mass_permissions(permitted)
     return unless params[:mass]
 
     permitted[:permissions] ||= {}
     group_read = Array(permitted[:permissions][:read]) - ['public']
-    permitted[:permissions][:read] = params[:mass] == 'public' ? ['public'] : group_read
+    permitted[:permissions][:read] = params[:mass] == 'public' ? (['public'] + group_read).uniq : group_read
   end
 end

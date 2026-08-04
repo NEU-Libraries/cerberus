@@ -211,13 +211,46 @@ describe Transformable do
       expect(permitted[:permissions][:read]).to eq(['librarians'])
     end
 
-    it 'sets read to [public] when :mass is "public"' do
+    it 'keeps the group grants alongside public when :mass is "public"' do
       host.params = { mass: 'public' }
       permitted = { permissions: { read: ['librarians'] } }
 
       host.mass_permissions(permitted)
 
+      # The grant is redundant while the item is public, but it is what a later
+      # flip to Private falls back to — so this submit must not silently drop it.
+      expect(permitted[:permissions][:read]).to eq(%w[public librarians])
+    end
+
+    it 'sets read to [public] when :mass is "public" with no group grants' do
+      host.params = { mass: 'public' }
+      permitted = { permissions: { read: [] } }
+
+      host.mass_permissions(permitted)
+
       expect(permitted[:permissions][:read]).to eq(['public'])
+    end
+
+    it 'does not duplicate the public sentinel already in read' do
+      host.params = { mass: 'public' }
+      permitted = { permissions: { read: %w[public librarians public] } }
+
+      host.mass_permissions(permitted)
+
+      expect(permitted[:permissions][:read]).to eq(%w[public librarians])
+    end
+
+    it 'survives a public save then a private one with the grants intact' do
+      # The A2 hazard end to end: the grant added on the public save is what
+      # makes the item reachable by that group once it goes private.
+      host.params = { mass: 'public' }
+      permitted = { permissions: { read: ['librarians'] } }
+      host.mass_permissions(permitted)
+
+      host.params = { mass: 'private' }
+      host.mass_permissions(permitted)
+
+      expect(permitted[:permissions][:read]).to eq(['librarians'])
     end
 
     it 'strips public from read when :mass is non-public' do
