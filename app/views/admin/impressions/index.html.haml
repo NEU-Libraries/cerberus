@@ -56,9 +56,9 @@
           .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-dataset-value' => usage_visitors_series(@report).to_json, 'usage-chart-colors-value' => %w[#5d569b].to_json}}
 
       #files.tab-pane{'aria-labelledby' => 'files-tab', role: 'tabpanel'}
-        = render 'top_table', entries: @report.top_works, empty: 'No file activity in this range.'
+        = render 'top_table', entries: @report.top_works, kind: 'work', empty: 'No file activity in this range.'
       - if @report.show_collections_tab?
         #collections.tab-pane{'aria-labelledby' => 'collections-tab', role: 'tabpanel'}
-          = render 'top_table', entries: @report.top_containers, empty: 'No container activity in this range.'
+          = render 'top_table', entries: @report.top_containers, kind: 'container', empty: 'No container activity in this range.'
       #composition.tab-pane{'aria-labelledby' => 'composition-tab', role: 'tabpanel'}
         = render 'composition', composition: @composition
