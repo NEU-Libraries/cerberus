@@ -32,6 +32,12 @@ describe XmlController do
       expect(assigns(:raw_xml)).to be_present
     end
 
+    it 'renders the refusal container empty, so Validate has a node to replace' do
+      get :editor, params: { id: work.id }
+      expect(response.body).to include('id="save_refusal"')
+      expect(response.body).not_to include('Not saved')
+    end
+
     it 'renders a breadcrumb trail ending in the resource and "Edit Work"' do
       get :editor, params: { id: work.id }
       expect(response.body).to include('aria-label="breadcrumb"')
@@ -88,6 +94,31 @@ describe XmlController do
         expect(assigns(:errors)).to eq(['xmlns:mods missing'])
         expect(assigns(:mods)).to be_nil
         expect(AtlasRb::Resource).not_to have_received(:preview)
+      end
+    end
+
+    # The refusal banner sits above the form, outside the #mods node the preview
+    # replaces, so clearing it needs a replace of its own. Asserted on the stream
+    # body rather than on assigns, since the bug was entirely in what got sent.
+    context 'the refusal banner left by an earlier refused Save' do
+      render_views
+
+      it 'clears it when validation passes' do
+        allow(XmlValidator).to receive(:call).and_return([])
+        put :validate, params: { resource_id: work.id, raw_xml: raw_xml }, xhr: true
+
+        expect(response.body).to include('target="save_refusal"')
+        expect(response.body).not_to include('Not saved')
+      end
+
+      it 'leaves it when validation fails' do
+        allow(XmlValidator).to receive(:call).and_return(['xmlns:mods missing'])
+        put :validate, params: { resource_id: work.id, raw_xml: raw_xml }, xhr: true
+
+        # Nothing was written, so a refusal from an earlier Save is still true.
+        # The current errors render in the preview pane instead of twice at once.
+        expect(response.body).not_to include('target="save_refusal"')
+        expect(response.body).to include('XML validation failed')
       end
     end
   end

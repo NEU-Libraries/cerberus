@@ -19,13 +19,7 @@
 -# A refused Save renders here with the curator's own submission still in the
 -# editor. Shown above the form so it is the first thing read, rather than
 -# leaving them to wonder why the page came back unchanged.
-- if @errors.present?
-  .alert.alert-danger{role: "alert"}
-    %h5.alert-heading Not saved — this XML is not valid
-    %p.mb-2 Your changes are still in the editor below. Correct the problem and save again.
-    %ul.mb-0
-      - @errors.each do |err|
-        %li= err.to_s
+= render 'save_refusal', errors: Array(@errors)
 
 = form_tag xml_validate_path, :method => :put, :id => "raw_xml_form" do
   = hidden_field_tag "resource_id", @resource.id

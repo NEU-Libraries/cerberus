@@ -1,0 +1,14 @@
+-# locals: errors (Array) — the validation messages from a refused Save; empty
+-# when the last Save was not refused.
+-#
+-# The container renders whether or not there are errors, because the Validate
+-# turbo_stream replaces this node to clear a stale refusal — Turbo needs the
+-# target to be on the page to find it.
+#save_refusal
+  - if errors.present?
+    .alert.alert-danger{role: "alert"}
+      %h5.alert-heading Not saved — this XML is not valid
+      %p.mb-2 Your changes are still in the editor below. Correct the problem and save again.
+      %ul.mb-0
+        - errors.each do |err|
+          %li= err.to_s
