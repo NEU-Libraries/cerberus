@@ -27,7 +27,7 @@ module SetsHelper
   # are present. Mirrors the mockup's phrasing.
   def set_recipe_sentence(chips_count:, added_count:, aside_count:)
     if chips_count.zero? && added_count.zero?
-      return 'This set is empty — add works or collections to it from their pages.'
+      return 'This set is empty — search the repository, then use “Add to set” on a result.'
     end
 
     clauses = set_recipe_clauses(chips_count, added_count, aside_count)
