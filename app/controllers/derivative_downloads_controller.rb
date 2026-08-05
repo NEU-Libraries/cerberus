@@ -16,13 +16,19 @@ class DerivativeDownloadsController < ApplicationController
                             .find { |asset| asset['use'] == params[:use] && asset['uri'].present? }
     raise Authorizable::ResourceNotFound if delegate.nil?
 
-    deny_if_unfinished_work!(params[:work_id])
-    deny_if_embargoed!(params[:work_id])
-    authorize! :read, derivative_tier_document(delegate)
+    authorize_tier!(delegate)
     redirect_to download_url_for(delegate), allow_other_host: true, status: :found
   end
 
   private
+
+    # Three gates on the containing Work and the tier itself: the deposit must be
+    # finished, the Work not embargoed, and the tier readable by this caller.
+    def authorize_tier!(delegate)
+      deny_if_unfinished_work!(params[:work_id])
+      deny_if_embargoed!(params[:work_id])
+      authorize! :read, derivative_tier_document(delegate)
+    end
 
     # A control labelled Download has to download. The redirect lands on
     # Cantaloupe, so the browser obeys *its* headers, not ours: a `download`

@@ -21,6 +21,10 @@ class MyDrsController < CatalogController
     @accounts = account_list
     @workspace_collections = workspace_collections
     @published = published_by_category
+    # Deposits this person started and never confirmed. My DRS is the only place
+    # they can find one: an unfinished deposit is hidden from general discovery,
+    # and its depositor is the one person who can finish it.
+    @unfinished = unfinished_deposits
     # Drives the "New collection" affordance — present only for a depositor with
     # a personal root to create the collection under.
     @personal_root_id = deposit_person&.[]('personal_root_id').presence
@@ -61,6 +65,19 @@ class MyDrsController < CatalogController
         'internal_resource_tesim:Collection', 'featured_bsi:true', '-tombstoned_bsi:true',
         MembershipQuery.descendants_fq(community_noids)
       ).merge(rows: 100)
+      Blacklight.default_index.search(builder).documents
+    end
+
+    # This depositor's own unfinished deposits. The gated search's own
+    # unfinished-deposit filter keeps a depositor their own rows, so this composes
+    # with it rather than working around it.
+    def unfinished_deposits
+      builder = search_service.search_builder.with({}).with_filters(
+        'internal_resource_tesim:Work',
+        %(depositor_ssi:"#{depositor_phrase}"),
+        'in_progress_bsi:true',
+        '-tombstoned_bsi:true'
+      ).merge(rows: 50)
       Blacklight.default_index.search(builder).documents
     end
 

@@ -70,6 +70,31 @@ RSpec.describe 'My DRS', type: :request do
       expect(response.body).to include('My Dataset')       # published work under it
     end
 
+    # An unfinished deposit is hidden from general discovery, so My DRS is the only
+    # place its depositor can find one — and they are the only person who can
+    # finish it.
+    it 'lists this depositor\'s unfinished deposits with a route that finishes one' do
+      allow(AtlasRb::Person).to receive(:resolve).and_return([])
+      unfinished = SolrDocument.new('id' => 'uuid-u', 'title_tsim' => ['thesis.docx'],
+                                    'alternate_ids_tesim' => ['id-unoid'], 'in_progress_bsi' => true)
+      allow_any_instance_of(MyDrsController).to receive(:unfinished_deposits).and_return([unfinished])
+
+      get '/my_drs'
+
+      expect(response.body).to include('Deposits to finish')
+      expect(response.body).to include('thesis.docx')
+      expect(response.body).to include(metadata_work_path('unoid'))
+    end
+
+    it 'omits the panel entirely when nothing is unfinished' do
+      allow(AtlasRb::Person).to receive(:resolve).and_return([])
+      allow_any_instance_of(MyDrsController).to receive(:unfinished_deposits).and_return([])
+
+      get '/my_drs'
+
+      expect(response.body).not_to include('Deposits to finish')
+    end
+
     it 'renders the accounts switcher for a person with more than one account' do
       allow(AtlasRb::Person).to receive(:resolve).and_return([])
       allow(AtlasRb::User).to receive(:accounts).and_return(

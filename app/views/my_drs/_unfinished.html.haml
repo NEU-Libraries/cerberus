@@ -1,0 +1,33 @@
+-# Deposits this person started and never confirmed. Rendered only when there are
+-# any: an empty state here would be a permanent panel about a state most
+-# depositors never reach, and the page's two columns already carry their own.
+-#
+-# Placed above the workspace/published split because it is the only actionable
+-# thing on the page — every row is waiting on this person. The caution tone
+-# matches the "In progress" result pill.
+-#
+-# Finish deposit goes to the metadata step, not Edit: an unfinished deposit
+-# refuses Edit by design, and the metadata step is the route that completes it.
+.my-drs-card.bg-white.border.rounded-3.overflow-hidden.shadow-sm.mb-4
+  .my-drs-card__head.p-3
+    %h5.mb-1
+      %i.fa-solid.fa-circle-exclamation.text-warning.me-2{ 'aria-hidden' => 'true' }
+      Deposits to finish
+    %p.small.text-muted.mb-0
+      Only you and repository staff can see these until you finish them.
+  .table-responsive
+    %table.table.table-borderless.admin-registry-table
+      %thead
+        %tr
+          %th{ scope: 'col' } File
+          %th.text-end{ scope: 'col' } Finish
+      %tbody
+        - unfinished.each do |work|
+          %tr
+            %td.admin-registry-table__name
+              %i.fa-regular.fa-file.text-muted.me-2{ 'aria-hidden' => 'true' }
+              = Array(work['title_tsim']).first.presence || '(untitled)'
+            %td.text-end
+              = link_to metadata_work_path(work), class: 'btn btn-sm btn-warning' do
+                %i.fa-solid.fa-pen-to-square.me-1{ 'aria-hidden' => 'true' }
+                Finish deposit

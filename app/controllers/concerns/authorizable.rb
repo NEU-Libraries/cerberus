@@ -119,38 +119,6 @@ module Authorizable
       authorize! :read, solr_doc_from_permissions(@permissions)
     end
 
-    # An unfinished deposit — in_progress, meaning no depositor has confirmed it —
-    # is a placeholder rather than a record: typically titled with the uploaded
-    # filename and carrying no subjects. Read gating does not cover it, because it
-    # inherits its parent's audience, so one deposited into a public collection is
-    # public. This refuses the page and the bytes behind it.
-    #
-    # 404 rather than 403: a deposit nobody has confirmed should not have its
-    # existence confirmed either.
-    def deny_if_unfinished!(work)
-      raise ResourceNotFound if work.in_progress && !may_see_unfinished?(work)
-    end
-
-    # Staff and admins because they curate. The depositor because the flag clears
-    # on *their* next action, and hiding a deposit from the one person who can
-    # finish it would strand it.
-    def may_see_unfinished?(work)
-      return false if effective_user.blank?
-      return true if effective_user.admin? || effective_user.member_of?(Permissions::STAFF_EDIT_GROUP)
-
-      effective_user.nuid.present? && effective_user.nuid == work.depositor
-    end
-
-    # For the byte routes, which hold a work id rather than the Work. The extra
-    # Atlas read is unavoidable: neither a Blob's own gate nor a permissions
-    # envelope carries the containing Work's deposit state.
-    def deny_if_unfinished_work!(work_id)
-      return if work_id.blank?
-
-      work = AtlasRb::Work.find(work_id)
-      deny_if_unfinished!(work) if work
-    end
-
     def authorize_edit!
       authorize_edit_for!(params[:id])
     end

@@ -25,6 +25,12 @@
 - if @accounts.to_a.size > 1
   = render 'accounts', accounts: @accounts
 
+-# Deposits started and never confirmed. Above the split because these are the
+-# only rows on the page waiting on the reader, and My DRS is the one place they
+-# can be found — an unfinished deposit is hidden from general discovery.
+- if @unfinished.present?
+  = render 'unfinished', unfinished: @unfinished
+
 .row.g-4
   -# Published — works promoted into community genre showcases, grouped by category.
   -# Placed first (left) as the outward-facing, professional tier; the teal
