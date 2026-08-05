@@ -30,13 +30,20 @@ class CollectionContentsResolver
   #
   # @yieldparam docs [Array<SolrDocument>] one page of member Works.
   # @return [void]
+  # `fl` must cover every field MetadataExportPacker reads, which is why it is
+  # taken from the packer rather than written out here. A field the packer reads and
+  # the query does not fetch is not an error anywhere — the doc simply has no value,
+  # and the manifest gets a blank cell. That silently emptied the Embargoed? and
+  # Embargo Date columns on a collection export while a set export of the same Work
+  # filled them, and because a manifest row carrying a PID *updates* that record, a
+  # re-load then cleared an embargo nobody had touched.
   def each_content_batch(batch: 200)
     return if @valkyrie_id.blank?
 
     start = 0
     loop do
       docs = search(*contents_fqs, rows: batch, start: start,
-                    fl: 'id,alternate_ids_ssim').documents
+                    fl: MetadataExportPacker::REQUIRED_DOC_FIELDS.join(',')).documents
       break if docs.empty?
 
       yield docs

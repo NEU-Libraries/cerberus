@@ -25,6 +25,18 @@ class MetadataExportPacker
   # a NOID; the loader accepts either.
   HEADERS = ['PIDs', 'MODS XML File Path', 'File Name', 'Embargoed?', 'Embargo Date'].freeze
 
+  # Every Solr field this packer reads off a doc, so a resolver's `fl` can be taken
+  # from here instead of guessed. A field the packer reads and the query did not
+  # fetch raises nothing — the doc just has no value — so the manifest gets a blank
+  # cell that reads as "nothing to say". The two resolvers had drifted apart exactly
+  # that way on the embargo columns.
+  REQUIRED_DOC_FIELDS = %w[
+    id
+    alternate_ids_ssim
+    embargo_release_date_dtsi
+    embargoed_bsi
+  ].freeze
+
   # @param docs [#each_content_batch] a gated contents resolver.
   # @param include_mods [Boolean] also bundle one mods/<noid>.xml per item.
   def initialize(docs:, include_mods: true)

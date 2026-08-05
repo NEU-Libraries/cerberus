@@ -33,12 +33,18 @@ class SetResolver
   # bulk-set-download plan), this just bounds a runaway recipe meanwhile.
   MAX_EXPORT_ROWS = 10_000
 
-  # The packer states its own requirements and this asks for them, rather than
-  # the two keeping separate lists that have to be remembered together. They
-  # were separate: the packer gained an embargo check while the field list still
+  # The packers state their own requirements and this asks for them, rather than
+  # keeping a separate list that has to be remembered alongside. They were
+  # separate: the packer gained an embargo check while the field list still
   # said "just the noid", so the check read nil on every document and withheld
   # nothing. That failure is silent and it fails towards serving content.
-  PACKER_FIELDS = SetZipPacker::REQUIRED_DOC_FIELDS.join(',')
+  #
+  # The UNION of both packers, because this resolver feeds both — SetZipPacker for
+  # the content download and MetadataExportPacker for the manifest. Asking for only
+  # one packer's fields reintroduces the same silent-nil bug on whichever path was
+  # left out; `embargoed_bsi` was missing that way, so a Work embargoed by flag
+  # rather than by release date exported as not embargoed.
+  PACKER_FIELDS = (SetZipPacker::REQUIRED_DOC_FIELDS | MetadataExportPacker::REQUIRED_DOC_FIELDS).join(',')
 
   # One included collection, with its gated contents tally.
   # +live+ is what the Set currently shows from this collection; +total+ is
