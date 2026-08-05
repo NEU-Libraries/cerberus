@@ -7,14 +7,18 @@
 # gated safe at deposit (Ffprobe), so this is pure container work, never an encode.
 #
 # Ordering + failure posture mirror PdfRenditionJob: convert first (the slow
-# part), then raise WorkNotComplete until the primary writer (ContentCreationJob)
-# has flipped the Work out of in_progress. Enrichment never fails a deposit — a
-# bad input, a hung ffmpeg, or a never-completing Work exhausts retries, logs,
-# and leaves the deposit intact (master present, no rendition, no poster).
+# part), then wait for the primary writer (ContentCreationJob) to land its Blob,
+# keyed on the artifact rather than on the Work's in_progress flag — see
+# PdfRenditionJob for why the flag is the wrong signal. Enrichment never fails a
+# deposit — a bad input, a hung ffmpeg, or a primary Blob that never lands
+# exhausts retries, logs, and leaves the deposit intact (master present, no
+# rendition, no poster).
 class MediaRenditionJob < ApplicationJob
+  include PrimaryFilePresence
+
   queue_as :default
 
-  class WorkNotComplete < StandardError; end
+  class PrimaryFileMissing < StandardError; end
 
   retry_on StandardError, attempts: 3, wait: :polynomially_longer do |job, exception|
     Rails.logger.warn(
@@ -22,9 +26,9 @@ class MediaRenditionJob < ApplicationJob
     )
   end
   # Declared after StandardError so it takes precedence (reverse-order matching).
-  retry_on WorkNotComplete, attempts: 6, wait: :polynomially_longer do |job, _exception|
+  retry_on PrimaryFileMissing, attempts: 6, wait: :polynomially_longer do |job, _exception|
     Rails.logger.warn(
-      "MediaRenditionJob: work #{job.arguments.first} never completed — A/V rendition skipped"
+      "MediaRenditionJob: work #{job.arguments.first} never received its primary file — A/V rendition skipped"
     )
   end
 
@@ -43,10 +47,10 @@ class MediaRenditionJob < ApplicationJob
 
   private
 
-    # Attach the rendition + poster once the primary writer has completed (the
-    # WorkNotComplete idiom defers to ContentCreationJob, exactly like PdfRenditionJob).
+    # Attach the rendition + poster once the primary Blob is there — deferring to
+    # ContentCreationJob, exactly like PdfRenditionJob.
     def attach(work_id, mp4_path, poster_path, rendition_key)
-      raise WorkNotComplete, "work #{work_id} is still in progress" if AtlasRb::Work.find(work_id).in_progress
+      raise PrimaryFileMissing, "work #{work_id} has no primary file yet" unless primary_file?(work_id)
 
       AtlasRb::Blob.create(work_id, mp4_path, File.basename(mp4_path), idempotency_key: rendition_key) if mp4_path
       # perform_now so the ambient acting NUID carries through (see ApplicationJob).

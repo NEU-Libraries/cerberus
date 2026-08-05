@@ -23,6 +23,12 @@
 # preserved), so only the type-routed *derivative* refresh is wanted here —
 # never a second ContentCreationJob/Blob.create.
 #
+# `complete_work:` is a genuinely different fact and not a second name for the
+# one above: it asks whether anything still owes this Work its metadata. A batch
+# loader has already supplied it, so ingest completing the Work is right. An
+# interactive deposit has not — a human confirms on the form's second page — so
+# that path passes false and ConfirmDepositJob completes the Work later.
+#
 # No derivative_widths pass through here: deposits get thumbnails only at
 # upload time. Small/medium/large are opt-in download renditions chosen on
 # the metadata page (DepositDerivativesJob), and per policy documents get
@@ -48,12 +54,14 @@ class IngestDispatch < ApplicationService
     application/x-tika-msoffice
   ].freeze
 
-  def initialize(work_id:, staged_path:, original_filename:, idempotency_key:, include_primary: true)
+  def initialize(work_id:, staged_path:, original_filename:, idempotency_key:, include_primary: true,
+                 complete_work: true)
     @work_id = work_id
     @staged_path = staged_path
     @original_filename = original_filename
     @idempotency_key = idempotency_key
     @include_primary = include_primary
+    @complete_work = complete_work
   end
 
   def call
@@ -67,7 +75,8 @@ class IngestDispatch < ApplicationService
     FullTextExtractionJob.perform_later(@work_id, @staged_path) if extractable_text?
     return unless @include_primary
 
-    ContentCreationJob.perform_later(@work_id, @staged_path, @original_filename, @idempotency_key)
+    ContentCreationJob.perform_later(@work_id, @staged_path, @original_filename, @idempotency_key,
+                                     complete_work: @complete_work)
   end
 
   private

@@ -125,6 +125,11 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     # raced save_descriptive! into AtlasRb::StaleResourceError (seen live;
     # invisible to specs, whose test adapter never runs the job inline).
     process_derivative_widths
+    # This save is the depositor confirming the deposit, and confirmation is what
+    # completes the Work — ingest deliberately leaves it in_progress. Deferred to a
+    # job because Atlas asks callers to complete only once the expected children
+    # are deposited, and the primary Blob may still be in flight.
+    ConfirmDepositJob.perform_later(params[:id])
   end
 
   # The "Upload File" affordance on the show page: add an arbitrary binary to
@@ -259,12 +264,20 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     # this path: small/medium/large are opt-in download renditions chosen on
     # the metadata page's checkbox/slider section, which arrives post-hoc via
     # DepositDerivativesJob (see #process_derivative_widths).
+    # complete_work: false — the depositor still owes the metadata page, so
+    # ingest must not complete this Work. #update_metadata does, once they save.
     def enqueue_ingest_jobs(file, staged_path)
       IngestDispatch.call(work_id: @work.id, staged_path: staged_path,
                           original_filename: file.original_filename,
-                          idempotency_key: SecureRandom.uuid)
+                          idempotency_key: SecureRandom.uuid,
+                          complete_work: false)
     end
 
+    # A lock, not housekeeping: an unfinished deposit is probably open on its
+    # depositor's screen at the metadata page, and this stops a second person
+    # editing underneath them. The metadata page itself stays reachable to anyone
+    # with edit rights (it rides `extra_edit`), so an abandoned deposit can always
+    # be finished or withdrawn.
     def reject_if_in_progress
       return unless AtlasRb::Work.find(params[:id]).in_progress
 

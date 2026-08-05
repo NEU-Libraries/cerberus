@@ -16,7 +16,9 @@ RSpec.describe PdfRenditionJob, type: :job do
     FileUtils.cp(fixtures.join('example.docx'), staged_path)
     allow(WordToPdf).to receive(:available?).and_return(true)
     allow(WordToPdf).to receive(:call) { FileUtils.cp(fixtures.join('example.pdf'), pdf_path) }
-    allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(in_progress: false))
+    allow(AtlasRb::Work).to receive(:file_sets).with(work_id).and_return(
+      [AtlasRb::Mash.new(assets: [AtlasRb::Mash.new(role: 'original_file', noid: 'b-1')])]
+    )
     allow(AtlasRb::Blob).to receive(:create)
     allow(IiifAssetsJob).to receive(:perform_now)
   end
@@ -46,13 +48,23 @@ RSpec.describe PdfRenditionJob, type: :job do
     expect(AtlasRb::Blob).to have_received(:create)
   end
 
-  it 'raises WorkNotComplete while the primary Blob writer is still running (rides retry_on)' do
-    allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(in_progress: true))
+  it 'raises PrimaryFileMissing while the primary Blob writer is still running (rides retry_on)' do
+    allow(AtlasRb::Work).to receive(:file_sets).with(work_id).and_return([])
 
     expect { described_class.new.perform(work_id, staged_path, rendition_key) }
-      .to raise_error(described_class::WorkNotComplete)
+      .to raise_error(described_class::PrimaryFileMissing)
     expect(AtlasRb::Blob).not_to have_received(:create)
     expect(IiifAssetsJob).not_to have_received(:perform_now)
+  end
+
+  # An unconfirmed deposit is in_progress indefinitely, so a wait keyed on that
+  # flag would strand the rendition on a human rather than on the Blob writer.
+  it 'attaches for a Work still awaiting its depositor, as long as the primary file is there' do
+    allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(in_progress: true))
+
+    described_class.new.perform(work_id, staged_path, rendition_key)
+
+    expect(AtlasRb::Blob).to have_received(:create)
   end
 
   it 'warns and skips on images built without LibreOffice (deposit untouched)' do

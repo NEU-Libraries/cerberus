@@ -23,7 +23,8 @@ RSpec.describe IngestDispatch do
     path = fixtures.join('image.png')
     expect { dispatch(path) }
       .to have_enqueued_job(IiifAssetsJob).with(work_id, path.to_s, refresh: false)
-      .and have_enqueued_job(ContentCreationJob).with(work_id, path.to_s, 'image.png', idempotency_key)
+      .and have_enqueued_job(ContentCreationJob)
+      .with(work_id, path.to_s, 'image.png', idempotency_key, complete_work: true)
       .and not_have_enqueued_job(PdfRenditionJob)
   end
 
@@ -76,9 +77,21 @@ RSpec.describe IngestDispatch do
   it 'enqueues only the primary ContentCreationJob for unenriched types' do
     path = fixtures.join('plain.txt')
     expect { dispatch(path) }
-      .to have_enqueued_job(ContentCreationJob).with(work_id, path.to_s, 'plain.txt', idempotency_key)
+      .to have_enqueued_job(ContentCreationJob)
+      .with(work_id, path.to_s, 'plain.txt', idempotency_key, complete_work: true)
       .and not_have_enqueued_job(IiifAssetsJob)
       .and not_have_enqueued_job(PdfRenditionJob)
+  end
+
+  # The interactive deposit opts out: a human still owes the metadata page, and
+  # that save is what completes the Work.
+  it 'threads complete_work: false through to the primary job' do
+    path = fixtures.join('plain.txt')
+    expect do
+      described_class.call(work_id: work_id, staged_path: path.to_s, original_filename: 'plain.txt',
+                           idempotency_key: idempotency_key, complete_work: false)
+    end.to have_enqueued_job(ContentCreationJob)
+      .with(work_id, path.to_s, 'plain.txt', idempotency_key, complete_work: false)
   end
 
   it 'derives a rendition key that is stable across calls and distinct from the primary key' do
