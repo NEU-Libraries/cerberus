@@ -54,7 +54,10 @@
       = f.label :root_collection, 'Root collection PID', class: 'admin-registry-form__label' do
         %i.fa-solid.fa-folder-open{'aria-hidden' => 'true'}
         Root collection PID
-      = f.text_field :root_collection, class: 'form-control admin-registry-form__input--id', placeholder: 'neu:6240', autocomplete: 'off'
+      -# NOID-shaped on purpose. This read `neu:6240`, a v1 Fedora pid, which no v2
+      -# collection has — so anyone copying the example's shape typed an identifier
+      -# that could never resolve.
+      = f.text_field :root_collection, class: 'form-control admin-registry-form__input--id', placeholder: 'e.g. 7h44jrj', autocomplete: 'off'
       .admin-registry-form__hint
         Atlas Collection PID. <strong>Required for IPTC</strong>, where the deposit-destination picker is boxed to this collection's children (the safety rail for non-librarian operators). <strong>Optional for XML and MULTIPAGE</strong> — those librarian-operated loaders let the operator pick any destination collection at upload time, so this can be left blank.
 
