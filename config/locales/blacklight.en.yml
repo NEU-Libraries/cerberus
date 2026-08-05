@@ -12,3 +12,11 @@ en:
         pages:
           one: 'Displaying <strong>%{start_num}</strong> to <strong>%{end_num}</strong> of <strong>%{total_num}</strong>'
           other: 'Displaying <strong>%{start_num}</strong> to <strong>%{end_num}</strong> of <strong>%{total_num}</strong>'
+      zero_results:
+        # Blacklight's own wording ends "then refine your search using the links
+        # on the left". On a zero-result search the facet panel still renders,
+        # heading and all, but every facet is empty — a term that matched nothing
+        # has nothing to narrow — so it sends the reader to look at a panel with no
+        # links in it. Advice that names a control the screen does not offer is
+        # worse than no advice: it reads as the page being broken.
+        use_fewer_keywords: 'Try fewer or more general keywords — a narrower term has nothing left to filter.'
