@@ -296,6 +296,36 @@ RSpec.describe 'Admin::Impersonations', type: :request do
         expect(session[:view_as_nuid]).to eq('000000002')
       end
 
+      # A redirect cannot reach a write made from inside a turbo-frame: Turbo hunts
+      # for that frame in the response, does not find it on the root page, and
+      # discards the whole thing — so the refusal reached the admin as a dead
+      # button, with no token, no error, and the banner still showing. A stream is
+      # honoured whatever frame the request came from.
+      context 'when the write came from inside a turbo-frame' do
+        let(:frame_headers) { { 'Turbo-Frame' => 'atlas_token' } }
+
+        it 'answers with a turbo-stream refresh rather than a discarded redirect' do
+          patch work_path('anything'), headers: frame_headers
+
+          expect(response).to have_http_status(:ok)
+          expect(response.media_type).to eq('text/vnd.turbo-stream.html')
+          expect(response.body).to include('action="refresh"')
+        end
+
+        it 'omits the request id, so Turbo cannot dedupe away its own refresh' do
+          patch work_path('anything'), headers: frame_headers
+
+          expect(response.body).not_to include('request-id')
+        end
+
+        it 'still ends the session and still says so' do
+          patch work_path('anything'), headers: frame_headers
+
+          expect(session[:view_as_nuid]).to be_blank
+          expect(flash[:alert]).to match(/Write attempted during View-as/)
+        end
+      end
+
       it 'exempts the impersonation controller so Exit ends cleanly' do
         delete admin_impersonation_path
 
