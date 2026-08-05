@@ -46,14 +46,22 @@ class SetDownloadsController < CatalogController
   private
 
     def packer_for(resolver)
-      SetZipPacker.new(resolver: resolver, nuid: current_user&.nuid,
+      SetZipPacker.new(resolver: resolver, nuid: effective_user&.nuid,
                        bypass_embargo: bypass_embargo?)
     end
 
     # The CALLER's right, never the set owner's — inheriting the owner's reach
     # is what put embargoed bytes into anonymous archives.
+    #
+    # `effective_user` rather than `current_user`, so the caller means the identity
+    # a View-as session is standing in. It is still the caller and never the owner,
+    # so the rule above is unchanged; but with current_user the archive was built as
+    # the real admin while every single-file route (DownloadsController,
+    # MediaController, DerivativeDownloadsController) resolved as the target. An
+    # admin checking what someone can reach then got a 403 from the file and the
+    # same file inside the ZIP, which defeats the only thing View-as is for.
     def bypass_embargo?
-      current_user.present? && current_user.can_bypass_embargo?
+      effective_user.present? && effective_user.can_bypass_embargo?
     end
 
     def zip_filename(set)

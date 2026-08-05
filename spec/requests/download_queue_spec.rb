@@ -94,7 +94,33 @@ RSpec.describe 'Download queue', type: :request do
     expect(flash[:alert]).to be_present
   end
 
+  # Matches the single-file routes, which all resolve as the View-as target.
+  it 'builds the archive as the view-as target, not the impersonating admin' do
+    post download_queue_items_path, params: { work_noid: work.id, blob_noid: 'blob1' }
+    enter_view_as('000000010')
+
+    expect(QueueZipPacker).to receive(:new)
+      .with(hash_including(nuid: '000000010', bypass_embargo: false))
+      .and_call_original
+
+    get download_queue_archive_path
+  end
+
   # --- helpers -------------------------------------------------------------
+
+  # An admin (who can bypass an embargo) standing in for a plain reader (who
+  # cannot). Hydration is the same GET /user that SSO sign-in makes; the session
+  # start emits an audit event we don't need to reach Atlas.
+  def enter_view_as(target_nuid)
+    sign_in User.new(email: 'admin@example.com', password: 'password',
+                     nuid: '000000004', name: 'User, Admin', role: 'admin')
+    allow(AtlasRb::AuditEvent).to receive(:emit)
+    allow(AtlasRb::Authentication).to receive(:login).with(target_nuid).and_return(
+      AtlasRb::Mash.new('nuid' => target_nuid, 'name' => 'Reader, Plain',
+                        'email' => "#{target_nuid}@neu.edu", 'role' => 'standard', 'groups' => [])
+    )
+    post admin_view_as_path, params: { nuid: target_nuid }
+  end
 
   def mods(kind) = "/home/cerberus/web/spec/fixtures/files/#{kind}-mods.xml"
   def read_public = { 'permissions' => { 'read' => ['public'] } }

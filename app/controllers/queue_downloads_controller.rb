@@ -15,16 +15,18 @@ class QueueDownloadsController < ApplicationController
     queue = DownloadQueue.new(session)
     return redirect_to(download_queue_path, alert: 'Your download queue is empty.') if queue.empty?
 
-    packer = QueueZipPacker.new(items: queue.items, nuid: current_user&.nuid,
+    packer = QueueZipPacker.new(items: queue.items, nuid: effective_user&.nuid,
                                 bypass_embargo: bypass_embargo?)
     zip_kit_stream(filename: zip_filename) { |zip| packer.pack(zip) }
   end
 
   private
 
-    # The CALLER's right — see SetDownloadsController for why that matters.
+    # The CALLER's right — see SetDownloadsController for why that matters, and
+    # why the caller is `effective_user`: during View-as the archive has to be
+    # built as the identity being stood in for, matching the single-file routes.
     def bypass_embargo?
-      current_user.present? && current_user.can_bypass_embargo?
+      effective_user.present? && effective_user.can_bypass_embargo?
     end
 
     def zip_filename

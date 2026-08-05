@@ -60,6 +60,22 @@ RSpec.describe 'Set downloads', type: :request do
     expect(response).to have_http_status(:not_found)
   end
 
+  # The single-file routes all resolve as the View-as target, so the archive has
+  # to as well — otherwise an admin checking someone's reach is refused a file
+  # and handed that same file inside the zip.
+  it 'builds the archive as the view-as target, not the impersonating admin' do
+    set = make_set('View-as Set')
+    add_work(set, work)
+    make_public(set)
+    enter_view_as('000000010')
+
+    expect(SetZipPacker).to receive(:new)
+      .with(hash_including(nuid: '000000010', bypass_embargo: false))
+      .and_call_original
+
+    get download_set_path(set['id'])
+  end
+
   # --- helpers -------------------------------------------------------------
 
   def nuid = '000000002'
@@ -84,6 +100,21 @@ RSpec.describe 'Set downloads', type: :request do
   end
 
   def sign_out_all = sign_out(curator)
+
+  # An admin (who can bypass an embargo) standing in for a plain reader (who
+  # cannot). Hydration is the same GET /user that SSO sign-in makes; the session
+  # start emits an audit event we don't need to reach Atlas.
+  def enter_view_as(target_nuid)
+    sign_out_all
+    sign_in User.new(email: 'admin@example.com', password: 'password',
+                     nuid: '000000004', name: 'User, Admin', role: 'admin')
+    allow(AtlasRb::AuditEvent).to receive(:emit)
+    allow(AtlasRb::Authentication).to receive(:login).with(target_nuid).and_return(
+      AtlasRb::Mash.new('nuid' => target_nuid, 'name' => 'Reader, Plain',
+                        'email' => "#{target_nuid}@neu.edu", 'role' => 'standard', 'groups' => [])
+    )
+    post admin_view_as_path, params: { nuid: target_nuid }
+  end
 
   def public_container(klass, parent_id)
     kind = klass.name.demodulize.downcase
