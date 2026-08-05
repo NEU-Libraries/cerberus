@@ -5,6 +5,23 @@ module ApplicationHelper
     VERSION
   end
 
+  # Whether the NUID sign-in shim exists in this environment. It stands in for
+  # SSO, which is production-only, so dev and staging offer it and production
+  # must not — it authenticates on a NUID with no secret.
+  #
+  # MUST track the matching condition in config/routes.rb: linking to a route that
+  # is not mounted raises, so the two moving apart breaks the page rather than
+  # degrading it.
+  def nuid_sign_in_available?
+    !Rails.env.production?
+  end
+
+  # Where an unauthenticated visitor is sent to sign in: the NUID shim where it
+  # exists, otherwise the ordinary session form (which is where SSO will land).
+  def sign_in_path_for_environment
+    nuid_sign_in_available? ? atlas_login_path : new_user_session_path
+  end
+
   def document_type_icon(klass_type)
     case klass_type
     when 'Community'  then 'fa-users'

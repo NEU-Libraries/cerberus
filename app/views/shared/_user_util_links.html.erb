@@ -81,9 +81,10 @@
       </li>
       <% else %>
         <li class="nav-item">
-          <%# switch to dedicated atlas login page? %>
-          <%= link_to "Login", atlas_login_path, class: 'nav-link' %>
-          <%#= link_to t('blacklight.header_links.login'), new_user_session_path, class: 'nav-link' %>
+          <%# The NUID shim where it exists (dev/staging), the ordinary session form
+              where it does not (production, which is where SSO lands). See
+              ApplicationHelper#nuid_sign_in_available?. %>
+          <%= link_to "Login", sign_in_path_for_environment, class: 'nav-link' %>
         </li>
     <% end %>
   <% end %>
