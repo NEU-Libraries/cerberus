@@ -11,6 +11,12 @@ import { Controller } from "@hotwired/stimulus"
 // exists — including a typed-but-not-added entry).
 export default class extends Controller {
   static targets = ["row", "template", "entry"]
+  // Set when the record carries curated (authority-bearing) subjects, which this
+  // editor never shows. The requirement means "has a subject" and such a record
+  // already has one, so requiring the entry would block a save the server accepts —
+  // and block it with only a browser tooltip, on a box that looks empty for reasons
+  // the curator cannot see from here.
+  static values = { optional: Boolean }
 
   connect() { this.syncRequired() }
 
@@ -46,6 +52,8 @@ export default class extends Controller {
   // holds a non-empty value, so the form can't submit with zero keywords. Wired
   // to connect/add/remove and to each keyword input's `input` event.
   syncRequired() {
+    if (this.optionalValue) { this.entryTarget.required = false; return }
+
     const hasValue = [...this.element.querySelectorAll("input[name$='[keywords][]']")]
       .some((input) => input.value.trim() !== "")
     this.entryTarget.required = !hasValue

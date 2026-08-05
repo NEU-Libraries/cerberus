@@ -133,11 +133,28 @@ module Transformable # rubocop:disable Metrics/ModuleLength
     params[resource_key].respond_to?(:key?) && params[resource_key].key?(:title)
   end
 
-  def descriptive_valid?(descriptive, keywords: false)
+  # `keywords: true` means "this resource must carry at least one subject", and the
+  # Keywords box is how a depositor supplies one. A record whose subjects are all
+  # authority-controlled already satisfies that, and those subjects are curated:
+  # MODSFields keeps them out of the box on purpose and MODSMerge never writes over
+  # them. So the form posts `curated_subjects` and it counts here — otherwise a
+  # curator fixing a title on such a record must invent a redundant keyword to save.
+  def descriptive_valid?(descriptive, keywords: false, curated_subjects: false)
     return false if descriptive[:title].blank?
-    return false if keywords && Array(descriptive[:keywords]).empty?
+    return false if keywords && Array(descriptive[:keywords]).empty? && !curated_subjects
 
     true
+  end
+
+  # Cast the flag the descriptive form posts alongside the MODS fields. Kept out of
+  # descriptive_params because that hash is splatted straight into save_descriptive!
+  # as the MODS payload, and this is not a MODS field.
+  #
+  # Trusting a form value is fine here: the guard is a curation prompt, not a
+  # security boundary — Atlas is that — so the worst a tampered value buys is a Work
+  # saved with no subjects, which the API permits anyway.
+  def curated_subjects_posted?(resource_key)
+    ActiveModel::Type::Boolean.new.cast(params.dig(resource_key, :curated_subjects)).present?
   end
 
   # Create-path title guard (containers): flashes and returns true when the
@@ -252,7 +269,8 @@ module Transformable # rubocop:disable Metrics/ModuleLength
 
   def apply_descriptive(klass, id, resource_key, keywords, show_path)
     descriptive = descriptive_params(resource_key, keywords: keywords)
-    unless descriptive_valid?(descriptive, keywords: keywords)
+    unless descriptive_valid?(descriptive, keywords:         keywords,
+                                           curated_subjects: curated_subjects_posted?(resource_key))
       flash[:alert] = keywords ? 'Please provide a title and at least one keyword.' : 'Please provide a title.'
       return redirect_back_or_to(public_send("edit_#{klass.downcase}_path", id))
     end

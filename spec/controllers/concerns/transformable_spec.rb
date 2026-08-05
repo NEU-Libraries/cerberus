@@ -201,6 +201,49 @@ describe Transformable do
     end
   end
 
+  # "At least one keyword" really means "at least one subject". A record whose
+  # subjects are all authority-controlled already has one, and MODSFields keeps
+  # those out of the Keywords box on purpose — so the rule has to accept them, or a
+  # curator editing only a title cannot save without inventing a redundant keyword.
+  describe '#descriptive_valid?' do
+    it 'refuses a blank title regardless of anything else' do
+      expect(host.descriptive_valid?({ title: '', keywords: %w[a] }, keywords: true)).to be false
+    end
+
+    it 'refuses no keywords when the record has no curated subjects either' do
+      expect(host.descriptive_valid?({ title: 'T', keywords: [] }, keywords: true)).to be false
+    end
+
+    it 'accepts no keywords when the record carries curated subjects' do
+      expect(
+        host.descriptive_valid?({ title: 'T', keywords: [] }, keywords: true, curated_subjects: true)
+      ).to be true
+    end
+
+    it 'accepts keywords when there are no curated subjects' do
+      expect(host.descriptive_valid?({ title: 'T', keywords: %w[a] }, keywords: true)).to be true
+    end
+
+    it 'ignores keywords entirely for resources that do not require them' do
+      expect(host.descriptive_valid?({ title: 'T', keywords: [] }, keywords: false)).to be true
+    end
+  end
+
+  describe '#curated_subjects_posted?' do
+    it 'casts the form flag, so only a real true counts' do
+      host.params = { work: { curated_subjects: 'true' } }
+      expect(host.curated_subjects_posted?(:work)).to be true
+    end
+
+    it 'is false when the flag says false, and when it is absent' do
+      host.params = { work: { curated_subjects: 'false' } }
+      expect(host.curated_subjects_posted?(:work)).to be false
+
+      host.params = { work: {} }
+      expect(host.curated_subjects_posted?(:work)).to be false
+    end
+  end
+
   describe '#mass_permissions' do
     it 'is a no-op without a :mass param' do
       host.params = {}

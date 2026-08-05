@@ -32,8 +32,21 @@
   -# (or Enter) promotes the typed value into a row. Every input posts as
   -# `<resource>[keywords][]`, so a value typed-but-not-added is still saved; the
   -# server strips/dedupes. At least one keyword is required (descriptive_valid?).
-  .mb-3{ data: { controller: 'keyword-list' } }
+  -#
+  -# ...unless the record already carries curated subjects, which this box never
+  -# shows: MODSFields skips authority-bearing ones and MODSMerge never overwrites
+  -# them. The requirement really means "has a subject", so a curated record already
+  -# satisfies it. The flag rides along for descriptive_valid? and relaxes the
+  -# client-side mirror, or a curator editing only a title is forced to invent a
+  -# keyword the record does not need.
+  - curated = descriptive[:curated_subjects].present?
+  .mb-3{ data: { controller: 'keyword-list', 'keyword-list-optional-value': curated.to_s } }
+    = hidden_field_tag "#{f.object_name}[curated_subjects]", curated.to_s
     %label.form-label.mb-1 Keywords
+    - if curated
+      .form-text.text-muted.mt-0.mb-2
+        %i.fa-solid.fa-circle-info{'aria-hidden' => 'true'}
+        This record also carries curated subjects from a controlled vocabulary. They appear on the record but cannot be edited here, so this box may be empty while the record still has subjects. Change them in the XML editor.
     - Array(descriptive[:keywords]).each do |kw|
       .input-group.mb-2{ data: { 'keyword-list-target': 'row' } }
         %input.form-control{ type: 'text', name: "#{f.object_name}[keywords][]", value: kw, 'aria-label': 'Keyword', data: { action: 'input->keyword-list#syncRequired' } }
@@ -48,4 +61,7 @@
       %input.form-control{ type: 'text', name: "#{f.object_name}[keywords][]", placeholder: 'Add a keyword…', 'aria-label': 'Add a keyword', data: { 'keyword-list-target': 'entry', action: 'keydown->keyword-list#addOnEnter input->keyword-list#syncRequired' } }
       %button.btn.btn-success{ type: 'button', 'aria-label': 'Add keyword', data: { action: 'click->keyword-list#add' } }
         %i.fa-solid.fa-plus{ 'aria-hidden': 'true' }
-    .form-text.text-muted Press + to add a keyword. At least one is required.
+    - if curated
+      .form-text.text-muted Press + to add a keyword. Optional here, because this record already has curated subjects.
+    - else
+      .form-text.text-muted Press + to add a keyword. At least one is required.
