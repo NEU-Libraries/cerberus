@@ -77,7 +77,9 @@ RSpec.describe 'XML loader create-mode flow', type: :request do
     expect(lr.xml_ingests.completed.count).to eq(1)
     expect(lr).to be_completed
     expect(AtlasRb::Work).to have_received(:create).with('neu:root', kind_of(String), idempotency_key: kind_of(String))
+    # complete_work: true — the manifest carried the metadata, so the loader's
+    # ingest completes the Work rather than waiting on a depositor.
     expect(ContentCreationJob).to have_received(:perform_later)
-      .with('w-created', a_string_ending_with('flower.jpg'), 'flower.jpg', kind_of(String))
+      .with('w-created', a_string_ending_with('flower.jpg'), 'flower.jpg', kind_of(String), complete_work: true)
   end
 end

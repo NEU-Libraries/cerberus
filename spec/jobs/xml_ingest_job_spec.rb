@@ -85,8 +85,10 @@ RSpec.describe XmlIngestJob, type: :job do
 
     it 'enqueues ContentCreationJob and (for images) IiifAssetsJob' do
       described_class.new.perform(ingest.id, create_row)
+      # complete_work: true — a loader's manifest IS its metadata, so nothing waits
+      # on a human and ingest completes the Work. The interactive deposit differs.
       expect(ContentCreationJob).to have_received(:perform_later)
-        .with('w-new', File.join(uploads_root, 'w-new', 'pic.tif'), 'pic.tif', 'idem-1')
+        .with('w-new', File.join(uploads_root, 'w-new', 'pic.tif'), 'pic.tif', 'idem-1', complete_work: true)
       expect(IiifAssetsJob).to have_received(:perform_later)
         .with('w-new', File.join(uploads_root, 'w-new', 'pic.tif'), refresh: false)
     end

@@ -7,8 +7,12 @@ describe DownloadsController do
   let(:collection) { AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004') }
   let(:work) { AtlasRb::Work.create(collection.id, '/home/cerberus/web/spec/fixtures/files/work-mods.xml', nuid: '000000004') }
 
+  # Completed, in that order: a Work whose bytes are downloadable is a finished
+  # deposit. An unfinished one withholds its bytes along with its page, so leaving
+  # it in_progress would make these streaming examples test the wrong thing.
   let(:noid) do
     AtlasRb::Blob.create(work.id, '/home/cerberus/web/spec/fixtures/files/image.png', 'image.png', nuid: '000000004')
+    AtlasRb::Work.complete(work.id, nuid: '000000004')
     AtlasRb::Work.assets(work.id, nuid: '000000004').first.noid
   end
 

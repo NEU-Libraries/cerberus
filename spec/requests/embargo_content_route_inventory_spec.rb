@@ -67,14 +67,17 @@ RSpec.describe 'Content-route inventory', type: :request do
   # The two packers take the CALLER's right, not the set owner's or the queue
   # owner's. Getting this backwards is what made the set ZIP identical for an
   # anonymous requester and the owner.
-  it 'derives each packer\'s bypass right from the current user' do
+  # The caller is `effective_user`: during a View-as session that is the identity
+  # being stood in for, which is how every single-file route resolves too, so the
+  # file and the archive give an admin one answer rather than two.
+  it 'derives each packer\'s bypass right from the caller' do
     aggregate_failures do
       %w[set_downloads_controller queue_downloads_controller].each do |name|
         source = Rails.root.join("app/controllers/#{name}.rb").read
         expect(source).to include('bypass_embargo: bypass_embargo?'),
                           "#{name} must pass a bypass right to its packer"
-        expect(source).to match(/def bypass_embargo\?.*current_user/m),
-                          "#{name}'s bypass right must come from current_user, not the owner"
+        expect(source).to match(/def bypass_embargo\?.*effective_user/m),
+                          "#{name}'s bypass right must come from the caller (effective_user), not the owner"
       end
     end
   end

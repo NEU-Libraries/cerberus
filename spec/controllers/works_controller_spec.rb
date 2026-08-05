@@ -84,10 +84,21 @@ describe WorksController do
 
       before { stub_work_in_progress(work) }
 
+      # Signed in as staff: an unfinished deposit is refused outright to everyone
+      # but its depositor, staff and admins, so the notice is only ever read by
+      # someone who can act on it.
       it 'flashes the in-progress notice and hides the Edit link' do
+        sign_in User.new(email: 'staff@example.com', nuid: '000000002', groups: [Permissions::STAFF_EDIT_GROUP])
+
         get :show, params: { id: work.id }
+
         expect(flash.now[:alert]).to eq(WorksController::IN_PROGRESS_NOTICE)
         expect(response.body).not_to match(%r{>\s*Edit\s*</a>})
+      end
+
+      it '404s a visitor who may not see an unfinished deposit' do
+        get :show, params: { id: work.id }
+        expect(response).to have_http_status(:not_found)
       end
     end
 
@@ -173,9 +184,19 @@ describe WorksController do
                                 collection_id: collection.id }
       end.to have_enqueued_job(IiifAssetsJob)
         .and have_enqueued_job(ContentCreationJob)
-        .with(anything, anything, 'image.png', a_string_matching(uuid_re))
+        .with(anything, anything, 'image.png', a_string_matching(uuid_re), complete_work: false)
 
       expect(subject).to redirect_to action: :metadata, id: assigns(:work).id
+    end
+
+    # complete_work: false is what keeps the deposit in_progress until its
+    # depositor saves the metadata page — and hidden from the public until then.
+    it 'leaves the work for its depositor to complete rather than completing on ingest' do
+      post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+                              collection_id: collection.id }
+
+      expect(ContentCreationJob).to have_been_enqueued.with(anything, anything, anything, anything,
+                                                            complete_work: false)
     end
 
     it 'does not enqueue any enrichment job for unenriched uploads' do
@@ -183,7 +204,7 @@ describe WorksController do
         post :create, params: { binary:        fixture_file_upload('plain.txt', 'text/plain'),
                                 collection_id: collection.id }
       end.to have_enqueued_job(ContentCreationJob)
-        .with(anything, anything, 'plain.txt', a_string_matching(uuid_re))
+        .with(anything, anything, 'plain.txt', a_string_matching(uuid_re), complete_work: false)
         .and not_have_enqueued_job(IiifAssetsJob)
         .and not_have_enqueued_job(PdfRenditionJob)
     end
