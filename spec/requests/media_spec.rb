@@ -19,6 +19,9 @@ RSpec.describe 'Media', type: :request do
     # do not carry it. Unembargoed by default; overridden in the context below.
     allow(AtlasRb::Blob).to receive(:work).and_return('w1')
     allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(AtlasRb::Mash.new('embargo' => ''))
+    # The unfinished-deposit gate reads the same Work; finished by default.
+    allow(AtlasRb::Work).to receive(:find).with('w1')
+                                          .and_return(AtlasRb::Mash.new(in_progress: false, depositor: '000000004'))
   end
 
   # Streaming is consumption for A/V: withholding the download button while

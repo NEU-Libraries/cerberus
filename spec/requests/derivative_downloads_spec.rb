@@ -13,6 +13,9 @@ RSpec.describe 'Derivative downloads', type: :request do
     # The embargo gate reads the Work's own permissions; default unembargoed,
     # overridden per example in the "under an active embargo" context below.
     allow(AtlasRb::Resource).to receive(:permissions).with(work_id).and_return(AtlasRb::Mash.new('embargo' => ''))
+    # The unfinished-deposit gate reads the Work itself; finished by default.
+    allow(AtlasRb::Work).to receive(:find).with(work_id)
+                                          .and_return(AtlasRb::Mash.new(in_progress: false, depositor: '000000004'))
   end
 
   def stub_tier(gated:, permission:, nuid:, use: 'large_image')

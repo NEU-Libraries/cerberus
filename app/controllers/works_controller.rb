@@ -41,6 +41,7 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     return render_gone(@work) if @work.tombstoned
 
     authorize_show!
+    deny_if_unfinished!(@work)
     flash.now[:alert] = IN_PROGRESS_NOTICE if @work.in_progress
     prepare_show_view
   end

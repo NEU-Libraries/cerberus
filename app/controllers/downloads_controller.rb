@@ -88,6 +88,7 @@ class DownloadsController < ApplicationController
                                        .find { |a| a['noid'] == params[:id] }
       return if @derivative_asset.nil?
 
+      deny_if_unfinished_work!(work_id)
       deny_if_embargoed!(work_id)
       authorize! :read, derivative_tier_document(@derivative_asset)
     end

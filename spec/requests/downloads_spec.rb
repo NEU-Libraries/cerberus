@@ -25,6 +25,10 @@ RSpec.describe 'Blob downloads', type: :request do
       AtlasRb::Mash.new('embargo' => '')
     )
     allow(AtlasRb::Blob).to receive(:work).and_return(work_id)
+    # The unfinished-deposit gate reads the containing Work: an in-progress deposit
+    # withholds its bytes even though its own read gate passes. Finished by default.
+    allow(AtlasRb::Work).to receive(:find).with(work_id)
+                                          .and_return(AtlasRb::Mash.new(in_progress: false, depositor: '000000004'))
   end
 
   # Only reached once the gate authorizes — stub the stream so show completes.
@@ -130,6 +134,54 @@ RSpec.describe 'Blob downloads', type: :request do
     get download_path(blob_id)
 
     expect(response).to have_http_status(:ok)
+  end
+
+  # An unfinished deposit's bytes go with its page: hiding the record while the
+  # file stays fetchable by URL would withhold nothing.
+  context 'when the containing work is an unfinished deposit' do
+    let(:depositor) { '000000015' }
+
+    before do
+      allow(AtlasRb::Work).to receive(:find).with(work_id)
+                                            .and_return(AtlasRb::Mash.new(in_progress: true, depositor: depositor))
+      stub_asset(gated: false, permission: ['public'], nuid: nil)
+      stub_stream!
+    end
+
+    it '404s an anonymous visitor' do
+      get download_path(blob_id)
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it 'streams to repository staff, who curate unfinished deposits' do
+      stub_asset(gated: false, permission: ['public'], nuid: '000000002')
+      sign_in User.new(email: 'staff@example.com', password: 'password', nuid: '000000002',
+                       role: 'privileged', groups: [Permissions::STAFF_EDIT_GROUP])
+
+      get download_path(blob_id)
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'streams to its own depositor, who is the one who can finish it' do
+      stub_asset(gated: false, permission: ['public'], nuid: depositor)
+      sign_in User.new(email: 'dep@example.com', password: 'password', nuid: depositor,
+                       role: 'standard', groups: [])
+
+      get download_path(blob_id)
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it '404s a different signed-in reader' do
+      stub_asset(gated: false, permission: ['public'], nuid: '000000010')
+      sign_in User.new(email: 'other@example.com', password: 'password', nuid: '000000010',
+                       role: 'standard', groups: [])
+
+      get download_path(blob_id)
+
+      expect(response).to have_http_status(:not_found)
+    end
   end
 
   context 'under an active embargo' do

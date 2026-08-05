@@ -16,6 +16,7 @@ class DerivativeDownloadsController < ApplicationController
                             .find { |asset| asset['use'] == params[:use] && asset['uri'].present? }
     raise Authorizable::ResourceNotFound if delegate.nil?
 
+    deny_if_unfinished_work!(params[:work_id])
     deny_if_embargoed!(params[:work_id])
     authorize! :read, derivative_tier_document(delegate)
     redirect_to download_url_for(delegate), allow_other_host: true, status: :found

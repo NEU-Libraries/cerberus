@@ -47,6 +47,7 @@ class MediaController < ApplicationController
       work_id = AtlasRb::Blob.work(params[:id], nuid: effective_user&.nuid)
       return if work_id.blank?
 
+      deny_if_unfinished_work!(work_id)
       deny_if_embargoed!(work_id)
     end
 
