@@ -344,6 +344,23 @@ describe WorksController do
         AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
       end
 
+      # Atlas refuses a derivative tier more visible than its Work. The collection
+      # form and the visibility cascade both keep the default within its
+      # collection, so this is a backstop — but it used to reach the Rails error
+      # page, abandoning a Work and a staged file with nothing said to anyone.
+      it 'still saves the work when Atlas refuses the collection’s derivative default' do
+        allow(Sentinel).to receive(:apply_default)
+          .and_raise(AtlasRb::DerivativePermissionsError.new('a derivative tier cannot be more visible than the Work'))
+
+        post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+                                collection_id: collection.id }
+
+        expect(response).to redirect_to(metadata_work_path(assigns(:work).id))
+        expect(flash[:notice]).to eq(described_class::DERIVATIVE_DEFAULT_FAILED)
+      ensure
+        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
       # Promotion is only on offer from the depositor's own root, so a forged
       # request from anywhere else deposits normally and promotes nothing —
       # that is what stops a Work being promoted out of a collection that

@@ -203,4 +203,53 @@ RSpec.describe VisibilityCascadeJob do
 
     expect { run }.not_to change(Message, :count)
   end
+
+  # A derivative-access default lives in Cerberus, not in the ACL Atlas holds, so
+  # narrowing a container used to leave its default naming an audience the
+  # container no longer had — and Atlas then refused every new deposit into it,
+  # because a tier may not be more visible than its Work.
+  describe 'the derivative default it leaves behind' do
+    let(:archives) { 'northeastern:drs:library:archives' }
+    let(:law) { 'northeastern:drs:school_of_law:law_library:staff' }
+
+    before do
+      allow(AtlasRb::Collection).to receive(:metadata)
+      allow(AtlasRb::Resource).to receive(:permissions).with('top').and_return(envelope(read: ['public']))
+    end
+
+    it 'clamps the narrowed container’s own default to what it can still offer' do
+      sentinel = Sentinel.create!(target_id: 'top', policy: { 'master' => ['public'] })
+      stub_targets(target('top', 'Collection'))
+
+      run(read_groups: [archives])
+
+      expect(sentinel.reload.policy['master']).to eq([archives])
+    end
+
+    it 'drops a tier whose audience the container no longer includes, leaving it to inherit' do
+      sentinel = Sentinel.create!(target_id: 'top', policy: { 'master' => [law] })
+      stub_targets(target('top', 'Collection'))
+
+      run(read_groups: [archives])
+
+      expect(sentinel.reload.policy['master']).to eq([])
+    end
+
+    it 'clamps a descendant collection’s default too, not only the container’s' do
+      sentinel = Sentinel.create!(target_id: 'c1', policy: { 'master' => ['public'] })
+      stub_targets(target('c1', 'Collection'))
+      allow(AtlasRb::Resource).to receive(:permissions).with('c1').and_return(envelope(read: ['public']))
+
+      run(read_groups: [archives])
+
+      expect(sentinel.reload.policy['master']).to eq([archives])
+    end
+
+    it 'leaves a default that is already within the new audience alone' do
+      sentinel = Sentinel.create!(target_id: 'top', policy: { 'master' => [archives] })
+      stub_targets(target('top', 'Collection'))
+
+      expect { run(read_groups: [archives]) }.not_to(change { sentinel.reload.updated_at })
+    end
+  end
 end

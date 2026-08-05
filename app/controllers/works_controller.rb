@@ -28,6 +28,12 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
   # needs to know; the distinction only matters in the log.
   PUBLISH_LINK_FAILED = "File uploaded — please review the metadata. It couldn't be added to the " \
                         'community showcase; contact DRS staff if this persists.'
+  # The deposit stands; only the collection's per-rendition default was refused,
+  # which leaves this work's renditions at its own visibility rather than the
+  # narrower one the collection asked for. Named to the depositor because that is
+  # wider access than intended, even though it is never wider than the work.
+  DERIVATIVE_DEFAULT_FAILED = 'File uploaded — please review the metadata. The collection\'s download ' \
+                              'restrictions could not be applied to it; contact DRS staff before sharing it.'
   UNSUPPORTED_AV = 'DRS streams H.264/AAC video and AAC/MP3 audio — please convert your file first.'
 
   before_action :authorize_show!, only: [:downloads, :manifest]
@@ -98,8 +104,7 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     create_at_destination(file)
     promote_if_requested
 
-    notice = @publish_link_failed ? PUBLISH_LINK_FAILED : 'File uploaded — please review the metadata.'
-    redirect_to metadata_work_path(@work.id), notice: notice
+    redirect_to metadata_work_path(@work.id), notice: create_notice
   end
 
   # Metadata + Permissions tabs are separate forms that both PATCH here with
@@ -258,6 +263,15 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
         files:     -> { AtlasRb::Work.assets(params[:id], nuid: viewer_nuid) },
         file_sets: -> { AtlasRb::Work.file_sets(params[:id], nuid: viewer_nuid) }
       )
+    end
+
+    # Both post-deposit steps that can fail without failing the deposit itself.
+    # Each names what did not happen; neither hides that the file is in.
+    def create_notice
+      return PUBLISH_LINK_FAILED if @publish_link_failed
+      return DERIVATIVE_DEFAULT_FAILED if @derivative_default_failed
+
+      'File uploaded — please review the metadata.'
     end
 
     # Per-type enrichment routing (thumbnails, PDF renditions) lives in
