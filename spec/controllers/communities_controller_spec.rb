@@ -444,15 +444,37 @@ describe CommunitiesController do
   # Ruby post-filter) keeps the Type facet counts matching what's shown.
   describe '#empty_showcase_uuids (private)' do
     it 'returns the community featured showcases that have no members' do
-      allow(controller).to receive(:featured_showcase_uuids).with('comm-uuid').and_return(%w[a b c])
       allow(controller).to receive(:populated_showcase_ids).with(%w[a b c]).and_return(Set['a'])
 
-      expect(controller.send(:empty_showcase_uuids, 'comm-uuid')).to match_array(%w[b c])
+      expect(controller.send(:empty_showcase_uuids, %w[a b c])).to match_array(%w[b c])
     end
 
     it 'returns [] when the community has no featured showcases' do
-      allow(controller).to receive(:featured_showcase_uuids).and_return([])
-      expect(controller.send(:empty_showcase_uuids, 'comm-uuid')).to eq([])
+      expect(controller.send(:empty_showcase_uuids, [])).to eq([])
+    end
+  end
+
+  # Atlas refuses a tombstone while any live member remains, and a showcase is a
+  # live member even when it is empty and hidden from the listing. Offering Delete
+  # off the listing alone promised a deletion that always failed, and told the
+  # reader to withdraw contents they could not see.
+  describe '#deletable? (private)' do
+    def deletable_with(documents:, showcases:)
+      controller.instance_variable_set(:@response, instance_double(Blacklight::Solr::Response,
+                                                                   documents: documents))
+      controller.send(:deletable?, showcases)
+    end
+
+    it 'is false while the community still holds showcases, listed or not' do
+      expect(deletable_with(documents: [], showcases: %w[a b])).to be(false)
+    end
+
+    it 'is false while the listing has children' do
+      expect(deletable_with(documents: [SolrDocument.new(id: '1')], showcases: [])).to be(false)
+    end
+
+    it 'is true only when both are empty' do
+      expect(deletable_with(documents: [], showcases: [])).to be(true)
     end
   end
 
