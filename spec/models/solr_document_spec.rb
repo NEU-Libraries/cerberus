@@ -108,4 +108,16 @@ describe SolrDocument do
       expect(SolrDocument.new(id: '1', personal_root_bsi: false).personal_root?).to be(false)
     end
   end
+
+  describe '#in_progress?' do
+    it 'is true for a JSON-boolean or string in_progress_bsi' do
+      expect(SolrDocument.new(id: '1', in_progress_bsi: true).in_progress?).to be(true)
+      expect(SolrDocument.new(id: '1', in_progress_bsi: 'true').in_progress?).to be(true)
+    end
+
+    it 'is false when absent or falsey' do
+      expect(SolrDocument.new(id: '1').in_progress?).to be(false)
+      expect(SolrDocument.new(id: '1', in_progress_bsi: false).in_progress?).to be(false)
+    end
+  end
 end

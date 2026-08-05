@@ -171,6 +171,19 @@ describe ApplicationHelper do
       doc = SolrDocument.new(id: '1', internal_resource_tesim: ['Collection'])
       expect(helper.pill_label(doc)).to eq('Collection')
     end
+
+    # Only staff, admins and the depositor ever see one of these rows, and for
+    # them "not finished yet" governs an embargo date on the same record.
+    it 'labels an unfinished deposit "In progress" ahead of Embargoed' do
+      doc = SolrDocument.new(id: '1', internal_resource_tesim: ['Work'], in_progress_bsi: true,
+                             embargo_release_date_dtsi: (Date.current + 30).to_s)
+      expect(helper.pill_label(doc)).to eq('In progress')
+    end
+
+    it 'does not label a finished deposit "In progress"' do
+      doc = SolrDocument.new(id: '1', internal_resource_tesim: ['Work'], in_progress_bsi: false)
+      expect(helper.pill_label(doc)).to eq('Work')
+    end
   end
 
   describe '#embargo_notice' do

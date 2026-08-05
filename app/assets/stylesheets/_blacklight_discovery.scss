@@ -73,6 +73,14 @@
   background-color: $danger;
 }
 
+// Unfinished-deposit override — $warning, the same caution tone the Cancel
+// buttons carry, one step down from embargo's red. Keeps the pill's inherited
+// white text: every other pill state is white on colour, and a single
+// dark-text pill would read as a mistake rather than a distinction.
+.thumb-type-pill--unfinished {
+  background-color: $warning;
+}
+
 .document-thumbnail img {
   position: absolute;
   margin: auto;

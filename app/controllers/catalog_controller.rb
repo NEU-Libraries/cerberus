@@ -366,14 +366,21 @@ class CatalogController < ApplicationController
   # context), so the media's img→fallback nextElementSibling onerror swap is
   # unaffected.
   def iiif_thumbnail(document, *_args)
-    # Pill text via the shared helper: "Embargoed" first, then "Featured" for
-    # showcases, "People" for the synthetic Faculty & Staff browse row,
-    # otherwise the resource type. Embargoed gets the opaque red variant —
-    # the one pill state worth reading at a glance over the translucent
-    # default every other tile uses.
-    pill_class = document.try(:embargoed?) ? 'thumb-type-pill thumb-type-pill--embargoed' : 'thumb-type-pill'
+    # Pill text via the shared helper (ApplicationHelper#pill_label owns the
+    # priority order). Two states earn an opaque variant over the translucent gray
+    # every other tile uses, because both are facts worth reading at a glance
+    # rather than blending into the thumbnail.
+    pill_class = ['thumb-type-pill', pill_state_class(document)].compact.join(' ')
     pill = view_context.content_tag(:span, view_context.pill_label(document), class: pill_class)
     view_context.safe_join([thumbnail_media(document), pill])
+  end
+
+  # Same precedence as the label: an unfinished deposit reads as unfinished first.
+  def pill_state_class(document)
+    return 'thumb-type-pill--unfinished' if document.try(:in_progress?)
+    return 'thumb-type-pill--embargoed' if document.try(:embargoed?)
+
+    nil
   end
 
   # The thumbnail image (with a hidden type-icon fallback for broken/missing

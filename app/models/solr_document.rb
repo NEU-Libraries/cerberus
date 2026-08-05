@@ -67,6 +67,16 @@ class SolrDocument
     Embargo.active?(embargo_release_date)
   end
 
+  # A deposit no depositor has confirmed. Only staff, admins and the depositor
+  # ever see one in a result list (SearchBuilder hides the rest), so the pill
+  # exists to tell those three that the row is a placeholder awaiting its
+  # metadata rather than a finished record. Solr returns a JSON boolean; coerce
+  # defensively for string-typed responses.
+  def in_progress?
+    value = self['in_progress_bsi']
+    value == true || value.to_s == 'true'
+  end
+
   def to_param
     raw = alternate_ids&.first
     noid = raw.split('id-').last if raw.present?

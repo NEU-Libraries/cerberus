@@ -31,12 +31,19 @@ module ApplicationHelper
     end
   end
 
-  # The thumbnail type-pill text: "Embargoed" takes priority over every other
-  # label — a viewer needs to know downloads are withheld before anything
-  # else the pill might say. Otherwise "Featured" for curated showcases,
-  # "People" for the synthetic Faculty & Staff browse row (a browse-to-many,
-  # not an individual), else the document's resource type.
+  # The thumbnail type-pill text, in priority order.
+  #
+  # "In progress" outranks even "Embargoed". The only people who see an unfinished
+  # deposit are the three who can act on it, and for them "this row is a
+  # placeholder awaiting its metadata" governs everything else the pill could say,
+  # including an embargo date on a record that is not finished yet.
+  #
+  # Then "Embargoed", because a viewer needs to know downloads are withheld before
+  # anything else; "Featured" for curated showcases; "People" for the synthetic
+  # Faculty & Staff browse row (a browse-to-many, not an individual); else the
+  # document's resource type.
   def pill_label(document)
+    return 'In progress' if document.try(:in_progress?)
     return 'Embargoed' if document.try(:embargoed?)
     return 'Featured' if document.try(:featured?)
     return 'People' if document.try(:people_browse?)
