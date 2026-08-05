@@ -86,6 +86,11 @@
                     %i.fa-solid.fa-download{'aria-hidden' => 'true'}
                     Download
                   - unless i.zero?
-                    = button_to admin_files_rollback_path, method: :post, params: { work_id: params[:work_id], blob_noid: asset.noid, version_id: version['version_id'] }, class: 'admin-registry-table__edit admin-registry-table__edit--restore ms-1', form_class: 'd-inline' do
+                    -# Confirms like every other consequential control here (Delete,
+                    -# Regenerate). Revert is non-destructive — it adds a version
+                    -# rather than removing one — but it swaps the file every viewer
+                    -# downloads and re-derives the renditions, so it should not
+                    -# happen on a mis-click in a table of near-identical rows.
+                    = button_to admin_files_rollback_path, method: :post, params: { work_id: params[:work_id], blob_noid: asset.noid, version_id: version['version_id'] }, class: 'admin-registry-table__edit admin-registry-table__edit--restore ms-1', form_class: 'd-inline', form: { data: { turbo_confirm: "Revert to version #{version['revision']}? It becomes the current file and the download renditions are rebuilt from it. Nothing is deleted — the version you are leaving stays in the history." } } do
                       %i.fa-solid.fa-rotate-left{'aria-hidden' => 'true'}
                       Revert
