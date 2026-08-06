@@ -244,6 +244,10 @@ Rack::Attack.blocklist('openai') do |req|
   !req.user_agent.blank? && req.user_agent.downcase.include?("openai".downcase)
 end
 
+Rack::Attack.blocklist('lightpanda') do |req|
+  (!req.env["HTTP_SEC_CH_UA"].blank? && req.env["HTTP_SEC_CH_UA"].downcase.include?("lightpanda")) || (!req.user_agent.blank? && req.user_agent.downcase.include?("lightpanda"))
+end
+
 Rack::Attack.blocklist("progressive throttle to block") do |req|
   if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase) && req.env["HTTP_SEC_FETCH_SITE"].blank?)
     if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 1
