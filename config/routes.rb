@@ -202,6 +202,12 @@ Rails.application.routes.draw do
       end
     end
 
+    # Deposits needing attention — the two ways a deposit gets stuck, on one
+    # surface: `?state=unconfirmed` (nobody confirmed the metadata page) and
+    # `?state=incomplete` (an enrichment job gave up). Read-only; every repair it
+    # points at is gated on its own surface.
+    get 'deposit_triage', to: 'deposit_triage#index', as: :deposit_triage
+
     # Restore a withdrawal — a registry of every tombstoned Work / Collection /
     # Community, each with a Restore action (reverses the show-page tombstone via
     # atlas_rb's operator-only Admin.restore). :id is the resource NOID; the

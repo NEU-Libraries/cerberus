@@ -24,4 +24,21 @@ module AdminFinderHelper
   def finder_doc_title(doc)
     Array(doc['title_tsim']).first.presence || '(untitled)'
   end
+
+  # When a resource was last written, for the deposit-triage list.
+  #
+  # Called "last change" and not "waiting since", which is what a triage reader
+  # actually wants to know but not what the field says: `updated_at_dtsi` is the
+  # most recent write of any kind, so a derivative job touching an abandoned
+  # deposit moves it. Naming it for the field keeps the column honest, and it still
+  # sorts the list usefully — the deposit nothing has touched in a month sinks to
+  # the top.
+  def deposit_last_change(doc)
+    stamp = doc['updated_at_dtsi']
+    return content_tag(:span, '—') if stamp.blank?
+
+    parsed = Time.iso8601(stamp)
+    content_tag(:span, parsed.strftime('%Y-%m-%d'), class: 'admin-registry-table__when',
+                                                    title: parsed.iso8601)
+  end
 end
