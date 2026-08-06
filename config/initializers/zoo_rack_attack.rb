@@ -101,6 +101,10 @@ Rack::Attack.safelist("Bielefeld University Library") do |req|
   !req.asn.blank? && req.asn == "680"
 end
 
+Rack::Attack.safelist("North West University SA") do |req|
+  !req.asn.blank? && req.asn == "8094"
+end
+
 Rack::Attack.safelist("University of Cape Town") do |req|
   !req.asn.blank? && req.asn == "36982"
 end
@@ -407,10 +411,6 @@ Rack::Attack.blocklist("CN Azure") do |req|
       req.env["HTTP_ACCEPT_LANGUAGE"].include?("zh-CN")
     end
   end
-end
-
-Rack::Attack.blocklist("afrinic") do |req|
-  req.rir == "afrinic"
 end
 
 Rack::Attack.blocklist("suspect hosting/proxy ASN orgs") do |req|
