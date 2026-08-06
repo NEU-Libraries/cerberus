@@ -16,7 +16,9 @@ RSpec.describe PdfRenditionJob, type: :job do
     FileUtils.cp(fixtures.join('example.docx'), staged_path)
     allow(WordToPdf).to receive(:available?).and_return(true)
     allow(WordToPdf).to receive(:call) { FileUtils.cp(fixtures.join('example.pdf'), pdf_path) }
-    allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(in_progress: false))
+    allow(AtlasRb::Work).to receive(:file_sets).with(work_id).and_return(
+      [AtlasRb::Mash.new(assets: [AtlasRb::Mash.new(role: 'original_file', noid: 'b-1')])]
+    )
     allow(AtlasRb::Blob).to receive(:create)
     allow(IiifAssetsJob).to receive(:perform_now)
   end
@@ -46,13 +48,23 @@ RSpec.describe PdfRenditionJob, type: :job do
     expect(AtlasRb::Blob).to have_received(:create)
   end
 
-  it 'raises WorkNotComplete while the primary Blob writer is still running (rides retry_on)' do
-    allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(in_progress: true))
+  it 'raises PrimaryFileMissing while the primary Blob writer is still running (rides retry_on)' do
+    allow(AtlasRb::Work).to receive(:file_sets).with(work_id).and_return([])
 
     expect { described_class.new.perform(work_id, staged_path, rendition_key) }
-      .to raise_error(described_class::WorkNotComplete)
+      .to raise_error(described_class::PrimaryFileMissing)
     expect(AtlasRb::Blob).not_to have_received(:create)
     expect(IiifAssetsJob).not_to have_received(:perform_now)
+  end
+
+  # An unconfirmed deposit is in_progress indefinitely, so a wait keyed on that
+  # flag would strand the rendition on a human rather than on the Blob writer.
+  it 'attaches for a Work still awaiting its depositor, as long as the primary file is there' do
+    allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(in_progress: true))
+
+    described_class.new.perform(work_id, staged_path, rendition_key)
+
+    expect(AtlasRb::Blob).to have_received(:create)
   end
 
   it 'warns and skips on images built without LibreOffice (deposit untouched)' do
@@ -85,5 +97,40 @@ RSpec.describe PdfRenditionJob, type: :job do
 
     expect(Rails.logger).to have_received(:warn).with(/gave up for work w-word/)
     expect(AtlasRb::Blob).not_to have_received(:create)
+  end
+
+  # A log line was the only trace of this before: the deposit keeps its file and
+  # stays readable, so nobody found out the document had no PDF version.
+  it 'flags the work incomplete once it has given up' do
+    allow(WordToPdf).to receive(:call).and_raise(Libreconv::ConversionFailedError, 'soffice exploded')
+    allow(IncompleteFlag).to receive(:set)
+
+    perform_enqueued_jobs { described_class.perform_later(work_id, staged_path, rendition_key) }
+
+    expect(IncompleteFlag).to have_received(:set)
+      .with(work_id, hash_including(reason: IncompleteReasons::PDF_RENDITION))
+  end
+
+  # The nuid has to come off the job instance. A give-up handler runs after
+  # around_perform has unwound, so the ambient Current.nuid is gone by then and
+  # Atlas has no principal to authenticate — which failed the write silently,
+  # since IncompleteFlag swallows its own errors by design.
+  it 'flags as the principal the job captured, not an ambient one' do
+    allow(WordToPdf).to receive(:call).and_raise(Libreconv::ConversionFailedError, 'soffice exploded')
+    allow(IncompleteFlag).to receive(:set)
+
+    Current.set(nuid: '000000002') do
+      perform_enqueued_jobs { described_class.perform_later(work_id, staged_path, rendition_key) }
+    end
+
+    expect(IncompleteFlag).to have_received(:set).with(work_id, hash_including(nuid: '000000002'))
+  end
+
+  it 'clears the flag on a run that succeeds, so a repaired work heals itself' do
+    allow(IncompleteFlag).to receive(:clear)
+
+    described_class.new.perform(work_id, staged_path, rendition_key)
+
+    expect(IncompleteFlag).to have_received(:clear).with(work_id)
   end
 end

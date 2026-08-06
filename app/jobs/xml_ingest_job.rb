@@ -66,6 +66,16 @@ class XmlIngestJob < ApplicationJob
     finalize_success(ingest)
   rescue EmbargoError => e
     finalize_failure(ingest, e.message)
+  rescue AtlasRb::NotFoundError
+    # A row naming an object this repository does not hold — the ordinary
+    # outcome of a hand-built manifest, or one carried over from another
+    # environment. Permanent, so it finalizes inline like the other row-level
+    # faults instead of escaping to retry_on: no amount of retrying makes the
+    # object appear, and the row would otherwise report three attempts and an
+    # exception class in place of the one fact the librarian needs. Catching
+    # the write rather than pre-resolving the id keeps it to a single Atlas
+    # round-trip and covers the embargo write on the same row.
+    finalize_failure(ingest, "No object with identifier '#{identifier}' exists in this repository.")
   end
   # rubocop:enable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 

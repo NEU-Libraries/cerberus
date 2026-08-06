@@ -28,6 +28,12 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
   # needs to know; the distinction only matters in the log.
   PUBLISH_LINK_FAILED = "File uploaded — please review the metadata. It couldn't be added to the " \
                         'community showcase; contact DRS staff if this persists.'
+  # The deposit stands; only the collection's per-rendition default was refused,
+  # which leaves this work's renditions at its own visibility rather than the
+  # narrower one the collection asked for. Named to the depositor because that is
+  # wider access than intended, even though it is never wider than the work.
+  DERIVATIVE_DEFAULT_FAILED = 'File uploaded — please review the metadata. The collection\'s download ' \
+                              'restrictions could not be applied to it; contact DRS staff before sharing it.'
   UNSUPPORTED_AV = 'DRS streams H.264/AAC video and AAC/MP3 audio — please convert your file first.'
 
   before_action :authorize_show!, only: [:downloads, :manifest]
@@ -41,6 +47,7 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     return render_gone(@work) if @work.tombstoned
 
     authorize_show!
+    deny_if_unfinished!(@work)
     flash.now[:alert] = IN_PROGRESS_NOTICE if @work.in_progress
     prepare_show_view
   end
@@ -97,8 +104,7 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     create_at_destination(file)
     promote_if_requested
 
-    notice = @publish_link_failed ? PUBLISH_LINK_FAILED : 'File uploaded — please review the metadata.'
-    redirect_to metadata_work_path(@work.id), notice: notice
+    redirect_to metadata_work_path(@work.id), notice: create_notice
   end
 
   # Metadata + Permissions tabs are separate forms that both PATCH here with
@@ -125,6 +131,11 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     # raced save_descriptive! into AtlasRb::StaleResourceError (seen live;
     # invisible to specs, whose test adapter never runs the job inline).
     process_derivative_widths
+    # This save is the depositor confirming the deposit, and confirmation is what
+    # completes the Work — ingest deliberately leaves it in_progress. Deferred to a
+    # job because Atlas asks callers to complete only once the expected children
+    # are deposited, and the primary Blob may still be in flight.
+    ConfirmDepositJob.perform_later(params[:id])
   end
 
   # The "Upload File" affordance on the show page: add an arbitrary binary to
@@ -254,17 +265,34 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
       )
     end
 
+    # Both post-deposit steps that can fail without failing the deposit itself.
+    # Each names what did not happen; neither hides that the file is in.
+    def create_notice
+      return PUBLISH_LINK_FAILED if @publish_link_failed
+      return DERIVATIVE_DEFAULT_FAILED if @derivative_default_failed
+
+      'File uploaded — please review the metadata.'
+    end
+
     # Per-type enrichment routing (thumbnails, PDF renditions) lives in
     # IngestDispatch, shared with the XML loader. No derivative_widths from
     # this path: small/medium/large are opt-in download renditions chosen on
     # the metadata page's checkbox/slider section, which arrives post-hoc via
     # DepositDerivativesJob (see #process_derivative_widths).
+    # complete_work: false — the depositor still owes the metadata page, so
+    # ingest must not complete this Work. #update_metadata does, once they save.
     def enqueue_ingest_jobs(file, staged_path)
       IngestDispatch.call(work_id: @work.id, staged_path: staged_path,
                           original_filename: file.original_filename,
-                          idempotency_key: SecureRandom.uuid)
+                          idempotency_key: SecureRandom.uuid,
+                          complete_work: false)
     end
 
+    # A lock, not housekeeping: an unfinished deposit is probably open on its
+    # depositor's screen at the metadata page, and this stops a second person
+    # editing underneath them. The metadata page itself stays reachable to anyone
+    # with edit rights (it rides `extra_edit`), so an abandoned deposit can always
+    # be finished or withdrawn.
     def reject_if_in_progress
       return unless AtlasRb::Work.find(params[:id]).in_progress
 

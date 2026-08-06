@@ -33,8 +33,7 @@ class CommunitiesController < CatalogController
     return render_gone(@community) if @community.tombstoned
 
     authorize_show!
-    @response = find_children(@community.valkyrie_id, params[:id],
-                              exclude_uuids: empty_showcase_uuids(@community.valkyrie_id))
+    load_children_and_deletability
     prepend_faculty_staff_entry(params[:id])
     assign_show_abilities!(klass: 'Community')
     breadcrumbs(params[:id])
@@ -51,9 +50,13 @@ class CommunitiesController < CatalogController
 
   def edit
     @community = AtlasRb::Community.find(params[:id])
-    # No cascade exists for a community, so nobody may narrow one here — not
-    # even an admin. The form withholds Private and offers the request instead.
-    @narrowing_allowed = false
+    # A community narrows its OWN object only. No cascade reaches the
+    # collections inside, which stay exactly as visible and as searchable as
+    # they were. That shallowness is the point — it holds a community's landing
+    # page back without touching its contents — but it is a sharp enough tool to
+    # be admin-only, and the form has to say what it does and does not do.
+    # Everyone else gets the request form instead.
+    @narrowing_allowed = current_user&.admin? || false
     form_preparation(@permissions, resource: @community)
     load_descriptive!('Community')
     load_container_analytics(@community, 'Community')
@@ -80,6 +83,16 @@ class CommunitiesController < CatalogController
 
   private
 
+    # One showcase lookup answers two questions: which showcases to hide from the
+    # listing (the empty ones), and whether Delete may be offered at all (any
+    # showcase is a live member Atlas refuses to tombstone around).
+    def load_children_and_deletability
+      showcases = featured_showcase_uuids(@community.valkyrie_id)
+      @response = find_children(@community.valkyrie_id, params[:id],
+                                exclude_uuids: empty_showcase_uuids(showcases))
+      @deletable = deletable?(showcases)
+    end
+
     # v1-faithful: only show Featured Collections that have content. Provisioning
     # seeds every community with the full genre showcase set, so without this the
     # browse would be littered with empty showcase rows. We compute the empty
@@ -91,13 +104,27 @@ class CommunitiesController < CatalogController
     # showcases, pairing with the Faculty & Staff node so both curated affordances
     # appear only when populated.
     #
-    # @param community_uuid [String] the community's valkyrie_id.
+    # @param showcase_uuids [Array<String>] the community's featured showcases.
     # @return [Array<String>] Solr uniqueKeys of empty featured showcases.
-    def empty_showcase_uuids(community_uuid)
-      showcase_uuids = featured_showcase_uuids(community_uuid)
+    def empty_showcase_uuids(showcase_uuids)
       return [] if showcase_uuids.empty?
 
       showcase_uuids - populated_showcase_ids(showcase_uuids).to_a
+    end
+
+    # Whether to offer Delete. The listing above is not the whole test: Atlas
+    # refuses a tombstone while any live member remains, and a showcase Collection
+    # is a live member even when it is empty and therefore hidden from the listing.
+    # Asking only the listing offered Delete on a community reading "This community
+    # is empty", then failed the delete and told the reader to withdraw contents
+    # they could not see.
+    #
+    # Provisioning gives every community the full genre showcase set, so in
+    # practice this is false for any community that provisioned normally. It stays
+    # a real test rather than a flat "never": ShowcaseProvisioner tolerates a failed
+    # showcase create, so a community can legitimately have none.
+    def deletable?(showcase_uuids)
+      @response.documents.empty? && showcase_uuids.empty?
     end
 
     # The Solr uniqueKeys of the community's featured showcase Collections (its

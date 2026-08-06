@@ -11,8 +11,9 @@ RSpec.describe SetZipPacker do
   let(:resolver) { instance_double(SetResolver) }
   let(:packer) { described_class.new(resolver: resolver, nuid: '000000002') }
 
-  def work_doc(noid)
-    SolrDocument.new('alternate_ids_ssim' => ["id-#{noid}"])
+  def work_doc(noid, embargo: nil)
+    SolrDocument.new('alternate_ids_ssim'        => ["id-#{noid}"],
+                     'embargo_release_date_dtsi' => embargo)
   end
 
   def blob(noid:, filename: nil, original_filename: nil, mime_type: nil)
@@ -27,6 +28,40 @@ RSpec.describe SetZipPacker do
   def names = zip.entries.map(&:name)
 
   before { allow(resolver).to receive(:each_content_batch).and_yield([work_doc('bc1234')]) }
+
+  # The set's gated search cannot filter these out: an embargoed Work is
+  # deliberately DISCOVERABLE — public metadata, withheld content — so it clears
+  # discovery and reaches the packer. Without the per-file check the archive is
+  # built with the set OWNER's reach and hands an anonymous caller bytes that
+  # /downloads/:id refuses them.
+  context 'when a member work is under an active embargo' do
+    before do
+      allow(resolver).to receive(:each_content_batch)
+        .and_yield([work_doc('work1', embargo: (Date.current + 30).to_s)])
+      allow(AtlasRb::Work).to receive(:assets)
+        .and_return([blob(noid: 'blobA', filename: 'a.jpg', mime_type: 'image/jpeg')])
+    end
+
+    it 'packs none of its bytes for a caller who cannot bypass' do
+      described_class.new(resolver: resolver, nuid: nil).pack(zip)
+      expect(names).not_to include('work1/a.jpg')
+    end
+
+    it 'names it as withheld rather than dropping it silently' do
+      described_class.new(resolver: resolver, nuid: nil).pack(zip)
+      expect(names).to include('ERRORS.txt')
+    end
+
+    it 'packs it for a caller who may bypass' do
+      described_class.new(resolver: resolver, nuid: '000000006', bypass_embargo: true).pack(zip)
+      expect(names).to include('work1/a.jpg')
+    end
+
+    it 'does not even ask Atlas for assets it will not pack' do
+      described_class.new(resolver: resolver, nuid: nil).pack(zip)
+      expect(AtlasRb::Work).not_to have_received(:assets)
+    end
+  end
 
   it 'streams a content Blob into a per-work folder under its labeled filename' do
     allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000002')

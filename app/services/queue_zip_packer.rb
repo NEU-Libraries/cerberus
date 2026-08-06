@@ -7,18 +7,22 @@
 # derivative rendition (`'d'`); both are packed via ZipEntryWriter, the derivative
 # fetched over HTTP from its (signed, internal-host) gated Cantaloupe URL.
 #
-# Gating: the queue is an explicit user-chosen list, so there's no Solr step;
-# `Work.assets(nuid:)` re-checks at Atlas per work (anon ⇒ public only), and an
-# item queued-then-restricted/removed simply isn't returned → skipped.
+# Gating, in two parts. `Work.assets(nuid:)` re-checks READ at Atlas per work
+# (anon ⇒ public only), so an item queued-then-restricted simply isn't returned.
+# That is not sufficient on its own: an embargoed Work is deliberately readable —
+# public metadata, withheld content — so its assets come back and would be packed.
+# The embargo is therefore checked here as well, per work.
 class QueueZipPacker
   include ZipEntryWriter
 
   # @param items [Array<Hash>] queue entries: { 'w' => work_noid, 'b' => blob_noid }
   #   for a Blob, or { 'w' => work_noid, 'd' => use } for a derivative rendition.
   # @param nuid [String, nil] acting NUID (nil for anonymous)
-  def initialize(items:, nuid:)
+  # @param bypass_embargo [Boolean] the CALLER's right to receive withheld content.
+  def initialize(items:, nuid:, bypass_embargo: false)
     @items = items
     @nuid = nuid
+    @bypass_embargo = bypass_embargo
   end
 
   def pack(zip)
@@ -39,6 +43,11 @@ class QueueZipPacker
     # item queued-then-restricted just isn't returned. (In the elsif, the asset
     # is uri-backed, i.e. a delegate, since it wasn't a content_blob?.)
     def pack_work(zip, work_noid, entries, manifest, errors)
+      if (release = withheld_until(work_noid))
+        errors << "#{work_noid}: withheld — under embargo until #{release}"
+        return
+      end
+
       blob_noids = values_for(entries, 'b')
       uses = values_for(entries, 'd')
 
@@ -56,5 +65,19 @@ class QueueZipPacker
     # The set of a queue-entry key's values (blob noids for 'b', uses for 'd').
     def values_for(entries, key)
       entries.filter_map { |entry| entry[key] }.to_set
+    end
+
+    # The release date when this work's content is withheld from THIS caller,
+    # else nil. Unlike SetZipPacker there is no Solr doc to read the date off —
+    # the queue is a bare list of noids — so this costs one Atlas call per
+    # distinct work. Acceptable: a queue is user-curated and short, and the
+    # alternative is handing out embargoed bytes.
+    def withheld_until(work_noid)
+      return nil if @bypass_embargo
+
+      release = AtlasRb::Resource.permissions(work_noid)&.embargo
+      # The stored value is a timestamp; the manifest is read by a person, so
+      # give them the date and not `2029-12-31T00:00:00+00:00`.
+      Embargo.active?(release) ? Embargo.release_date(release) : nil
     end
 end

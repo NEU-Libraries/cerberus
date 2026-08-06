@@ -15,6 +15,12 @@ Lint/MissingSuper:
     - 'app/components/blacklight/**/*'
 Metrics/ClassLength:
   Max: 120
+  Exclude:
+    # Blacklight's configure_blacklight block is a declarative table of facets,
+    # search fields and sorts, and the project keeps that config in the
+    # controller. Its length tracks the size of the Solr index, not the
+    # complexity of the class.
+    - 'app/controllers/catalog_controller.rb'
 Metrics/AbcSize:
   Max: 22
   Exclude:

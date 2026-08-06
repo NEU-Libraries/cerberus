@@ -5,7 +5,9 @@ require 'rails_helper'
 RSpec.describe MediaRenditionJob do
   before do
     allow(MediaRemux).to receive(:available?).and_return(true)
-    allow(AtlasRb::Work).to receive(:find).and_return(double('work', in_progress: false))
+    allow(AtlasRb::Work).to receive(:file_sets).and_return(
+      [AtlasRb::Mash.new(assets: [AtlasRb::Mash.new(role: 'original_file', noid: 'b-1')])]
+    )
     allow(AtlasRb::Blob).to receive(:create)
     allow(IiifAssetsJob).to receive(:perform_now)
     allow(File).to receive(:exist?).and_return(true)

@@ -26,7 +26,10 @@
                 -# tab from the URL fragment after the document loads, so a Turbo swap can
                 -# show the previous pane for a frame before tab-hash corrects it.
                 = link_to "Edit", edit_community_path(@community.id), class: "px-3", data: { turbo: false }
-              - if @can_tombstone && @response.documents.empty?
+              -# @deletable rather than the listing: a community's empty showcases
+              -# are live members Atlas refuses to tombstone around, and they are
+              -# hidden from that listing. See CommunitiesController#deletable?.
+              - if @can_tombstone && @deletable
                 = render 'shared/tombstone_modal',
                          id:   @community.id,
                          kind: 'community',

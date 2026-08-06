@@ -1,3 +1,8 @@
+-# Without this the browser tab renders as a bare " - DRS Search Results": the
+-# layout expects every page to name itself, and the People index does.
+- content_for(:page_title) do
+  = @display_name
+
 -# Breadcrumb + name-plate well ride :container_header so they span the full
 -# main width above the sidebar/results row, matching the People index and the
 -# community/collection/work show pages. The trail (built in the controller)
@@ -7,8 +12,6 @@
   = render 'shared/breadcrumbs', show_add: false
 
   .container.p-4.my-3.well.rounded-3
-    - if @person['title'].present?
-      .text-muted.text-uppercase.fw-semibold.small.mb-1{ style: 'letter-spacing:.08em' }= @person['title']
     %h3.mb-0
       %i.fa-solid.fa-user.text-primary.me-2{ 'aria-hidden' => 'true' }
       = @display_name

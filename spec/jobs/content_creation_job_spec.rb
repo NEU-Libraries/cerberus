@@ -33,4 +33,17 @@ RSpec.describe ContentCreationJob, type: :job do
     expect(AtlasRb::Blob).not_to have_received(:create)
     expect(AtlasRb::Work).not_to have_received(:complete)
   end
+
+  # The interactive deposit's Work is completed by its depositor's metadata save,
+  # so ingest must leave it in_progress — that flag is what hides an unfinished
+  # deposit from the public.
+  it 'writes the blob but leaves the work in progress when complete_work is false' do
+    allow(AtlasRb::Blob).to receive(:create)
+    allow(AtlasRb::Work).to receive(:complete)
+
+    described_class.new.perform(work_id, source_path, original_filename, idempotency_key, complete_work: false)
+
+    expect(AtlasRb::Blob).to have_received(:create)
+    expect(AtlasRb::Work).not_to have_received(:complete)
+  end
 end

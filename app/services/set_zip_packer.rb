@@ -12,9 +12,20 @@
 class SetZipPacker
   include ZipEntryWriter
 
-  def initialize(resolver:, nuid:)
+  # Every Solr field this packer reads off a member doc. SetResolver builds its
+  # `fl` from this list, so a new field lands in the query by declaring it here.
+  # Keeping the two in step by hand is what let the embargo check read nil on
+  # every document — the resolver was still fetching "just the noid".
+  REQUIRED_DOC_FIELDS = %w[
+    id
+    alternate_ids_ssim
+    embargo_release_date_dtsi
+  ].freeze
+
+  def initialize(resolver:, nuid:, bypass_embargo: false)
     @resolver = resolver
     @nuid = nuid
+    @bypass_embargo = bypass_embargo
   end
 
   # @param zip [ZipKit::Streamer] an open writer (from `zip_kit_stream`)
@@ -24,14 +35,7 @@ class SetZipPacker
     errors = []
 
     @resolver.each_content_batch do |docs|
-      docs.each do |doc|
-        noid = noid_of(doc)
-        next if noid.blank?
-
-        AtlasRb::Work.assets(noid, nuid: @nuid).each do |asset|
-          write_asset(zip, noid, asset, manifest, errors) if content_blob?(asset)
-        end
-      end
+      docs.each { |doc| pack_member(zip, doc, manifest, errors) }
     end
 
     write_manifest(zip, manifest, errors)
@@ -39,8 +43,46 @@ class SetZipPacker
 
   private
 
+    def pack_member(zip, doc, manifest, errors)
+      noid = noid_of(doc)
+      return if noid.blank?
+
+      # Named in the manifest rather than dropped in silence: someone who asked
+      # for a set of twelve and got eleven files should be able to see which was
+      # held back, and why.
+      if embargo_withholds_doc?(doc)
+        errors << "#{noid}: withheld — under embargo until #{embargo_date_of(doc)}"
+        return
+      end
+
+      AtlasRb::Work.assets(noid, nuid: @nuid).each do |asset|
+        write_asset(zip, noid, asset, manifest, errors) if content_blob?(asset)
+      end
+    end
+
     # Solr stores the noid in `alternate_ids_ssim` as `id-<noid>`.
     def noid_of(doc)
       Array(doc['alternate_ids_ssim']).first.to_s.delete_prefix('id-').presence
+    end
+
+    # An embargoed member is skipped, not packed. The resolver's gated search
+    # cannot do this for us: an embargoed Work is deliberately DISCOVERABLE —
+    # its metadata stays public and only its content is withheld — so it passes
+    # discovery gating and arrives here like any other member. Without this the
+    # archive is assembled with the set OWNER's reach and hands an anonymous
+    # requester bytes that `/downloads/:id` refuses them.
+    #
+    # The check is free: the embargo date is already on the Solr doc, so no
+    # extra Atlas round-trip per member.
+    def embargo_withholds_doc?(doc)
+      return false if @bypass_embargo
+
+      Embargo.active?(embargo_date_of(doc))
+    end
+
+    # The stored value is a timestamp; the manifest is read by a person, so give
+    # them the date and not `2029-12-31T00:00:00+00:00`.
+    def embargo_date_of(doc)
+      Embargo.release_date(Array(doc['embargo_release_date_dtsi']).first)
     end
 end

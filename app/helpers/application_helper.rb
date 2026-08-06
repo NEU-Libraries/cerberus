@@ -5,6 +5,23 @@ module ApplicationHelper
     VERSION
   end
 
+  # Whether the NUID sign-in shim exists in this environment. It stands in for
+  # SSO, which is production-only, so dev and staging offer it and production
+  # must not — it authenticates on a NUID with no secret.
+  #
+  # MUST track the matching condition in config/routes.rb: linking to a route that
+  # is not mounted raises, so the two moving apart breaks the page rather than
+  # degrading it.
+  def nuid_sign_in_available?
+    !Rails.env.production?
+  end
+
+  # Where an unauthenticated visitor is sent to sign in: the NUID shim where it
+  # exists, otherwise the ordinary session form (which is where SSO will land).
+  def sign_in_path_for_environment
+    nuid_sign_in_available? ? atlas_login_path : new_user_session_path
+  end
+
   def document_type_icon(klass_type)
     case klass_type
     when 'Community'  then 'fa-users'
@@ -14,13 +31,24 @@ module ApplicationHelper
     end
   end
 
-  # The thumbnail type-pill text: "Embargoed" takes priority over every other
-  # label — a viewer needs to know downloads are withheld before anything
-  # else the pill might say. Otherwise "Featured" for curated showcases,
-  # "People" for the synthetic Faculty & Staff browse row (a browse-to-many,
-  # not an individual), else the document's resource type.
+  # The thumbnail type-pill text, in priority order.
+  #
+  # "In progress" outranks even "Embargoed". The only people who see an unfinished
+  # deposit are the three who can act on it, and for them "this row is a
+  # placeholder awaiting its metadata" governs everything else the pill could say,
+  # including an embargo date on a record that is not finished yet.
+  #
+  # Then "Embargoed", because a viewer needs to know downloads are withheld before
+  # anything else — including ahead of "Incomplete", which is a maintenance fact
+  # about a record anyone can still read, and which has surfaces of its own.
+  #
+  # Then "Featured" for curated showcases; "People" for the synthetic Faculty &
+  # Staff browse row (a browse-to-many, not an individual); else the document's
+  # resource type.
   def pill_label(document)
+    return 'In progress' if document.try(:in_progress?)
     return 'Embargoed' if document.try(:embargoed?)
+    return 'Incomplete' if document.try(:incomplete?)
     return 'Featured' if document.try(:featured?)
     return 'People' if document.try(:people_browse?)
 

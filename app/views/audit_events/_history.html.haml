@@ -43,6 +43,10 @@
               %th.audit-event__view-col{scope: 'col'}
                 %span.visually-hidden Details
           %tbody
+            -# One directory round-trip for the whole table. audit_event_actor
+            -# resolves per row off Rails.cache, so priming here is the
+            -# difference between one batch and a request per distinct NUID.
+            - NuidResolver.names_for(events.flat_map { |e| [e['actor_nuid'], e['on_behalf_of_nuid']] })
             - events.each do |event|
               - action_partial = "audit_events/event_#{event['action']}"
               - resolved = lookup_context.exists?(action_partial, [], true) ? action_partial : 'audit_events/event_generic'

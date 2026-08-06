@@ -1,1 +1,8 @@
-%img.mt-1{loading: "lazy", src: src, style: "max-width: 100%; padding: 4px; border: 1px solid rgba(0,0,0,0.2);"}/
+-# locals: src (String), alt (String)
+-#
+-# The record's preview image. `alt` names the work rather than describing the
+-# picture, because nothing in the repository holds a description of what a
+-# preview depicts — the title is the one true thing we can say about it. It is
+-# worded as a preview so a screen reader announces something distinct from the
+-# heading beside it, instead of repeating the title twice.
+%img.mt-1{loading: "lazy", src: src, alt: alt, style: "max-width: 100%; padding: 4px; border: 1px solid rgba(0,0,0,0.2);"}/

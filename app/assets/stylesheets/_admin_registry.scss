@@ -165,6 +165,12 @@
     word-break: break-all;
   }
 
+  // A date in a ledger column. Tabular figures so the column scans vertically:
+  // the cell exists to be compared against the rows above and below it.
+  &__when {
+    font-variant-numeric: tabular-nums;
+  }
+
   // Raw OCFL version label sitting under the revision ordinal — a borderless,
   // muted footnote to the primary chip. Kept for debugging (the OCFL vN can
   // skip when preservation-envelope bumps consume versions); the revision

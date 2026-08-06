@@ -76,6 +76,19 @@ RSpec.describe 'Admin::Impressions', type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.media_type).to eq('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     end
+
+    it 'names a scoped download after the table it came from' do
+      get '/admin/impressions/export.csv?kind=container'
+
+      expect(response).to have_http_status(:ok)
+      expect(response.headers['Content-Disposition']).to include('impressions-collections-')
+    end
+
+    it 'leaves an unscoped download named as it was' do
+      get '/admin/impressions/export.csv'
+
+      expect(response.headers['Content-Disposition']).to match(/impressions-\d{4}-/)
+    end
   end
 
   describe 'item picker' do

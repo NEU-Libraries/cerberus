@@ -23,6 +23,12 @@
 # preserved), so only the type-routed *derivative* refresh is wanted here —
 # never a second ContentCreationJob/Blob.create.
 #
+# `complete_work:` is a genuinely different fact and not a second name for the
+# one above: it asks whether anything still owes this Work its metadata. A batch
+# loader has already supplied it, so ingest completing the Work is right. An
+# interactive deposit has not — a human confirms on the form's second page — so
+# that path passes false and ConfirmDepositJob completes the Work later.
+#
 # No derivative_widths pass through here: deposits get thumbnails only at
 # upload time. Small/medium/large are opt-in download renditions chosen on
 # the metadata page (DepositDerivativesJob), and per policy documents get
@@ -48,17 +54,24 @@ class IngestDispatch < ApplicationService
     application/x-tika-msoffice
   ].freeze
 
-  def initialize(work_id:, staged_path:, original_filename:, idempotency_key:, include_primary: true)
+  # rubocop:disable Metrics/ParameterLists -- all six are keywords, so there is no
+  # positional-order hazard for the cop to protect against, and each names one
+  # independent fact about the dispatch. Bundling them into an options object
+  # would hide the two flags that callers actually vary.
+  def initialize(work_id:, staged_path:, original_filename:, idempotency_key:, include_primary: true,
+                 complete_work: true)
     @work_id = work_id
     @staged_path = staged_path
     @original_filename = original_filename
     @idempotency_key = idempotency_key
     @include_primary = include_primary
+    @complete_work = complete_work
   end
+  # rubocop:enable Metrics/ParameterLists
 
   def call
     if mime_type.start_with?('image/') || mime_type == 'application/pdf'
-      IiifAssetsJob.perform_later(@work_id, @staged_path)
+      IiifAssetsJob.perform_later(@work_id, @staged_path, refresh: refreshing?)
     elsif CONVERTIBLE_MIME_TYPES.include?(mime_type)
       PdfRenditionJob.perform_later(@work_id, @staged_path, rendition_key)
     elsif mime_type.start_with?('video/', 'audio/')
@@ -67,10 +80,19 @@ class IngestDispatch < ApplicationService
     FullTextExtractionJob.perform_later(@work_id, @staged_path) if extractable_text?
     return unless @include_primary
 
-    ContentCreationJob.perform_later(@work_id, @staged_path, @original_filename, @idempotency_key)
+    ContentCreationJob.perform_later(@work_id, @staged_path, @original_filename, @idempotency_key,
+                                     complete_work: @complete_work)
   end
 
   private
+
+    # The two conditions coincide by construction: the only callers that skip
+    # the primary Blob are replace and rollback, and both are re-deriving the
+    # assets of a Work that already has them. A separate flag would be a second
+    # name for the same fact.
+    def refreshing?
+      !@include_primary
+    end
 
     # Direct full-text candidates: native PDFs and plain text. Office docs are
     # excluded here — their text comes from the PDF rendition (PdfRenditionJob),

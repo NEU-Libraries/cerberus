@@ -39,6 +39,30 @@ describe WorksController do
       expect(CGI.unescapeHTML(response.body)).to include(work.title)
     end
 
+    # The preview is the largest thing on the page and carried no alt at all,
+    # so a screen reader announced an unlabelled image. Nothing in the
+    # repository describes what a preview depicts, so it is named by its work.
+    context 'the preview image' do
+      it 'names the work it previews' do
+        AtlasRb::Work.set_thumbnails(work.id, thumbnail: 't', thumbnail_2x: 't2',
+                                              preview: 'http://example.com/preview.jpg')
+
+        get :show, params: { id: work.id }
+
+        # The fixture title carries an apostrophe, which HAML escapes.
+        expect(CGI.unescapeHTML(response.body)).to include(%(alt="Preview of #{work.title}"))
+      end
+
+      # The no-preview placeholder is a decorative icon, already aria-hidden —
+      # it must not gain an announced label in its place.
+      it 'renders the placeholder with nothing to announce when there is no preview' do
+        get :show, params: { id: work.id }
+
+        expect(response.body).not_to include('alt="Preview of')
+        expect(response.body).to include('fa-regular fa-image')
+      end
+    end
+
     context 'Edit affordance is gated on the :edit ability' do
       it 'is hidden from a signed-in user who cannot edit' do
         sign_in User.new(email: 'viewer@example.com', nuid: '000000005', role: 'standard', groups: [])
@@ -60,10 +84,21 @@ describe WorksController do
 
       before { stub_work_in_progress(work) }
 
+      # Signed in as staff: an unfinished deposit is refused outright to everyone
+      # but its depositor, staff and admins, so the notice is only ever read by
+      # someone who can act on it.
       it 'flashes the in-progress notice and hides the Edit link' do
+        sign_in User.new(email: 'staff@example.com', nuid: '000000002', groups: [Permissions::STAFF_EDIT_GROUP])
+
         get :show, params: { id: work.id }
+
         expect(flash.now[:alert]).to eq(WorksController::IN_PROGRESS_NOTICE)
         expect(response.body).not_to match(%r{>\s*Edit\s*</a>})
+      end
+
+      it '404s a visitor who may not see an unfinished deposit' do
+        get :show, params: { id: work.id }
+        expect(response).to have_http_status(:not_found)
       end
     end
 
@@ -149,9 +184,19 @@ describe WorksController do
                                 collection_id: collection.id }
       end.to have_enqueued_job(IiifAssetsJob)
         .and have_enqueued_job(ContentCreationJob)
-        .with(anything, anything, 'image.png', a_string_matching(uuid_re))
+        .with(anything, anything, 'image.png', a_string_matching(uuid_re), complete_work: false)
 
       expect(subject).to redirect_to action: :metadata, id: assigns(:work).id
+    end
+
+    # complete_work: false is what keeps the deposit in_progress until its
+    # depositor saves the metadata page — and hidden from the public until then.
+    it 'leaves the work for its depositor to complete rather than completing on ingest' do
+      post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+                              collection_id: collection.id }
+
+      expect(ContentCreationJob).to have_been_enqueued.with(anything, anything, anything, anything,
+                                                            complete_work: false)
     end
 
     it 'does not enqueue any enrichment job for unenriched uploads' do
@@ -159,7 +204,7 @@ describe WorksController do
         post :create, params: { binary:        fixture_file_upload('plain.txt', 'text/plain'),
                                 collection_id: collection.id }
       end.to have_enqueued_job(ContentCreationJob)
-        .with(anything, anything, 'plain.txt', a_string_matching(uuid_re))
+        .with(anything, anything, 'plain.txt', a_string_matching(uuid_re), complete_work: false)
         .and not_have_enqueued_job(IiifAssetsJob)
         .and not_have_enqueued_job(PdfRenditionJob)
     end
@@ -295,6 +340,23 @@ describe WorksController do
         expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
         expect(response).to redirect_to(metadata_work_path(assigns(:work).id))
         expect(flash[:notice]).to eq(described_class::PUBLISH_LINK_FAILED)
+      ensure
+        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
+      # Atlas refuses a derivative tier more visible than its Work. The collection
+      # form and the visibility cascade both keep the default within its
+      # collection, so this is a backstop — but it used to reach the Rails error
+      # page, abandoning a Work and a staged file with nothing said to anyone.
+      it 'still saves the work when Atlas refuses the collection’s derivative default' do
+        allow(Sentinel).to receive(:apply_default)
+          .and_raise(AtlasRb::DerivativePermissionsError.new('a derivative tier cannot be more visible than the Work'))
+
+        post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+                                collection_id: collection.id }
+
+        expect(response).to redirect_to(metadata_work_path(assigns(:work).id))
+        expect(flash[:notice]).to eq(described_class::DERIVATIVE_DEFAULT_FAILED)
       ensure
         AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
       end
@@ -709,6 +771,20 @@ describe WorksController do
       # obj_type local picks up the controller name, so the prose is
       # resource-aware rather than the generic "page" default.
       expect(CGI.unescapeHTML(response.body)).to include('the work you requested was not found')
+    end
+
+    # A read against a missing id comes back nil; a WRITE raises
+    # AtlasRb::NotFoundError instead, because a caller that asked to change
+    # something and silently got nil is the worse outcome. Both belong on the
+    # same 404 page — without the write shape in the rescue list it renders a
+    # Rails 500, params dump and all.
+    it 'renders the same 404 when a write raises AtlasRb::NotFoundError' do
+      allow(AtlasRb::Work).to receive(:find).and_raise(AtlasRb::NotFoundError, 'GET /works/x → 404')
+
+      get :show, params: { id: 'does-not-exist-1234' }
+
+      expect(response).to have_http_status(:not_found)
+      expect(response).to render_template('errors/not_found')
     end
   end
 

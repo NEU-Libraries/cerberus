@@ -36,6 +36,17 @@ module LoadsHelper
     loader.multipage? ? :sequence : :source_filename
   end
 
+  # What this loader takes, for the never-run empty state. Kind-specific because
+  # the copy used to describe IPTC-tagged JPEGs on every loader, so an operator
+  # opening an XML or multipage loader was told to bring the wrong thing.
+  def loader_intake_description(loader)
+    case loader.kind
+    when 'xml'       then 'a manifest spreadsheet with a MODS file per row'
+    when 'multipage' then 'a manifest spreadsheet with a MODS file and ordered page images per item'
+    else                  'an archive of IPTC-tagged JPEGs'
+    end
+  end
+
   def load_report_progress_summary(load_report)
     total = load_report.total_ingests
     return '—' if total.zero?

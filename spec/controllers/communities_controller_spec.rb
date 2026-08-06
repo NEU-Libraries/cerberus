@@ -52,6 +52,45 @@ describe CommunitiesController do
       expect(response.body).not_to include('breadcrumb-add') # Add dropdown suppressed on edit
     end
 
+    # Private on a community reaches that object and nothing else: its own page
+    # goes dark while every collection inside stays readable and searchable.
+    # Only an admin is offered it, and the copy has to say what it does not do —
+    # the generic "only chosen groups can see your item" line would be false.
+    context 'the Private option' do
+      let(:admin_user) do
+        User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin')
+      end
+
+      # The control is only withheld from a community that is currently public —
+      # an already-private one shows the select so it can be widened again. So
+      # the fixture has to be public for this to test anything.
+      before { publicize_ancestry!(community: community) }
+
+      it 'offers Private to an admin, saying it does not restrict the collections inside' do
+        sign_in admin_user
+
+        get :edit, params: { id: community.id }
+
+        expect(response.body).to match(/<option[^>]*value="private"/)
+        expect(response.body).to include('It does not restrict the collections inside it')
+      end
+
+      it 'does not offer an admin the form that asks an administrator' do
+        sign_in admin_user
+
+        get :edit, params: { id: community.id }
+
+        expect(response.body).not_to include('Ask to restrict this community')
+      end
+
+      it 'withholds Private from a non-admin editor and offers the request instead' do
+        get :edit, params: { id: community.id }
+
+        expect(response.body).not_to match(/<option[^>]*value="private"/)
+        expect(response.body).to include('Ask to restrict this community')
+      end
+    end
+
     context 'audit history tab' do
       let(:history_envelope) do
         AtlasRb::Mash.new('resource_id' => community.id, 'events' => [])
@@ -405,15 +444,37 @@ describe CommunitiesController do
   # Ruby post-filter) keeps the Type facet counts matching what's shown.
   describe '#empty_showcase_uuids (private)' do
     it 'returns the community featured showcases that have no members' do
-      allow(controller).to receive(:featured_showcase_uuids).with('comm-uuid').and_return(%w[a b c])
       allow(controller).to receive(:populated_showcase_ids).with(%w[a b c]).and_return(Set['a'])
 
-      expect(controller.send(:empty_showcase_uuids, 'comm-uuid')).to match_array(%w[b c])
+      expect(controller.send(:empty_showcase_uuids, %w[a b c])).to match_array(%w[b c])
     end
 
     it 'returns [] when the community has no featured showcases' do
-      allow(controller).to receive(:featured_showcase_uuids).and_return([])
-      expect(controller.send(:empty_showcase_uuids, 'comm-uuid')).to eq([])
+      expect(controller.send(:empty_showcase_uuids, [])).to eq([])
+    end
+  end
+
+  # Atlas refuses a tombstone while any live member remains, and a showcase is a
+  # live member even when it is empty and hidden from the listing. Offering Delete
+  # off the listing alone promised a deletion that always failed, and told the
+  # reader to withdraw contents they could not see.
+  describe '#deletable? (private)' do
+    def deletable_with(documents:, showcases:)
+      controller.instance_variable_set(:@response, instance_double(Blacklight::Solr::Response,
+                                                                   documents: documents))
+      controller.send(:deletable?, showcases)
+    end
+
+    it 'is false while the community still holds showcases, listed or not' do
+      expect(deletable_with(documents: [], showcases: %w[a b])).to be(false)
+    end
+
+    it 'is false while the listing has children' do
+      expect(deletable_with(documents: [SolrDocument.new(id: '1')], showcases: [])).to be(false)
+    end
+
+    it 'is true only when both are empty' do
+      expect(deletable_with(documents: [], showcases: [])).to be(true)
     end
   end
 

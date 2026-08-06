@@ -70,6 +70,57 @@ RSpec.describe 'My DRS', type: :request do
       expect(response.body).to include('My Dataset')       # published work under it
     end
 
+    # An unfinished deposit is hidden from general discovery, so My DRS is the only
+    # place its depositor can find one — and they are the only person who can
+    # finish it.
+    it 'lists this depositor\'s unfinished deposits with a route that finishes one' do
+      allow(AtlasRb::Person).to receive(:resolve).and_return([])
+      unfinished = SolrDocument.new('id' => 'uuid-u', 'title_tsim' => ['thesis.docx'],
+                                    'alternate_ids_tesim' => ['id-unoid'], 'in_progress_bsi' => true)
+      allow_any_instance_of(MyDrsController).to receive(:unfinished_deposits).and_return([unfinished])
+
+      get '/my_drs'
+
+      expect(response.body).to include('Deposits to finish')
+      expect(response.body).to include('thesis.docx')
+      expect(response.body).to include(metadata_work_path('unoid'))
+    end
+
+    it 'omits the panel entirely when nothing is unfinished' do
+      allow(AtlasRb::Person).to receive(:resolve).and_return([])
+      allow_any_instance_of(MyDrsController).to receive(:unfinished_deposits).and_return([])
+
+      get '/my_drs'
+
+      expect(response.body).not_to include('Deposits to finish')
+    end
+
+    # A depositor cannot re-run an enrichment job, so this panel exists to tell
+    # them what is missing rather than to offer an action — otherwise a missing
+    # thumbnail just reads as how DRS looks.
+    it 'lists their works a job gave up on, and says what each is missing' do
+      allow(AtlasRb::Person).to receive(:resolve).and_return([])
+      flagged = SolrDocument.new('id' => 'uuid-i', 'title_tsim' => ['thesis.docx'],
+                                 'alternate_ids_tesim' => ['id-inoid'], 'incomplete_bsi' => true,
+                                 'incomplete_reason_ssi' => IncompleteReasons::PDF_RENDITION)
+      allow_any_instance_of(MyDrsController).to receive(:incomplete_works).and_return([flagged])
+
+      get '/my_drs'
+
+      expect(response.body).to include('Works with something missing')
+      expect(response.body).to include('No PDF version was made')
+      expect(response.body).to include(work_path('inoid'))
+    end
+
+    it 'omits that panel when nothing is flagged' do
+      allow(AtlasRb::Person).to receive(:resolve).and_return([])
+      allow_any_instance_of(MyDrsController).to receive(:incomplete_works).and_return([])
+
+      get '/my_drs'
+
+      expect(response.body).not_to include('Works with something missing')
+    end
+
     it 'renders the accounts switcher for a person with more than one account' do
       allow(AtlasRb::Person).to receive(:resolve).and_return([])
       allow(AtlasRb::User).to receive(:accounts).and_return(

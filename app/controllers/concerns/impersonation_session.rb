@@ -125,13 +125,29 @@ module ImpersonationSession
 
     # View-as is read-only. A state-changing request ends the session loudly
     # rather than silently performing (or silently dropping) a write.
+    #
+    # "Loudly" needs help when the write came from inside a turbo-frame — the My
+    # DRS token panel is one. Turbo looks for that frame in the redirect's target,
+    # does not find it on the root page, and discards the entire response: no
+    # token, no error, no flash, and the banner still showing until the next
+    # navigation. The button looks simply dead, so an admin may keep pressing it
+    # while no longer impersonating anyone.
+    #
+    # A turbo-stream is honoured whatever frame the request came from, and a
+    # refresh re-renders the page, which surfaces the flash and drops the banner.
     def reject_writes_in_view_as
       return unless view_as?
       return if request.get? || request.head?
 
       end_impersonation
-      redirect_to root_path,
-                  alert: 'Write attempted during View-as — the session has ended.'
+      alert = 'Write attempted during View-as — the session has ended.'
+      return redirect_to(root_path, alert: alert) unless turbo_frame_request?
+
+      flash[:alert] = alert
+      # request_id: nil is load-bearing. It defaults to the current request's id,
+      # and Turbo drops a refresh whose id it has already seen — which is true of
+      # every refresh issued in reply to the request that triggered it.
+      render turbo_stream: turbo_stream.refresh(request_id: nil)
     end
 
     # Sliding 30-minute inactivity window. Each request either expires the

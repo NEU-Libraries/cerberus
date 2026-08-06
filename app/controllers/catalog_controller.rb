@@ -229,14 +229,26 @@ class CatalogController < ApplicationController
     # end
 
     # "sort results by" select (pulldown)
-    # label in pulldown is followed by the name of the Solr field to sort by and
-    # whether the sort is ascending or descending (it must be asc or desc
-    # except in the relevancy case). Add the sort: option to configure a
-    # custom Blacklight url parameter value separate from the Solr sort fields.
-    config.add_sort_field 'relevance', sort: 'score desc, pub_date_si desc, title_si asc', label: 'relevance'
-    config.add_sort_field 'year-desc', sort: 'pub_date_si desc, title_si asc', label: 'year'
-    config.add_sort_field 'author', sort: 'author_si asc, title_si asc', label: 'author'
-    config.add_sort_field 'title_si asc, pub_date_si desc', label: 'title'
+    #
+    # Every clause must name a field Atlas indexes as single-valued: Solr sorts
+    # on a single-valued field only, and it does not error on a field no
+    # document carries — it finds the value missing everywhere and returns
+    # index order, so a sort naming an unindexed field silently does nothing.
+    # `title_ssi`, `creator_ssi` and `date_ssi` are Atlas's SortIndexer fields,
+    # projected for sorting alone and never displayed; `created_at_dtsi` is
+    # Valkyrie's own record timestamp. Title breaks each name tie so a sort is
+    # deterministic across pages.
+    #
+    # date_ssi and created_at_dtsi are deliberately separate options: date_ssi
+    # is the MODS origin date (when the thing itself was made), created_at_dtsi
+    # is when the repository made the record. For an archival scan a reader
+    # wants the first.
+    config.add_sort_field 'relevance', sort: 'score desc, created_at_dtsi desc', label: 'relevance'
+    config.add_sort_field 'title', sort: 'title_ssi asc', label: 'title'
+    config.add_sort_field 'creator', sort: 'creator_ssi asc, title_ssi asc', label: 'creator (A-Z)'
+    config.add_sort_field 'creator-desc', sort: 'creator_ssi desc, title_ssi asc', label: 'creator (Z-A)'
+    config.add_sort_field 'date-created', sort: 'date_ssi desc, title_ssi asc', label: 'date created'
+    config.add_sort_field 'date-added', sort: 'created_at_dtsi desc, title_ssi asc', label: 'date added'
 
     # If there are more than this many search results, no spelling ("did you
     # mean") suggestion is offered.
@@ -354,14 +366,22 @@ class CatalogController < ApplicationController
   # context), so the media's img→fallback nextElementSibling onerror swap is
   # unaffected.
   def iiif_thumbnail(document, *_args)
-    # Pill text via the shared helper: "Embargoed" first, then "Featured" for
-    # showcases, "People" for the synthetic Faculty & Staff browse row,
-    # otherwise the resource type. Embargoed gets the opaque red variant —
-    # the one pill state worth reading at a glance over the translucent
-    # default every other tile uses.
-    pill_class = document.try(:embargoed?) ? 'thumb-type-pill thumb-type-pill--embargoed' : 'thumb-type-pill'
+    # Pill text via the shared helper (ApplicationHelper#pill_label owns the
+    # priority order). Two states earn an opaque variant over the translucent gray
+    # every other tile uses, because both are facts worth reading at a glance
+    # rather than blending into the thumbnail.
+    pill_class = ['thumb-type-pill', pill_state_class(document)].compact.join(' ')
     pill = view_context.content_tag(:span, view_context.pill_label(document), class: pill_class)
     view_context.safe_join([thumbnail_media(document), pill])
+  end
+
+  # Same precedence as the label, so the tone and the text never disagree.
+  def pill_state_class(document)
+    return 'thumb-type-pill--unfinished' if document.try(:in_progress?)
+    return 'thumb-type-pill--embargoed' if document.try(:embargoed?)
+    return 'thumb-type-pill--incomplete' if document.try(:incomplete?)
+
+    nil
   end
 
   # The thumbnail image (with a hidden type-icon fallback for broken/missing

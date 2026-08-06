@@ -1,10 +1,15 @@
+-# locals: entries, empty (String), kind (String) — 'work' or 'container'.
+-#
+-# `kind` scopes this table's own export links. Without it both links under both
+-# tables resolved to the same combined download, so a curator who clicked CSV
+-# under Top collections got a file led by the files table.
 - entries ||= []
 - if entries.any?
   .usage-export
-    = link_to admin_impressions_export_path(format: :csv, **usage_export_params(@report)), class: 'admin-registry-table__edit' do
+    = link_to admin_impressions_export_path(format: :csv, kind: kind, **usage_export_params(@report)), class: 'admin-registry-table__edit' do
       %i.fa-solid.fa-file-csv{'aria-hidden' => 'true'}
       CSV
-    = link_to admin_impressions_export_path(format: :xlsx, **usage_export_params(@report)), class: 'admin-registry-table__edit' do
+    = link_to admin_impressions_export_path(format: :xlsx, kind: kind, **usage_export_params(@report)), class: 'admin-registry-table__edit' do
       %i.fa-solid.fa-file-excel{'aria-hidden' => 'true'}
       Excel
   .table-responsive

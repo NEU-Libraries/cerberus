@@ -148,5 +148,73 @@ RSpec.describe 'Admin::Loaders', type: :request do
         expect(response).to have_http_status(:unprocessable_content)
       end
     end
+
+    # A registry row a librarian made to try the documented steps is deletable.
+    # One that has run is not: its LoadReports describe Works that outlive it.
+    describe 'DELETE /admin/loaders/:slug' do
+      let!(:loader) { Loader.create!(valid_params[:loader]) }
+
+      it 'deletes a loader that has never run' do
+        expect { delete "/admin/loaders/#{loader.slug}" }
+          .to change(Loader, :count).by(-1)
+        expect(response).to redirect_to(admin_loaders_path)
+      end
+
+      it 'names the deleted slug in the flash' do
+        delete "/admin/loaders/#{loader.slug}"
+        follow_redirect!
+        expect(response.body).to include('marcom')
+        expect(response.body).to include('deleted')
+      end
+
+      context 'when the loader has run' do
+        before { LoadReport.create!(loader: loader, source_filename: 'batch.zip') }
+
+        it 'refuses the delete and keeps the loader' do
+          expect { delete "/admin/loaders/#{loader.slug}" }
+            .not_to change(Loader, :count)
+          expect(response).to redirect_to(admin_loaders_path)
+        end
+
+        it 'says how many loads are holding it, not the association wording' do
+          delete "/admin/loaders/#{loader.slug}"
+          follow_redirect!
+          expect(response.body).to include('1 load on record')
+          expect(response.body).not_to include('dependent load_reports exist')
+        end
+
+        it 'keeps the load report' do
+          delete "/admin/loaders/#{loader.slug}"
+          expect(LoadReport.count).to eq(1)
+        end
+      end
+    end
+  end
+
+  # The registry stays :admin-only for the delete too — it is not one of the
+  # devolved-admin surfaces.
+  describe 'DELETE authorization' do
+    let!(:loader) { Loader.create!(valid_params[:loader]) }
+
+    it 'refuses a :privileged staff user with 403' do
+      sign_in staff_user
+      delete "/admin/loaders/#{loader.slug}"
+      expect(response).to have_http_status(:forbidden)
+      expect(Loader.count).to eq(1)
+    end
+
+    it 'refuses the devolved-admin tier with 403' do
+      sign_in delegate_user
+      delete "/admin/loaders/#{loader.slug}"
+      expect(response).to have_http_status(:forbidden)
+      expect(Loader.count).to eq(1)
+    end
+
+    it 'refuses a loader-role user with 403' do
+      sign_in marcom_user
+      delete "/admin/loaders/#{loader.slug}"
+      expect(response).to have_http_status(:forbidden)
+      expect(Loader.count).to eq(1)
+    end
   end
 end

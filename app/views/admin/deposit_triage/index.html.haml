@@ -1,0 +1,89 @@
+= render 'admin/breadcrumb_header'
+
+- documents = @response.documents
+- unconfirmed = @state == 'unconfirmed'
+
+.admin-registry.my-3
+  -# No count in the head strip: the tabs below carry one each, and two
+  -# comparable numbers are worth more than one that repeats the table under it.
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-clipboard-list{'aria-hidden' => 'true'}
+      Deposits needing attention
+    .admin-registry__head-actions
+      %span.admin-registry__subtitle
+        - if current_user&.admin?
+          %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+          Admin-only
+        - else
+          %i.fa-solid.fa-user-shield{'aria-hidden' => 'true'}
+          Delegated admin access
+
+  -# Plain links, not JS tabs: each list pages independently, so each is its own
+  -# GET. Both counts show, so the inactive tab says whether it is worth opening.
+  %nav.px-3.pt-3{'aria-label' => 'Deposit state'}
+    %ul.nav.nav-tabs
+      - Admin::DepositTriageController::TABS.each do |state, label|
+        - active = state == @state
+        %li.nav-item
+          = link_to admin_deposit_triage_path(state: state),
+            class: "nav-link#{' active' if active}", 'aria-current': ('page' if active) do
+            = label
+            %span.badge.text-bg-secondary.ms-1= @counts[state]
+
+  .p-3
+    %p.text-muted.small.mb-0
+      - if unconfirmed
+        Nobody has confirmed these on the deposit form's second page, so they are hidden from search and from their collections. Their depositors see them under “Deposits to finish”. Finish one on their behalf, or withdraw it from its own page.
+      - else
+        These are published and readable, but a background job gave up before it finished making something — a rendition, a thumbnail, or the extracted text. Replacing the file rebuilds what is missing.
+
+  - if documents.any?
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table
+        %thead
+          %tr
+            %th{scope: 'col'} Title
+            %th{scope: 'col'} Depositor
+            %th{scope: 'col'} PID
+            %th{scope: 'col'}= unconfirmed ? 'Last change' : 'What is missing'
+            %th{scope: 'col'}
+        %tbody
+          - documents.each do |doc|
+            %tr
+              %td
+                .admin-registry-table__name= finder_doc_title(doc)
+              %td= audit_event_actor(doc['depositor_ssi'])
+              %td
+                %span.admin-registry-table__id= doc.to_param
+              %td.small.text-muted
+                - if unconfirmed
+                  = deposit_last_change(doc)
+                - else
+                  = IncompleteReasons.describe(doc.incomplete_reason)
+              %td.text-end
+                = link_to(unconfirmed ? metadata_work_path(doc) : work_path(doc),
+                  class: 'admin-registry-table__edit') do
+                  - if unconfirmed
+                    %i.fa-solid.fa-pen-to-square{'aria-hidden' => 'true'}
+                    Finish deposit
+                  - else
+                    %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+                    Open
+
+    - if @response.respond_to?(:total_pages) && @response.total_pages > 1
+      .px-3.pt-2
+        = paginate @response
+  - else
+    .admin-registry__empty
+      %i.fa-solid.fa-clipboard-check.admin-registry__empty-icon{'aria-hidden' => 'true'}
+      %p.mb-1.fw-semibold.text-body
+        - if unconfirmed
+          Every deposit has been confirmed
+        - else
+          Nothing is missing a part
+      %p.mb-0.small.text-muted
+        - if unconfirmed
+          A deposit whose metadata page is never saved appears here, so it can be finished or withdrawn.
+        - else
+          A work whose rendition, thumbnail or text extraction fails appears here, so it can be rebuilt.

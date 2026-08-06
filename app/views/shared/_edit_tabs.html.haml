@@ -8,10 +8,12 @@
 -# @param klass [String] 'Work' | 'Collection' | 'Community'
 -# @param id [String] the resource noid
 -# @param active [String, nil] key of the standalone tab being viewed
+-# @param open [String, nil] key of the pane to open, when not the first one
 - keys = edit_tab_keys(klass)
 - edit_path = public_send("edit_#{klass.downcase}_path", id)
--# The first visible pane tab is the one Bootstrap opens by default.
-- default_key = keys.find { |key| !key.in?(EditTabsHelper::STANDALONE) }
+-# Which pane opens. The panes ask edit_tab_open_key too, so the row and the
+-# content it drives cannot disagree about which one is showing.
+- default_key = edit_tab_open_key(klass, open: local_assigns[:open])
 %ul.nav.nav-tabs{data: (active ? {} : { controller: 'tab-hash' })}
   - keys.each do |key|
     %li.nav-item

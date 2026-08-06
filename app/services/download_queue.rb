@@ -18,8 +18,13 @@ class DownloadQueue
     @session = session
   end
 
+  # Read-only view. Never mutate what this returns — the session only records a
+  # change that goes through `[]=` (see #replace), so an in-place `<<` or
+  # `delete` is silently dropped when the session is serialized at the end of
+  # the request. Returns a plain [] for an absent key rather than seeding one,
+  # so a read can't leave a write behind.
   def items
-    @session[:download_queue] ||= []
+    @session[:download_queue] || []
   end
 
   def count
@@ -46,11 +51,11 @@ class DownloadQueue
   end
 
   def remove(work_noid, blob_noid)
-    items.delete(blob_entry(work_noid, blob_noid))
+    replace(items - [blob_entry(work_noid, blob_noid)])
   end
 
   def remove_derivative(work_noid, use)
-    items.delete(derivative_entry(work_noid, use))
+    replace(items - [derivative_entry(work_noid, use)])
   end
 
   def clear
@@ -60,11 +65,19 @@ class DownloadQueue
   private
 
     def push(entry)
-      return :already if items.include?(entry)
-      return :full if count >= MAX
+      current = items
+      return :already if current.include?(entry)
+      return :full if current.size >= MAX
 
-      items << entry
+      replace(current + [entry])
       :ok
+    end
+
+    # The single write path. Assignment through `[]=` is what marks the session
+    # dirty; building a new array and assigning it is therefore the only
+    # reliable way to change the queue.
+    def replace(entries)
+      @session[:download_queue] = entries
     end
 
     def blob_entry(work_noid, blob_noid)

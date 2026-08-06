@@ -106,6 +106,54 @@ describe 'audit_events/_history.html.haml' do
     end
   end
 
+  # "Who did this" answered as `000000003` is only an answer to a reader who
+  # can read NUIDs. The name leads; the chip keeps the identifier available.
+  context 'resolving actor names' do
+    it 'shows the name above the NUID chip' do
+      allow(NuidResolver).to receive(:names_for).and_return({ '000000002' => 'Doe, Jane' })
+      allow(NuidResolver).to receive(:name_for).with('000000002').and_return('Doe, Jane')
+
+      render_with(events: [event(action: 'create')])
+
+      expect(rendered).to have_css('.audit-event__actor', text: 'Doe, Jane')
+      expect(rendered).to have_css('.audit-event__nuid', text: '000000002')
+    end
+
+    it 'falls back to the bare chip when the NUID has no directory entry' do
+      allow(NuidResolver).to receive(:names_for).and_return({})
+      allow(NuidResolver).to receive(:name_for).and_return(nil)
+
+      render_with(events: [event(action: 'create', actor: '000000000')])
+
+      expect(rendered).to have_no_css('.audit-event__actor')
+      expect(rendered).to have_css('.audit-event__nuid', text: '000000000')
+    end
+
+    # The resolver echoes the NUID back for the anonymous and system
+    # principals rather than returning nil, which printed the digits twice.
+    it 'does not print the NUID as its own name when the resolver echoes it' do
+      allow(NuidResolver).to receive(:names_for).and_return({})
+      allow(NuidResolver).to receive(:name_for).with('000000099').and_return('000000099')
+
+      render_with(events: [event(action: 'create', actor: '000000099')])
+
+      expect(rendered).to have_no_css('.audit-event__actor')
+      expect(rendered).to have_css('.audit-event__nuid', text: '000000099', count: 1)
+    end
+
+    # One batch for the table, not one lookup per row.
+    it 'primes every actor and on-behalf NUID in a single resolver call' do
+      allow(NuidResolver).to receive(:names_for).and_return({})
+      allow(NuidResolver).to receive(:name_for).and_return(nil)
+
+      render_with(events: [event(action: 'create', actor: '000000002'),
+                           event(action: 'update', actor: '000000004', on_behalf_of: '000000005')])
+
+      expect(NuidResolver).to have_received(:names_for)
+        .with(array_including('000000002', '000000004', '000000005')).once
+    end
+  end
+
   context 'with structural-relationship verbs (Option C — dedicated partials, not generic)' do
     before do
       render_with(events: [event(action: 'reparent', change_type: 'structural',

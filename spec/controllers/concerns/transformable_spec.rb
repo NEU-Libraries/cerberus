@@ -201,6 +201,49 @@ describe Transformable do
     end
   end
 
+  # "At least one keyword" really means "at least one subject". A record whose
+  # subjects are all authority-controlled already has one, and MODSFields keeps
+  # those out of the Keywords box on purpose — so the rule has to accept them, or a
+  # curator editing only a title cannot save without inventing a redundant keyword.
+  describe '#descriptive_valid?' do
+    it 'refuses a blank title regardless of anything else' do
+      expect(host.descriptive_valid?({ title: '', keywords: %w[a] }, keywords: true)).to be false
+    end
+
+    it 'refuses no keywords when the record has no curated subjects either' do
+      expect(host.descriptive_valid?({ title: 'T', keywords: [] }, keywords: true)).to be false
+    end
+
+    it 'accepts no keywords when the record carries curated subjects' do
+      expect(
+        host.descriptive_valid?({ title: 'T', keywords: [] }, keywords: true, curated_subjects: true)
+      ).to be true
+    end
+
+    it 'accepts keywords when there are no curated subjects' do
+      expect(host.descriptive_valid?({ title: 'T', keywords: %w[a] }, keywords: true)).to be true
+    end
+
+    it 'ignores keywords entirely for resources that do not require them' do
+      expect(host.descriptive_valid?({ title: 'T', keywords: [] }, keywords: false)).to be true
+    end
+  end
+
+  describe '#curated_subjects_posted?' do
+    it 'casts the form flag, so only a real true counts' do
+      host.params = { work: { curated_subjects: 'true' } }
+      expect(host.curated_subjects_posted?(:work)).to be true
+    end
+
+    it 'is false when the flag says false, and when it is absent' do
+      host.params = { work: { curated_subjects: 'false' } }
+      expect(host.curated_subjects_posted?(:work)).to be false
+
+      host.params = { work: {} }
+      expect(host.curated_subjects_posted?(:work)).to be false
+    end
+  end
+
   describe '#mass_permissions' do
     it 'is a no-op without a :mass param' do
       host.params = {}
@@ -211,13 +254,46 @@ describe Transformable do
       expect(permitted[:permissions][:read]).to eq(['librarians'])
     end
 
-    it 'sets read to [public] when :mass is "public"' do
+    it 'keeps the group grants alongside public when :mass is "public"' do
       host.params = { mass: 'public' }
       permitted = { permissions: { read: ['librarians'] } }
 
       host.mass_permissions(permitted)
 
+      # The grant is redundant while the item is public, but it is what a later
+      # flip to Private falls back to — so this submit must not silently drop it.
+      expect(permitted[:permissions][:read]).to eq(%w[public librarians])
+    end
+
+    it 'sets read to [public] when :mass is "public" with no group grants' do
+      host.params = { mass: 'public' }
+      permitted = { permissions: { read: [] } }
+
+      host.mass_permissions(permitted)
+
       expect(permitted[:permissions][:read]).to eq(['public'])
+    end
+
+    it 'does not duplicate the public sentinel already in read' do
+      host.params = { mass: 'public' }
+      permitted = { permissions: { read: %w[public librarians public] } }
+
+      host.mass_permissions(permitted)
+
+      expect(permitted[:permissions][:read]).to eq(%w[public librarians])
+    end
+
+    it 'survives a public save then a private one with the grants intact' do
+      # The A2 hazard end to end: the grant added on the public save is what
+      # makes the item reachable by that group once it goes private.
+      host.params = { mass: 'public' }
+      permitted = { permissions: { read: ['librarians'] } }
+      host.mass_permissions(permitted)
+
+      host.params = { mass: 'private' }
+      host.mass_permissions(permitted)
+
+      expect(permitted[:permissions][:read]).to eq(['librarians'])
     end
 
     it 'strips public from read when :mass is non-public' do
@@ -309,9 +385,10 @@ describe Transformable do
     end
   end
 
-  # There is no cascade for a Community, so letting one narrow would leave every
-  # collection inside it more visible than its container. The form offers no
-  # Private option; this is the backstop for JS-off or a hand-made request.
+  # Narrowing a Community changes that object alone — no cascade reaches the
+  # collections inside, which stay as visible as they were. Only an admin is
+  # offered it; for everyone else this is the backstop behind a form that does
+  # not show the option, catching JS-off and hand-made requests.
   describe '#apply_permissions when the submit narrows a Community' do
     before { allow(AtlasRb::Community).to receive(:metadata) }
 
@@ -325,6 +402,36 @@ describe Transformable do
 
       expect(AtlasRb::Community).not_to have_received(:metadata)
       expect(host.flash[:alert]).to eq(Transformable::COMMUNITY_NARROWING_REFUSED)
+    end
+
+    it 'refuses a group-ACL editor, who is not an admin' do
+      host.current_user = user_double(groups: ['curators'])
+      host.params = ActionController::Parameters.new(
+        id: 'm-1', community: { permissions: { '1' => { 'group_id' => 'curators', 'ability' => 'read' } } }
+      )
+      host.instance_variable_set(:@permissions, AtlasRb::Mash.new('read' => ['public']))
+
+      host.apply_permissions('Community', 'm-1', :community)
+
+      expect(AtlasRb::Community).not_to have_received(:metadata)
+    end
+
+    # The admin path writes the ordinary way. Nothing is handed to
+    # NarrowingRequest, because a community has no cascade to hand it to — the
+    # shallowness is the behaviour, not an omission.
+    it 'lets an admin narrow the community object, without a cascade' do
+      allow(NarrowingRequest).to receive(:call)
+      host.current_user = user_double(admin: true)
+      host.params = ActionController::Parameters.new(
+        id: 'm-1', community: { permissions: { '1' => { 'group_id' => 'curators', 'ability' => 'read' } } }
+      )
+      host.instance_variable_set(:@permissions, AtlasRb::Mash.new('read' => ['public']))
+
+      host.apply_permissions('Community', 'm-1', :community)
+
+      expect(AtlasRb::Community).to have_received(:metadata)
+      expect(NarrowingRequest).not_to have_received(:call)
+      expect(host.flash[:alert]).to be_nil
     end
 
     # Widening a community is unconstrained — descendants keep their own

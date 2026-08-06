@@ -165,7 +165,8 @@ Rails.application.routes.draw do
 
   namespace :admin do
     root to: 'dashboard#index'
-    resources :loaders, only: [:index, :new, :create, :edit, :update], param: :slug
+    # Destroy is refused for a loader that has run — see LoadersController.
+    resources :loaders, only: [:index, :new, :create, :edit, :update, :destroy], param: :slug
 
     # Group names — the cosmetic display name for a Grouper group (raw → pretty),
     # consulted by ApplicationController#pretty_group wherever a group surfaces.
@@ -200,6 +201,12 @@ Rails.application.routes.draw do
         delete 'affiliations/:community_id', to: 'people#remove_affiliation', as: :remove_affiliation
       end
     end
+
+    # Deposits needing attention — the two ways a deposit gets stuck, on one
+    # surface: `?state=unconfirmed` (nobody confirmed the metadata page) and
+    # `?state=incomplete` (an enrichment job gave up). Read-only; every repair it
+    # points at is gated on its own surface.
+    get 'deposit_triage', to: 'deposit_triage#index', as: :deposit_triage
 
     # Restore a withdrawal — a registry of every tombstoned Work / Collection /
     # Community, each with a Restore action (reverses the show-page tombstone via
@@ -249,10 +256,25 @@ Rails.application.routes.draw do
   put '/xml/update' => 'xml#update'
 
   # atlas
-  get '/atlas/login' => 'atlas#login'
-  post '/atlas/process_login' => 'atlas#process_login'
-  get '/atlas/find_or_create' => 'atlas#find_or_create'
-  post '/atlas/process_find_or_create' => 'atlas#process_find_or_create'
+  #
+  # The NUID sign-in shim stands in for SSO, which only exists in production, so
+  # dev and staging need it to sign in at all. It authenticates on a submitted
+  # NUID alone — no secret — and process_find_or_create additionally accepts a
+  # `groups` list, so it can mint an account carrying the repository admin group.
+  # That is acceptable where SSO is absent and unacceptable beside it, so the
+  # routes do not exist in production rather than relying on nobody finding them.
+  #
+  # ApplicationHelper#nuid_sign_in_available? mirrors this condition for the views
+  # that link here; the two have to move together.
+  unless Rails.env.production?
+    get '/atlas/login' => 'atlas#login'
+    post '/atlas/process_login' => 'atlas#process_login'
+    get '/atlas/find_or_create' => 'atlas#find_or_create'
+    post '/atlas/process_find_or_create' => 'atlas#process_find_or_create'
+  end
+
+  # Not gated: the user menu links here for everyone, and it only renders the
+  # signed-in user's own record.
   get '/atlas/user' => 'atlas#user'
 
   # error pages — also targeted by config.exceptions_app

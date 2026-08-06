@@ -158,8 +158,19 @@ RSpec.describe 'Admin::Files', type: :request do
 
       it 'offers Revert on prior versions but not the current one' do
         get '/admin/files/manage', params: { work_id: 'w1' }
-        # one Revert button (for v1); v2 is current, so it gets none.
-        expect(response.body.scan('Revert').size).to eq(1)
+        # One Revert control (for v1); v2 is current, so it gets none. Counted by
+        # the form's action rather than the word "Revert", which also appears in
+        # the confirm copy — the word is a proxy for the control, and the two
+        # stopped agreeing once the button gained a confirmation.
+        expect(response.body.scan(admin_files_rollback_path).size).to eq(1)
+      end
+
+      it 'makes Revert confirm first, like the other consequential controls' do
+        get '/admin/files/manage', params: { work_id: 'w1' }
+
+        expect(response.body).to include('data-turbo-confirm')
+        expect(response.body).to match(/Revert to version 1\?/)
+        expect(response.body).to match(/Nothing is deleted/)
       end
     end
 

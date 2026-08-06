@@ -23,12 +23,15 @@ class TombstonedItems < ApplicationService
     super()
   end
 
-  # @return [Blacklight::Solr::Response] the tombstoned resource documents,
-  #   ordered by title (no withdrawal timestamp is indexed to sort on).
+  # @return [Blacklight::Solr::Response] the tombstoned resource documents, most
+  #   recently withdrawn first. A tombstone is the last write a resource takes,
+  #   so `updated_at_dtsi` is the withdrawal time in all but name — which is the
+  #   order an admin wants on a restore screen, since the thing just withdrawn in
+  #   error is the thing being looked for.
   def call
     builder = TombstonedSearchBuilder.new(@scope)
                                      .with(q: '*:*', per_page: PER_PAGE, page: @page)
-                                     .merge(sort: 'title_si asc')
+                                     .merge(sort: 'updated_at_dtsi desc')
     Blacklight.default_index.search(builder)
   end
 end

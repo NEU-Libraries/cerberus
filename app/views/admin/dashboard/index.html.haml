@@ -56,6 +56,16 @@
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
 
+    = link_to admin_deposit_triage_path, class: 'admin-action-card admin-action-card--triage', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-clipboard-list{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Deposits needing attention
+      %span.admin-action-card__desc
+        Deposits nobody confirmed, which stay hidden from search until somebody does, and works a background job left short a rendition, thumbnail or extracted text. Two lists, oldest first.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
     = link_to admin_tombstones_path, class: 'admin-action-card admin-action-card--restore', role: 'listitem' do
       %span.admin-action-card__icon
         %i.fa-solid.fa-trash-can-arrow-up{'aria-hidden' => 'true'}

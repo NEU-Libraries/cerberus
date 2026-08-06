@@ -20,6 +20,7 @@ class FullTextExtractionJob < ApplicationJob
     Rails.logger.warn(
       "FullTextExtractionJob gave up for work #{job.arguments.first}: #{exception.class}: #{exception.message}"
     )
+    IncompleteFlag.set(job.arguments.first, nuid: job.current_nuid, reason: IncompleteReasons::FULL_TEXT)
   end
 
   def perform(work_id, source_path)
@@ -29,6 +30,7 @@ class FullTextExtractionJob < ApplicationJob
     return if text.blank?
 
     AtlasRb::Work.set_full_text(work_id, text: text)
+    IncompleteFlag.clear(work_id)
   end
 
   private

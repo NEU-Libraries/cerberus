@@ -30,4 +30,42 @@ RSpec.describe Metadata::MODSFields do
     with_kw = Metadata::MODSMerge.call(xml: xml, keywords: %w[alpha beta])
     expect(described_class.call(xml: with_kw)[:keywords]).to contain_exactly('alpha', 'beta')
   end
+
+  # The form's mandatory-keyword rule stands in for "this record has a subject", so
+  # it has to tell a record with NO subjects apart from one whose subjects are all
+  # curated and therefore never shown here. Without that, a curator fixing a title
+  # on such a record is told it has no keywords and cannot save until they invent
+  # one the record does not need.
+  describe 'curated_subjects' do
+    it 'is true when every subject is authority-controlled, so the box looks empty' do
+      expect(fields[:keywords]).to eq([])
+      expect(fields[:curated_subjects]).to be true
+    end
+
+    it 'stays true once free-text keywords are added alongside the curated ones' do
+      with_kw = Metadata::MODSMerge.call(xml: xml, keywords: %w[alpha])
+      expect(described_class.call(xml: with_kw)[:curated_subjects]).to be true
+    end
+
+    it 'is false when the record carries no subjects at all' do
+      bare = <<~XML
+        <mods:mods xmlns:mods="http://www.loc.gov/mods/v3">
+          <mods:titleInfo><mods:title>Bare</mods:title></mods:titleInfo>
+        </mods:mods>
+      XML
+      expect(described_class.call(xml: bare)[:curated_subjects]).to be false
+    end
+
+    it 'is false when the only subjects ARE the editable free-text keywords' do
+      only_kw = <<~XML
+        <mods:mods xmlns:mods="http://www.loc.gov/mods/v3">
+          <mods:titleInfo><mods:title>Keywords only</mods:title></mods:titleInfo>
+          <mods:subject><mods:topic>free text</mods:topic></mods:subject>
+        </mods:mods>
+      XML
+      parsed = described_class.call(xml: only_kw)
+      expect(parsed[:keywords]).to eq(['free text'])
+      expect(parsed[:curated_subjects]).to be false
+    end
+  end
 end

@@ -184,4 +184,40 @@ RSpec.describe SearchBuilder do
       expect(type_fq(scope)).to be_empty
     end
   end
+
+  # An unfinished deposit inherits its parent's audience, so read gating alone
+  # leaves one deposited into a public collection publicly discoverable.
+  describe '#exclude_unfinished_deposits' do
+    def unfinished_fq(user)
+      params = {}
+      scope = double('scope', blacklight_config: CatalogController.blacklight_config, current_user: user)
+      described_class.new(scope).exclude_unfinished_deposits(params)
+      Array(params[:fq])
+    end
+
+    it 'excludes them for an anonymous visitor' do
+      expect(unfinished_fq(nil)).to eq(['-in_progress_bsi:true'])
+    end
+
+    it 'excludes them for a signed-in reader, but keeps that reader their own' do
+      user = User.new(nuid: '000000015', role: 'standard', groups: [])
+      expect(unfinished_fq(user)).to eq(['((*:* -in_progress_bsi:true) OR depositor_ssi:000000015)'])
+    end
+
+    it 'appends nothing for repository staff, who curate them' do
+      user = User.new(nuid: '000000002', role: 'privileged', groups: [Permissions::STAFF_EDIT_GROUP])
+      expect(unfinished_fq(user)).to be_empty
+    end
+
+    it 'appends nothing for an admin' do
+      expect(unfinished_fq(User.new(nuid: '000000004', role: 'admin'))).to be_empty
+    end
+
+    # A bare `-field:value` cannot be one side of an OR in Solr: with no positive
+    # set to subtract from, the clause matches nothing and every Work vanishes.
+    it 'subtracts the negation from *:* so the OR is satisfiable' do
+      user = User.new(nuid: '000000015', role: 'standard', groups: [])
+      expect(unfinished_fq(user).first).to start_with('((*:* -')
+    end
+  end
 end

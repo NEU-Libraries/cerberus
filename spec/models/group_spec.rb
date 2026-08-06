@@ -33,6 +33,45 @@ RSpec.describe Group, type: :model do
     end
   end
 
+  describe '.search' do
+    before do
+      described_class.create!(raw:      'northeastern:drs:repository:loaders:marcom',
+                              cosmetic: 'Marketing and Communications')
+      described_class.create!(raw:      'northeastern:drs:school_of_law:law_library:staff',
+                              cosmetic: 'Law Library Staff')
+    end
+
+    it 'matches part of the raw identifier' do
+      expect(described_class.search('marcom').pluck(:cosmetic)).to eq(['Marketing and Communications'])
+    end
+
+    it 'matches part of the display name' do
+      expect(described_class.search('Law Library').pluck(:cosmetic)).to eq(['Law Library Staff'])
+    end
+
+    it 'ignores case' do
+      expect(described_class.search('MARCOM').count).to eq(1)
+    end
+
+    it 'ignores surrounding whitespace' do
+      expect(described_class.search('  marcom  ').count).to eq(1)
+    end
+
+    it 'returns every row for a blank term' do
+      expect(described_class.search('').count).to eq(2)
+      expect(described_class.search(nil).count).to eq(2)
+    end
+
+    # `%` and `_` are LIKE wildcards but ordinary characters in a Grouper
+    # identifier, so an unescaped term would match every row. Escaped, `%`
+    # matches nothing (no fixture contains one) and `_` matches only the row
+    # whose identifier really carries an underscore.
+    it 'treats a LIKE wildcard as a literal character' do
+      expect(described_class.search('%').count).to eq(0)
+      expect(described_class.search('_').pluck(:cosmetic)).to eq(['Law Library Staff'])
+    end
+  end
+
   describe '.for_select' do
     before do
       described_class.create!(raw: 'northeastern:drs:repository:zzz', cosmetic: 'Alpha Group')

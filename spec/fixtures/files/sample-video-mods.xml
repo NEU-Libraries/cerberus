@@ -2,7 +2,7 @@
 <mods:mods xmlns:drs="https://repository.neu.edu/spec/v1" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:niec="http://repository.neu.edu/schema/niec" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
 
     <mods:titleInfo usage="primary">
-        <mods:title>Moss-Covered Tree Trunk</mods:title>
+        <mods:title>Sample Video Recording — Moss-Covered Tree Trunk</mods:title>
         <mods:nonSort/></mods:titleInfo>
     <mods:abstract>A short close-up study of moss growing on a tree trunk in a temperate woodland. Included as sample audiovisual material so the repository's in-browser video player can be exercised on seed data.</mods:abstract>
 

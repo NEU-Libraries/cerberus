@@ -12,7 +12,6 @@ require 'rails_helper'
 RSpec.describe 'People', type: :request do
   let(:person) do
     { 'id' => 'pp11aa22', 'nuid' => '000000777', 'display_name' => 'Stephen Flynn',
-      'title' => 'Professor of Political Science',
       'bio' => 'Founding Director of the Global Resilience Institute.',
       'orcid' => '0000-0002-1825-0097' }
   end
@@ -71,7 +70,7 @@ RSpec.describe 'People', type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('Stephen Flynn')
-      expect(response.body).to include('Professor of Political Science')
+      expect(response.body).to include('Founding Director of the Global Resilience Institute.')
       expect(response.body).to include('0000-0002-1825-0097') # ORCID is fine to show
       expect(response.body).not_to include('000000777') # the NUID is not
     end

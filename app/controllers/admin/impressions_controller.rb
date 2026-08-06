@@ -38,12 +38,15 @@ module Admin
 
     # CSV / Excel of the top-N tables (the quarterly-report artifact). Format
     # comes off the URL extension (.csv / .xlsx); no Mime registration needed.
+    # `kind` scopes it to one table, so the links under Top files export files;
+    # omitting it still exports both, which is the quarterly-report shape.
     def export
       report = build_report
+      export = ImpressionsExport.new(report, kind: params[:kind])
       if params[:format] == 'xlsx'
-        send_data ImpressionsExport.new(report).xlsx, filename: filename(report, 'xlsx'), type: XLSX_TYPE
+        send_data export.xlsx, filename: filename(report, 'xlsx', export.slug), type: XLSX_TYPE
       else
-        send_data ImpressionsExport.new(report).csv, filename: filename(report, 'csv'), type: 'text/csv'
+        send_data export.csv, filename: filename(report, 'csv', export.slug), type: 'text/csv'
       end
     end
 
@@ -103,8 +106,13 @@ module Admin
         nil
       end
 
-      def filename(report, ext)
-        "impressions-#{report.range.begin}_#{report.range.end}-#{report.segment}.#{ext}"
+      # The scope slug is in the name so two downloads from one dashboard do not
+      # land in ~/Downloads as impressions-….csv and impressions-…(1).csv.
+      def filename(report, ext, slug = nil)
+        [
+          'impressions', slug, "#{report.range.begin}_#{report.range.end}",
+          "#{report.segment}.#{ext}"
+        ].compact.join('-')
       end
   end
 end

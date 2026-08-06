@@ -13,6 +13,9 @@ RSpec.describe 'Derivative downloads', type: :request do
     # The embargo gate reads the Work's own permissions; default unembargoed,
     # overridden per example in the "under an active embargo" context below.
     allow(AtlasRb::Resource).to receive(:permissions).with(work_id).and_return(AtlasRb::Mash.new('embargo' => ''))
+    # The unfinished-deposit gate reads the Work itself; finished by default.
+    allow(AtlasRb::Work).to receive(:find).with(work_id)
+                                          .and_return(AtlasRb::Mash.new(in_progress: false, depositor: '000000004'))
   end
 
   def stub_tier(gated:, permission:, nuid:, use: 'large_image')
@@ -28,6 +31,22 @@ RSpec.describe 'Derivative downloads', type: :request do
 
     expect(response).to have_http_status(:found)
     expect(response.location).to start_with("#{uri}?exp=").and include('&sig=')
+  end
+
+  # The redirect target is Cantaloupe, so the browser obeys its headers: with no
+  # disposition the JPEG renders in a tab and a control labelled Download does
+  # not download. Appending after signing is safe — the HMAC covers the path.
+  it 'asks Cantaloupe for an attachment, named by tier and work' do
+    stub_tier(gated: false, permission: ['public'], nuid: nil)
+
+    get derivative_download_path(work_id, 'large_image')
+
+    # The route param here is the tier `use` verbatim; in the app that is a
+    # display label ("Large Image"), which parameterizes to "large-image".
+    disposition = CGI.unescape(response.location[/response-content-disposition=(.+)\z/, 1])
+    expect(disposition).to eq(%(attachment; filename="large_image_#{work_id}.jpg"; ) +
+                              %(filename*=UTF-8''large_image_#{work_id}.jpg))
+    expect(response.location).to match(/\?exp=\d+&sig=[a-f0-9]+&response-content-disposition=/)
   end
 
   it 'redirects a gated tier for a member of a gating group' do

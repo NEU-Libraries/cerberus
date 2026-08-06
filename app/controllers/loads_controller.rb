@@ -9,7 +9,11 @@ class LoadsController < ApplicationController
 
   copy_blacklight_config_from(CatalogController)
 
-  BAD_DESTINATION_MSG = 'Choose a destination collection (search by title or paste a collection NOID).'
+  # "PID" to match this field's own placeholder, the loader form's "Root collection
+  # PID" label, and the manifest's PIDs column. The identifier is a NOID in v2, but
+  # the interface has settled on v1's word for it, and giving the reader two words
+  # for one thing is worse than using the older one consistently.
+  BAD_DESTINATION_MSG = 'Choose a destination collection (search by title or paste a collection PID).'
 
   before_action :authenticate_user!
   before_action :set_loader

@@ -55,9 +55,29 @@ module WorkDeposit
     # and applies it when the async renditions arrive.
     def finalize_new_work(file, collection_id)
       save_descriptive!('Work', @work.id, title: file.original_filename, description: nil)
-      Sentinel.apply_default(collection_id, @work.id)
+      apply_derivative_default(collection_id)
       staged_path = stage_upload(file, @work.id)
       enqueue_ingest_jobs(file, staged_path)
+    end
+
+    # The collection's derivative-access default, applied to the new Work.
+    #
+    # Atlas refuses a tier more visible than its Work, so a default naming an
+    # audience the Work does not have is rejected. That should not happen — the
+    # authoring form checks the default against its collection, and a visibility
+    # cascade re-clamps it — but the deposit must not die on the Rails error page
+    # if it ever does again: the Work and its file already exist by this point, so
+    # raising abandoned a half-made deposit and told the depositor nothing.
+    #
+    # Not silent, though. The default exists to make renditions MORE restrictive
+    # than the Work, so skipping it leaves them at the Work's own audience — wider
+    # than intended, and the depositor is the one who needs to know.
+    def apply_derivative_default(collection_id)
+      Sentinel.apply_default(collection_id, @work.id)
+    rescue AtlasRb::DerivativePermissionsError => e
+      Rails.logger.error("[deposit] derivative default rejected for work #{@work.id} " \
+                         "under collection #{collection_id}: #{e.message}")
+      @derivative_default_failed = true
     end
 
     # Reject-at-upload gate (called before the Work is created): an A/V file

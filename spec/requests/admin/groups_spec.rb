@@ -165,5 +165,47 @@ RSpec.describe 'Admin::Groups', type: :request do
       get '/admin/groups', params: { page: 2 }
       expect(response.body).to include('grp:025')
     end
+
+    it 'keeps the search term across pages' do
+      26.times { |i| Group.create!(raw: format('law:%03d', i), cosmetic: "Law #{i}") }
+      Group.create!(raw: 'nupd:media', cosmetic: 'NUPD Media')
+
+      get '/admin/groups', params: { q: 'law', page: 2 }
+      expect(response.body).to include('law:025')
+      expect(response.body).not_to include('nupd:media')
+    end
+  end
+
+  describe 'search' do
+    before do
+      sign_in admin_user
+      Group.create!(raw:      'northeastern:drs:repository:loaders:marcom',
+                    cosmetic: 'Marketing and Communications')
+      Group.create!(raw:      'northeastern:drs:school_of_law:law_library:staff',
+                    cosmetic: 'Law Library Staff')
+    end
+
+    it 'narrows the registry to matching rows' do
+      get '/admin/groups', params: { q: 'marcom' }
+      expect(response.body).to include('northeastern:drs:repository:loaders:marcom')
+      expect(response.body).not_to include('northeastern:drs:school_of_law:law_library:staff')
+    end
+
+    it 'finds a row by its display name as well as its identifier' do
+      get '/admin/groups', params: { q: 'Law Library' }
+      expect(response.body).to include('northeastern:drs:school_of_law:law_library:staff')
+    end
+
+    # A bare filtered count can't be told apart from a registry that lost rows.
+    it 'reports the filtered count against the unfiltered total' do
+      get '/admin/groups', params: { q: 'marcom' }
+      expect(response.body).to include('1 of 2 entries')
+    end
+
+    it 'says so plainly when nothing matches, and offers to clear' do
+      get '/admin/groups', params: { q: 'northeastern:drs:nupd:media' }
+      expect(response.body).to include('No group names match')
+      expect(response.body).to include('Clear search')
+    end
   end
 end

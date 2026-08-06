@@ -16,8 +16,14 @@ module Admin
 
     before_action :set_group, only: %i[edit update destroy]
 
+    # `@total` is the unfiltered size, carried separately from
+    # `@groups.total_count` so the header can read "3 of 159 entries" during a
+    # search. A bare filtered count leaves an admin unable to tell a narrow
+    # match from a registry that has lost rows.
     def index
-      @groups = Group.page(params[:page]).per(PER_PAGE)
+      @query  = params[:q].to_s.strip
+      @total  = Group.count
+      @groups = Group.search(@query).page(params[:page]).per(PER_PAGE)
     end
 
     def new

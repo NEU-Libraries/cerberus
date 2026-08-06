@@ -1,3 +1,12 @@
+-# A passing validation clears the refusal banner that a refused Save left above
+-# the form. The banner sits outside #mods, so the preview replacement below
+-# cannot reach it. A FAILING validation deliberately leaves it alone: nothing
+-# was written, so "Not saved" is still true, and the errors themselves render in
+-# the preview pane rather than twice on one screen.
+- if Array(@errors).empty?
+  = turbo_stream.replace 'save_refusal' do
+    = render 'save_refusal', errors: []
+
 = turbo_stream.replace "mods" do
   - if @errors.present?
     #mods

@@ -8,7 +8,12 @@ SimpleCov.start 'rails' do
   add_filter 'app/channels'
   add_filter 'lib/cerberus/vocab'
   add_filter 'app/indexers'
-  minimum_coverage 90
+  # The floor is a property of the whole suite, so it can only be judged by a
+  # run of the whole suite. Any subset — `rake smoke`, or the handful of files
+  # that cover a patch in progress — would fail on coverage alone and say
+  # nothing about the code under test. SMOKE lifts the floor; it does not
+  # disable the report.
+  minimum_coverage 90 unless ENV['SMOKE']
 end
 
 # This file is copied to spec/ when you run 'rails generate rspec:install'
@@ -48,10 +53,12 @@ rescue ActiveRecord::PendingMigrationError => e
   abort e.to_s.strip
 end
 RSpec.configure do |config|
-  # The lock is taken BEFORE the reset, not after: the reset is the destructive
-  # step, so acquiring afterwards would let a second run wipe the first run's
-  # store before discovering it should not have started.
+  # The preflight and the lock are both taken BEFORE the reset, not after: the
+  # reset is the destructive step, so anything that could veto it has to run
+  # first. The preflight checks which instance is about to be wiped; the lock
+  # stops a second run from wiping the first run's store mid-flight.
   config.before(:suite) do
+    SpecPreflight.assert_safe_to_reset!
     ExclusiveRunLock.acquire!
     AtlasRb::Reset.clean
   end

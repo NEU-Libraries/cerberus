@@ -100,6 +100,30 @@ RSpec.describe 'Loads', type: :request do
     end
   end
 
+  # The never-run empty state tells an operator what to bring, so it has to
+  # describe the loader in front of them rather than one fixed kind.
+  describe 'GET /loaders/:slug/loads (history) with no past runs' do
+    before { sign_in admin_user }
+
+    it 'names IPTC-tagged JPEGs for an IPTC loader' do
+      get loader_loads_path(marcom_loader)
+
+      expect(response.body).to include('No past uploads')
+      expect(response.body).to include('IPTC-tagged JPEGs')
+    end
+
+    it 'names a manifest, not IPTC, for an XML loader' do
+      loader = Loader.create!(slug: 'xml-history', display_name: 'XML Metadata Loader',
+                              group: 'northeastern:drs:repository:loaders:xml',
+                              root_collection: 'neu:root', kind: :xml)
+
+      get loader_loads_path(loader)
+
+      expect(response.body).to include('manifest spreadsheet')
+      expect(response.body).not_to include('IPTC-tagged JPEGs')
+    end
+  end
+
   describe 'GET /loaders/marcom/loads/new' do
     before do
       sign_in marcom_user

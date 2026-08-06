@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mods:mods xmlns:drs="https://repository.neu.edu/spec/v1" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:niec="http://repository.neu.edu/schema/niec" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+
+    <mods:titleInfo usage="primary">
+        <mods:title>Sample Multipage Booklet</mods:title>
+        <mods:nonSort/></mods:titleInfo>
+    <mods:abstract>A two-page item for the multipage batch loader's sample archive. Its manifest carries one Sequence 0 row naming this MODS file, then one row per page in order, with Last Item flagged on the final page.</mods:abstract>
+
+    <mods:name type="corporate" usage="primary">
+        <mods:namePart>Northeastern University Library</mods:namePart>
+        <mods:role>
+            <mods:roleTerm authority="marcrelator" authorityURI="http://id.loc.gov/vocabulary/relators" valueURI="http://id.loc.gov/vocabulary/relators/cre" type="text">Creator</mods:roleTerm>
+        </mods:role>
+    </mods:name>
+
+    <mods:originInfo>
+        <mods:dateCreated keyDate="yes" encoding="w3cdtf">2026-03-01</mods:dateCreated>
+    </mods:originInfo>
+
+    <mods:genre authority="aat" authorityURI="http://vocab.getty.edu/aat/" valueURI="http://vocab.getty.edu/aat/300046300">books</mods:genre>
+
+    <mods:subject authority="lcsh" authorityURI="http://id.loc.gov/authorities/subjects" valueURI="http://id.loc.gov/authorities/subjects/sh85028045">
+        <mods:topic>Sample materials</mods:topic>
+    </mods:subject>
+
+    <mods:typeOfResource>still image</mods:typeOfResource>
+    <mods:physicalDescription>
+        <mods:form authority="marcform">electronic</mods:form>
+        <mods:digitalOrigin>born digital</mods:digitalOrigin>
+    </mods:physicalDescription>
+
+    <mods:accessCondition type="use and reproduction">Sample material created by Northeastern University Library for testing the batch loaders.</mods:accessCondition>
+    <mods:recordInfo>
+        <mods:recordContentSource>Northeastern University Libraries</mods:recordContentSource>
+        <mods:recordOrigin>Enhanced</mods:recordOrigin>
+        <mods:languageOfCataloging>
+            <mods:languageTerm authority="iso639-2b" authorityURI="http://id.loc.gov/vocabulary/iso639-2" type="text" valueURI="http://id.loc.gov/vocabulary/iso639-2/eng">English</mods:languageTerm>
+        </mods:languageOfCataloging>
+        <mods:recordCreationDate encoding="w3cdtf">2026-03-01</mods:recordCreationDate>
+    </mods:recordInfo>
+
+    <mods:extension displayLabel="scholarly_object">
+        <scholarly_object>
+            <category/>
+            <department/>
+            <degree/>
+            <course_info>
+            </course_info>
+        </scholarly_object>
+    </mods:extension>
+    <mods:extension>
+        <niec:niec/>
+    </mods:extension>
+</mods:mods>

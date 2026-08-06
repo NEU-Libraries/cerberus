@@ -62,6 +62,68 @@ describe DerivativeCreator do
     end
   end
 
+  describe 'existing_widths' do
+    def assets_for(urls)
+      urls.map { |role, uri| AtlasRb::Mash.new(role: "#{role}_image", uri: uri) }
+    end
+
+    # The property that matters: whatever #call emits, existing_widths recovers
+    # widths that regenerate the SAME URIs. Not "the same width objects" — 0.5
+    # comes back as Rational(1, 2), which is the same size. A fourth size shape
+    # added to iiif_size without its inverse fails here.
+    it 'recovers widths that reproduce the renditions they came from' do
+      [
+        nil,
+        { small: 320, medium: 640, large: 1280 },
+        { small: 0.25, medium: Rational(2, 3), large: 0.9 },
+        { small: 800, medium: 0.5, large: nil },
+        { small: 1.5 }
+      ].each do |widths|
+        urls = DerivativeCreator.call(base: base, widths: widths)
+        recovered = DerivativeCreator.existing_widths(assets_for(urls))
+
+        expect(DerivativeCreator.call(base: base, widths: recovered)).to eq(urls)
+      end
+    end
+
+    it 'rebuilds against a new base, which is the whole point on a replace' do
+      urls = DerivativeCreator.call(base: base)
+      recovered = DerivativeCreator.existing_widths(assets_for(urls))
+
+      expect(DerivativeCreator.call(base: 'http://example.com/iiif/3/new.jp2', widths: recovered)).to eq(
+        small:  'http://example.com/iiif/3/new.jp2/full/pct:33/0/default.jpg',
+        medium: 'http://example.com/iiif/3/new.jp2/full/pct:50/0/default.jpg',
+        large:  'http://example.com/iiif/3/new.jp2/full/pct:75/0/default.jpg'
+      )
+    end
+
+    it 'reads only the rendition tiers, ignoring blobs and the service delegate' do
+      assets = [
+        AtlasRb::Mash.new(role: 'original_file', noid: 'b-1'),
+        AtlasRb::Mash.new(role: 'service_file', uri: base),
+        AtlasRb::Mash.new(role: 'small_image', uri: "#{base}/full/pct:33/0/default.jpg")
+      ]
+
+      expect(DerivativeCreator.existing_widths(assets)).to eq(small: Rational(33, 100))
+    end
+
+    it 'returns nil for a work with no renditions, so the caller can skip' do
+      expect(DerivativeCreator.existing_widths([AtlasRb::Mash.new(role: 'original_file')])).to be_nil
+      expect(DerivativeCreator.existing_widths([])).to be_nil
+    end
+
+    # Defaulting an unreadable tier would rebuild it at `full` — a Small tier
+    # serving the full-resolution image, which is a permission leak.
+    it 'drops a tier whose size it cannot read, and says so' do
+      allow(Rails.logger).to receive(:warn)
+      assets = assets_for(small:  "#{base}/full/tricky/0/default.jpg",
+                          medium: "#{base}/full/pct:50/0/default.jpg")
+
+      expect(DerivativeCreator.existing_widths(assets)).to eq(medium: Rational(1, 2))
+      expect(Rails.logger).to have_received(:warn).with(/unreadable size .* small not rebuilt/)
+    end
+  end
+
   describe 'initialize' do
     it 'sets the base and widths' do
       creator = DerivativeCreator.new(base: base, widths: { small: 50 })

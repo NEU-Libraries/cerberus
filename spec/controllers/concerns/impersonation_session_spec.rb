@@ -24,6 +24,11 @@ describe ImpersonationSession do
 
       def main_app = self
       def root_path = '/'
+      # reject_writes_in_view_as branches on this: a write from inside a turbo
+      # frame needs a turbo-stream reply, because Turbo discards a redirect whose
+      # target frame is absent from the response. A plain write takes the redirect,
+      # which is the path these examples exercise.
+      def turbo_frame_request? = false
 
       def redirect_to(target, **opts)
         @redirected = { target: target, opts: opts }

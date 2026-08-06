@@ -10,6 +10,29 @@ describe ApplicationHelper do
     end
   end
 
+  # The NUID shim authenticates on a NUID alone, with no secret, and its
+  # find_or_create sibling accepts a `groups` list — so it can mint an account
+  # holding the repository admin group. That is the point of it where SSO does not
+  # exist (dev, staging) and unacceptable beside it, so the routes are not mounted
+  # in production. These pin the view side: linking to an unmounted route raises,
+  # so the helper and config/routes.rb have to agree.
+  describe '#nuid_sign_in_available? / #sign_in_path_for_environment' do
+    it 'offers the shim outside production' do
+      expect(helper.nuid_sign_in_available?).to be true
+      expect(helper.sign_in_path_for_environment).to eq(atlas_login_path)
+    end
+
+    it 'falls back to the session form when the shim is absent' do
+      allow(helper).to receive(:nuid_sign_in_available?).and_return(false)
+      expect(helper.sign_in_path_for_environment).to eq(new_user_session_path)
+    end
+
+    it 'keys on the environment rather than being hardcoded true' do
+      allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new('production'))
+      expect(helper.nuid_sign_in_available?).to be false
+    end
+  end
+
   describe '#document_type_icon' do
     it 'maps Community to fa-users' do
       expect(helper.document_type_icon('Community')).to eq('fa-users')
@@ -147,6 +170,32 @@ describe ApplicationHelper do
     it 'falls back to the resource type' do
       doc = SolrDocument.new(id: '1', internal_resource_tesim: ['Collection'])
       expect(helper.pill_label(doc)).to eq('Collection')
+    end
+
+    # Only staff, admins and the depositor ever see one of these rows, and for
+    # them "not finished yet" governs an embargo date on the same record.
+    it 'labels an unfinished deposit "In progress" ahead of Embargoed' do
+      doc = SolrDocument.new(id: '1', internal_resource_tesim: ['Work'], in_progress_bsi: true,
+                             embargo_release_date_dtsi: (Date.current + 30).to_s)
+      expect(helper.pill_label(doc)).to eq('In progress')
+    end
+
+    it 'does not label a finished deposit "In progress"' do
+      doc = SolrDocument.new(id: '1', internal_resource_tesim: ['Work'], in_progress_bsi: false)
+      expect(helper.pill_label(doc)).to eq('Work')
+    end
+
+    it 'labels a work whose pipeline partly failed "Incomplete"' do
+      doc = SolrDocument.new(id: '1', internal_resource_tesim: ['Work'], incomplete_bsi: true)
+      expect(helper.pill_label(doc)).to eq('Incomplete')
+    end
+
+    # Withheld content is the stronger fact for any viewer. "Incomplete" is a
+    # maintenance note on a record they can still read, and it has other surfaces.
+    it 'prefers "Embargoed" over "Incomplete" when a work is both' do
+      doc = SolrDocument.new(id: '1', internal_resource_tesim: ['Work'], incomplete_bsi: true,
+                             embargo_release_date_dtsi: (Date.current + 30).to_s)
+      expect(helper.pill_label(doc)).to eq('Embargoed')
     end
   end
 

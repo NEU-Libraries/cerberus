@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<office:document
+    xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+    xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0"
+    xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+    xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"
+    xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"
+    xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0"
+    xmlns:presentation="urn:oasis:names:tc:opendocument:xmlns:presentation:1.0"
+    office:version="1.2"
+    office:mimetype="application/vnd.oasis.opendocument.presentation">
+  <office:automatic-styles>
+    <style:style style:name="TitleFrame" style:family="graphic">
+      <style:graphic-properties draw:fill="none" draw:stroke="none"/>
+    </style:style>
+    <style:style style:name="TitleText" style:family="paragraph">
+      <style:text-properties fo:font-size="40pt" fo:font-weight="bold" fo:color="#2666a6"/>
+    </style:style>
+    <style:style style:name="BodyText" style:family="paragraph">
+      <style:text-properties fo:font-size="20pt" fo:color="#343a40"/>
+    </style:style>
+  </office:automatic-styles>
+  <office:body>
+    <office:presentation>
+      <draw:page draw:name="Cover">
+        <draw:frame draw:style-name="TitleFrame" svg:width="24cm" svg:height="4cm" svg:x="2cm" svg:y="5cm">
+          <draw:text-box>
+            <text:p text:style-name="TitleText">Sample Presentation</text:p>
+          </draw:text-box>
+        </draw:frame>
+        <draw:frame draw:style-name="TitleFrame" svg:width="24cm" svg:height="3cm" svg:x="2cm" svg:y="9.5cm">
+          <draw:text-box>
+            <text:p text:style-name="BodyText">Northeastern University Library</text:p>
+            <text:p text:style-name="BodyText">Digital Repository Service</text:p>
+          </draw:text-box>
+        </draw:frame>
+      </draw:page>
+      <draw:page draw:name="About">
+        <draw:frame draw:style-name="TitleFrame" svg:width="24cm" svg:height="3cm" svg:x="2cm" svg:y="2cm">
+          <draw:text-box>
+            <text:p text:style-name="TitleText">About this file</text:p>
+          </draw:text-box>
+        </draw:frame>
+        <draw:frame draw:style-name="TitleFrame" svg:width="24cm" svg:height="10cm" svg:x="2cm" svg:y="5.5cm">
+          <draw:text-box>
+            <text:p text:style-name="BodyText">This slide deck is sample material held in the DRS so that</text:p>
+            <text:p text:style-name="BodyText">the PowerPoint path can be exercised: the original file is</text:p>
+            <text:p text:style-name="BodyText">preserved, and a PDF rendition is generated alongside it.</text:p>
+            <text:p text:style-name="BodyText"/>
+            <text:p text:style-name="BodyText">It carries no third-party branding, so its first page is safe</text:p>
+            <text:p text:style-name="BodyText">to use as the work's thumbnail.</text:p>
+          </draw:text-box>
+        </draw:frame>
+      </draw:page>
+      <draw:page draw:name="Placeholder">
+        <draw:frame draw:style-name="TitleFrame" svg:width="24cm" svg:height="3cm" svg:x="2cm" svg:y="2cm">
+          <draw:text-box>
+            <text:p text:style-name="TitleText">A second content slide</text:p>
+          </draw:text-box>
+        </draw:frame>
+        <draw:frame draw:style-name="TitleFrame" svg:width="24cm" svg:height="8cm" svg:x="2cm" svg:y="5.5cm">
+          <draw:text-box>
+            <text:p text:style-name="BodyText">Present so the deck has more than one page, which the</text:p>
+            <text:p text:style-name="BodyText">rendition and full-text extraction paths both need.</text:p>
+          </draw:text-box>
+        </draw:frame>
+      </draw:page>
+    </office:presentation>
+  </office:body>
+</office:document>

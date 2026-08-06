@@ -61,6 +61,7 @@ class VisibilityCascadeJob < ApplicationJob
     # @return [Symbol]
     def write_container(target, permissions)
       target.atlas_class.metadata(target.noid, { 'permissions' => permissions })
+      clamp_sentinel(target.noid, Array(permissions['read']))
       :container
     end
 
@@ -73,7 +74,36 @@ class VisibilityCascadeJob < ApplicationJob
       return :unchanged if clamped.sort == Array(current.read).sort
 
       target.atlas_class.metadata(target.noid, { 'permissions' => envelope(current, clamped) })
+      clamp_sentinel(target.noid, clamped)
       :narrowed
+    end
+
+    # A container's derivative-access default lives in Cerberus, not in the ACL
+    # Atlas holds, so narrowing the container leaves it untouched and pointing at
+    # an audience the container no longer has. Sentinel already refuses that
+    # combination when someone authors it (policy_within_resource); this keeps the
+    # same rule true when the container narrows underneath a default that was
+    # coherent when written.
+    #
+    # It has to hold, not merely look untidy: Atlas refuses a tier more visible
+    # than its Work, and the default is applied to every new deposit — so a stale
+    # default made the next deposit into that collection fail outright.
+    #
+    # A tier whose audience shares nobody with the container's new one clamps to
+    # the empty list — withheld from everyone rather than re-pointed at whoever is
+    # left. Same answer audience_intersect gives a disjoint child ACL, and the
+    # right way round for a gate whose purpose is to withhold. The authoring form
+    # renders it as "Restrict to groups" with none ticked, which is what it is.
+    def clamp_sentinel(noid, read_groups)
+      sentinel = Sentinel.find_by(target_id: noid)
+      return if sentinel.nil?
+
+      clamped = sentinel.policy.transform_values do |groups|
+        Permissions.audience_intersect(Array(groups), read_groups)
+      end
+      return if clamped == sentinel.policy
+
+      sentinel.update(policy: clamped)
     end
 
     # The resource's whole ACL envelope with only `read` replaced.

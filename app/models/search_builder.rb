@@ -4,7 +4,7 @@ class SearchBuilder < Blacklight::SearchBuilder
   include Blacklight::Solr::SearchBuilderBehavior
 
   self.default_processor_chain += [:apply_gated_discovery, :append_extra_filters, :exclude_curation_containers,
-                                   :scope_to_resource_type]
+                                   :scope_to_resource_type, :exclude_unfinished_deposits]
 
   def apply_gated_discovery(solr_parameters)
     # Admins carry the `can :manage, :all` short-circuit in Ability, but that
@@ -68,6 +68,24 @@ class SearchBuilder < Blacklight::SearchBuilder
     solr_parameters[:fq].push('-featured_bsi:true', '-personal_root_bsi:true', '-system_container_bsi:true')
   end
 
+  # Keep unfinished deposits out of general discovery. `in_progress` means no
+  # depositor has confirmed the deposit, so the record is a placeholder — commonly
+  # titled with the uploaded filename and carrying no subjects — and a reader
+  # cannot tell it from a finished one.
+  #
+  # Read gating does not cover this: an unfinished deposit inherits its parent's
+  # audience, so one deposited into a public collection is public.
+  #
+  # Three audiences still see it. Staff and admins because they curate; the
+  # depositor because the flag is cleared by *their* next action, and hiding it
+  # from them would strand a deposit they alone can finish.
+  def exclude_unfinished_deposits(solr_parameters)
+    return if gated_user&.admin? || gated_user&.member_of?(Permissions::STAFF_EDIT_GROUP)
+
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << unfinished_clause
+  end
+
   # Constrain a search to a single resource type when the scope's context
   # carries a `:resource_type_scope` (e.g. the /communities and /collections
   # index actions, which otherwise inherit CatalogController's unscoped browse
@@ -112,5 +130,17 @@ class SearchBuilder < Blacklight::SearchBuilder
       permissions = ['public']
       permissions.concat(Array(gated_user&.groups))
       permissions.uniq
+    end
+
+    # A signed-in depositor keeps their own unfinished deposits.
+    #
+    # The `*:*` is load-bearing: Solr cannot evaluate a purely negative clause as
+    # one side of an OR, so the negation needs a positive set to subtract from.
+    # Without it the whole clause matches nothing and every Work disappears.
+    def unfinished_clause
+      nuid = gated_user&.nuid
+      return '-in_progress_bsi:true' if nuid.blank?
+
+      "((*:* -in_progress_bsi:true) OR depositor_ssi:#{RSolr.solr_escape(nuid)})"
     end
 end

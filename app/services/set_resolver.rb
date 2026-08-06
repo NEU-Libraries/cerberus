@@ -33,6 +33,19 @@ class SetResolver
   # bulk-set-download plan), this just bounds a runaway recipe meanwhile.
   MAX_EXPORT_ROWS = 10_000
 
+  # The packers state their own requirements and this asks for them, rather than
+  # keeping a separate list that has to be remembered alongside. They were
+  # separate: the packer gained an embargo check while the field list still
+  # said "just the noid", so the check read nil on every document and withheld
+  # nothing. That failure is silent and it fails towards serving content.
+  #
+  # The UNION of both packers, because this resolver feeds both — SetZipPacker for
+  # the content download and MetadataExportPacker for the manifest. Asking for only
+  # one packer's fields reintroduces the same silent-nil bug on whichever path was
+  # left out; `embargoed_bsi` was missing that way, so a Work embargoed by flag
+  # rather than by release date exported as not embargoed.
+  PACKER_FIELDS = (SetZipPacker::REQUIRED_DOC_FIELDS | MetadataExportPacker::REQUIRED_DOC_FIELDS).join(',')
+
   # One included collection, with its gated contents tally.
   # +live+ is what the Set currently shows from this collection; +total+ is
   # what it would show with nothing set aside. They diverge only when a
@@ -78,10 +91,16 @@ class SetResolver
   # discover — per-member permission gating comes free, exactly as on the
   # page. No-ops (no yield) when the recipe has no positive clause.
   #
-  # `fl` is trimmed to what SetZipPacker needs (just the noid, via
-  # alternate_ids). Paged rather than one giant fetch; capped at
-  # {MAX_EXPORT_ROWS} as a coarse runaway guard until the deferred cumulative
-  # size cap + job fallback lands (see the bulk-set-download plan).
+  # `fl` is trimmed to what SetZipPacker needs — see {PACKER_FIELDS}. Paged
+  # rather than one giant fetch; capped at {MAX_EXPORT_ROWS} as a coarse runaway
+  # guard until the deferred cumulative size cap + job fallback lands (see the
+  # bulk-set-download plan).
+  #
+  # Discovery gating is NOT the whole of the packer's job. An embargoed Work is
+  # deliberately discoverable — public metadata, withheld content — so it clears
+  # this search and the packer has to withhold it itself. That is why the embargo
+  # date is in the field list: trimming it away silently disabled the check and
+  # put embargoed bytes into anonymous archives.
   #
   # @param batch [Integer] page size
   # @yieldparam docs [Array<SolrDocument>] one page of content Works
@@ -92,8 +111,7 @@ class SetResolver
 
     start = 0
     loop do
-      docs = search(*fqs, rows: batch, start: start,
-                    fl: 'id,alternate_ids_ssim').documents
+      docs = search(*fqs, rows: batch, start: start, fl: PACKER_FIELDS).documents
       break if docs.empty?
 
       yield docs

@@ -21,7 +21,6 @@
         %thead
           %tr
             %th{scope: 'col'} Display name
-            %th{scope: 'col'} Title
             %th{scope: 'col'} NUID
             %th{scope: 'col'}
         %tbody
@@ -30,7 +29,6 @@
               %td.admin-registry-table__name
                 %i.fa-solid.fa-user.text-primary.me-2{'aria-hidden' => 'true'}
                 = person['display_name'].presence || '(no name)'
-              %td= person['title']
               %td
                 %span.admin-registry-table__id= person['nuid']
               %td.text-end

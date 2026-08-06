@@ -163,6 +163,25 @@ RSpec.describe SetResolver do
         .to contain_exactly(work_a.valkyrie_id, work_sub.valkyrie_id, work_b.valkyrie_id)
     end
 
+    # Against real Solr, and driving the real packer — which is the point. The
+    # packer's embargo check was correct in isolation and still withheld
+    # nothing, because the `fl` here never fetched the field it reads. A packer
+    # unit spec cannot catch that: it builds its own documents, so it asserts
+    # its own assumption about their shape.
+    it 'carries the embargo date through to the packer, which withholds on it' do
+      embargoed = public_work(collection_b.id)
+      AtlasRb::Work.metadata(embargoed.id,
+                             { 'permissions' => { 'read'    => ['public'],
+                                                  'embargo' => (Date.current + 365).to_s } },
+                             nuid: nuid)
+
+      zip = FakeZip.new
+      SetZipPacker.new(resolver: resolver(recipe(works: [embargoed])), nuid: nil).pack(zip)
+
+      expect(zip.entries.map(&:name)).to include('ERRORS.txt')
+      expect(zip.entries.map(&:name).grep_v(/\.txt\z/)).to be_empty
+    end
+
     it 'pages through in batches, yielding every work across pages' do
       expect(batched_ids(recipe(collections: [collection_a]), batch: 1))
         .to contain_exactly(work_a.valkyrie_id, work_sub.valkyrie_id)

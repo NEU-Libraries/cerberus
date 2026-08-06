@@ -48,7 +48,7 @@
       %i.fa-solid.fa-file-import.admin-registry__empty-icon{'aria-hidden' => 'true'}
       %p.mb-1.fw-semibold.text-body No past uploads
       %p.mb-3.small.text-muted
-        Begin a batch upload of IPTC-tagged JPEGs to deposit into a #{@loader.display_name} collection.
+        This loader takes #{loader_intake_description(@loader)}.
       = link_to new_loader_load_path(@loader), class: 'btn btn-primary btn-sm' do
         %i.fa-solid.fa-cloud-arrow-up.me-1{'aria-hidden' => 'true'}
         Begin first upload

@@ -40,6 +40,26 @@ module EditTabsHelper
     TABS.fetch(klass.to_s, []).select { |key| edit_tab_visible?(key) }
   end
 
+  # Which pane opens when the page loads. The tab row and the panes have to
+  # agree on this, so both ask here rather than each deciding for itself.
+  #
+  # `open` names a pane explicitly, which a re-render needs: a rejected save
+  # must come back on the tab the reader was working in. It cannot rely on the
+  # URL fragment for that, because Turbo follows a redirect with fetch and the
+  # Fetch spec drops the fragment from the resolved URL — the Location header
+  # carries it and the browser never sees it. An unknown or hidden key falls
+  # back to the default rather than opening nothing.
+  #
+  # @param klass [String] 'Work' | 'Collection' | 'Community'.
+  # @param open [String, nil] key of the pane to open, if not the first.
+  # @return [String, nil] the key of the pane that opens.
+  def edit_tab_open_key(klass, open: nil)
+    keys = edit_tab_keys(klass)
+    return open if keys.include?(open) && !open.in?(STANDALONE)
+
+    keys.find { |key| !key.in?(STANDALONE) }
+  end
+
   # Whether this viewer may see a tab. Only *user*-dependent gates live here —
   # class-dependent membership is TABS above. The edit view's pane must share
   # this predicate rather than re-testing the underlying ability, so a gate is

@@ -26,5 +26,18 @@
     <% end %>
 
     <%= render "devise/shared/links" %>
+
+    <%# Anything gated redirects a signed-out visitor here, but in dev and staging
+        the accounts people test with have no password — they sign in by NUID. So
+        arriving from a gated page was a dead end: the form in front of you cannot
+        authenticate any fixture user, and nothing on the page said where to go.
+        Absent in production, where this form (and SSO behind it) is the real route. %>
+    <% if nuid_sign_in_available? %>
+      <div class="form-text text-muted mt-4">
+        <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+        Testing with a fixture account? Those sign in by NUID rather than by password —
+        use <%= link_to "NUID sign-in", atlas_login_path %> instead.
+      </div>
+    <% end %>
   </div>
 </div>

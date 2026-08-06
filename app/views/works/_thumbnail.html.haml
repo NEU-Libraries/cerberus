@@ -1,4 +1,4 @@
 - if !@work.preview.blank?
-  = render partial: "image", locals: {src: @work.preview}
+  = render partial: "image", locals: {src: @work.preview, alt: "Preview of #{@work.title}"}
 - else
   = render partial: "icon"
