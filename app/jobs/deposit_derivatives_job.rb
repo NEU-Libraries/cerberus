@@ -28,6 +28,7 @@ class DepositDerivativesJob < ApplicationJob
     Rails.logger.warn(
       "DepositDerivativesJob gave up for work #{job.arguments.first}: #{exception.class}: #{exception.message}"
     )
+    IncompleteFlag.set(job.arguments.first, nuid: job.current_nuid, reason: IncompleteReasons::DERIVATIVES)
   end
   # Declared after StandardError so it takes precedence (ActiveJob matches
   # rescue handlers in reverse declaration order).
@@ -35,6 +36,7 @@ class DepositDerivativesJob < ApplicationJob
     Rails.logger.warn(
       "DepositDerivativesJob: service never appeared for work #{job.arguments.first} — derivatives skipped"
     )
+    IncompleteFlag.set(job.arguments.first, nuid: job.current_nuid, reason: IncompleteReasons::DERIVATIVES)
   end
 
   def perform(work_id, widths)
@@ -44,6 +46,7 @@ class DepositDerivativesJob < ApplicationJob
     raise ServiceNotReady, "work #{work_id} has no IIIF service yet" if base.blank?
 
     DerivativeCreationJob.perform_now(work_id, base, widths: widths)
+    IncompleteFlag.clear(work_id)
   end
 
   private

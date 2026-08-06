@@ -31,6 +31,11 @@
 - if @unfinished.present?
   = render 'unfinished', unfinished: @unfinished
 
+-# Finished works a job gave up on. After the panel above, because that one is
+-# waiting on the reader and this one is waiting on staff.
+- if @incomplete.present?
+  = render 'incomplete', incomplete: @incomplete
+
 .row.g-4
   -# Published — works promoted into community genre showcases, grouped by category.
   -# Placed first (left) as the outward-facing, professional tier; the teal

@@ -184,6 +184,19 @@ describe ApplicationHelper do
       doc = SolrDocument.new(id: '1', internal_resource_tesim: ['Work'], in_progress_bsi: false)
       expect(helper.pill_label(doc)).to eq('Work')
     end
+
+    it 'labels a work whose pipeline partly failed "Incomplete"' do
+      doc = SolrDocument.new(id: '1', internal_resource_tesim: ['Work'], incomplete_bsi: true)
+      expect(helper.pill_label(doc)).to eq('Incomplete')
+    end
+
+    # Withheld content is the stronger fact for any viewer. "Incomplete" is a
+    # maintenance note on a record they can still read, and it has other surfaces.
+    it 'prefers "Embargoed" over "Incomplete" when a work is both' do
+      doc = SolrDocument.new(id: '1', internal_resource_tesim: ['Work'], incomplete_bsi: true,
+                             embargo_release_date_dtsi: (Date.current + 30).to_s)
+      expect(helper.pill_label(doc)).to eq('Embargoed')
+    end
   end
 
   describe '#embargo_notice' do

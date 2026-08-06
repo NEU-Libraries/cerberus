@@ -39,12 +39,16 @@ module ApplicationHelper
   # including an embargo date on a record that is not finished yet.
   #
   # Then "Embargoed", because a viewer needs to know downloads are withheld before
-  # anything else; "Featured" for curated showcases; "People" for the synthetic
-  # Faculty & Staff browse row (a browse-to-many, not an individual); else the
-  # document's resource type.
+  # anything else — including ahead of "Incomplete", which is a maintenance fact
+  # about a record anyone can still read, and which has surfaces of its own.
+  #
+  # Then "Featured" for curated showcases; "People" for the synthetic Faculty &
+  # Staff browse row (a browse-to-many, not an individual); else the document's
+  # resource type.
   def pill_label(document)
     return 'In progress' if document.try(:in_progress?)
     return 'Embargoed' if document.try(:embargoed?)
+    return 'Incomplete' if document.try(:incomplete?)
     return 'Featured' if document.try(:featured?)
     return 'People' if document.try(:people_browse?)
 

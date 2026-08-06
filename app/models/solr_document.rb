@@ -77,6 +77,20 @@ class SolrDocument
     value == true || value.to_s == 'true'
   end
 
+  # A work whose pipeline partly failed: complete and readable, but missing a
+  # rendition, a thumbnail, or its full text. Unlike in_progress? this withholds
+  # nothing — it marks a record as degraded so somebody can repair it.
+  def incomplete?
+    value = self['incomplete_bsi']
+    value == true || value.to_s == 'true'
+  end
+
+  # The machine token naming what failed; IncompleteReasons turns it into a
+  # sentence. nil on a work that is not flagged.
+  def incomplete_reason
+    self['incomplete_reason_ssi']
+  end
+
   def to_param
     raw = alternate_ids&.first
     noid = raw.split('id-').last if raw.present?

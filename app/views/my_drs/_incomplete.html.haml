@@ -1,0 +1,29 @@
+-# This person's finished works that are missing something a job failed to make.
+-#
+-# No action button, deliberately: a depositor cannot re-run an enrichment job, so
+-# the honest affordance is the record itself plus what is missing from it. The
+-# panel exists so a missing thumbnail reads as a fault somebody can fix rather
+-# than as how DRS looks.
+-#
+-# Rendered only when there are rows, like the panel above it, and placed after it
+-# because that one has something the reader can do.
+.my-drs-card.bg-white.border.rounded-3.overflow-hidden.shadow-sm.mb-4
+  .my-drs-card__head.p-3
+    %h5.mb-1
+      %i.fa-solid.fa-triangle-exclamation.text-warning.me-2{ 'aria-hidden' => 'true' }
+      Works with something missing
+    %p.small.text-muted.mb-0
+      These are published and readable. DRS staff can rebuild what is missing — contact them if it matters to you.
+  .table-responsive
+    %table.table.table-borderless.admin-registry-table
+      %thead
+        %tr
+          %th{ scope: 'col' } Work
+          %th{ scope: 'col' } What is missing
+      %tbody
+        - incomplete.each do |work|
+          %tr
+            %td.admin-registry-table__name
+              %i.fa-regular.fa-file.text-muted.me-2{ 'aria-hidden' => 'true' }
+              = link_to Array(work['title_tsim']).first.presence || '(untitled)', work_path(work)
+            %td.text-muted.small= IncompleteReasons.describe(work.incomplete_reason)

@@ -375,10 +375,11 @@ class CatalogController < ApplicationController
     view_context.safe_join([thumbnail_media(document), pill])
   end
 
-  # Same precedence as the label: an unfinished deposit reads as unfinished first.
+  # Same precedence as the label, so the tone and the text never disagree.
   def pill_state_class(document)
     return 'thumb-type-pill--unfinished' if document.try(:in_progress?)
     return 'thumb-type-pill--embargoed' if document.try(:embargoed?)
+    return 'thumb-type-pill--incomplete' if document.try(:incomplete?)
 
     nil
   end

@@ -24,12 +24,14 @@ class MediaRenditionJob < ApplicationJob
     Rails.logger.warn(
       "MediaRenditionJob gave up for work #{job.arguments.first}: #{exception.class}: #{exception.message}"
     )
+    IncompleteFlag.set(job.arguments.first, nuid: job.current_nuid, reason: IncompleteReasons::MEDIA_RENDITION)
   end
   # Declared after StandardError so it takes precedence (reverse-order matching).
   retry_on PrimaryFileMissing, attempts: 6, wait: :polynomially_longer do |job, _exception|
     Rails.logger.warn(
       "MediaRenditionJob: work #{job.arguments.first} never received its primary file — A/V rendition skipped"
     )
+    IncompleteFlag.set(job.arguments.first, nuid: job.current_nuid, reason: IncompleteReasons::MEDIA_RENDITION)
   end
 
   def perform(work_id, staged_path, rendition_key)
@@ -55,6 +57,7 @@ class MediaRenditionJob < ApplicationJob
       AtlasRb::Blob.create(work_id, mp4_path, File.basename(mp4_path), idempotency_key: rendition_key) if mp4_path
       # perform_now so the ambient acting NUID carries through (see ApplicationJob).
       IiifAssetsJob.perform_now(work_id, poster_path) if poster_path
+      IncompleteFlag.clear(work_id)
     end
 
     def rendition_path(staged_path)

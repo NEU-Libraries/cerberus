@@ -95,6 +95,32 @@ RSpec.describe 'My DRS', type: :request do
       expect(response.body).not_to include('Deposits to finish')
     end
 
+    # A depositor cannot re-run an enrichment job, so this panel exists to tell
+    # them what is missing rather than to offer an action — otherwise a missing
+    # thumbnail just reads as how DRS looks.
+    it 'lists their works a job gave up on, and says what each is missing' do
+      allow(AtlasRb::Person).to receive(:resolve).and_return([])
+      flagged = SolrDocument.new('id' => 'uuid-i', 'title_tsim' => ['thesis.docx'],
+                                 'alternate_ids_tesim' => ['id-inoid'], 'incomplete_bsi' => true,
+                                 'incomplete_reason_ssi' => IncompleteReasons::PDF_RENDITION)
+      allow_any_instance_of(MyDrsController).to receive(:incomplete_works).and_return([flagged])
+
+      get '/my_drs'
+
+      expect(response.body).to include('Works with something missing')
+      expect(response.body).to include('No PDF version was made')
+      expect(response.body).to include(work_path('inoid'))
+    end
+
+    it 'omits that panel when nothing is flagged' do
+      allow(AtlasRb::Person).to receive(:resolve).and_return([])
+      allow_any_instance_of(MyDrsController).to receive(:incomplete_works).and_return([])
+
+      get '/my_drs'
+
+      expect(response.body).not_to include('Works with something missing')
+    end
+
     it 'renders the accounts switcher for a person with more than one account' do
       allow(AtlasRb::Person).to receive(:resolve).and_return([])
       allow(AtlasRb::User).to receive(:accounts).and_return(

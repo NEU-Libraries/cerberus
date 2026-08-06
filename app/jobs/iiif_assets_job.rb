@@ -34,6 +34,7 @@ class IiifAssetsJob < ApplicationJob
     Rails.logger.warn(
       "IiifAssetsJob: unreadable source for work #{job.arguments.first} — thumbnails skipped (#{exception.message})"
     )
+    IncompleteFlag.set(job.arguments.first, nuid: job.current_nuid, reason: IncompleteReasons::THUMBNAILS)
   end
 
   # `refresh:` distinguishes "seed the assets" from "re-derive them". The
@@ -53,6 +54,8 @@ class IiifAssetsJob < ApplicationJob
     # the FileSet (StaleObjectError → 500 → Delegates not persisted).
     ThumbnailCreationJob.perform_now(work_id, result.open_base)
     persist_service!(work_id, result.gated_base)
+
+    IncompleteFlag.clear(work_id)
 
     widths = derivative_widths || (refresh ? existing_widths(work_id) : nil)
     return if widths.nil?

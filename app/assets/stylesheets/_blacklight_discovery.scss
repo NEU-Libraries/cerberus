@@ -81,6 +81,14 @@
   background-color: $warning;
 }
 
+// Incomplete override — $yellow, one step down again from the unfinished orange
+// it sits beside. The two are close on purpose: both are caution, and the label
+// is what separates them. Orange means a person has not finished the deposit;
+// amber means a job gave up on a record that is otherwise readable.
+.thumb-type-pill--incomplete {
+  background-color: $yellow;
+}
+
 .document-thumbnail img {
   position: absolute;
   margin: auto;

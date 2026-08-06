@@ -30,6 +30,7 @@ class PdfRenditionJob < ApplicationJob
     Rails.logger.warn(
       "PdfRenditionJob gave up for work #{job.arguments.first}: #{exception.class}: #{exception.message}"
     )
+    IncompleteFlag.set(job.arguments.first, nuid: job.current_nuid, reason: IncompleteReasons::PDF_RENDITION)
   end
   # Declared after StandardError so it takes precedence (ActiveJob matches
   # rescue handlers in reverse declaration order). ~16 minutes of cover.
@@ -37,6 +38,7 @@ class PdfRenditionJob < ApplicationJob
     Rails.logger.warn(
       "PdfRenditionJob: work #{job.arguments.first} never received its primary file — PDF rendition skipped"
     )
+    IncompleteFlag.set(job.arguments.first, nuid: job.current_nuid, reason: IncompleteReasons::PDF_RENDITION)
   end
 
   def perform(work_id, staged_path, rendition_key)
@@ -57,6 +59,7 @@ class PdfRenditionJob < ApplicationJob
     IiifAssetsJob.perform_now(work_id, pdf_path)
     # Office docs get their full text from this rendition (so soffice ran once).
     FullTextExtractionJob.perform_later(work_id, pdf_path)
+    IncompleteFlag.clear(work_id)
   end
 
   private
