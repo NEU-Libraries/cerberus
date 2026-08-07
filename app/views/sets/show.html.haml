@@ -23,7 +23,11 @@
     %p.mb-0.mt-3= @set['description']
   %p.recipe-line.small.mb-0{class: (@set['description'].present? ? 'mt-2' : 'mt-3')}
     = set_recipe_sentence(chips_count: chips.size, added_count: added_noids.size, aside_count: aside_docs.size)
-  - if public_set || @can_edit || @owned
+  -# An admin or devolved admin gets the Reindex action on any set they can
+  -# reach, including one they neither own nor may edit — so it opens this row
+  -# on its own, not only alongside the owner's controls.
+  - admin_tier = current_user&.admin? || current_user&.admin_delegate?
+  - if public_set || @can_edit || @owned || admin_tier
     .d-flex.align-items-center.flex-wrap.gap-2.pt-3
       - if public_set
         %span{data: { controller: 'clipboard', 'clipboard-text-value': set_url(@set['id']) }}
@@ -34,8 +38,15 @@
         = link_to download_set_path(@set['id']), class: 'btn btn-outline-primary btn-sm', 'aria-label' => "Download #{@set['title']} as a zip", data: { turbo: false } do
           %i.fa-solid.fa-file-zipper.me-1{'aria-hidden' => 'true'}
           Download
-      - if @can_edit || @owned
+      - if @can_edit || @owned || admin_tier
         .ms-auto
+          -# Walks the recipe and rebuilds the search record of everything it
+          -# names. Runs in the background, so this only starts it.
+          - if admin_tier
+            = button_to 'Reindex', admin_reindex_set_path(@set['id']),
+                        class:      'btn btn-link p-0 px-3 align-baseline text-decoration-none',
+                        form_class: 'd-inline',
+                        title:      'Rebuild the search records this set names'
           - if @can_edit
             = link_to 'Edit', edit_set_path(@set['id']), class: 'px-3'
           - if @owned

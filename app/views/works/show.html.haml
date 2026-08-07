@@ -37,6 +37,18 @@
                        kind:          'work',
                        path:          tombstone_work_path(@work.id),
                        trigger_class: 'px-2'
+            -# Rebuilds this work's search record from Atlas. Solr-only and
+            -# idempotent, so it is safe to offer as a one-click repair for a
+            -# record that has gone stale against a changed indexer.
+            -#
+            -# A POST, so button_to rather than link_to: the classes strip the
+            -# button chrome back to a plain link, because the rest of this row
+            -# is plain links and a repair action should not outrank Edit.
+            - if current_user&.admin? || current_user&.admin_delegate?
+              = button_to 'Reindex', admin_reindex_work_path(@work.id),
+                          class:      'btn btn-link p-0 px-2 align-baseline text-decoration-none',
+                          form_class: 'd-inline',
+                          title:      'Rebuild this work’s search record'
       %hr.section-divider
       .d-flex.justify-content-between.align-items-center.mb-3.small
         %span
