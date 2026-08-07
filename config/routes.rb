@@ -235,6 +235,14 @@ Rails.application.routes.draw do
     post 'files/rollback', to: 'files#rollback', as: :files_rollback
     get  'files/:id/versions/:version_id/content', to: 'file_versions#content',
                                                    as: :file_version_content
+
+    # Reindex — rebuild a resource's Solr doc from Atlas's authoritative store,
+    # the in-app counterpart to lib/tasks/reindex.rake. A Work is one call and
+    # answers inline; a Set walks its recipe in a job and reports to the inbox.
+    # Mounted here rather than on the show-page controllers because the Atlas
+    # endpoint behind them is system-gated and applies no per-user check.
+    post 'reindex/work/:noid', to: 'reindex#work', as: :reindex_work
+    post 'reindex/set/:noid',  to: 'reindex#set',  as: :reindex_set
   end
 
   get '/downloads/:id', to: 'downloads#show', as: :download
