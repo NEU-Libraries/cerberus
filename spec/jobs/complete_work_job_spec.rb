@@ -127,7 +127,26 @@ RSpec.describe CompleteWorkJob, type: :job do
         expect(message.body).to include('neu:w1').and include('1 page(s)').and include('2 were expected')
       end
 
-      it 'stays silent (but still refuses to complete) without a creator' do
+      it 'records the breach on the admin ledger, naming the Work and both counts' do
+        report = create(:load_report, loader: loader, creator_nuid: '000000003', status: :completed)
+        create(:multipage_ingest, load_report: report, status: :completed, work_pid: 'neu:w1', sequence: 1)
+        create(:multipage_ingest, load_report: report, status: :completed, work_pid: 'neu:w1', sequence: 2)
+
+        allow(AtlasRb::Work).to receive(:file_sets).and_return([page_entry('fs1', 1)])
+        allow(AtlasRb::Work).to receive(:complete)
+
+        expect { described_class.perform_now(report.id) }.to change(AdminNotice, :count).by(1)
+
+        notice = AdminNotice.last
+        expect(notice.kind).to eq('work_completion_mismatch')
+        expect(notice.subject_noid).to eq('neu:w1')
+        expect(notice.detail(:expected)).to eq(2)
+        expect(notice.detail(:actual)).to eq(1)
+      end
+
+      # A breach is a staff concern whether or not there is a depositor to tell,
+      # so the ledger records it even when the inbox half is suppressed.
+      it 'sends no message without a creator, still refuses to complete, and still records it' do
         report = create(:load_report, loader: loader, status: :completed)
         create(:multipage_ingest, load_report: report, status: :completed, work_pid: 'neu:w1', sequence: 1)
         create(:multipage_ingest, load_report: report, status: :completed, work_pid: 'neu:w1', sequence: 2)
@@ -135,7 +154,8 @@ RSpec.describe CompleteWorkJob, type: :job do
         allow(AtlasRb::Work).to receive(:file_sets).and_return([page_entry('fs1', 1)])
         allow(AtlasRb::Work).to receive(:complete)
 
-        expect { described_class.perform_now(report.id) }.not_to change(Message, :count)
+        expect { described_class.perform_now(report.id) }
+          .to change(AdminNotice, :count).by(1).and(not_change(Message, :count))
         expect(AtlasRb::Work).not_to have_received(:complete)
       end
     end

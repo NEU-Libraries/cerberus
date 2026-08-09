@@ -166,6 +166,35 @@ RSpec.describe VisibilityCascadeJob do
       expect(message.body).to include('1 item narrowed', 'already at least that restricted')
     end
 
+    it 'records the cascade on the admin ledger, with its tally and its failures' do
+      stub_targets(target('w1'))
+      allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: ['public']))
+      allow(AtlasRb::Work).to receive(:metadata).and_raise(AtlasRb::ForbiddenError.new('no rights'))
+
+      expect { run }.to change(AdminNotice, :count).by(1)
+
+      notice = AdminNotice.last
+      expect(notice.kind).to eq('visibility_cascade')
+      expect(notice.subject_noid).to eq('top')
+      expect(notice.detail(:narrowed)).to eq(0)
+      expect(notice.detail(:failures)).to include(a_string_including('w1'))
+    end
+
+    it 'sends no message when there is no actor, and records the notice anyway' do
+      stub_targets(target('w1'))
+      allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: ['public']))
+      allow(AtlasRb::Work).to receive(:metadata)
+
+      cascade = lambda do
+        Current.set(nuid: nil) do
+          described_class.perform_now(noid: 'top', uuid: 'uuid-top', permissions: { 'read' => ['public'] })
+        end
+      end
+
+      expect(&cascade).to change(AdminNotice, :count).by(1).and(not_change(Message, :count))
+      expect(AdminNotice.last.actor_nuid).to be_nil
+    end
+
     # Anything that failed to narrow is still exposed, so it is named rather
     # than folded into a count.
     it 'names what it could not change' do

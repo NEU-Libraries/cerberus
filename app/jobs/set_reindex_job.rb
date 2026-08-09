@@ -78,14 +78,16 @@ class SetReindexJob < ApplicationJob
 
     # Whoever clicked has moved on by now, and a partial run is the one outcome
     # they must not have to discover for themselves — a branch that failed to
-    # reindex is still stale, so failures are named rather than counted.
+    # reindex is still stale, so failures are named rather than counted. A run
+    # with no actor (a rake task) has nobody to tell and is recorded regardless.
     def report(actor:, set_noid:, title:, result:)
-      return if actor.blank?
-
-      SystemMessage.deliver(
-        to_nuid: actor,
-        subject: result[:failures].any? ? 'Set reindex finished with problems' : 'Set reindex finished',
-        body:    body_for(set_noid, title, result)
+      CompletionNotice.deliver(
+        kind:         'set_reindex',
+        to_nuid:      actor,
+        subject:      result[:failures].any? ? 'Set reindex finished with problems' : 'Set reindex finished',
+        body:         body_for(set_noid, title, result),
+        subject_noid: set_noid,
+        payload:      { title: title, count: result[:count], failures: result[:failures] }
       )
     end
 

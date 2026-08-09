@@ -2,9 +2,6 @@
 
 require 'rails_helper'
 
-# `change`'s negated form reads badly inside a compound matcher, so name it.
-RSpec::Matchers.define_negated_matcher :not_change, :change
-
 RSpec.describe CompletionNotice do
   describe '.deliver' do
     it 'records the notice and sends the inbox message when there is an actor' do

@@ -124,14 +124,17 @@ class VisibilityCascadeJob < ApplicationJob
     # A cascade is slow enough that whoever triggered it has moved on, and a
     # partial result is the one outcome they must not have to discover for
     # themselves — anything that failed to narrow is still exposed, so failures
-    # are named rather than counted.
+    # are named rather than counted. A cascade with no actor (a rake task) has
+    # nobody to tell and is recorded on the admin ledger regardless — an item
+    # left exposed matters whether or not a person triggered the run.
     def report(actor:, noid:, tally:, failures:)
-      return if actor.blank?
-
-      SystemMessage.deliver(
-        to_nuid: actor,
-        subject: failures.any? ? 'Visibility change finished with problems' : 'Visibility change finished',
-        body:    body_for(noid, tally, failures)
+      CompletionNotice.deliver(
+        kind:         'visibility_cascade',
+        to_nuid:      actor,
+        subject:      failures.any? ? 'Visibility change finished with problems' : 'Visibility change finished',
+        body:         body_for(noid, tally, failures),
+        subject_noid: noid,
+        payload:      { narrowed: tally[:narrowed], unchanged: tally[:unchanged], failures: failures }
       )
     end
 

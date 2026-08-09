@@ -149,16 +149,19 @@ class LoadReport < ApplicationRecord
       CompleteWorkJob.perform_later(id)
     end
 
-    # First system producer for the User Inbox: tell whoever started the
-    # load that it reached a terminal state. Pre-inbox rows never recorded
-    # a creator — nothing to notify.
+    # Tell whoever started the load that it reached a terminal state, and record
+    # it on the admin ledger either way. A row with no creator still belongs on
+    # the ledger — there is simply nobody to send the inbox half to.
     def notify_creator!
-      return if creator_nuid.blank?
-
-      SystemMessage.deliver(
+      CompletionNotice.deliver(
+        kind:    'load_report',
         to_nuid: creator_nuid,
         subject: %(Load "#{source_filename}" #{status.humanize.downcase}),
-        body:    notification_body
+        body:    notification_body,
+        # The ledger rebuilds the report path from these two rather than storing
+        # it, so the same row can render as an in-app path or a mailed URL.
+        payload: { load_report_id: id, loader_slug: loader&.slug, status: status,
+                   completed: completed_ingests, warnings: warning_ingests, failed: failed_ingests }
       )
     end
 

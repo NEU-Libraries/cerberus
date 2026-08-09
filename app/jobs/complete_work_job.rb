@@ -46,20 +46,22 @@ class CompleteWorkJob < ApplicationJob
     # Invariant breach: every page row of this Work reads completed, but Atlas
     # disagrees on the page count. Leave the Work in_progress (the
     # stuck-deposit operator flag) and tell the creator rather than complete a
-    # Work we can't vouch for.
+    # Work we can't vouch for. It reaches the admin ledger too — a breach is a
+    # staff concern, and the creator is told to contact staff about it anyway.
     def report_mismatch(report, work_pid, expected, actual)
       Rails.logger.error(
         "CompleteWorkJob: LoadReport #{report.id} expected #{expected} page FileSets " \
         "on #{work_pid}, Atlas lists #{actual} — not completing"
       )
-      return if report.creator_nuid.blank?
-
-      SystemMessage.deliver(
-        to_nuid: report.creator_nuid,
-        subject: %(Load "#{report.source_filename}" needs attention),
-        body:    "The load finished, but Work #{work_pid} lists #{actual} page(s) where " \
-                 "#{expected} were expected, so it was left incomplete. " \
-                 'Contact a repository administrator before re-running the load.'
+      CompletionNotice.deliver(
+        kind:         'work_completion_mismatch',
+        to_nuid:      report.creator_nuid,
+        subject:      %(Load "#{report.source_filename}" needs attention),
+        body:         "The load finished, but Work #{work_pid} lists #{actual} page(s) where " \
+                      "#{expected} were expected, so it was left incomplete. " \
+                      'Contact a repository administrator before re-running the load.',
+        subject_noid: work_pid,
+        payload:      { load_report_id: report.id, expected: expected, actual: actual }
       )
     end
 end

@@ -110,11 +110,27 @@ RSpec.describe SetReindexJob do
                                       Rails.application.routes.url_helpers.set_path('set123'))
     end
 
-    it 'stays silent when there is no actor to tell' do
+    it 'records the run on the admin ledger, with the set and its failures' do
+      allow(AtlasRb::Compilation).to receive(:find).and_return(compilation(collections: %w[c1]))
+      allow(AtlasRb::System).to receive(:reindex_subtree).and_return(1)
+
+      expect { run }.to change(AdminNotice, :count).by(1)
+
+      notice = AdminNotice.last
+      expect(notice.kind).to eq('set_reindex')
+      expect(notice.actor_nuid).to eq(actor)
+      expect(notice.subject_noid).to eq('set123')
+      expect(notice.detail(:count)).to eq(1)
+      expect(notice.detail(:failures)).to be_empty
+    end
+
+    it 'sends no message when there is no actor, and records the notice anyway' do
       allow(AtlasRb::Compilation).to receive(:find).and_return(compilation)
 
       expect { Current.set(nuid: nil) { described_class.perform_now('set123') } }
-        .not_to change(Message, :count)
+        .to change(AdminNotice, :count).by(1)
+        .and(not_change(Message, :count))
+      expect(AdminNotice.last.actor_nuid).to be_nil
     end
   end
 end
