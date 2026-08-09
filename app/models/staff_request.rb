@@ -25,6 +25,13 @@ class StaffRequest < ApplicationRecord
   # sees the row and is told an administrator has to act.
   ADMIN_ONLY_KINDS = %w[restrict].freeze
 
+  # Narrowing a Community does not cascade, and no form offers it — so whoever
+  # fulfils the request has to be told how, or the request is unanswerable.
+  # Restricting each Collection inside cascades (and confirms) on its own, which
+  # is why that is the route rather than a Community-wide sweep.
+  COMMUNITY_REMEDY = 'Restricting a community does not reach what is inside it. Restrict each collection ' \
+                     'within it first — each of those cascades to its own contents — then the community.'
+
   normalizes :subject_title, :note, :resolution_note, :resolution, with: ->(value) { value.presence }
 
   validates :kind, inclusion: { in: KINDS }
@@ -48,6 +55,11 @@ class StaffRequest < ApplicationRecord
   def resolved? = status == 'resolved'
 
   def admin_only? = ADMIN_ONLY_KINDS.include?(kind)
+
+  # Guidance the fulfiller needs and cannot infer from the row, or nil.
+  def remedy_note
+    COMMUNITY_REMEDY if kind == 'restrict' && subject_type == 'Community'
+  end
 
   # A claim is advisory, not a lock. It tells the rest of the team somebody has
   # picked this up; it does not stop anyone else resolving the request, because

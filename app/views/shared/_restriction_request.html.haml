@@ -3,7 +3,8 @@
 -# The way out of a refused narrowing. Rendered when the acting user cannot make
 -# the change themselves: on a community, which only an administrator may
 -# restrict, and on a collection holding other people's material. Shape follows
--# the Work edit page's move/withdraw requests — a note, a submit, and a Message.
+-# the Work edit page's move/withdraw requests — a note, a submit, and a
+-# StaffRequest row on the admin ledger.
 .py-2.px-1
   %h5.pb-2 Restricted access
   %p.text-muted.small.mb-3
@@ -12,7 +13,7 @@
       administrators handle that change.
     - else
       This collection holds material deposited by other people, so DRS administrators handle restricting it.
-    Your request goes to their inbox — they will follow up with you there.
+    Your request joins their queue — they will follow up with you in your inbox.
   = form_with url: public_send("request_restriction_#{resource}_path", params[:id]), method: :post do
     .well.p-3.my-3.rounded-3
       %label.form-label{ for: 'restriction_note' } Who should still be able to see it?

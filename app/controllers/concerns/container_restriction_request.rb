@@ -3,23 +3,16 @@
 # "Ask DRS staff to restrict this" on a Collection or Community edit page.
 #
 # Following WorkChangeRequest's model rather than inventing approval machinery:
-# a request is a Message, which the recipient fulfils with the ordinary tools.
-# Kept as a sibling of that concern instead of generalising it — the two differ
-# in resource, verb, recipient and remedy, so folding them together would
+# a request is a StaffRequest row, which the fulfiller answers with the ordinary
+# tools. Kept as a sibling of that concern instead of generalising it — the two
+# differ in resource, verb, fulfiller and remedy, so folding them together would
 # parameterise more than it shares.
 #
-# Addressed to Permissions::ADMIN_GROUP rather than the staff group. Only the
-# :admin role may run a cascade, and a staff-group editor is precisely who this
-# affordance exists for, so sending it to their own inbox would be a loop.
+# Only the :admin role may run a cascade, so StaffRequest marks this kind
+# admin-only. A staff-group editor is precisely who the affordance exists for,
+# which is why asking them to do it themselves would be a loop.
 module ContainerRestrictionRequest
   extend ActiveSupport::Concern
-
-  # Narrowing a Community does not cascade, and the form offers it to nobody —
-  # so the fulfiller needs telling how to do it, or the request is unanswerable.
-  # Restricting each Collection inside cascades (and confirms) on its own, which
-  # is why that is the route rather than a Community-wide sweep.
-  COMMUNITY_REMEDY = 'Restricting a community does not reach what is inside it. Restrict each collection ' \
-                     'within it first — each of those cascades to its own contents — then the community.'
 
   def request_restriction
     note = params[:request_note].to_s.strip
@@ -45,24 +38,19 @@ module ContainerRestrictionRequest
       public_send("#{controller_name.singularize}_path", params[:id])
     end
 
-    # A user-sent message, so the recipient can see who asked and reply.
+    # The requester is attribution-aware (attributed_nuid), so an impersonated
+    # request names the person acted for. The note carries who must still be
+    # able to see the container, which is the one fact the fulfiller cannot
+    # work out for themselves.
     def deliver_restriction_request(note)
       container = AtlasRb.const_get(container_klass).find(params[:id])
-      requester = current_user.try(:name).presence || current_user&.nuid
-      Message.create!(
-        sender_nuid:     attributed_nuid,
-        recipient_group: Permissions::ADMIN_GROUP,
-        subject:         %(Request to restrict “#{container.title}”),
-        body:            request_body(container, requester, note)
+      StaffRequest.create!(
+        kind:           'restrict',
+        subject_type:   container_klass,
+        subject_noid:   params[:id],
+        subject_title:  container.title,
+        requester_nuid: attributed_nuid,
+        note:           note
       )
-    end
-
-    def request_body(container, requester, note)
-      lines = ["#{requester} has asked for this #{container_klass.downcase} to be restricted.",
-               '', %(#{container_klass}: “#{container.title}”),
-               public_send("#{controller_name.singularize}_url", params[:id]),
-               '', "Should still be able to see it: #{note}"]
-      lines += ['', COMMUNITY_REMEDY] if container_klass == 'Community'
-      lines.join("\n")
     end
 end

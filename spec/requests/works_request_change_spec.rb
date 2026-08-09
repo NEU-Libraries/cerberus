@@ -7,7 +7,7 @@ require 'rails_helper'
 # a real Work is created and a real edit ACL granted to the staff group, so the
 # authorize_resource_writes! gate (which reads Atlas permissions) is exercised
 # end-to-end. The request itself mutates nothing in Atlas — it creates a
-# Cerberus Message to the DRS staff group inbox.
+# Cerberus StaffRequest row on the admin ledger.
 RSpec.describe 'Works request_change', type: :request do
   include Devise::Test::IntegrationHelpers
 
@@ -37,7 +37,7 @@ RSpec.describe 'Works request_change', type: :request do
     it 'forbids the unauthenticated and sends nothing' do
       expect do
         post request_change_work_path(work.id), params: { request_action: 'withdraw' }
-      end.not_to change(Message, :count)
+      end.not_to change(StaffRequest, :count)
       expect(response).to have_http_status(:forbidden)
     end
 
@@ -45,7 +45,7 @@ RSpec.describe 'Works request_change', type: :request do
       sign_in outsider
       expect do
         post request_change_work_path(work.id), params: { request_action: 'withdraw' }
-      end.not_to change(Message, :count)
+      end.not_to change(StaffRequest, :count)
       expect(response).to have_http_status(:forbidden)
     end
   end
@@ -53,33 +53,45 @@ RSpec.describe 'Works request_change', type: :request do
   describe 'as an in-group editor' do
     before { sign_in editor }
 
-    it 'sends a withdraw request to the staff group inbox' do
+    it 'opens a withdraw request on the ledger, snapshotting the title' do
       expect do
         post request_change_work_path(work.id), params: { request_action: 'withdraw', request_note: 'No longer authoritative.' }
-      end.to change(Message, :count).by(1)
+      end.to change(StaffRequest, :count).by(1)
 
-      message = Message.last
-      expect(message.recipient_group).to eq(Permissions::STAFF_EDIT_GROUP)
-      expect(message.sender_nuid).to eq('000000002')
-      expect(message.subject).to start_with('Request to withdraw')
-      expect(message.body).to include('No longer authoritative.')
+      request = StaffRequest.last
+      expect(request.kind).to eq('withdraw')
+      expect(request.status).to eq('open')
+      expect(request.subject_type).to eq('Work')
+      expect(request.subject_noid).to eq(work.id)
+      expect(request.subject_title).to be_present
+      expect(request.requester_nuid).to eq('000000002')
+      expect(request.note).to eq('No longer authoritative.')
+      expect(request).not_to be_admin_only
       expect(response).to redirect_to(work_path(work.id))
       expect(flash[:notice]).to include('DRS staff')
     end
 
-    it 'sends a move request carrying the destination' do
+    # No group-addressed message: fulfilling a request is shared work, and a
+    # message is dismissed per person.
+    it 'sends no inbox message' do
+      expect do
+        post request_change_work_path(work.id), params: { request_action: 'withdraw' }
+      end.not_to change(Message, :count)
+    end
+
+    it 'opens a move request carrying the destination' do
       expect do
         post request_change_work_path(work.id), params: { request_action: 'move', request_note: 'Engineering Theses collection' }
-      end.to change(Message, :count).by(1)
+      end.to change(StaffRequest, :count).by(1)
 
-      expect(Message.last.subject).to start_with('Request to move')
-      expect(Message.last.body).to include('Engineering Theses collection')
+      expect(StaffRequest.last.kind).to eq('move')
+      expect(StaffRequest.last.note).to eq('Engineering Theses collection')
     end
 
     it 'rejects a move with no destination and sends nothing' do
       expect do
         post request_change_work_path(work.id), params: { request_action: 'move', request_note: '' }
-      end.not_to change(Message, :count)
+      end.not_to change(StaffRequest, :count)
       expect(response).to redirect_to(edit_work_path(work.id))
       expect(flash[:alert]).to include('where this work should move to')
     end
@@ -87,7 +99,7 @@ RSpec.describe 'Works request_change', type: :request do
     it 'rejects an unknown request action and sends nothing' do
       expect do
         post request_change_work_path(work.id), params: { request_action: 'destroy_everything' }
-      end.not_to change(Message, :count)
+      end.not_to change(StaffRequest, :count)
       expect(flash[:alert]).to include('withdrawal or a move')
     end
   end
