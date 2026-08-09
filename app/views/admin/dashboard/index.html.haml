@@ -15,6 +15,18 @@
     Repository-structure operations. These actions change how objects are arranged and surfaced across the repository, so they apply repository-wide and live behind the admin gate.
 
   .admin-actions__grid{role: 'list'}
+    -# First in the grid: it is the surface somebody opens daily, and the only
+    -# one that says what is waiting on the team rather than offering a tool.
+    = link_to admin_ledger_path, class: 'admin-action-card admin-action-card--ledger', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-list-check{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Requests & activity
+      %span.admin-action-card__desc
+        What depositors have asked staff to do — withdraw, move, restrict — with who claimed each one and what is still open. Alongside it, the record of what the repository did, including every work published to a community showcase, and a digest of each day.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
     = link_to admin_reparent_path, class: 'admin-action-card admin-action-card--structure', role: 'listitem' do
       %span.admin-action-card__icon
         %i.fa-solid.fa-sitemap{'aria-hidden' => 'true'}

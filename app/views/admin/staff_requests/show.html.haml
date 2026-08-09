@@ -1,0 +1,83 @@
+= render 'admin/breadcrumb_header'
+- content_for :page_title, "Request to #{@request.kind}"
+- remedy_path, remedy_label = ledger_remedy(@request)
+- fulfillable = !@request.admin_only? || current_user&.admin?
+
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-clipboard-list{'aria-hidden' => 'true'}
+      = "Request to #{@request.kind}"
+    .admin-registry__head-actions= ledger_status_chip(@request)
+
+  .admin-registry__body
+    %dl.ledger-facts
+      %div
+        %dt About
+        %dd
+          = ledger_subject_link(@request)
+          %span.ledger-type= @request.subject_type
+      %div
+        %dt Asked by
+        %dd= audit_event_actor(@request.requester_nuid)
+      %div
+        %dt Opened
+        %dd= ledger_timestamp(@request.created_at)
+      - if @request.claimed_by_nuid.present?
+        %div
+          %dt Claimed by
+          %dd= audit_event_actor(@request.claimed_by_nuid)
+      - if @request.resolved?
+        %div
+          %dt Resolved by
+          %dd
+            = audit_event_actor(@request.resolved_by_nuid)
+            %span.ledger-type= @request.resolution
+
+    - if @request.note.present?
+      .well.p-3.my-3.rounded-3
+        %h5.pb-2= @request.kind == 'move' ? 'Requested destination' : 'What they said'
+        %p.mb-0= @request.note
+
+    - if @request.remedy_note.present?
+      .ledger-remedy-note.my-3
+        %i.fa-solid.fa-circle-info.me-2{'aria-hidden' => 'true'}
+        = @request.remedy_note
+
+    - if @request.resolved?
+      - if @request.resolution_note.present?
+        .well.p-3.my-3.rounded-3
+          %h5.pb-2 Reply sent to the requester
+          %p.mb-0= @request.resolution_note
+    - elsif !fulfillable
+      .ledger-remedy-note.my-3
+        %i.fa-solid.fa-user-shield.me-2{'aria-hidden' => 'true'}
+        An administrator has to act on this one — only they can run a visibility cascade.
+    - else
+      -# The remedy lives on its own surface, gated there. This page points at
+      -# it and records the outcome; it never becomes a second place to write.
+      .my-3
+        - if remedy_path
+          = link_to remedy_path, class: 'btn btn-primary btn-sm me-2' do
+            %i.fa-solid.fa-arrow-up-right-from-square.me-1{'aria-hidden' => 'true'}
+            = remedy_label
+        - if @request.open?
+          = button_to 'Claim', claim_admin_staff_request_path(@request), class: 'btn btn-outline-secondary btn-sm d-inline-block'
+        - else
+          = button_to 'Return to the queue', unclaim_admin_staff_request_path(@request), method: :delete, class: 'btn btn-outline-secondary btn-sm d-inline-block'
+
+      .well.p-3.my-3.rounded-3
+        %h5.pb-2 Resolve this request
+        = form_with url: resolve_admin_staff_request_path(@request), method: :post do
+          %label.form-label{for: 'resolution_note'} Reply to the requester
+          %textarea.form-control#resolution_note{name: 'resolution_note', rows: 3,
+            placeholder: 'Say what you did, or why you did not. This goes to their inbox.'}
+          .mt-3
+            %button.btn.btn-success.btn-sm.me-2{type: 'submit', name: 'resolution', value: 'done'}
+              %i.fa-solid.fa-check.me-1{'aria-hidden' => 'true'}
+              Mark as done
+            %button.btn.btn-outline-danger.btn-sm{type: 'submit', name: 'resolution', value: 'declined'}
+              %i.fa-solid.fa-xmark.me-1{'aria-hidden' => 'true'}
+              Decline
+
+= link_to 'Back to the ledger', admin_ledger_path, class: 'btn btn-light btn-sm'

@@ -1,0 +1,12 @@
+-# Fallback row for every kind that needs no shape of its own: the body the
+-# producer already wrote says what happened, so the row just frames it.
+%tr.ledger-row{class: "ledger-row--#{ledger_notice_tone(notice)}"}
+  %td.text-nowrap= ledger_timestamp(notice.created_at)
+  %td= ledger_notice_kind_chip(notice)
+  %td
+    .ledger-subject= notice.subject
+    - if notice.body.present?
+      %p.ledger-detail.mb-0= notice.body
+    - if (path = ledger_notice_link(notice))
+      = link_to 'View', path, class: 'ledger-link'
+  %td= audit_event_actor(notice.actor_nuid)

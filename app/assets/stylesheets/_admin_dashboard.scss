@@ -152,4 +152,5 @@
   &--files        { --admin-action-color: #5a5e8c; } // desaturated indigo: versioned content
   &--groups       { --admin-action-color: #7a5c84; } // desaturated violet: a naming / label affordance
   &--triage       { --admin-action-color: #8a6a1f; } // muted ochre: something is waiting. The caution family the In progress / Incomplete pills use, aged down out of Bootstrap orange
+  &--ledger       { --admin-action-color: #54687a; } // slate ink: the record of record. Matches the digest tone on the ledger itself
 }

@@ -1,0 +1,31 @@
+-# A showcase publication, and the row librarians actually read this tab for.
+-#
+-# It carries the community, the genre and the filename the deposit was titled
+-# with, because the two things being checked are "does this belong on a showcase
+-# at all" and "is it under the right genre" — and a .pptx under Datasets reads
+-# wrong at a glance. A refusal states its reason in plain words; the payload
+-# keeps the token so the reason stays queryable.
+- refused = notice.detail(:outcome) == 'refused'
+%tr.ledger-row{class: "ledger-row--#{ledger_notice_tone(notice)}"}
+  %td.text-nowrap= ledger_timestamp(notice.created_at)
+  %td= ledger_notice_kind_chip(notice)
+  %td
+    .ledger-subject
+      - if (path = ledger_notice_link(notice))
+        = link_to notice.detail(:work_title).presence || notice.subject, path
+      - else
+        = notice.detail(:work_title).presence || notice.subject
+    %p.ledger-detail.mb-0
+      - if refused
+        %span.ledger-refused Refused
+        = ledger_promotion_reason(notice.detail(:reason))
+      - else
+        = [notice.detail(:community_name), notice.detail(:genre)].compact_blank.join(' · ')
+    - if refused && notice.detail(:genre).present?
+      %p.ledger-detail.mb-0
+        = "Asked for: #{[notice.detail(:community_name), notice.detail(:genre)].compact_blank.join(' · ')}"
+    - if !refused && (manage = notice.subject_noid.presence) && current_user&.admin?
+      = link_to 'Change where it appears', admin_linked_members_manage_path(work_id: manage), class: 'ledger-link'
+    - elsif !refused && notice.subject_noid.present?
+      %span.ledger-note An administrator can change where it appears.
+  %td= audit_event_actor(notice.actor_nuid)

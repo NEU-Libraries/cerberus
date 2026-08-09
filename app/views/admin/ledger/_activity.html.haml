@@ -1,0 +1,39 @@
+-# The write-once record. Newest first, and nothing here is worked: a librarian
+-# reads it and acts elsewhere. Rows dispatch to _notice_<kind> with
+-# _notice_generic as the fallback, so a new kind is a new file rather than a
+-# case statement — the same dispatch the audit log uses.
+.p-3
+  %p.text-muted.small.mb-0
+    What the repository did — loads, visibility changes, reindexes, and every work published to a community showcase. The daily digest sums each day up, and is what the emailed summary will carry.
+
+%nav.px-3.pb-2{'aria-label' => 'Activity kind'}
+  = link_to 'All', admin_ledger_path(tab: 'activity'),
+    class: "btn btn-sm me-1 #{@kind.blank? ? 'btn-secondary' : 'btn-outline-secondary'}",
+    'aria-current': ('page' if @kind.blank?)
+  - Admin::LedgerHelper::NOTICE_KINDS.each do |kind, descriptor|
+    - current = kind == @kind
+    = link_to descriptor[:label], admin_ledger_path(tab: 'activity', kind: kind),
+      class: "btn btn-sm me-1 #{current ? 'btn-secondary' : 'btn-outline-secondary'}",
+      'aria-current': ('page' if current)
+
+- if @notices.any?
+  .table-responsive
+    %table.table.table-borderless.admin-registry-table.ledger-table.ledger-table--activity
+      %thead
+        %tr
+          %th.text-nowrap{scope: 'col'} When
+          %th{scope: 'col'} What
+          %th{scope: 'col'} Detail
+          %th{scope: 'col'} Who
+      %tbody
+        - @notices.each do |notice|
+          - partial = "admin/ledger/notice_#{notice.kind}"
+          - resolved = lookup_context.exists?(partial, [], true) ? partial : 'admin/ledger/notice_generic'
+          = render partial: resolved, locals: { notice: notice }
+  = paginate @notices
+- else
+  .admin-registry__empty
+    %i.fa-solid.fa-book.admin-registry__empty-icon{'aria-hidden' => 'true'}
+    %p.mb-1.fw-semibold.text-body Nothing recorded yet
+    %p.mb-0.small.text-muted
+      Loads, visibility changes, reindexes and showcase publications are recorded here as they happen.

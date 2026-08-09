@@ -1,0 +1,59 @@
+-# The day's closing entry, and the one row in this table that is not a line.
+-#
+-# Every other notice is one event; a digest is a whole day, so rendering it as
+-# another line would flatten the difference. It spans the table as a ruled
+-# block instead — the eye finds it because it is shaped differently, not
+-# because it is brighter, which is how a ledger marks a day's end.
+-#
+-# This block is also the payload a mailed summary will carry, which is why the
+-# counts and the showcase list are read from the payload's parts rather than
+-# from any stored text.
+- counts = notice.detail(:counts) || {}
+- showcases = notice.detail(:showcases) || {}
+- entries = Array(showcases['entries'])
+%tr.ledger-row.ledger-row--daily_digest.ledger-digest-row
+  %td.ledger-digest-cell{colspan: 4}
+    %section.ledger-digest{'aria-label' => "Daily digest for #{notice.occurred_on.strftime('%B %-d, %Y')}"}
+      %header.ledger-digest__rule
+        %span.ledger-digest__date= notice.occurred_on.strftime('%B %-d, %Y')
+
+      %dl.ledger-digest__counts
+        = render 'admin/ledger/digest_count', label: 'Requests',
+          value: "#{counts['requests_opened'].to_i} opened · #{counts['requests_resolved'].to_i} resolved · #{counts['requests_open'].to_i} still open"
+        = render 'admin/ledger/digest_count', label: 'Loads',
+          value: "#{counts['loads_run'].to_i} run · #{counts['loads_failed'].to_i} failed"
+        = render 'admin/ledger/digest_count', label: 'Deposits',
+          value: "#{counts['deposits_unconfirmed'].to_i} waiting on a depositor · #{counts['deposits_incomplete'].to_i} missing something"
+        = render 'admin/ledger/digest_count', label: 'Repository',
+          value: "#{counts['cascades'].to_i} visibility changes · #{counts['reindexes'].to_i} reindexes"
+        = render 'admin/ledger/digest_count', label: 'Showcases',
+          value: "#{showcases['promoted'].to_i} published · #{showcases['refused'].to_i} refused"
+
+      - if entries.any?
+        .ledger-digest__section
+          %h4.ledger-digest__heading Published to showcases
+          -# Grouped by community then genre: a work in the wrong bucket is only
+          -# visible when you can scan within one genre at a time.
+          - entries.reject { |e| e['outcome'] == 'refused' }.group_by { |e| [e['community'], e['genre']] }.each do |(community, genre), group|
+            .ledger-digest__group
+              %span.ledger-digest__group-label= [community.presence || 'Unknown community', genre.presence || 'No genre'].join(' · ')
+              %ul.ledger-digest__items
+                - group.each do |entry|
+                  %li
+                    %span.ledger-digest__item-title= entry['title'].presence || entry['work_noid']
+                    = audit_event_nuid(entry['nuid'])
+
+          - refusals = entries.select { |e| e['outcome'] == 'refused' }
+          - if refusals.any?
+            .ledger-digest__group.ledger-digest__group--refused
+              %span.ledger-digest__group-label Refused
+              %ul.ledger-digest__items
+                - refusals.each do |entry|
+                  %li
+                    %span.ledger-digest__item-title= entry['title'].presence || entry['work_noid']
+                    %span.ledger-digest__reason= ledger_promotion_reason(entry['reason'])
+                    = audit_event_nuid(entry['nuid'])
+
+          - if showcases['truncated'].to_i.positive?
+            %p.ledger-digest__more
+              = link_to "#{showcases['truncated']} more on the Showcase list", admin_ledger_path(tab: 'activity', kind: 'showcase_promotion')

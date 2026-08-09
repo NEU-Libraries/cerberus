@@ -1,0 +1,315 @@
+// ---------------------------------------------------------------------
+// Admin ledger — Requests & activity (/admin/ledger).
+//
+// Same archival register as audit-history and admin-registry: quiet
+// card-shell, uppercase microcopy headers, monospace identifier chips,
+// one tone per row carried by a left rail. Two tone vocabularies,
+// because the two tabs signal different things — a request is toned by
+// its *state* (what is outstanding), a notice by its *kind* (what
+// happened). Both are driven by --ledger-tone, so adding either is one
+// map entry here and one class on the row.
+// ---------------------------------------------------------------------
+
+$ledger-rail-width: 4px;
+
+// Request state. "Resolved" is deliberately drained of colour rather
+// than green: this surface exists to show what is still outstanding, so
+// a finished request should recede and let the open ones carry the eye.
+// Green would make a worked-through queue read as celebratory.
+$ledger-tone-open:     #c46410;
+$ledger-tone-claimed:  #2666a6;
+$ledger-tone-resolved: #adb5bd;
+
+// Activity kinds. Borrowed from the audit-history tones so the two
+// ledgers speak one colour language — a link is the same green in both.
+$ledger-tone-load:     #0e8a7a;
+$ledger-tone-showcase: #4e8a5f;
+$ledger-tone-cascade:  #2666a6;
+$ledger-tone-reindex:  #6c757d;
+$ledger-tone-breach:   #a73a31;
+// The digest's own tone: a slate ink that sits in the arc none of the
+// audit tones occupy, so a day's closing entry is never confused with
+// one of the events inside it.
+$ledger-tone-digest:   #54687a;
+
+.ledger-table {
+  margin-bottom: 0;
+  font-variant-numeric: tabular-nums;
+
+  tbody td {
+    padding: 0.55rem 0.85rem;
+    vertical-align: top;
+    color: $gray-800;
+    border: 0;
+    border-bottom: 1px solid $gray-200;
+    background-color: transparent; // let the rail's ::before show through
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+
+  // Left rail, as on the audit table: a 4px stripe at the left edge of
+  // the first cell, tinted by --ledger-tone. It is the row's chromatic
+  // signal; everything else stays greyscale.
+  tbody tr td:first-child {
+    position: relative;
+    padding-left: 1.1rem;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: $ledger-rail-width;
+      background-color: var(--ledger-tone, #{$ledger-tone-reindex});
+    }
+  }
+
+  // Hover belongs to the request table, whose rows open something. The
+  // activity table is read-only, so a hover tint there would promise an
+  // affordance that is not present.
+  tbody tr:hover td { background-color: #fbf9f4; }
+  &--activity tbody tr:hover td { background-color: transparent; }
+}
+
+.ledger-row {
+  &--open       { --ledger-tone: #{$ledger-tone-open}; }
+  &--claimed    { --ledger-tone: #{$ledger-tone-claimed}; }
+  &--resolved   { --ledger-tone: #{$ledger-tone-resolved}; }
+
+  &--load_report              { --ledger-tone: #{$ledger-tone-load}; }
+  &--showcase_promotion       { --ledger-tone: #{$ledger-tone-showcase}; }
+  &--visibility_cascade       { --ledger-tone: #{$ledger-tone-cascade}; }
+  &--set_reindex              { --ledger-tone: #{$ledger-tone-reindex}; }
+  &--work_completion_mismatch { --ledger-tone: #{$ledger-tone-breach}; }
+  &--refused                  { --ledger-tone: #{$ledger-tone-breach}; }
+  &--daily_digest             { --ledger-tone: #{$ledger-tone-digest}; }
+
+  // A resolved request is history, not work. Fading it keeps it findable
+  // under the Resolved filter without competing in the default view.
+  &--resolved td { opacity: 0.72; }
+}
+
+// Chip — same soft-badge construction as the audit action chip: the
+// background is the tone mixed into white, the icon and label take the
+// full tone. One custom property drives all three.
+.ledger-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--ledger-tone, #{$gray-700});
+  background-color: color-mix(in srgb, var(--ledger-tone, #{$gray-700}) 12%, white);
+  border: 1px solid color-mix(in srgb, var(--ledger-tone, #{$gray-700}) 28%, white);
+
+  .fa-solid { font-size: 0.85em; }
+}
+
+// A status chip inside a row inherits --ledger-tone from the row. On the
+// request page it stands alone in the header strip, with no row above it,
+// so it carries its own tone.
+.ledger-status {
+  &--open     { --ledger-tone: #{$ledger-tone-open}; }
+  &--claimed  { --ledger-tone: #{$ledger-tone-claimed}; }
+  &--resolved { --ledger-tone: #{$ledger-tone-resolved}; }
+}
+
+.ledger-subject {
+  font-weight: 600;
+  color: $gray-800;
+  overflow-wrap: anywhere;
+}
+
+// Resource type beside a title — a quiet qualifier, not a second title.
+.ledger-type {
+  margin-left: 0.4rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 600;
+  color: $gray-500;
+}
+
+.ledger-detail {
+  font-size: 0.83rem;
+  color: $gray-600;
+  margin-top: 0.15rem;
+}
+
+.ledger-refused {
+  font-weight: 600;
+  color: $ledger-tone-breach;
+  margin-right: 0.3rem;
+}
+
+.ledger-note {
+  display: inline-block;
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  color: $gray-500;
+  font-style: italic;
+}
+
+.ledger-link {
+  display: inline-block;
+  margin-top: 0.25rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.ledger-age {
+  font-size: 0.82rem;
+  color: $gray-600;
+  font-variant-numeric: tabular-nums;
+}
+
+// Request show page — label/value pairs, not a table.
+.ledger-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 1rem 1.5rem;
+  margin: 0;
+
+  dt {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    color: $gray-500;
+    margin-bottom: 0.2rem;
+  }
+  dd { margin: 0; }
+}
+
+.ledger-remedy-note {
+  padding: 0.75rem 1rem;
+  border-left: $ledger-rail-width solid $ledger-tone-cascade;
+  background-color: color-mix(in srgb, #{$ledger-tone-cascade} 6%, white);
+  font-size: 0.88rem;
+  color: $gray-700;
+}
+
+// ---------------------------------------------------------------------
+// The daily digest — the one row in the activity table that is not a
+// line. Every other notice is a single event; a digest is a whole day,
+// so it spans the table as a ruled block instead. The eye finds it
+// because it is shaped differently, not because it is brighter, which
+// is how a ledger has always marked the end of a day.
+// ---------------------------------------------------------------------
+.ledger-digest-cell {
+  padding: 0 !important;
+
+  &::before { display: none; } // the block is its own signal; no rail
+}
+
+.ledger-digest {
+  padding: 1rem 1.25rem 1.25rem;
+  background-color: #fbfcfd;
+  border-top: 1px solid $gray-300;
+  border-bottom: 1px solid $gray-300;
+
+  &__rule {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
+
+    // Rules either side of the date, so the block reads as a ledger's
+    // day divider rather than a card header.
+    &::before,
+    &::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background-color: $gray-300;
+    }
+  }
+
+  &__date {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+    color: $ledger-tone-digest;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__counts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 0.6rem 1.5rem;
+    margin: 0 0 1rem;
+  }
+
+  &__count-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    color: $gray-500;
+  }
+
+  &__count-value {
+    margin: 0;
+    font-size: 0.86rem;
+    color: $gray-800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__heading {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    color: $gray-600;
+    margin-bottom: 0.5rem;
+  }
+
+  &__group {
+    margin-bottom: 0.7rem;
+    padding-left: 0.75rem;
+    border-left: 2px solid $gray-300;
+
+    &--refused { border-left-color: $ledger-tone-breach; }
+  }
+
+  &__group-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: $gray-700;
+  }
+
+  &__items {
+    list-style: none;
+    margin: 0.2rem 0 0;
+    padding: 0;
+
+    li {
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      font-size: 0.83rem;
+      padding: 0.1rem 0;
+    }
+  }
+
+  &__item-title {
+    color: $gray-800;
+    overflow-wrap: anywhere;
+  }
+
+  &__reason {
+    color: $gray-600;
+    font-style: italic;
+  }
+
+  &__more {
+    margin: 0.4rem 0 0;
+    font-size: 0.8rem;
+  }
+}

@@ -1,0 +1,44 @@
+-# The staff queue. Oldest first, because the request that has waited longest is
+-# the one somebody forgot — same order the deposit triage list uses.
+.p-3
+  %p.text-muted.small.mb-0
+    What depositors have asked staff to do for them. Claiming one tells the rest of the team you have it. The work itself happens on the object’s own page — come back and resolve the request when it is done.
+
+%nav.px-3.pb-2{'aria-label' => 'Request status'}
+  - { 'open' => 'Open', 'claimed' => 'Claimed', 'resolved' => 'Resolved', 'all' => 'All' }.each do |status, label|
+    - current = status == @status
+    = link_to label, admin_ledger_path(tab: 'requests', status: status),
+      class: "btn btn-sm me-1 #{current ? 'btn-secondary' : 'btn-outline-secondary'}",
+      'aria-current': ('page' if current)
+
+- if @requests.any?
+  .table-responsive
+    %table.table.table-borderless.admin-registry-table.ledger-table
+      %thead
+        %tr
+          %th{scope: 'col'} Status
+          %th{scope: 'col'} Asked for
+          %th{scope: 'col'} About
+          %th{scope: 'col'} Who asked
+          %th{scope: 'col'} Waiting
+          %th{scope: 'col'}
+            %span.visually-hidden Open
+      %tbody
+        - @requests.each do |request|
+          %tr.ledger-row{class: "ledger-row--#{request.status}"}
+            %td= ledger_status_chip(request)
+            %td= ledger_request_kind_chip(request)
+            %td
+              = ledger_subject_link(request)
+              %span.ledger-type= request.subject_type
+            %td= audit_event_actor(request.requester_nuid)
+            %td.text-nowrap= ledger_age(request.created_at)
+            %td.text-end
+              = link_to 'Open', admin_staff_request_path(request), class: 'btn btn-sm btn-outline-secondary'
+  = paginate @requests
+- else
+  .admin-registry__empty
+    %i.fa-solid.fa-clipboard-check.admin-registry__empty-icon{'aria-hidden' => 'true'}
+    %p.mb-1.fw-semibold.text-body= @status == 'open' ? 'Nothing waiting' : 'No requests here'
+    %p.mb-0.small.text-muted
+      Requests to withdraw or move a work, and to restrict a collection or community, appear here.
