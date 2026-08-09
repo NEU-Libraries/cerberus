@@ -10,12 +10,27 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_02_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_09_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
   enable_extension "timescaledb"
   enable_extension "uuid-ossp"
+
+  create_table "admin_notices", force: :cascade do |t|
+    t.string "actor_nuid"
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.string "kind", null: false
+    t.date "occurred_on", null: false
+    t.jsonb "payload", default: {}, null: false
+    t.string "subject", null: false
+    t.string "subject_noid"
+    t.datetime "updated_at", null: false
+    t.index ["kind", "created_at"], name: "index_admin_notices_on_kind_and_created_at"
+    t.index ["kind", "occurred_on"], name: "index_admin_notices_on_kind_and_occurred_on"
+    t.index ["kind", "occurred_on"], name: "index_admin_notices_one_digest_per_day", unique: true, where: "((kind)::text = 'daily_digest'::text)"
+  end
 
   create_table "bookmarks", id: :serial, force: :cascade do |t|
     t.datetime "created_at", precision: nil, null: false
@@ -178,6 +193,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_02_000001) do
     t.datetime "updated_at", null: false
     t.index ["session_id"], name: "index_sessions_on_session_id", unique: true
     t.index ["updated_at"], name: "index_sessions_on_updated_at"
+  end
+
+  create_table "staff_requests", force: :cascade do |t|
+    t.datetime "claimed_at"
+    t.string "claimed_by_nuid"
+    t.datetime "created_at", null: false
+    t.string "kind", null: false
+    t.text "note"
+    t.string "requester_nuid", null: false
+    t.string "resolution"
+    t.text "resolution_note"
+    t.datetime "resolved_at"
+    t.string "resolved_by_nuid"
+    t.string "status", default: "open", null: false
+    t.string "subject_noid", null: false
+    t.string "subject_title"
+    t.string "subject_type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["status", "created_at"], name: "index_staff_requests_on_status_and_created_at"
+    t.index ["subject_noid"], name: "index_staff_requests_on_subject_noid"
   end
 
   create_table "user_agents", id: false, force: :cascade do |t|
