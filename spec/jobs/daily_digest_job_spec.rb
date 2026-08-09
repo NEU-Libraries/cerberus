@@ -6,11 +6,14 @@ RSpec.describe DailyDigestJob do
   let(:day) { Date.new(2026, 8, 8) }
 
   # Solr is reachable in this environment, but the stuck-deposit counts depend on
-  # whatever else the suite has left in the index. Pinned so the digest's own
-  # arithmetic is what these examples measure.
-  before do
+  # whatever else the suite has left in the index. Pinned to an empty backlog so
+  # the digest's own arithmetic is what these examples measure, and so a day is
+  # quiet unless an example puts something in it.
+  before { stub_backlog(0) }
+
+  def stub_backlog(total)
     allow(Blacklight.default_index).to receive(:search)
-      .and_return(instance_double(Blacklight::Solr::Response, total: 3))
+      .and_return(instance_double(Blacklight::Solr::Response, total: total))
   end
 
   # A request kind needs an actor and a subject; an activity kind needs neither.
@@ -43,6 +46,8 @@ RSpec.describe DailyDigestJob do
     end
 
     it 'reads the stuck-deposit counts from the triage builder’s own clauses' do
+      stub_backlog(3)
+
       described_class.perform_now(day)
 
       counts = AdminNotice.find_by(kind: 'daily_digest').detail(:counts)
@@ -94,17 +99,41 @@ RSpec.describe DailyDigestJob do
   end
 
   describe 'one digest per day' do
+    before { notice_on(day, kind: 'set_reindex') }
+
     it 'writes nothing the second time and does not raise' do
       described_class.perform_now(day)
 
       expect { described_class.perform_now(day) }.not_to change(AdminNotice, :count)
       expect(described_class.perform_now(day)).to be_nil
     end
+  end
 
-    it 'defaults to yesterday, so the scheduled run sums a whole day' do
-      described_class.perform_now
+  it 'defaults to yesterday, so the scheduled run sums a whole day' do
+    notice_on(Date.yesterday, kind: 'set_reindex')
 
-      expect(AdminNotice.find_by(kind: 'daily_digest').occurred_on).to eq(Date.yesterday)
+    described_class.perform_now
+
+    expect(AdminNotice.find_by(kind: 'daily_digest').occurred_on).to eq(Date.yesterday)
+  end
+
+  # A block of zeroes is noise: nothing happened, and nothing can be acted on.
+  describe 'a quiet day' do
+    it 'writes no digest at all' do
+      expect { described_class.perform_now(day) }.not_to change(AdminNotice, :count)
+    end
+
+    it 'writes one when only the backlog is non-zero, because that still needs working' do
+      stub_backlog(5)
+
+      expect { described_class.perform_now(day) }.to change(AdminNotice, :count).by(1)
+    end
+
+    # An unknown figure is not a zero, so a Solr outage never suppresses a day.
+    it 'writes one when a count could not be read' do
+      allow(Blacklight.default_index).to receive(:search).and_raise(StandardError, 'connection refused')
+
+      expect { described_class.perform_now(day) }.to change(AdminNotice, :count).by(1)
     end
   end
 end

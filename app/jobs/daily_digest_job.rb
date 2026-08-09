@@ -20,12 +20,15 @@ class DailyDigestJob < ApplicationJob
 
   def perform(day = nil)
     day = (day || Date.yesterday).to_date
+    counts = counts_for(day)
+    showcases = showcases_for(day)
+    return if quiet_day?(counts, showcases)
 
     AdminNotice.create!(
       kind:        AdminNotice::DIGEST,
       subject:     "Daily digest for #{day.strftime('%B %-d, %Y')}",
       occurred_on: day,
-      payload:     { counts: counts_for(day), showcases: showcases_for(day) }
+      payload:     { counts: counts, showcases: showcases }
     )
   rescue ActiveRecord::RecordNotUnique
     Rails.logger.info("DailyDigestJob: #{day} already has a digest — leaving it alone")
@@ -33,6 +36,19 @@ class DailyDigestJob < ApplicationJob
   end
 
   private
+
+    # A day with nothing in it earns no row, in the ledger or in a mailed
+    # summary — a block of zeroes is noise, and there is nothing to act on.
+    #
+    # The backlog figures count towards this: a day where nothing happened but
+    # five deposits sit stuck is still a day somebody has to hear about. An
+    # unknown figure (Solr unreachable) is never treated as quiet, because we
+    # cannot say that it was.
+    def quiet_day?(counts, showcases)
+      return false if counts.value?(nil)
+
+      counts.each_value.all? { |value| value.to_i.zero? } && showcases[:entries].empty?
+    end
 
     def counts_for(day)
       {

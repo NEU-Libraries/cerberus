@@ -18,16 +18,8 @@
         %span.ledger-digest__date= notice.occurred_on.strftime('%B %-d, %Y')
 
       %dl.ledger-digest__counts
-        = render 'admin/ledger/digest_count', label: 'Requests',
-          value: "#{counts['requests_made'].to_i} made"
-        = render 'admin/ledger/digest_count', label: 'Loads',
-          value: "#{counts['loads_run'].to_i} run · #{counts['loads_failed'].to_i} failed"
-        = render 'admin/ledger/digest_count', label: 'Deposits',
-          value: "#{counts['deposits_unconfirmed'].to_i} waiting on a depositor · #{counts['deposits_incomplete'].to_i} missing something"
-        = render 'admin/ledger/digest_count', label: 'Repository',
-          value: "#{counts['cascades'].to_i} visibility changes · #{counts['reindexes'].to_i} reindexes"
-        = render 'admin/ledger/digest_count', label: 'Showcases',
-          value: "#{showcases['promoted'].to_i} published · #{showcases['refused'].to_i} refused"
+        - digest_figures(counts, showcases).each do |label, parts|
+          = render 'admin/ledger/digest_count', label: label, parts: parts
 
       - if entries.any?
         .ledger-digest__section

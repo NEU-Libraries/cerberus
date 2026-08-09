@@ -1,5 +1,9 @@
--# One line of the digest's count block. A definition list rather than tiles:
--# these are a day's figures read in sequence, not headline metrics.
+-# locals: label (String), parts (Array of [text, path]) — see digest_figure.
+-#
+-# A definition list rather than stat tiles: these are a day's figures read in
+-# sequence, not headline metrics. Each figure that has something behind it
+-# links to the surface listing it, so the digest indexes the day.
 %div
   %dt.ledger-digest__count-label= label
-  %dd.ledger-digest__count-value= value
+  %dd.ledger-digest__count-value
+    = safe_join(parts.map { |text, path| path ? link_to(text, path) : text }, ' · ')

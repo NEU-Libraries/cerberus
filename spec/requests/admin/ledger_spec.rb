@@ -167,5 +167,22 @@ RSpec.describe 'Admin ledger', type: :request do
       expect(response.body).to include('Marine Science · Datasets')
       expect(response.body).to include('Published to showcases')
     end
+
+    # A figure with something behind it is a way into the day; a zero is a fact
+    # with nowhere to go, and a link to an empty list wastes the click.
+    it 'links a figure that has something behind it, and leaves a zero plain' do
+      AdminNotice.create!(
+        kind: 'daily_digest', subject: 'Daily digest', occurred_on: Time.zone.today,
+        payload: { counts:    { 'deposits_unconfirmed' => 4, 'deposits_incomplete' => 0 },
+                   showcases: { 'promoted' => 0, 'refused' => 0, 'entries' => [] } }
+      )
+
+      get admin_ledger_path(tab: 'activity')
+
+      expect(response.body).to include(%(<a href="#{admin_deposit_triage_path(state: 'unconfirmed')}">))
+      expect(response.body).to include('4 waiting on a depositor')
+      expect(response.body).to include('0 missing something')
+      expect(response.body).not_to include(%(<a href="#{admin_deposit_triage_path(state: 'incomplete')}">))
+    end
   end
 end

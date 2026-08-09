@@ -7,7 +7,8 @@ namespace :admin do
     notice = DailyDigestJob.perform_now(day)
 
     if notice.nil?
-      puts "#{day} already has a digest. Nothing written."
+      existing = AdminNotice.exists?(kind: AdminNotice::DIGEST, occurred_on: day)
+      puts existing ? "#{day} already has a digest. Nothing written." : "Nothing happened on #{day}. No digest written."
       next
     end
 
