@@ -14,7 +14,7 @@
     %span.ledger-digest__date= notice.occurred_on.strftime('%B %-d, %Y')
 
   %dl.ledger-digest__counts
-    - digest_figures(counts, showcases).each do |label, parts|
+    - digest_figures(counts, showcases, notice.occurred_on).each do |label, parts|
       = render 'admin/ledger/digest_count', label: label, parts: parts
 
   - if promoted.any?
@@ -44,4 +44,4 @@
 
   - if showcases['truncated'].to_i.positive?
     %p.ledger-digest__more
-      = link_to "#{showcases['truncated']} more on the Showcase list", admin_ledger_path(tab: 'activity', kind: 'showcase_promotion')
+      = link_to "#{showcases['truncated']} more on the Showcase list", admin_ledger_path(tab: 'activity', kind: 'showcase_promotion', on: notice.occurred_on)

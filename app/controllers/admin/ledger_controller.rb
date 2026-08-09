@@ -39,7 +39,8 @@ module Admin
     def index
       @tab = TABS.key?(params[:tab]) ? params[:tab] : 'requests'
       @kind = params[:kind].presence
-      @notices = ordered(scope_for(@tab).of_kind(@kind)).page(params[:page]).per(per_page)
+      @on = requested_day
+      @notices = ordered(filtered).page(params[:page]).per(per_page)
       # One directory round-trip for the whole page. audit_event_actor resolves
       # per row off Rails.cache, so priming here is the difference between one
       # batch and a request per distinct NUID.
@@ -47,6 +48,24 @@ module Admin
     end
 
     private
+
+      # `?on=YYYY-MM-DD` narrows a tab to one day. It exists so a digest's
+      # figures can link to what they counted: "1 made" on August 3rd means
+      # the request made that day, not every request ever made.
+      #
+      # An unparseable date is ignored rather than raising — the value comes
+      # from a query string, and a filtered page that quietly shows everything
+      # beats an error page.
+      def requested_day
+        Date.iso8601(params[:on].to_s)
+      rescue Date::Error
+        nil
+      end
+
+      def filtered
+        scope = scope_for(@tab).of_kind(@kind)
+        @on ? scope.on_day(@on) : scope
+      end
 
       def scope_for(tab)
         case tab

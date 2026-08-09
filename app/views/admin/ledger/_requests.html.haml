@@ -11,14 +11,16 @@
     What depositors have asked staff to do for them, because they cannot do it themselves. Each row says what was asked and points at the tool that does it.
 
 %nav.px-3.pb-2{'aria-label' => 'Request kind'}
-  = link_to 'All', admin_ledger_path(tab: 'requests'),
+  = link_to 'All', admin_ledger_path(tab: 'requests', on: @on),
     class: "btn btn-sm me-1 #{@kind.blank? ? 'btn-secondary' : 'btn-outline-secondary'}",
     'aria-current': ('page' if @kind.blank?)
   - AdminNotice::REQUEST_KINDS.each do |kind|
     - current = kind == @kind
-    = link_to Admin::LedgerHelper::KINDS.dig(kind, :label), admin_ledger_path(tab: 'requests', kind: kind),
+    = link_to Admin::LedgerHelper::KINDS.dig(kind, :label), admin_ledger_path(tab: 'requests', kind: kind, on: @on),
       class: "btn btn-sm me-1 #{current ? 'btn-secondary' : 'btn-outline-secondary'}",
       'aria-current': ('page' if current)
+
+= render 'admin/ledger/day_filter'
 
 - if @notices.any?
   .table-responsive
@@ -37,6 +39,12 @@
 - else
   .admin-registry__empty
     %i.fa-solid.fa-clipboard-check.admin-registry__empty-icon{'aria-hidden' => 'true'}
-    %p.mb-1.fw-semibold.text-body Nothing asked for yet
-    %p.mb-0.small.text-muted
-      Requests to withdraw or move a work, and to restrict a collection or community, appear here.
+    -# Say which emptiness this is. Narrowed to a day, "nothing asked for yet"
+    -# would be a plain lie about the repository.
+    - if @on
+      %p.mb-1.fw-semibold.text-body= "Nothing asked for on #{@on.strftime('%B %-d, %Y')}"
+      %p.mb-0.small.text-muted= link_to 'Show every day', admin_ledger_path(tab: 'requests')
+    - else
+      %p.mb-1.fw-semibold.text-body Nothing asked for yet
+      %p.mb-0.small.text-muted
+        Requests to withdraw or move a work, and to restrict a collection or community, appear here.

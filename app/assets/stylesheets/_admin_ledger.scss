@@ -152,6 +152,35 @@ $ledger-tone-digest:   #54687a;
   font-variant-numeric: tabular-nums;
 }
 
+// "Only August 3, 2026 ×" — shown when a digest figure narrowed the list
+// to the day it counted. Reads as an applied constraint rather than a
+// control: the digest sets it, and the × is the only thing to do with it
+// here. Takes the digest's own slate ink, so the tie back is visible.
+.ledger-day-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: $ledger-tone-digest;
+  background-color: color-mix(in srgb, #{$ledger-tone-digest} 10%, white);
+  border: 1px solid color-mix(in srgb, #{$ledger-tone-digest} 26%, white);
+
+  .fa-solid { font-size: 0.85em; }
+
+  &__clear {
+    color: inherit;
+    line-height: 1;
+    opacity: 0.7;
+
+    &:hover,
+    &:focus-visible { opacity: 1; }
+  }
+}
+
 // ---------------------------------------------------------------------
 // A day's digest — its own tab, one day per page.
 //

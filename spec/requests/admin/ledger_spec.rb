@@ -160,6 +160,59 @@ RSpec.describe 'Admin ledger', type: :request do
     end
   end
 
+  # A digest's figures link here with ?on=<day>, so a tab has to be able to
+  # answer for one day. Without it "1 made" on the 3rd opened every request ever
+  # made, which answers a question nobody asked.
+  describe 'the day filter' do
+    before { sign_in admin }
+
+    let!(:older) do
+      AdminNotice.create!(kind: 'request_move', subject: 'Request to move “atlas.pdf”',
+                          actor_nuid: '000000010', subject_noid: 'w2', occurred_on: Date.new(2026, 8, 3),
+                          payload: { subject_type: 'Work', subject_title: 'atlas.pdf' })
+    end
+
+    it 'narrows a tab to one day, and says that it has' do
+      get admin_ledger_path(tab: 'requests', on: '2026-08-03')
+
+      expect(response.body).to include('atlas.pdf')
+      expect(response.body).not_to include('thesis.pdf')
+      expect(response.body).to include('Only August 3, 2026')
+    end
+
+    it 'offers a way back to every day' do
+      get admin_ledger_path(tab: 'requests', on: '2026-08-03')
+
+      expect(response.body).to include(%(href="#{admin_ledger_path(tab: 'requests')}"))
+    end
+
+    it 'keeps the day when a kind filter is chosen' do
+      get admin_ledger_path(tab: 'requests', on: '2026-08-03')
+
+      # Rails escapes the query string's ampersands in the rendered href.
+      expect(response.body).to include(
+        CGI.escapeHTML(admin_ledger_path(tab: 'requests', kind: 'request_move', on: '2026-08-03'))
+      )
+    end
+
+    # The value comes off a query string, so a page that quietly shows
+    # everything beats an error page.
+    it 'ignores an unparseable date rather than raising' do
+      get admin_ledger_path(tab: 'requests', on: 'yesterday-ish')
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('thesis.pdf')
+      expect(response.body).not_to include('Only August')
+    end
+
+    it 'says which emptiness it is when the day holds nothing' do
+      get admin_ledger_path(tab: 'activity', on: '2026-08-03')
+
+      expect(response.body).to include('Nothing recorded on August 3, 2026')
+      expect(response.body).not_to include('Nothing recorded yet')
+    end
+  end
+
   describe 'the digests tab' do
     before { sign_in admin }
 
@@ -207,6 +260,10 @@ RSpec.describe 'Admin ledger', type: :request do
 
       expect(response.body).to include('0 reindexes')
       expect(response.body).to include('1 visibility change')
+      # Every day-scoped figure carries its day, or it opens the whole history.
+      expect(response.body).to include(
+        CGI.escapeHTML(admin_ledger_path(tab: 'activity', kind: 'visibility_cascade', on: Time.zone.today.to_s))
+      )
       expect(response.body).not_to include('reindices')
       expect(response.body).not_to include('1 visibility changes')
     end

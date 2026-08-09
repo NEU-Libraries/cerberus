@@ -7,14 +7,16 @@
     What the repository did — loads, visibility changes, reindexes, and every work published to a community showcase. One row per event; the Digests tab sums each day up.
 
 %nav.px-3.pb-2{'aria-label' => 'Activity kind'}
-  = link_to 'All', admin_ledger_path(tab: 'activity'),
+  = link_to 'All', admin_ledger_path(tab: 'activity', on: @on),
     class: "btn btn-sm me-1 #{@kind.blank? ? 'btn-secondary' : 'btn-outline-secondary'}",
     'aria-current': ('page' if @kind.blank?)
   - AdminNotice::ACTIVITY_KINDS.each do |kind|
     - current = kind == @kind
-    = link_to Admin::LedgerHelper::KINDS.dig(kind, :label), admin_ledger_path(tab: 'activity', kind: kind),
+    = link_to Admin::LedgerHelper::KINDS.dig(kind, :label), admin_ledger_path(tab: 'activity', kind: kind, on: @on),
       class: "btn btn-sm me-1 #{current ? 'btn-secondary' : 'btn-outline-secondary'}",
       'aria-current': ('page' if current)
+
+= render 'admin/ledger/day_filter'
 
 - if @notices.any?
   .table-responsive
@@ -35,6 +37,10 @@
 - else
   .admin-registry__empty
     %i.fa-solid.fa-book.admin-registry__empty-icon{'aria-hidden' => 'true'}
-    %p.mb-1.fw-semibold.text-body Nothing recorded yet
-    %p.mb-0.small.text-muted
-      Loads, visibility changes, reindexes and showcase publications are recorded here as they happen.
+    - if @on
+      %p.mb-1.fw-semibold.text-body= "Nothing recorded on #{@on.strftime('%B %-d, %Y')}"
+      %p.mb-0.small.text-muted= link_to 'Show every day', admin_ledger_path(tab: 'activity', kind: @kind)
+    - else
+      %p.mb-1.fw-semibold.text-body Nothing recorded yet
+      %p.mb-0.small.text-muted
+        Loads, visibility changes, reindexes and showcase publications are recorded here as they happen.
