@@ -76,6 +76,22 @@ RSpec.describe 'Admin ledger', type: :request do
       expect(response.body).to include('Restrict each collection within it first')
     end
 
+    # Only :admin may run a visibility cascade. The delegate tier sees the row —
+    # seeing the queue is the point — and is told who has to act.
+    it 'offers the remedy to an admin and names the gate to a delegate' do
+      AdminNotice.create!(kind: 'request_restrict', subject: 'Request to restrict “Reading Room”',
+                          actor_nuid: '000000010', subject_noid: 'c1',
+                          payload: { subject_type: 'Collection', subject_title: 'Reading Room' })
+
+      get admin_ledger_path
+      expect(response.body).to include('Open its permissions')
+
+      sign_in delegate
+      get admin_ledger_path
+      expect(response.body).to include('An administrator has to do this one')
+      expect(response.body).not_to include('Open its permissions')
+    end
+
     # An unknown filter shows everything rather than an unexplained empty page.
     it 'falls through to every request on an unknown kind' do
       get admin_ledger_path(tab: 'requests', kind: 'nonsense')
