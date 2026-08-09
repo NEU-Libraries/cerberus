@@ -26,15 +26,20 @@ module Admin
 
     TABS = {
       'requests' => 'Requests',
-      'activity' => 'Activity'
+      'activity' => 'Activity',
+      'digests'  => 'Digests'
     }.freeze
 
     PER_PAGE = 50
 
+    # A digest is a page-sized report of one whole day, so it gets a page.
+    # Paging back through them reads the way the mailed summaries will arrive.
+    DIGESTS_PER_PAGE = 1
+
     def index
       @tab = TABS.key?(params[:tab]) ? params[:tab] : 'requests'
       @kind = params[:kind].presence
-      @notices = scope_for(@tab).of_kind(@kind).newest_first.page(params[:page]).per(PER_PAGE)
+      @notices = ordered(scope_for(@tab).of_kind(@kind)).page(params[:page]).per(per_page)
       # One directory round-trip for the whole page. audit_event_actor resolves
       # per row off Rails.cache, so priming here is the difference between one
       # batch and a request per distinct NUID.
@@ -44,7 +49,21 @@ module Admin
     private
 
       def scope_for(tab)
-        tab == 'requests' ? AdminNotice.requests : AdminNotice.activity
+        case tab
+        when 'requests' then AdminNotice.requests
+        when 'digests'  then AdminNotice.digests
+        else                 AdminNotice.activity
+        end
+      end
+
+      def per_page
+        @tab == 'digests' ? DIGESTS_PER_PAGE : PER_PAGE
+      end
+
+      # A digest is about a day, so it sorts by that day. Everything else is an
+      # event, which sorts by when it happened.
+      def ordered(scope)
+        @tab == 'digests' ? scope.by_day : scope.newest_first
       end
   end
 end

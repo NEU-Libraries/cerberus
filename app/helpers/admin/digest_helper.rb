@@ -43,10 +43,14 @@ module Admin
                        admin_deposit_triage_path(state: 'incomplete'))]
       end
 
+      # The only two labels that are countable nouns, so the only two that need
+      # agreeing with their figure — "1 reindexes" reads as a bug.
       def repository_figures(counts)
-        [digest_figure(counts['cascades'], 'visibility changes',
+        cascades = counts['cascades'].to_i
+        reindexes = counts['reindexes'].to_i
+        [digest_figure(cascades, 'visibility change'.pluralize(cascades),
                        admin_ledger_path(tab: 'activity', kind: 'visibility_cascade')),
-         digest_figure(counts['reindexes'], 'reindexes',
+         digest_figure(reindexes, 'reindex'.pluralize(reindexes),
                        admin_ledger_path(tab: 'activity', kind: 'set_reindex'))]
       end
 

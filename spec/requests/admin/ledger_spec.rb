@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-# The ledger's two tabs. No Atlas here: both lists read Cerberus's own tables,
+# The ledger's three tabs. No Atlas here: every list reads Cerberus's own table,
 # which is the whole reason the surface can show what is outstanding at all.
 RSpec.describe 'Admin ledger', type: :request do
   include Devise::Test::IntegrationHelpers
@@ -98,7 +98,7 @@ RSpec.describe 'Admin ledger', type: :request do
       expect(response.body).to include('thesis.pdf')
     end
 
-    # The two tabs are one table split by kind, so neither may leak the other.
+    # The tabs are one table split by kind, so none may leak into another.
     it 'keeps activity off the requests tab and requests off the activity tab' do
       AdminNotice.create!(kind: 'set_reindex', subject: 'Set reindex finished', subject_noid: 's1')
 
@@ -151,7 +151,19 @@ RSpec.describe 'Admin ledger', type: :request do
       expect(response.body).not_to include('reef-survey.csv')
     end
 
-    it 'renders a digest as its own block, grouped by community and genre' do
+    it 'keeps digests off the activity tab — they are their own family' do
+      AdminNotice.create!(kind: 'daily_digest', subject: 'Daily digest', occurred_on: Time.zone.today,
+                          payload: { counts: { 'requests_made' => 1 } })
+
+      get admin_ledger_path(tab: 'activity')
+      expect(response.body).not_to include('ledger-digest')
+    end
+  end
+
+  describe 'the digests tab' do
+    before { sign_in admin }
+
+    it 'renders a digest, grouped by community and genre' do
       AdminNotice.create!(
         kind: 'daily_digest', subject: 'Daily digest', occurred_on: Time.zone.today,
         payload: { counts:    { 'requests_made' => 2, 'loads_run' => 1 },
@@ -161,7 +173,7 @@ RSpec.describe 'Admin ledger', type: :request do
                                                 'outcome' => 'promoted' }] } }
       )
 
-      get admin_ledger_path(tab: 'activity')
+      get admin_ledger_path(tab: 'digests')
 
       expect(response.body).to include('ledger-digest')
       expect(response.body).to include('Marine Science · Datasets')
@@ -177,12 +189,44 @@ RSpec.describe 'Admin ledger', type: :request do
                    showcases: { 'promoted' => 0, 'refused' => 0, 'entries' => [] } }
       )
 
-      get admin_ledger_path(tab: 'activity')
+      get admin_ledger_path(tab: 'digests')
 
       expect(response.body).to include(%(<a href="#{admin_deposit_triage_path(state: 'unconfirmed')}">))
       expect(response.body).to include('4 waiting on a depositor')
       expect(response.body).to include('0 missing something')
       expect(response.body).not_to include(%(<a href="#{admin_deposit_triage_path(state: 'incomplete')}">))
+    end
+
+    # A day is a page, so paging back walks one day at a time.
+    it 'shows one day per page' do
+      2.times do |ago|
+        AdminNotice.create!(kind: 'daily_digest', subject: "Digest #{ago}",
+                            occurred_on: Time.zone.today - ago, payload: { counts: {} })
+      end
+
+      get admin_ledger_path(tab: 'digests')
+      expect(response.body).to include(Time.zone.today.strftime('%B %-d, %Y'))
+      expect(response.body).not_to include((Time.zone.today - 1).strftime('%B %-d, %Y'))
+
+      get admin_ledger_path(tab: 'digests', page: 2)
+      expect(response.body).to include((Time.zone.today - 1).strftime('%B %-d, %Y'))
+    end
+
+    # Nothing was published, and a depositor asked for something that silently
+    # did not happen — so it does not sit under a "Published" heading.
+    it 'gives refusals their own heading rather than filing them under published' do
+      AdminNotice.create!(
+        kind: 'daily_digest', subject: 'Daily digest', occurred_on: Time.zone.today,
+        payload: { counts:    {},
+                   showcases: { 'promoted' => 0, 'refused' => 1,
+                                'entries' => [{ 'outcome' => 'refused', 'reason' => 'no_showcase',
+                                                'title' => 'slides.pptx', 'nuid' => '000000010' }] } }
+      )
+
+      get admin_ledger_path(tab: 'digests')
+
+      expect(response.body).to include('Refused')
+      expect(response.body).not_to include('Published to showcases')
     end
   end
 end

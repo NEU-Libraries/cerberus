@@ -1,0 +1,47 @@
+-# One day's closing entry: the counts, then every work that reached a community
+-# showcase, grouped by community and genre — a work in the wrong bucket is only
+-# visible when you can scan one genre at a time.
+-#
+-# Read from the payload's parts rather than any stored text, because a mailed
+-# summary renders the same fields with absolute URLs.
+- counts = notice.detail(:counts) || {}
+- showcases = notice.detail(:showcases) || {}
+- entries = Array(showcases['entries'])
+- promoted = entries.reject { |entry| entry['outcome'] == 'refused' }
+- refusals = entries.select { |entry| entry['outcome'] == 'refused' }
+%section.ledger-digest{'aria-label' => "Digest for #{notice.occurred_on.strftime('%B %-d, %Y')}"}
+  %header.ledger-digest__rule
+    %span.ledger-digest__date= notice.occurred_on.strftime('%B %-d, %Y')
+
+  %dl.ledger-digest__counts
+    - digest_figures(counts, showcases).each do |label, parts|
+      = render 'admin/ledger/digest_count', label: label, parts: parts
+
+  - if promoted.any?
+    .ledger-digest__section
+      %h4.ledger-digest__heading Published to showcases
+      - promoted.group_by { |entry| [entry['community'], entry['genre']] }.each do |(community, genre), group|
+        .ledger-digest__group
+          %span.ledger-digest__group-label= [community.presence || 'Unknown community', genre.presence || 'No genre'].join(' · ')
+          %ul.ledger-digest__items
+            - group.each do |entry|
+              %li
+                %span.ledger-digest__item-title= entry['title'].presence || entry['work_noid']
+                = audit_event_nuid(entry['nuid'])
+
+  -# Its own heading, not a footnote under "Published": nothing was published,
+  -# and a depositor asked for something that silently did not happen.
+  - if refusals.any?
+    .ledger-digest__section
+      %h4.ledger-digest__heading Refused
+      .ledger-digest__group.ledger-digest__group--refused
+        %ul.ledger-digest__items
+          - refusals.each do |entry|
+            %li
+              %span.ledger-digest__item-title= entry['title'].presence || entry['work_noid']
+              %span.ledger-digest__reason= ledger_promotion_reason(entry['reason'])
+              = audit_event_nuid(entry['nuid'])
+
+  - if showcases['truncated'].to_i.positive?
+    %p.ledger-digest__more
+      = link_to "#{showcases['truncated']} more on the Showcase list", admin_ledger_path(tab: 'activity', kind: 'showcase_promotion')

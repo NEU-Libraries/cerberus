@@ -1,0 +1,17 @@
+-# One day per page. A digest is a page-sized report, not a row — stacked among
+-# the one-line activity rows it buried them and read badly itself — so it gets
+-# a page, and the paginator walks back a day at a time.
+.p-3
+  %p.text-muted.small.mb-0
+    Each day, summed up: what was asked, what ran, what is still stuck, and every work published to a community showcase. A day with nothing in it gets no digest. This is what the emailed summary will carry.
+
+- if @notices.any?
+  - @notices.each do |notice|
+    = render 'admin/ledger/digest_day', notice: notice
+  = paginate @notices
+- else
+  .admin-registry__empty
+    %i.fa-solid.fa-book.admin-registry__empty-icon{'aria-hidden' => 'true'}
+    %p.mb-1.fw-semibold.text-body No digests yet
+    %p.mb-0.small.text-muted
+      A digest is written each morning for the day before, whenever there was something to report.

@@ -21,11 +21,14 @@ class AdminNotice < ApplicationRecord
 
   # What the repository did on its own account.
   ACTIVITY_KINDS = %w[load_report work_completion_mismatch visibility_cascade
-                      set_reindex showcase_promotion daily_digest].freeze
+                      set_reindex showcase_promotion].freeze
 
-  KINDS = (REQUEST_KINDS + ACTIVITY_KINDS).freeze
-
+  # A whole day, summed up. Its own family because it is a different size of
+  # thing: every other row is one event, and a page-sized summary among them
+  # buries them and reads badly itself.
   DIGEST = 'daily_digest'
+
+  KINDS = (REQUEST_KINDS + ACTIVITY_KINDS + [DIGEST]).freeze
 
   validates :kind, inclusion: { in: KINDS }
   validates :subject, presence: true
@@ -38,10 +41,15 @@ class AdminNotice < ApplicationRecord
   before_validation :default_occurred_on
 
   scope :newest_first, -> { order(created_at: :desc) }
+  # Digests are ordered by the day they are about, not the moment they were
+  # written: a re-run, or a backfill of several days at once, must not shuffle
+  # them out of calendar order.
+  scope :by_day,       -> { order(occurred_on: :desc, created_at: :desc) }
   scope :oldest_first, -> { order(created_at: :asc) }
   scope :on_day,       ->(day) { where(occurred_on: day) }
   scope :requests,     -> { where(kind: REQUEST_KINDS) }
-  scope :activity,     -> { where.not(kind: REQUEST_KINDS) }
+  scope :activity,     -> { where(kind: ACTIVITY_KINDS) }
+  scope :digests,      -> { where(kind: DIGEST) }
   # An unknown filter value falls through to everything rather than to nothing,
   # so a hand-typed query string cannot render an empty page with no explanation.
   scope :of_kind,      ->(kind) { KINDS.include?(kind.to_s) ? where(kind: kind) : all }

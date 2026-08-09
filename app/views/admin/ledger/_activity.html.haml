@@ -4,7 +4,7 @@
 -# case statement — the same dispatch the audit log uses.
 .p-3
   %p.text-muted.small.mb-0
-    What the repository did — loads, visibility changes, reindexes, and every work published to a community showcase. The daily digest sums each day up, and is what the emailed summary will carry.
+    What the repository did — loads, visibility changes, reindexes, and every work published to a community showcase. One row per event; the Digests tab sums each day up.
 
 %nav.px-3.pb-2{'aria-label' => 'Activity kind'}
   = link_to 'All', admin_ledger_path(tab: 'activity'),

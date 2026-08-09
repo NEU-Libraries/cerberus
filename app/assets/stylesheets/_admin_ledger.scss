@@ -24,7 +24,10 @@ $ledger-tone-load:     #0e8a7a;
 $ledger-tone-showcase: #4e8a5f;
 $ledger-tone-cascade:  #2666a6;
 $ledger-tone-reindex:  #6c757d;
-$ledger-tone-breach:   #a73a31;
+// Something did not happen and needs a person — an incomplete load, or a
+// showcase publication that was refused. The audit log's tombstone brick,
+// which is as loud as this register gets.
+$ledger-tone-attention: #a73a31;
 // The digest's own tone: a slate ink that sits in the arc none of the
 // audit tones occupy, so a day's closing entry is never confused with
 // one of the events inside it.
@@ -77,9 +80,8 @@ $ledger-tone-digest:   #54687a;
   &--showcase_promotion       { --ledger-tone: #{$ledger-tone-showcase}; }
   &--visibility_cascade       { --ledger-tone: #{$ledger-tone-cascade}; }
   &--set_reindex              { --ledger-tone: #{$ledger-tone-reindex}; }
-  &--work_completion_mismatch { --ledger-tone: #{$ledger-tone-breach}; }
-  &--refused                  { --ledger-tone: #{$ledger-tone-breach}; }
-  &--daily_digest             { --ledger-tone: #{$ledger-tone-digest}; }
+  &--work_completion_mismatch { --ledger-tone: #{$ledger-tone-attention}; }
+  &--refused                  { --ledger-tone: #{$ledger-tone-attention}; }
 }
 
 // Chip — same soft-badge construction as the audit action chip: the
@@ -125,7 +127,7 @@ $ledger-tone-digest:   #54687a;
 
 .ledger-refused {
   font-weight: 600;
-  color: $ledger-tone-breach;
+  color: $ledger-tone-attention;
   margin-right: 0.3rem;
 }
 
@@ -151,23 +153,18 @@ $ledger-tone-digest:   #54687a;
 }
 
 // ---------------------------------------------------------------------
-// The daily digest — the one row in the activity table that is not a
-// line. Every other notice is a single event; a digest is a whole day,
-// so it spans the table as a ruled block instead. The eye finds it
-// because it is shaped differently, not because it is brighter, which
-// is how a ledger has always marked the end of a day.
+// A day's digest — its own tab, one day per page.
+//
+// It began as a block spanning the activity table, which was wrong twice
+// over: page-sized summaries buried the one-line events around them, and
+// a summary read badly inside a table whose columns did not apply to it.
+// A digest is a different size of thing from an event, so it gets a page
+// of its own and the paginator walks back a day at a time.
 // ---------------------------------------------------------------------
-.ledger-digest-cell {
-  padding: 0 !important;
-
-  &::before { display: none; } // the block is its own signal; no rail
-}
-
 .ledger-digest {
   padding: 1rem 1.25rem 1.25rem;
   background-color: #fbfcfd;
   border-top: 1px solid $gray-300;
-  border-bottom: 1px solid $gray-300;
 
   &__rule {
     display: flex;
@@ -231,7 +228,7 @@ $ledger-tone-digest:   #54687a;
     padding-left: 0.75rem;
     border-left: 2px solid $gray-300;
 
-    &--refused { border-left-color: $ledger-tone-breach; }
+    &--refused { border-left-color: $ledger-tone-attention; }
   }
 
   &__group-label {

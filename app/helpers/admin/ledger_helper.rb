@@ -12,7 +12,10 @@ module Admin
       'request_move'             => { label: 'Move',       icon: 'fa-folder-open' },
       'request_restrict'         => { label: 'Restrict',   icon: 'fa-lock' },
       'load_report'              => { label: 'Load',       icon: 'fa-file-import' },
-      'work_completion_mismatch' => { label: 'Breach',     icon: 'fa-triangle-exclamation' },
+      # "Incomplete" rather than anything stronger: the work is short some pages
+      # and needs a person, which is what incomplete_bsi and the triage list
+      # already call this condition. Nothing here is a security matter.
+      'work_completion_mismatch' => { label: 'Incomplete', icon: 'fa-triangle-exclamation' },
       'visibility_cascade'       => { label: 'Visibility', icon: 'fa-eye-slash' },
       'set_reindex'              => { label: 'Reindex',    icon: 'fa-arrows-rotate' },
       'showcase_promotion'       => { label: 'Showcase',   icon: 'fa-star' },
