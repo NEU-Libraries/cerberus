@@ -3,12 +3,12 @@
 # "Ask DRS staff to restrict this" on a Collection or Community edit page.
 #
 # Following WorkChangeRequest's model rather than inventing approval machinery:
-# a request is a StaffRequest row, which the fulfiller answers with the ordinary
-# tools. Kept as a sibling of that concern instead of generalising it — the two
-# differ in resource, verb, fulfiller and remedy, so folding them together would
-# parameterise more than it shares.
+# a request is one write-once ledger row, which the fulfiller answers with the
+# ordinary tools. Kept as a sibling of that concern instead of generalising it —
+# the two differ in resource, verb, fulfiller and remedy, so folding them
+# together would parameterise more than it shares.
 #
-# Only the :admin role may run a cascade, so StaffRequest marks this kind
+# Only the :admin role may run a cascade, so the ledger marks this kind
 # admin-only. A staff-group editor is precisely who the affordance exists for,
 # which is why asking them to do it themselves would be a loop.
 module ContainerRestrictionRequest
@@ -20,7 +20,7 @@ module ContainerRestrictionRequest
 
     deliver_restriction_request(note)
     redirect_to container_show_path,
-                notice: 'Your request has been sent to DRS administrators — they will follow up in your inbox.'
+                notice: 'Your request has been sent to DRS administrators — they will be in touch.'
   end
 
   private
@@ -44,13 +44,12 @@ module ContainerRestrictionRequest
     # work out for themselves.
     def deliver_restriction_request(note)
       container = AtlasRb.const_get(container_klass).find(params[:id])
-      StaffRequest.create!(
-        kind:           'restrict',
-        subject_type:   container_klass,
-        subject_noid:   params[:id],
-        subject_title:  container.title,
-        requester_nuid: attributed_nuid,
-        note:           note
+      AdminNotice.create!(
+        kind:         'request_restrict',
+        subject:      %(Request to restrict “#{container.title}”),
+        actor_nuid:   attributed_nuid,
+        subject_noid: params[:id],
+        payload:      { subject_type: container_klass, subject_title: container.title, note: note }
       )
     end
 end

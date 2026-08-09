@@ -195,26 +195,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_09_000002) do
     t.index ["updated_at"], name: "index_sessions_on_updated_at"
   end
 
-  create_table "staff_requests", force: :cascade do |t|
-    t.datetime "claimed_at"
-    t.string "claimed_by_nuid"
-    t.datetime "created_at", null: false
-    t.string "kind", null: false
-    t.text "note"
-    t.string "requester_nuid", null: false
-    t.string "resolution"
-    t.text "resolution_note"
-    t.datetime "resolved_at"
-    t.string "resolved_by_nuid"
-    t.string "status", default: "open", null: false
-    t.string "subject_noid", null: false
-    t.string "subject_title"
-    t.string "subject_type", null: false
-    t.datetime "updated_at", null: false
-    t.index ["status", "created_at"], name: "index_staff_requests_on_status_and_created_at"
-    t.index ["subject_noid"], name: "index_staff_requests_on_subject_noid"
-  end
-
   create_table "user_agents", id: false, force: :cascade do |t|
     t.datetime "classified_at"
     t.boolean "is_bot", default: false, null: false

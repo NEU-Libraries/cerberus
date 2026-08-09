@@ -6,8 +6,6 @@
     %span.admin-registry__title
       %i.fa-solid.fa-list-check{'aria-hidden' => 'true'}
       Requests & activity
-      - if @open_count.positive?
-        %span.admin-registry__count= pluralize(@open_count, 'open request')
     .admin-registry__head-actions
       %span.admin-registry__subtitle
         - if current_user&.admin?
@@ -18,16 +16,14 @@
           Delegated admin access
 
   -# Plain links, not JS tabs — the same idiom deposit triage uses, so each list
-  -# is its own GET and keeps its own paging.
+  -# is its own GET and keeps its own paging. Both tabs read one table; the tab
+  -# is a filter on kind.
   %nav.px-3.pt-3{'aria-label' => 'Ledger section'}
     %ul.nav.nav-tabs
       - Admin::LedgerController::TABS.each do |tab, label|
         - active = tab == @tab
         %li.nav-item
-          = link_to admin_ledger_path(tab: tab), class: "nav-link#{' active' if active}",
-            'aria-current': ('page' if active) do
-            = label
-            - if tab == 'requests' && @open_count.positive?
-              %span.badge.text-bg-secondary.ms-1= @open_count
+          = link_to label, admin_ledger_path(tab: tab), class: "nav-link#{' active' if active}",
+            'aria-current': ('page' if active)
 
   = render "admin/ledger/#{@tab}"

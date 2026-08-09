@@ -1,0 +1,19 @@
+-# One request. It carries the note the depositor wrote, and a link to the tool
+-# that fulfils it — never the remedy itself, which is gated on its own surface.
+- remedy_path, remedy_label = ledger_remedy(notice)
+- admin_only = ledger_admin_only?(notice)
+%tr.ledger-row{class: "ledger-row--#{ledger_notice_tone(notice)}"}
+  %td.text-nowrap= ledger_timestamp(notice.created_at)
+  %td= ledger_kind_chip(notice)
+  %td
+    = ledger_request_subject(notice)
+    %span.ledger-type= notice.detail(:subject_type)
+    - if notice.detail(:note).present?
+      %p.ledger-detail.mb-0= notice.detail(:note)
+    - if (remedy_note = ledger_remedy_note(notice))
+      %p.ledger-detail.mb-0= remedy_note
+    - if admin_only && !current_user&.admin?
+      %span.ledger-note An administrator has to do this one — only they can run a visibility cascade.
+    - elsif remedy_path
+      = link_to remedy_label, remedy_path, class: 'ledger-link'
+  %td= audit_event_actor(notice.actor_nuid)

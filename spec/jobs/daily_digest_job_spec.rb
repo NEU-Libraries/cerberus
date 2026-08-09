@@ -13,24 +13,21 @@ RSpec.describe DailyDigestJob do
       .and_return(instance_double(Blacklight::Solr::Response, total: 3))
   end
 
-  def notice_on(day, kind:, **payload)
-    AdminNotice.create!(kind: kind, subject: 'x', occurred_on: day, payload: payload)
+  # A request kind needs an actor and a subject; an activity kind needs neither.
+  def notice_on(day, kind:, actor: nil, **payload)
+    AdminNotice.create!(kind: kind, subject: 'x', occurred_on: day, actor_nuid: actor,
+                        subject_noid: ('x1' if actor), payload: payload)
   end
 
   describe 'the counts' do
-    it 'counts the requests opened and resolved on the day, and everything still open' do
-      StaffRequest.create!(kind: 'withdraw', subject_type: 'Work', subject_noid: 'w1',
-                           requester_nuid: '000000010', created_at: day.midday)
-      resolved = StaffRequest.create!(kind: 'move', subject_type: 'Work', subject_noid: 'w2',
-                                      requester_nuid: '000000010', created_at: day.midday)
-      resolved.update!(status: 'resolved', resolved_at: day.midday)
+    it 'counts the requests made on the day, and not those made on another' do
+      notice_on(day, kind: 'request_withdraw', actor: '000000010')
+      notice_on(day, kind: 'request_move', actor: '000000010')
+      notice_on(day - 1, kind: 'request_restrict', actor: '000000010')
 
       described_class.perform_now(day)
 
-      counts = AdminNotice.find_by(kind: 'daily_digest').detail(:counts)
-      expect(counts['requests_opened']).to eq(2)
-      expect(counts['requests_resolved']).to eq(1)
-      expect(counts['requests_open']).to eq(1)
+      expect(AdminNotice.find_by(kind: 'daily_digest').detail(:counts)['requests_made']).to eq(2)
     end
 
     it 'counts the cascades and reindexes recorded that day' do

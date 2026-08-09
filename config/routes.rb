@@ -208,21 +208,12 @@ Rails.application.routes.draw do
     # points at is gated on its own surface.
     get 'deposit_triage', to: 'deposit_triage#index', as: :deposit_triage
 
-    # The ledger — `?tab=requests` (the shared staff-request queue) and
-    # `?tab=activity` (the write-once record of what the repository did). Two
-    # tabs on one surface, like deposit triage, because they are read together.
-    #
-    # A request is a resource in its own right: the ledger lists, and
-    # StaffRequestsController owns the row. Neither carries a remedy — every one
-    # of those already exists elsewhere and is gated there.
+    # The ledger — `?tab=requests` (what depositors asked staff to do) and
+    # `?tab=activity` (what the repository did). Two tabs on one surface, like
+    # deposit triage, because they are read together; both are a filter on
+    # AdminNotice#kind. Read-only: every remedy a row points at already exists
+    # elsewhere and is gated there.
     get 'ledger', to: 'ledger#index'
-    resources :staff_requests, only: %i[show], path: 'requests' do
-      member do
-        post   :claim
-        delete :unclaim
-        post   :resolve
-      end
-    end
 
     # Restore a withdrawal — a registry of every tombstoned Work / Collection /
     # Community, each with a Restore action (reverses the show-page tombstone via

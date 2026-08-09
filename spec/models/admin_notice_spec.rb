@@ -11,6 +11,32 @@ RSpec.describe AdminNotice, type: :model do
     it 'requires a subject' do
       expect(described_class.new(kind: 'set_reindex')).not_to be_valid
     end
+
+    # One table means these cannot be NOT NULL columns, so a request kind
+    # carries the constraint in the model instead.
+    it 'requires an actor and a subject noid on a request kind only' do
+      expect(described_class.new(kind: 'request_withdraw', subject: 'x')).not_to be_valid
+      expect(described_class.new(kind: 'request_withdraw', subject: 'x',
+                                 actor_nuid: '000000010', subject_noid: 'w1')).to be_valid
+      expect(described_class.new(kind: 'set_reindex', subject: 'x')).to be_valid
+    end
+  end
+
+  describe 'the two families' do
+    it 'splits requests from activity, and each scope excludes the other' do
+      request = described_class.create!(kind: 'request_move', subject: 'x',
+                                        actor_nuid: '000000010', subject_noid: 'w1')
+      event = described_class.create!(kind: 'set_reindex', subject: 'y')
+
+      expect(described_class.requests.to_a).to eq([request])
+      expect(described_class.activity.to_a).to eq([event])
+      expect(request).to be_request
+      expect(event).not_to be_request
+    end
+
+    it 'reads the verb out of a request kind' do
+      expect(described_class.new(kind: 'request_withdraw').request_action).to eq('withdraw')
+    end
   end
 
   describe 'occurred_on' do

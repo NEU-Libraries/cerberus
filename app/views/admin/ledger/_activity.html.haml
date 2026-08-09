@@ -10,9 +10,9 @@
   = link_to 'All', admin_ledger_path(tab: 'activity'),
     class: "btn btn-sm me-1 #{@kind.blank? ? 'btn-secondary' : 'btn-outline-secondary'}",
     'aria-current': ('page' if @kind.blank?)
-  - Admin::LedgerHelper::NOTICE_KINDS.each do |kind, descriptor|
+  - AdminNotice::ACTIVITY_KINDS.each do |kind|
     - current = kind == @kind
-    = link_to descriptor[:label], admin_ledger_path(tab: 'activity', kind: kind),
+    = link_to Admin::LedgerHelper::KINDS.dig(kind, :label), admin_ledger_path(tab: 'activity', kind: kind),
       class: "btn btn-sm me-1 #{current ? 'btn-secondary' : 'btn-outline-secondary'}",
       'aria-current': ('page' if current)
 

@@ -21,9 +21,11 @@ RSpec.describe 'Admin ledger', type: :request do
              groups: [Permissions::STAFF_EDIT_GROUP])
   end
 
-  let!(:open_request) do
-    StaffRequest.create!(kind: 'withdraw', subject_type: 'Work', subject_noid: 'w1',
-                         subject_title: 'thesis.pdf', requester_nuid: '000000010')
+  let!(:withdrawal) do
+    AdminNotice.create!(kind: 'request_withdraw', subject: 'Request to withdraw “thesis.pdf”',
+                        actor_nuid: '000000010', subject_noid: 'w1',
+                        payload: { subject_type: 'Work', subject_title: 'thesis.pdf',
+                                   note: 'No longer authoritative.' })
   end
 
   describe 'the authorization gate' do
@@ -54,26 +56,41 @@ RSpec.describe 'Admin ledger', type: :request do
   describe 'the requests tab' do
     before { sign_in admin }
 
-    it 'is the default tab and lists open requests' do
+    it 'is the default tab, and lists the request with its note and remedy' do
       get admin_ledger_path
+
       expect(response.body).to include('thesis.pdf')
-      expect(response.body).to include('Requests')
+      expect(response.body).to include('No longer authoritative.')
+      expect(response.body).to include('Open the work to withdraw it')
     end
 
-    it 'hides a resolved request from the open list, and shows it under Resolved' do
-      open_request.resolve!(nuid: '000000004')
+    # Narrowing a community does not cascade, so whoever fulfils it has to be
+    # told the route or the request is unanswerable.
+    it 'carries the community remedy on a community restriction' do
+      AdminNotice.create!(kind: 'request_restrict', subject: 'Request to restrict “Archives”',
+                          actor_nuid: '000000010', subject_noid: 'm1',
+                          payload: { subject_type: 'Community', subject_title: 'Archives' })
 
       get admin_ledger_path
-      expect(response.body).not_to include('thesis.pdf')
 
-      get admin_ledger_path(tab: 'requests', status: 'resolved')
-      expect(response.body).to include('thesis.pdf')
+      expect(response.body).to include('Restrict each collection within it first')
     end
 
     # An unknown filter shows everything rather than an unexplained empty page.
-    it 'falls through to every request on an unknown status' do
-      get admin_ledger_path(tab: 'requests', status: 'nonsense')
+    it 'falls through to every request on an unknown kind' do
+      get admin_ledger_path(tab: 'requests', kind: 'nonsense')
       expect(response.body).to include('thesis.pdf')
+    end
+
+    # The two tabs are one table split by kind, so neither may leak the other.
+    it 'keeps activity off the requests tab and requests off the activity tab' do
+      AdminNotice.create!(kind: 'set_reindex', subject: 'Set reindex finished', subject_noid: 's1')
+
+      get admin_ledger_path(tab: 'requests')
+      expect(response.body).not_to include('Set reindex finished')
+
+      get admin_ledger_path(tab: 'activity')
+      expect(response.body).not_to include('thesis.pdf')
     end
   end
 
@@ -121,7 +138,7 @@ RSpec.describe 'Admin ledger', type: :request do
     it 'renders a digest as its own block, grouped by community and genre' do
       AdminNotice.create!(
         kind: 'daily_digest', subject: 'Daily digest', occurred_on: Time.zone.today,
-        payload: { counts:    { 'requests_opened' => 2, 'loads_run' => 1 },
+        payload: { counts:    { 'requests_made' => 2, 'loads_run' => 1 },
                    showcases: { 'promoted' => 1, 'refused' => 0, 'truncated' => 0,
                                 'entries' => [{ 'community' => 'Marine Science', 'genre' => 'Datasets',
                                                 'title' => 'reef-survey.csv', 'nuid' => '000000010',

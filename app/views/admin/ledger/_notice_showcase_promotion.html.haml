@@ -8,7 +8,7 @@
 - refused = notice.detail(:outcome) == 'refused'
 %tr.ledger-row{class: "ledger-row--#{ledger_notice_tone(notice)}"}
   %td.text-nowrap= ledger_timestamp(notice.created_at)
-  %td= ledger_notice_kind_chip(notice)
+  %td= ledger_kind_chip(notice)
   %td
     .ledger-subject
       - if (path = ledger_notice_link(notice))

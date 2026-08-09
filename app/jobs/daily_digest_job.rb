@@ -36,11 +36,7 @@ class DailyDigestJob < ApplicationJob
 
     def counts_for(day)
       {
-        requests_opened:      StaffRequest.opened_on(day).count,
-        requests_resolved:    StaffRequest.resolved_on(day).count,
-        # A running total, not a figure for the day: what is still waiting is
-        # the number somebody acts on.
-        requests_open:        StaffRequest.unresolved.count,
+        requests_made:        AdminNotice.requests.on_day(day).count,
         loads_run:            LoadReport.where(finished_at: day.all_day).count,
         loads_failed:         LoadReport.failed.where(finished_at: day.all_day).count,
         cascades:             AdminNotice.of_kind('visibility_cascade').on_day(day).count,

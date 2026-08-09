@@ -44,7 +44,7 @@
   #move.tab-pane{"aria-labelledby" => "move-tab", role: "tabpanel"}
     .py-2.px-1
       %p.text-muted.small.mb-3
-        Ask the DRS staff to move this work to a different collection. Your request joins the staff queue — they will follow up with you in your inbox.
+        Ask the DRS staff to move this work to a different collection. They will be in touch.
       = form_with url: request_change_work_path(params[:id]), method: :post do
         = hidden_field_tag :request_action, "move"
         .well.p-3.my-3.rounded-3
@@ -58,7 +58,7 @@
   #delete.tab-pane{"aria-labelledby" => "delete-tab", role: "tabpanel"}
     .py-2.px-1
       %p.text-muted.small.mb-3
-        Ask the DRS staff to delete (withdraw) this work. Your request joins the staff queue — they will follow up with you in your inbox.
+        Ask the DRS staff to delete (withdraw) this work. They will be in touch.
       = form_with url: request_change_work_path(params[:id]), method: :post do
         = hidden_field_tag :request_action, "withdraw"
         .well.p-3.my-3.rounded-3

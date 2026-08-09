@@ -6,7 +6,7 @@ require 'rails_helper'
 # controller specs don't load Warden.
 #
 # Atlas is stubbed rather than seeded. The concern only reads a title and writes
-# a StaffRequest, so standing up real containers would cost two resources per
+# an AdminNotice, so standing up real containers would cost two resources per
 # example in the shared test store to prove nothing extra.
 RSpec.describe 'Container restriction requests', type: :request do
   include Devise::Test::IntegrationHelpers
@@ -31,35 +31,33 @@ RSpec.describe 'Container restriction requests', type: :request do
   end
 
   describe 'POST /collections/:id/request_restriction' do
-    it 'opens a restrict request on the ledger and says who asked for what' do
+    it 'records a restrict request and says who asked for what' do
       expect do
         post request_restriction_collection_path('c1'), params: { request_note: 'Archives staff only' }
-      end.to change(StaffRequest, :count).by(1)
+      end.to change(AdminNotice, :count).by(1)
 
-      request = StaffRequest.last
-      expect(request.kind).to eq('restrict')
-      expect(request.subject_type).to eq('Collection')
-      expect(request.subject_noid).to eq('c1')
-      expect(request.subject_title).to eq('Reading Room')
-      expect(request.requester_nuid).to eq(nuid)
-      expect(request.note).to eq('Archives staff only')
+      notice = AdminNotice.last
+      expect(notice.kind).to eq('request_restrict')
+      expect(notice).to be_request
+      expect(notice.subject_noid).to eq('c1')
+      expect(notice.actor_nuid).to eq(nuid)
+      expect(notice.detail(:subject_type)).to eq('Collection')
+      expect(notice.detail(:subject_title)).to eq('Reading Room')
+      expect(notice.detail(:note)).to eq('Archives staff only')
     end
 
-    # Only the :admin role may cascade, and the requester here IS staff, so a
-    # request the staff group could work would be a loop. The ledger marks the
-    # kind admin-only instead of addressing anybody.
-    it 'marks the row admin-only, and sends no inbox message' do
+    # Nothing is addressed to anybody. Staff read the ledger; the requester
+    # hears back off-site.
+    it 'sends no inbox message' do
       expect do
         post request_restriction_collection_path('c1'), params: { request_note: 'Archives staff only' }
       end.not_to change(Message, :count)
-
-      expect(StaffRequest.last).to be_admin_only
     end
 
-    it 'refuses an empty note rather than opening a blank request' do
+    it 'refuses an empty note rather than recording a blank request' do
       expect do
         post request_restriction_collection_path('c1'), params: { request_note: '  ' }
-      end.not_to change(StaffRequest, :count)
+      end.not_to change(AdminNotice, :count)
 
       expect(flash[:alert]).to include('Say who this should still be able to see')
     end
@@ -69,23 +67,8 @@ RSpec.describe 'Container restriction requests', type: :request do
     it 'names the community, not a collection' do
       post request_restriction_community_path('m1'), params: { request_note: 'nobody' }
 
-      expect(StaffRequest.last.subject_type).to eq('Community')
-      expect(StaffRequest.last.subject_title).to eq('Archives')
-    end
-
-    # A community restriction cannot be fulfilled in one action — no cascade
-    # exists for one — so the row has to carry the route or whoever works it is
-    # as stuck as the requester.
-    it 'carries the remedy that tells the administrator how to carry it out' do
-      post request_restriction_community_path('m1'), params: { request_note: 'nobody' }
-
-      expect(StaffRequest.last.remedy_note).to include('Restrict each collection within it first')
-    end
-
-    it 'carries no remedy for a collection, which cascades on its own' do
-      post request_restriction_collection_path('c1'), params: { request_note: 'nobody' }
-
-      expect(StaffRequest.last.remedy_note).to be_nil
+      expect(AdminNotice.last.detail(:subject_type)).to eq('Community')
+      expect(AdminNotice.last.detail(:subject_title)).to eq('Archives')
     end
   end
 end

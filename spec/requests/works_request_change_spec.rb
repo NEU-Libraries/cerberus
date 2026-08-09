@@ -6,8 +6,8 @@ require 'rails_helper'
 # Runs against the live Atlas test backend like the resource controller specs:
 # a real Work is created and a real edit ACL granted to the staff group, so the
 # authorize_resource_writes! gate (which reads Atlas permissions) is exercised
-# end-to-end. The request itself mutates nothing in Atlas — it creates a
-# Cerberus StaffRequest row on the admin ledger.
+# end-to-end. The request itself mutates nothing in Atlas — it writes one
+# AdminNotice row on the admin ledger.
 RSpec.describe 'Works request_change', type: :request do
   include Devise::Test::IntegrationHelpers
 
@@ -34,18 +34,18 @@ RSpec.describe 'Works request_change', type: :request do
   describe 'authorization' do
     # request_change is edit-gated (not the authn-gated create surface), so an
     # unauthenticated caller is a clean 403 — same as PATCH #update.
-    it 'forbids the unauthenticated and sends nothing' do
+    it 'forbids the unauthenticated and records nothing' do
       expect do
         post request_change_work_path(work.id), params: { request_action: 'withdraw' }
-      end.not_to change(StaffRequest, :count)
+      end.not_to change(AdminNotice, :count)
       expect(response).to have_http_status(:forbidden)
     end
 
-    it 'forbids an authenticated non-editor and sends nothing' do
+    it 'forbids an authenticated non-editor and records nothing' do
       sign_in outsider
       expect do
         post request_change_work_path(work.id), params: { request_action: 'withdraw' }
-      end.not_to change(StaffRequest, :count)
+      end.not_to change(AdminNotice, :count)
       expect(response).to have_http_status(:forbidden)
     end
   end
@@ -53,53 +53,52 @@ RSpec.describe 'Works request_change', type: :request do
   describe 'as an in-group editor' do
     before { sign_in editor }
 
-    it 'opens a withdraw request on the ledger, snapshotting the title' do
+    it 'records a withdraw request, snapshotting the title' do
       expect do
         post request_change_work_path(work.id), params: { request_action: 'withdraw', request_note: 'No longer authoritative.' }
-      end.to change(StaffRequest, :count).by(1)
+      end.to change(AdminNotice, :count).by(1)
 
-      request = StaffRequest.last
-      expect(request.kind).to eq('withdraw')
-      expect(request.status).to eq('open')
-      expect(request.subject_type).to eq('Work')
-      expect(request.subject_noid).to eq(work.id)
-      expect(request.subject_title).to be_present
-      expect(request.requester_nuid).to eq('000000002')
-      expect(request.note).to eq('No longer authoritative.')
-      expect(request).not_to be_admin_only
+      notice = AdminNotice.last
+      expect(notice.kind).to eq('request_withdraw')
+      expect(notice).to be_request
+      expect(notice.subject_noid).to eq(work.id)
+      expect(notice.actor_nuid).to eq('000000002')
+      expect(notice.detail(:subject_type)).to eq('Work')
+      expect(notice.detail(:subject_title)).to be_present
+      expect(notice.detail(:note)).to eq('No longer authoritative.')
       expect(response).to redirect_to(work_path(work.id))
       expect(flash[:notice]).to include('DRS staff')
     end
 
-    # No group-addressed message: fulfilling a request is shared work, and a
-    # message is dismissed per person.
+    # Nothing is addressed to anybody: staff read the ledger, and reply to the
+    # depositor off-site.
     it 'sends no inbox message' do
       expect do
         post request_change_work_path(work.id), params: { request_action: 'withdraw' }
       end.not_to change(Message, :count)
     end
 
-    it 'opens a move request carrying the destination' do
+    it 'records a move request carrying the destination' do
       expect do
         post request_change_work_path(work.id), params: { request_action: 'move', request_note: 'Engineering Theses collection' }
-      end.to change(StaffRequest, :count).by(1)
+      end.to change(AdminNotice, :count).by(1)
 
-      expect(StaffRequest.last.kind).to eq('move')
-      expect(StaffRequest.last.note).to eq('Engineering Theses collection')
+      expect(AdminNotice.last.kind).to eq('request_move')
+      expect(AdminNotice.last.detail(:note)).to eq('Engineering Theses collection')
     end
 
-    it 'rejects a move with no destination and sends nothing' do
+    it 'rejects a move with no destination and records nothing' do
       expect do
         post request_change_work_path(work.id), params: { request_action: 'move', request_note: '' }
-      end.not_to change(StaffRequest, :count)
+      end.not_to change(AdminNotice, :count)
       expect(response).to redirect_to(edit_work_path(work.id))
       expect(flash[:alert]).to include('where this work should move to')
     end
 
-    it 'rejects an unknown request action and sends nothing' do
+    it 'rejects an unknown request action and records nothing' do
       expect do
         post request_change_work_path(work.id), params: { request_action: 'destroy_everything' }
-      end.not_to change(StaffRequest, :count)
+      end.not_to change(AdminNotice, :count)
       expect(flash[:alert]).to include('withdrawal or a move')
     end
   end

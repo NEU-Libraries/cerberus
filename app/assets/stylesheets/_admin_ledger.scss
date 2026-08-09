@@ -3,22 +3,20 @@
 //
 // Same archival register as audit-history and admin-registry: quiet
 // card-shell, uppercase microcopy headers, monospace identifier chips,
-// one tone per row carried by a left rail. Two tone vocabularies,
-// because the two tabs signal different things — a request is toned by
-// its *state* (what is outstanding), a notice by its *kind* (what
-// happened). Both are driven by --ledger-tone, so adding either is one
-// map entry here and one class on the row.
+// one tone per row carried by a left rail. Every row is toned by its
+// kind through --ledger-tone, so adding a kind is one map entry here and
+// one class on the row.
 // ---------------------------------------------------------------------
 
 $ledger-rail-width: 4px;
 
-// Request state. "Resolved" is deliberately drained of colour rather
-// than green: this surface exists to show what is still outstanding, so
-// a finished request should recede and let the open ones carry the eye.
-// Green would make a worked-through queue read as celebratory.
-$ledger-tone-open:     #c46410;
-$ledger-tone-claimed:  #2666a6;
-$ledger-tone-resolved: #adb5bd;
+// Requests, toned by what they ask for. Withdraw borrows the audit log's
+// tombstone brick, because it is the same act asked for rather than
+// done; move takes the ochre the triage card uses for "waiting on
+// somebody"; restrict the violet that already means a permission.
+$ledger-tone-withdraw: #a73a31;
+$ledger-tone-move:     #8a6a1f;
+$ledger-tone-restrict: #7a5c84;
 
 // Activity kinds. Borrowed from the audit-history tones so the two
 // ledgers speak one colour language — a link is the same green in both.
@@ -64,17 +62,16 @@ $ledger-tone-digest:   #54687a;
     }
   }
 
-  // Hover belongs to the request table, whose rows open something. The
-  // activity table is read-only, so a hover tint there would promise an
-  // affordance that is not present.
+  // Subtle warm hover, as on the audit table: a reading aid across a dense
+  // list, not a promise that the row is clickable. Neither tab has a
+  // clickable row — every action is an explicit link inside a cell.
   tbody tr:hover td { background-color: #fbf9f4; }
-  &--activity tbody tr:hover td { background-color: transparent; }
 }
 
 .ledger-row {
-  &--open       { --ledger-tone: #{$ledger-tone-open}; }
-  &--claimed    { --ledger-tone: #{$ledger-tone-claimed}; }
-  &--resolved   { --ledger-tone: #{$ledger-tone-resolved}; }
+  &--request_withdraw { --ledger-tone: #{$ledger-tone-withdraw}; }
+  &--request_move     { --ledger-tone: #{$ledger-tone-move}; }
+  &--request_restrict { --ledger-tone: #{$ledger-tone-restrict}; }
 
   &--load_report              { --ledger-tone: #{$ledger-tone-load}; }
   &--showcase_promotion       { --ledger-tone: #{$ledger-tone-showcase}; }
@@ -83,10 +80,6 @@ $ledger-tone-digest:   #54687a;
   &--work_completion_mismatch { --ledger-tone: #{$ledger-tone-breach}; }
   &--refused                  { --ledger-tone: #{$ledger-tone-breach}; }
   &--daily_digest             { --ledger-tone: #{$ledger-tone-digest}; }
-
-  // A resolved request is history, not work. Fading it keeps it findable
-  // under the Resolved filter without competing in the default view.
-  &--resolved td { opacity: 0.72; }
 }
 
 // Chip — same soft-badge construction as the audit action chip: the
@@ -106,15 +99,6 @@ $ledger-tone-digest:   #54687a;
   border: 1px solid color-mix(in srgb, var(--ledger-tone, #{$gray-700}) 28%, white);
 
   .fa-solid { font-size: 0.85em; }
-}
-
-// A status chip inside a row inherits --ledger-tone from the row. On the
-// request page it stands alone in the header strip, with no row above it,
-// so it carries its own tone.
-.ledger-status {
-  &--open     { --ledger-tone: #{$ledger-tone-open}; }
-  &--claimed  { --ledger-tone: #{$ledger-tone-claimed}; }
-  &--resolved { --ledger-tone: #{$ledger-tone-resolved}; }
 }
 
 .ledger-subject {
@@ -164,32 +148,6 @@ $ledger-tone-digest:   #54687a;
   font-size: 0.82rem;
   color: $gray-600;
   font-variant-numeric: tabular-nums;
-}
-
-// Request show page — label/value pairs, not a table.
-.ledger-facts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-  gap: 1rem 1.5rem;
-  margin: 0;
-
-  dt {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 600;
-    color: $gray-500;
-    margin-bottom: 0.2rem;
-  }
-  dd { margin: 0; }
-}
-
-.ledger-remedy-note {
-  padding: 0.75rem 1rem;
-  border-left: $ledger-rail-width solid $ledger-tone-cascade;
-  background-color: color-mix(in srgb, #{$ledger-tone-cascade} 6%, white);
-  font-size: 0.88rem;
-  color: $gray-700;
 }
 
 // ---------------------------------------------------------------------

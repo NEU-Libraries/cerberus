@@ -4,17 +4,13 @@ module Admin
   # Formatting for the ledger. Identifier chips and actor cells come straight
   # from AuditEventsHelper so a NUID reads the same on every surface.
   #
-  # Two tone vocabularies, each driven by a CSS custom property the row sets:
-  # a request is toned by its *state* (what is outstanding), a notice by its
-  # *kind* (what happened). Adding either is one map entry and one CSS line.
+  # One tone per row, carried by --ledger-tone. Adding a kind is one map entry
+  # here and one CSS line.
   module LedgerHelper
-    REQUEST_KINDS = {
-      'withdraw' => { label: 'Withdraw', icon: 'fa-trash-can' },
-      'move'     => { label: 'Move',     icon: 'fa-folder-open' },
-      'restrict' => { label: 'Restrict', icon: 'fa-lock' }
-    }.freeze
-
-    NOTICE_KINDS = {
+    KINDS = {
+      'request_withdraw'         => { label: 'Withdraw',   icon: 'fa-trash-can' },
+      'request_move'             => { label: 'Move',       icon: 'fa-folder-open' },
+      'request_restrict'         => { label: 'Restrict',   icon: 'fa-lock' },
       'load_report'              => { label: 'Load',       icon: 'fa-file-import' },
       'work_completion_mismatch' => { label: 'Breach',     icon: 'fa-triangle-exclamation' },
       'visibility_cascade'       => { label: 'Visibility', icon: 'fa-eye-slash' },
@@ -31,22 +27,19 @@ module Admin
       'atlas_forbidden'   => 'Atlas refused the link. The showcase may not be marked featured.'
     }.freeze
 
-    def ledger_status_chip(request)
-      tag.span(class: "ledger-chip ledger-chip--status ledger-status--#{request.status}") do
-        safe_join([tag.i(class: "fa-solid #{status_icon(request.status)}", 'aria-hidden': 'true'),
-                   request.status.capitalize])
-      end
-    end
+    # Narrowing a community does not cascade, and no form offers it — so
+    # whoever fulfils the request has to be told the route, or the request is
+    # unanswerable. Restricting each collection inside cascades (and confirms)
+    # on its own, which is why that is the way rather than a community sweep.
+    COMMUNITY_REMEDY = 'Restricting a community does not reach what is inside it. Restrict each collection ' \
+                       'within it first — each of those cascades to its own contents — then the community.'
 
-    def ledger_kind_chip(kind, map)
-      descriptor = map.fetch(kind, { label: kind.to_s.humanize, icon: 'fa-circle-dot' })
+    def ledger_kind_chip(notice)
+      descriptor = KINDS.fetch(notice.kind, { label: notice.kind.to_s.humanize, icon: 'fa-circle-dot' })
       tag.span(class: 'ledger-chip') do
         safe_join([tag.i(class: "fa-solid #{descriptor[:icon]}", 'aria-hidden': 'true'), descriptor[:label]])
       end
     end
-
-    def ledger_request_kind_chip(request) = ledger_kind_chip(request.kind, REQUEST_KINDS)
-    def ledger_notice_kind_chip(notice)   = ledger_kind_chip(notice.kind, NOTICE_KINDS)
 
     # A refusal is a failure, not an association, so it takes the breach tone
     # rather than the showcase one. Everything else is toned by kind alone.
@@ -56,33 +49,37 @@ module Admin
       notice.kind
     end
 
-    def ledger_age(time)
-      return tag.span('—', class: 'text-muted') if time.blank?
-
-      tag.time("#{time_ago_in_words(time)} ago", datetime: time.iso8601, class: 'ledger-age')
-    end
-
     def ledger_timestamp(time)
       tag.time(time.strftime('%b %-d, %Y · %H:%M'), datetime: time.iso8601, class: 'ledger-age')
     end
 
     # The object a request is about. Falls back to plain text when the row
     # names a type with no show page.
-    def ledger_subject_link(request)
-      label = request.subject_title.presence || request.subject_noid
-      path = resource_path_for(request.subject_type, request.subject_noid)
+    def ledger_request_subject(notice)
+      label = notice.detail(:subject_title).presence || notice.subject_noid
+      path = resource_path_for(notice.detail(:subject_type), notice.subject_noid)
       path ? link_to(label, path, class: 'ledger-subject') : tag.span(label, class: 'ledger-subject')
     end
 
     # Where the request is actually fulfilled. Each of these already exists and
     # is gated where it lives, which is why the ledger only points at them.
-    def ledger_remedy(request)
-      case request.kind
-      when 'withdraw' then [resource_path_for('Work', request.subject_noid), 'Open the work to withdraw it']
-      when 'move'     then [admin_reparent_path, 'Open the re-parent finder']
-      when 'restrict' then [edit_path_for(request.subject_type, request.subject_noid), 'Open its permissions']
+    def ledger_remedy(notice)
+      case notice.kind
+      when 'request_withdraw' then [resource_path_for('Work', notice.subject_noid), 'Open the work to withdraw it']
+      when 'request_move'     then [admin_reparent_path, 'Open the re-parent finder']
+      when 'request_restrict' then [edit_path_for(notice.detail(:subject_type), notice.subject_noid),
+                                    'Open its permissions']
       end
     end
+
+    # Guidance the fulfiller needs and cannot infer from the row, or nil.
+    def ledger_remedy_note(notice)
+      COMMUNITY_REMEDY if notice.kind == 'request_restrict' && notice.detail(:subject_type) == 'Community'
+    end
+
+    # Only :admin may run a visibility cascade, so only :admin can fulfil a
+    # restriction. The devolved-admin tier sees the row and is told as much.
+    def ledger_admin_only?(notice) = notice.kind == 'request_restrict'
 
     # Built from the payload's parts, never from a stored link: the same row has
     # to render as an in-app path here and as an absolute URL in a future mail.
@@ -100,11 +97,6 @@ module Admin
     end
 
     private
-
-      def status_icon(status)
-        { 'open' => 'fa-circle-dot', 'claimed' => 'fa-user-check', 'resolved' => 'fa-check' }
-          .fetch(status, 'fa-circle-dot')
-      end
 
       def resource_path_for(type, noid)
         safe_path(:"#{type.to_s.downcase}_path", noid)

@@ -19,7 +19,7 @@
 
       %dl.ledger-digest__counts
         = render 'admin/ledger/digest_count', label: 'Requests',
-          value: "#{counts['requests_opened'].to_i} opened · #{counts['requests_resolved'].to_i} resolved · #{counts['requests_open'].to_i} still open"
+          value: "#{counts['requests_made'].to_i} made"
         = render 'admin/ledger/digest_count', label: 'Loads',
           value: "#{counts['loads_run'].to_i} run · #{counts['loads_failed'].to_i} failed"
         = render 'admin/ledger/digest_count', label: 'Deposits',
