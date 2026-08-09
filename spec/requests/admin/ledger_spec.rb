@@ -197,6 +197,20 @@ RSpec.describe 'Admin ledger', type: :request do
       expect(response.body).not_to include(%(<a href="#{admin_deposit_triage_path(state: 'incomplete')}">))
     end
 
+    # Left to the inflector, "reindex" reads as a Latin -ex and comes back
+    # "reindices"; "1 visibility changes" is the other way to get it wrong.
+    it 'agrees the countable figures with their number' do
+      AdminNotice.create!(kind: 'daily_digest', subject: 'Daily digest', occurred_on: Time.zone.today,
+                          payload: { counts: { 'reindexes' => 0, 'cascades' => 1 } })
+
+      get admin_ledger_path(tab: 'digests')
+
+      expect(response.body).to include('0 reindexes')
+      expect(response.body).to include('1 visibility change')
+      expect(response.body).not_to include('reindices')
+      expect(response.body).not_to include('1 visibility changes')
+    end
+
     # A day is a page, so paging back walks one day at a time.
     it 'shows one day per page' do
       2.times do |ago|

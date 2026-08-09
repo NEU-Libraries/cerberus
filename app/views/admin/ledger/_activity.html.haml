@@ -30,7 +30,8 @@
           - partial = "admin/ledger/notice_#{notice.kind}"
           - resolved = lookup_context.exists?(partial, [], true) ? partial : 'admin/ledger/notice_generic'
           = render partial: resolved, locals: { notice: notice }
-  = paginate @notices
+  %nav.paginate-section{ 'aria-label' => 'Activity pages' }
+    = paginate @notices, theme: 'blacklight'
 - else
   .admin-registry__empty
     %i.fa-solid.fa-book.admin-registry__empty-icon{'aria-hidden' => 'true'}

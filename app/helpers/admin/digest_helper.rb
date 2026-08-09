@@ -48,9 +48,11 @@ module Admin
       def repository_figures(counts)
         cascades = counts['cascades'].to_i
         reindexes = counts['reindexes'].to_i
+        # "reindex" is spelled out rather than inflected: the pluralizer reads it
+        # as a Latin -ex and returns "reindices".
         [digest_figure(cascades, 'visibility change'.pluralize(cascades),
                        admin_ledger_path(tab: 'activity', kind: 'visibility_cascade')),
-         digest_figure(reindexes, 'reindex'.pluralize(reindexes),
+         digest_figure(reindexes, reindexes == 1 ? 'reindex' : 'reindexes',
                        admin_ledger_path(tab: 'activity', kind: 'set_reindex'))]
       end
 

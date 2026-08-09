@@ -32,7 +32,8 @@
       %tbody
         - @notices.each do |notice|
           = render partial: 'admin/ledger/request', locals: { notice: notice }
-  = paginate @notices
+  %nav.paginate-section{ 'aria-label' => 'Request pages' }
+    = paginate @notices, theme: 'blacklight'
 - else
   .admin-registry__empty
     %i.fa-solid.fa-clipboard-check.admin-registry__empty-icon{'aria-hidden' => 'true'}
