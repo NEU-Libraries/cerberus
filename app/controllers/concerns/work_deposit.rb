@@ -41,10 +41,61 @@ module WorkDeposit
     # depositor can already see.
     def promote_to_showcase(showcase_id)
       AtlasRb::System::Work.add_linked_member(@work.id, showcase_id, on_behalf_of: current_user&.nuid)
+      record_promotion(outcome: 'promoted', showcase_id: showcase_id)
     rescue AtlasRb::ForbiddenError => e
       Rails.logger.warn("[publish] add_linked_member forbidden for work #{@work.id} " \
                         "-> #{showcase_id}: #{e.message}")
       @publish_link_failed = true
+      record_promotion(outcome: 'refused', reason: 'atlas_forbidden', showcase_id: showcase_id)
+    end
+
+    # Every promotion attempt reaches the admin ledger, refusals included.
+    #
+    # A showcase is a curated public surface that nobody approves onto, so staff
+    # read the list afterwards to catch a work promoted that belongs on no
+    # showcase at all, or filed under the wrong genre. That is why it carries
+    # every attempt rather than only the anomalies.
+    #
+    # A refusal is the outcome nobody else can see. The Work deposits correctly,
+    # the depositor gets one flash and moves on, and the showcase silently does
+    # not gain it — so without this row, only a log line records that somebody
+    # asked to publish and did not.
+    def record_promotion(outcome:, reason: nil, showcase_id: nil)
+      community_noid = params[:publish_community_id].presence
+      AdminNotice.create!(
+        kind:         'showcase_promotion',
+        subject:      promotion_subject(outcome),
+        actor_nuid:   current_user&.nuid,
+        subject_noid: @work&.id,
+        payload:      { outcome: outcome, reason: reason, showcase_noid: showcase_id,
+                        community_noid: community_noid, genre: params[:publish_genre].presence,
+                        community_name: promotion_community_name(community_noid),
+                        # The filename the deposit was titled with — the strongest
+                        # wrong-genre signal available, and free. A .pptx filed
+                        # under "Datasets" reads wrong at a glance. It is a
+                        # snapshot: a later rename leaves it alone, which for a
+                        # review list is what you want to see.
+                        work_title: @deposit_title }
+      )
+    end
+
+    def promotion_subject(outcome)
+      return 'Showcase publication refused' if outcome == 'refused'
+
+      genre = params[:publish_genre].presence
+      genre ? %(Published to the “#{genre}” showcase) : 'Published to a showcase'
+    end
+
+    # Resolved here rather than through DepositorContext#community_name, which
+    # assumes a real affiliation and dereferences the resource unguarded. This
+    # noid comes straight from the form, so it can name nothing at all — and a
+    # ledger write must never break a deposit that has already succeeded.
+    def promotion_community_name(noid)
+      return nil if noid.blank?
+
+      AtlasRb::Community.find(noid)&.[]('title').presence
+    rescue AtlasRb::Error, Faraday::Error, JSON::ParserError
+      nil
     end
 
     # Shared tail of both deposit branches: seed the title via the structure-safe
@@ -55,6 +106,9 @@ module WorkDeposit
     # and applies it when the async renditions arrive.
     def finalize_new_work(file, collection_id)
       save_descriptive!('Work', @work.id, title: file.original_filename, description: nil)
+      # Held for the showcase-promotion notice, which runs after this and has no
+      # file of its own to read the title from.
+      @deposit_title = file.original_filename
       apply_derivative_default(collection_id)
       staged_path = stage_upload(file, @work.id)
       enqueue_ingest_jobs(file, staged_path)

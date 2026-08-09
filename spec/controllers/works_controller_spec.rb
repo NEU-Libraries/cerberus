@@ -396,6 +396,101 @@ describe WorksController do
         AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
       end
     end
+
+    # Nobody approves a work onto a showcase, so staff read the list afterwards
+    # to catch one that belongs on no showcase or sits under the wrong genre.
+    # The refusals matter most: they are invisible to everyone but the depositor,
+    # who sees one flash and moves on.
+    context 'the showcase-promotion ledger' do
+      def stub_person_rooted_at(collection_id)
+        person = AtlasRb::Mash.new('nuid' => user.nuid, 'personal_root_id' => collection_id,
+                                   'affiliated_community_ids' => ['comm1'])
+        allow(AtlasRb::Person).to receive(:resolve).and_return([person])
+      end
+
+      before do
+        # Scoped to the one noid: a blanket stub also intercepts the lookup that
+        # builds the fixture community, which then has no id to parent under.
+        allow(AtlasRb::Community).to receive(:find).and_call_original
+        allow(AtlasRb::Community).to receive(:find).with('comm1')
+                                                   .and_return(AtlasRb::Mash.new('id'    => 'comm1',
+                                                                                 'title' => 'Marine Science'))
+        allow(AtlasRb::Work).to receive(:create).and_call_original
+      end
+
+      def deposit(**overrides)
+        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+                                collection_id: collection.id, publish: '1',
+                                publish_community_id: 'comm1', publish_genre: 'Datasets' }.merge(overrides)
+      end
+
+      it 'records a promotion with the community, the genre and the uploaded filename' do
+        stub_person_rooted_at(collection.id)
+        allow(ShowcaseFinder).to receive(:call).and_return('showcasenoid')
+        allow(AtlasRb::System::Work).to receive(:add_linked_member)
+
+        expect { deposit }.to change(AdminNotice, :count).by(1)
+
+        notice = AdminNotice.last
+        expect(notice.kind).to eq('showcase_promotion')
+        expect(notice.subject).to include('Datasets')
+        expect(notice.actor_nuid).to eq(user.nuid)
+        expect(notice.subject_noid).to eq(assigns(:work).id)
+        expect(notice.detail(:outcome)).to eq('promoted')
+        expect(notice.detail(:community_name)).to eq('Marine Science')
+        expect(notice.detail(:showcase_noid)).to eq('showcasenoid')
+        # The filename is the wrong-genre signal — a .pptx under "Datasets"
+        # reads wrong at a glance.
+        expect(notice.detail(:work_title)).to eq('image.png')
+      ensure
+        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
+      it 'records a refusal when Atlas forbids the link' do
+        stub_person_rooted_at(collection.id)
+        allow(ShowcaseFinder).to receive(:call).and_return('showcasenoid')
+        allow(AtlasRb::System::Work).to receive(:add_linked_member).and_raise(AtlasRb::ForbiddenError.new('nope'))
+
+        expect { deposit }.to change(AdminNotice, :count).by(1)
+
+        expect(AdminNotice.last.detail(:outcome)).to eq('refused')
+        expect(AdminNotice.last.detail(:reason)).to eq('atlas_forbidden')
+      ensure
+        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
+      it 'records a refusal when the destination is not the depositor’s root' do
+        stub_person_rooted_at('some-other-root')
+        allow(AtlasRb::System::Work).to receive(:add_linked_member)
+
+        expect { deposit }.to change(AdminNotice, :count).by(1)
+
+        expect(AdminNotice.last.detail(:reason)).to eq('not_personal_root')
+      ensure
+        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
+      it 'records a refusal when the genre has no showcase the depositor can see' do
+        stub_person_rooted_at(collection.id)
+        allow(ShowcaseFinder).to receive(:call).and_return(nil)
+        allow(AtlasRb::System::Work).to receive(:add_linked_member)
+
+        expect { deposit }.to change(AdminNotice, :count).by(1)
+
+        expect(AdminNotice.last.detail(:reason)).to eq('no_showcase')
+        expect(AdminNotice.last.detail(:genre)).to eq('Datasets')
+      ensure
+        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
+      it 'records nothing when the deposit asked for no promotion' do
+        stub_person_rooted_at(collection.id)
+
+        expect { deposit(publish: '0') }.not_to change(AdminNotice, :count)
+      ensure
+        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+      end
+    end
   end
 
   describe 'new' do

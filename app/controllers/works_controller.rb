@@ -179,12 +179,21 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     # already exists and is correctly placed, so there is nothing to roll back.
     def promote_if_requested
       return unless ActiveModel::Type::Boolean.new.cast(params[:publish])
-      return @publish_link_failed = true unless publish_offered?
+      # The destination is not the depositor's own root, so the form never
+      # offered promotion here — a typed URL, or a tampered field.
+      return refuse_promotion('not_personal_root') unless publish_offered?
 
       showcase_id = publish_showcase_id
-      return @publish_link_failed = true if showcase_id.blank?
+      # No showcase exists for that genre in that community, or the depositor
+      # cannot see the one that does.
+      return refuse_promotion('no_showcase') if showcase_id.blank?
 
       promote_to_showcase(showcase_id)
+    end
+
+    def refuse_promotion(reason)
+      @publish_link_failed = true
+      record_promotion(outcome: 'refused', reason: reason)
     end
 
     # Server backstop for the metadata page's opt-in download sizes. The
