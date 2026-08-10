@@ -40,7 +40,6 @@ RSpec.describe 'works/_av_player', type: :view do
     end
   end
 
-
   # A Streaming Only video reaches here with downloadable false. v1's player told
   # the reader to download a file its own gate would then refuse; this must not.
   context 'when the viewer may not download the file' do
