@@ -106,26 +106,32 @@ module Transformable # rubocop:disable Metrics/ModuleLength
     @public_allowed = true
   end
 
-  # Everything the permissions section of a *create* form needs. The resource
-  # does not exist yet, so it has no grants to show and nothing beneath it to
-  # cascade to: the rows start empty and @narrowing_allowed stays unset, which
-  # is what puts shared/_visibility_control on its ordinary offered branch (see
-  # the `== false` test there).
+  # Everything the permissions section of a *create* form needs.
   #
-  # Order is load-bearing. The ceiling is read off the destination container's
-  # envelope, which @permissions holds from the create gate until the last line
-  # replaces it with the form's (empty) row list.
+  # Atlas copies the destination's read ACL onto a new child wholesale — group
+  # grants included — so the form opens holding exactly what the resource would
+  # be born with, rather than a blank slate or a fixed default. That is what
+  # lets it add a choice without moving the outcome: submit it untouched and the
+  # ACL is the one inheritance would have produced anyway. A form that defaulted
+  # to Private instead would quietly narrow every child of a public container,
+  # and drop the inherited group grants with it.
+  #
+  # @narrowing_allowed stays unset, which is what puts _visibility_control on
+  # its ordinary offered branch (see the `== false` test there) — there is
+  # nothing inside a resource that does not exist to cascade to.
+  #
+  # Order is load-bearing twice. The ceiling reads the destination's envelope,
+  # and pretty_resource_permissions then MUTATES that same envelope (stripping
+  # the public sentinel) before returning the form's rows, so the ceiling has to
+  # be settled first.
   #
   # @param destination_id [String] the container this resource will be made in.
   def new_form_permissions!(destination_id)
+    inherited = @permissions
     assign_destination_ceiling(destination_id)
-    # Private, matching the ACL Atlas mints a container with (read: []). The
-    # control adds a choice here; it must not also move the outcome for someone
-    # who leaves it alone, and of the two directions to be wrong in silently,
-    # publishing is the one that cannot be taken back.
-    @public = false
+    @public = @public_allowed
     @groups = groups_for_permissions_picker
-    @permissions = []
+    @permissions = pretty_resource_permissions(inherited)
   end
 
   # The create-form counterpart to {#assign_visibility_ceiling}. That one walks

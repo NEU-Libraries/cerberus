@@ -12,11 +12,12 @@
       = c.text_field :title, required: true
       = c.text_area :description, rows: 10
 
-    -# The two controls the Permissions tab offers, so a Collection is born with
-    -# the audience its creator chose instead of inheriting one silently and
-    -# needing a second visit to correct it. No embargo field — that is a
-    -# Work-level affordance — and no narrowing confirmation, because a
-    -# Collection this new has nothing inside it to cascade to.
+    -# The two controls the Permissions tab offers. They open holding the ACL
+    -# this Collection would inherit from its destination, so the audience it is
+    -# about to be born with is visible and editable here rather than only
+    -# discoverable afterwards. No embargo field — that is a Work-level
+    -# affordance — and no narrowing confirmation, because a Collection this new
+    -# has nothing inside it to cascade to.
     %h4.pt-4.pb-2 Permissions
     .row
       .col-sm

@@ -270,12 +270,24 @@ describe CollectionsController do
     context 'permissions section' do
       render_views
 
-      it 'renders the group grant editor with no committed rows' do
+      it 'renders the group grant editor' do
         get :new, params: { community_id: community.id }
 
-        expect(assigns(:permissions)).to eq([])
         expect(response.body).to include('Group Permissions')
         expect(response.body).to include('collection[permissions][new][group_id]')
+      end
+
+      # Atlas copies the destination's read ACL onto a new child, so the form has
+      # to open holding it. Showing a blank slate would invite a curator to
+      # submit one and silently drop grants they never saw.
+      it 'prefills the grants the new collection would inherit' do
+        AtlasRb::Community.metadata(community.id,
+                                    { 'permissions' => { 'read' => ['editors'] } }, nuid: '000000004')
+
+        get :new, params: { community_id: community.id }
+
+        expect(assigns(:permissions).map(&:group_id)).to include('editors')
+        expect(response.body).to include('collection[permissions][1][group_id]')
       end
 
       # A brand-new Collection has nothing inside it, so the cascade warning the
@@ -298,18 +310,20 @@ describe CollectionsController do
         expect(CGI.unescapeHTML(response.body)).to include("#{community.title}” is private")
       end
 
-      # Private matches the ACL Atlas mints a Collection with, so the control
-      # adds a choice without moving the outcome for a reader who ignores it.
-      it 'offers the choice under a public destination and preselects Private' do
+      # Public is what the Collection would inherit, so preselecting it is what
+      # lets the control add a choice without moving the outcome for a reader
+      # who ignores it. Preselecting Private would narrow every child of a
+      # public container instead.
+      it 'offers the choice under a public destination and preselects the inherited Public' do
         publicize_ancestry!(community: community)
 
         get :new, params: { community_id: community.id }
 
         control = response.parsed_body.at_css('[name="mass"]')
         expect(assigns(:public_allowed)).to be(true)
-        expect(assigns(:public)).to be(false)
+        expect(assigns(:public)).to be(true)
         expect(control.name).to eq('select')
-        expect(control.at_css('option[selected]')['value']).to eq('private')
+        expect(control.at_css('option[selected]')['value']).to eq('public')
       end
     end
   end
@@ -370,6 +384,24 @@ describe CollectionsController do
       expect(AtlasRb::Collection).not_to have_received(:create)
       expect(flash[:alert]).to eq('Please provide a title.')
       expect(response).to redirect_to(new_community_collection_path(community.id))
+    end
+
+    # Atlas copies the destination's ACL onto a new child, and the form opens
+    # holding that copy — so submitting it untouched has to land where a bare
+    # create would. Otherwise adding the control would itself change what
+    # creating a Collection does.
+    it 'lands on the inherited ACL when the prefilled controls are submitted untouched' do
+      publicize_ancestry!(community: community)
+      reference = AtlasRb::Collection.create(community.id, nuid: '000000004')
+      inherited = Array(AtlasRb::Resource.permissions(reference.id)&.read)
+
+      post :create, params: { community_id: community.id, mass: 'public',
+                              collection: { title: 'InheritedCollection', description: 'D' } }
+
+      created_id = response.location.split('/').last
+      expect(Array(AtlasRb::Resource.permissions(created_id)&.read)).to match_array(inherited)
+    ensure
+      [reference&.id, created_id].compact.each { |id| AtlasRb::Collection.tombstone(id) }
     end
 
     it 'applies the submitted visibility and group grants to the new collection' do
