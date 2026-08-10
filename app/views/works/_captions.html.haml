@@ -28,8 +28,10 @@
       \— a new upload takes its place, and the file it replaces stays in this
       Work's version history.
   - else
+    -# Mind the line breaks: HAML reads a line that STARTS with ".srt" as a
+    -# div.srt, so the sentence keeps the extension away from the margin.
     %p.text-muted.small.mb-0
-      WebVTT (.vtt) only — a browser reads no other caption format. Convert an
-      .srt file before you upload it.
+      WebVTT (.vtt) only — a browser reads no other caption format.
+      Convert an .srt file before you upload it.
 
 %hr.section-divider.mt-3.mb-0
