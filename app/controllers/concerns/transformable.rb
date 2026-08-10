@@ -21,6 +21,11 @@ module Transformable # rubocop:disable Metrics/ModuleLength
   COMMUNITY_NARROWING_REFUSED = 'Restricting a community needs DRS administrators — it does not reach the ' \
                                 'collections inside it. Nothing has been changed.'
 
+  # Stands in for a private destination's title when the lookup that would name
+  # it fails. The sentence it lands in is already about a container the reader
+  # just navigated through, so it reads as a reference rather than a gap.
+  DESTINATION_TITLE_UNKNOWN = 'The destination container'
+
   def pretty_resource_permissions(perms)
     return [] if perms.blank?
 
@@ -99,6 +104,49 @@ module Transformable # rubocop:disable Metrics/ModuleLength
   rescue Faraday::Error, JSON::ParserError
     # A parent lookup failure must not block the form — Atlas still enforces.
     @public_allowed = true
+  end
+
+  # Everything the permissions section of a *create* form needs. The resource
+  # does not exist yet, so it has no grants to show and nothing beneath it to
+  # cascade to: the rows start empty and @narrowing_allowed stays unset, which
+  # is what puts shared/_visibility_control on its ordinary offered branch (see
+  # the `== false` test there).
+  #
+  # Order is load-bearing. The ceiling is read off the destination container's
+  # envelope, which @permissions holds from the create gate until the last line
+  # replaces it with the form's (empty) row list.
+  #
+  # @param destination_id [String] the container this resource will be made in.
+  def new_form_permissions!(destination_id)
+    assign_destination_ceiling(destination_id)
+    # Private, matching the ACL Atlas mints a container with (read: []). The
+    # control adds a choice here; it must not also move the outcome for someone
+    # who leaves it alone, and of the two directions to be wrong in silently,
+    # publishing is the one that cannot be taken back.
+    @public = false
+    @groups = groups_for_permissions_picker
+    @permissions = []
+  end
+
+  # The create-form counterpart to {#assign_visibility_ceiling}. That one walks
+  # the resource's ancestor_chain, which a resource that does not exist yet has
+  # none of — but the create gate has already loaded the destination's envelope
+  # into @permissions, and the destination IS the parent whose visibility bounds
+  # the child. So the ceiling costs no extra call.
+  #
+  # Only the private branch needs the parent named, so the lookup for its title
+  # is paid only there. A failed lookup still withholds Public: the envelope has
+  # already said the destination is private, and Atlas would refuse the write
+  # regardless, so generic copy beats a choice that cannot succeed.
+  def assign_destination_ceiling(destination_id)
+    @public_allowed = Array(@permissions&.read).include?('public')
+    return if @public_allowed
+
+    node = AtlasRb::Resource.find(destination_id)
+    @visibility_parent = { 'klass' => node&.dig('klass'),
+                           'title' => node&.dig('resource', 'title').presence || DESTINATION_TITLE_UNKNOWN }
+  rescue Faraday::Error, AtlasRb::Error, JSON::ParserError
+    @visibility_parent = { 'title' => DESTINATION_TITLE_UNKNOWN }
   end
 
   # The "add a group" dropdown's candidate list. An :admin or a devolved-admin
@@ -230,6 +278,39 @@ module Transformable # rubocop:disable Metrics/ModuleLength
     with_stale_retry { AtlasRb.const_get(klass).metadata(id, perms) }
   rescue AtlasRb::PermissionsError => e
     flash[:alert] = PERMISSIONS_REFUSED.fetch(e.code, e.message)
+  end
+
+  # Write a create form's permissions onto a resource that was just minted.
+  #
+  # Deliberately not #apply_permissions. That one is the edit path, and two of
+  # its assumptions are false one line after a create: there is no cascade to
+  # run (nothing is inside a resource this new), and @permissions still holds
+  # the DESTINATION's envelope from the create gate rather than this resource's
+  # — so NarrowingRequest would compare against the wrong audience and address
+  # a nil noid.
+  #
+  # The submitted grants are merged into the new resource's own envelope rather
+  # than replacing it. Atlas assigns edit_groups, edit_users and embargo
+  # unconditionally from the payload, so posting a form that names only read
+  # groups would strip the grants Atlas gave the resource at create — including
+  # the one the creator reaches it through.
+  def apply_new_permissions(klass, id, resource_key)
+    submitted = permission_params(resource_key)[:permissions]
+    return if submitted.blank?
+
+    payload = { permissions: minted_permissions(id).merge(submitted.symbolize_keys) }
+    with_stale_retry { AtlasRb.const_get(klass).metadata(id, payload) }
+  rescue AtlasRb::PermissionsError => e
+    flash[:alert] = PERMISSIONS_REFUSED.fetch(e.code, e.message)
+  end
+
+  # The ACL Atlas gave a resource at create, as the symbol-keyed hash the
+  # metadata setter reads back. Only the grant lists are carried: `depositor`
+  # and `proxy_uploader` are preserved by Atlas when omitted, and echoing them
+  # would re-assert attribution this form has no business touching.
+  def minted_permissions(id)
+    envelope = AtlasRb::Resource.permissions(id)
+    %i[read edit edit_users embargo].index_with { |key| envelope&.dig(key.to_s) }.compact
   end
 
   # Taking audience away from a Collection has to reach everything inside it,

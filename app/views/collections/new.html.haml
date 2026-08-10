@@ -2,9 +2,26 @@
 
 -# The destination is the nested route's parent segment (@create_path), not a
 -# form field — you say where a Collection goes by navigating there.
-= bootstrap_form_tag url: @create_path do |f|
-  = bootstrap_fields_for :collection do |c|
-    = c.text_field :title, required: true
-    = c.text_area :description, rows: 10
-  = f.button :submit, class: "btn btn-primary my-3"
+-#
+-# group-permissions scopes the whole form rather than the grant rows alone: its
+-# entry row and its row template both live inside the partial below, and the
+-# resource value is what supplies the `collection[...]` field-name prefix.
+.metadata-form{ data: { controller: "group-permissions", "group-permissions-resource-value": "collection" } }
+  = bootstrap_form_tag url: @create_path do |f|
+    = bootstrap_fields_for :collection do |c|
+      = c.text_field :title, required: true
+      = c.text_area :description, rows: 10
 
+    -# The two controls the Permissions tab offers, so a Collection is born with
+    -# the audience its creator chose instead of inheriting one silently and
+    -# needing a second visit to correct it. No embargo field — that is a
+    -# Work-level affordance — and no narrowing confirmation, because a
+    -# Collection this new has nothing inside it to cascade to.
+    %h4.pt-4.pb-2 Permissions
+    .row
+      .col-sm
+        = render 'shared/visibility_control', resource: 'collection'
+    = render 'shared/group_permissions', resource: 'collection'
+
+    .well.p-3.my-3.rounded-3
+      = f.button :submit, class: "btn btn-primary"

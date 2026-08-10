@@ -41,6 +41,7 @@ class CollectionsController < CatalogController
   def new
     @collection = OpenStruct.new
     @create_path = child_create_path('collections')
+    new_form_permissions!(@destination_id)
   end
 
   def edit
@@ -56,6 +57,12 @@ class CollectionsController < CatalogController
 
     c = AtlasRb::Collection.create(@destination_id)
     save_descriptive!('Collection', c.id, title: permitted['title'], description: permitted['description'])
+    # After the title, not before it. Either call can fail against Atlas, and
+    # this order picks the better wreckage: a titled Collection still holding
+    # the ACL it was minted with, which the Permissions tab can correct — rather
+    # than a correctly-restricted Collection with no title, which is the shape
+    # #title_missing? exists to keep out of the repository.
+    apply_new_permissions('Collection', c.id, :collection)
     redirect_to collection_path(c.id)
   end
 

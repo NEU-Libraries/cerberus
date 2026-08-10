@@ -264,6 +264,54 @@ describe CollectionsController do
       get :new, params: { collection_id: collection.id }
       expect(assigns(:create_path)).to eq(collection_collections_path(collection.id))
     end
+
+    # The create form carries the same two controls the Permissions tab does, so
+    # a Collection is born with a chosen audience rather than a silent one.
+    context 'permissions section' do
+      render_views
+
+      it 'renders the group grant editor with no committed rows' do
+        get :new, params: { community_id: community.id }
+
+        expect(assigns(:permissions)).to eq([])
+        expect(response.body).to include('Group Permissions')
+        expect(response.body).to include('collection[permissions][new][group_id]')
+      end
+
+      # A brand-new Collection has nothing inside it, so the cascade warning the
+      # edit tab carries must not appear — and leaving @narrowing_allowed unset
+      # is what keeps _visibility_control off its locked branch.
+      it 'leaves the narrowing state unset' do
+        get :new, params: { community_id: community.id }
+
+        expect(assigns(:narrowing_allowed)).to be_nil
+        expect(response.body).not_to include('narrowing-confirm')
+      end
+
+      it 'withholds Public under a private destination and names it' do
+        get :new, params: { community_id: community.id }
+
+        control = response.parsed_body.at_css('[name="mass"]')
+        expect(assigns(:public_allowed)).to be(false)
+        expect(control.name).to eq('input')
+        expect(control['value']).to eq('private')
+        expect(CGI.unescapeHTML(response.body)).to include("#{community.title}” is private")
+      end
+
+      # Private matches the ACL Atlas mints a Collection with, so the control
+      # adds a choice without moving the outcome for a reader who ignores it.
+      it 'offers the choice under a public destination and preselects Private' do
+        publicize_ancestry!(community: community)
+
+        get :new, params: { community_id: community.id }
+
+        control = response.parsed_body.at_css('[name="mass"]')
+        expect(assigns(:public_allowed)).to be(true)
+        expect(assigns(:public)).to be(false)
+        expect(control.name).to eq('select')
+        expect(control.at_css('option[selected]')['value']).to eq('private')
+      end
+    end
   end
 
   describe 'tombstone' do
@@ -322,6 +370,54 @@ describe CollectionsController do
       expect(AtlasRb::Collection).not_to have_received(:create)
       expect(flash[:alert]).to eq('Please provide a title.')
       expect(response).to redirect_to(new_community_collection_path(community.id))
+    end
+
+    it 'applies the submitted visibility and group grants to the new collection' do
+      publicize_ancestry!(community: community)
+
+      post :create, params: { community_id: community.id, mass: 'public',
+                              collection: { title: 'PermissionedCollection', description: 'D',
+                                            permissions: { '1' => { group_id: 'editors', ability: 'read' } } } }
+
+      created_id = response.location.split('/').last
+      expect(Array(AtlasRb::Resource.permissions(created_id)&.read)).to contain_exactly('public', 'editors')
+    ensure
+      AtlasRb::Collection.tombstone(created_id) if created_id
+    end
+
+    # Atlas assigns edit_groups, edit_users and embargo unconditionally from the
+    # payload, so the submitted grants have to be merged into the envelope the
+    # new Collection was minted with. Replacing it would strip the edit grants
+    # Atlas just gave it — a form naming only read groups names no edit ones.
+    it 'merges the submitted grants into the minted envelope rather than replacing it' do
+      allow(AtlasRb::Collection).to receive(:metadata).and_call_original
+
+      post :create, params: { community_id: community.id, mass: 'private',
+                              collection: { title: 'EnvelopeCollection', description: 'D',
+                                            permissions: { '1' => { group_id: 'editors', ability: 'read' } } } }
+
+      created_id = response.location.split('/').last
+      expect(AtlasRb::Collection).to have_received(:metadata).with(
+        created_id, hash_including(permissions: hash_including(edit: [Permissions::STAFF_EDIT_GROUP],
+                                                               read: ['editors']))
+      )
+    ensure
+      AtlasRb::Collection.tombstone(created_id) if created_id
+    end
+
+    # #apply_permissions would address params[:id] — nil on this path — and
+    # compare against the DESTINATION's envelope, which is what @permissions
+    # still holds here. A Collection one line old has nothing to cascade to.
+    it 'does not consult the narrowing cascade for a collection it has just created' do
+      allow(NarrowingRequest).to receive(:call)
+
+      post :create, params: { community_id: community.id, mass: 'private',
+                              collection: { title: 'NoCascadeCollection', description: 'D' } }
+
+      created_id = response.location.split('/').last
+      expect(NarrowingRequest).not_to have_received(:call)
+    ensure
+      AtlasRb::Collection.tombstone(created_id) if created_id
     end
 
     # The destination is a route segment, so there is no request shape that
