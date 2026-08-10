@@ -176,7 +176,8 @@ RSpec.describe SetResolver do
                              nuid: nuid)
 
       zip = FakeZip.new
-      SetZipPacker.new(resolver: resolver(recipe(works: [embargoed])), nuid: nil).pack(zip)
+      SetZipPacker.new(resolver: resolver(recipe(works: [embargoed])), nuid: nil,
+                       ability: Ability.new(nil)).pack(zip)
 
       expect(zip.entries.map(&:name)).to include('ERRORS.txt')
       expect(zip.entries.map(&:name).grep_v(/\.txt\z/)).to be_empty
