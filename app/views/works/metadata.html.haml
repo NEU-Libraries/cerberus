@@ -22,6 +22,9 @@
 
     = render 'shared/group_permissions', resource: 'work'
 
+    - if @streaming_only_offered
+      = render 'works/streaming_only', enabled: @streaming_only
+
     .well.p-3.my-3.rounded-3
       = f.button :submit, class: 'btn btn-success'
       -# Plain link (not button_to) — `button_to` emits a nested <form>,

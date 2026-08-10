@@ -15,7 +15,14 @@
   - else
     %video.video-js.vjs-default-skin.av-player__media{controls: true, preload: 'metadata', playsinline: true, poster: poster, 'data-av-player-target': 'media'}
       %source{src: media_path(file.noid), type: file.mime_type}
-  %p.av-player__fallback.text-muted.small.mb-0
-    Trouble playing this file?
-    = link_to 'Download it', download_path(file.noid)
-    instead.
+  -# `downloadable` comes from the same per-asset gate the downloads card and
+  -# DownloadsController use, so a Streaming Only video, a gated tier and an
+  -# active embargo all suppress this line alike, and a reader is never told to
+  -# download a file the next click would refuse. (v1 advertised its download
+  -# link unconditionally and did exactly that.) Decided by the caller rather
+  -# than here, so this partial stays presentational.
+  - if downloadable
+    %p.av-player__fallback.text-muted.small.mb-0
+      Trouble playing this file?
+      = link_to 'Download it', download_path(file.noid)
+      instead.

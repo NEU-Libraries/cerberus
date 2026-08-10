@@ -61,25 +61,35 @@ class QueueZipPacker
       uses = values_for(entries, 'd')
 
       AtlasRb::Work.assets(work_noid, nuid: @nuid).each do |asset|
-        # Named rather than skipped in silence, matching how an embargoed member
-        # is reported: someone who queued a file and did not get it should be
-        # able to see which, and that access — not a failure — is the reason.
-        wanted = content_blob?(asset) ? blob_noids.include?(asset.noid) : uses.include?(asset[:use])
-        next unless wanted
+        next unless queued?(asset, blob_noids, uses)
 
-        unless DerivativeGate.readable?(asset, @ability)
-          errors << "#{work_noid}: withheld — #{asset[:use].presence || asset.noid} is not available to download"
-          next
-        end
-
-        if content_blob?(asset)
-          write_asset(zip, work_noid, asset, manifest, errors)
-        else
-          write_derivative(zip, work_noid, asset, manifest, errors)
-        end
+        pack_queued_asset(zip, work_noid, asset, manifest, errors)
       end
     rescue Faraday::Error, JSON::ParserError => e
       errors << "#{work_noid}: assets unavailable — #{e.class}: #{e.message}"
+    end
+
+    # Whether this asset is one the queue actually asked for: content Blobs by
+    # noid, derivative renditions by use.
+    def queued?(asset, blob_noids, uses)
+      content_blob?(asset) ? blob_noids.include?(asset.noid) : uses.include?(asset[:use])
+    end
+
+    # A withheld asset is named rather than dropped in silence, matching how an
+    # embargoed member is already reported: someone who queued a file and did not
+    # get it should be able to see which one, and that access — not a failure —
+    # is the reason.
+    def pack_queued_asset(zip, work_noid, asset, manifest, errors)
+      unless DerivativeGate.readable?(asset, @ability)
+        errors << "#{work_noid}: withheld — #{asset[:use].presence || asset.noid} is not available to download"
+        return
+      end
+
+      if content_blob?(asset)
+        write_asset(zip, work_noid, asset, manifest, errors)
+      else
+        write_derivative(zip, work_noid, asset, manifest, errors)
+      end
     end
 
     # The set of a queue-entry key's values (blob noids for 'b', uses for 'd').

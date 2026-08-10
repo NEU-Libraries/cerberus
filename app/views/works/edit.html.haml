@@ -37,6 +37,8 @@
             %input.form-select.form-select-sm#embargo{name: "work[permissions][embargo]", type: "date", value: @embargo}/
             %label.small.py-3{for: "embargo"} If this item is embargoed, please enter the release date.
         = render 'shared/group_permissions', resource: 'work'
+        - if @streaming_only_offered
+          = render 'works/streaming_only', enabled: @streaming_only
         %div
           .well.p-3.my-3.rounded-3
             = f.button :submit, class: "btn btn-success"

@@ -93,6 +93,10 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     form_preparation(@permissions, resource: @work)
     load_descriptive!('Work')
     load_advanced!('Work')
+    # Decided off the Work's own assets here: by edit time the content Blob has
+    # landed, and the staged upload the deposit page probes is long gone.
+    assets = AtlasRb::Work.assets(params[:id], nuid: effective_user&.nuid)
+    load_streaming_only!(offered: StreamingOnly.applicable?(assets))
     breadcrumbs(params[:id], editing: true)
   end
 
@@ -113,6 +117,7 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
   # one keyword are required.
   def update
     handle_metadata_update(klass: 'Work', resource_key: :work, keywords: true)
+    apply_streaming_only!
   end
 
   def metadata
@@ -121,6 +126,10 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     @image_probe = StagedImageProbe.call(work_id: params[:id])
     form_preparation(@permissions, resource: @work)
     load_descriptive!('Work')
+    # The staged file, not the Work's assets: ContentCreationJob may still be in
+    # flight when this page renders, and asking Atlas would hide the toggle from
+    # exactly the deposits that want it.
+    load_streaming_only!(offered: StagedVideoProbe.call(work_id: params[:id]))
   end
 
   def update_metadata
@@ -131,6 +140,7 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     # raced save_descriptive! into AtlasRb::StaleResourceError (seen live;
     # invisible to specs, whose test adapter never runs the job inline).
     process_derivative_widths
+    apply_streaming_only!
     # This save is the depositor confirming the deposit, and confirmation is what
     # completes the Work — ingest deliberately leaves it in_progress. Deferred to a
     # job because Atlas asks callers to complete only once the expected children
@@ -163,6 +173,37 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
   end
 
   private
+
+    # State for the Streaming Only toggle. `offered` differs by page because the
+    # evidence does — see the two call sites. The audience is computed from
+    # @read_groups rather than @permissions: form_preparation has already
+    # replaced the latter with the form's row objects by the time this runs.
+    def load_streaming_only!(offered:)
+      @streaming_only_offered = offered
+      return unless offered
+
+      @streaming_only = StreamingOnly.on?(StreamingOnly.stored_policy(params[:id]), read: @read_groups)
+    end
+
+    # Persist the toggle, if this form carried it. The Metadata and Advanced tabs
+    # PATCH the same action without the field, and an absent field must mean
+    # "leave it alone" rather than "turn it off" — hence the nil check, and the
+    # unchecked hidden input in the partial.
+    #
+    # Runs AFTER handle_metadata_update, because the same submit can widen the
+    # Work from private to public, and the tier audience is computed against the
+    # Work's read ACL. Reading it before the save would size the tier against the
+    # visibility the reader was replacing.
+    def apply_streaming_only!
+      requested = params.dig(:work, :streaming_only)
+      return if requested.nil?
+
+      StreamingOnly.apply!(params[:id],
+                           enabled: ActiveModel::Type::Boolean.new.cast(requested).present?,
+                           read:    Array(AtlasRb::Resource.permissions(params[:id])&.read))
+    rescue AtlasRb::DerivativePermissionsError => e
+      flash[:alert] = "Streaming Only wasn't changed — Atlas refused it: #{e.message}"
+    end
 
     # Promotion is offered only when the destination IS the depositor's own
     # personal root. That is what keeps a promoted Work in the depositor's own

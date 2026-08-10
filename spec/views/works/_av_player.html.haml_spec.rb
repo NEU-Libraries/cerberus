@@ -3,10 +3,10 @@
 require 'rails_helper'
 
 RSpec.describe 'works/_av_player', type: :view do
-  def render_player(mime:, preview:)
+  def render_player(mime:, preview:, downloadable: true)
     assign(:work, AtlasRb::Mash.new(preview: preview))
     render partial: 'works/av_player',
-           locals:  { file: AtlasRb::Mash.new(noid: 'b-1', mime_type: mime) }
+           locals:  { file: AtlasRb::Mash.new(noid: 'b-1', mime_type: mime), downloadable: downloadable }
   end
 
   context 'audio with a poster' do
@@ -38,5 +38,26 @@ RSpec.describe 'works/_av_player', type: :view do
       expect(rendered).to have_css('video.av-player__media[poster]')
       expect(rendered).to have_css('.av-player[data-av-player-audio-poster-value="false"]')
     end
+  end
+
+
+  # A Streaming Only video reaches here with downloadable false. v1's player told
+  # the reader to download a file its own gate would then refuse; this must not.
+  context 'when the viewer may not download the file' do
+    before { render_player(mime: 'video/mp4', preview: nil, downloadable: false) }
+
+    it 'still renders the player' do
+      expect(rendered).to have_css('video.av-player__media')
+    end
+
+    it 'withholds the download-instead line' do
+      expect(rendered).not_to have_css('.av-player__fallback')
+      expect(rendered).not_to have_link('Download it')
+    end
+  end
+
+  it 'offers the download-instead line when the viewer may download the file' do
+    render_player(mime: 'video/mp4', preview: nil, downloadable: true)
+    expect(rendered).to have_link('Download it')
   end
 end

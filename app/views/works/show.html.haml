@@ -74,7 +74,11 @@
         -# In-page audio/video player. Like Tify, the skin CSS ships separately
         -# and video.js arrives via dynamic import, so other pages never pay.
         = stylesheet_link_tag 'video-js', 'data-turbo-track': 'false'
-        = render partial: 'av_player', locals: { file: @av_file }
+        -# The player offers a download link only where this viewer could follow
+        -# one, decided by the same per-asset gate as the downloads card.
+        = render partial: 'av_player',
+                 locals: { file:         @av_file,
+                           downloadable: derivative_readable?(@av_file, embargo_date: @permissions&.embargo) }
       - else
         = render partial: "thumbnail"
     .col-md-6.order-md-2.order-1

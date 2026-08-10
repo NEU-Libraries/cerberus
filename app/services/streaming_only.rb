@@ -50,8 +50,15 @@ module StreamingOnly
   # Collection's Sentinel default, say — leaves the toggle reading "off", so
   # turning it off can never quietly widen a restriction this feature did not
   # impose. See .apply!, which only removes a tier it recognizes.
+  #
+  # The key test is not redundant with the comparison. On a Work that does not
+  # grant the admin group .audience_for is `[]`, and an ABSENT tier would compare
+  # equal to it — leaving the toggle stuck on for every restricted Work, and
+  # .apply! convinced it had nothing to write.
   def self.on?(policy, read: nil)
-    Array(policy&.[](TIER)) == audience_for(read)
+    return false unless policy.respond_to?(:key?) && policy.key?(TIER)
+
+    Array(policy[TIER]) == audience_for(read)
   end
 
   # Set or clear the video tier, preserving every other tier.

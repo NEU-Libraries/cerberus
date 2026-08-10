@@ -6,6 +6,9 @@ require 'rails_helper'
 # Atlas reads stubbed. (FakeZip is in spec/support.)
 RSpec.describe QueueZipPacker do
   let(:zip) { FakeZip.new }
+  # These fixtures' assets carry no gate, so DerivativeGate resolves them public
+  # and a guest ability reads them. The tier gate has its own examples below.
+  let(:ability) { Ability.new(nil) }
 
   def blob(noid:, filename: nil, original_filename: nil, mime_type: nil)
     AtlasRb::Mash.new('noid' => noid, 'filename' => filename,
@@ -37,17 +40,17 @@ RSpec.describe QueueZipPacker do
     end
 
     it 'packs none of its bytes for a caller who cannot bypass' do
-      described_class.new(items: items, nuid: nil).pack(zip)
+      described_class.new(items: items, nuid: nil, ability: ability).pack(zip)
       expect(names).not_to include('work1/pdf_blobA.pdf')
     end
 
     it 'names it as withheld rather than dropping it silently' do
-      described_class.new(items: items, nuid: nil).pack(zip)
+      described_class.new(items: items, nuid: nil, ability: ability).pack(zip)
       expect(zip.entries.map(&:name)).to include('ERRORS.txt')
     end
 
     it 'packs it for a caller who may bypass' do
-      described_class.new(items: items, nuid: '000000006', bypass_embargo: true).pack(zip)
+      described_class.new(items: items, nuid: '000000006', ability: ability, bypass_embargo: true).pack(zip)
       expect(names).to include('work1/pdf_blobA.pdf')
     end
   end
@@ -59,7 +62,7 @@ RSpec.describe QueueZipPacker do
     )
     allow(AtlasRb::Blob).to receive(:content).with('blobA').and_yield('A')
 
-    described_class.new(items: items, nuid: '000000002').pack(zip)
+    described_class.new(items: items, nuid: '000000002', ability: ability).pack(zip)
 
     expect(names).to include('work1/pdf_blobA.pdf')
     expect(names).not_to include('work1/pdf_blobB.pdf')
@@ -72,7 +75,7 @@ RSpec.describe QueueZipPacker do
     allow(AtlasRb::Blob).to receive(:content).with('blobA').and_yield('a')
     allow(AtlasRb::Blob).to receive(:content).with('blobC').and_yield('c')
 
-    described_class.new(items: items, nuid: nil).pack(zip)
+    described_class.new(items: items, nuid: nil, ability: ability).pack(zip)
 
     expect(names).to include('work1/a.jpg', 'work2/c.jpg')
   end
@@ -85,7 +88,7 @@ RSpec.describe QueueZipPacker do
                                             .and_return([delegate(noid: 'del1', uri: 'https://iiif.example/large')])
     allow(AtlasRb::Blob).to receive(:content)
 
-    described_class.new(items: items, nuid: nil).pack(zip)
+    described_class.new(items: items, nuid: nil, ability: ability).pack(zip)
 
     expect(names).to eq(['MANIFEST.txt'])
     expect(AtlasRb::Blob).not_to have_received(:content)
@@ -99,7 +102,7 @@ RSpec.describe QueueZipPacker do
     allow(IiifSigner).to receive(:sign_url).and_return('https://iiif.example/signed')
     allow(Faraday).to receive(:get) # no real HTTP; the chunk stream is Faraday's job
 
-    described_class.new(items: items, nuid: nil).pack(zip)
+    described_class.new(items: items, nuid: nil, ability: ability).pack(zip)
 
     expect(names).to include('work1/large-image.jpg')
     expect(Faraday).to have_received(:get).with('https://iiif.example/signed')
@@ -112,7 +115,7 @@ RSpec.describe QueueZipPacker do
     )
     allow(Faraday).to receive(:get)
 
-    described_class.new(items: items, nuid: nil).pack(zip)
+    described_class.new(items: items, nuid: nil, ability: ability).pack(zip)
 
     expect(names).to eq(['MANIFEST.txt'])
     expect(Faraday).not_to have_received(:get)
@@ -122,7 +125,7 @@ RSpec.describe QueueZipPacker do
     items = [{ 'w' => 'work1', 'b' => 'blobA' }]
     allow(AtlasRb::Work).to receive(:assets).with('work1', nuid: nil).and_raise(Faraday::TimeoutError)
 
-    described_class.new(items: items, nuid: nil).pack(zip)
+    described_class.new(items: items, nuid: nil, ability: ability).pack(zip)
 
     errors = zip.entries.find { |e| e.name == 'ERRORS.txt' }
     expect(errors).to be_present
@@ -134,7 +137,7 @@ RSpec.describe QueueZipPacker do
     allow(AtlasRb::Work).to receive(:assets).with('work1', nuid: nil).and_return([blob(noid: 'blobA', filename: 'a.jpg')])
     allow(AtlasRb::Blob).to receive(:content).with('blobA').and_yield('a')
 
-    described_class.new(items: items, nuid: nil).pack(zip)
+    described_class.new(items: items, nuid: nil, ability: ability).pack(zip)
 
     expect(zip.entries.last.name).to eq('MANIFEST.txt')
   end

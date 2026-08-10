@@ -1,0 +1,29 @@
+-# locals: enabled (Boolean) — the stored state, for the checkbox.
+-#
+-# Offered only for a Work with video content: StreamingOnly.applicable? on the
+-# edit page, StagedVideoProbe at deposit, where the Blob may still be in flight.
+-#
+-# The unchecked hidden field rides along deliberately. A cleared checkbox submits
+-# nothing, so without it the controller cannot tell "turn this off" from "this
+-# form does not own the field" — and the Permissions and Metadata tabs both PATCH
+-# the same action with disjoint fields, so that distinction is load-bearing.
+%hr.section-divider.my-3
+
+.my-3.rounded-3
+  %h4.pb-2
+    %i.fa-solid.fa-film.me-2{ 'aria-hidden' => 'true' }
+    Streaming Only
+  .form-check
+    = hidden_field_tag 'work[streaming_only]', '0', id: nil
+    = check_box_tag 'work[streaming_only]', '1', enabled, class: 'form-check-input'
+    %label.form-check-label{ for: 'work_streaming_only' }
+      Play this video on its page, but do not offer it for download
+  %p.text-muted.small.mt-2.mb-1
+    Use this where a licence permits access but not distribution. The download
+    button, the bulk download queue, and the link under the player are all
+    withheld; DRS administrators can still retrieve the file.
+  %p.text-muted.small.mb-0
+    It removes the offer, not the possibility — anyone who can play a video can
+    record it.
+
+%hr.section-divider.mt-3.mb-0
