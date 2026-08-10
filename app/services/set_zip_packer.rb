@@ -22,9 +22,15 @@ class SetZipPacker
     embargo_release_date_dtsi
   ].freeze
 
-  def initialize(resolver:, nuid:, bypass_embargo: false)
+  # @param ability [Ability] the CALLER's ability. Atlas re-authorizes a member at
+  #   the WORK level; the per-asset derivative gate rides its assets as advisory
+  #   `gated` / `permission` for the display layer to enforce, so a restricted
+  #   tier — a Streaming Only video, a gated master — reaches here looking like
+  #   any other asset and has to be checked.
+  def initialize(resolver:, nuid:, ability:, bypass_embargo: false)
     @resolver = resolver
     @nuid = nuid
+    @ability = ability
     @bypass_embargo = bypass_embargo
   end
 
@@ -56,7 +62,13 @@ class SetZipPacker
       end
 
       AtlasRb::Work.assets(noid, nuid: @nuid).each do |asset|
-        write_asset(zip, noid, asset, manifest, errors) if content_blob?(asset)
+        next unless content_blob?(asset)
+
+        if DerivativeGate.readable?(asset, @ability)
+          write_asset(zip, noid, asset, manifest, errors)
+        else
+          errors << "#{noid}: withheld — #{asset[:use].presence || asset.noid} is not available to download"
+        end
       end
     end
 

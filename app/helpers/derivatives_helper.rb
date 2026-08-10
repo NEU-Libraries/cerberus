@@ -12,10 +12,11 @@
 module DerivativesHelper
   # Public tier (gated: false) → readable by anyone; gated tier → only members
   # of its read groups (permission), which Atlas withholds from guests (nil →
-  # empty → denied).
+  # empty → denied). The rule itself lives in DerivativeGate, so the bulk-download
+  # packers — which run outside a request and have no current_ability — apply the
+  # same one rather than a second copy of it.
   def derivative_tier_document(delegate)
-    read = delegate['gated'] ? Array(delegate['permission']) : ['public']
-    SolrDocument.new('read_access_group_ssim' => read, 'internal_resource_tesim' => 'Work')
+    DerivativeGate.document(delegate)
   end
 
   # Can the current viewer read this asset? Blobs (master / PDF / audio / video)

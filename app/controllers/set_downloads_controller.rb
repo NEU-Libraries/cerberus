@@ -47,7 +47,7 @@ class SetDownloadsController < CatalogController
 
     def packer_for(resolver)
       SetZipPacker.new(resolver: resolver, nuid: effective_user&.nuid,
-                       bypass_embargo: bypass_embargo?)
+                       ability: current_ability, bypass_embargo: bypass_embargo?)
     end
 
     # The CALLER's right, never the set owner's — inheriting the owner's reach
