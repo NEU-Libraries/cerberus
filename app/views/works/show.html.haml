@@ -78,6 +78,7 @@
         -# one, decided by the same per-asset gate as the downloads card.
         = render partial: 'av_player',
                  locals: { file:         @av_file,
+                           caption:      @caption,
                            downloadable: derivative_readable?(@av_file, embargo_date: @permissions&.embargo) }
       - else
         = render partial: "thumbnail"

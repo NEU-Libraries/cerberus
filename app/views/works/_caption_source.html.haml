@@ -1,0 +1,8 @@
+-# locals: caption (AtlasRb::Mash, nil) — the Work's WebVTT Blob.
+-#
+-# The one <track> line, rendered inside whichever element the player mounted, so
+-# the audio and video branches of works/_av_player cannot drift apart. srclang
+-# and label are fixed because nothing records the real ones — see CaptionTrack.
+- if caption
+  %track{ kind: 'captions', src: media_path(caption.noid),
+          srclang: CaptionTrack::LANGUAGE, label: CaptionTrack::LABEL, default: true }/

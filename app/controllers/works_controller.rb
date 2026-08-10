@@ -97,6 +97,7 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     # landed, and the staged upload the deposit page probes is long gone.
     assets = AtlasRb::Work.assets(params[:id], nuid: effective_user&.nuid)
     load_streaming_only!(offered: StreamingOnly.applicable?(assets))
+    load_caption!(offered: CaptionTrack.applicable?(assets), files: assets)
     breadcrumbs(params[:id], editing: true)
   end
 
@@ -118,6 +119,7 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
   def update
     handle_metadata_update(klass: 'Work', resource_key: :work, keywords: true)
     apply_streaming_only!
+    apply_caption!
   end
 
   def metadata
@@ -127,9 +129,12 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     form_preparation(@permissions, resource: @work)
     load_descriptive!('Work')
     # The staged file, not the Work's assets: ContentCreationJob may still be in
-    # flight when this page renders, and asking Atlas would hide the toggle from
-    # exactly the deposits that want it.
-    load_streaming_only!(offered: StagedVideoProbe.call(work_id: params[:id]))
+    # flight when this page renders, and asking Atlas would hide the toggle and
+    # the caption field from exactly the deposits that want them. Probed once and
+    # shared, since both sections ask the same question of the same upload.
+    video = StagedVideoProbe.call(work_id: params[:id])
+    load_streaming_only!(offered: video)
+    load_caption!(offered: video)
   end
 
   def update_metadata
@@ -141,6 +146,10 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     # invisible to specs, whose test adapter never runs the job inline).
     process_derivative_widths
     apply_streaming_only!
+    # Before the confirm below, so the caption Blob is queued behind the deposit's
+    # own finalization rather than ahead of it. CaptionJob waits for the primary
+    # file regardless — see the job, which explains why it must.
+    apply_caption!
     # This save is the depositor confirming the deposit, and confirmation is what
     # completes the Work — ingest deliberately leaves it in_progress. Deferred to a
     # job because Atlas asks callers to complete only once the expected children
@@ -194,6 +203,27 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     # Work from private to public, and the tier audience is computed against the
     # Work's read ACL. Reading it before the save would size the tier against the
     # visibility the reader was replacing.
+    # State for the Captions section. `files` is absent at deposit, where the Work
+    # has no assets yet and so can have no caption to link to.
+    def load_caption!(offered:, files: nil)
+      @caption_offered = offered
+      @caption = CaptionTrack.for(files)
+    end
+
+    # Stage a caption upload and hand it to CaptionJob, if this form carried one.
+    #
+    # A refused format flashes and carries on rather than raising, for the same
+    # reason apply_permissions does: this runs after the descriptive save, and the
+    # title and abstract edits that came with it are valid and already written.
+    def apply_caption!
+      file = params[:caption]
+      return if file.blank?
+      return flash[:alert] = CaptionTrack::REFUSED unless CaptionTrack.accepted?(file.original_filename)
+
+      CaptionJob.perform_later(params[:id], stage_upload(file, params[:id]),
+                               file.original_filename, SecureRandom.uuid)
+    end
+
     def apply_streaming_only!
       requested = params.dig(:work, :streaming_only)
       return if requested.nil?
@@ -297,6 +327,7 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
       @files = reads[:files]
       @scholar = GoogleScholarMetadata.for(work: @work, permissions: @permissions, files: @files)
       @av_file = MediaRemux.playable_file(@files)
+      @caption = CaptionTrack.for(@files)
       prepare_zoom_view(params[:id], pages: reads[:file_sets])
       assign_show_abilities!(klass: 'Work')
       work_breadcrumbs(params[:id])

@@ -1,0 +1,35 @@
+-# locals: caption (AtlasRb::Mash, nil) — the Work's current caption Blob, if it
+-# has one, for the link to it.
+-#
+-# Offered only for a Work with video content: CaptionTrack.applicable? on the
+-# edit page, StagedVideoProbe at deposit, where the Blob may still be in flight.
+-#
+-# The field rides the surrounding metadata form (multipart on both pages) rather
+-# than owning a form of its own, because a nested <form> is stripped by the
+-# browser and a sibling one would need its own page — the depositor would lose
+-# unsaved metadata to reach it.
+-#
+-# The name is bare `caption`, not `work[caption]`: this is a file the controller
+-# stages and hands to a job, not an Atlas metadata field, which is the same
+-# reason the Thumbnail input beside it is bare too.
+%hr.section-divider.my-3
+
+.my-3.rounded-3
+  %h4.pb-2
+    %i.fa-solid.fa-closed-captioning.me-2{ 'aria-hidden' => 'true' }
+    Captions
+  %label.form-label{ for: 'caption' } Captions file
+  %input#caption.form-control{ name: 'caption', type: 'file', accept: CaptionTrack::EXTENSION }/
+  %p.text-muted.small.mt-2.mb-1
+    = "The player shows these captions under the video, labelled #{CaptionTrack::LABEL}."
+  - if caption
+    %p.text-muted.small.mb-0
+      = link_to 'View the current captions file', media_path(caption.noid)
+      \— a new upload takes its place, and the file it replaces stays in this
+      Work's version history.
+  - else
+    %p.text-muted.small.mb-0
+      WebVTT (.vtt) only — a browser reads no other caption format. Convert an
+      .srt file before you upload it.
+
+%hr.section-divider.mt-3.mb-0
