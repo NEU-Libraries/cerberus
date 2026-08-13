@@ -90,4 +90,5 @@
 .container
   .row
     .col-md-12
+      = render partial: 'associations', locals: { associations: @associations }
       = render partial: 'downloads', locals: { files: downloads }

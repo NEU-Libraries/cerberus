@@ -22,6 +22,7 @@
 //   _pagination          — search-results pagination as flat text links
 //   _search_controls     — sort/per-page/view controls relocated into sidebar
 //   _scoped_search       — "Search this collection/community" header box
+//   _work_associations   — Associated works box (Work show) + admin manage rows
 @import 'layout';
 @import 'featured_content';
 @import 'blacklight_discovery';
@@ -49,3 +50,4 @@
 @import 'iiif_viewer';
 @import 'av_player';
 @import 'full_text_match';
+@import 'work_associations';

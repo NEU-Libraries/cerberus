@@ -1,0 +1,28 @@
+-# Render nothing when there is nothing. A Work with no associations is the
+-# normal case, and an empty card on every show page is noise. This also covers
+-# the case where every edge was gated away — the viewer must not learn that a
+-# record they cannot read exists.
+- return if associations.nil? || associations.empty?
+
+#associations.card.mb-4
+  .card-header
+    %h2.h5.mb-0 Associated works
+  %ul.list-group.list-group-flush
+    - { outbound: associations.outbound, inbound: associations.inbound }.each do |direction, groups|
+      - groups.each do |type, documents|
+        %li.list-group-item.work-association-group
+          .work-association-group__label
+            %i.fa-solid{class: association_icon(type), 'aria-hidden' => 'true'}
+            %span.ms-1= association_label(type, direction)
+          - documents.each do |doc|
+            .work-association
+              .work-association__thumb
+                - if doc.thumbnail_ssi.present?
+                  = image_tag doc.thumbnail_ssi, alt: '', loading: 'lazy'
+                - else
+                  %i.fa-regular.fa-image{'aria-hidden' => 'true'}
+              .work-association__body
+                -# finder_doc_title is the app's one title-off-a-Solr-doc reader,
+                -# with the untitled fallback; it needs no blacklight_config.
+                = link_to finder_doc_title(doc), work_path(doc.to_param), class: 'work-association__title'
+                %span.work-association__id= doc.to_param

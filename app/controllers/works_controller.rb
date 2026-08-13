@@ -19,6 +19,11 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
   # the Blacklight SearchBuilder, so this controller needs the catalog config —
   # the same wiring Admin::PeopleController uses for its community picker.
   include Blacklight::Configurable
+  # Blacklight::Controller supplies search_state and the config; `search_service`
+  # itself lives in Searchable, which CatalogController's subclasses get by
+  # inheritance and this controller does not. The associations box needs it to
+  # resolve its edges through the gated search.
+  include Blacklight::Searchable
 
   copy_blacklight_config_from(CatalogController)
 
@@ -40,6 +45,16 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
   authorize_resource_writes!(extra_edit: %i[metadata update_metadata request_change upload add_file])
   before_action :reject_if_in_progress, only: [:edit]
   after_action :record_view_impression, only: :show
+
+  # Plumb the acting user into the search service, as CatalogController does for
+  # its own subtree. Blacklight 8 scopes every SearchBuilder to the
+  # SearchService rather than the controller, so without this
+  # SearchBuilder#gated_user is nil and the associations box would silently gate
+  # as anonymous — hiding a viewer's own restricted associated Works from them.
+  # `effective_user` honours a view-as session.
+  def search_service_context
+    { current_user: current_user, effective_user: effective_user }
+  end
 
   def show
     @work = AtlasRb::Work.find(params[:id])
@@ -328,22 +343,39 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
       @scholar = GoogleScholarMetadata.for(work: @work, permissions: @permissions, files: @files)
       @av_file = MediaRemux.playable_file(@files)
       @caption = CaptionTrack.for(@files)
+      # Resolved on the request thread, not in the worker: the gate is the
+      # search service, which reads the acting user, and a worker holds no
+      # database connection.
+      @associations = WorkAssociations.call(associations:   reads[:associations],
+                                            search_service: search_service)
       prepare_zoom_view(params[:id], pages: reads[:file_sets])
       assign_show_abilities!(klass: 'Work')
       work_breadcrumbs(params[:id])
     end
 
-    # The show page's three independent Atlas reads, run concurrently. mods carries
+    # The show page's four independent Atlas reads, run concurrently. mods carries
     # no nuid (gated by Current.nuid, the real user); assets and file_sets gate on
     # the effective (view-as) user, resolved here on the request thread because the
     # workers must not touch ActiveRecord.
     def parallel_show_reads
       viewer_nuid = effective_user&.nuid
       parallel_atlas_reads(
-        mods:      -> { AtlasRb::Work.mods(params[:id], 'html') },
-        files:     -> { AtlasRb::Work.assets(params[:id], nuid: viewer_nuid) },
-        file_sets: -> { AtlasRb::Work.file_sets(params[:id], nuid: viewer_nuid) }
+        mods:         -> { AtlasRb::Work.mods(params[:id], 'html') },
+        files:        -> { AtlasRb::Work.assets(params[:id], nuid: viewer_nuid) },
+        file_sets:    -> { AtlasRb::Work.file_sets(params[:id], nuid: viewer_nuid) },
+        associations: -> { associations_or_none(params[:id]) }
       )
+    end
+
+    # The associations box is supplementary, so a failed read must not take the
+    # page with it — unlike mods / assets / file_sets, which it cannot render
+    # without. parallel_atlas_reads re-raises any task's error, so the rescue
+    # belongs inside the task. nil reads as "no associations" downstream.
+    def associations_or_none(id)
+      AtlasRb::Work.associations(id)
+    rescue StandardError => e
+      Rails.logger.error("WorksController: associations read failed for #{id}: #{e.class} #{e.message}")
+      nil
     end
 
     # Both post-deposit steps that can fail without failing the deposit itself.

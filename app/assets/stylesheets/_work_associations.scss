@@ -1,0 +1,86 @@
+// ---------------------------------------------------------------------
+// Associated works — the box on a Work show page, and the rows in the
+// admin manage panel that mirror it.
+//
+// The card shell is the Downloads card's, so the two read as siblings in
+// the same column. What varies is inside a list item: a quiet predicate
+// heading, then the works it groups. Deliberately no colour per
+// predicate — a relationship is a label, not a status, and a five-colour
+// legend would outrank the Embargoed and Incomplete pills, which do
+// carry status.
+// ---------------------------------------------------------------------
+
+.work-association-group {
+  &__label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    color: $gray-600;
+    margin-bottom: 0.6rem;
+
+    .fa-solid {
+      color: $gray-500;
+      font-size: 0.9em;
+    }
+  }
+}
+
+// One associated work. The thumbnail box matches the set-contents row so
+// a reader meets the same object shape wherever a Work is listed.
+.work-association {
+  display: flex;
+  gap: 0.85rem;
+  align-items: center;
+  padding: 0.4rem 0;
+
+  & + & {
+    border-top: 1px solid $gray-200;
+  }
+
+  &__thumb {
+    width: 52px;
+    height: 52px;
+    flex: none;
+    border: 1px solid $gray-300;
+    background: $gray-100;
+    border-radius: 0.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $gray-400;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__body {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__title {
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  // Identifiers should look like identifiers, not body words.
+  &__id {
+    font-family: var(--bs-font-monospace);
+    font-size: 0.78rem;
+    color: $gray-600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  // Trailing action, used only by the admin manage panel. Pushed right so
+  // the row's shape is the same with or without it.
+  &__action {
+    margin-left: auto;
+    flex: none;
+  }
+}

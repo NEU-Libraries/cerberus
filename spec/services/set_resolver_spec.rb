@@ -48,7 +48,7 @@ RSpec.describe SetResolver do
 
   let(:user) { nil }
   let(:search_service) do
-    GatedSearchService.new(config: CatalogController.blacklight_config, context: { current_user: user })
+    GatedSearchService.new(config: CatalogController.blacklight_config, current_user: user)
   end
 
   describe '#contents_fqs' do
