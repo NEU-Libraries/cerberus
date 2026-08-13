@@ -215,11 +215,14 @@ Rails.application.routes.draw do
     # elsewhere and is gated there.
     get 'ledger', to: 'ledger#index'
 
-    # Restore a withdrawal — a registry of every tombstoned Work / Collection /
-    # Community, each with a Restore action (reverses the show-page tombstone via
-    # atlas_rb's operator-only Admin.restore). :id is the resource NOID; the
-    # `type` body param selects the right Admin restorer.
-    resources :tombstones, only: [:index] do
+    # The tombstone registry — every tombstoned Work / Collection / Community,
+    # with the two ways out of a withdrawal: Restore reverses the show-page
+    # tombstone, and DELETE purges the item for good (both via atlas_rb's
+    # operator-only Admin namespace). :id is the resource NOID; the `type` body
+    # param selects the right Admin class. The two verbs are gated differently
+    # in the controller, matching Atlas: restore reaches the devolved-admin
+    # tier, destroy is :admin only.
+    resources :tombstones, only: %i[index destroy] do
       member { post :restore }
     end
 

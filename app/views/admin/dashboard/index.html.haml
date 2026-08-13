@@ -84,6 +84,8 @@
       %span.admin-action-card__title Restore a tombstoned item
       %span.admin-action-card__desc
         Review every tombstoned Work, Collection and Community, and reverse a tombstone — the item becomes discoverable again, with the restore recorded in its History.
+        - if current_user&.admin?
+          An admin can also delete a tombstoned item permanently.
       %span.admin-action-card__cta
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}

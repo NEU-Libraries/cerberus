@@ -21,6 +21,9 @@
   .p-3
     %p.text-muted.small.mb-0
       Every tombstoned Work, Collection and Community. Restoring reverses the tombstone — the item becomes discoverable again and its History records the restore. A Collection or Community can only be restored once any tombstoned parent above it is restored.
+    - if current_user&.admin?
+      %p.text-muted.small.mb-0.mt-2
+        Permanent deletion is the other way out of a withdrawal, and nothing reverses it: it removes the item and every preserved copy of its files, earlier versions included, leaving only the audit record. A Collection or Community must be emptied first, and its tombstoned members count.
 
   - if documents.any?
     .table-responsive
@@ -40,9 +43,14 @@
               %td
                 %span.admin-registry-table__id= doc.to_param
               %td.text-end
-                = button_to restore_admin_tombstone_path(doc.to_param), params: { type: doc.klass_type }, class: 'admin-registry-table__edit admin-registry-table__edit--restore', form: { data: { turbo_confirm: "Restore “#{finder_doc_title(doc)}”? It will be discoverable again.", turbo_confirm_title: 'Confirm restore', turbo_confirm_button: 'Restore', turbo_confirm_variant: 'primary' } } do
-                  %i.fa-solid.fa-rotate-left{'aria-hidden' => 'true'}
-                  Restore
+                .d-inline-flex.gap-3.align-items-center
+                  = button_to restore_admin_tombstone_path(doc.to_param), params: { type: doc.klass_type }, class: 'admin-registry-table__edit admin-registry-table__edit--restore', form: { class: 'd-inline', data: { turbo_confirm: "Restore “#{finder_doc_title(doc)}”? It will be discoverable again.", turbo_confirm_title: 'Confirm restore', turbo_confirm_button: 'Restore', turbo_confirm_variant: 'primary' } } do
+                    %i.fa-solid.fa-rotate-left{'aria-hidden' => 'true'}
+                    Restore
+                  - if current_user&.admin?
+                    = button_to admin_tombstone_path(doc.to_param), method: :delete, params: { type: doc.klass_type }, class: 'admin-registry-table__edit admin-registry-table__edit--purge', form: { class: 'd-inline', data: { turbo_confirm: tombstone_purge_confirm(doc), turbo_confirm_title: 'Confirm permanent deletion', turbo_confirm_button: 'Delete permanently' } } do
+                      %i.fa-solid.fa-trash-can{'aria-hidden' => 'true'}
+                      Delete permanently
 
     - if @response.respond_to?(:total_pages) && @response.total_pages > 1
       .px-3.pt-2

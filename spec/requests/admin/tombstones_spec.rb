@@ -2,11 +2,15 @@
 
 require 'rails_helper'
 
-# The restore-a-withdrawal registry. Inherits the Admin::BaseController gate,
-# lists tombstoned resources, and reverses a withdrawal via atlas_rb's
-# operator-only Admin restorers. TombstonedItems and atlas_rb are stubbed so
+# The tombstone registry. Lists tombstoned resources and offers the two ways
+# out of a withdrawal — reverse it, or finish it permanently — via atlas_rb's
+# operator-only Admin namespace. TombstonedItems and atlas_rb are stubbed so
 # these exercise the Cerberus controller/view wiring + the type dispatch, not
 # Atlas or the live Solr inverse query (covered in tombstoned_items_spec).
+#
+# The two verbs are gated differently, so the gate block covers both: the
+# devolved-admin tier reaches restore but not destroy, matching Atlas's
+# Ability, which grants the delegate tier :restore and withholds :destroy.
 RSpec.describe 'Admin::Tombstones', type: :request do
   include Devise::Test::IntegrationHelpers
 
@@ -64,6 +68,18 @@ RSpec.describe 'Admin::Tombstones', type: :request do
       get '/admin/tombstones'
       expect(response).to redirect_to(new_user_session_path)
     end
+
+    # Atlas's apply_admin_delegate_abilities grants :reparent, :restore,
+    # :create AuditEvent and :read_versions, and deliberately omits :destroy.
+    # Gating destroy any wider here would only earn a 403 from the far end.
+    it 'forbids a devolved-admin delegate the permanent delete' do
+      sign_in delegate_user
+      expect(AtlasRb::Admin::Work).not_to receive(:destroy)
+
+      delete '/admin/tombstones/abc', params: { type: 'Work' }
+
+      expect(response).to have_http_status(:forbidden)
+    end
   end
 
   describe 'as admin' do
@@ -85,6 +101,28 @@ RSpec.describe 'Admin::Tombstones', type: :request do
         allow(TombstonedItems).to receive(:call).and_return(fake_results)
         get '/admin/tombstones'
         expect(response.body).to include('Nothing is tombstoned')
+      end
+
+      # The caveat is row-typed because it is only true of a container: Atlas
+      # refuses a Collection or Community that still holds a member and counts
+      # tombstoned ones, while a Work purge cascades into its own FileSets.
+      it 'offers the permanent delete on a Work row, with no container caveat' do
+        allow(TombstonedItems).to receive(:call)
+          .and_return(fake_results(tombstoned_doc(noid: 'abc', title: 'Withdrawn Thesis')))
+
+        get '/admin/tombstones'
+
+        expect(response.body).to include('Delete permanently')
+        expect(response.body).not_to include('still holds a member')
+      end
+
+      it 'warns about members on a container row' do
+        allow(TombstonedItems).to receive(:call)
+          .and_return(fake_results(tombstoned_doc(noid: 'xyz', title: 'Old Collection', klass: 'Collection')))
+
+        get '/admin/tombstones'
+
+        expect(response.body).to include('still holds a member')
       end
     end
 
@@ -115,6 +153,88 @@ RSpec.describe 'Admin::Tombstones', type: :request do
         post '/admin/tombstones/abc/restore', params: { type: 'Collection' }
         expect(flash[:alert]).to include('tombstoned parent')
       end
+    end
+
+    describe 'DELETE destroy' do
+      # The confirm marker is atlas_rb's friction gate on the one irreversible
+      # verb, so assert it on the wire rather than trusting the binding's default
+      # — there isn't one, and omitting it raises ArgumentError.
+      it 'purges through the Work admin with the confirm marker and redirects with a notice' do
+        expect(AtlasRb::Admin::Work).to receive(:destroy)
+          .with('abc', confirm: :i_understand)
+          .and_return(instance_double(Faraday::Response, success?: true))
+
+        delete '/admin/tombstones/abc', params: { type: 'Work' }
+
+        expect(response).to redirect_to(admin_tombstones_path)
+        expect(flash[:notice]).to include('Permanently deleted')
+      end
+
+      it 'dispatches to the Community admin for a Community' do
+        expect(AtlasRb::Admin::Community).to receive(:destroy)
+          .with('xyz', confirm: :i_understand)
+          .and_return(instance_double(Faraday::Response, success?: true))
+
+        delete '/admin/tombstones/xyz', params: { type: 'Community' }
+
+        expect(response).to redirect_to(admin_tombstones_path)
+      end
+
+      it 'rejects an unknown resource type without calling atlas_rb' do
+        expect(AtlasRb::Admin::Work).not_to receive(:destroy)
+        delete '/admin/tombstones/abc', params: { type: 'Pizza' }
+        expect(flash[:alert]).to include('Unknown resource type')
+      end
+
+      # Atlas answers a non-empty container with 422 + code "has_children", on a
+      # path outside atlas_rb's typed-error middleware — so it arrives as a plain
+      # response and the code has to be read off the body. Note the envelope puts
+      # the message on `error` and the token on `code`, the opposite way round
+      # from the re-parent and linked-member envelopes.
+      it 'names the members when Atlas refuses a non-empty container' do
+        refusal = '{"error":"cannot destroy a collection that still has members","code":"has_children"}'
+        allow(AtlasRb::Admin::Collection).to receive(:destroy)
+          .and_return(instance_double(Faraday::Response, success?: false, body: refusal))
+
+        delete '/admin/tombstones/abc', params: { type: 'Collection' }
+
+        expect(flash[:alert]).to include('still has members', 'tombstoned members count')
+      end
+
+      it 'falls back to the generic alert on a refusal it cannot read' do
+        allow(AtlasRb::Admin::Work).to receive(:destroy)
+          .and_return(instance_double(Faraday::Response, success?: false, body: 'Not Found'))
+
+        delete '/admin/tombstones/abc', params: { type: 'Work' }
+
+        expect(flash[:alert]).to eq(Admin::TombstonesController::PURGE_FAILED)
+      end
+
+      it 'reports a transport failure instead of raising' do
+        allow(AtlasRb::Admin::Work).to receive(:destroy).and_raise(Faraday::ConnectionFailed, 'down')
+
+        delete '/admin/tombstones/abc', params: { type: 'Work' }
+
+        expect(response).to redirect_to(admin_tombstones_path)
+        expect(flash[:alert]).to eq(Admin::TombstonesController::PURGE_FAILED)
+      end
+    end
+  end
+
+  # The delegate tier shares the registry with :admin but not the purge, so the
+  # control has to be absent from the page as well as refused at the route —
+  # otherwise the surface offers an action the far end will only reject.
+  describe 'as a devolved-admin delegate' do
+    before { sign_in delegate_user }
+
+    it 'offers Restore but not the permanent delete' do
+      allow(TombstonedItems).to receive(:call)
+        .and_return(fake_results(tombstoned_doc(noid: 'abc', title: 'Withdrawn Thesis')))
+
+      get '/admin/tombstones'
+
+      expect(response.body).to include('Restore')
+      expect(response.body).not_to include('Delete permanently')
     end
   end
 end
