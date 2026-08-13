@@ -37,12 +37,12 @@ RSpec.describe 'People', type: :request do
   describe 'GET /communities/:community_id/people (Faculty & Staff)' do
     it 'trails the breadcrumb through the community and its ancestors' do
       allow(AtlasRb::Community).to receive(:find).and_return(OpenStruct.new(title: 'Communications'))
-      # #breadcrumbs walks the community's ancestor_chain off a single find.
+      # #breadcrumbs walks the community's ancestors off a single find.
       community = OpenStruct.new(
         klass:    'Community',
         resource: OpenStruct.new(
           id: 'jm640df', title: 'Communications',
-          ancestor_chain: [{ 'noid' => '9zw3s1h', 'klass' => 'Community', 'title' => 'Northeastern University' }]
+          ancestors: [{ 'noid' => '9zw3s1h', 'klass' => 'Community', 'title' => 'Northeastern University' }]
         )
       )
       allow(AtlasRb::Resource).to receive(:find).with('jm640df').and_return(community)
@@ -78,12 +78,12 @@ RSpec.describe 'People', type: :request do
     it 'trails the breadcrumb through the affiliated community and its ancestors' do
       affiliated = person.merge('affiliated_community_ids' => ['jm640df'])
       allow(AtlasRb::Person).to receive(:find).and_return(affiliated)
-      # #breadcrumbs walks the community's ancestor_chain off a single find.
+      # #breadcrumbs walks the community's ancestors off a single find.
       community = OpenStruct.new(
         klass:    'Community',
         resource: OpenStruct.new(
           id: 'jm640df', title: 'Communications',
-          ancestor_chain: [{ 'noid' => '9zw3s1h', 'klass' => 'Community', 'title' => 'Northeastern University' }]
+          ancestors: [{ 'noid' => '9zw3s1h', 'klass' => 'Community', 'title' => 'Northeastern University' }]
         )
       )
       allow(AtlasRb::Resource).to receive(:find).with('jm640df').and_return(community)

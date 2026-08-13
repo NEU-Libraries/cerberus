@@ -418,7 +418,7 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     # crumb. Mirrors ApplicationController#edit_breadcrumb_tail, differing only in
     # the tail label — an editor can back out to the Work via the trail.
     def upload_breadcrumbs
-      Array(@work.ancestor_chain).each do |node|
+      Array(@work.ancestors).each do |node|
         add_breadcrumb_for(node['noid'], node['klass'], node['title'])
       end
       breadcrumb(@work.title, work_path(@work.id), match: :exact)

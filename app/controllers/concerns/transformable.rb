@@ -95,7 +95,7 @@ module Transformable # rubocop:disable Metrics/ModuleLength
   # that doesn't supply the resource.
   def assign_visibility_ceiling(resource)
     @public_allowed = true
-    parent = Array(resource&.ancestor_chain).last
+    parent = Array(resource&.ancestors).last
     return if parent.blank?
     return if Array(AtlasRb::Resource.permissions(parent['noid'])&.read).include?('public')
 
@@ -135,7 +135,7 @@ module Transformable # rubocop:disable Metrics/ModuleLength
   end
 
   # The create-form counterpart to {#assign_visibility_ceiling}. That one walks
-  # the resource's ancestor_chain, which a resource that does not exist yet has
+  # the resource's ancestors, which a resource that does not exist yet has
   # none of — but the create gate has already loaded the destination's envelope
   # into @permissions, and the destination IS the parent whose visibility bounds
   # the child. So the ceiling costs no extra call.

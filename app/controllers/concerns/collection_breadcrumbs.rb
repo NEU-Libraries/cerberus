@@ -24,7 +24,7 @@ module CollectionBreadcrumbs
     # crumb), so an edit/XML page keeps the same prefix as the show page.
     def collection_breadcrumbs(id, editing: false)
       result = AtlasRb::Resource.find(id)
-      parent_noid = Array(result.resource.ancestor_chain).last&.dig('noid')
+      parent_noid = Array(result.resource.ancestors).last&.dig('noid')
 
       if owner_workspace?(parent_noid)
         breadcrumb('My DRS', my_drs_path)

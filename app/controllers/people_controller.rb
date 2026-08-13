@@ -83,7 +83,7 @@ class PeopleController < CatalogController
     # community and that community's ancestors — e.g. Northeastern University /
     # Communications / Faculty & Staff / <name> — so the trail leads back through
     # the community the person belongs to, not just the flat People index. The
-    # shared #breadcrumbs walks the community's ancestor_chain (each crumb linked
+    # shared #breadcrumbs walks the community's ancestors (each crumb linked
     # to its show page); "Faculty & Staff" links the community-scoped browse, and
     # the person is the you-are-here tail. Falls back to the flat People trail
     # when the person has no affiliation or the community lookup fails (a stale

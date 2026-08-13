@@ -466,8 +466,8 @@ describe CollectionsController do
   describe '#collection_breadcrumbs (private)' do
     def stub_collection(parent_noid:)
       item = OpenStruct.new(id: 'cnoid', title: 'Working Files',
-                            ancestor_chain: [{ 'noid' => 'people', 'klass' => 'Community', 'title' => 'People' },
-                                             { 'noid' => parent_noid, 'klass' => 'Collection', 'title' => 'Personal Root' }])
+                            ancestors: [{ 'noid' => 'people', 'klass' => 'Community', 'title' => 'People' },
+                                        { 'noid' => parent_noid, 'klass' => 'Collection', 'title' => 'Personal Root' }])
       allow(AtlasRb::Resource).to receive(:find).with('cnoid').and_return(OpenStruct.new(resource: item, klass: 'Collection'))
     end
 

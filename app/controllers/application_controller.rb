@@ -33,9 +33,9 @@ class ApplicationController < ActionController::Base
   def breadcrumbs(id, editing: false, match: :inclusive, result: nil)
     result ||= AtlasRb::Resource.find(id)
     item = result.resource
-    # ancestor_chain carries each ancestor's title alongside its noid/klass, so
+    # `ancestors` carries each ancestor's title alongside its noid/klass, so
     # the whole trail is built from this single find — no per-ancestor round-trip.
-    Array(item.ancestor_chain).each do |node|
+    Array(item.ancestors).each do |node|
       add_breadcrumb_for(node['noid'], node['klass'], node['title'], match: match)
     end
 

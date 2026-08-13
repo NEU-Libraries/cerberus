@@ -887,16 +887,16 @@ describe WorksController do
   # the already-loaded @work (it makes no Atlas fetch of its own) plus one
   # Person.resolve; here we set @work and stub the resolve, then assert the crumbs.
   describe '#work_breadcrumbs (private)' do
-    def work_result(parent_noid:, chain:)
+    def work_result(parent_noid:, ancestors:)
       controller.instance_variable_set(:@work,
                                        AtlasRb::Mash.new('id' => 'wnoid', 'title' => 'Coastal Survey',
-                                                         'depositor' => '000000007', 'ancestor_chain' => chain))
-      parent_noid # documents intent; the chain's last node carries it
+                                                         'depositor' => '000000007', 'ancestors' => ancestors))
+      parent_noid # documents intent; the last ancestor node carries it
     end
 
     it 'trails community / Person / work for a work homed in the depositor Person root' do
       work_result(parent_noid: 'jane-root',
-                  chain:       [{ 'noid' => 'people', 'klass' => 'Community', 'title' => 'People' },
+                  ancestors:   [{ 'noid' => 'people', 'klass' => 'Community', 'title' => 'People' },
                                 { 'noid' => 'jane-root', 'klass' => 'Collection', 'title' => 'Personal Root' }])
       person = AtlasRb::Mash.new('id' => 'janenoid', 'display_name' => 'Jane Doe',
                                  'personal_root_id' => 'jane-root', 'affiliated_community_ids' => ['libnoid'])
@@ -912,7 +912,7 @@ describe WorksController do
 
     it 'keeps the plain structural trail for a workspace work (not in a personal root)' do
       work_result(parent_noid: 'col',
-                  chain:       [{ 'noid' => 'col', 'klass' => 'Collection', 'title' => 'My Collection' }])
+                  ancestors:   [{ 'noid' => 'col', 'klass' => 'Collection', 'title' => 'My Collection' }])
       # Depositor has a Person, but its root is not this work's parent.
       person = AtlasRb::Mash.new('id' => 'janenoid', 'personal_root_id' => 'jane-root',
                                  'affiliated_community_ids' => ['libnoid'])
