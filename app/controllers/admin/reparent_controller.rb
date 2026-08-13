@@ -133,13 +133,12 @@ module Admin
       # The node's current immediate parent, as a lightweight display object
       # (title + noid + klass), or nil when the node is already top-level.
       # `ancestors` is ordered root→…→parent, so the last entry is the parent.
+      # Each entry carries the parent's title, so naming it costs no second fetch.
       def immediate_parent(node)
-        ancestors = Array(node.resource.ancestors)
-        return nil if ancestors.empty?
+        parent = Array(node.resource.ancestors).last
+        return nil if parent.blank?
 
-        parent_id, parent_klass = ancestors.last
-        found = AtlasRb.const_get(parent_klass).find(parent_id)
-        OpenStruct.new(title: found.title, noid: parent_id, klass: parent_klass)
+        OpenStruct.new(title: parent['title'], noid: parent['noid'], klass: parent['klass'])
       end
 
       def node_path(node)
