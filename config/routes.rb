@@ -191,6 +191,16 @@ Rails.application.routes.draw do
     post   'linked_members/add',    to: 'linked_members#add',     as: :linked_members_add
     delete 'linked_members/remove', to: 'linked_members#remove',  as: :linked_members_remove
 
+    # Associated works — find a Work, then assert or retract the typed edges
+    # between it and other Works (codebook / figure / transcription / …).
+    # Admin-only because Atlas gates the write that way: the claim renders on
+    # the target's page too. `remove` carries holder_id, because the edge lives
+    # on whichever Work asserted it and either direction is retractable here.
+    get    'associations',        to: 'associations#index'
+    get    'associations/manage', to: 'associations#manage',  as: :associations_manage
+    post   'associations/add',    to: 'associations#add',     as: :associations_add
+    delete 'associations/remove', to: 'associations#remove',  as: :associations_remove
+
     # People — the curatorial Person registry: create a Person by NUID, edit the
     # authoritative display_name / title / bio / orcid, and manage community
     # affiliations (the edges that drive the Faculty & Staff browse). Keyed by

@@ -1,0 +1,89 @@
+= render 'admin/breadcrumb_header'
+
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-diagram-project{'aria-hidden' => 'true'}
+      Associated works
+    .admin-registry__head-actions
+      %span.admin-registry__subtitle
+        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+        Admin-only
+
+  .p-3
+    .reparent-node-summary
+      %span.reparent-node-summary__label Managing
+      = finder_type_chip('Work')
+      %span.reparent-node-summary__title= @work.resource.title
+      %span.admin-registry-table__id= params[:work_id]
+
+    -# Both directions, both retractable. The edge is stored once, on the Work
+    -# that asserts it, so an inbound row's remove acts on the other Work — which
+    -# an admin may do, holding rights on both ends. Each row carries its holder.
+    - { outbound: @outbound, inbound: @inbound }.each do |direction, groups|
+      %h2.linked-members__subhead{class: direction == :inbound ? 'mt-4' : nil}
+        = association_direction_caption(direction)
+        %span.admin-registry__count= pluralize(groups.values.sum(&:size), 'association')
+      - if groups.any?
+        - groups.each do |type, rows|
+          .work-association-group.mb-2
+            .work-association-group__label
+              %i.fa-solid{class: association_icon(type), 'aria-hidden' => 'true'}
+              %span.ms-1= association_label(type, direction)
+            - rows.each do |row|
+              .work-association
+                .work-association__body
+                  = link_to row.title, work_path(row.noid), class: 'work-association__title'
+                  %span.work-association__id= row.noid
+                .work-association__action
+                  - holder = direction == :inbound ? row.noid : params[:work_id]
+                  - target = direction == :inbound ? params[:work_id] : row.noid
+                  = button_to admin_associations_remove_path(work_id: params[:work_id], holder_id: holder, target_id: target, type: type), method: :delete, class: 'linked-members__btn linked-members__btn--remove', form: { class: 'linked-members__btn-form', data: { turbo_confirm: "Remove “#{association_label(type, direction)}: #{row.title}”? The relationship is dropped from both works' pages. Neither work is changed otherwise." } } do
+                    - concat content_tag(:i, '', class: 'fa-solid fa-xmark me-1', 'aria-hidden' => 'true')
+                    Remove
+      - else
+        %p.text-muted.small.mb-0
+          - if direction == :inbound
+            No other work claims a relationship to this one.
+          - else
+            This work claims no relationship to another. Search below to add one.
+
+    %h2.linked-members__subhead.mt-4 Assert a relationship
+    %p.text-muted.small.mb-3
+      The edge is stored on this work, so it reads outward: this work is the codebook, figure or transcription
+      %em for
+      the one you pick. To record the reverse, manage the other work instead.
+    = render 'admin/finder/search_form', url: admin_associations_manage_path, q: params[:q], hidden: { work_id: params[:work_id] }, placeholder: 'Search works to associate…'
+
+  - if @results
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table
+        %thead
+          %tr
+            %th{scope: 'col'} Title
+            %th{scope: 'col'} Type
+            %th{scope: 'col'} PID
+            %th{scope: 'col'} Relationship
+        %tbody
+          - @results.documents.each do |doc|
+            %tr
+              %td
+                .admin-registry-table__name= finder_doc_title(doc)
+              %td= finder_type_chip(doc.klass_type)
+              %td
+                %span.admin-registry-table__id= doc.to_param
+              %td.text-end
+                -# A form per row rather than a button_to: the predicate is a
+                -# choice made at the moment of adding, and button_to carries
+                -# only fixed params.
+                = form_with url: admin_associations_add_path, method: :post, class: 'work-association-add' do |form|
+                  = form.hidden_field :work_id, value: params[:work_id]
+                  = form.hidden_field :target_id, value: doc.to_param
+                  = form.label :type, 'This work is the', class: 'work-association-add__label', for: "type_#{doc.to_param}"
+                  = form.select :type, association_type_options, {}, class: 'form-select form-select-sm work-association-add__select', id: "type_#{doc.to_param}"
+                  = form.submit 'Add', class: 'linked-members__btn linked-members__btn--add'
+
+  .px-3.pb-3
+    = link_to admin_associations_path, class: 'reparent-back' do
+      %i.fa-solid.fa-arrow-left.me-1{'aria-hidden' => 'true'}
+      Find another work

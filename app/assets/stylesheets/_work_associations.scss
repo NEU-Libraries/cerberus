@@ -84,3 +84,25 @@
     flex: none;
   }
 }
+
+// The per-row "This work is the … for" control in the admin manage panel.
+// One form per candidate row, because the predicate is chosen at the moment
+// of adding rather than picked once for the whole result set.
+.work-association-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-content: flex-end;
+
+  &__label {
+    font-size: 0.78rem;
+    color: $gray-600;
+    white-space: nowrap;
+    margin: 0;
+  }
+
+  &__select {
+    width: auto;
+    font-size: 0.8rem;
+  }
+}
