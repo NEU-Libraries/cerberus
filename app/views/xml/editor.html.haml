@@ -1,5 +1,11 @@
 - content_for :head do
   = javascript_import_module_tag "preview_application"
+  -# Turbo clones the page snapshot before it swaps the body, so a Stimulus
+  -# disconnect() runs too late to undo what the editor widget injected — the
+  -# clone already holds it, and a restore visit paints the editor twice. Opting
+  -# the page out of the cache also stops a restore from re-seating XML that was
+  -# typed but never validated or saved.
+  = tag.meta(name: "turbo-cache-control", content: "no-cache")
 
 -# Breadcrumb rides :container_header so it spans the full main width above the
 -# editor, matching the Metadata/Permissions edit pages this is a sub-tab of.
