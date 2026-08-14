@@ -1,7 +1,12 @@
 - content_for(:container_header) do
   = render 'shared/breadcrumbs', show_add: false
 
-%h3.py-3 Edit Collection
+-# The heading names the resource, so the page says what is being edited rather
+-# than restating the trail's last crumb. Matches the XML editor, which is a
+-# sub-tab of this page and has always named its resource.
+%h3.py-3
+  Edit Collection -
+  = @collection.title
 
 -# @open_tab is set by an action that re-renders this page and has to land the
 -# reader back on the pane they were working in — a rejected Derivative access
