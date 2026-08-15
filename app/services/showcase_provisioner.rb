@@ -11,6 +11,8 @@
 # Current.nuid (set by the controller, or the reset seed's Current.set block),
 # but the showcases are recorded as UNOWNED_NUID — see #provision.
 class ShowcaseProvisioner < ApplicationService
+  include AtlasWrite
+
   def initialize(community_id:)
     @community_id = community_id
     super()
@@ -58,11 +60,5 @@ class ShowcaseProvisioner < ApplicationService
       return if Metadata::MODSMerge.unchanged?(xml, merged)
 
       AtlasRb::Collection.update(id, write_tmp_xml(merged))
-    end
-
-    def write_tmp_xml(xml)
-      path = Rails.root.join('tmp', "#{SecureRandom.uuid}.xml").to_s
-      File.write(path, xml)
-      path
     end
 end
