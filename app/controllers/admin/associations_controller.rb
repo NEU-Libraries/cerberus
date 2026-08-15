@@ -38,6 +38,11 @@ module Admin
 
     # Atlas's 422 codes on an association write, in the admin's terms. The
     # vocabulary is atlas_rb's; the wording is ours.
+    #
+    # Keyed on the envelope's `error` discriminator, which atlas_rb hands back
+    # as a String, so the raw code is the lookup key. An unrecognised code — or
+    # an absent one — falls through to the generic sentence rather than saying
+    # nothing.
     REFUSALS = {
       'invalid_type'        => 'That is not a relationship Atlas recognises.',
       'target_not_found'    => 'No Work with that PID — nothing was linked.',
@@ -68,7 +73,7 @@ module Admin
       AtlasRb::Work.associate(params[:work_id], params[:target_id], type: params[:type])
       redirect_to manage_path, notice: 'Association added.'
     rescue AtlasRb::WorkAssociationError => e
-      redirect_to manage_path, alert: REFUSALS.fetch(e.code.to_s, GENERIC_REFUSAL)
+      redirect_to manage_path, alert: REFUSALS.fetch(e.code, GENERIC_REFUSAL)
     rescue Faraday::Error => e
       log_failure('add', e)
       redirect_to manage_path, alert: GENERIC_REFUSAL
@@ -80,7 +85,7 @@ module Admin
       AtlasRb::Work.disassociate(params[:holder_id], params[:target_id], type: params[:type])
       redirect_to manage_path, notice: 'Association removed.'
     rescue AtlasRb::WorkAssociationError => e
-      redirect_to manage_path, alert: REFUSALS.fetch(e.code.to_s, GENERIC_REFUSAL)
+      redirect_to manage_path, alert: REFUSALS.fetch(e.code, GENERIC_REFUSAL)
     rescue Faraday::Error => e
       log_failure('remove', e)
       redirect_to manage_path, alert: GENERIC_REFUSAL
