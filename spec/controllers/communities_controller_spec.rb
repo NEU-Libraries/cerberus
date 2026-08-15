@@ -517,4 +517,64 @@ describe CommunitiesController do
       expect(result).to eq(Set['uuid-full'])
     end
   end
+
+  # #update is the shared entry point for the Metadata and Permissions tabs.
+  # A community is the one container that never cascades: restricting it changes
+  # that object alone and deliberately leaves its collections as visible as they
+  # were. That is sharp enough to be admin-only, and the gate lives on the
+  # server as well as in the form.
+  describe 'update' do
+    let(:user) { User.new(email: 'ed@example.com', nuid: '000000002', groups: ['editors']) }
+    let(:admin_user) { User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin') }
+
+    before do
+      AtlasRb::Community.metadata(community.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      sign_in user
+    end
+
+    it 'merges the descriptive fields into the existing MODS and redirects to show' do
+      patch :update, params: { id:        community.id,
+                               community: { title: 'NewCommunityTitle', description: 'NewCommunityAbstract' } }
+
+      expect(response).to redirect_to(community_path(community.id))
+      updated = AtlasRb::Community.find(community.id, nuid: '000000004')
+      expect(updated.title).to start_with('NewCommunityTitle')
+      expect(updated.description).to include('NewCommunityAbstract')
+    end
+
+    it 'refuses a blank title and returns to the edit page without writing MODS' do
+      allow(AtlasRb::Community).to receive(:update)
+
+      patch :update, params: { id: community.id, community: { title: '', description: 'Whatever' } }
+
+      expect(AtlasRb::Community).not_to have_received(:update)
+      expect(flash[:alert]).to eq('Please provide a title.')
+      expect(response).to redirect_to(edit_community_path(community.id))
+    end
+
+    context 'when the submitted change narrows the community' do
+      before { publicize_ancestry!(community: community) }
+
+      it 'refuses a non-admin narrowing and writes nothing' do
+        allow(AtlasRb::Community).to receive(:metadata)
+
+        patch :update, params: { id: community.id, mass: 'private', community: { embargo: '' } }
+
+        expect(AtlasRb::Community).not_to have_received(:metadata)
+        expect(flash[:alert]).to eq(Transformable::COMMUNITY_NARROWING_REFUSED)
+      end
+
+      # An admin's narrowing is written the ordinary way. NarrowingRequest is the
+      # Collection cascade and must not be reached from here at all.
+      it 'writes an admin narrowing directly, without reaching the cascade' do
+        allow(NarrowingRequest).to receive(:call)
+        sign_in admin_user
+
+        patch :update, params: { id: community.id, mass: 'private', community: { embargo: '' } }
+
+        expect(NarrowingRequest).not_to have_received(:call)
+        expect(Array(AtlasRb::Resource.permissions(community.id, nuid: '000000004')&.read)).not_to include('public')
+      end
+    end
+  end
 end

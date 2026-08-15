@@ -533,4 +533,82 @@ describe CollectionsController do
       controller.send(:collection_breadcrumbs, 'cnoid', editing: true)
     end
   end
+
+  # #update is the shared entry point for the Metadata and Permissions tabs,
+  # which are separate forms posting disjoint fields to the same action. The
+  # branches worth pinning are the ones that decide whether Atlas is written at
+  # all: a refused ACL must not take the descriptive edit down with it, and a
+  # narrowing must reach the cascade rather than being written here.
+  describe 'update' do
+    let(:user) { User.new(email: 'ed@example.com', nuid: '000000002', groups: ['editors']) }
+
+    before do
+      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      sign_in user
+    end
+
+    it 'merges the descriptive fields into the existing MODS and redirects to show' do
+      patch :update, params: { id:         collection.id,
+                               collection: { title: 'NewCollectionTitle', description: 'NewCollectionAbstract' } }
+
+      expect(response).to redirect_to(collection_path(collection.id))
+      updated = AtlasRb::Collection.find(collection.id, nuid: '000000004')
+      expect(updated.title).to start_with('NewCollectionTitle')
+      expect(updated.description).to include('NewCollectionAbstract')
+    end
+
+    it 'refuses a blank title and returns to the edit page without writing MODS' do
+      allow(AtlasRb::Collection).to receive(:update)
+
+      patch :update, params: { id: collection.id, collection: { title: '', description: 'Whatever' } }
+
+      expect(AtlasRb::Collection).not_to have_received(:update)
+      expect(flash[:alert]).to eq('Please provide a title.')
+      expect(response).to redirect_to(edit_collection_path(collection.id))
+    end
+
+    # The parent has to be public first. Atlas refuses a child grant that would
+    # make it more visible than its container, and that refusal is the subject
+    # of the next example rather than this one.
+    it 'writes a submitted group grant to the read ACL' do
+      publicize_ancestry!(community: community)
+
+      patch :update, params: { id:         collection.id,
+                               collection: { permissions: { '1' => { group_id: 'editors', ability: 'read' } } } }
+
+      expect(Array(AtlasRb::Resource.permissions(collection.id, nuid: '000000004')&.read)).to include('editors')
+    end
+
+    # apply_permissions runs BEFORE the descriptive save, so a raise rather than
+    # a flash would discard title and abstract edits that are independent of the
+    # ACL and perfectly valid on their own.
+    #
+    # Atlas refuses this one for real, with no stub: the parent community is not
+    # public, so a read grant on the child would make it more visible than its
+    # container.
+    it 'reports a refused ACL write and still saves the descriptive fields beside it' do
+      patch :update, params: { id:         collection.id,
+                               collection: { title:       'TitleSurvivesRefusal',
+                                             description: 'AbstractSurvivesRefusal',
+                                             permissions: { '1' => { group_id: 'editors', ability: 'read' } } } }
+
+      expect(flash[:alert]).to eq(Transformable::PERMISSIONS_REFUSED['visibility_exceeds_parent'])
+      expect(AtlasRb::Collection.find(collection.id, nuid: '000000004').title).to start_with('TitleSurvivesRefusal')
+    end
+
+    # Taking audience away from a Collection has to reach everything inside it,
+    # and the container is written last, so the synchronous write is skipped
+    # entirely and the whole change goes to VisibilityCascadeJob.
+    it 'hands a narrowing to NarrowingRequest instead of writing it here' do
+      allow(NarrowingRequest).to receive(:call)
+        .and_return(NarrowingRequest::Outcome.new(status: :dispatched, message: 'Queued.'))
+      allow(AtlasRb::Collection).to receive(:metadata)
+
+      patch :update, params: { id:         collection.id,
+                               collection: { permissions: { '1' => { group_id: 'editors', ability: 'read' } } } }
+
+      expect(AtlasRb::Collection).not_to have_received(:metadata)
+      expect(flash[:notice]).to eq('Queued.')
+    end
+  end
 end
