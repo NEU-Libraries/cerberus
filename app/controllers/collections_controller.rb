@@ -49,19 +49,9 @@ class CollectionsController < CatalogController
   end
 
   def create
-    permitted = params.expect(collection: [:title, :description]).to_h
-    # Guard before minting: a blank title would otherwise produce an untitled
-    # Collection (MODSMerge leaves a blank title untouched). Client-side
-    # `required` is the first line; this is the backstop.
-    return redirect_to(new_child_path('collection')) if title_missing?(permitted)
+    c = mint_titled!('Collection', :collection)
+    return redirect_to(new_child_path('collection')) if c.nil?
 
-    c = AtlasRb::Collection.create(@destination_id)
-    save_descriptive!('Collection', c.id, title: permitted['title'], description: permitted['description'])
-    # After the title, not before it. Either call can fail against Atlas, and
-    # this order picks the better wreckage: a titled Collection still holding
-    # the ACL it was minted with, which the Permissions tab can correct — rather
-    # than a correctly-restricted Collection with no title, which is the shape
-    # #title_missing? exists to keep out of the repository.
     apply_new_permissions('Collection', c.id, :collection)
     redirect_to collection_path(c.id)
   end

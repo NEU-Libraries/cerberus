@@ -87,6 +87,33 @@ module DescriptiveMetadata
     end
   end
 
+  # Mint a container and give it its title, in that order and in one place.
+  #
+  # The two steps belong together because the invariant spans them: MODSMerge
+  # leaves a blank title untouched, so minting first and titling second would
+  # leave an untitled resource in the repository whenever the title is missing.
+  # The guard therefore runs before the mint, and the client-side `required`
+  # attribute is only the first line of it — this is the backstop for JS-off and
+  # for a direct POST.
+  #
+  # The title is written before anything else the caller wants to do, because
+  # either call can fail against Atlas and this order picks the better wreckage:
+  # a titled resource still holding the ACL it was minted with, which the
+  # Permissions tab can correct, rather than a correctly-restricted resource
+  # with no title.
+  #
+  # @return [AtlasRb::Mash, nil] the minted resource, or nil when the title was
+  #   missing — in which case the flash is already set and the caller only has
+  #   to send the reader back to the form.
+  def mint_titled!(klass, resource_key)
+    permitted = params.expect(resource_key => [:title, :description]).to_h
+    return nil if title_missing?(permitted)
+
+    resource = AtlasRb.const_get(klass).create(@destination_id)
+    save_descriptive!(klass, resource.id, title: permitted['title'], description: permitted['description'])
+    resource
+  end
+
   def apply_descriptive(klass, id, resource_key, keywords, show_path)
     descriptive = descriptive_params(resource_key, keywords: keywords)
     unless descriptive_valid?(descriptive, keywords:         keywords,

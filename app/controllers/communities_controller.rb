@@ -63,16 +63,12 @@ class CommunitiesController < CatalogController
     breadcrumbs(params[:id], editing: true)
   end
 
+  # Showcases are provisioned only once the community exists and is titled, so a
+  # missing title never leaves orphaned showcases behind.
   def create
-    permitted = params.require(:community).permit(:title, :description).to_h
-    # Guard before minting: a blank title would otherwise produce an untitled
-    # resource (MODSMerge leaves a blank title untouched) and still provision
-    # showcases against that orphan. Client-side `required` is the first line;
-    # this is the backstop (JS off / direct POST).
-    return redirect_to(new_child_path('community')) if title_missing?(permitted)
+    c = mint_titled!('Community', :community)
+    return redirect_to(new_child_path('community')) if c.nil?
 
-    c = AtlasRb::Community.create(@destination_id)
-    save_descriptive!('Community', c.id, title: permitted['title'], description: permitted['description'])
     ShowcaseProvisioner.call(community_id: c.id)
     redirect_to community_path(c.id)
   end
