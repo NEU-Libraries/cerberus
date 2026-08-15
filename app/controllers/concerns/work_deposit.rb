@@ -31,6 +31,38 @@ module WorkDeposit
     #
     # The showcase link is a :system-attributed write (AtlasRb::System::Work),
     # not a call the depositor's own credential could make — Atlas scopes
+    # Promotion is offered only when the destination IS the depositor's own
+    # personal root. That is what keeps a promoted Work in the depositor's own
+    # space now that the route, not the publish branch, decides placement — and
+    # it keys on the destination rather than on which button you arrived by, so
+    # it can't be sidestepped by typing a URL.
+    def publish_offered?
+      root = deposit_person&.[]('personal_root_id').presence
+      root.present? && root.to_s == @destination_id.to_s
+    end
+
+    # Add the showcase edge when the form asked for one. A promotion that can't
+    # be honoured leaves the deposit standing and flags the flash — the Work
+    # already exists and is correctly placed, so there is nothing to roll back.
+    def promote_if_requested
+      return unless ActiveModel::Type::Boolean.new.cast(params[:publish])
+      # The destination is not the depositor's own root, so the form never
+      # offered promotion here — a typed URL, or a tampered field.
+      return refuse_promotion('not_personal_root') unless publish_offered?
+
+      showcase_id = publish_showcase_id
+      # No showcase exists for that genre in that community, or the depositor
+      # cannot see the one that does.
+      return refuse_promotion('no_showcase') if showcase_id.blank?
+
+      promote_to_showcase(showcase_id)
+    end
+
+    def refuse_promotion(reason)
+      @publish_link_failed = true
+      record_promotion(outcome: 'refused', reason: reason)
+    end
+
     # :system's grant to a featured Collection on one side and, on the other,
     # to a Work whose depositor matches the asserted on_behalf_of NUID. The
     # rescue is a safety net for that scoping (a misconfigured showcase, or an

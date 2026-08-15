@@ -10,6 +10,9 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
   include WorkDeposit
   include WorkBreadcrumbs
   include WorkChangeRequest
+  include WorkCaptions
+  include WorkStreamingOnly
+  include WorkDerivativeWidths
   include UploadStaging
   include RecordsImpressions
   include ZoomViewer
@@ -197,120 +200,6 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
   end
 
   private
-
-    # State for the Streaming Only toggle. `offered` differs by page because the
-    # evidence does — see the two call sites. The audience is computed from
-    # @read_groups rather than @permissions: form_preparation has already
-    # replaced the latter with the form's row objects by the time this runs.
-    def load_streaming_only!(offered:)
-      @streaming_only_offered = offered
-      return unless offered
-
-      @streaming_only = StreamingOnly.on?(StreamingOnly.stored_policy(params[:id]), read: @read_groups)
-    end
-
-    # Persist the toggle, if this form carried it. The Metadata and Advanced tabs
-    # PATCH the same action without the field, and an absent field must mean
-    # "leave it alone" rather than "turn it off" — hence the nil check, and the
-    # unchecked hidden input in the partial.
-    #
-    # Runs AFTER handle_metadata_update, because the same submit can widen the
-    # Work from private to public, and the tier audience is computed against the
-    # Work's read ACL. Reading it before the save would size the tier against the
-    # visibility the reader was replacing.
-    # State for the Captions section. `files` is absent at deposit, where the Work
-    # has no assets yet and so can have no caption to link to.
-    def load_caption!(offered:, files: nil)
-      @caption_offered = offered
-      @caption = CaptionTrack.for(files)
-    end
-
-    # Stage a caption upload and hand it to CaptionJob, if this form carried one.
-    #
-    # A refused format flashes and carries on rather than raising, for the same
-    # reason apply_permissions does: this runs after the descriptive save, and the
-    # title and abstract edits that came with it are valid and already written.
-    def apply_caption!
-      file = params[:caption]
-      return if file.blank?
-      return flash[:alert] = CaptionTrack::REFUSED unless CaptionTrack.accepted?(file.original_filename)
-
-      CaptionJob.perform_later(params[:id], stage_upload(file, params[:id]),
-                               file.original_filename, SecureRandom.uuid)
-    end
-
-    def apply_streaming_only!
-      requested = params.dig(:work, :streaming_only)
-      return if requested.nil?
-
-      StreamingOnly.apply!(params[:id],
-                           enabled: ActiveModel::Type::Boolean.new.cast(requested).present?,
-                           read:    Array(AtlasRb::Resource.permissions(params[:id])&.read))
-    rescue AtlasRb::DerivativePermissionsError => e
-      flash[:alert] = "Streaming Only wasn't changed — Atlas refused it: #{e.message}"
-    end
-
-    # Promotion is offered only when the destination IS the depositor's own
-    # personal root. That is what keeps a promoted Work in the depositor's own
-    # space now that the route, not the publish branch, decides placement — and
-    # it keys on the destination rather than on which button you arrived by, so
-    # it can't be sidestepped by typing a URL.
-    def publish_offered?
-      root = deposit_person&.[]('personal_root_id').presence
-      root.present? && root.to_s == @destination_id.to_s
-    end
-
-    # Add the showcase edge when the form asked for one. A promotion that can't
-    # be honoured leaves the deposit standing and flags the flash — the Work
-    # already exists and is correctly placed, so there is nothing to roll back.
-    def promote_if_requested
-      return unless ActiveModel::Type::Boolean.new.cast(params[:publish])
-      # The destination is not the depositor's own root, so the form never
-      # offered promotion here — a typed URL, or a tampered field.
-      return refuse_promotion('not_personal_root') unless publish_offered?
-
-      showcase_id = publish_showcase_id
-      # No showcase exists for that genre in that community, or the depositor
-      # cannot see the one that does.
-      return refuse_promotion('no_showcase') if showcase_id.blank?
-
-      promote_to_showcase(showcase_id)
-    end
-
-    def refuse_promotion(reason)
-      @publish_link_failed = true
-      record_promotion(outcome: 'refused', reason: reason)
-    end
-
-    # Server backstop for the metadata page's opt-in download sizes. The
-    # Stimulus controller is the primary enforcement, so a violation here
-    # means JS-off or tampering — in that case the metadata still saves and
-    # only the optional derivatives are skipped, with the reason flashed
-    # (never bounce the whole form over decoration). Known interplay: if
-    # descriptive validation also fails, apply_descriptive overwrites this
-    # flash (last writer wins) — acceptable; valid derivatives enqueued
-    # here are independent of the title and harmless.
-    def process_derivative_widths
-      raw = params[:derivative_widths]
-      return unless raw.is_a?(ActionController::Parameters)
-
-      probe = StagedImageProbe.call(work_id: params[:id])
-      return flash[:alert] = 'Download sizes were skipped: no staged image was found for this work.' if probe.nil?
-
-      enqueue_valid_widths(raw, probe)
-    end
-
-    def enqueue_valid_widths(raw, probe)
-      result = DerivativeWidths.call(raw:          raw.permit(:small, :medium, :large).to_h,
-                                     longest_edge: probe.longest_edge)
-      unless result.valid?
-        return flash[:alert] = "Download sizes were not generated: #{result.error} " \
-                               'Your other changes were saved — revisit this page to configure download sizes.'
-      end
-      return if result.widths.empty?
-
-      DepositDerivativesJob.perform_later(params[:id], result.widths)
-    end
 
     # Resolve the depositor NUID for a new Work.
     #
