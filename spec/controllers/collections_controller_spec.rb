@@ -592,7 +592,7 @@ describe CollectionsController do
                                              description: 'AbstractSurvivesRefusal',
                                              permissions: { '1' => { group_id: 'editors', ability: 'read' } } } }
 
-      expect(flash[:alert]).to eq(Transformable::PERMISSIONS_REFUSED['visibility_exceeds_parent'])
+      expect(flash[:alert]).to eq(ResourcePermissions::PERMISSIONS_REFUSED['visibility_exceeds_parent'])
       expect(AtlasRb::Collection.find(collection.id, nuid: '000000004').title).to start_with('TitleSurvivesRefusal')
     end
 

@@ -561,7 +561,7 @@ describe CommunitiesController do
         patch :update, params: { id: community.id, mass: 'private', community: { embargo: '' } }
 
         expect(AtlasRb::Community).not_to have_received(:metadata)
-        expect(flash[:alert]).to eq(Transformable::COMMUNITY_NARROWING_REFUSED)
+        expect(flash[:alert]).to eq(ResourcePermissions::COMMUNITY_NARROWING_REFUSED)
       end
 
       # An admin's narrowing is written the ordinary way. NarrowingRequest is the
