@@ -70,6 +70,13 @@ services:
       # Where a handle sends a reader. Atlas does not know Cerberus's public
       # host, so it arrives as config.
       CERBERUS_PUBLIC_BASE: ${CERBERUS_PUBLIC_BASE:-http://localhost:3000}
+      # Atlas writes the citable URL, not the bare handle, into the MODS `hdl`
+      # identifier, so it needs the resolver too. Its own default is the global
+      # proxy, which is right for production and wrong here — an unregistered
+      # prefix is in no registry. Shares one value with the web service above,
+      # or the Work page header and the metadata table name different hosts for
+      # the same object.
+      HANDLE_RESOLVER_BASE: ${HANDLE_RESOLVER_BASE:-http://localhost:8000}
     ports:
       - 3001:3000
   atlas-test:
