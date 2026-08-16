@@ -6,6 +6,7 @@ volumes:
   iiif:
   iiif-cache:
   uploads:
+  handle-data:
 services:
   db:
     # TimescaleDB is a Postgres extension; this image is vanilla Postgres 14
@@ -37,6 +38,11 @@ services:
       # Container-internal Cantaloupe route for server-side info.json reads
       # (IiifManifest dimensions); browsers keep using the public iiif_host.
       CERBERUS_IIIF_INTERNAL_HOST: ${CERBERUS_IIIF_INTERNAL_HOST:-}
+      # Resolver a minted handle is linked against on the Work page. An
+      # unregistered prefix is not in the Global Handle Registry, so the global
+      # CNRI proxy cannot answer for it and a dev stack must name its own
+      # server, which mounts the same proxy. Unset means the global one.
+      HANDLE_RESOLVER_BASE: ${HANDLE_RESOLVER_BASE:-}
     ports:
       - 3000:3000
   atlas:
@@ -44,16 +50,72 @@ services:
     entrypoint: /home/atlas/web/docker-entrypoint.sh
     environment:
       RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
+      # Handle minting. Atlas owns the client and the admin credential; Cerberus
+      # only reads the handle back off the Work. Unset (the default without the
+      # handles profile) means this stack does not mint, which is a supported
+      # state — /complete still succeeds and leaves the Work unminted.
+      HANDLE_SERVER_URL: ${HANDLE_SERVER_URL:-https://handle:8000}
+      HANDLE_PREFIX: ${HANDLE_PREFIX:-DRSDEV}
+      HANDLE_ADMIN_SECRET: ${HANDLE_ADMIN_SECRET:-}
+      # The handle server's certificate is self-signed CN=anonymous with no SAN,
+      # so no hostname verifies against it and a CA bundle is no help. Left
+      # unset elsewhere, so a real certificate is verified normally.
+      HANDLE_SSL_VERIFY: 'false'
+      # Where a handle sends a reader. Atlas does not know Cerberus's public
+      # host, so it arrives as config.
+      CERBERUS_PUBLIC_BASE: ${CERBERUS_PUBLIC_BASE:-http://localhost:3000}
     ports:
       - 3001:3000
   atlas-test:
     image: nakatomi/atlas_web:${ATLAS}
     entrypoint: /home/atlas/web/docker-entrypoint.sh
+    # Deliberately given none of the HANDLE_* / CERBERUS_PUBLIC_BASE variables
+    # above. Atlas mints only when a client is configured, so withholding them
+    # is what keeps the suite from writing live records into a handle server —
+    # a spec that finalizes a Work would otherwise mint one every run.
     environment:
       RAILS_ENV: 'test'
       RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
     ports:
       - 3002:3000
+  handle:
+    # Handle.Net server (independent-service mode, unregistered local prefix).
+    # Built from ~/projects/cerberus-handles, whose README is the reference.
+    # Opt-in: `docker compose --profile handles up` starts it, a plain up
+    # leaves it alone.
+    image: nakatomi/cerberus-handles:9.3.2
+    profiles:
+      - handles
+    # Listed variable by variable rather than through `env_file: .env`. That
+    # keeps unrelated Cerberus config out of the container, and — the sharper
+    # reason — the IMAGE's defaults are not the defaults in cerberus-handles'
+    # .env.example: omit STORAGE_TYPE and SQL_URL and the server falls back to
+    # the embedded BDB-JE store, which skips the admin seed. Reads and homing
+    # still work, so it looks fine until the first write, which can then never
+    # authenticate.
+    environment:
+      HANDLE_PREFIX: ${HANDLE_PREFIX:-DRSDEV}
+      # The admin identity must name the same prefix or it is not
+      # authoritative for it — hence the one variable in both places.
+      SERVER_ADMINS: "300:${HANDLE_PREFIX:-DRSDEV}/ADMIN"
+      # Renamed on the way in: a bare ADMIN_SECRET in Cerberus's .env reads as
+      # Cerberus's own. Empty, the container refuses to boot — the right
+      # failure, since this authenticates every administrative write.
+      ADMIN_SECRET: ${HANDLE_ADMIN_SECRET:-}
+      STORAGE_TYPE: sql
+      SQL_URL: jdbc:sqlite:/var/handle/svr/handles.db
+      SQL_DRIVER: org.sqlite.JDBC
+    ports:
+      # HTTP and HTTPS are port-unified: reads answer over plain HTTP,
+      # administrative writes need TLS on this same port. The native Handle
+      # protocol (2641/tcp+udp) stays on the compose network — publish it only
+      # if you want the hdl-* tools from the host.
+      - 8000:8000/tcp
+    volumes:
+      # Config and the server keypair regenerate from the environment on every
+      # boot, so this carries only the handle store and the seeded admin
+      # record. Wiping it is a full reset.
+      - handle-data:/var/handle/svr
   iiif:
     image: uclalibrary/cantaloupe:5.0.6-2
     ports:
