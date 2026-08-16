@@ -50,15 +50,17 @@
                           form_class: 'd-inline',
                           title:      'Rebuild this work’s search record'
       %hr.section-divider
-      .d-flex.justify-content-between.align-items-center.mb-3.small
-        %span
-          %i.fa-solid.fa-link.text-muted{'aria-hidden' => 'true'}
-          %span.text-muted.ms-1 Permanent URL:
-          = link_to @work.permanent_url, @work.permanent_url, class: 'ms-1'
-        - if downloads.present?
-          = link_to '#downloads' do
-            %span.text-muted= "Downloads (#{downloads.size})"
-            %i.fa-solid.fa-arrow-down.ms-1{'aria-hidden' => 'true'}
+      -# Both halves of this row are conditional, so the row itself goes when
+      -# neither has anything to say — an empty flex row would still carry its
+      -# bottom margin and open a gap under the divider.
+      - permanent_url = handle_url(@work.handle)
+      - if permanent_url.present? || downloads.present?
+        .d-flex.justify-content-between.align-items-center.mb-3.small
+          = render 'permanent_url', url: permanent_url
+          - if downloads.present?
+            = link_to '#downloads' do
+              %span.text-muted= "Downloads (#{downloads.size})"
+              %i.fa-solid.fa-arrow-down.ms-1{'aria-hidden' => 'true'}
   .row
     .col-md-6.order-md-1.order-2
       - if @multipage && @can_zoom

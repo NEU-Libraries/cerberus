@@ -66,6 +66,15 @@ module Cerberus
     # delegate (signed download URLs + deep-zoom identifier tokens).
     config.x.cerberus.iiif_signing_secret = ENV.fetch('CERBERUS_IIIF_SIGNING_SECRET', nil)
 
+    # Where a Work's minted handle resolves. Atlas stores the bare identifier
+    # ("<prefix>/<noid>"), so a resolver base is what turns it into a link.
+    # CNRI's global proxy answers only for prefixes in the Global Handle
+    # Registry; an unregistered prefix must name its own server, which mounts
+    # that same proxy. An empty value reads as unset, because compose passes
+    # the variable through whether or not .env defines it.
+    config.x.cerberus.handle_resolver_base = ENV.fetch('HANDLE_RESOLVER_BASE', nil).presence ||
+                                             'https://hdl.handle.net'
+
     # Acting-NUID sentinel for unauthenticated Cerberus traffic. The
     # logged-out path threads this NUID as the acting user, so the signed
     # assertion Cerberus mints carries sub = guest_nuid and Atlas resolves to
