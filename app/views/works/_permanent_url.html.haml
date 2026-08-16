@@ -1,0 +1,14 @@
+-# The Work's citable URL, built from the handle Atlas mints at /complete.
+-#
+-# Minting is best-effort, so a complete Work can carry no handle — that is
+-# "not minted yet", never an error, and a later /complete heals it. The row
+-# must therefore say nothing at all rather than offer a placeholder link.
+-#
+-# The %span stays either way: it is the left-hand flex item of the row that
+-# holds the Downloads link, which stays at the right edge only while it has a
+-# sibling to be spaced away from.
+%span
+  - if url.present?
+    %i.fa-solid.fa-link.text-muted{'aria-hidden' => 'true'}
+    %span.text-muted.ms-1 Permanent URL:
+    = link_to url, url, class: 'ms-1'
