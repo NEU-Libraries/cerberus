@@ -38,11 +38,13 @@ services:
       # Container-internal Cantaloupe route for server-side info.json reads
       # (IiifManifest dimensions); browsers keep using the public iiif_host.
       CERBERUS_IIIF_INTERNAL_HOST: ${CERBERUS_IIIF_INTERNAL_HOST:-}
-      # Resolver a minted handle is linked against on the Work page. An
-      # unregistered prefix is not in the Global Handle Registry, so the global
-      # CNRI proxy cannot answer for it and a dev stack must name its own
-      # server, which mounts the same proxy. Unset means the global one.
-      HANDLE_RESOLVER_BASE: ${HANDLE_RESOLVER_BASE:-}
+      # Resolver a minted handle is linked against on the Work page. Defaults to
+      # the sibling handle service rather than to CNRI's global proxy: this
+      # stack mints under an unregistered prefix, which is in no Global Handle
+      # Registry, so hdl.handle.net cannot answer for it and every dev link
+      # would look broken. Both ends run the same CNRI proxy, so the local one
+      # is a true rehearsal. Production sets this to the global proxy.
+      HANDLE_RESOLVER_BASE: ${HANDLE_RESOLVER_BASE:-http://localhost:8000}
     ports:
       - 3000:3000
   atlas:
@@ -51,12 +53,16 @@ services:
     environment:
       RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
       # Handle minting. Atlas owns the client and the admin credential; Cerberus
-      # only reads the handle back off the Work. Unset (the default without the
-      # handles profile) means this stack does not mint, which is a supported
-      # state — /complete still succeeds and leaves the Work unminted.
+      # only reads the handle back off the Work. The client is inert unless the
+      # URL, prefix and secret are all set, and an unminted Work is a supported
+      # state — /complete succeeds either way.
       HANDLE_SERVER_URL: ${HANDLE_SERVER_URL:-https://handle:8000}
       HANDLE_PREFIX: ${HANDLE_PREFIX:-DRSDEV}
-      HANDLE_ADMIN_SECRET: ${HANDLE_ADMIN_SECRET:-}
+      # This default MUST match the handle service's ADMIN_SECRET below. They
+      # are the two ends of one credential: leave this empty while the server
+      # has a value and Atlas cannot authenticate a write, so it silently mints
+      # nothing — a stack that looks healthy and produces no handles.
+      HANDLE_ADMIN_SECRET: ${HANDLE_ADMIN_SECRET:-cerberus-dev-handle-admin}
       # The handle server's certificate is self-signed CN=anonymous with no SAN,
       # so no hostname verifies against it and a CA bundle is no help. Left
       # unset elsewhere, so a real certificate is verified normally.
@@ -81,11 +87,13 @@ services:
   handle:
     # Handle.Net server (independent-service mode, unregistered local prefix).
     # Built from ~/projects/cerberus-handles, whose README is the reference.
-    # Opt-in: `docker compose --profile handles up` starts it, a plain up
-    # leaves it alone.
+    #
+    # An ordinary service, started by a plain `up` like every other one. It was
+    # briefly opt-in behind a compose profile; that made the default dev stack
+    # one where no Work is ever minted, so the whole path went unexercised
+    # unless someone remembered a flag — and profiles are excluded from `down`
+    # as well as `up`, so the container outlived the stack it belonged to.
     image: nakatomi/cerberus-handles:9.3.2
-    profiles:
-      - handles
     # Listed variable by variable rather than through `env_file: .env`. That
     # keeps unrelated Cerberus config out of the container, and — the sharper
     # reason — the IMAGE's defaults are not the defaults in cerberus-handles'
@@ -99,9 +107,13 @@ services:
       # authoritative for it — hence the one variable in both places.
       SERVER_ADMINS: "300:${HANDLE_PREFIX:-DRSDEV}/ADMIN"
       # Renamed on the way in: a bare ADMIN_SECRET in Cerberus's .env reads as
-      # Cerberus's own. Empty, the container refuses to boot — the right
-      # failure, since this authenticates every administrative write.
-      ADMIN_SECRET: ${HANDLE_ADMIN_SECRET:-}
+      # Cerberus's own. The server refuses to boot on an empty one, which as an
+      # always-on service would fail a plain `up` for anyone who has not set it
+      # — hence the dev fallback. It authenticates administrative writes to a
+      # local, unregistered handle store, so a known value costs nothing here.
+      # This file is developer-only; staging and production are Swarm stacks
+      # that carry their own secret. Do not promote this default to either.
+      ADMIN_SECRET: ${HANDLE_ADMIN_SECRET:-cerberus-dev-handle-admin}
       STORAGE_TYPE: sql
       SQL_URL: jdbc:sqlite:/var/handle/svr/handles.db
       SQL_DRIVER: org.sqlite.JDBC
