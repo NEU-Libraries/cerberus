@@ -7,6 +7,10 @@
     %body{"data-user" => current_user.id}
   - else
     %body(data-user="-1")
+  / Google Tag Manager (noscript)
+  %noscript
+    %iframe{:height => "0", :src => "https://www.googletagmanager.com/ns.html?id=GTM-5HSG46KS", :style => "display:none;visibility:hidden", :width => "0"}
+  / End Google Tag Manager (noscript)
   .wrap
     %nav.skip-links
       %a.show-on-focus(href="#main-content")
