@@ -73,7 +73,7 @@ class VisibilityCascadeJob < ApplicationJob
       clamped = Permissions.audience_intersect(Array(current.read), container_read)
       return :unchanged if clamped.sort == Array(current.read).sort
 
-      target.atlas_class.metadata(target.noid, { 'permissions' => envelope(current, clamped) })
+      target.atlas_class.metadata(target.noid, { 'permissions' => Permissions.envelope_with_read(current, clamped) })
       clamp_sentinel(target.noid, clamped)
       :narrowed
     end
@@ -104,21 +104,6 @@ class VisibilityCascadeJob < ApplicationJob
       return if clamped == sentinel.policy
 
       sentinel.update(policy: clamped)
-    end
-
-    # The resource's whole ACL envelope with only `read` replaced.
-    #
-    # Atlas's permissions setter assigns edit_groups, edit_users and the embargo
-    # unconditionally from the incoming hash, so a payload carrying `read` alone
-    # would collapse edit_groups to the staff auto-prepend and blank the embargo
-    # release date. depositor and proxy_uploader are the exception and are
-    # deliberately omitted: those are write-once, and the setter only touches
-    # them when the key is present.
-    def envelope(current, read)
-      { 'embargo'    => current.embargo,
-        'read'       => read,
-        'edit'       => Array(current.edit),
-        'edit_users' => Array(current.edit_users) }
     end
 
     # A cascade is slow enough that whoever triggered it has moved on, and a

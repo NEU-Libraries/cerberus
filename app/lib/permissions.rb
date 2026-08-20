@@ -68,6 +68,26 @@ module Permissions
     Array(inner) & Array(outer)
   end
 
+  # A resource's whole ACL envelope with only `read` replaced, ready for the
+  # metadata PATCH.
+  #
+  # It has to be the whole envelope. Atlas's permissions setter assigns
+  # edit_groups, edit_users and the embargo unconditionally from the incoming
+  # hash, so a payload carrying `read` alone collapses edit_groups to the staff
+  # auto-prepend and blanks the embargo release date. `depositor` and
+  # `proxy_uploader` are the exception and are deliberately omitted: those are
+  # write-once, and the setter only touches them when the key is present.
+  #
+  # @param current [#read, #edit, #edit_users, #embargo] the stored envelope, as
+  #   AtlasRb::Resource.permissions returns it.
+  # @param read [Array<String>] the read audience to write.
+  def self.envelope_with_read(current, read)
+    { 'embargo'    => current.embargo,
+      'read'       => Array(read),
+      'edit'       => Array(current.edit),
+      'edit_users' => Array(current.edit_users) }
+  end
+
   # Whether everyone who can see `inner` can also see `outer` — `public` being
   # the universal audience on either side. Conservative-correct without
   # resolving Grouper membership: two different group names count as different
