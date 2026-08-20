@@ -32,11 +32,11 @@
       %h6.derivative-group-heading Image renditions
       %ol.derivative-ladder.list-unstyled.mb-4
         - Sentinel::IMAGE_LADDER.each do |tier|
-          = render "collections/derivative_tier", tier: tier, sentinel: sentinel, groups: groups
+          = render "shared/derivative_tier", tier: tier, sentinel: sentinel, groups: groups, open_label: "Inherit from collection"
       %h6.derivative-group-heading Other renditions
       %ul.derivative-independent.list-unstyled.mb-0
         - Sentinel::INDEPENDENT.each do |tier|
-          = render "collections/derivative_tier", tier: tier, sentinel: sentinel, groups: groups
+          = render "shared/derivative_tier", tier: tier, sentinel: sentinel, groups: groups, open_label: "Inherit from collection"
     .well.p-3.my-3.rounded-3
       = f.button "Save default", type: :submit, class: "btn btn-success"
       = link_to "Cancel", collection_path(collection_id), class: "btn btn-warning"
