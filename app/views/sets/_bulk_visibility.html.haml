@@ -31,7 +31,7 @@
       an included collection. Works you have set aside are not touched.
 
   -# The warning sits before the control it applies to, not under it.
-  .well.p-3.my-3.rounded-3.border-danger-subtle
+  .well.p-3.my-3.rounded-3
     %h6.mb-1
       %i.fa-solid.fa-triangle-exclamation.text-danger.me-1{ 'aria-hidden' => 'true' }
       This cannot be undone
@@ -39,9 +39,10 @@
       There is no bulk action to make works public again. Restoring public access means editing each
       work, so check the set's contents before you run this. A work removed from the set afterwards
       stays private.
-    = button_to "Make all works private", privatize_set_path(set_id),
-                class: "btn btn-danger", form: { class: "d-inline" },
+    = button_to privatize_set_path(set_id), class: "btn btn-danger", form: { class: "d-inline" },
                 data: { turbo_confirm: "Make every work in this set private? Public access is removed from all of them. There is no bulk action to undo this.",
                         turbo_confirm_title: "Confirm privatize",
                         turbo_confirm_button: "Make private",
-                        turbo_confirm_variant: "danger" }
+                        turbo_confirm_variant: "danger" } do
+      %i.fa-solid.fa-user-lock.me-1{ 'aria-hidden' => 'true' }
+      Make all works private
