@@ -1,0 +1,47 @@
+-# locals: set_id (String)
+-#
+-# The Set edit page's Visibility tab: one bulk action that strips public read
+-# from every Work the set holds.
+-#
+-# The tab is "Visibility" and the action names itself fully, because there is
+-# deliberately no matching "make public" and a tab called "Privatize" would
+-# imply its inverse sits somewhere nearby. The absence is stated on the pane
+-# rather than left for someone to go looking for: a one-click widening across a
+-# whole set is a disclosure foot-gun, and the reason is more useful to the
+-# reader than the silence.
+-#
+-# The work count is the lazily-loaded frame the My Sets index already uses, so
+-# the blast radius is on the screen before the button is pressed without the
+-# edit page paying a recipe resolution on every load.
+.py-2.px-1
+  .well.p-3.my-3.rounded-3
+    %h5.mb-1 Visibility
+    %p.small.text-muted.mb-0
+      Remove public access from every work this set holds. Group grants are kept, so a work stays
+      readable by the groups it already names — and those grants are what it falls back on. Works
+      that are already private are left alone.
+
+  .well.p-3.my-3.rounded-3
+    .d-flex.align-items-baseline.gap-2.mb-1
+      %h6.mb-0 This set currently holds
+      = turbo_frame_tag "set-works-count-#{set_id}", src: works_count_set_path(set_id), loading: :lazy do
+        %span.text-muted Counting…
+    %p.small.text-muted.mb-0
+      The sweep covers the works the set resolves to right now, including those it reaches through
+      an included collection. Works you have set aside are not touched.
+
+  -# The warning sits before the control it applies to, not under it.
+  .well.p-3.my-3.rounded-3.border-danger-subtle
+    %h6.mb-1
+      %i.fa-solid.fa-triangle-exclamation.text-danger.me-1{ 'aria-hidden' => 'true' }
+      This cannot be undone
+    %p.small.text-muted.mb-3
+      There is no bulk action to make works public again. Restoring public access means editing each
+      work, so check the set's contents before you run this. A work removed from the set afterwards
+      stays private.
+    = button_to "Make all works private", privatize_set_path(set_id),
+                class: "btn btn-danger", form: { class: "d-inline" },
+                data: { turbo_confirm: "Make every work in this set private? Public access is removed from all of them. There is no bulk action to undo this.",
+                        turbo_confirm_title: "Confirm privatize",
+                        turbo_confirm_button: "Make private",
+                        turbo_confirm_variant: "danger" }

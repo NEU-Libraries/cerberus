@@ -160,6 +160,13 @@ Rails.application.routes.draw do
       delete 'works/:work_id',             to: 'sets#remove_work',       as: :remove_work
       post   'aside',                      to: 'sets#set_aside',         as: :set_aside
       delete 'aside/:work_id',             to: 'sets#put_back',          as: :put_back
+      # The bulk actions. `sentinel` authors the Set's derivative-access policy
+      # (the same verb the Collection tab uses); the two POSTs enqueue a sweep
+      # over the Works the Set denotes. Both sweeps are operator-only — see
+      # SetsController#require_bulk_operator.
+      patch  'sentinel',                   to: 'sets#sentinel',          as: :sentinel
+      post   'apply_sentinel',             to: 'sets#apply_sentinel',    as: :apply_sentinel
+      post   'privatize',                  to: 'sets#privatize',         as: :privatize
     end
   end
 

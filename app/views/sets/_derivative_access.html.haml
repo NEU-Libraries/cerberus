@@ -1,0 +1,55 @@
+-# locals: set_id (String), sentinel (Sentinel|nil), groups (Array<[id, name]>)
+-#
+-# The Set edit page's Derivative access tab. Authors this Set's per-tier policy
+-# and, separately, sweeps it across the Works the Set already holds.
+-#
+-# Saving and applying are two blocks rather than two buttons in a row, because
+-# they are two different things and the difference is the point of the tab: a
+-# Collection's policy stamps new deposits and is never retroactive, so nothing
+-# else in the app changes a rendition that already exists. Putting Apply in the
+-# same button row as Save would read as one action with a stray extra control.
+-#
+-# The ladder itself is the shared partial the Collection tab uses. What differs
+-# is the open option: a Collection is a container whose visibility caps its
+-# Works, so there its renditions inherit the collection; a Set is not, so here
+-# they inherit each Work.
+.py-2.px-1
+  = bootstrap_form_tag(url: sentinel_set_path(set_id), method: :patch) do |f|
+    .well.p-3.my-3.rounded-3
+      %h5.mb-1 Derivative access
+      %p.small.text-muted.mb-0
+        Restrict which groups may download each rendition of this set's works. A rendition you
+        don't restrict inherits the visibility of the work it belongs to. Image visibility must
+        narrow as resolution grows, so a rendition can't be more open than a smaller one above it.
+        Audio, video, and PDF renditions gate on their own.
+    %section.my-3{ data: { controller: "derivative-policy" } }
+      %h6.derivative-group-heading Image renditions
+      %ol.derivative-ladder.list-unstyled.mb-4
+        - Sentinel::IMAGE_LADDER.each do |tier|
+          = render "shared/derivative_tier", tier: tier, sentinel: sentinel, groups: groups, open_label: "Inherit from the work"
+      %h6.derivative-group-heading Other renditions
+      %ul.derivative-independent.list-unstyled.mb-0
+        - Sentinel::INDEPENDENT.each do |tier|
+          = render "shared/derivative_tier", tier: tier, sentinel: sentinel, groups: groups, open_label: "Inherit from the work"
+    .well.p-3.my-3.rounded-3
+      = f.button "Save policy", type: :submit, class: "btn btn-success"
+      = link_to "Cancel", set_path(set_id), class: "btn btn-warning"
+
+  .well.p-3.my-3.rounded-3
+    %h5.mb-1 Apply it to this set's works
+    %p.small.text-muted.mb-3
+      Saving the policy above does not change anything already in this set. Apply it to write the
+      policy onto every work the set holds now. Each rendition is narrowed to what its own work
+      allows, so a private work's renditions are withheld rather than refused. You'll get a message
+      when it finishes.
+    - if sentinel.nil?
+      %p.small.text-muted.mb-0
+        %i.fa-solid.fa-circle-info.me-1{ 'aria-hidden' => 'true' }
+        Save a policy first.
+    - else
+      = button_to "Apply to this set's works", apply_sentinel_set_path(set_id),
+                  class: "btn btn-primary", form: { class: "d-inline" },
+                  data: { turbo_confirm: "Apply this policy to every work in this set? Renditions that are currently downloadable may stop being downloadable. You can change the policy and apply it again.",
+                          turbo_confirm_title: "Confirm apply",
+                          turbo_confirm_button: "Apply",
+                          turbo_confirm_variant: "primary" }

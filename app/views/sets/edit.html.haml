@@ -3,28 +3,46 @@
 - content_for(:container_header) do
   = render 'shared/breadcrumbs', show_add: false
 
+-# Which pane opens. Normally Details; a rejected Sentinel save names its own
+-# pane so the reader comes back to the ladder they were working in, which the
+-# URL fragment cannot do for them (Turbo follows the redirect with fetch, and
+-# the Fetch spec strips the fragment from the resolved URL).
+- open = @open_tab.presence || 'details'
+
 .container.my-2
   %h3.pb-2
     %i.fa-solid.fa-layer-group.text-primary.me-2{'aria-hidden' => 'true'}
     Edit set
 
-  -# Details is open to any editor; Sharing (ACL) is owner/admin-only.
+  -# Details is open to any editor; Sharing (ACL) is owner/admin-only; the two
+  -# bulk-action tabs are operator-only, on the same predicate their write paths
+  -# gate on (SetBulkActions#bulk_operator?).
   %ul.nav.nav-tabs{'data-controller' => 'tab-hash'}
     %li.nav-item
-      %button#details-tab.nav-link.active{'aria-controls' => 'details', 'aria-selected' => 'true', 'data-bs-target' => '#details', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Details
+      %button#details-tab.nav-link{class: ('active' if open == 'details'), 'aria-controls' => 'details', 'aria-selected' => (open == 'details').to_s, 'data-bs-target' => '#details', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Details
     - if @owned
       %li.nav-item
-        %button#sharing-tab.nav-link{'aria-controls' => 'sharing', 'aria-selected' => 'false', 'data-bs-target' => '#sharing', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Sharing
+        %button#sharing-tab.nav-link{class: ('active' if open == 'sharing'), 'aria-controls' => 'sharing', 'aria-selected' => (open == 'sharing').to_s, 'data-bs-target' => '#sharing', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Sharing
+    - if bulk_operator?
+      %li.nav-item
+        %button#derivative-access-tab.nav-link{class: ('active' if open == 'derivative-access'), 'aria-controls' => 'derivative-access', 'aria-selected' => (open == 'derivative-access').to_s, 'data-bs-target' => '#derivative-access', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Derivative access
+      %li.nav-item
+        %button#visibility-tab.nav-link{class: ('active' if open == 'visibility'), 'aria-controls' => 'visibility', 'aria-selected' => (open == 'visibility').to_s, 'data-bs-target' => '#visibility', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Visibility
     - if current_user&.loader_tier?
       %li.nav-item
-        %button#export-tab.nav-link{'aria-controls' => 'export', 'aria-selected' => 'false', 'data-bs-target' => '#export', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Export
+        %button#export-tab.nav-link{class: ('active' if open == 'export'), 'aria-controls' => 'export', 'aria-selected' => (open == 'export').to_s, 'data-bs-target' => '#export', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Export
 
   .tab-content.pt-1
-    #details.tab-pane.active{'aria-labelledby' => 'details-tab', role: 'tabpanel'}
+    #details.tab-pane{class: ('active' if open == 'details'), 'aria-labelledby' => 'details-tab', role: 'tabpanel'}
       = render 'form', url: set_path(@set['id']), method: :patch, submit_label: 'Save', cancel_path: set_path(@set['id'])
     - if @owned
-      #sharing.tab-pane{'aria-labelledby' => 'sharing-tab', role: 'tabpanel'}
+      #sharing.tab-pane{class: ('active' if open == 'sharing'), 'aria-labelledby' => 'sharing-tab', role: 'tabpanel'}
         = render 'sharing'
+    - if bulk_operator?
+      #derivative-access.tab-pane{class: ('active' if open == 'derivative-access'), 'aria-labelledby' => 'derivative-access-tab', role: 'tabpanel'}
+        = render 'derivative_access', set_id: @set['id'], sentinel: @sentinel, groups: sentinel_groups
+      #visibility.tab-pane{class: ('active' if open == 'visibility'), 'aria-labelledby' => 'visibility-tab', role: 'tabpanel'}
+        = render 'bulk_visibility', set_id: @set['id']
     - if current_user&.loader_tier?
-      #export.tab-pane{'aria-labelledby' => 'export-tab', role: 'tabpanel'}
+      #export.tab-pane{class: ('active' if open == 'export'), 'aria-labelledby' => 'export-tab', role: 'tabpanel'}
         = render 'export', set_id: @set['id']

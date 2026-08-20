@@ -15,10 +15,18 @@ class SetsController < CatalogController
   include ShowScopedSearch
   include SetRecipe
   include SetSharing
+  include SetBulkActions
 
   before_action :authenticate_user!, except: [:show]
   before_action :require_curator,    except: [:show]
   before_action :load_set,           except: [:index, :new, :create, :picker, :recipients]
+  # Declared here rather than in SetBulkActions so it lands after the two gates
+  # above: an anonymous request has to reach authenticate_user! and be sent to
+  # sign in, not be told it is forbidden. The three actions it names live in that
+  # concern, which is all the cop below is objecting to.
+  # rubocop:disable Rails/LexicallyScopedActionFilter
+  before_action :require_bulk_operator, only: %i[sentinel apply_sentinel privatize]
+  # rubocop:enable Rails/LexicallyScopedActionFilter
 
   # A private Set read (or any write) the caller may not perform: Atlas says
   # 403, the user sees the standard forbidden page. Unknown ids surface as
@@ -78,10 +86,13 @@ class SetsController < CatalogController
   end
 
   # Details tab is open to any editor; the Sharing tab is owner/admin-only
-  # (gated in the view + on the sharing write path).
+  # (gated in the view + on the sharing write path); the two bulk-action tabs
+  # are operator-only (SetBulkActions#require_bulk_operator, mirrored in the
+  # view by #bulk_operator?).
   def edit
     edit_breadcrumbs
     prepare_sharing_form if @owned
+    @sentinel = Sentinel.find_by(target_id: params[:id]) if bulk_operator?
   end
 
   def create
