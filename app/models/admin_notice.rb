@@ -21,7 +21,8 @@ class AdminNotice < ApplicationRecord
 
   # What the repository did on its own account.
   ACTIVITY_KINDS = %w[load_report work_completion_mismatch visibility_cascade
-                      set_reindex showcase_promotion].freeze
+                      set_reindex showcase_promotion set_privatize
+                      set_sentinel_apply].freeze
 
   # A whole day, summed up. Its own family because it is a different size of
   # thing: every other row is one event, and a page-sized summary among them

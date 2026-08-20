@@ -24,6 +24,9 @@ $ledger-tone-load:     #0e8a7a;
 $ledger-tone-showcase: #4e8a5f;
 $ledger-tone-cascade:  #2666a6;
 $ledger-tone-reindex:  #6c757d;
+// Derivative access: a desaturated cyan-slate, kept clear of the load teal
+// above and the cascade navy below.
+$ledger-tone-rendition: #3f7f8c;
 // Something did not happen and needs a person — an incomplete load, or a
 // showcase publication that was refused. The audit log's tombstone brick,
 // which is as loud as this register gets.
@@ -80,6 +83,8 @@ $ledger-tone-digest:   #54687a;
   &--showcase_promotion       { --ledger-tone: #{$ledger-tone-showcase}; }
   &--visibility_cascade       { --ledger-tone: #{$ledger-tone-cascade}; }
   &--set_reindex              { --ledger-tone: #{$ledger-tone-reindex}; }
+  &--set_privatize            { --ledger-tone: #{$ledger-tone-cascade}; }
+  &--set_sentinel_apply       { --ledger-tone: #{$ledger-tone-rendition}; }
   &--work_completion_mismatch { --ledger-tone: #{$ledger-tone-attention}; }
   &--refused                  { --ledger-tone: #{$ledger-tone-attention}; }
 }

@@ -18,6 +18,10 @@ module Admin
       'work_completion_mismatch' => { label: 'Incomplete', icon: 'fa-triangle-exclamation' },
       'visibility_cascade'       => { label: 'Visibility', icon: 'fa-eye-slash' },
       'set_reindex'              => { label: 'Reindex',    icon: 'fa-arrows-rotate' },
+      # Both Set sweeps keep the wording of the tab that starts them, so a row
+      # here reads as the same action the operator clicked.
+      'set_privatize'            => { label: 'Privatize',  icon: 'fa-user-lock' },
+      'set_sentinel_apply'       => { label: 'Derivative access', icon: 'fa-images' },
       'showcase_promotion'       => { label: 'Showcase',   icon: 'fa-star' },
       'daily_digest'             => { label: 'Digest',     icon: 'fa-book' }
     }.freeze
@@ -88,8 +92,9 @@ module Admin
     # to render as an in-app path here and as an absolute URL in a future mail.
     def ledger_notice_link(notice)
       case notice.kind
-      when 'load_report'        then load_report_path_for(notice)
-      when 'set_reindex'        then safe_path(:set_path, notice.subject_noid)
+      when 'load_report' then load_report_path_for(notice)
+      when 'set_reindex', 'set_privatize', 'set_sentinel_apply'
+        safe_path(:set_path, notice.subject_noid)
       when 'visibility_cascade' then safe_path(:collection_path, notice.subject_noid)
       when 'work_completion_mismatch', 'showcase_promotion' then safe_path(:work_path, notice.subject_noid)
       end
