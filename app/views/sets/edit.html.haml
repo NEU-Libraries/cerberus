@@ -3,11 +3,13 @@
 - content_for(:container_header) do
   = render 'shared/breadcrumbs', show_add: false
 
--# Which pane opens. Normally Details; a rejected Sentinel save names its own
--# pane so the reader comes back to the ladder they were working in, which the
--# URL fragment cannot do for them (Turbo follows the redirect with fetch, and
--# the Fetch spec strips the fragment from the resolved URL).
-- open = @open_tab.presence || 'details'
+-# Which pane opens. Normally Details, but every bulk action has to return the
+-# operator to the pane they acted in, and a fragment cannot carry that: Turbo
+-# follows a redirect with fetch, and the Fetch spec strips the fragment from the
+-# resolved URL, so `anchor:` arrives nowhere. A query param survives the
+-# redirect. `@open_tab` covers the other case, a rejected save that re-renders
+-# rather than redirecting, where there is no URL to read.
+- open = params[:tab].presence || @open_tab.presence || 'details'
 
 .container.my-2
   %h3.pb-2

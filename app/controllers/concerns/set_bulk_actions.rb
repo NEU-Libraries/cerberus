@@ -62,26 +62,26 @@ module SetBulkActions
 
     return render_rejected_set_sentinel(record) unless record.save
 
-    redirect_to edit_set_path(params[:id], anchor: 'derivative-access'),
+    redirect_to edit_set_path(params[:id], tab: 'derivative-access'),
                 notice: 'Derivative access saved. Apply it to sweep the works already in this set.'
   end
 
   # Enqueue the derivative-access sweep over the Works the Set denotes.
   def apply_sentinel
     if Sentinel.find_by(target_id: params[:id]).nil?
-      return redirect_to edit_set_path(params[:id], anchor: 'derivative-access'),
+      return redirect_to edit_set_path(params[:id], tab: 'derivative-access'),
                          alert: 'Save a derivative access policy before applying it.'
     end
 
     SetSentinelApplyJob.perform_later(set_noid: params[:id])
-    redirect_to edit_set_path(params[:id], anchor: 'derivative-access'),
+    redirect_to edit_set_path(params[:id], tab: 'derivative-access'),
                 notice: 'Applying derivative access to this set’s works. You’ll get a message when it finishes.'
   end
 
   # Enqueue the privatize sweep over the Works the Set denotes.
   def privatize
     SetPrivatizeJob.perform_later(set_noid: params[:id])
-    redirect_to edit_set_path(params[:id], anchor: 'visibility'),
+    redirect_to edit_set_path(params[:id], tab: 'visibility'),
                 notice: 'Making this set’s works private. You’ll get a message when it finishes.'
   end
 

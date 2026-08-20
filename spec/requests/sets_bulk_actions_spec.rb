@@ -102,7 +102,7 @@ RSpec.describe 'Sets bulk actions', type: :request do
       post "/sets/#{set['id']}/privatize"
 
       expect(SetPrivatizeJob).to have_received(:perform_later).with(set_noid: set['id'])
-      expect(response).to redirect_to(edit_set_path(set['id'], anchor: 'visibility'))
+      expect(response).to redirect_to(edit_set_path(set['id'], tab: 'visibility'))
       expect(flash[:notice]).to include('Making this set’s works private')
     end
   end
@@ -122,7 +122,7 @@ RSpec.describe 'Sets bulk actions', type: :request do
       post "/sets/#{set['id']}/apply_sentinel"
 
       expect(SetSentinelApplyJob).to have_received(:perform_later).with(set_noid: set['id'])
-      expect(response).to redirect_to(edit_set_path(set['id'], anchor: 'derivative-access'))
+      expect(response).to redirect_to(edit_set_path(set['id'], tab: 'derivative-access'))
     end
   end
 
@@ -132,7 +132,7 @@ RSpec.describe 'Sets bulk actions', type: :request do
       patch "/sets/#{set['id']}/sentinel", params: { sentinel: { master: { mode: 'restrict', groups: [staff] } } }
 
       expect(Sentinel.find_by(target_id: set['id']).policy).to eq({ 'master' => [staff] })
-      expect(response).to redirect_to(edit_set_path(set['id'], anchor: 'derivative-access'))
+      expect(response).to redirect_to(edit_set_path(set['id'], tab: 'derivative-access'))
     end
 
     # A Set is not a container, so an unrestricted tier is omitted rather than
