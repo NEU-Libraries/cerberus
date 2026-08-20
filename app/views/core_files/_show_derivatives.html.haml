@@ -1,5 +1,9 @@
 
-%h4 Downloads
+%h4
+  Downloads
+  - if @core_file.stream_only?
+    %small{style: "margin-left: 10px;"}
+      Streaming Only
 
 - if !(@core_file.under_embargo?(current_user))
   .list-buttons

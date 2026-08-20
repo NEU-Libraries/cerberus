@@ -10,7 +10,7 @@
           .btn-group
             = render partial: 'core_files/fulltext_button', locals: {content: content }
             = render partial: 'shopping_carts/add_or_remove_btn', locals: { :id => content.pid }
-        -elsif content.klass != "ImageThumbnailFile" && content.klass != "PageFile" && !((content.klass == 'AudioFile' || content.klass == 'VideoFile' || content.klass == 'AudioMasterFile' || content.klass == 'VideoMasterFile') && item.stream_only?)
+        -elsif content.klass != "ImageThumbnailFile" && content.klass != "PageFile" && !((content.klass == 'AudioFile' || content.klass == 'VideoFile' || content.klass == 'AudioMasterFile' || content.klass == 'VideoMasterFile') && (item.stream_only? && !current_user.repo_staff?))
           .btn-group
             = render partial: 'core_files/derivative_button', locals: {content: content }
             = render partial: 'shopping_carts/add_or_remove_btn', locals: { :id => content.pid }
@@ -27,7 +27,7 @@
           .btn-group
             = render partial: 'core_files/fulltext_button', locals: {content: content }
             = render partial: 'shopping_carts/add_or_remove_btn', locals: { :id => content.pid }
-        -elsif content.klass != "ImageThumbnailFile" && content.klass != "PageFile" && !((content.klass == 'AudioFile' || content.klass == 'VideoFile' || content.klass == 'AudioMasterFile' || content.klass == 'VideoMasterFile') && item.stream_only?)
+        -elsif content.klass != "ImageThumbnailFile" && content.klass != "PageFile" && !((content.klass == 'AudioFile' || content.klass == 'VideoFile' || content.klass == 'AudioMasterFile' || content.klass == 'VideoMasterFile') && (item.stream_only? && !current_user.repo_staff?))
           .btn-group
             = render partial: 'core_files/derivative_button', locals: {content: content }
             = render partial: 'shopping_carts/add_or_remove_btn', locals: { :id => content.pid }
