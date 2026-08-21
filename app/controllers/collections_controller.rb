@@ -132,8 +132,10 @@ class CollectionsController < CatalogController
         entry = permitted[tier]
         next if entry.blank?
 
+        # Committed rows and the entry row share one field name, so `uniq` keeps
+        # a group named twice from reaching Atlas twice.
         if entry[:mode] == 'restrict'
-          policy[tier] = Array(entry[:groups]).compact_blank
+          policy[tier] = Array(entry[:groups]).compact_blank.uniq
         elsif public_collection
           policy[tier] = ['public']
         end

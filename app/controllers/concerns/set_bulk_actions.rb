@@ -126,7 +126,9 @@ module SetBulkActions
         entry = permitted[tier]
         next if entry.blank? || entry[:mode] != 'restrict'
 
-        policy[tier] = Array(entry[:groups]).compact_blank
+        # Committed rows and the entry row share one field name, so `uniq` keeps
+        # a group named twice from reaching Atlas twice.
+        policy[tier] = Array(entry[:groups]).compact_blank.uniq
       end
     end
 end
