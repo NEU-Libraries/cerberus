@@ -56,6 +56,12 @@ class CatalogController < ApplicationController
 
     # solr field configuration for search results/index views
     config.index.title_field = 'title_tsim'
+    # Both presenters differ from Blacklight's only in rendering a heading's
+    # sub/sup markup. Set on config.index rather than per view because
+    # view_config merges the named view over these defaults, so list and gallery
+    # both inherit it.
+    config.index.document_presenter_class = EnhancedIndexPresenter
+    config.show.document_presenter_class = EnhancedShowPresenter
     # config.index.display_type_field = 'format'
     # config.index.thumbnail_field = 'thumbnail_path_ss'
     config.index.thumbnail_method = :iiif_thumbnail
