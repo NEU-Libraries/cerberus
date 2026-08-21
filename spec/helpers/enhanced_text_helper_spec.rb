@@ -82,6 +82,31 @@ RSpec.describe EnhancedTextHelper, type: :helper do
     it 'handles nil' do
       expect(helper.plain_text(nil)).to eq('')
     end
+
+    # A title is free text, and "<" is a character a physics title uses for its
+    # own sake — MODS holding `&lt;Tc` yields the text `<Tc`. An HTML parser
+    # treats the two spacings differently: "< T" cannot open a tag, "<T" can.
+    it 'keeps a spaced less-than that means less-than' do
+      expect(helper.plain_text('Superconductivity at Ti < Tc')).to eq('Superconductivity at Ti < Tc')
+    end
+
+    # KNOWN LIMITATION, pinned rather than endorsed: an unspaced less-than reads
+    # as a tag, and the element it opens swallows everything up to the next ">".
+    # Both helpers share it, because both hand the string to an HTML parser that
+    # resolves the ambiguity toward markup.
+    it 'drops the text after an unspaced less-than' do
+      expect(helper.plain_text('Superconductivity at Ti <Tc')).to eq('Superconductivity at Ti ')
+      expect(helper.enhanced_text('Superconductivity at Ti <Tc')).to eq('Superconductivity at Ti ')
+    end
+
+    # The damage is a span, not a tail, and its size depends on where the next
+    # ">" falls — here that is the subscript's own closing bracket, so a valid
+    # subscript is destroyed too and the "2" survives as bare text. This is the
+    # example the Atlas fix is written against, so it is the one to watch: it
+    # flips the day the parse is narrowed to the allowlist.
+    it 'lets an unspaced less-than swallow a following subscript' do
+      expect(helper.enhanced_text('Ti <Tc in Bi<sub>2</sub>O')).to eq('Ti 2O')
+    end
   end
 
   describe 'truncating through #plain_text' do

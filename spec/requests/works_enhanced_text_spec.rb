@@ -29,16 +29,16 @@ RSpec.describe 'Work enhanced text', type: :request do
       .and include(FORMULA_MARKUP)
   end
 
-  # The one place the tags still show, and the reason for the Atlas gap report:
-  # the MODS metadata block is HTML that Atlas builds and Cerberus injects whole
-  # (works/show.html.haml, `@mods.html_safe`). Atlas escapes the title into it,
-  # so the markup cannot be recovered on this side without picking entities back
-  # out of finished HTML. Pinned so the day Atlas stops escaping it, this fails
-  # and the expectation flips rather than the behaviour changing unnoticed.
-  it 'still shows the escaped tags inside the Atlas-rendered MODS block' do
+  # The MODS metadata block is HTML that Atlas builds and Cerberus injects whole
+  # (works/show.html.haml, `@mods.html_safe`), so Cerberus cannot sanitize it on
+  # this side — the markup either survives Atlas's decorator or it is gone.
+  # Asserted here because the block sits directly under the heading, and the two
+  # disagreeing is what a reader notices first.
+  it 'renders the subscripts inside the Atlas-rendered MODS block' do
     mods_block = response.body[%r{<dt>Title</dt>\s*<dd>(.*?)</dd>}m, 1]
 
-    expect(mods_block).to include('&lt;sub&gt;')
+    expect(mods_block).to include(FORMULA_MARKUP)
+    expect(mods_block).not_to include('&lt;sub&gt;')
   end
 
   it 'strips the markup from the citation_title tag, where it could only be characters' do
@@ -59,6 +59,29 @@ RSpec.describe 'Work enhanced text', type: :request do
     alt = response.body[/alt="Preview of ([^"]*)"/, 1]
 
     expect(alt).to include(FORMULA_TEXT) if alt
+  end
+
+  # Gap 2's fix spans three repos — Atlas writes title_plain_tsim, the
+  # blacklight-solr image lists it in the request handler's qf, and Cerberus
+  # sends the query. Only an end-to-end search proves all three are in place;
+  # each half looks correct on its own while the reader still finds nothing.
+  describe 'searching for the formula' do
+    it 'finds the work by the plain text a reader types' do
+      get search_catalog_path(q: FORMULA_TEXT, search_field: 'all_fields')
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(work.id)
+    end
+
+    # Matching happens on the plain text, display happens on the marked-up
+    # string, and one result row has to do both. Atlas keeps title_tsim marked
+    # up precisely so the heading can render — asserting the pair together is
+    # what catches a well-meant "just strip the index field" change.
+    it 'renders the subscripts in the row it matched' do
+      get search_catalog_path(q: FORMULA_TEXT, search_field: 'all_fields')
+
+      expect(response.body).to include(FORMULA_MARKUP)
+    end
   end
 
   # --- helpers -------------------------------------------------------------
