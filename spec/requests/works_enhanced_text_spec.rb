@@ -19,7 +19,7 @@ RSpec.describe 'Work enhanced text', type: :request do
 
   let!(:community)  { public_container(AtlasRb::Community, nil) }
   let!(:collection) { public_container(AtlasRb::Collection, community.id) }
-  let!(:work)       { public_work(collection.id) }
+  let(:work) { public_work(collection.id, 'work-enhanced-text') }
 
   before { get work_path(work.id) }
 
@@ -84,6 +84,34 @@ RSpec.describe 'Work enhanced text', type: :request do
     end
   end
 
+  # A title where "<" is a character in its own right, which is what MODS holding
+  # `&lt;Tc` yields. Both halves of the page used to lose the span between the
+  # bare "<" and the next ">" — Cerberus's heading and Atlas's MODS block
+  # independently, since each parsed the value as HTML. Asserting them together
+  # is the point: they are two codebases that have to agree on one string.
+  describe 'a literal less-than in the title' do
+    let(:work) { public_work(collection.id, 'work-literal-less-than') }
+
+    let(:expected) { 'Resistivity at Ti &lt;Tc and Ti &lt; Tc in Bi<sub>2</sub>O' }
+
+    it 'keeps the whole title in the heading Cerberus renders' do
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("<h3>#{expected}</h3>")
+    end
+
+    it 'keeps the whole title in the block Atlas renders' do
+      mods_block = response.body[%r{<dt>Title</dt>\s*<dd>(.*?)</dd>}m, 1]
+
+      expect(mods_block).to eq(expected)
+    end
+
+    it 'keeps the whole title in the page title, with the markup off' do
+      title = response.body[%r{<title>(.*?)</title>}m, 1]
+
+      expect(title.strip).to eq('Resistivity at Ti &lt;Tc and Ti &lt; Tc in Bi2O')
+    end
+  end
+
   # --- helpers -------------------------------------------------------------
 
   def mods(kind) = Rails.root.join('spec/fixtures/files', "#{kind}-mods.xml").to_s
@@ -96,8 +124,8 @@ RSpec.describe 'Work enhanced text', type: :request do
     container
   end
 
-  def public_work(parent_id)
-    created = AtlasRb::Work.create(parent_id, mods('work-enhanced-text'), nuid: '000000004')
+  def public_work(parent_id, fixture)
+    created = AtlasRb::Work.create(parent_id, mods(fixture), nuid: '000000004')
     AtlasRb::Work.complete(created.id, nuid: '000000004')
     AtlasRb::Work.metadata(created.id, read_public, nuid: '000000004')
     created

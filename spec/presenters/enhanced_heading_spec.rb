@@ -31,8 +31,18 @@ RSpec.describe EnhancedHeading do
       expect(presenter_for(described_presenter, title, view_config).heading).to eq(title)
     end
 
-    it 'drops a tag outside the allowlist' do
-      expect(presenter_for(described_presenter, '<b>Bold</b>', view_config).heading).to eq('Bold')
+    # A tag outside the allowlist shows as source text rather than being tidied
+    # away, so a heading never silently loses a character of the record.
+    it 'shows a tag outside the allowlist as source text' do
+      expect(presenter_for(described_presenter, '<b>Bold</b>', view_config).heading)
+        .to eq('&lt;b&gt;Bold&lt;/b&gt;')
+    end
+
+    # The reason the parse was narrowed: an HTML parser read "<Tc" as opening an
+    # element and discarded the rest of the heading.
+    it 'keeps a literal less-than and everything after it' do
+      expect(presenter_for(described_presenter, 'Ti <Tc in Bi<sub>2</sub>O', view_config).heading)
+        .to eq('Ti &lt;Tc in Bi<sub>2</sub>O')
     end
 
     it 'returns a heading the view will not escape again' do
