@@ -22,7 +22,7 @@
         don't restrict inherits the visibility of the work it belongs to. Image visibility must
         narrow as resolution grows, so a rendition can't be more open than a smaller one above it.
         Audio, video, and PDF renditions gate on their own.
-    %section.my-3{ data: { controller: "derivative-policy" } }
+    %section.my-3{ data: { controller: "derivative-policy", "derivative-policy-groups-value": derivative_group_registry(groups) } }
       %h6.derivative-group-heading Image renditions
       %ol.derivative-ladder.list-unstyled.mb-4
         - Sentinel::IMAGE_LADDER.each do |tier|

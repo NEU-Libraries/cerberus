@@ -31,4 +31,13 @@ module SentinelsHelper
 
     { mode: 'restrict', groups: Array(groups) }
   end
+
+  # The group registry the tab's typeahead filters over, as JSON for the
+  # Stimulus value. Rendered once for the whole ladder rather than once per
+  # tier: every tier offers the same groups, and the list runs to dozens of
+  # entries, so repeating it eight times is the markup the typeahead exists to
+  # get rid of.
+  def derivative_group_registry(groups)
+    groups.map { |raw, cosmetic| { value: raw, label: cosmetic } }.to_json
+  end
 end
