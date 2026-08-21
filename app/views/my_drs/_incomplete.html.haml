@@ -25,5 +25,5 @@
           %tr
             %td.admin-registry-table__name
               %i.fa-regular.fa-file.text-muted.me-2{ 'aria-hidden' => 'true' }
-              = link_to Array(work['title_tsim']).first.presence || '(untitled)', work_path(work)
+              = link_to finder_doc_heading(work), work_path(work)
             %td.text-muted.small= IncompleteReasons.describe(work.incomplete_reason)

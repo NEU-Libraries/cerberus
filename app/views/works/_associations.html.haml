@@ -22,7 +22,7 @@
                 - else
                   %i.fa-regular.fa-image{'aria-hidden' => 'true'}
               .work-association__body
-                -# finder_doc_title is the app's one title-off-a-Solr-doc reader,
+                -# finder_doc_heading is the app's one title-off-a-Solr-doc reader,
                 -# with the untitled fallback; it needs no blacklight_config.
-                = link_to finder_doc_title(doc), work_path(doc.to_param), class: 'work-association__title'
+                = link_to finder_doc_heading(doc), work_path(doc.to_param), class: 'work-association__title'
                 %span.work-association__id= doc.to_param

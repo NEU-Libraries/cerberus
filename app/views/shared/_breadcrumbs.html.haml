@@ -2,7 +2,7 @@
   %ol.breadcrumb.align-items-center
     - breadcrumb_trail do |crumb|
       %li.breadcrumb-item{class: crumb.current? ? "active" : "" }
-        = link_to_unless crumb.current?, crumb.name, crumb.url, (crumb.current? ? {"aria-current" => "page"} : {})
+        = link_to_unless crumb.current?, enhanced_text(crumb.name), crumb.url, (crumb.current? ? {"aria-current" => "page"} : {})
     -# The "Add a child here" affordance, gated on @can_edit (set by the show
     -# page) for every branch — you may only add a child to a container you can
     -# edit. Atlas enforces the same rule on the write (:create_child, resolved

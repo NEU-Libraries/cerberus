@@ -1,5 +1,5 @@
 - content_for(:page_title) do
-  = @work.title
+  = plain_text(@work.title)
 - content_for(:container_header) do
   = render 'shared/breadcrumbs'
 
@@ -23,7 +23,7 @@
   .row
     .col-12
       .d-flex.flex-column.flex-md-row.justify-content-md-between.align-items-md-end
-        %h3= @work.title
+        %h3= enhanced_text(@work.title)
         - if user_signed_in?
           .text-end.small.pb-2.flex-shrink-0.text-nowrap
             - if @can_edit && !@work.in_progress

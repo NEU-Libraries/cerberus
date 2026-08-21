@@ -21,8 +21,19 @@ module AdminFinderHelper
 
   # First title value off a resource Solr doc (title_tsim is multivalued), with a
   # clear fallback so an untitled resource is still selectable.
+  #
+  # Plain text, because most callers put the title somewhere markup cannot
+  # render — a confirm dialog, a query string, a table cell built by
+  # interpolation. Element content that can show a subscript asks for it
+  # explicitly via finder_doc_heading.
   def finder_doc_title(doc)
-    Array(doc['title_tsim']).first.presence || '(untitled)'
+    plain_text(Array(doc['title_tsim']).first.presence || '(untitled)')
+  end
+
+  # finder_doc_title for a place that renders markup: an admin table cell or a
+  # link label, where a formula's subscript should read as one.
+  def finder_doc_heading(doc)
+    enhanced_text(Array(doc['title_tsim']).first.presence || '(untitled)')
   end
 
   # When a resource was last written, for the deposit-triage list.

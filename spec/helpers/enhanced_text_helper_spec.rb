@@ -69,6 +69,16 @@ RSpec.describe EnhancedTextHelper, type: :helper do
       expect(helper.plain_text(SUPERCONDUCTOR)).to end_with('Bi2Sr2CaCu2O8')
     end
 
+    it 'decodes an ampersand rather than leaving it escaped' do
+      expect(helper.plain_text('Ford &amp; Sons')).to eq('Ford & Sons')
+    end
+
+    # The value is meant to be interpolated, so it must not arrive pre-escaped:
+    # a second escape would print the entity itself.
+    it 'returns an ordinary string, not html_safe output' do
+      expect(helper.plain_text('H<sub>2</sub>O')).not_to be_html_safe
+    end
+
     it 'handles nil' do
       expect(helper.plain_text(nil)).to eq('')
     end

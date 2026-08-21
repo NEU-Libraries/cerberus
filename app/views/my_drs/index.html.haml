@@ -68,7 +68,7 @@
                         %span.text-uppercase.small.text-muted.fw-semibold= label
                     %td.admin-registry-table__name
                       %i.fa-regular.fa-file.text-muted.me-2{ 'aria-hidden' => 'true' }
-                      = link_to Array(work['title_tsim']).first.presence || '(untitled)', work_path(work)
+                      = link_to finder_doc_heading(work), work_path(work)
       - else
         .p-3
           %p.text-muted.mb-0
@@ -102,7 +102,7 @@
                 %tr
                   %td.admin-registry-table__name
                     %i.fa-regular.fa-folder-open.text-muted.me-2{ 'aria-hidden' => 'true' }
-                    = link_to Array(coll['title_tsim']).first.presence || '(untitled)', collection_path(coll)
+                    = link_to finder_doc_heading(coll), collection_path(coll)
                   %td.text-muted.small.text-nowrap
                     - if Array(coll['read_access_group_ssim']).include?('public')
                       %i.fa-solid.fa-globe.me-1{ 'aria-hidden' => 'true' }

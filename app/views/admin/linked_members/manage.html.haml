@@ -14,7 +14,7 @@
     .reparent-node-summary
       %span.reparent-node-summary__label Managing
       = finder_type_chip('Work')
-      %span.reparent-node-summary__title= @work.resource.title
+      %span.reparent-node-summary__title= enhanced_text(@work.resource.title)
       %span.admin-registry-table__id= params[:work_id]
 
     %h2.linked-members__subhead
@@ -25,7 +25,7 @@
         - @linked.each do |coll|
           %li.linked-members__item
             = finder_type_chip('Collection')
-            %span.linked-members__title= coll.title
+            %span.linked-members__title= enhanced_text(coll.title)
             %span.admin-registry-table__id= coll.noid
             = button_to admin_linked_members_remove_path(work_id: params[:work_id], collection_id: coll.noid), method: :delete, class: 'linked-members__btn linked-members__btn--remove', form: { class: 'linked-members__btn-form' } do
               - concat content_tag(:i, '', class: 'fa-solid fa-xmark me-1', 'aria-hidden' => 'true')
@@ -50,7 +50,7 @@
           - @results.documents.each do |doc|
             %tr
               %td
-                .admin-registry-table__name= finder_doc_title(doc)
+                .admin-registry-table__name= finder_doc_heading(doc)
               %td= finder_type_chip(doc.klass_type)
               %td
                 %span.admin-registry-table__id= doc.to_param

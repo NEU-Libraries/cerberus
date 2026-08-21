@@ -6,7 +6,7 @@
 -# sub-tab of this page and has always named its resource.
 %h3.py-3
   Edit Community -
-  = @community.title
+  = enhanced_text(@community.title)
 
 = render 'shared/edit_tabs', klass: 'Community', id: params[:id], active: nil
 

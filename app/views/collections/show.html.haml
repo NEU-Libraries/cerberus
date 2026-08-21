@@ -1,5 +1,5 @@
 - content_for(:page_title) do
-  = @collection.title
+  = plain_text(@collection.title)
 - content_for(:container_header) do
   = render 'shared/breadcrumbs'
   -# = breadcrumbs
@@ -12,12 +12,12 @@
           .scoped-search-wrap.float-md-end.ms-md-3.mb-3.mb-md-0
             = render 'shared/scoped_search', path: collection_path(@collection.id), label: 'Search this collection'
         %h3.d-inline
-          = @collection.title
+          = enhanced_text(@collection.title)
         %h5.d-inline.text-black-50
           %span.fa-solid.fa-folder-open.ps-2.pe-1
           Collection
         .clearfix.pt-3
-        = @collection.description
+        = enhanced_text(@collection.description)
         .clearfix.pt-3
           - if user_signed_in?
             .float-end

@@ -13,7 +13,7 @@
     %div
       %h3.mb-1 Rights history
       - if @resource_title.present?
-        %p.text-muted.mb-0= @resource_title
+        %p.text-muted.mb-0= enhanced_text(@resource_title)
     = link_to back_path, class: 'btn btn-sm btn-outline-secondary' do
       %i.fa-solid.fa-arrow-left{'aria-hidden' => 'true'}
       Back to audit log

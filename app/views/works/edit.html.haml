@@ -6,7 +6,7 @@
 -# sub-tab of this page and has always named its resource.
 %h3.py-3
   Edit Work -
-  = @work.title
+  = enhanced_text(@work.title)
 
 = render 'shared/edit_tabs', klass: 'Work', id: params[:id], active: nil
 

@@ -14,7 +14,7 @@
         - entries.each do |entry|
           %tr
             %td
-              .admin-registry-table__name= entry[:doc] ? finder_doc_title(entry[:doc]) : '(unresolved)'
+              .admin-registry-table__name= entry[:doc] ? finder_doc_heading(entry[:doc]) : '(unresolved)'
             %td
               - if entry[:doc]
                 = finder_type_chip(Array(entry[:doc]['internal_resource_tesim']).first)

@@ -14,7 +14,7 @@
     .reparent-node-summary
       %span.reparent-node-summary__label Managing
       = finder_type_chip('Work')
-      %span.reparent-node-summary__title= @work.resource.title
+      %span.reparent-node-summary__title= enhanced_text(@work.resource.title)
       %span.admin-registry-table__id= params[:work_id]
 
     -# Both directions, both retractable. The edge is stored once, on the Work
@@ -33,12 +33,12 @@
             - rows.each do |row|
               .work-association
                 .work-association__body
-                  = link_to row.title, work_path(row.noid), class: 'work-association__title'
+                  = link_to enhanced_text(row.title), work_path(row.noid), class: 'work-association__title'
                   %span.work-association__id= row.noid
                 .work-association__action
                   - holder = direction == :inbound ? row.noid : params[:work_id]
                   - target = direction == :inbound ? params[:work_id] : row.noid
-                  = button_to admin_associations_remove_path(work_id: params[:work_id], holder_id: holder, target_id: target, type: type), method: :delete, class: 'linked-members__btn linked-members__btn--remove', form: { class: 'linked-members__btn-form', data: { turbo_confirm: "Remove “#{association_label(type, direction)}: #{row.title}”? The relationship is dropped from both works' pages. Neither work is changed otherwise." } } do
+                  = button_to admin_associations_remove_path(work_id: params[:work_id], holder_id: holder, target_id: target, type: type), method: :delete, class: 'linked-members__btn linked-members__btn--remove', form: { class: 'linked-members__btn-form', data: { turbo_confirm: "Remove “#{association_label(type, direction)}: #{plain_text(row.title)}”? The relationship is dropped from both works' pages. Neither work is changed otherwise." } } do
                     - concat content_tag(:i, '', class: 'fa-solid fa-xmark me-1', 'aria-hidden' => 'true')
                     Remove
       - else
@@ -68,7 +68,7 @@
           - @results.documents.each do |doc|
             %tr
               %td
-                .admin-registry-table__name= finder_doc_title(doc)
+                .admin-registry-table__name= finder_doc_heading(doc)
               %td= finder_type_chip(doc.klass_type)
               %td
                 %span.admin-registry-table__id= doc.to_param

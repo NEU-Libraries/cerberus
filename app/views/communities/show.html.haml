@@ -1,5 +1,5 @@
 - content_for(:page_title) do
-  = @community.title
+  = plain_text(@community.title)
 - content_for(:container_header) do
   = render 'shared/breadcrumbs'
   -# = breadcrumbs
@@ -12,12 +12,12 @@
           .scoped-search-wrap.float-md-end.ms-md-3.mb-3.mb-md-0
             = render 'shared/scoped_search', path: community_path(@community.id), label: 'Search this community'
         %h3.d-inline
-          = @community.title
+          = enhanced_text(@community.title)
         %h5.d-inline.text-black-50
           %span.fa-solid.fa-users.ps-2.pe-1
           Community
         .clearfix.pt-3
-        = @community.description
+        = enhanced_text(@community.description)
         .clearfix.pt-3
           - if user_signed_in?
             .float-end

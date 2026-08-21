@@ -28,7 +28,13 @@ module EnhancedTextHelper
   # stray `<sub>` as characters, which is worse than dropping it. Truncation
   # goes through here too: `truncate` counts characters and knows nothing
   # about tags, so cutting the markup-bearing string can sever one.
+  #
+  # Returns an ordinary String, not html_safe output, so it composes: the caller
+  # can interpolate it into a sentence or hand it to `tag.meta` and let that
+  # escape it once. `strip_tags` would be the obvious tool but returns escaped
+  # html_safe *output* — interpolating that into a larger string escapes it a
+  # second time and prints `&amp;amp;` for an ampersand.
   def plain_text(value)
-    strip_tags(value.to_s)
+    Nokogiri::HTML5.fragment(value.to_s).text
   end
 end

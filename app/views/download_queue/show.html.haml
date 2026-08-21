@@ -42,7 +42,7 @@
               %tr
                 %td
                   - if index.zero?
-                    = link_to (@titles.dig(work_noid, 'title').presence || 'Untitled work'), work_path(work_noid), class: 'admin-registry-table__name fw-semibold'
+                    = link_to enhanced_text(@titles.dig(work_noid, 'title').presence || 'Untitled work'), work_path(work_noid), class: 'admin-registry-table__name fw-semibold'
                     %span.admin-registry-table__id.ms-2= work_noid
                 %td.admin-registry-table__name= file_label
                 %td
