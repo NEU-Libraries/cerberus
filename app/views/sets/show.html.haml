@@ -49,7 +49,7 @@
             -# names. Runs in the background, so this only starts it.
             - if admin_tier
               = button_to 'Reindex', admin_reindex_set_path(@set['id']),
-                          class:      'btn btn-link p-0 px-3 align-baseline text-decoration-none',
+                          class:      'btn btn-link link-action px-3',
                           form_class: 'd-inline',
                           title:      'Rebuild the search records this set names'
             - if @can_edit

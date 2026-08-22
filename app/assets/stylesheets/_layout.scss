@@ -32,6 +32,32 @@ a:not(.btn, .dropdown-item, .navbar-brand, .nav-link) {
   }
 }
 
+// A POST action that has to sit in a row of plain links and read as one of
+// them -- Reindex beside Edit and Delete. `button_to` can only emit a <button>,
+// and two rules pull that button away from its neighbours: `.btn` sets its own
+// font-size, so the button ignores a `.small` inherited from the row, and the
+// link colour above matches an <a> only, so the button keeps the button blue.
+// Undo both, and hold the colour through hover and focus, because the anchors
+// beside it never change colour either.
+// Everything a button needs to stop looking like one. Left and right padding
+// is left to the caller, since the row it joins sets its own rhythm (px-2 on a
+// Work, px-3 on a Set) and a Bootstrap spacing utility overrides this anyway.
+.link-action {
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: inherit;
+  color: $link-blue;
+  text-decoration: none;
+  vertical-align: baseline;
+
+  &:hover,
+  &:focus,
+  &:active {
+    color: $link-blue;
+    text-decoration: none;
+  }
+}
+
 .navbar-search {
   padding-bottom: 0;
 }
