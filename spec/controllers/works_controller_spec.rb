@@ -690,6 +690,28 @@ describe WorksController do
       expect(subject).to redirect_to action: :show, id: work.id
     end
 
+    # A Word manual line break (U+000B) has no XML 1.0 representation, so it used
+    # to vanish when Nokogiri serialized the text node and run the words either
+    # side of it together -- HTTP 200, no warning, and the merge propagated into
+    # the index. Asserted end to end against the stored MODS, because the whole
+    # defect lived between the form post and what Atlas kept. Built from the
+    # codepoint so this file stays ASCII.
+    it 'separates the words a pasted Word line break sat between, in the stored title' do
+      patch :update_metadata, params: { id: work.id, work: { title: "Simple#{[0x000B].pack('U')}form",
+                                                             description: 'D', keywords: %w[alpha] } }
+
+      doc = NEU::MODS::Document.parse(AtlasRb::Work.mods(work.id, 'xml', nuid: '000000004'))
+      expect(doc.title_parts[:title]).to eq('Simple form')
+    end
+
+    it 'keeps the break as a line break in the stored abstract, which a textarea round-trips' do
+      patch :update_metadata, params: { id: work.id, work: { title: 'T', keywords: %w[alpha],
+                                                             description: "Para one#{[0x000B].pack('U')}Para two" } }
+
+      doc = NEU::MODS::Document.parse(AtlasRb::Work.mods(work.id, 'xml', nuid: '000000004'))
+      expect(doc.abstract_nodes.first.text).to eq("Para one\nPara two")
+    end
+
     it 'rejects a save with no keywords (keywords are mandatory)' do
       patch :update_metadata, params: { id: work.id, work: { title: 'NewTitle', description: 'NewAbstract' } }
 
@@ -761,6 +783,13 @@ describe WorksController do
       expect(doc.editable_personal_creators).to eq([{ given: 'Jenny', family: 'Smith' }])
       expect(doc.preserved_names.size).to eq(3) # Cohen, NU, Flynn untouched
       expect(subject).to redirect_to action: :show, id: work.id
+    end
+
+    it 'separates a title part where a pasted Word line break was' do
+      patch :update, params: { id: work.id, work: { form: 'advanced', subtitle: "a#{[0x000B].pack('U')}b" } }
+
+      doc = NEU::MODS::Document.parse(AtlasRb::Work.mods(work.id, 'xml', nuid: '000000004'))
+      expect(doc.title_parts[:subtitle]).to eq('a b')
     end
 
     it 'edits a structured title part (subtitle) in place, leaving the bare title' do

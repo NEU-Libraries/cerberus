@@ -17,17 +17,31 @@ module Metadata
   # A nil field means "leave it untouched"; a value (including "", [], or a
   # creator array) means "set it". Each apply_* skips a write that wouldn't change
   # anything, so a no-op submit doesn't churn nodes or mint an OCFL version.
+  #
+  # Every incoming value passes through Metadata::ControlCharacters first, because
+  # Nokogiri drops a character XML 1.0 cannot represent when it serializes the
+  # text node -- a manual line break pasted out of Word would vanish and merge the
+  # words either side of it, with nothing to show it happened. Cleaning here
+  # covers both forms and every other caller in one place, and nil survives it, so
+  # "leave it untouched" still means that.
+  #
+  # rubocop:disable Metrics/ClassLength
+  # The length is one apply_* per field the forms own plus one normalisation per
+  # field shape, so it tracks the size of the two forms rather than the difficulty
+  # of any one method. Collapsing the near-identical creator pair behind a lookup
+  # table would buy the metric back and cost the reader indirection.
   class MODSMerge < ApplicationService
     def initialize(xml:, title: nil, abstract: nil, keywords: nil, # rubocop:disable Metrics/ParameterLists
                    subtitle: nil, part_name: nil, part_number: nil, non_sort: nil,
                    personal_creators: nil, corporate_creators: nil)
       @doc = Nokogiri::XML(xml.to_s, &:noblanks)
       @mods = NEU::MODS::Document.new(@doc)
-      @title = title
-      @abstract = abstract
+      @title = ControlCharacters.clean_line(title)
+      @abstract = ControlCharacters.clean_text(abstract)
       @keywords = keywords
       @title_parts = { 'subTitle' => subtitle, 'partName' => part_name,
                        'partNumber' => part_number, 'nonSort' => non_sort }
+                     .transform_values { |value| ControlCharacters.clean_line(value) }
       @personal_creators = personal_creators
       @corporate_creators = corporate_creators
     end
@@ -132,17 +146,25 @@ module Metadata
       # --- normalisation (canonical_ws so no-op guards match the gem's read) ----
 
       def normalized_keywords
-        Array(@keywords).map { |k| k.to_s.strip }.reject(&:empty?).uniq
+        Array(@keywords).map { |k| ControlCharacters.clean_line(k.to_s).strip }.reject(&:empty?).uniq
       end
 
       def normalized_personal_creators
         Array(@personal_creators)
-          .map { |c| { given: NEU::MODS.canonical_ws(c[:given]), family: NEU::MODS.canonical_ws(c[:family]) } }
+          .map { |c| { given: canonical_line(c[:given]), family: canonical_line(c[:family]) } }
           .reject { |c| c[:given].empty? && c[:family].empty? }
       end
 
       def normalized_corporate_creators
-        Array(@corporate_creators).map { |n| NEU::MODS.canonical_ws(n) }.reject(&:empty?).uniq
+        Array(@corporate_creators).map { |n| canonical_line(n) }.reject(&:empty?).uniq
+      end
+
+      # A separator control already becomes a space here, because canonical_ws
+      # collapses Ruby's \s and that covers U+000B and U+000C. What it leaves is
+      # the rest of C0, for Nokogiri to drop at serialize -- so clean first, and a
+      # name or a keyword gets the same treatment as a title.
+      def canonical_line(value)
+        NEU::MODS.canonical_ws(ControlCharacters.clean_line(value))
       end
 
       def existing_keywords
@@ -177,7 +199,8 @@ module Metadata
       end
 
       def normalize_set(arr)
-        arr.map { |s| NEU::MODS.canonical_ws(s) }.sort
+        arr.map { |s| canonical_line(s) }.sort
       end
   end
+  # rubocop:enable Metrics/ClassLength
 end

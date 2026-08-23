@@ -140,4 +140,59 @@ RSpec.describe Metadata::MODSMerge do
       expect(authority_names(d).size).to eq(3)
     end
   end
+  # A character XML 1.0 cannot represent is dropped by Nokogiri at serialize, so
+  # a Word manual line break used to vanish from the stored MODS and merge the
+  # words either side of it -- HTTP 200, no warning, and the merge propagated into
+  # the search index. Built from codepoints so this file stays ASCII.
+  describe 'characters XML cannot store' do
+    def cp(*codepoints) = codepoints.pack('U*')
+
+    let(:vt) { cp(0x000B) }
+
+    it 'separates a title where a Word line break was, instead of merging the words' do
+      d = doc(described_class.call(xml: xml, title: "Simple#{vt}form VT test"))
+      expect(d.at_xpath("/mods:mods/mods:titleInfo[@usage='primary']/mods:title", ns).text)
+        .to eq('Simple form VT test')
+    end
+
+    it 'keeps the break as a line break in an abstract, which a textarea round-trips' do
+      d = doc(described_class.call(xml: xml, abstract: "Para one#{vt}Para two"))
+      expect(d.at_xpath('/mods:mods/mods:abstract', ns).text).to eq("Para one\nPara two")
+    end
+
+    it 'separates a title part' do
+      d = doc(described_class.call(xml: xml, subtitle: "a#{vt}b"))
+      expect(d.at_xpath("/mods:mods/mods:titleInfo[@usage='primary']/mods:subTitle", ns).text).to eq('a b')
+    end
+
+    it 'separates a keyword' do
+      d = doc(described_class.call(xml: xml, keywords: ["Civil#{vt}society"]))
+      expect(bare_topics(d)).to eq(['Civil society'])
+    end
+
+    it 'separates a creator name' do
+      d = doc(described_class.call(xml: xml, personal_creators: [{ given: "Jen#{vt}ny", family: 'Smith' }]))
+      expect(d.xpath('/mods:mods/mods:name/mods:namePart[@type="given"]', ns).map(&:text)).to include('Jen ny')
+    end
+
+    it 'drops a control that carries no meaning, rather than separating on it' do
+      d = doc(described_class.call(xml: xml, title: "Bell#{cp(0x0007)}test"))
+      expect(d.at_xpath("/mods:mods/mods:titleInfo[@usage='primary']/mods:title", ns).text).to eq('Belltest')
+    end
+
+    # The clean has to survive the no-op guard both ways: re-submitting the
+    # already-clean value must not mint a version, and neither must re-submitting
+    # the dirty paste that produced it.
+    it 're-submitting the same pasted value is a no-op (no version churn)' do
+      once = described_class.call(xml: xml, title: "Simple#{vt}form")
+      twice = described_class.call(xml: once, title: "Simple#{vt}form")
+      expect(described_class.unchanged?(once, twice)).to be(true)
+    end
+
+    it 'is a no-op when the cleaned value equals what is already stored' do
+      once = described_class.call(xml: xml, title: 'Simple form')
+      twice = described_class.call(xml: once, title: "Simple#{vt}form")
+      expect(described_class.unchanged?(once, twice)).to be(true)
+    end
+  end
 end
