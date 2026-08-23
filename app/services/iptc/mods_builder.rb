@@ -45,8 +45,12 @@ module Iptc
     XSI_NS  = 'http://www.w3.org/2001/XMLSchema-instance'
     SCHEMA_LOCATION = "#{MODS_NS} http://www.loc.gov/standards/mods/v3/mods-3-5.xsd".freeze
 
+    # Tags whose MODS element may legitimately hold a line break. Everything else
+    # lands in a single-line element, where a break would be wrong.
+    PROSE_TAGS = %i[Description].freeze
+
     def initialize(iptc:)
-      @iptc = iptc
+      @iptc = storable(iptc)
       @warnings = []
     end
 
@@ -58,6 +62,41 @@ module Iptc
     private
 
       attr_reader :iptc
+
+      # Reduce every string tag to what XML 1.0 can store, once, before any emit_*
+      # reads it -- so a field added later cannot reopen the hole.
+      #
+      # This path needs it more than the forms do, not less. exiftool hands a
+      # control character straight back (MarCom types captions in an image editor,
+      # and a paste out of Word carries U+000B), Nokogiri::XML::Builder writes the
+      # raw byte into its output rather than dropping it, and nothing here
+      # validates -- so `Bos<VT>ton` reached Atlas inside a document that does not
+      # parse strictly, and became `Boston`. In a batch of hundreds nobody reads
+      # the field that changed.
+      #
+      # Silent, like the simple metadata form: the replacement is unambiguous and
+      # there is no human to hand a decision to. Deliberately NOT a row warning --
+      # every other warning here names something a person can act on, and this one
+      # would only dilute them.
+      def storable(tags)
+        tags.to_h { |tag, value| [tag, storable_value(tag, value)] }
+      end
+
+      # Only strings carry the problem; DateTimeOriginal arrives as a Time and
+      # Keywords/SupplementalCategories as arrays of strings.
+      def storable_value(tag, value)
+        case value
+        when String then clean_string(tag, value)
+        when Array  then value.map { |v| v.is_a?(String) ? clean_string(tag, v) : v }
+        else value
+        end
+      end
+
+      def clean_string(tag, value)
+        return Metadata::ControlCharacters.clean_text(value) if PROSE_TAGS.include?(tag)
+
+        Metadata::ControlCharacters.clean_line(value)
+      end
 
       def validate_required!
         raise MissingRequiredField, 'Headline' if iptc[:Headline].blank?
