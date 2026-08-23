@@ -36,6 +36,6 @@ module UsageChartsHelper
     #   axis renders the key verbatim), chronological.
     def dense_series(range, series)
       range.to_a.index_with { |day| series[day].to_i }
-                .transform_keys { |day| day.strftime(LABEL_FORMAT) }
+           .transform_keys { |day| day.strftime(LABEL_FORMAT) }
     end
 end
