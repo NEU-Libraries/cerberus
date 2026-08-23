@@ -5,7 +5,13 @@
 -# the preview pane rather than twice on one screen.
 - if Array(@errors).empty?
   = turbo_stream.replace 'save_refusal' do
-    = render 'save_refusal', errors: [], repairable: false, repaired: false
+    = render 'save_refusal', errors: [], repairable: false, repaired: nil
+
+-# Replaced whatever the outcome, unlike the refusal above: this describes the
+-# buffer that was just submitted, and that buffer is what the response has in
+-# hand either way. A validation failure leaves it as true as a pass does.
+= turbo_stream.replace 'escape_advisory' do
+  = render 'escape_advisory', advisory: @double_escapes
 
 = turbo_stream.replace "mods" do
   - if @errors.present?
@@ -16,7 +22,9 @@
           - @errors.each do |err|
             %li= err.to_s
         - if @repairable
-          = render 'repair_offer'
+          = render 'repair_offer', kind: 'control_characters',
+                                   label: 'Replace the control characters',
+                                   variant: 'danger'
   - else
     = @mods.html_safe
 

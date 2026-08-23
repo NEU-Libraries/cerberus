@@ -1,10 +1,13 @@
--# The editor's one notice slot, above the form. Three states: nothing to say, a
--# refused Save, or a repair that changed the text without storing it.
+-# The editor's notice slot for what the last submission did, above the form.
+-# Three states: nothing to say, a refused Save, or a repair that changed the text
+-# without storing it. What the buffer itself holds is a separate slot below this
+-# one — see xml/_escape_advisory.
 -#
 -# locals: errors (Array) — the validation messages from a refused Save; empty
 -# when the last Save was not refused. repairable (Boolean) — whether one of those
 -# messages is about a control character, which the editor can fix on request.
--# repaired (Boolean) — whether a repair just rewrote the editor's text.
+-# repaired (Symbol, nil) — which repair just rewrote the editor's text, so the
+-# confirmation names the change the curator asked for and can read in the buffer.
 -#
 -# The container renders whatever the state, because both the Validate and the
 -# Repair turbo_streams replace this node — Turbo needs the target to be on the
@@ -18,10 +21,18 @@
         - errors.each do |err|
           %li= err.to_s
       - if repairable
-        = render 'repair_offer'
-  - elsif repaired
+        = render 'repair_offer', kind: 'control_characters',
+                                 label: 'Replace the control characters',
+                                 variant: 'danger'
+  - elsif repaired == :control_characters
     .alert.alert-warning{role: "alert"}
       %h5.alert-heading Control characters replaced — nothing saved yet
       %p.mb-0
         Each one became a line break, so the words either side of it stay apart.
+        Read the editor below, then Validate + Preview or Save.
+  - elsif repaired == :double_escapes
+    .alert.alert-warning{role: "alert"}
+      %h5.alert-heading Double escapes decoded — nothing saved yet
+      %p.mb-0
+        Each one became the character it spelled out, one level only.
         Read the editor below, then Validate + Preview or Save.

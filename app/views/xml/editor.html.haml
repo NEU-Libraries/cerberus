@@ -25,7 +25,12 @@
 -# A refused Save renders here with the curator's own submission still in the
 -# editor. Shown above the form so it is the first thing read, rather than
 -# leaving them to wonder why the page came back unchanged.
-= render 'save_refusal', errors: Array(@errors), repairable: @repairable, repaired: false
+= render 'save_refusal', errors: Array(@errors), repairable: @repairable, repaired: nil
+
+-# What the buffer holds, as opposed to what the last submission did. Renders on a
+-# plain page load too: a record whose stored XML is escaped twice displays wrong
+-# on its show page, so the curator arrives here already looking for the cause.
+= render 'escape_advisory', advisory: @double_escapes
 
 -# The slot a repair's stream replaces with the script that reseats the Ace
 -# buffer. It has to exist on the page for Turbo to find the target, and it stays

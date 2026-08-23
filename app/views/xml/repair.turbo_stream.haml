@@ -3,7 +3,12 @@
 -# on the Turbo path is also what keeps CSRF working: the button reaches this
 -# action through `formaction`, which the form's per-form token does not cover.
 = turbo_stream.replace 'save_refusal' do
-  = render 'save_refusal', errors: [], repairable: false, repaired: true
+  = render 'save_refusal', errors: [], repairable: false, repaired: @repaired
+
+-# Recomputed from the repaired document, so decoding one level of a document
+-# escaped deeper than that offers the next level rather than reporting silence.
+= turbo_stream.replace 'escape_advisory' do
+  = render 'escape_advisory', advisory: @double_escapes
 
 -# Ace owns a virtual DOM over #editor, so no markup replacement can move the
 -# buffer — setting the session value is the only way in, and only markup inside a

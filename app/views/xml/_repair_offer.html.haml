@@ -1,17 +1,23 @@
--# The button that replaces the control characters a validation just named. No
--# local gate: this renders only where the caller has already established there is
--# something to replace.
+-# The button that applies one of the editor's repairs to the buffer. No local
+-# gate: this renders only where the caller has already established there is
+-# something to repair.
 -#
--# `form:` rather than nesting, because the two places the offer belongs are both
--# outside #raw_xml_form — the refusal banner above it, and the Turbo-replaced
--# preview pane beside it. A submitter outside a form still fires that form's
--# submit event, so the editor controller still syncs the Ace buffer into the
--# hidden field, and the curator's unsaved edits are what gets repaired.
+-# locals:
+-#   kind    — which repair to run, read by XmlController#repair
+-#   label   — what the button says it does, so each offer names its own fix
+-#   variant — the Bootstrap outline colour, matched to the alert it sits in
+-#
+-# `form:` rather than nesting, because the three places an offer belongs are all
+-# outside #raw_xml_form — the refusal banner above it, the advisory below that,
+-# and the Turbo-replaced preview pane beside it. A submitter outside a form still
+-# fires that form's submit event, so the editor controller still syncs the Ace
+-# buffer into the hidden field, and the curator's unsaved edits are what gets
+-# repaired.
 -#
 -# It must stay a Turbo submission. Per-form CSRF tokens bind the form's token to
 -# the form's own action, so a `formaction` override can only authenticate on the
 -# global token Turbo sends in the X-CSRF-Token header — opting out of Turbo here
 -# earns a 422 from InvalidAuthenticityToken. Save relies on the same thing.
-%button.btn.btn-outline-danger.btn-sm.mt-2{type: "submit", form: "raw_xml_form", formaction: xml_repair_path}
+%button.btn.btn-sm.mt-2{class: "btn-outline-#{variant}", type: "submit", form: "raw_xml_form", formaction: xml_repair_path(kind: kind)}
   %i.fas.fa-screwdriver-wrench.me-1
-  Replace the control characters
+  = label

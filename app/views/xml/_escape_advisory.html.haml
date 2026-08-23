@@ -1,0 +1,26 @@
+-# The editor's advisory slot, below the refusal banner and above the form.
+-#
+-# locals: advisory (String, nil) — the message from Metadata::DoubleEscapes,
+-# describing the current buffer; nil when there is nothing to say.
+-#
+-# A slot of its own rather than a third state of #save_refusal, because the two
+-# answer different questions and update on different terms. The refusal reports
+-# what the last Save did, and a failed Validate deliberately leaves it standing;
+-# this reports what is in the buffer, so every response that has seen the buffer
+-# replaces it. Sharing one node would force one of those rules onto the other.
+-#
+-# The container renders whether or not there is a message, because the Validate
+-# and Repair turbo_streams replace this node — Turbo needs the target on the page
+-# to find it, and the id has to survive each replacement.
+-#
+-# alert-info, where a refusal is alert-danger and a completed repair is
+-# alert-warning: this document is valid and Save will take it, so the notice is
+-# advice about what a reader will see, not a problem holding anything up.
+#escape_advisory
+  - if advisory.present?
+    .alert.alert-info{role: "alert"}
+      %h5.alert-heading This will display as an escape, not a character
+      %p.mb-2= advisory
+      = render 'repair_offer', kind: 'double_escapes',
+                               label: 'Decode the double escapes',
+                               variant: 'primary'

@@ -18,6 +18,7 @@ class XmlController < ApplicationController
     @resource = item.resource
     @klass = item.klass
     resource_mods(item.klass)
+    @double_escapes = Metadata::DoubleEscapes.report(@raw_xml)
     editor_breadcrumbs(item.klass, params[:id])
   end
 
@@ -27,6 +28,7 @@ class XmlController < ApplicationController
 
     @errors = XmlValidator.call(xml: params[:raw_xml])
     @repairable = Metadata::ControlCharacters.any?(params[:raw_xml])
+    @double_escapes = Metadata::DoubleEscapes.report(params[:raw_xml])
     @mods = AtlasRb::Resource.preview(create_temp_xml) if @errors.empty?
   end
 
@@ -40,9 +42,16 @@ class XmlController < ApplicationController
   # This is a repair, not a save. Nothing is written until the curator presses
   # Save, and nothing re-validates either: the buffer changed, so the preview pane
   # is left showing the last render it was given.
+  #
+  # Two offers share the action, because they share every part of the answer but
+  # one line -- the same buffer arrives, the same stream reseats it, and neither
+  # writes anything. `kind` says which was pressed, and an unrecognised one falls
+  # back to the control characters rather than doing nothing the curator can see.
   def repair
     @resource = AtlasRb::Resource.find(params[:resource_id]).resource
-    @raw_xml = Metadata::ControlCharacters.clean_text(params[:raw_xml])
+    @repaired = repair_kind
+    @raw_xml = apply_repair(@repaired, params[:raw_xml])
+    @double_escapes = Metadata::DoubleEscapes.report(@raw_xml)
   end
 
   # Save re-runs the same validation Validate + Preview does, and refuses on
@@ -66,6 +75,17 @@ class XmlController < ApplicationController
 
   private
 
+    def repair_kind
+      params[:kind] == 'double_escapes' ? :double_escapes : :control_characters
+    end
+
+    def apply_repair(kind, xml)
+      case kind
+      when :double_escapes then Metadata::DoubleEscapes.decode(xml)
+      else Metadata::ControlCharacters.clean_text(xml)
+      end
+    end
+
     # Re-render the editor holding the curator's OWN submission, not the stored
     # document. A rejected save that reverts the textarea to what is on the
     # server throws away the work that prompted the save — nearly as bad as the
@@ -76,6 +96,7 @@ class XmlController < ApplicationController
       @klass = item.klass
       @raw_xml = params[:raw_xml]
       @repairable = Metadata::ControlCharacters.any?(params[:raw_xml])
+      @double_escapes = Metadata::DoubleEscapes.report(params[:raw_xml])
       @mods = AtlasRb.const_get(item.klass).mods(params[:resource_id], 'html')
       editor_breadcrumbs(item.klass, params[:resource_id])
       render :editor, status: :unprocessable_content

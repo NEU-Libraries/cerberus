@@ -251,7 +251,7 @@ describe XmlController do
 
       expect(response).to have_http_status(:unprocessable_content)
       expect(response.body).to include('Replace the control characters')
-      expect(response.body).to include(xml_repair_path)
+      expect(response.body).to include(xml_repair_path(kind: 'control_characters'))
     end
 
     it 'appears beside a failed Validate' do
@@ -268,7 +268,8 @@ describe XmlController do
     it 'stays a Turbo submission of the editor form' do
       put :update, params: { resource_id: work.id, raw_xml: dirty_xml }
 
-      button = response.body[/<button[^>]*formaction="#{Regexp.escape(xml_repair_path)}"[^>]*>/]
+      formaction = ERB::Util.html_escape(xml_repair_path(kind: 'control_characters'))
+      button = response.body[/<button[^>]*formaction="#{Regexp.escape(formaction)}"[^>]*>/]
       expect(button).to be_present
       expect(button).to include('form="raw_xml_form"')
       expect(button).not_to include('data-turbo')
@@ -281,6 +282,161 @@ describe XmlController do
 
       expect(response.body).to include('Not saved')
       expect(response.body).not_to include('Replace the control characters')
+    end
+  end
+
+  # A reference escaped twice is well-formed XML, so no validator can refuse it
+  # and no renderer can tell it from a record that means the escape. The editor is
+  # the one surface that can name it: it shows the source the curator has to read,
+  # and it can offer the one-level decode without writing anything.
+  describe 'the double-escape advisory' do
+    render_views
+
+    let(:escaped_xml) do
+      '<mods:mods xmlns:mods="http://www.loc.gov/mods/v3">' \
+        '<mods:titleInfo><mods:title>XM&lt;LGBT/&gt;</mods:title></mods:titleInfo>' \
+        '<mods:abstract>called XM&amp;lt;LGBT/&amp;gt;.</mods:abstract></mods:mods>'
+    end
+    let(:decoded_xml) { escaped_xml.sub('XM&amp;lt;LGBT/&amp;gt;', 'XM&lt;LGBT/&gt;') }
+
+    def stub_stored_xml(xml)
+      allow(AtlasRb::Work).to receive(:mods).with(work.id, 'html').and_return('<div>preview</div>')
+      allow(AtlasRb::Work).to receive(:mods).with(work.id, 'xml').and_return(xml)
+    end
+
+    # The record displays wrong on its show page, so the curator arrives here
+    # already looking for the cause. Making them press Validate first would hide
+    # the answer behind a step they have no reason to take.
+    it 'appears on a plain page load, before anything is validated' do
+      stub_stored_xml(escaped_xml)
+
+      get :editor, params: { id: work.id }
+
+      expect(response.body).to include('This will display as an escape, not a character')
+      expect(response.body).to include('Decode the double escapes')
+    end
+
+    it 'names the reference and the line, so the curator can find it in the buffer' do
+      stub_stored_xml(escaped_xml)
+
+      get :editor, params: { id: work.id }
+
+      expect(CGI.unescapeHTML(response.body))
+        .to include('escapes characters twice: &amp;lt; on line 1, &amp;gt; on line 1')
+    end
+
+    it 'stays away from a document that escapes correctly' do
+      stub_stored_xml(decoded_xml)
+
+      get :editor, params: { id: work.id }
+
+      expect(response.body).not_to include('Decode the double escapes')
+    end
+
+    it 'refreshes on a Validate, which has the submitted buffer in hand' do
+      put :validate, params: { resource_id: work.id, raw_xml: escaped_xml }, xhr: true
+
+      expect(response.body).to include('target="escape_advisory"')
+      expect(response.body).to include('Decode the double escapes')
+    end
+
+    # The refusal banner is deliberately left standing by a failed Validate, so
+    # the advisory needs a target of its own to stay true to the buffer.
+    it 'refreshes even when that Validate fails' do
+      allow(XmlValidator).to receive(:call).and_return(['xmlns:mods missing'])
+
+      put :validate, params: { resource_id: work.id, raw_xml: escaped_xml }, xhr: true
+
+      expect(response.body).to include('target="escape_advisory"')
+      expect(response.body).to include('Decode the double escapes')
+    end
+  end
+
+  describe 'the decode repair' do
+    let(:escaped_xml) { '<mods><abstract>XM&amp;lt;LGBT/&amp;gt;</abstract></mods>' }
+    let(:decoded_xml) { '<mods><abstract>XM&lt;LGBT/&gt;</abstract></mods>' }
+
+    it 'takes one level off the submitted buffer' do
+      put :repair, params: { resource_id: work.id, raw_xml: escaped_xml, kind: 'double_escapes' }, xhr: true
+
+      expect(assigns(:raw_xml)).to eq(decoded_xml)
+    end
+
+    it 'writes nothing to Atlas -- the curator still has to press Save' do
+      resource_id = work.id
+      allow(AtlasRb::Work).to receive(:update)
+
+      put :repair, params: { resource_id: resource_id, raw_xml: escaped_xml, kind: 'double_escapes' }, xhr: true
+
+      expect(AtlasRb::Work).not_to have_received(:update)
+    end
+
+    # Two repairs share the action, so the wrong confirmation would describe a
+    # change the curator cannot find in the buffer.
+    context 'what the curator sees' do
+      render_views
+
+      it 'names the change it made, not the other repair' do
+        put :repair, params: { resource_id: work.id, raw_xml: escaped_xml, kind: 'double_escapes' }, xhr: true
+
+        expect(response.body).to include('Double escapes decoded')
+        expect(response.body).to include('nothing saved yet')
+        expect(response.body).not_to include('Control characters replaced')
+      end
+
+      it 'takes the offer away, since the buffer is now clean' do
+        put :repair, params: { resource_id: work.id, raw_xml: escaped_xml, kind: 'double_escapes' }, xhr: true
+
+        expect(response.body).to include('target="escape_advisory"')
+        expect(response.body).not_to include('Decode the double escapes')
+      end
+
+      # One level per press. A document deeper than one level gets the offer back
+      # rather than a claim that it is finished.
+      it 'offers the next level of a document escaped deeper than one' do
+        put :repair, params: { resource_id: work.id, raw_xml: '<r>&amp;amp;lt;</r>', kind: 'double_escapes' }, xhr: true
+
+        expect(assigns(:raw_xml)).to eq('<r>&amp;lt;</r>')
+        expect(response.body).to include('Decode the double escapes')
+      end
+    end
+
+    it 'still replaces control characters when that is the offer pressed' do
+      dirty = "<mods><title>Simple#{0x000B.chr(Encoding::UTF_8)}form</title></mods>"
+
+      put :repair, params: { resource_id: work.id, raw_xml: dirty, kind: 'control_characters' }, xhr: true
+
+      expect(assigns(:raw_xml)).to eq("<mods><title>Simple\nform</title></mods>")
+    end
+  end
+
+  # The document is well-formed, so refusing it would be the editor inventing a
+  # rule XML does not have. The advisory is advice; Save stays the curator's call.
+  describe 'saving a document that escapes twice' do
+    let(:escaped_xml) { '<mods><abstract>XM&amp;lt;LGBT/&amp;gt;</abstract></mods>' }
+
+    before { allow(XmlValidator).to receive(:call).and_return([]) }
+
+    it 'is accepted, not refused' do
+      put :update, params: { resource_id: work.id, raw_xml: escaped_xml }
+
+      expect(response).to redirect_to(work_path(work.id))
+    end
+  end
+
+  # Both slots can have something to say at once: the refusal is about the last
+  # Save, the advisory about the buffer. Each keeps its own offer.
+  describe 'a document with both problems' do
+    render_views
+
+    let(:both) { "<mods><title>Simple#{0x000B.chr(Encoding::UTF_8)}form</title><abstract>&amp;lt;</abstract></mods>" }
+
+    it 'refuses the Save over the control character and still advises on the escape' do
+      put :update, params: { resource_id: work.id, raw_xml: both }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include('Replace the control characters')
+      expect(response.body).to include('Decode the double escapes')
     end
   end
 end
