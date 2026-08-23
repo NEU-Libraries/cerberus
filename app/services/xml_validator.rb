@@ -17,12 +17,21 @@ require 'open-uri'
 #
 # Phase 4 (does the MODS-display partial actually render?) is handled by
 # the caller via AtlasRb::Resource.preview, since rendering lives Atlas-side.
+#
+# A character XML 1.0 cannot store is reported ahead of the parse. libxml fails
+# on it too, but answers with "PCDATA invalid Char value 11" -- which names
+# neither the character, nor that Word wrote it as a manual line break, nor what
+# to put in its place. Nothing is lost by pre-empting: such a document never
+# parses, so the phases below could not have run either way.
 class XmlValidator < ApplicationService
   def initialize(xml:)
     @xml = xml
   end
 
   def call
+    control_characters = Metadata::ControlCharacters.report(@xml)
+    return [control_characters] if control_characters
+
     syntax_error = parse
     return [syntax_error] if syntax_error
 

@@ -35,6 +35,28 @@ describe XmlValidator do
       expect(Kataba).not_to have_received(:fetch_schema)
     end
 
+    # libxml refuses the same document with "PCDATA invalid Char value 11", which
+    # names neither the character nor the fix. The character is built from its
+    # codepoint so this file stays ASCII.
+    context 'when the document holds a character XML cannot store' do
+      let(:with_line_break) { valid_mods.sub('Test', "Simple#{[0x000B].pack('U')}form") }
+
+      it 'reports it in plain language instead of the libxml message' do
+        errors = XmlValidator.call(xml: with_line_break)
+
+        expect(errors.size).to eq(1)
+        expect(errors.first).to be_a(String)
+        expect(errors.first).to include('U+000B (a manual line break, as Word writes Shift+Enter) on line 5')
+        expect(errors.first).to include('Replace each one with a line break or a space')
+      end
+
+      it 'skips the parse and the schema fetch, which such a document never reaches anyway' do
+        XmlValidator.call(xml: with_line_break)
+
+        expect(Kataba).not_to have_received(:fetch_schema)
+      end
+    end
+
     it 'flags documents that do not declare the MODS namespace' do
       xml = <<~XML
         <?xml version="1.0" encoding="UTF-8"?>
