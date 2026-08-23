@@ -180,4 +180,107 @@ describe XmlController do
       end
     end
   end
+  # The editor OFFERS the repair rather than applying it. A surface labelled "Edit
+  # raw XML" that rewrote bytes on their way to storage would be lying about what
+  # it stores, so the cleaned document comes back for the curator to read and save
+  # themselves. Codepoints, not literals, so this file stays ASCII.
+  describe 'repair' do
+    def cp(*codepoints) = codepoints.pack('U*')
+
+    let(:dirty_xml) { "<mods><titleInfo><title>Simple#{cp(0x000B)}form</title></titleInfo></mods>" }
+    let(:clean_xml) { "<mods><titleInfo><title>Simple\nform</title></titleInfo></mods>" }
+
+    it 'cleans the submitted buffer' do
+      put :repair, params: { resource_id: work.id, raw_xml: dirty_xml }, xhr: true
+
+      expect(assigns(:raw_xml)).to eq(clean_xml)
+    end
+
+    it 'writes nothing to Atlas -- the curator still has to press Save' do
+      resource_id = work.id
+      allow(AtlasRb::Work).to receive(:update)
+
+      put :repair, params: { resource_id: resource_id, raw_xml: dirty_xml }, xhr: true
+
+      expect(AtlasRb::Work).not_to have_received(:update)
+    end
+
+    context 'what the curator sees' do
+      render_views
+
+      it 'says the text changed and that nothing was saved' do
+        put :repair, params: { resource_id: work.id, raw_xml: dirty_xml }, xhr: true
+
+        expect(response.body).to include('target="save_refusal"')
+        expect(response.body).to include('Control characters replaced')
+        expect(response.body).to include('nothing saved yet')
+      end
+
+      # Ace owns a virtual DOM over #editor, so replacing markup cannot move the
+      # buffer -- the stream has to set the session value. The cleaned document
+      # rides in as a JSON string literal, which is also what escapes it.
+      it 'sets the Ace buffer to the cleaned document' do
+        put :repair, params: { resource_id: work.id, raw_xml: dirty_xml }, xhr: true
+
+        expect(response.body).to include('ace.edit("editor").getSession().setValue(')
+        expect(response.body).to include(clean_xml.to_json.gsub('"', '&quot;'))
+          .or include(clean_xml.to_json)
+      end
+
+      it 'takes the offer away, since there is nothing left to repair' do
+        put :repair, params: { resource_id: work.id, raw_xml: dirty_xml }, xhr: true
+
+        expect(response.body).not_to include('Replace the control characters')
+      end
+    end
+  end
+
+  # The offer only appears where the validator has just named a control
+  # character -- on a refused Save above the form, and beside a failed Validate in
+  # the preview pane. Both render the same button, and both submit the CURRENT
+  # editor buffer, not the stored document.
+  describe 'the repair offer' do
+    render_views
+
+    def cp(*codepoints) = codepoints.pack('U*')
+
+    let(:dirty_xml) { "<mods><titleInfo><title>Simple#{cp(0x000B)}form</title></titleInfo></mods>" }
+
+    it 'appears in the refusal banner when a Save is refused over one' do
+      put :update, params: { resource_id: work.id, raw_xml: dirty_xml }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include('Replace the control characters')
+      expect(response.body).to include(xml_repair_path)
+    end
+
+    it 'appears beside a failed Validate' do
+      put :validate, params: { resource_id: work.id, raw_xml: dirty_xml }, xhr: true
+
+      expect(response.body).to include('XML validation failed')
+      expect(response.body).to include('Replace the control characters')
+    end
+
+    # Load-bearing, and silent when it breaks. Per-form CSRF tokens bind the
+    # form's token to the form's own action, so this button authenticates on the
+    # global token Turbo puts in a header. Opting the submission out of Turbo --
+    # or giving the button a form of its own -- earns a 422 instead.
+    it 'stays a Turbo submission of the editor form' do
+      put :update, params: { resource_id: work.id, raw_xml: dirty_xml }
+
+      button = response.body[/<button[^>]*formaction="#{Regexp.escape(xml_repair_path)}"[^>]*>/]
+      expect(button).to be_present
+      expect(button).to include('form="raw_xml_form"')
+      expect(button).not_to include('data-turbo')
+    end
+
+    it 'is absent when the document is refused for some other reason' do
+      allow(XmlValidator).to receive(:call).and_return(['Opening and ending tag mismatch'])
+
+      put :update, params: { resource_id: work.id, raw_xml: '<mods><titleInfo></oops>' }
+
+      expect(response.body).to include('Not saved')
+      expect(response.body).not_to include('Replace the control characters')
+    end
+  end
 end

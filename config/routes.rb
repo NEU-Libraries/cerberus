@@ -288,6 +288,7 @@ Rails.application.routes.draw do
   # xml
   get '/xml/editor/:id' => 'xml#editor', as: 'xml_editor'
   put '/xml/validate' => 'xml#validate'
+  put '/xml/repair' => 'xml#repair'
   put '/xml/update' => 'xml#update'
 
   # atlas

@@ -5,7 +5,7 @@
 -# the preview pane rather than twice on one screen.
 - if Array(@errors).empty?
   = turbo_stream.replace 'save_refusal' do
-    = render 'save_refusal', errors: []
+    = render 'save_refusal', errors: [], repairable: false, repaired: false
 
 = turbo_stream.replace "mods" do
   - if @errors.present?
@@ -15,6 +15,8 @@
         %ul.mb-0
           - @errors.each do |err|
             %li= err.to_s
+        - if @repairable
+          = render 'repair_offer'
   - else
     = @mods.html_safe
 

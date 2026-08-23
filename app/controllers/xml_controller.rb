@@ -7,8 +7,9 @@ class XmlController < ApplicationController
   # The raw-XML editor is a sibling of the Metadata/Permissions edit tabs and
   # must gate the same way they do — it was the lone ungated hole in the edit
   # surface (authorization audit G1). authenticate first, then the :edit
-  # ability keyed on the resource. editor carries params[:id]; validate/update
-  # carry params[:resource_id], so authorize_xml_edit! reads whichever is set.
+  # ability keyed on the resource. editor carries params[:id]; validate, repair
+  # and update carry params[:resource_id], so authorize_xml_edit! reads whichever
+  # is set.
   before_action :authenticate_user!
   before_action :authorize_xml_edit!
 
@@ -25,7 +26,23 @@ class XmlController < ApplicationController
     @resource = item.resource
 
     @errors = XmlValidator.call(xml: params[:raw_xml])
+    @repairable = Metadata::ControlCharacters.any?(params[:raw_xml])
     @mods = AtlasRb::Resource.preview(create_temp_xml) if @errors.empty?
+  end
+
+  # Offer the repair; do not apply it. A surface labelled "Edit raw XML" that
+  # rewrote bytes on their way to storage would be lying about what it stores, so
+  # the cleaned document comes back into the editor for the curator to read and
+  # save for themselves. The simple Metadata form takes the opposite path on
+  # purpose: someone who typed a title is not looking at XML and should get their
+  # title back without being asked about codepoints.
+  #
+  # This is a repair, not a save. Nothing is written until the curator presses
+  # Save, and nothing re-validates either: the buffer changed, so the preview pane
+  # is left showing the last render it was given.
+  def repair
+    @resource = AtlasRb::Resource.find(params[:resource_id]).resource
+    @raw_xml = Metadata::ControlCharacters.clean_text(params[:raw_xml])
   end
 
   # Save re-runs the same validation Validate + Preview does, and refuses on
@@ -58,14 +75,15 @@ class XmlController < ApplicationController
       @resource = item.resource
       @klass = item.klass
       @raw_xml = params[:raw_xml]
+      @repairable = Metadata::ControlCharacters.any?(params[:raw_xml])
       @mods = AtlasRb.const_get(item.klass).mods(params[:resource_id], 'html')
       editor_breadcrumbs(item.klass, params[:resource_id])
       render :editor, status: :unprocessable_content
     end
 
     # :edit gate for whichever id param this action carries (editor → :id,
-    # validate/update → :resource_id), mirroring the resource controllers'
-    # authorize_edit!.
+    # validate/repair/update → :resource_id), mirroring the resource
+    # controllers' authorize_edit!.
     def authorize_xml_edit!
       authorize_edit_for!(params[:id] || params[:resource_id])
     end

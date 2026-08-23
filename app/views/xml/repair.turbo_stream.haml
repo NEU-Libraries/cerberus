@@ -1,0 +1,23 @@
+-# A repair is neither a redirect nor a failure, and Turbo Drive refuses a 200
+-# form response that is not one of those — so it answers with a stream. Staying
+-# on the Turbo path is also what keeps CSRF working: the button reaches this
+-# action through `formaction`, which the form's per-form token does not cover.
+= turbo_stream.replace 'save_refusal' do
+  = render 'save_refusal', errors: [], repairable: false, repaired: true
+
+-# Ace owns a virtual DOM over #editor, so no markup replacement can move the
+-# buffer — setting the session value is the only way in, and only markup inside a
+-# <turbo-stream> action runs at all. Hence a slot of its own: each repair
+-# replaces the last one's script rather than leaving a dead one behind.
+-#
+-# ace.edit returns the editor already attached to that element, so this is the
+-# session the curator is typing in, and the form's submit listener re-syncs the
+-# hidden field from it on the next Validate or Save.
+-#
+-# to_json is the escaping: Rails encodes < > & as \uXXXX, so no document content
+-# can close the script element.
+= turbo_stream.replace 'editor_buffer' do
+  #editor_buffer
+    :javascript
+      ace.edit("editor").getSession().setValue(#{@raw_xml.to_json});
+      window.scrollTo(0, 0);

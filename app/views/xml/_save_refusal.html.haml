@@ -1,9 +1,14 @@
--# locals: errors (Array) — the validation messages from a refused Save; empty
--# when the last Save was not refused.
+-# The editor's one notice slot, above the form. Three states: nothing to say, a
+-# refused Save, or a repair that changed the text without storing it.
 -#
--# The container renders whether or not there are errors, because the Validate
--# turbo_stream replaces this node to clear a stale refusal — Turbo needs the
--# target to be on the page to find it.
+-# locals: errors (Array) — the validation messages from a refused Save; empty
+-# when the last Save was not refused. repairable (Boolean) — whether one of those
+-# messages is about a control character, which the editor can fix on request.
+-# repaired (Boolean) — whether a repair just rewrote the editor's text.
+-#
+-# The container renders whatever the state, because both the Validate and the
+-# Repair turbo_streams replace this node — Turbo needs the target to be on the
+-# page to find it, and the id has to survive each replacement.
 #save_refusal
   - if errors.present?
     .alert.alert-danger{role: "alert"}
@@ -12,3 +17,11 @@
       %ul.mb-0
         - errors.each do |err|
           %li= err.to_s
+      - if repairable
+        = render 'repair_offer'
+  - elsif repaired
+    .alert.alert-warning{role: "alert"}
+      %h5.alert-heading Control characters replaced — nothing saved yet
+      %p.mb-0
+        Each one became a line break, so the words either side of it stay apart.
+        Read the editor below, then Validate + Preview or Save.

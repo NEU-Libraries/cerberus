@@ -191,5 +191,32 @@ RSpec.describe 'Authorization gates', type: :request do
         expect(response).to have_http_status(:forbidden)
       end
     end
+
+    # Repair reads a resource and echoes a cleaned buffer back into the editor.
+    # It writes nothing, but it is still a pane of the edit surface and it reads
+    # the resource, so it gates with its siblings rather than being treated as
+    # harmless. It answers a Turbo Stream, so the admitted example asks for one --
+    # a plain HTML request gets 406, which is a format answer, not a gate answer.
+    describe 'PUT /xml/repair (echoes a cleaned buffer back into the editor)' do
+      let(:dirty_xml) { "<mods><titleInfo><title>Simple#{[0x000B].pack('U')}form</title></titleInfo></mods>" }
+      let(:stream) { { 'Accept' => 'text/vnd.turbo-stream.html' } }
+
+      it 'redirects the unauthenticated to sign in' do
+        put '/xml/repair', params: { resource_id: work.id, raw_xml: dirty_xml }, headers: stream
+        expect(response).to redirect_to(new_user_session_path)
+      end
+
+      it 'forbids an authenticated non-editor' do
+        sign_in outsider
+        put '/xml/repair', params: { resource_id: work.id, raw_xml: dirty_xml }, headers: stream
+        expect(response).to have_http_status(:forbidden)
+      end
+
+      it 'admits an in-group editor' do
+        sign_in editor
+        put '/xml/repair', params: { resource_id: work.id, raw_xml: dirty_xml }, headers: stream
+        expect(response).to have_http_status(:ok)
+      end
+    end
   end
 end
