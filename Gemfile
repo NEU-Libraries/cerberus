@@ -61,7 +61,7 @@ gem 'bootsnap', require: false
 # the UI reports success. It also adds `depositor:` to Collection.create /
 # Community.create, which reset.rake needs to attribute the institutional tree
 # to the anonymous NUID rather than to whoever ran the seed.
-gem 'atlas_rb', '>= 1.9.3'
+gem 'atlas_rb', '>= 1.12.0'
 gem 'blacklight', '>= 8.0', '< 9.0'
 gem 'blacklight-gallery'
 gem 'bootstrap'
