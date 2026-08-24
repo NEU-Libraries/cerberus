@@ -30,8 +30,22 @@ services:
       POSTGRES_PASSWORD: example
     ports:
       - 5432:5432
+    # Nothing here is slow to start, but Postgres accepts connections a moment
+    # after its container does, and the services below prepare their databases
+    # on boot. Without a gate, whichever of them wins the race asks a socket
+    # that is not listening yet, gives up, and then serves 500s for the life of
+    # the stack -- a caller sees "We could not find your database", which reads
+    # as a missing database rather than a service that started too early.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
   web:
     image: nakatomi/cerberus_web
+    depends_on:
+      db:
+        condition: service_healthy
     entrypoint: /home/cerberus/web/docker-entrypoint.sh
     environment:
       ATLAS_URL: 'http://atlas:3000/'
@@ -49,6 +63,9 @@ services:
       - 3000:3000
   atlas:
     image: nakatomi/atlas_web:${ATLAS:-latest}
+    depends_on:
+      db:
+        condition: service_healthy
     entrypoint: /home/atlas/web/docker-entrypoint.sh
     environment:
       RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
@@ -81,6 +98,9 @@ services:
       - 3001:3000
   atlas-test:
     image: nakatomi/atlas_web:${ATLAS:-latest}
+    depends_on:
+      db:
+        condition: service_healthy
     entrypoint: /home/atlas/web/docker-entrypoint.sh
     # Deliberately given none of the HANDLE_* / CERBERUS_PUBLIC_BASE variables
     # above. Atlas mints only when a client is configured, so withholding them
