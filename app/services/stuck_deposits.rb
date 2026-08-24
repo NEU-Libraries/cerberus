@@ -21,14 +21,17 @@ class StuckDeposits < ApplicationService
     super()
   end
 
-  # @return [Blacklight::Solr::Response] oldest first. A triage list is worked
-  #   from the back: the deposit stuck longest is the one most likely to have been
-  #   forgotten, and the one that has been broken for an hour can wait.
+  # @return [Blacklight::Solr::Response] newest first, which is when a stuck
+  #   deposit is cheapest to unstick: the depositor still remembers it and can be
+  #   asked, where a year-old one needs a decision instead of a nudge. It also
+  #   matches the tombstone registry and the ledger, so a reader moving between the
+  #   admin registries does not have to relearn which end is which. The oldest are
+  #   still there, at the back.
   def call
     builder = DepositTriageSearchBuilder.new(@scope)
                                         .with(q: '*:*', per_page: PER_PAGE, page: @page)
                                         .state(@state)
-                                        .merge(sort: 'updated_at_dtsi asc')
+                                        .merge(sort: 'updated_at_dtsi desc')
     Blacklight.default_index.search(builder)
   end
 end
