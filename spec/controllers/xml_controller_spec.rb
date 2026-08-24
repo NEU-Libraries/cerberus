@@ -439,4 +439,9 @@ describe XmlController do
       expect(response.body).to include('Decode the double escapes')
     end
   end
+
+  # This file leaves Works waiting on a depositor, which the admin triage registry
+  # lists. Purging them keeps that registry's own specs measuring its filter rather
+  # than the size of the suite (see spec/support/work_cleanup.rb).
+  after(:all) { purge_stuck_works! }
 end

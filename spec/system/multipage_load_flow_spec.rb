@@ -201,4 +201,9 @@ RSpec.describe 'Multipage loader end-to-end flow', type: :request do
       expect(AtlasRb::Work).not_to have_received(:complete)
     end
   end
+
+  # The loaders under test create Works and do not confirm them, so this file
+  # leaves rows on the admin triage registry. Purging them keeps that registry's
+  # own specs measuring its filter (see spec/support/work_cleanup.rb).
+  after(:all) { purge_stuck_works! }
 end
