@@ -10,17 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Make env file
-      run: |
-        cp .env.example .env
-    - name: Dotenv Action
-      id: dotenv
-      uses: falti/dotenv-action@v1.1.4
     - name: Install HTTPie
       run: sudo apt-get install httpie
     - name: Show versions
       run: |
         echo "cerberus_version=$(cat .version)"
-        echo "atlas_version=${{ steps.dotenv.outputs.atlas }}"
+        echo "atlas_version=$(cat .atlas_version)"
     - name: Deploy
-      run: http --check-status --ignore-stdin PUT https://cerberusv2.library.northeastern.edu/deploy token=${{ secrets.CERBERUS_DEPLOY_TOKEN }} cerberus_version=$(cat .version) atlas_version=${{ steps.dotenv.outputs.atlas }}
+      run: http --check-status --ignore-stdin PUT https://cerberusv2.library.northeastern.edu/deploy token=${{ secrets.CERBERUS_DEPLOY_TOKEN }} cerberus_version=$(cat .version) atlas_version=$(cat .atlas_version)

@@ -48,7 +48,7 @@ services:
     ports:
       - 3000:3000
   atlas:
-    image: nakatomi/atlas_web:${ATLAS}
+    image: nakatomi/atlas_web:${ATLAS:-latest}
     entrypoint: /home/atlas/web/docker-entrypoint.sh
     environment:
       RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
@@ -80,7 +80,7 @@ services:
     ports:
       - 3001:3000
   atlas-test:
-    image: nakatomi/atlas_web:${ATLAS}
+    image: nakatomi/atlas_web:${ATLAS:-latest}
     entrypoint: /home/atlas/web/docker-entrypoint.sh
     # Deliberately given none of the HANDLE_* / CERBERUS_PUBLIC_BASE variables
     # above. Atlas mints only when a client is configured, so withholding them
