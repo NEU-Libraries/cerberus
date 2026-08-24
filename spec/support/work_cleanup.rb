@@ -52,18 +52,10 @@ module WorkCleanup
         works = AtlasRb::Work.list(**state, page: page, per_page: PER_PAGE, nuid: nuid).works
         break if works.blank?
 
-        ids.concat(works.map { |row| row_id(row) })
+        ids.concat(works.pluck('id'))
         break if works.size < PER_PAGE
       end
       ids
-    end
-
-    # `GET /works` wraps each row in a `work` key, where the gem's own docs describe
-    # the row AS the summary. Reading through the wrapper and falling back to the
-    # row keeps this working whichever shape arrives, rather than mapping to a
-    # column of nils and purging nothing.
-    def row_id(row)
-      row.fetch('work', row)['id']
     end
 
     # Anything other than "gone" is left to raise: a cleanup that swallows its own

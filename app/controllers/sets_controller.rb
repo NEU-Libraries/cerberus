@@ -44,8 +44,7 @@ class SetsController < CatalogController
   def index
     @scope = params[:scope].presence_in(SCOPES)
     page = AtlasRb::Compilation.list(scope: @scope, page: params[:page].presence)
-    # Unlike .find/.create, .list entries arrive wrapped: {"compilation" => {...}}.
-    @sets = Array(page['compilations']).pluck('compilation')
+    @sets = Array(page['compilations'])
     @pagination = page['pagination']
     # Grant-scoped tabs list other people's Sets, so name each owner.
     @owner_names = @scope ? NuidResolver.names_for(@sets.pluck('depositor')) : {}

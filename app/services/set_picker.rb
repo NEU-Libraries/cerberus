@@ -15,11 +15,10 @@ class SetPicker
     @page = [page.to_i, 1].max
   end
 
-  # @return [Array(Array<Hash>, Hash)] unwrapped compilation rows + a
-  #   pagination hash in Atlas's (Pagy) vocabulary ('page' / 'pages' /
-  #   'count'). .list entries arrive wrapped: {"compilation" => {...}}.
+  # @return [Array(Array<Hash>, Hash)] the compilation rows + a pagination
+  #   hash in Atlas's (Pagy) vocabulary ('page' / 'pages' / 'count').
   def call
     result = AtlasRb::Compilation.list(q: @query.presence, page: @page, per_page: PER_PAGE)
-    [Array(result['compilations']).pluck('compilation'), result['pagination']]
+    [Array(result['compilations']), result['pagination']]
   end
 end
