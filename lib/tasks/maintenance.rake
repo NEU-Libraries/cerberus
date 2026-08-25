@@ -51,9 +51,14 @@ namespace :maintenance do
 
   desc 'Stop the queues taking new work (running jobs are left to finish)'
   task pause_queues: :environment do
-    SolidQueue::Queue.all.each do |queue|
+    # Iterate the DECLARED queues, not SolidQueue::Queue.all. The latter reads
+    # DISTINCT queue_name off the jobs table, so an idle repository — one whose
+    # finished jobs have just been cleared — reports no queues and gets nothing
+    # paused, silently. See config.x.cerberus.job_queues.
+    Rails.application.config.x.cerberus.job_queues.each do |name|
+      queue = SolidQueue::Queue.find_by_name(name) # rubocop:disable Rails/DynamicFindBy
       queue.pause
-      puts "Paused #{queue.name} (#{queue.size} waiting)."
+      puts "Paused #{name} (#{queue.size} waiting)."
     end
   end
 

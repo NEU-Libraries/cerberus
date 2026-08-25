@@ -96,6 +96,15 @@ module Cerberus
     config.x.cerberus.impression_volume_threshold = 150
     config.x.cerberus.impression_ip_allowlist     = %w[155.33.16.26]
 
+    # Every queue the app can enqueue to. Declared rather than discovered:
+    # SolidQueue::Queue.all derives its names from DISTINCT queue_name over the
+    # jobs table, so a queue with no rows at that moment is invisible — and
+    # `clear_finished_in_batches` runs hourly, so an idle repository really does
+    # reach that state. Pausing by discovery would then pause nothing and say so
+    # in the same breath. A spec asserts this list covers every `queue_as` in
+    # app/jobs.
+    config.x.cerberus.job_queues = %w[default background]
+
     # Read-only maintenance window. Atlas owns the flag; this is how long
     # Cerberus caches its answer, so the whole app picks a flip up within one
     # TTL without asking Atlas once per request. Short on purpose: the window
