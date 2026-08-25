@@ -36,11 +36,11 @@
         the deploy opened. Background jobs are not resumed by this page — if the
         deploy paused the queues, it resumes them when it finishes.
 
-      = button_to close_maintenance_path, method: :delete, class: 'btn btn-primary' do
+      = button_to admin_close_maintenance_path, method: :delete, class: 'btn btn-primary' do
         %i.fa-solid.fa-lock-open.me-1{'aria-hidden' => 'true'}
         Close the window
     - else
-      = form_with url: open_maintenance_path, method: :post, class: 'well p-3 my-3 rounded-3' do |f|
+      = form_with url: admin_open_maintenance_path, method: :post, class: 'well p-3 my-3 rounded-3' do |f|
         .mb-3
           = f.label :message, 'Message for the banner (optional)', class: 'form-label'
           = f.text_field :message, class: 'form-control',

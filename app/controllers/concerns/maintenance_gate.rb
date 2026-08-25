@@ -34,6 +34,15 @@ module MaintenanceGate
   #   admin/impersonations      — view_as and its exit are session-only. act_as
   #                               is NOT here: it exists to attribute writes,
   #                               and during a window there are none.
+  #   catalog#index             — Blacklight routes search at GET *and* POST.
+  #                               A long query arrives as a POST, so without
+  #                               this a window would refuse searching.
+  #   catalog#track             — records the result counter in the session so
+  #                               next/previous works from a record page.
+  #   atlas#process_login       — the NUID sign-in shim (absent in production).
+  #                               Reads Atlas the same way devise does. Note
+  #                               that atlas#process_find_or_create is NOT
+  #                               here: it provisions a user in Atlas.
   #
   # The maintenance surface itself is not listed. It opts out in its own
   # controller, next to the code the exemption protects.
@@ -46,6 +55,9 @@ module MaintenanceGate
     download_queue#destroy_all
     admin/impersonations#create_view_as
     admin/impersonations#destroy
+    catalog#index
+    catalog#track
+    atlas#process_login
   ].freeze
 
   included do

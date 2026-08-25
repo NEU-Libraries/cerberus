@@ -25,11 +25,7 @@ class MaintenanceMode
     # @return [Integer, nil] seconds Atlas asks a refused caller to wait.
     delegate :retry_after, to: :window
 
-    # The window's state, cached. Falls back to an OPEN window when Atlas can't
-    # be reached, which is deliberate on two counts: Atlas is unreachable during
-    # its own container swap, which is exactly when the window should hold; and
-    # Cerberus cannot render a page without Atlas anyway, so a maintenance
-    # notice is a truer answer than the 500 that would otherwise surface.
+    # The window's state, cached.
     #
     # @return [AtlasRb::Mash] read_only, source, since, message, retry_after
     def window
@@ -73,17 +69,40 @@ class MaintenanceMode
         reset_cache!
       end
 
+      # Two failure modes, and they need opposite answers.
+      #
+      # A TRANSPORT failure — nothing answered at all — happens while Atlas is
+      # being replaced, which is exactly when a window is likely to be open and
+      # when Cerberus could not render a page anyway. Hold the window.
+      #
+      # An HTTP response we cannot read means Atlas is up and talking but told
+      # us nothing about a window: most often it is a build older than the
+      # endpoint. Treat that as no window. Failing closed here would be far
+      # worse than the ugly error a refused write would produce — it would put
+      # the whole site into maintenance mode on any Atlas hiccup, and it would
+      # make Cerberus impossible to deploy ahead of Atlas.
+      #
+      # Atlas is the boundary either way: a write during a window it did not
+      # tell us about is still refused, and MaintenanceGate's
+      # AtlasRb::ReadOnlyModeError rescue turns that into the same page.
       def fetch_window
         AtlasRb::Maintenance.read(nuid: acting_nuid)
-      rescue StandardError => e
-        Rails.logger.error("[maintenance] could not read the window from Atlas: #{e.class}: #{e.message}")
+      rescue Faraday::ConnectionFailed, Faraday::TimeoutError => e
+        Rails.logger.error("[maintenance] Atlas did not answer, holding the window: #{e.class}: #{e.message}")
         unreachable_window
+      rescue StandardError => e
+        Rails.logger.error(
+          "[maintenance] Atlas answered but not with a window, assuming none: #{e.class}: #{e.message}"
+        )
+        no_window
       end
 
       # Current.nuid is set per request; a rake task or job has none, so fall
       # back to the guest identity — the read sits on Atlas's authenticated
       # read floor, which the guest fixture satisfies.
       def acting_nuid = Current.nuid.presence || Rails.application.config.x.cerberus.guest_nuid
+
+      def no_window = AtlasRb::Mash.new('read_only' => false)
 
       def unreachable_window
         AtlasRb::Mash.new(
