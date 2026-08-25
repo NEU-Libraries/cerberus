@@ -1,8 +1,8 @@
 // ---------------------------------------------------------------------
 // The read-only maintenance banner. Same construction as the
-// impersonation banner — a single tone token drives a left rail, a
-// tinted field and a solid badge via color-mix — because it answers the
-// same kind of question: what mode is this session in, right now.
+// impersonation banner — a single tone token drives a tinted field and a
+// solid badge via color-mix — because it answers the same kind of
+// question: what mode is this session in, right now.
 //
 // Design intent: CAUTION, not alarm. A window is planned and reads still
 // work, but a librarian needs to know before they start typing that a save
@@ -24,7 +24,6 @@ $maintenance-tone: #b8801f; // desaturated amber — caution, but read-only
   top: 0;
   z-index: 1070; // under .impersonation-banner (1080) on purpose
   border-bottom: 1px solid color-mix(in srgb, var(--maintenance-color) 35%, white);
-  border-left: 4px solid var(--maintenance-color);
   background-color: color-mix(in srgb, var(--maintenance-color) 12%, white);
   color: color-mix(in srgb, var(--maintenance-color) 80%, black);
 
