@@ -4,17 +4,18 @@
 // tinted field and a solid badge via color-mix — because it answers the
 // same kind of question: what mode is this session in, right now.
 //
-// Design intent: STANDING, not urgent. A window is planned, reads still
-// work, and the banner may be up for the length of a migration, so it
-// has to be legible without becoming something to escape from. It sits
-// below the impersonation banner's z-index: an admin acting as someone
-// else needs that signal on top.
+// Design intent: CAUTION, not alarm. A window is planned and reads still
+// work, but a librarian needs to know before they start typing that a save
+// will not land. It sits below the impersonation banner's z-index: an admin
+// acting as someone else needs that signal on top.
 // ---------------------------------------------------------------------
 
-// Matches $error-tone-planned on the 503 page. Duplicated rather than
-// shared because the error tones are file-local by convention here, and
-// _error_page is imported after this file.
-$maintenance-tone: #3f7d86; // muted slate-teal — planned, not a fault
+// The same desaturated amber the view-as banner uses ($impersonation-tone-view).
+// That is deliberate rather than convenient: amber already means "read-only,
+// caution" in this app, so a librarian who has met a view-as session reads this
+// one without being taught it. The 503 page keeps its own slate-teal — amber
+// would sit too close to the 500 page's #c46410 in that family.
+$maintenance-tone: #b8801f; // desaturated amber — caution, but read-only
 
 .maintenance-banner {
   --maintenance-color: #{$maintenance-tone};
