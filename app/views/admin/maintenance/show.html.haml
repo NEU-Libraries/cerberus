@@ -1,0 +1,58 @@
+= render 'admin/breadcrumb_header'
+
+- open_now = @window.read_only.present?
+- source   = @window.source.presence
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-screwdriver-wrench{'aria-hidden' => 'true'}
+      Maintenance window
+      %span.admin-registry__count= open_now ? 'Read-only' : 'Accepting writes'
+    .admin-registry__head-actions
+      %span.admin-registry__subtitle
+        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+        Admin-only
+
+  .p-3
+    %p.text-body-secondary
+      A window makes the whole repository read-only. Searching, browsing and
+      downloading carry on; depositing, editing and every other write are
+      refused until it is closed. Use one before a migration or a risky deploy.
+
+    - if open_now
+      .well.p-3.my-3.rounded-3
+        %dl.mb-0
+          %dt.text-uppercase.small.text-body-secondary Opened by
+          %dd= source == 'deploy' ? 'The deploy orchestrator' : 'An operator'
+          - if @window.since.present?
+            %dt.text-uppercase.small.text-body-secondary Since
+            %dd= @window.since
+          - if @window.message.present?
+            %dt.text-uppercase.small.text-body-secondary Message
+            %dd= @window.message
+
+      %p.text-body-secondary.small
+        Closing here clears the window whichever door opened it, including one
+        the deploy opened. Background jobs are not resumed by this page — if the
+        deploy paused the queues, it resumes them when it finishes.
+
+      = button_to close_maintenance_path, method: :delete, class: 'btn btn-primary' do
+        %i.fa-solid.fa-lock-open.me-1{'aria-hidden' => 'true'}
+        Close the window
+    - else
+      = form_with url: open_maintenance_path, method: :post, class: 'well p-3 my-3 rounded-3' do |f|
+        .mb-3
+          = f.label :message, 'Message for the banner (optional)', class: 'form-label'
+          = f.text_field :message, class: 'form-control',
+                                   placeholder: 'Scheduled maintenance until 10:00'
+          .form-text
+            Shown on every page and on the page a refused write lands on. Say
+            when you expect to be finished.
+        .mb-3
+          = f.label :retry_after, 'Ask callers to retry after (seconds, optional)', class: 'form-label'
+          = f.number_field :retry_after, class: 'form-control', min: 1, style: 'max-width: 12rem;'
+        %p.text-body-secondary.small
+          Opening a window does not pause background jobs. A job already queued
+          will keep trying to write and will be refused, so drain the queues
+          first for anything other than a quick look.
+        = f.submit 'Open the window', class: 'btn btn-primary'

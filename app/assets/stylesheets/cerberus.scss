@@ -16,7 +16,8 @@
 //   _inbox               — User Inbox (correspondence ledger, navbar badge)
 //   _ingest_status       — IPTC loader status chips + dashboard tiles
 //   _deposit_form        — Collection → New Work deposit slip
-//   _error_page          — 403 / 404 / 410 / 500 error pages
+//   _error_page          — 403 / 404 / 410 / 500 / 503 error pages
+//   _maintenance         — the read-only maintenance banner
 //   _applied_filter      — search-results header + constraint chip
 //   _facets              — active-facet card muting
 //   _pagination          — search-results pagination as flat text links
@@ -36,6 +37,7 @@
 @import 'admin_linked_members';
 @import 'admin_ledger';
 @import 'impersonation';
+@import 'maintenance';
 @import 'inbox';
 @import 'my_drs';
 @import 'ingest_status';

@@ -143,6 +143,17 @@
           %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
 
     - if current_user&.admin?
+      = link_to admin_maintenance_path, class: 'admin-action-card admin-action-card--maintenance', role: 'listitem' do
+        %span.admin-action-card__icon
+          %i.fa-solid.fa-screwdriver-wrench{'aria-hidden' => 'true'}
+        %span.admin-action-card__title Maintenance window
+        %span.admin-action-card__desc
+          Make the whole repository read-only while a migration or a risky deploy runs. Searching and downloading carry on; depositing and editing are refused until the window is closed.
+        %span.admin-action-card__cta
+          Open
+          %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
+    - if current_user&.admin?
       = link_to '/jobs', class: 'admin-action-card admin-action-card--jobs', role: 'listitem' do
         %span.admin-action-card__icon
           %i.fa-solid.fa-gears{'aria-hidden' => 'true'}

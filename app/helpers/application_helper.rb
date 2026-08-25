@@ -161,4 +161,11 @@ module ApplicationHelper
         content_tag(:span, title, class: 'visually-hidden')
     end
   end
+
+  # The read-only maintenance window, for the standing banner. Wrapped in
+  # helpers rather than called on MaintenanceMode from the template so the
+  # cached Atlas read has one entry point from the view layer.
+  def maintenance_window? = MaintenanceMode.read_only?
+
+  def maintenance_message = MaintenanceMode.message
 end

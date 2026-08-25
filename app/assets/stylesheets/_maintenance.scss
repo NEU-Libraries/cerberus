@@ -1,0 +1,76 @@
+// ---------------------------------------------------------------------
+// The read-only maintenance banner. Same construction as the
+// impersonation banner — a single tone token drives a left rail, a
+// tinted field and a solid badge via color-mix — because it answers the
+// same kind of question: what mode is this session in, right now.
+//
+// Design intent: STANDING, not urgent. A window is planned, reads still
+// work, and the banner may be up for the length of a migration, so it
+// has to be legible without becoming something to escape from. It sits
+// below the impersonation banner's z-index: an admin acting as someone
+// else needs that signal on top.
+// ---------------------------------------------------------------------
+
+// Matches $error-tone-planned on the 503 page. Duplicated rather than
+// shared because the error tones are file-local by convention here, and
+// _error_page is imported after this file.
+$maintenance-tone: #3f7d86; // muted slate-teal — planned, not a fault
+
+.maintenance-banner {
+  --maintenance-color: #{$maintenance-tone};
+
+  position: sticky;
+  top: 0;
+  z-index: 1070; // under .impersonation-banner (1080) on purpose
+  border-bottom: 1px solid color-mix(in srgb, var(--maintenance-color) 35%, white);
+  border-left: 4px solid var(--maintenance-color);
+  background-color: color-mix(in srgb, var(--maintenance-color) 12%, white);
+  color: color-mix(in srgb, var(--maintenance-color) 80%, black);
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.22rem 0.7rem;
+    border-radius: 0.3rem;
+    background-color: var(--maintenance-color);
+    color: $white;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+
+    .fa-solid { font-size: 0.9em; }
+  }
+
+  &__note {
+    font-size: 0.88rem;
+    line-height: 1.4;
+  }
+
+  // The operator's own message, when they left one. Set in the same
+  // register as an audit-log value: quieter weight, its own quotation.
+  &__message {
+    font-size: 0.88rem;
+    font-style: italic;
+    color: color-mix(in srgb, var(--maintenance-color) 88%, black);
+  }
+
+  &__manage {
+    margin-left: auto;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: color-mix(in srgb, var(--maintenance-color) 88%, black);
+    white-space: nowrap;
+  }
+}

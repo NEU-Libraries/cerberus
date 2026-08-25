@@ -179,6 +179,15 @@ Rails.application.routes.draw do
     # consulted by ApplicationController#pretty_group wherever a group surfaces.
     resources :groups, only: [:index, :new, :create, :edit, :update, :destroy]
 
+    # The read-only maintenance window. One noun, two verbs: POST opens it,
+    # DELETE closes it. This is the door a human uses; a rake task and the
+    # deploy orchestrator are the other two, and all three write the same flag
+    # in Atlas. Closing must stay reachable while the window is open — see
+    # Admin::MaintenanceController.
+    get    'maintenance',      to: 'maintenance#show',         as: :maintenance
+    post   'maintenance/open', to: 'maintenance#open_window',  as: :open_maintenance
+    delete 'maintenance',      to: 'maintenance#close_window', as: :close_maintenance
+
     # Usage analytics — repository-wide impression rollups (views/downloads),
     # with CSV/Excel export of the top-N tables (the quarterly-report artifact).
     get 'impressions',        to: 'impressions#index', as: :impressions
