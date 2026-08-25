@@ -23,7 +23,7 @@ class MaintenanceMode
     def message = window.message.presence
 
     # @return [Integer, nil] seconds Atlas asks a refused caller to wait.
-    def retry_after = window.retry_after
+    delegate :retry_after, to: :window
 
     # The window's state, cached. Falls back to an OPEN window when Atlas can't
     # be reached, which is deliberate on two counts: Atlas is unreachable during
@@ -36,19 +36,25 @@ class MaintenanceMode
       Rails.cache.fetch(CACHE_KEY, expires_in: ttl) { fetch_window }
     end
 
-    # Open the window as the operator door (the admin hub, or the console).
+    # Open the window.
     #
+    # @param source ['operator', 'deploy'] which door is acting. Atlas records
+    #   it and enforces one rule with it — see #close!.
     # @return [AtlasRb::Mash] the state Atlas reports after the write
-    def open!(message: nil, retry_after: nil)
-      write(read_only: true, message: message, retry_after: retry_after)
+    def open!(message: nil, retry_after: nil, source: 'operator')
+      write(read_only: true, source: source, message: message, retry_after: retry_after)
     end
 
-    # Close the window as the operator door. An operator close clears a window
-    # opened by either door — see AtlasRb::Maintenance.write for the rule that
-    # stops a finishing deploy closing a window a human opened by hand.
+    # Close the window.
+    #
+    # A `deploy` close is refused when an operator opened the window, so a
+    # deploy that finishes cannot end a window a human opened by hand. Atlas
+    # answers that refusal with 200 and the *unchanged* state rather than an
+    # error, so a caller that needs to know must read `read_only` off the
+    # return value. An operator close clears either.
     #
     # @return [AtlasRb::Mash] the state Atlas reports after the write
-    def close! = write(read_only: false)
+    def close!(source: 'operator') = write(read_only: false, source: source)
 
     # Drop the cached state. Called after a write so the flipping request sees
     # its own effect rather than waiting out the TTL.
@@ -56,10 +62,10 @@ class MaintenanceMode
 
     private
 
-      def write(read_only:, message: nil, retry_after: nil)
+      def write(read_only:, source:, message: nil, retry_after: nil)
         AtlasRb::Maintenance.write(
           read_only:   read_only,
-          source:      'operator',
+          source:      source,
           message:     message,
           retry_after: retry_after
         )

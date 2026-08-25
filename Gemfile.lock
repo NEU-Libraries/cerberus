@@ -480,7 +480,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord-session_store
-  atlas_rb (>= 1.12.0)
+  atlas_rb (>= 1.13.1)
   blacklight (>= 8.0, < 9.0)
   blacklight-gallery
   bootsnap

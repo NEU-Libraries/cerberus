@@ -61,7 +61,13 @@ gem 'bootsnap', require: false
 # the UI reports success. It also adds `depositor:` to Collection.create /
 # Community.create, which reset.rake needs to attribute the institutional tree
 # to the anonymous NUID rather than to whoever ran the seed.
-gem 'atlas_rb', '>= 1.12.0'
+# 1.13.1 is a floor, not a preference: it added AtlasRb::Maintenance (the
+# read-only window's flag) and, more importantly, the middleware that raises
+# AtlasRb::ReadOnlyModeError on Atlas's maintenance 503. Under an older binding
+# that 503 matches no middleware, the response carries no resource key, and the
+# binding returns nil — so a refused write silently no-ops and the UI reports
+# success.
+gem 'atlas_rb', '>= 1.13.1'
 gem 'blacklight', '>= 8.0', '< 9.0'
 gem 'blacklight-gallery'
 gem 'bootstrap'
