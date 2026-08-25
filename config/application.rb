@@ -96,6 +96,13 @@ module Cerberus
     config.x.cerberus.impression_volume_threshold = 150
     config.x.cerberus.impression_ip_allowlist     = %w[155.33.16.26]
 
+    # Read-only maintenance window. Atlas owns the flag; this is how long
+    # Cerberus caches its answer, so the whole app picks a flip up within one
+    # TTL without asking Atlas once per request. Short on purpose: the window
+    # opens seconds before a migration starts, and a stale "open" is far less
+    # costly than a stale "closed".
+    config.x.cerberus.maintenance_ttl = ENV.fetch('CERBERUS_MAINTENANCE_TTL', '5').to_i.seconds
+
     # Route exceptions through ErrorsController so error pages share the
     # application layout (header, footer, search bar). Rails dispatches
     # by status-code path (/404, /500, etc.) when set to self.routes.

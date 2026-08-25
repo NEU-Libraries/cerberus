@@ -14,6 +14,12 @@ class ApplicationController < ActionController::Base
   before_action :store_preferred_view
   before_action :set_current_nuid
 
+  # Included here, not with the concerns above, because its before_action has to
+  # run after set_current_nuid: reading the window from Atlas is an authenticated
+  # read, and Current.nuid is what the signed assertion carries. Included earlier
+  # it would still work, attributed to the guest identity instead of the caller.
+  include MaintenanceGate
+
   # Authorization is evaluated against the effective user, so a view-as
   # session renders the target's access decisions (acting-as leaves this as
   # the real admin — only writes are re-attributed). effective_user comes
