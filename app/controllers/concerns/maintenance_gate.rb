@@ -31,9 +31,19 @@ module MaintenanceGate
   #                               writes Atlas's preferred_account.
   #   download_queue            — the queue lives in the session, and downloads
   #                               keep working, so assembling one should too.
-  #   admin/impersonations      — view_as and its exit are session-only. act_as
-  #                               is NOT here: it exists to attribute writes,
-  #                               and during a window there are none.
+  #   admin/impersonations#destroy — EXITING only. The session is torn down
+  #                               before the end event is emitted, so an admin
+  #                               must always be able to leave a session they
+  #                               have already left. The end event itself is
+  #                               lost during a window: an impersonation exited
+  #                               inside one leaves no end row in the ledger.
+  #                               Starting a session is NOT here — neither
+  #                               view_as nor act_as. Both record a
+  #                               session-start AuditEvent in Atlas first, and
+  #                               fail closed if it does not land, so neither
+  #                               can work during a window whatever this gate
+  #                               does. Refusing them here makes the message
+  #                               clear and saves a round trip.
   #   catalog#index             — Blacklight routes search at GET *and* POST.
   #                               A long query arrives as a POST, so without
   #                               this a window would refuse searching.
@@ -53,7 +63,6 @@ module MaintenanceGate
     download_queue#create
     download_queue#destroy
     download_queue#destroy_all
-    admin/impersonations#create_view_as
     admin/impersonations#destroy
     catalog#index
     catalog#track

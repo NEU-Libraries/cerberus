@@ -25,17 +25,17 @@ RSpec.describe 'Maintenance write-route inventory', type: :request do
   # window is: reads keep working, so the session bookkeeping behind them must
   # keep working too.
   SESSION_ONLY = {
-    'devise/sessions#create'              => 'sign-in reads Atlas (GET /user) and writes a session row',
-    'devise/sessions#destroy'             => 'sign-out clears the session',
-    'accounts#switch'                     => 'records which account is acting, in the session',
-    'download_queue#create'               => 'the download queue lives in the session',
-    'download_queue#destroy'              => 'as above',
-    'download_queue#destroy_all'          => 'as above',
-    'admin/impersonations#create_view_as' => 'view-as is a session flag; it grants no writes',
-    'admin/impersonations#destroy'        => 'leaving an impersonation clears the session',
-    'catalog#index'                       => 'Blacklight routes search at POST as well as GET',
-    'catalog#track'                       => 'stores the result counter in the session',
-    'atlas#process_login'                 => 'the NUID sign-in shim; reads Atlas like devise does'
+    'devise/sessions#create'       => 'sign-in reads Atlas (GET /user) and writes a session row',
+    'devise/sessions#destroy'      => 'sign-out clears the session',
+    'accounts#switch'              => 'records which account is acting, in the session',
+    'download_queue#create'        => 'the download queue lives in the session',
+    'download_queue#destroy'       => 'as above',
+    'download_queue#destroy_all'   => 'as above',
+    'admin/impersonations#destroy' => 'the session is torn down before the end event is ' \
+                                      'emitted, so leaving must always work',
+    'catalog#index'                => 'Blacklight routes search at POST as well as GET',
+    'catalog#track'                => 'stores the result counter in the session',
+    'atlas#process_login'          => 'the NUID sign-in shim; reads Atlas like devise does'
   }.freeze
 
   # The window's own off-switch. Exempt in its own controller rather than on the
@@ -49,9 +49,9 @@ RSpec.describe 'Maintenance write-route inventory', type: :request do
   # Everything else. Each of these reaches an Atlas write, a Cerberus table, or
   # a background job that will do one, so each is refused. Listed by controller
   # rather than by action: the rule is about the surface, not the verb.
-  # admin/impersonations appears here AND in SESSION_ONLY: view-as and its exit
-  # are session-only, while act_as exists to attribute writes and is refused.
-  # The exact-action list is consulted first, so both hold.
+  # admin/impersonations appears here AND in SESSION_ONLY: exiting is session-only,
+  # while STARTING a session (view_as or act_as) records an AuditEvent in Atlas
+  # and is refused. The exact-action list is consulted first, so both hold.
   REFUSED_CONTROLLERS = %w[
     accounts admin/associations admin/files admin/groups admin/impersonations
     admin/linked_members

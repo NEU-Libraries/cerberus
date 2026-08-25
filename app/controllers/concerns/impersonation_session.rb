@@ -107,7 +107,13 @@ module ImpersonationSession
 
     begin
       emit_impersonation_event('impersonation_ended', target, mode)
-    rescue Faraday::Error => e
+    rescue Faraday::Error, AtlasRb::Error => e
+      # AtlasRb::Error as well as Faraday::Error, because a refusal Atlas states
+      # in an HTTP response is still a failed emit. A read-only maintenance
+      # window is the case that proves it: the session is already gone by this
+      # point, so letting AtlasRb::ReadOnlyModeError escape would land the admin
+      # on the maintenance page instead of their redirect, telling them the exit
+      # failed when it did not.
       Rails.logger.error("impersonation_ended audit emit failed: #{e.class} #{e.message}")
     end
   end
