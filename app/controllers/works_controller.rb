@@ -107,7 +107,7 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
   end
 
   def edit
-    @work = AtlasRb::Work.find(params[:id])
+    @work = requested_work
     form_preparation(@permissions, resource: @work)
     load_descriptive!('Work')
     load_advanced!('Work')
@@ -296,9 +296,16 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     # with edit rights (it rides `extra_edit`), so an abandoned deposit can always
     # be finished or withdrawn.
     def reject_if_in_progress
-      return unless AtlasRb::Work.find(params[:id]).in_progress
+      return unless requested_work.in_progress
 
       redirect_to work_path(params[:id]), alert: IN_PROGRESS_NOTICE
+    end
+
+    # The requested Work, read from Atlas once per request. #edit needs the same
+    # payload the in-progress gate above already fetched, and that gate runs as
+    # a before_action, so without the memo the edit page reads it twice.
+    def requested_work
+      @requested_work ||= AtlasRb::Work.find(params[:id])
     end
 
     # Trail for the upload form: the Work's structural ancestors, then the Work

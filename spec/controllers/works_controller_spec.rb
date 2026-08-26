@@ -599,6 +599,17 @@ describe WorksController do
       end
     end
 
+    # The in-progress gate is a before_action and the action needs the same
+    # payload, so the read is memoized rather than made twice.
+    it 'reads the Work from Atlas once' do
+      loaded = AtlasRb::Work.find(work.id, nuid: '000000004')
+      expect(AtlasRb::Work).to receive(:find).once.with(work.id).and_return(loaded)
+
+      get :edit, params: { id: work.id }
+
+      expect(response).to have_http_status(:ok)
+    end
+
     context 'audit history tab' do
       let(:history_envelope) do
         AtlasRb::Mash.new('resource_id' => work.id, 'events' => [])
