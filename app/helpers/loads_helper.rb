@@ -51,10 +51,14 @@ module LoadsHelper
     total = load_report.total_ingests
     return '—' if total.zero?
 
+    completed = load_report.completed_ingests
+    warnings  = load_report.warning_ingests
+    failed    = load_report.failed_ingests
+
     parts = []
-    parts << "#{load_report.completed_ingests} of #{total} completed" if load_report.completed_ingests.positive?
-    parts << "#{load_report.warning_ingests} with warnings"           if load_report.warning_ingests.positive?
-    parts << "#{load_report.failed_ingests} failed"                   if load_report.failed_ingests.positive?
+    parts << "#{completed} of #{total} completed" if completed.positive?
+    parts << "#{warnings} with warnings"          if warnings.positive?
+    parts << "#{failed} failed"                   if failed.positive?
     parts.any? ? parts.join(' · ') : "#{total} pending"
   end
 

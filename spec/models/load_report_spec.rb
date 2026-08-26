@@ -90,6 +90,32 @@ RSpec.describe LoadReport, type: :model do
     end
   end
 
+  describe '#status_tally' do
+    it 'tallies every ingest table under the enum label' do
+      report = create(:load_report)
+      create_list(:xml_ingest, 2, load_report: report, status: :completed)
+      create(:iptc_ingest, load_report: report, status: :completed)
+      create(:multipage_ingest, load_report: report, status: :failed)
+      expect(report.status_tally).to eq('completed' => 3, 'failed' => 1)
+    end
+
+    it 'reads 0 for a status with no rows' do
+      expect(create(:load_report).status_tally['failed']).to eq(0)
+    end
+
+    # The tally is memoized, so anything holding a report across row writes
+    # needs an invalidation hook. reload is that hook.
+    it 'is dropped by reload' do
+      report = create(:load_report)
+      create(:iptc_ingest, load_report: report, status: :completed)
+      expect(report.completed_ingests).to eq(1)
+
+      create(:iptc_ingest, load_report: report, status: :completed)
+      expect(report.completed_ingests).to eq(1)
+      expect(report.reload.completed_ingests).to eq(2)
+    end
+  end
+
   describe '#total_ingests' do
     it 'sums xml, iptc, and multipage ingests' do
       report = create(:load_report)

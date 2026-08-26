@@ -1,4 +1,4 @@
-- ingests = report_ingests(load_report, loader)
+- ingests = report_ingests(load_report, loader).order(report_ingest_order(loader)).to_a
 .admin-registry.my-3{data: { controller: 'load-poll', 'load-poll-terminal-value' => load_report.terminal?.to_s, 'load-poll-url-value' => loader_load_path(loader, load_report) }}
   %header.admin-registry__head
     %span.admin-registry__title
@@ -45,7 +45,7 @@
           %span.ingest-summary__count= load_report.total_ingests
           %span.ingest-summary__label Total
         - %i[completed pending processing completed_with_warnings failed].each do |status|
-          - count = ingests.where(status: status).count
+          - count = load_report.status_tally[status.to_s]
           .ingest-summary__tile{class: "ingest-summary__tile--#{status}"}
             %span.ingest-summary__count= count
             %span.ingest-summary__label= status.to_s.humanize
@@ -61,7 +61,7 @@
             %th{scope: 'col'}
         %tbody
           = render partial: 'ingest_row',
-                   collection: ingests.order(report_ingest_order(loader)),
+                   collection: ingests,
                    as: :ingest
   - elsif load_report.in_progress?
     .admin-registry__empty

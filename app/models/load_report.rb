@@ -42,20 +42,44 @@ class LoadReport < ApplicationRecord
     update!(status: :failed, finished_at: Time.current)
   end
 
+  # Row counts keyed by status label, as one grouped query per ingest table
+  # rather than a COUNT per status per table.
+  #
+  # Memoized because both readers ask repeatedly: the loader index renders a
+  # progress summary for every report on the page, and the show page's meter
+  # reads the counters several times per render while polling. Without the memo
+  # a single row on the index costs 21 COUNTs.
+  #
+  # Keys are the enum's string labels, so a status with no rows is absent and
+  # reads 0 through the Hash default.
+  def status_tally
+    @status_tally ||= ingest_relations.each_with_object(Hash.new(0)) do |relation, tally|
+      relation.group(:status).count.each { |status, count| tally[status.to_s] += count }
+    end
+  end
+
+  # Drop the memoized tally along with everything else reload drops. A caller
+  # that writes ingest rows and then re-reads a counter on the same instance
+  # needs some hook to invalidate; this is the one Rails already hands it.
+  def reload(...)
+    @status_tally = nil
+    super
+  end
+
   def total_ingests
-    ingest_relations.sum(&:count)
+    status_tally.values.sum
   end
 
   def completed_ingests
-    ingest_relations.sum { |rel| rel.completed.count }
+    status_tally['completed']
   end
 
   def warning_ingests
-    ingest_relations.sum { |rel| rel.completed_with_warnings.count }
+    status_tally['completed_with_warnings']
   end
 
   def failed_ingests
-    ingest_relations.sum { |rel| rel.failed.count }
+    status_tally['failed']
   end
 
   # Ingests that have reached a terminal per-row state, over the total —
