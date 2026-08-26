@@ -78,6 +78,11 @@ RSpec.configure do |config|
   # See spec/integration/kataba_loc_regression_spec.rb for the rationale.
   config.filter_run_excluding :loc_smoke unless ENV['RUN_LOC_SMOKE']
 
+  # The Atlas round-trip profile reports numbers rather than asserting anything,
+  # so a default run (and CI) skips it. Opt in with RUN_PROFILE=1 or by naming the
+  # tag. See spec/integration/atlas_roundtrip_profile_spec.rb.
+  config.filter_run_excluding :profile unless ENV['RUN_PROFILE']
+
   config.include Devise::Test::ControllerHelpers, type: :controller
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [Rails.root.join('spec/fixtures').to_s]
