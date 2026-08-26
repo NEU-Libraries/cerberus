@@ -79,10 +79,11 @@ RSpec.describe 'Admin::Files', type: :request do
         [AtlasRb::Mash.new('noid' => 'b1', 'label' => 'report.pdf', 'use' => 'content',
                            'mime_type' => 'application/pdf', 'size' => 1234)]
       )
-      allow(AtlasRb::Blob).to receive(:versions).with('b1').and_return(
-        AtlasRb::Mash.new('versions' => [{ 'revision' => 1, 'version_id' => 'v1',
-                                          'created' => '2026-06-20T09:00:00Z',
-                                          'actor_nuid' => '000000002', 'digest' => 'sha512:bbbb' }])
+      allow(AtlasRb::Blob).to receive(:find_many_versions).with(['b1']).and_return(
+        [AtlasRb::Mash.new('blob_id'  => 'b1',
+                           'versions' => [{ 'revision' => 1, 'version_id' => 'v1',
+                                            'created' => '2026-06-20T09:00:00Z',
+                                            'actor_nuid' => '000000002', 'digest' => 'sha512:bbbb' }])]
       )
 
       get '/admin/files/manage', params: { work_id: 'w1' }
@@ -124,13 +125,18 @@ RSpec.describe 'Admin::Files', type: :request do
         )
         # revision is the contiguous ordinal; version_id is the raw OCFL label,
         # which skips (v4 for revision 2) after a preservation-envelope bump.
-        allow(AtlasRb::Blob).to receive(:versions).with('b1').and_return(
-          AtlasRb::Mash.new('versions' => [
-                              { 'revision' => 2, 'version_id' => 'v4', 'created' => '2026-06-24T10:00:00Z',
-                                'actor_nuid' => '000000004', 'digest' => 'sha512:aaaa' },
-                              { 'revision' => 1, 'version_id' => 'v1', 'created' => '2026-06-20T09:00:00Z',
-                                'actor_nuid' => '000000002', 'digest' => 'sha512:bbbb' }
-                            ])
+        # The Delegate is dropped before the batch read, so only the held Blob's
+        # noid is asked for.
+        allow(AtlasRb::Blob).to receive(:find_many_versions).with(['b1']).and_return(
+          [AtlasRb::Mash.new(
+            'blob_id'  => 'b1',
+            'versions' => [
+              { 'revision' => 2, 'version_id' => 'v4', 'created' => '2026-06-24T10:00:00Z',
+                'actor_nuid' => '000000004', 'digest' => 'sha512:aaaa' },
+              { 'revision' => 1, 'version_id' => 'v1', 'created' => '2026-06-20T09:00:00Z',
+                'actor_nuid' => '000000002', 'digest' => 'sha512:bbbb' }
+            ]
+          )]
         )
       end
 
@@ -149,6 +155,44 @@ RSpec.describe 'Admin::Files', type: :request do
         expect(headlines).to include('2', '1')
         # ...while the skipping OCFL labels ride below as secondary/debug.
         expect(secondary).to eq(%w[v4 v1])
+      end
+
+      it 'reads every Blob\'s history in one call, whatever the file count' do
+        allow(AtlasRb::Work).to receive(:assets).with('w1').and_return(
+          %w[b1 b2 b3 b4].map do |noid|
+            AtlasRb::Mash.new('noid' => noid, 'label' => "page-#{noid}.jpg", 'mime_type' => 'image/jpeg')
+          end
+        )
+        expect(AtlasRb::Blob).to receive(:find_many_versions).once
+                                                             .with(%w[b1 b2 b3 b4]).and_return([])
+
+        get '/admin/files/manage', params: { work_id: 'w1' }
+
+        expect(response).to have_http_status(:ok)
+      end
+
+      # find_many_versions drops an id it cannot resolve, so the row must still
+      # render — just with no version table, exactly as a failed read behaved.
+      it 'renders a Blob whose history the batch read dropped' do
+        allow(AtlasRb::Blob).to receive(:find_many_versions).and_return([])
+
+        get '/admin/files/manage', params: { work_id: 'w1' }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('report.pdf', 'Replace file')
+        expect(response.body).not_to include('v4')
+      end
+
+      it 'makes no history call when the Work has no replaceable Blobs' do
+        allow(AtlasRb::Work).to receive(:assets).with('w1').and_return(
+          [AtlasRb::Mash.new('noid' => 'd1', 'label' => 'delegate', 'uri' => 'http://img/thumb')]
+        )
+        expect(AtlasRb::Blob).not_to receive(:find_many_versions)
+
+        get '/admin/files/manage', params: { work_id: 'w1' }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('no replaceable files')
       end
 
       it 'excludes derived Delegates (those with a uri), which are not replaceable' do

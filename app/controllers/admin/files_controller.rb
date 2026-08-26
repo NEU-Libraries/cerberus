@@ -44,9 +44,9 @@ module Admin
       @work = AtlasRb::Work.find(params[:work_id])
       raise ResourceNotFound if @work.nil?
 
-      @blobs = AtlasRb::Work.assets(params[:work_id])
-                            .reject { |asset| asset[:uri].present? }
-                            .map { |asset| { asset: asset, versions: versions_for(asset.noid) } }
+      assets  = AtlasRb::Work.assets(params[:work_id]).reject { |asset| asset[:uri].present? }
+      history = version_history(assets.map(&:noid))
+      @blobs  = assets.map { |asset| { asset: asset, versions: history.fetch(asset.noid, []) } }
     end
 
     # Replace a Blob's bytes with a new upload — a new version, NOID preserved.
@@ -70,8 +70,17 @@ module Admin
 
     private
 
-      def versions_for(blob_noid)
-        Array(AtlasRb::Blob.versions(blob_noid)['versions'])
+      # Every replaceable Blob's version history in one call rather than a
+      # versions-per-noid fan-out: this page reads every held binary on the
+      # Work, which on a multipage Work is one per page. find_many_versions is
+      # unordered and drops an id it cannot resolve, so index by blob_id; a
+      # dropped id renders as a file with no version table, which is what a
+      # failed history read already did.
+      def version_history(blob_noids)
+        return {} if blob_noids.empty?
+
+        AtlasRb::Blob.find_many_versions(blob_noids)
+                     .to_h { |envelope| [envelope['blob_id'], Array(envelope['versions'])] }
       end
 
       def back_to_manage(flash_opts)
