@@ -20,16 +20,17 @@
       refused until it is closed. Use one before a migration or a risky deploy.
 
     - if open_now
-      .well.p-3.my-3.rounded-3
-        %dl.mb-0
-          %dt.text-uppercase.small.text-body-secondary Opened by
-          %dd= source == 'deploy' ? 'The deploy orchestrator' : 'An operator'
-          - if @window.since.present?
-            %dt.text-uppercase.small.text-body-secondary Since
-            %dd= @window.since
-          - if @window.message.present?
-            %dt.text-uppercase.small.text-body-secondary Message
-            %dd= @window.message
+      -# The open window's particulars are a read-out, not a form section, so they
+      -# sit bare in the card body. The .well below is the form that opens one.
+      %dl.my-3
+        %dt.text-uppercase.small.text-body-secondary Opened by
+        %dd= source == 'deploy' ? 'The deploy orchestrator' : 'An operator'
+        - if @window.since.present?
+          %dt.text-uppercase.small.text-body-secondary Since
+          %dd= @window.since
+        - if @window.message.present?
+          %dt.text-uppercase.small.text-body-secondary Message
+          %dd= @window.message
 
       %p.text-body-secondary.small
         Closing here clears the window whichever door opened it, including one
