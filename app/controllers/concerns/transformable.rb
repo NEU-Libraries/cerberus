@@ -16,6 +16,21 @@ module Transformable
   include DescriptiveMetadata
   include AdvancedMetadata
 
+  # The resource's raw MODS, read once per request.
+  #
+  # Both form loaders parse the same document — DescriptiveMetadata for the bare
+  # title/abstract/keywords, AdvancedMetadata for the structured title parts and
+  # names — and the Work edit page runs both, so without this the page fetched
+  # the same XML from Atlas twice.
+  #
+  # Read paths only. The write path in #save_descriptive! deliberately re-reads
+  # inside with_stale_retry, because a retry has to pick up the current MODS and
+  # its lock token; handing it a memo from earlier in the request would defeat
+  # the retry.
+  def resource_mods(klass)
+    @resource_mods ||= AtlasRb.const_get(klass).mods(params[:id], 'xml')
+  end
+
   # Shared #update handler for the Work/Collection/Community Metadata + Permissions
   # tabs (separate forms, both PATCH #update with disjoint fields). Permissions go
   # to Atlas's metadata endpoint; descriptive fields are validated then merged

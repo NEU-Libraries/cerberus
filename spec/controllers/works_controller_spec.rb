@@ -610,6 +610,17 @@ describe WorksController do
       expect(response).to have_http_status(:ok)
     end
 
+    # The Metadata and Advanced tabs parse the same document — one for the bare
+    # title, the other for its structured parts — and #edit loads both.
+    it 'reads the MODS from Atlas once' do
+      xml = AtlasRb::Work.mods(work.id, 'xml', nuid: '000000004')
+      expect(AtlasRb::Work).to receive(:mods).once.with(work.id, 'xml').and_return(xml)
+
+      get :edit, params: { id: work.id }
+
+      expect(response).to have_http_status(:ok)
+    end
+
     context 'audit history tab' do
       let(:history_envelope) do
         AtlasRb::Mash.new('resource_id' => work.id, 'events' => [])

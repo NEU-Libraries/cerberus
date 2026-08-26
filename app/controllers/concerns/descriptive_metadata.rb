@@ -68,7 +68,7 @@ module DescriptiveMetadata
   # the edit form pre-fills with the BARE title (+ read-only structured parts),
   # the abstract, and the free-text keywords — exactly what #update merges back.
   def load_descriptive!(klass)
-    @descriptive = Metadata::MODSFields.call(xml: AtlasRb.const_get(klass).mods(params[:id], 'xml'))
+    @descriptive = Metadata::MODSFields.call(xml: resource_mods(klass))
   end
 
   # Merge the descriptive fields into the existing MODS and write via the raw,

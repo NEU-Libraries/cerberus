@@ -13,7 +13,7 @@ module AdvancedMetadata
   # preserved (authority-bearing / non-Creator) names shown read-only. Driven off
   # the shared NEU::MODS gem — exactly what save_advanced! merges back.
   def load_advanced!(klass)
-    doc = NEU::MODS::Document.parse(AtlasRb.const_get(klass).mods(params[:id], 'xml'))
+    doc = NEU::MODS::Document.parse(resource_mods(klass))
     parts = doc.title_parts
     @advanced = {
       subtitle: parts[:subtitle], part_name: parts[:part_name],
