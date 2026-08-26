@@ -14,35 +14,34 @@
 -# the blast radius is on the screen before the button is pressed without the
 -# edit page paying a recipe resolution on every load.
 .py-2.px-1
-  .well.p-3.my-3.rounded-3
-    %h5.mb-1 Visibility
-    %p.small.text-muted.mb-0
-      Remove public access from every work this set holds. Group grants are kept, so a work stays
-      readable by the groups it already names — and those grants are what it falls back on. Works
-      that are already private are left alone.
+  %h5.pb-2 Visibility
+  %p.small.text-muted.mb-3
+    Remove public access from every work this set holds. Group grants are kept, so a work stays
+    readable by the groups it already names — and those grants are what it falls back on. Works
+    that are already private are left alone.
 
-  .well.p-3.my-3.rounded-3
-    .d-flex.align-items-baseline.gap-2.mb-1
-      %h6.mb-0 This set currently holds
-      = turbo_frame_tag "set-works-count-#{set_id}", src: works_count_set_path(set_id), loading: :lazy do
-        %span.text-muted Counting…
-    %p.small.text-muted.mb-0
-      The sweep covers the works the set resolves to right now, including those it reaches through
-      an included collection. Works you have set aside are not touched.
+  .d-flex.align-items-baseline.gap-2.mb-1
+    %h6.mb-0 This set currently holds
+    = turbo_frame_tag "set-works-count-#{set_id}", src: works_count_set_path(set_id), loading: :lazy do
+      %span.text-muted Counting…
+  %p.small.text-muted.mb-3
+    The sweep covers the works the set resolves to right now, including those it reaches through
+    an included collection. Works you have set aside are not touched.
 
-  -# The warning sits before the control it applies to, not under it.
-  .well.p-3.my-3.rounded-3
-    %h6.mb-1
-      %i.fa-solid.fa-triangle-exclamation.text-danger.me-1{ 'aria-hidden' => 'true' }
-      This cannot be undone
-    %p.small.text-muted.mb-3
+  -# The warning sits before the control it applies to, not under it, and carries
+  -# alert chrome so it reads as a caution rather than more explanatory prose —
+  -# the pane itself is unbracketed, so the alert is what distinguishes the two.
+  .alert.alert-warning.py-2.px-3.small.d-flex.align-items-start.mb-3{ role: 'alert' }
+    %i.fa-solid.fa-triangle-exclamation.me-2.mt-1{ 'aria-hidden' => 'true' }
+    %div
+      %strong.d-block This cannot be undone
       There is no bulk action to make works public again. Restoring public access means editing each
       work, so check the set's contents before you run this. A work removed from the set afterwards
       stays private.
-    = button_to privatize_set_path(set_id), class: "btn btn-danger", form: { class: "d-inline" },
-                data: { turbo_confirm: "Make every work in this set private? Public access is removed from all of them. There is no bulk action to undo this.",
-                        turbo_confirm_title: "Confirm privatize",
-                        turbo_confirm_button: "Make private",
-                        turbo_confirm_variant: "danger" } do
-      %i.fa-solid.fa-user-lock.me-1{ 'aria-hidden' => 'true' }
-      Make all works private
+  = button_to privatize_set_path(set_id), class: "btn btn-danger", form: { class: "d-inline" },
+              data: { turbo_confirm: "Make every work in this set private? Public access is removed from all of them. There is no bulk action to undo this.",
+                      turbo_confirm_title: "Confirm privatize",
+                      turbo_confirm_button: "Make private",
+                      turbo_confirm_variant: "danger" } do
+    %i.fa-solid.fa-user-lock.me-1{ 'aria-hidden' => 'true' }
+    Make all works private
