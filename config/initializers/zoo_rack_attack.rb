@@ -432,15 +432,6 @@ Rack::Attack.blocklist("block asn") do |req|
   Rails.cache.read("block asn #{req.asn}")
 end
 
-Rack::Attack.throttle("facet scrape", limit: 1, period: 10) do |req|
-  facet = req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creator") || req.fullpath.include?("rss")
-  if facet
-    if req.env["HTTP_COOKIE"].blank? || !req.env["HTTP_COOKIE"].include?("cerberus_app_session")
-      true
-    end
-  end
-end
-
 # dl throttle by signature and blanks
 Rack::Attack.throttle("download scraper blank wave", limit: 1, period: 10) do |request|
   if request.referrer.blank? && request.env["HTTP_COOKIE"].blank?
@@ -580,6 +571,15 @@ Rack::Attack.throttle("challenged", limit: 0, period: 60) do |req|
 
       # Challenge only if never seen
       req.remote_ip unless seen
+    end
+  end
+end
+
+Rack::Attack.throttle("facet scrape", limit: 1, period: 10) do |req|
+  facet = req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creator") || req.fullpath.include?("rss")
+  if facet
+    if req.env["HTTP_COOKIE"].blank? || !req.env["HTTP_COOKIE"].include?("cerberus_app_session")
+      true
     end
   end
 end
