@@ -554,11 +554,11 @@ end
 
 Rack::Attack.throttle("challenged", limit: 0, period: 60) do |req|
   $redis.auth(ENV["REDIS_PASSWD"])
-  seen = $redis.zscore("rack_attack:unique_ips", req.ip)
+  seen = $redis.zscore("rack_attack:unique_ips", req.remote_ip)
 
   # Always record the visit
   now = Time.now
-  $redis.zadd("rack_attack:unique_ips", now.to_f, req.ip)
+  $redis.zadd("rack_attack:unique_ips", now.to_f, req.remote_ip)
   $redis.zremrangebyscore("rack_attack:unique_ips", "-inf", (now - 86_400).to_f) ; nil # avoid return contamination
 
   if req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase)
