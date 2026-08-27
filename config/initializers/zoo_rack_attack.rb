@@ -565,13 +565,15 @@ Rack::Attack.throttle("challenged", limit: 0, period: 60) do |req|
   $redis.auth(ENV["REDIS_PASSWD"])
   seen = $redis.zscore("rack_attack:unique_ips", req.remote_ip)
 
+  facet = req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creator") || req.fullpath.include?("rss")
+
   # Always record the visit
   now = Time.now
   $redis.zadd("rack_attack:unique_ips", now.to_f, req.remote_ip)
   $redis.zremrangebyscore("rack_attack:unique_ips", "-inf", (now - 86_400).to_f) ; nil # avoid return contamination
 
   if req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase)
-    if req.env["HTTP_COOKIE"].blank? && (req.fullpath.include?("files/") || req.fullpath.include?("datastream_id=content"))
+    if req.env["HTTP_COOKIE"].blank? && (req.fullpath.include?("files/") || req.fullpath.include?("datastream_id=content") || facet)
       if !seen
         File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-challenge.log", "#{req.remote_ip} - #{req.asn} - #{req.asn_org} - #{req.path} - #{req.fingerprint} - #{Time.now}" + "\n", mode: 'a')
       end
