@@ -435,7 +435,7 @@ end
 Rack::Attack.throttle("facet scrape", limit: 1, period: 10) do |req|
   facet = req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creator") || req.fullpath.include?("rss")
   if facet
-    if req.env["HTTP_COOKIE"].blank? || req.env["HTTP_COOKIE"].include?("cerberus_app_session")
+    if req.env["HTTP_COOKIE"].blank? || !req.env["HTTP_COOKIE"].include?("cerberus_app_session")
       true
     end
   end
