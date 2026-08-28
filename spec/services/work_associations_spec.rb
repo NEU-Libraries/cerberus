@@ -36,7 +36,9 @@ RSpec.describe WorkAssociations do
   # only asserts something is hidden.
   let(:user) { nil }
   let(:search_service) do
-    GatedSearchService.new(config: CatalogController.blacklight_config, current_user: user)
+    GatedSearchService.new(config:       CatalogController.blacklight_config,
+                           search_state: Blacklight::SearchState.new({}, CatalogController.blacklight_config),
+                           current_user: user)
   end
 
   def resolve(work_id)
@@ -124,6 +126,7 @@ RSpec.describe WorkAssociations do
       result = described_class.call(
         associations:   AtlasRb::Work.associations(dataset.id, nuid: nuid),
         search_service: GatedSearchService.new(config:       CatalogController.blacklight_config,
+                                               search_state: Blacklight::SearchState.new({}, CatalogController.blacklight_config),
                                                current_user: staff)
       )
       expect(noids(result.inbound.fetch('is_figure_for'))).to include(secret.id)
