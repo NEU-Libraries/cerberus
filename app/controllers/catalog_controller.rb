@@ -9,6 +9,14 @@ class CatalogController < ApplicationController
     config.search_service_class = GatedSearchService
     config.view.gallery(document_component: Blacklight::Gallery::DocumentComponent, icon: Blacklight::Gallery::Icons::GalleryComponent)
 
+    # The layout renders whatever this names and nothing else, so the DRS
+    # header has to be reachable from here to appear at all.
+    config.header_component = Cerberus::HeaderComponent
+
+    # Facet panels are cards here, not Bootstrap accordion items — see the
+    # Blacklight::Facets::FieldComponent template override.
+    config.index.facet_group_component = Cerberus::FacetGroupComponent
+
     # Retain the genres `category` param in the search state. Blacklight's
     # permit_search_params strips any param not in search_state_fields, so without
     # this the view-type toggle (whose URL is url_for(search_state.to_h.merge(view:)))
@@ -22,6 +30,14 @@ class CatalogController < ApplicationController
     config.track_search_session.storage = false
     config.autocomplete_enabled = false
     config.autocomplete_path = nil
+
+    # Blacklight ships an advanced search form at /catalog/advanced and enables
+    # it by default. It is off here because the form enumerates every facet
+    # field with no value limit, and several of ours are descriptive fields
+    # whose value lists are unbounded. Turning it on is a deliberate piece of
+    # work — curate which facets appear, and cap the ones that stay — not a
+    # default to inherit.
+    config.advanced_search.enabled = false
     ## Class for sending and receiving requests from a search index
     # config.repository_class = Blacklight::Solr::Repository
     #

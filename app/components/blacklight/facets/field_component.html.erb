@@ -1,0 +1,44 @@
+<%# Cerberus override of Blacklight::Facets::FieldComponent's template.
+
+    Upstream builds each facet panel as a Bootstrap accordion item. We build a
+    Bootstrap card instead, which is the chrome the rest of the sidebar and the
+    result rows already use — an accordion reads as a different component
+    family on a page whose other panels are cards.
+
+    Everything structural is upstream's: the ids, the aria wiring, the
+    data-bs-toggle collapse behaviour, and the `facet-limit` /
+    `facet-limit-active` / `blacklight-<key>` hooks the app's SCSS targets.
+    Only the presentational class names differ.
+
+    The `h6` on the heading is load-bearing: Blacklight sizes facet headings
+    through this class rather than a stylesheet rule, so dropping it shrinks
+    every facet title. The chevron and the card's spacing are supplied by
+    _facets.scss, since the accordion button we are not using is what would
+    otherwise draw them. %>
+<div class="card facet-limit blacklight-<%= @facet_field.key %> <%= 'facet-limit-active' if @facet_field.active? %>">
+  <h3 class="card-header p-0 facet-field-heading h6" id="<%= header_html_id %>">
+    <button
+      type="button"
+      class="btn w-100 d-block p-2 text-start collapse-toggle <%= "collapsed" if @facet_field.collapsed? %>"
+      data-bs-toggle="collapse"
+      data-bs-target="#<%= html_id %>"
+      aria-expanded="<%= @facet_field.collapsed? ? 'false' : 'true' %>"
+      aria-controls="<%= html_id %>"
+    >
+      <%= label %>
+    </button>
+  </h3>
+  <div id="<%= html_id %>" role="region" aria-labelledby="<%= header_html_id %>" class="panel-collapse facet-content collapse <%= "show" unless @facet_field.collapsed? %>">
+    <div class="card-body">
+      <%= body %>
+
+      <% if @facet_field.modal_path %>
+        <div class="more_facets">
+          <%= link_to t("more_#{@facet_field.key}_html", scope: 'blacklight.search.facets', default: :more_html, field_name: @facet_field.label),
+            @facet_field.modal_path,
+            data: { blacklight_modal: 'trigger', turbo: false } %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

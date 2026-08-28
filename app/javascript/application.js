@@ -3,7 +3,7 @@ import "@hotwired/turbo-rails"
 import "controllers"
 import bootstrap from "bootstrap"
 import githubAutoCompleteElement from "@github/auto-complete-element"
-import Blacklight from "blacklight"
+import Blacklight from "blacklight-frontend"
 // Imported after turbo-rails so window.Turbo exists when it self-registers the
 // Bootstrap-modal confirm dialog in place of the native window.confirm().
 import "cerberus/turbo_confirm"

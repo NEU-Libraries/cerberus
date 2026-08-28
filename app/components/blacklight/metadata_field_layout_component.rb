@@ -4,7 +4,12 @@ module Blacklight
   class MetadataFieldLayoutComponent < ViewComponent::Base
     with_collection_parameter :field
     renders_one :label
-    renders_many :values, (lambda do |value: nil, &block|
+    # `index` is the value's position within the field, which Blacklight sends
+    # so a layout can indent every value after the first. This layout does not
+    # indent — the template gives each value its own full-width row — so the
+    # argument is accepted and dropped. It must stay in the signature: the
+    # caller always sends it, and an unknown keyword raises.
+    renders_many :values, (lambda do |value: nil, index: nil, &block| # rubocop:disable Lint/UnusedBlockArgument
       if @value_tag.nil?
         block&.call || value
       elsif block

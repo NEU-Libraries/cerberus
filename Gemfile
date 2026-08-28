@@ -68,8 +68,10 @@ gem 'bootsnap', require: false
 # binding returns nil — so a refused write silently no-ops and the UI reports
 # success.
 gem 'atlas_rb', '>= 1.13.1'
-gem 'blacklight', '>= 8.0', '< 9.0'
-gem 'blacklight-gallery'
+gem 'blacklight', '~> 9.0'
+# 6.x is the first line that allows Blacklight 9; its gemspec pins the 9.0.0
+# betas, which 9.0.0 final satisfies.
+gem 'blacklight-gallery', '~> 6.0'
 gem 'bootstrap'
 gem 'bootstrap_form'
 gem 'cancancan'
