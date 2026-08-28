@@ -6,6 +6,19 @@ class SearchBuilder < Blacklight::SearchBuilder
   self.default_processor_chain += [:apply_gated_discovery, :append_extra_filters, :exclude_curation_containers,
                                    :scope_to_resource_type, :exclude_unfinished_deposits]
 
+  # Blacklight's step of this name asks `search_state.controller.action_name`
+  # whether the advanced search form is being rendered. A builder's search
+  # state takes its "controller" from the builder's scope, and most of ours are
+  # built off a SearchService or a plain query object rather than a controller.
+  # Neither answers `action_name`, so the step raises before the query is ever
+  # sent. Skip it when the scope is not a controller: there is no action to be
+  # on, and so no form to gather facet values for.
+  def add_facets_for_advanced_search_form(solr_parameters)
+    return unless search_state.controller.respond_to?(:action_name)
+
+    super
+  end
+
   def apply_gated_discovery(solr_parameters)
     # Admins carry the `can :manage, :all` short-circuit in Ability, but that
     # only governs CanCanCan checks on documents already in hand — it never
