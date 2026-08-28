@@ -14,7 +14,7 @@
 #        the single showcase NOID for one genre — the linked-member edge target
 #        WorksController#create writes to on publish.
 #
-# Uses the same `Blacklight.default_index.search(SearchBuilder.new(scope))`
+# Uses the same `Blacklight.default_index.search(params: SearchBuilder.new(scope))`
 # idiom as ResourceSearch, so it runs through the gated SearchBuilder chain
 # (scope = the controller, supplying current_user) — a private/embargoed
 # showcase the depositor can't see is never offered as a publish target.
@@ -58,7 +58,7 @@ class ShowcaseFinder < ApplicationService
       ).merge(rows: MAX_SHOWCASES)
 
       labels = FeaturedContent.genre_labels.to_set
-      Blacklight.default_index.search(builder).documents.each_with_object({}) do |doc, map|
+      Blacklight.default_index.search(params: builder).documents.each_with_object({}) do |doc, map|
         title = Array(doc['title_tsim']).first
         map[title] = doc.to_param if title.present? && labels.include?(title)
       end

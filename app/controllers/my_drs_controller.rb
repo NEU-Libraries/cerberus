@@ -69,7 +69,7 @@ class MyDrsController < CatalogController
         'internal_resource_tesim:Collection', 'featured_bsi:true', '-tombstoned_bsi:true',
         MembershipQuery.descendants_fq(community_noids)
       ).merge(rows: 100)
-      Blacklight.default_index.search(builder).documents
+      Blacklight.default_index.search(params: builder).documents
     end
 
     # This depositor's own unfinished deposits. The gated search's own
@@ -93,7 +93,7 @@ class MyDrsController < CatalogController
         '-tombstoned_bsi:true',
         *filters
       ).merge(rows: 50)
-      Blacklight.default_index.search(builder).documents
+      Blacklight.default_index.search(params: builder).documents
     end
 
     # The depositor's own works surfaced into one showcase (the linked-member
@@ -106,6 +106,6 @@ class MyDrsController < CatalogController
         MembershipQuery.members_fq([showcase_uuid], include_linked: true),
         '-tombstoned_bsi:true'
       ).merge(rows: 50)
-      Blacklight.default_index.search(builder).documents
+      Blacklight.default_index.search(params: builder).documents
     end
 end

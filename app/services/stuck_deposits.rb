@@ -32,6 +32,6 @@ class StuckDeposits < ApplicationService
                                         .with(q: '*:*', per_page: PER_PAGE, page: @page)
                                         .state(@state)
                                         .merge(sort: 'updated_at_dtsi desc')
-    Blacklight.default_index.search(builder)
+    Blacklight.default_index.search(params: builder)
   end
 end

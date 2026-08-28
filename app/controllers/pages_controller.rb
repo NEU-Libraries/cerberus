@@ -27,6 +27,6 @@ class PagesController < CatalogController
                               .with({})
                               .with_filters('internal_resource_tesim:Work')
                               .merge(sort: 'created_at_dtsi desc', rows: HOME_RECENT_COUNT)
-      Blacklight.default_index.search(builder).documents
+      Blacklight.default_index.search(params: builder).documents
     end
 end

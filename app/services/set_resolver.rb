@@ -252,6 +252,6 @@ class SetResolver
     def search(*filter_queries, **extra)
       builder = @search_service.search_builder.with({}).with_filters(*filter_queries)
       builder = builder.merge(**extra) if extra.any?
-      Blacklight.default_index.search(builder)
+      Blacklight.default_index.search(params: builder)
     end
 end

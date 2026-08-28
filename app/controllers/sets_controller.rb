@@ -188,7 +188,7 @@ class SetsController < CatalogController
       return Blacklight::Solr::Response.new({}, {}) if fqs.nil?
 
       builder = search_service.search_builder.with(search_state).with_filters(*fqs)
-      Blacklight.default_index.search(builder)
+      Blacklight.default_index.search(params: builder)
     end
 
     # Display digests (title / klass) for every recipe noun, keyed by noid —

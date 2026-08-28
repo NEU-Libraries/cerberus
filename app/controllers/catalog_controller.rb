@@ -325,7 +325,7 @@ class CatalogController < ApplicationController
     filters = [membership]
     filters << MembershipQuery.excluding_fq(MembershipQuery.identity_fq(exclude_uuids)) if exclude_uuids.present?
     builder = search_service.search_builder.with(search_state).with_filters(*filters)
-    Blacklight.default_index.search(builder)
+    Blacklight.default_index.search(params: builder)
   end
 
   # fq matching everything in the anchor's subtree: every descendant
@@ -360,7 +360,7 @@ class CatalogController < ApplicationController
       'internal_resource_tesim:(Collection OR Community)'
     ).merge(rows: 100_000, fl: 'id')
 
-    Blacklight.default_index.search(builder).documents.map(&:id)
+    Blacklight.default_index.search(params: builder).documents.map(&:id)
   end
 
   # Type pill overlay — keeps the resource type legible even when a custom

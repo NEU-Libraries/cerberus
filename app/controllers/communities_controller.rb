@@ -130,7 +130,7 @@ class CommunitiesController < CatalogController
         'internal_resource_tesim:Collection', 'featured_bsi:true', '-tombstoned_bsi:true',
         MembershipQuery.members_fq([community_uuid], include_linked: false)
       ).merge(rows: 100)
-      Blacklight.default_index.search(builder).documents.map(&:id)
+      Blacklight.default_index.search(params: builder).documents.map(&:id)
     end
 
     # The subset of +showcase_uuids+ (Solr uniqueKeys) that have >=1 member,
@@ -151,7 +151,7 @@ class CommunitiesController < CatalogController
       members = MembershipQuery.members_fq(showcase_uuids, include_linked: true)
       builder = search_service.search_builder.with({}).with_filters(members)
                               .merge(rows: 0, facet: true, 'facet.mincount': 1, 'facet.field': MEMBERSHIP_FIELDS)
-      Blacklight.default_index.search(builder).dig('facet_counts', 'facet_fields') || {}
+      Blacklight.default_index.search(params: builder).dig('facet_counts', 'facet_fields') || {}
     end
 
     # Yield each Solr facet value (an `id-<uuid>` string) with a positive count
@@ -209,6 +209,6 @@ class CommunitiesController < CatalogController
         'internal_resource_tesim:Person',
         %(affiliated_community_ids_ssim:"#{community_noid.to_s.gsub(/["\\]/, '')}")
       ).merge(rows: 0)
-      Blacklight.default_index.search(builder).total
+      Blacklight.default_index.search(params: builder).total
     end
 end

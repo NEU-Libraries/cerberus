@@ -33,7 +33,7 @@ class PeopleController < CatalogController
     scope_to_community if params[:community_id].present?
     builder = search_service.search_builder.with(search_state)
     builder = builder.with_filters(@community_filter) if @community_filter
-    @response = Blacklight.default_index.search(builder)
+    @response = Blacklight.default_index.search(params: builder)
   end
 
   def show
@@ -127,7 +127,7 @@ class PeopleController < CatalogController
                               .with(search_state)
                               .with_filters(%(depositor_ssi:"#{solr_phrase(nuid)}"),
                                             'internal_resource_tesim:Work')
-      Blacklight.default_index.search(builder)
+      Blacklight.default_index.search(params: builder)
     end
 
     # The community whose Faculty & Staff we're scoping to (for the page header).

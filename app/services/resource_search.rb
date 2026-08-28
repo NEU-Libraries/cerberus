@@ -5,7 +5,7 @@
 # flow's node step searches all three (anything can be moved), its
 # destination step narrows to whatever ALLOWED_PARENTS permits for that node's
 # class; the linked-members flow searches Works then Collections.
-# Uses the same `Blacklight.default_index.search(builder)` idiom as the other
+# Uses the same `Blacklight.default_index.search(params: builder)` idiom as the other
 # Solr service objects, but instead of resolving a subtree it answers "which
 # resources of these types match what the admin typed?".
 #
@@ -57,7 +57,7 @@ class ResourceSearch < ApplicationService
     builder = SearchBuilder.new(@scope)
                            .with(q: @query.to_s, per_page: DEFAULT_PER_PAGE)
                            .with_filters(*filters)
-    Blacklight.default_index.search(builder)
+    Blacklight.default_index.search(params: builder)
   end
 
   # The fq fragments this search applies. Pure — unit-tested directly.

@@ -102,6 +102,6 @@ class WorkAssociations < ApplicationService
                                .with({})
                                .with_filters("{!terms f=alternate_ids_ssim}#{terms}")
                                .merge(rows: noids.size)
-      Blacklight.default_index.search(builder)
+      Blacklight.default_index.search(params: builder)
     end
 end

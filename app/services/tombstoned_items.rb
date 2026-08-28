@@ -5,7 +5,7 @@
 # tombstone actions on the show pages: those withdraw, this finds what was
 # withdrawn so an admin can reverse it.
 #
-# Uses the same `Blacklight.default_index.search(builder)` idiom as the other
+# Uses the same `Blacklight.default_index.search(params: builder)` idiom as the other
 # Solr service objects (see ResourceSearch), but through {TombstonedSearchBuilder},
 # which inverts the catalog's default `-tombstoned_bsi:true` exclusion. Paginated
 # (withdrawals are rare, but the result rides Blacklight's Kaminari integration
@@ -32,6 +32,6 @@ class TombstonedItems < ApplicationService
     builder = TombstonedSearchBuilder.new(@scope)
                                      .with(q: '*:*', per_page: PER_PAGE, page: @page)
                                      .merge(sort: 'updated_at_dtsi desc')
-    Blacklight.default_index.search(builder)
+    Blacklight.default_index.search(params: builder)
   end
 end
