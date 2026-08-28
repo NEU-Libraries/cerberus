@@ -1,4 +1,11 @@
+<%# Cerberus override of Blacklight::Response::ViewTypeButtonComponent's
+    template, for `turbo: false` — the toggle swaps a whole results column and
+    the frame-less full load is what keeps the sidebar controls in step.
+
+    The caption is hidden rather than dropped: the buttons read as icons, and
+    the text is what names them for a screen reader. Blacklight marks it hidden
+    in the markup rather than from a stylesheet, so the class belongs here. %>
 <%= link_to url, title: label, aria: aria_attributes, data: { turbo: false }, class: "#{Array(@classes).join(' ')} view-type-#{ @key.to_s.parameterize } #{"active" if selected?}" do %>
   <%= icon %>
-  <span class="caption"><%= label %></span>
+  <span class="caption visually-hidden"><%= label %></span>
 <% end %>

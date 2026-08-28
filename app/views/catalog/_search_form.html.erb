@@ -6,7 +6,12 @@
     </a>
   </h5>
 
-  <%= form_tag('/catalog', method: :get, class: 'search-query-form container-fluid me-0 pe-0') do -%>
+  <%# The column classes size the form against the wordmark beside it.
+      Blacklight sets them on its own search bar rather than on
+      .search-query-form, so they have to be named here — without a width the
+      form grows to fill the navbar row and wraps the wordmark onto two
+      lines. %>
+  <%= form_tag('/catalog', method: :get, class: 'search-query-form container-fluid me-0 pe-0 col-md-12 col-lg-8') do -%>
     <%= render Blacklight::HiddenSearchStateComponent.new(params: params) %>
     <div class="input-group">
       <input type="text" class="form-control" placeholder="Search..." id="q" name="q" value="<%= params[:q] %>">

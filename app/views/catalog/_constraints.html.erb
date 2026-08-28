@@ -5,6 +5,12 @@
     </h1>
   <% end %>
   <div class="search-results-header__constraints flex-grow-1">
-    <%= render blacklight_config&.view_config(document_index_view_type)&.constraints_component.new(search_state: search_state) %>
+    <%# The component's own heading names the constraint list for a screen
+        reader. Blacklight styles it as visible text, which on this row reads
+        as a second title competing with the h1 beside it — so it is kept for
+        assistive tech and taken out of the visual flow. %>
+    <%= render blacklight_config&.view_config(document_index_view_type)&.constraints_component.new(
+          search_state: search_state, heading_classes: 'constraints-label visually-hidden'
+        ) %>
   </div>
 </div>
