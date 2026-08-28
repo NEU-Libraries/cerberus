@@ -3,11 +3,11 @@
 require 'simplecov'
 
 SimpleCov.start 'rails' do
-  add_filter 'spec'
-  add_filter 'vendor'
-  add_filter 'app/channels'
-  add_filter 'lib/cerberus/vocab'
-  add_filter 'app/indexers'
+  skip 'spec'
+  skip 'vendor'
+  skip 'app/channels'
+  skip 'lib/cerberus/vocab'
+  skip 'app/indexers'
   # The floor is a property of the whole suite, so it can only be judged by a
   # run of the whole suite. Any subset — `rake smoke`, or the handful of files
   # that cover a patch in progress — would fail on coverage alone and say
@@ -15,6 +15,14 @@ SimpleCov.start 'rails' do
   # disable the report.
   minimum_coverage 90 unless ENV['SMOKE']
 end
+
+# libvips writes glib warnings straight to stderr, outside the Rails logger, and
+# ruby-vips cannot forward them to one (its log handler deadlocks on the GIL).
+# The specs deliberately feed corrupt images to the probe and derivative paths to
+# assert the graceful-degradation branches, so those warnings are expected output
+# and only obscure the rspec report. libvips reads this at init and suppresses the
+# VIPS log domain when it is set to any value.
+ENV['VIPS_WARNING'] ||= '1'
 
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 require 'spec_helper'
