@@ -184,13 +184,19 @@ class CatalogController < ApplicationController
     config.add_index_field 'published_ssim', label: 'Published'
     config.add_index_field 'published_vern_ssim', label: 'Published'
     config.add_index_field 'lc_callnum_ssim', label: 'Call number'
-    config.add_index_field 'description_tsim', label: 'Description'
+    # join: true renders a field's values as one sentence in a single row.
+    # Without it each value gets its own row, which here would also mean its own
+    # expand/collapse control (see the MetadataFieldLayoutComponent template) —
+    # several truncation toggles stacked under one label. Atlas projects a
+    # single abstract today, so this only bites on a Work that carries more
+    # than one.
+    config.add_index_field 'description_tsim', label: 'Description', join: true
 
     # solr fields to be displayed in the show (single result) view
     #   The ordering of the field names is the order of the display
     # config.add_show_field 'title_tsim', label: 'Title'
     # config.add_show_field 'title_vern_ssim', label: 'Title'
-    config.add_show_field 'description_tsim', label: 'Description'
+    config.add_show_field 'description_tsim', label: 'Description', join: true
     config.add_show_field 'subtitle_tsim', label: 'Subtitle'
     config.add_show_field 'subtitle_vern_ssim', label: 'Subtitle'
     config.add_show_field 'author_tsim', label: 'Author'
