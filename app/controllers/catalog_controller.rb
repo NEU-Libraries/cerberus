@@ -82,6 +82,16 @@ class CatalogController < ApplicationController
     # config.index.thumbnail_field = 'thumbnail_path_ss'
     config.index.thumbnail_method = :iiif_thumbnail
 
+    # Container browses — a community, collection, set or genre listing its
+    # members — render a result list from a `show` action, so their rows are
+    # built against config.show. Most of what they need falls through from
+    # config.index, because a view config reverse-merges it. This key does not:
+    # Blacklight sets it to nil on config.show so its own single-document page
+    # draws no thumbnail, and a key that is present-but-nil blocks the merge.
+    # Naming it here is what puts the thumbnail and its type pill back on every
+    # container row.
+    config.show.document_thumbnail_component = Blacklight::Document::ThumbnailComponent
+
     # config.add_results_document_tool(:bookmark, partial: 'bookmark_control', if: :render_bookmarks_control?)
     config.index.document_actions.delete(:bookmark)
     config.show.document_actions.delete(:bookmark)
