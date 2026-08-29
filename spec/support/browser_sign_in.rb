@@ -9,10 +9,14 @@ module BrowserSignIn
     visit atlas_login_path
     fill_in 'user[nuid]', with: nuid
     click_button 'Atlas Login'
-    # Wait for the redirect to land before the spec navigates on. Asserting the
-    # form is gone rather than the flash text, because the notice differs for a
-    # NUID that holds more than one account and that is not what this is for.
-    expect(page).to have_no_field('user[nuid]', wait: 5)
+    # Wait for the redirect to LAND, not merely for the form to go. The form
+    # disappears as the submission starts, so a spec that treats that as done
+    # can issue its own visit while the redirect is still in flight — the
+    # redirect then arrives last and replaces the page the spec asked for,
+    # which reads as an unrelated assertion failure on a page nobody navigated
+    # to. The path is the signal; the flash text is not, because the notice
+    # differs for a NUID holding more than one account.
+    expect(page).to have_current_path(root_path, wait: 5)
   end
 end
 
