@@ -196,3 +196,32 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+  selenium:
+    # Headless Chrome for the browser spec lane. Capybara drives it over the
+    # remote WebDriver protocol, so no browser and no chromedriver is installed
+    # in the web image — which matters because that image is the one published
+    # and deployed, and a browser has no business in it.
+    #
+    # The tag tracks the selenium-webdriver version in Gemfile.lock. Client and
+    # server negotiate the same W3C protocol across a version gap, but holding
+    # both ends on one minor removes the gap as a suspect when a session fails
+    # to start.
+    image: selenium/standalone-chrome:4.10
+    # Behind a profile so an ordinary `up` never starts it: the browser is only
+    # needed while the browser specs run, and it is the heaviest service here
+    # per unit of use.
+    profiles:
+      - test
+    # Chrome maps its renderer heap into /dev/shm, and Docker's 64 MB default is
+    # far under what a page needs. Exhausting it aborts the tab, which surfaces
+    # as "session deleted because of page crash" rather than as a memory error.
+    shm_size: 1gb
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - "-f"
+      - http://localhost:4444/status
+      interval: 10s
+      timeout: 5s
+      retries: 5
