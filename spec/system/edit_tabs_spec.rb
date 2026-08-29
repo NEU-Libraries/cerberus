@@ -46,17 +46,7 @@ RSpec.describe 'Edit page tabs', :browser, type: :system do
 
   # --- helpers ---------------------------------------------------------------
 
-  def admin_nuid = '000000004'
-
-  def mods_path(kind) = Rails.root.join("spec/fixtures/files/#{kind}-mods.xml").to_s
-
-  # A Work has to sit under a Collection under a Community, and it has to be
-  # complete before the edit page will offer it.
   def create_editable_work
-    community = AtlasRb::Community.create(nil, mods_path('community'), nuid: admin_nuid)
-    collection = AtlasRb::Collection.create(community.id, mods_path('collection'), nuid: admin_nuid)
-    work = AtlasRb::Work.create(collection.id, mods_path('work'), nuid: admin_nuid)
-    AtlasRb::Work.complete(work.id, nuid: admin_nuid)
-    work
+    create_work(create_collection(create_community.id).id)
   end
 end
