@@ -81,3 +81,11 @@ jobs:
         valColorRange: ${{ steps.coverage.outputs.pct }}
         minColorRange: 50
         maxColorRange: 90
+    # The browser lane runs last, and after the coverage artifact has been
+    # copied to the host. `rake browser` regenerates coverage/ inside the
+    # container from a handful of examples, so running it any earlier would
+    # overwrite the full suite's report and drive the badge to a wrong figure.
+    - name: Start the browser
+      run: docker compose -f docker-compose.yml -f docker-compose.ci.yml --profile test up -d selenium
+    - name: Run browser specs
+      run: docker compose exec -T web bundle exec rake browser
