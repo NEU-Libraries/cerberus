@@ -24,9 +24,8 @@ class SetsController < CatalogController
   # above: an anonymous request has to reach authenticate_user! and be sent to
   # sign in, not be told it is forbidden. The three actions it names live in that
   # concern, which is all the cop below is objecting to.
-  # rubocop:disable Rails/LexicallyScopedActionFilter
+  # rubocop:disable-next Rails/LexicallyScopedActionFilter
   before_action :require_bulk_operator, only: %i[sentinel apply_sentinel privatize]
-  # rubocop:enable Rails/LexicallyScopedActionFilter
 
   # A private Set read (or any write) the caller may not perform: Atlas says
   # 403, the user sees the standard forbidden page. Unknown ids surface as
