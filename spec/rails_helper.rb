@@ -91,6 +91,12 @@ RSpec.configure do |config|
   # tag. See spec/integration/atlas_roundtrip_profile_spec.rb.
   config.filter_run_excluding :profile unless ENV['RUN_PROFILE']
 
+  # Browser specs need the `selenium` service, which an ordinary `up` does not
+  # start. A default run and CI's full suite therefore skip them rather than
+  # fail on a browser that was never meant to be there; `rake browser` sets
+  # RUN_BROWSER and brings them back in.
+  config.filter_run_excluding :browser unless ENV['RUN_BROWSER']
+
   config.include Devise::Test::ControllerHelpers, type: :controller
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [Rails.root.join('spec/fixtures').to_s]
