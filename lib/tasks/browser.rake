@@ -7,6 +7,10 @@
 # up and cost real time, which would make that gate both slower and refusable
 # for a reason that says nothing about the code.
 #
+# CI does not run this lane. It would have to pull a browser image on every
+# push for a handful of examples, so these specs only run when someone runs
+# them — do not read a green pipeline as covering them.
+#
 # SMOKE lifts the whole-suite coverage floor, which this subset could never
 # meet; RUN_BROWSER opts the tagged examples back in. Both are set here because
 # SimpleCov and the rspec filters read them as rails_helper loads, before any
