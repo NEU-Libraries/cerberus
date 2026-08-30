@@ -41,6 +41,28 @@ services:
       interval: 5s
       timeout: 3s
       retries: 12
+  redis:
+    image: redis:7-alpine
+    # Backs Atlas's response cache, which is what keeps a Work show page off the
+    # jbuilder path for every read after the first.
+    #
+    # An ordinary service rather than one behind a compose profile. Caching in
+    # development is already opt-in behind `rails dev:cache`, so gating the
+    # container on a second flag would leave the cache path unexercised locally
+    # — the trap the handle service hit — and this is the cheapest service in
+    # the stack, so withholding it saves nothing worth having.
+    #
+    # Cache-only: persistence is off because every key is reconstructible from
+    # Postgres, and the LRU ceiling means a runaway key count evicts instead of
+    # growing into the host's memory.
+    command: >
+      redis-server --save "" --appendonly no
+      --maxmemory 192mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
   web:
     image: nakatomi/cerberus_web
     depends_on:
@@ -65,6 +87,8 @@ services:
     image: nakatomi/atlas_web:${ATLAS:-latest}
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     entrypoint: /home/atlas/web/docker-entrypoint.sh
     environment:
