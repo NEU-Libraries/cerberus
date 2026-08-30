@@ -31,13 +31,19 @@ Rails.application.configure do
 
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 
-  # In the development environment your application's code is reloaded any time
-  # it changes. This slows down response time but is perfect for development
-  # since you don't have to restart the web server when you make code changes.
-  config.cache_classes = false
+  # Staging is deployed from an image and never edited in place, so reloading
+  # buys nothing here and costs a great deal. Rails' reload interlock serialises
+  # concurrent requests, which defeats ParallelAtlasReads: the four Atlas reads a
+  # Work show page issues at once stop overlapping, and the batch costs more than
+  # running them one after another. Eager loading also turns a load error into a
+  # boot failure rather than a 500 on whichever request first reaches the file.
+  config.cache_classes = true
+  config.eager_load = true
 
-  # Do not eager load code on boot.
-  config.eager_load = false
+  # Match production. :debug writes every SQL statement and every partial render
+  # to disk, which is a real cost on a box serving requests rather than one
+  # developer.
+  config.log_level = :info
 
   # Show full error reports.
   config.consider_all_requests_local = true
@@ -45,8 +51,12 @@ Rails.application.configure do
   # Enable server timing
   config.server_timing = true
 
-  # Enable/disable caching. By default caching is disabled.
-  # Run rails dev:cache to toggle caching.
+  # Caching stays off until a shared cache store is reachable from the staging
+  # stack. The gate below is inherited from development and is never satisfied in
+  # a deployed image, so this resolves to :null_store — chatty rather than wrong,
+  # since MaintenanceMode then reads the window from Atlas once per request. A
+  # store configured against an unreachable server would be worse: it passes
+  # every "is caching on?" check and then no-ops on every read and write.
   if Rails.root.join("tmp/caching-dev.txt").exist?
     config.action_controller.perform_caching = true
     config.action_controller.enable_fragment_cache_logging = true
