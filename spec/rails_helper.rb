@@ -2,6 +2,12 @@
 
 require 'simplecov'
 
+# Each parallel worker covers only its own slice, so it needs its own result
+# name: SimpleCov keys .resultset.json by command name, and workers sharing one
+# would overwrite each other instead of merging. With distinct names the last
+# worker to exit writes a report merged across all of them.
+SimpleCov.command_name("rspec#{ENV['TEST_ENV_NUMBER']}") if ENV.key?('TEST_ENV_NUMBER')
+
 SimpleCov.start 'rails' do
   skip 'spec'
   skip 'vendor'
@@ -13,7 +19,11 @@ SimpleCov.start 'rails' do
   # that cover a patch in progress — would fail on coverage alone and say
   # nothing about the code under test. SMOKE lifts the floor; it does not
   # disable the report.
-  minimum_coverage 90 unless ENV['SMOKE']
+  #
+  # A parallel worker is lifted for the same reason: it checks the floor when it
+  # exits, and every worker but the last exits holding a partial merge. The floor
+  # therefore stays with the unsharded run, which is what CI executes.
+  minimum_coverage 90 unless ENV['SMOKE'] || ENV.key?('TEST_ENV_NUMBER')
 end
 
 # libvips writes glib warnings straight to stderr, outside the Rails logger, and

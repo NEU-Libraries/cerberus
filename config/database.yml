@@ -45,13 +45,18 @@ staging:
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
+# Suffixed per parallel worker. parallel_tests leaves TEST_ENV_NUMBER empty for
+# the first worker and numbers the rest from 2, so an unsharded run keeps the
+# unsuffixed names it has always used. Workers cannot share these: the suite
+# runs inside a transaction per example, and two workers on one database would
+# deadlock on each other's uncommitted rows.
 test:
   primary:
     <<: *default
-    database: cerberus_test
+    database: cerberus_test<%= ENV['TEST_ENV_NUMBER'] %>
   queue:
     <<: *default
-    database: cerberus_queue_test
+    database: cerberus_queue_test<%= ENV['TEST_ENV_NUMBER'] %>
     migrations_paths: db/queue_migrate
 
 atlas_test:

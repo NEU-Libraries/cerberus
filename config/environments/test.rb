@@ -5,7 +5,21 @@ require "active_support/core_ext/integer/time"
 # your test database is "scratch space" for the test suite and is wiped
 # and recreated between test runs. Don't rely on the data there!
 
-ENV['ATLAS_URL'] = 'http://atlas-test:3000/'
+# One worker's slice of the parallel topology, or the whole thing when running
+# unsharded. parallel_tests leaves TEST_ENV_NUMBER empty for the first worker and
+# numbers the rest from 2, which is exactly the suffix the compose services and
+# the Solr cores carry — so worker 1 keeps talking to the single-instance names
+# that a plain `rspec` has always used, and nothing changes for an unsharded run.
+#
+# Both names have to move together. A run resets whichever Atlas it points at,
+# and that reset wipes the Solr core that Atlas writes to; a worker reading a
+# core its own Atlas does not own would see another worker's documents and lose
+# its own to that worker's reset.
+worker = ENV['TEST_ENV_NUMBER'].to_s
+suffix = worker.empty? ? '' : "-#{worker}"
+
+ENV['ATLAS_URL'] = "http://atlas-test#{suffix}:3000/"
+ENV['SOLR_URL'] ||= "http://solr:8983/solr/blacklight-test#{suffix}"
 
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.

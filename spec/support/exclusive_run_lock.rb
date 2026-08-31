@@ -18,7 +18,17 @@ module ExclusiveRunLock
   # they all reach the same atlas-test service, and the service is what needs
   # serializing. Overridable so a genuinely separate Atlas (a second container,
   # CI with one instance per job) can run concurrently without a false conflict.
-  PATH = ENV.fetch('CERBERUS_RSPEC_LOCK_PATH', '/tmp/cerberus-rspec-run.lock')
+  #
+  # One lock per worker, because the thing being serialized is the Atlas
+  # instance and each worker owns its own. A single shared path would make the
+  # workers refuse each other, which is the opposite of the point — while still
+  # leaving two concurrent *suites* correctly blocked, since worker N of one run
+  # and worker N of the other contend for the same file.
+  PATH = ENV.fetch('CERBERUS_RSPEC_LOCK_PATH') do
+    worker = ENV['TEST_ENV_NUMBER'].to_s
+    suffix = worker.empty? ? '' : "-#{worker}"
+    "/tmp/cerberus-rspec-run#{suffix}.lock"
+  end
 
   class << self
     # Take the lock for the lifetime of the process, or abort. Matches
