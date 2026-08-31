@@ -45,7 +45,7 @@ lane_services() {
 # the same session costs a no-op rather than a restart.
 lane_up() {
   local workers="$1"
-  local profiles=(--profile test)
+  local profiles=(--profile atlas-test)
   [[ "$workers" -gt 1 ]] && profiles+=(--profile parallel)
 
   # shellcheck disable=SC2046
@@ -71,7 +71,7 @@ lane_up() {
 
   if [[ "$ready" -ne "$want" ]]; then
     echo "only $ready of $want test Atlas instances answered GET /reset." >&2
-    echo "Check: ${COMPOSE[*]} --profile test logs atlas-test" >&2
+    echo "Check: ${COMPOSE[*]} --profile atlas-test logs atlas-test" >&2
     return 1
   fi
   return 0

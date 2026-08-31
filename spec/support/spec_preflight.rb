@@ -57,7 +57,7 @@ module SpecPreflight
     raise UnsafeTarget, <<~MSG
       Refusing to run: nothing is listening on #{uri.host}:#{uri.port}, so there is no test Atlas to reset.
 
-      It is behind the `test` compose profile and does not start with a plain
+      It is behind the `atlas-test` compose profile and does not start with a plain
       `up`. The wrappers bring it up for you:
 
         bin/spec spec/models/my_spec.rb   # one process

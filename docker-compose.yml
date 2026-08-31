@@ -127,14 +127,19 @@ services:
       HANDLE_RESOLVER_BASE: ${HANDLE_RESOLVER_BASE:-http://localhost:8000}
     ports:
       - 3001:3000
-  # Behind the `test` profile, so a plain `up` does not start it: nothing but the
-  # specs talks to this instance, and an always-on container the specs need only
+  # Behind a profile, so a plain `up` does not start it: nothing but the specs
+  # talks to this instance, and an always-on container the specs need only
   # occasionally holds ~340 MB around the clock for nothing. bin/spec and
   # bin/parallel-spec bring it up on demand, and SpecPreflight names them when a
   # run finds it missing.
+  #
+  # Its own profile rather than `test`, which selenium already carries: CI runs
+  # the unsharded suite and must start this, but must NOT pull a browser image on
+  # every push for a lane it does not run. One profile covering both would force
+  # that choice.
   atlas-test:
     image: nakatomi/atlas_web:${ATLAS:-latest}
-    profiles: [test]
+    profiles: [atlas-test]
     depends_on:
       db:
         condition: service_healthy
@@ -154,9 +159,10 @@ services:
   # --down puts it away, which is what keeps roughly a gigabyte of idle
   # containers off a developer's machine.
   #
-  # They carry `test` as well as `parallel` so that `--profile test` names the
-  # whole lane. Both wrappers pass explicit service names to `up`, so asking for
-  # one worker starts one instance regardless of how wide the profile reaches.
+  # `parallel` only, deliberately NOT `atlas-test`. CI runs the suite unsharded
+  # and brings worker 1 up with `--profile atlas-test`, so folding these into that
+  # profile would start three Atlas instances CI never uses — and whose Solr cores
+  # it has not provisioned. bin/parallel-spec asks for both when it wants them.
   #
   # Each worker owns a whole Atlas: its own logical database, its own Solr core,
   # and its own OCFL root. That is not tidiness. A run's before(:suite) calls
@@ -182,7 +188,7 @@ services:
   # database.yml and the safeguard never looks.
   atlas-test-2: &parallel_atlas
     image: nakatomi/atlas_web:${ATLAS:-latest}
-    profiles: [test, parallel]
+    profiles: [parallel]
     depends_on:
       db:
         condition: service_healthy
