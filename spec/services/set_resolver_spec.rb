@@ -171,7 +171,12 @@ RSpec.describe SetResolver do
     # unit spec cannot catch that: it builds its own documents, so it asserts
     # its own assumption about their shape.
     it 'carries the embargo date through to the packer, which withholds on it' do
-      embargoed = public_work(collection_b.id)
+      # Its own collection, not one of the shared pair. The recipe reaches this
+      # Work by direct add, so the parent is arbitrary — but the before(:all)
+      # hierarchy is shared by every example in the file, and the chip tallies
+      # assert exactly how many Works each shared collection holds. A public
+      # Work left in one of them is counted by whichever chip example runs later.
+      embargoed = public_work(public_collection(community.id).id)
       AtlasRb::Work.metadata(embargoed.id,
                              { 'permissions' => { 'read'    => ['public'],
                                                   'embargo' => (Date.current + 365).to_s } },
