@@ -127,8 +127,14 @@ services:
       HANDLE_RESOLVER_BASE: ${HANDLE_RESOLVER_BASE:-http://localhost:8000}
     ports:
       - 3001:3000
+  # Behind the `test` profile, so a plain `up` does not start it: nothing but the
+  # specs talks to this instance, and an always-on container the specs need only
+  # occasionally holds ~340 MB around the clock for nothing. bin/spec and
+  # bin/parallel-spec bring it up on demand, and SpecPreflight names them when a
+  # run finds it missing.
   atlas-test:
     image: nakatomi/atlas_web:${ATLAS:-latest}
+    profiles: [test]
     depends_on:
       db:
         condition: service_healthy
@@ -143,11 +149,14 @@ services:
     ports:
       - 3002:3000
   # Workers 2-4 of the parallel spec lane. Worker 1 is the atlas-test service
-  # above, so an unsharded run needs none of this and a plain `up` starts none
-  # of it — the profile keeps roughly a gigabyte of idle containers off a
-  # developer's machine until they ask for it:
+  # above, so an unsharded run needs none of these. Nothing here starts by
+  # default; bin/parallel-spec brings the lane up on demand and bin/parallel-spec
+  # --down puts it away, which is what keeps roughly a gigabyte of idle
+  # containers off a developer's machine.
   #
-  #   docker compose --profile parallel up -d
+  # They carry `test` as well as `parallel` so that `--profile test` names the
+  # whole lane. Both wrappers pass explicit service names to `up`, so asking for
+  # one worker starts one instance regardless of how wide the profile reaches.
   #
   # Each worker owns a whole Atlas: its own logical database, its own Solr core,
   # and its own OCFL root. That is not tidiness. A run's before(:suite) calls
@@ -173,7 +182,7 @@ services:
   # database.yml and the safeguard never looks.
   atlas-test-2: &parallel_atlas
     image: nakatomi/atlas_web:${ATLAS:-latest}
-    profiles: [parallel]
+    profiles: [test, parallel]
     depends_on:
       db:
         condition: service_healthy

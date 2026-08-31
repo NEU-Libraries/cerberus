@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+#
+# Run rspec unsharded, bringing the test Atlas up first if it is not already.
+#
+# This is the everyday loop — one file, one directory, one `--example` — and it
+# is a thin passthrough: every argument goes to rspec untouched.
+#
+#   bin/spec                                   # the whole suite, one process
+#   bin/spec spec/models/work_spec.rb
+#   bin/spec spec/requests --example "embargo"
+#   bin/spec --down                            # release the test Atlas
+#
+# Exists because atlas-test sits behind a compose profile, so a plain `up` does
+# not start it and the raw `docker exec … rspec` fails on name resolution until
+# something does. Keeping it profiled is what stops a container the specs need
+# only occasionally from holding ~340 MB around the clock.
+#
+# SMOKE is set for any argument list that names something: a subset cannot meet
+# the whole-suite coverage floor, so leaving it unset would fail every partial
+# run on arithmetic rather than on the code. A bare `bin/spec` runs everything
+# and keeps the floor.
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/spec-lane.sh
+source "$SCRIPT_DIR/lib/spec-lane.sh"
+
+lane_init
+
+if [[ "${1:-}" == "--down" ]]; then
+  lane_down 1
+  exit 0
+fi
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  sed -n '2,21p' "$0" | sed 's/^# \{0,1\}//'
+  exit 0
+fi
+
+lane_up 1
+
+env_args=()
+[[ $# -gt 0 ]] && env_args=(-e SMOKE=1)
+
+exec docker exec "${env_args[@]}" -w "$REPO_ROOT" cerberus-web-1 \
+  bundle exec rspec "$@"

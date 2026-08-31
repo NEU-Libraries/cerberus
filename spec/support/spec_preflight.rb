@@ -25,6 +25,7 @@ module SpecPreflight
   def self.assert_safe_to_reset!
     assert_test_atlas!
     assert_credentials!
+    assert_reachable!
   end
 
   def self.assert_test_atlas!
@@ -41,6 +42,28 @@ module SpecPreflight
       Running now would wipe and reseed that instance. If this is a development
       Atlas, its objects would be re-minted with new NOIDs while Solr kept the
       old documents, leaving search results that all 404.
+    MSG
+  end
+
+  # The test Atlas sits behind a compose profile, so a plain `up` does not start
+  # it and it is legitimately absent much of the time. Without this the run dies
+  # in AtlasRb::Reset on a name-resolution error from deep inside Faraday, which
+  # reads like an outage rather than a container nobody asked for yet. A TCP
+  # connect is enough to tell the two apart, and costs nothing when it succeeds.
+  def self.assert_reachable!
+    uri = URI.parse(ENV.fetch('ATLAS_URL'))
+    Socket.tcp(uri.host, uri.port, connect_timeout: 2, &:close)
+  rescue SocketError, SystemCallError
+    raise UnsafeTarget, <<~MSG
+      Refusing to run: nothing is listening on #{uri.host}:#{uri.port}, so there is no test Atlas to reset.
+
+      It is behind the `test` compose profile and does not start with a plain
+      `up`. The wrappers bring it up for you:
+
+        bin/spec spec/models/my_spec.rb   # one process
+        bin/parallel-spec                 # sharded across four
+
+      Release it again with `bin/spec --down` or `bin/parallel-spec --down`.
     MSG
   end
 
