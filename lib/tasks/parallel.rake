@@ -23,6 +23,11 @@ namespace :parallel do
   # Matches the atlas-test-2..4 services in docker-compose.yml.
   MAX_WORKERS = 4
 
+  # Written by the RuntimeLogger formatter in .rspec_parallel. Under tmp/, so it
+  # is per-checkout and gitignored: a committed one would be a snapshot of one
+  # machine's timings, going stale from the moment it landed.
+  RUNTIME_LOG = 'tmp/parallel_runtime_rspec.log'
+
   desc "Run the whole suite across N workers (default #{MAX_WORKERS})"
   # No :environment prerequisite, matching :smoke and :browser — this task only
   # shells out, and each worker boots the app itself.
@@ -42,7 +47,16 @@ namespace :parallel do
     end
 
     Rake::Task['parallel:prepare'].invoke(workers)
-    sh "bundle exec parallel_rspec -n #{workers} --group-by runtime --verbose"
+
+    # Balance on recorded runtime once there is a recording to balance on, and
+    # fall back to file size for the very first run on a fresh checkout. Size is
+    # a poor proxy here — the heaviest file is not close to the largest — so the
+    # first run may finish lopsided. It only happens once: .rspec_parallel has
+    # every worker write its timings, so the next run splits on real numbers.
+    strategy = File.exist?(RUNTIME_LOG) ? 'runtime' : 'filesize'
+    puts "splitting #{workers} ways by #{strategy}"
+
+    sh "bundle exec parallel_rspec -n #{workers} --group-by #{strategy} --verbose"
   end
 
   desc 'Create and migrate the per-worker Cerberus databases'
