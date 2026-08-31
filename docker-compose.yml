@@ -135,6 +135,52 @@ services:
       RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
     ports:
       - 3002:3000
+  # Workers 2-4 of the parallel spec lane. Worker 1 is the atlas-test service
+  # above, so an unsharded run needs none of this and a plain `up` starts none
+  # of it — the profile keeps roughly a gigabyte of idle containers off a
+  # developer's machine until they ask for it:
+  #
+  #   docker compose --profile parallel up -d
+  #
+  # Each worker owns a whole Atlas: its own logical database, its own Solr core,
+  # and its own OCFL root. That is not tidiness. A run's before(:suite) calls
+  # GET /reset, which wipes the database, empties the OCFL root and deletes the
+  # instance's Solr core by query — so two workers sharing any one of the three
+  # would destroy each other's fixtures mid-run.
+  #
+  # No host ports: Cerberus reaches these by service name on the compose
+  # network, and publishing four would collide for nothing.
+  #
+  # The OCFL root needs no configuration — it is Rails.root/tmp/files inside the
+  # container, and these services mount no volumes, so each is already its own.
+  # The database is created and migrated by the image's entrypoint on boot.
+  # Only the Solr core needs provisioning; see bin/parallel-solr-cores.
+  atlas-test-2: &parallel_atlas
+    image: nakatomi/atlas_web:${ATLAS:-latest}
+    profiles: [parallel]
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: /home/atlas/web/docker-entrypoint.sh
+    environment:
+      RAILS_ENV: 'test'
+      RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
+      DATABASE_URL: 'postgresql://postgres:example@db/atlas_test_2'
+      ATLAS_TEST_SOLR_URL: 'http://solr:8983/solr/blacklight-test-2'
+  atlas-test-3:
+    <<: *parallel_atlas
+    environment:
+      RAILS_ENV: 'test'
+      RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
+      DATABASE_URL: 'postgresql://postgres:example@db/atlas_test_3'
+      ATLAS_TEST_SOLR_URL: 'http://solr:8983/solr/blacklight-test-3'
+  atlas-test-4:
+    <<: *parallel_atlas
+    environment:
+      RAILS_ENV: 'test'
+      RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
+      DATABASE_URL: 'postgresql://postgres:example@db/atlas_test_4'
+      ATLAS_TEST_SOLR_URL: 'http://solr:8983/solr/blacklight-test-4'
   handle:
     # Handle.Net server (independent-service mode, unregistered local prefix).
     # Built from ~/projects/cerberus-handles, whose README is the reference.
