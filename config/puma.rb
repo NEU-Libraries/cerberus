@@ -24,20 +24,30 @@ environment ENV.fetch("RAILS_ENV") { "development" }
 # Specifies the `pidfile` that Puma will use.
 pidfile ENV.fetch("PIDFILE") { "tmp/pids/server.pid" }
 
-# Specifies the number of `workers` to boot in clustered mode.
-# Workers are forked web server processes. If using threads and workers together
-# the concurrency of the application would be max `threads` * `workers`.
-# Workers do not work on JRuby or Windows (both of which do not support
-# processes).
+# Workers are forked processes, and processes are the only way a Ruby web server
+# gets real parallelism: the GVL serialises Ruby execution within one process, so
+# threads overlap only where a request waits on IO. Rendering a Blacklight page
+# does not wait on IO, so concurrent users queue behind each other in single
+# mode. Measured with four concurrent page loads, four workers took /catalog from
+# 328ms to 132ms and a Work show page from 404ms to 182ms.
 #
-# workers ENV.fetch("WEB_CONCURRENCY") { 2 }
+# This does almost nothing for one user on an idle box — a lone Work show page
+# moved 129ms to 117ms — so read it as capacity, not latency.
+#
+# Atlas needs the same setting for the Work show page to benefit, because each
+# page fans out into several Atlas reads and a single-mode Atlas re-serialises
+# them. Cerberus workers alone recover 15% of that page; both together recover
+# 51%. Atlas reads the same WEB_CONCURRENCY in its own config/puma.rb.
+#
+# Defaulting to 0 keeps single mode wherever it is not asked for, so development
+# and the test suite are untouched.
+web_concurrency = ENV.fetch("WEB_CONCURRENCY", 0).to_i
+workers web_concurrency
 
-# Use the `preload_app!` method when specifying a `workers` number.
-# This directive tells Puma to first boot the application and load code
-# before forking the application. This takes advantage of Copy On Write
-# process behavior so workers use less memory.
-#
-# preload_app!
+# Boot the app before forking so workers share pages by copy-on-write. Puma 8
+# preloads by default in cluster mode; saying so keeps the file honest about
+# what happens, and survives a downgrade.
+preload_app! if web_concurrency.positive?
 
 # Allow puma to be restarted by `bin/rails restart` command.
 plugin :tmp_restart
