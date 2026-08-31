@@ -109,6 +109,12 @@ group :development, :test do
   gem 'rspec'
   gem 'rspec-rails'
 
+  # Shards the suite across worker processes. Each worker needs its own Atlas
+  # instance, because a run's before(:suite) resets whichever one it points at
+  # and would otherwise wipe its neighbours' fixtures mid-run; TEST_ENV_NUMBER
+  # is what config/environments/test.rb reads to pick that instance.
+  gem 'parallel_tests', require: false
+
   # QA gems
   gem 'rubocop', require: false
   gem 'rubocop-rails', require: false

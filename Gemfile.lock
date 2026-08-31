@@ -282,6 +282,8 @@ GEM
     orm_adapter (0.5.0)
     ostruct (0.6.3)
     parallel (1.28.0)
+    parallel_tests (5.7.0)
+      parallel
     parser (3.3.12.0)
       ast (~> 2.4.1)
       racc
@@ -512,6 +514,7 @@ DEPENDENCIES
   namae
   neu-mods
   next_rails
+  parallel_tests
   pg
   propshaft
   puma
