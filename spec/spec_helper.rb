@@ -46,6 +46,22 @@ RSpec.configure do |config|
   # triggering implicit auto-inclusion in groups with matching metadata.
   config.shared_context_metadata_behavior = :apply_to_host_groups
 
+  # Random order, because this suite shares one mutable backend. Every example
+  # writes into the same Atlas instance, and the reset that clears it runs once
+  # per suite rather than once per example — so a spec that leaves a resource
+  # behind is seeding whatever runs next. Defined order hides that: the leak and
+  # the assertion it breaks keep their relative positions, and the suite stays
+  # green while the dependency accumulates. Randomising is what makes such a
+  # leak fail, and fail near its cause.
+  #
+  # A failure here reproduces: rspec prints the seed, and passing it back with
+  # --seed replays that exact order.
+  config.order = :random
+
+  # Seeds Ruby's own PRNG from the same value, so anything in the app or the
+  # specs that reaches for rand is replayed by --seed as well.
+  Kernel.srand config.seed
+
   # The settings below are suggested to provide a good initial experience
   # with RSpec, but feel free to customize to your heart's content.
   #   # This allows you to limit a spec run to individual examples or groups
@@ -79,16 +95,4 @@ RSpec.configure do |config|
   #   # end of the spec run, to help surface which specs are running
   #   # particularly slow.
   #   config.profile_examples = 10
-  #
-  #   # Run specs in random order to surface order dependencies. If you find an
-  #   # order dependency and want to debug it, you can fix the order by providing
-  #   # the seed, which is printed after each run.
-  #   #     --seed 1234
-  #   config.order = :random
-  #
-  #   # Seed global randomization in this process using the `--seed` CLI option.
-  #   # Setting this allows you to use `--seed` to deterministically reproduce
-  #   # test failures related to randomization by passing the same `--seed` value
-  #   # as the one that triggered the failure.
-  #   Kernel.srand config.seed
 end
