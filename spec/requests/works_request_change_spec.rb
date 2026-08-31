@@ -26,7 +26,18 @@ RSpec.describe 'Works request_change', type: :request do
   end
 
   def grant_edit!
-    AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => [Permissions::STAFF_EDIT_GROUP] } }, nuid: '000000004')
+    # Public read alongside the edit grant, so the :edit gate is what the
+    # authorization examples exercise. Atlas gates reads on the resource's own
+    # ACL, so a private Work is invisible to a guest and the request 404s before
+    # reaching the gate — proving the resource is hidden, not that the write is
+    # refused. Widening runs top-down; Atlas refuses a resource more visible than
+    # its container. Read and edit go in one call, since Atlas assigns the edit
+    # grants unconditionally from the payload.
+    publicize_ancestry!(community: community, collection: collection)
+    AtlasRb::Work.metadata(work.id,
+                           { 'permissions' => { 'read' => ['public'],
+                                                'edit' => [Permissions::STAFF_EDIT_GROUP] } },
+                           nuid: '000000004')
   end
 
   before { grant_edit! }

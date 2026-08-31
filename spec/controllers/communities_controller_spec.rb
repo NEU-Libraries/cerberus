@@ -35,6 +35,13 @@ describe CommunitiesController do
 
     before do
       AtlasRb::Community.metadata(community.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      # Readable as well as editable. Atlas gates reads on the resource's own ACL,
+      # and this fixture user carries no NUID, so the ACL read is made as the
+      # guest — a private resource comes back as nothing and the page 404s before
+      # the edit gate runs. Publicizing after the edit write, because
+      # publicize_resource! reads the current envelope and carries the grant
+      # through; the reverse order would drop it.
+      publicize_resource!(AtlasRb::Community, community, '000000004')
       sign_in user
     end
 

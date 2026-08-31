@@ -42,9 +42,25 @@ RSpec.describe 'Authorization gates', type: :request do
 
   # Grant edit to the staff group so the in-group editor passes authorize_edit!
   # (and Atlas authorizes its write); the outsider does not. Set as admin.
+  #
+  # Public read as well, because Atlas gates reads on the resource's own ACL: a
+  # private resource is invisible to anyone outside its read audience, so the
+  # request 404s before reaching the gate and proves only that the resource is
+  # hidden. These examples exist to prove the gate refuses, so the resource has
+  # to be visible to the caller being refused.
+  #
+  # Widening runs top-down — Atlas refuses a resource more visible than its
+  # container — so the containers above the resource go first. A Community has
+  # none, and a Collection's is the Community alone.
   def grant_edit!(klass, id)
+    publicize_ancestry!(
+      community:  (community unless klass == 'Community'),
+      collection: (collection if klass == 'Work')
+    )
     AtlasRb.const_get(klass).metadata(
-      id, { 'permissions' => { 'edit' => [Permissions::STAFF_EDIT_GROUP] } }, nuid: '000000004'
+      id,
+      { 'permissions' => { 'read' => ['public'], 'edit' => [Permissions::STAFF_EDIT_GROUP] } },
+      nuid: '000000004'
     )
   end
 
@@ -88,6 +104,12 @@ RSpec.describe 'Authorization gates', type: :request do
   # with no rights on the container was able to create Collections and Works
   # inside it.
   describe 'POST #create (edit on the destination)' do
+    # The destination is readable but grants edit to nobody, which is the state
+    # these examples need: the caller can see the container and is still refused.
+    # Left private, Atlas's read gate hides it and the request 404s before the
+    # :edit gate runs, so the example would pass for the wrong reason.
+    before { publicize_resource!(AtlasRb::Community, community, '000000004') }
+
     it 'redirects the unauthenticated to sign in (works)' do
       post collection_works_path(collection.id)
       expect(response).to redirect_to(new_user_session_path)

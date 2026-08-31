@@ -19,6 +19,15 @@ describe DownloadsController do
   describe 'show' do
     context 'with public read permission' do
       before do
+        # Make the Work genuinely readable before any stub is installed. The gate
+        # resolves the containing Work with AtlasRb::Work.find, which is not
+        # stubbed here, and Atlas gates reads on the resource's own ACL — so a
+        # private Work raises 403 out of the gate rather than reaching the stream.
+        # Widening runs top-down; Atlas refuses a resource more visible than its
+        # container.
+        publicize_ancestry!(community: community, collection: collection)
+        AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+
         allow(AtlasRb::Resource).to receive(:permissions).with(noid).and_return(
           AtlasRb::Mash.new('embargo' => '', 'depositor' => [], 'read' => ['public'], 'edit' => [])
         )

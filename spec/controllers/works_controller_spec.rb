@@ -557,6 +557,14 @@ describe WorksController do
 
     before do
       AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      # Readable as well as editable. Atlas gates reads on the resource's own ACL,
+      # and this fixture user carries no NUID, so the ACL read is made as the
+      # guest — a private resource comes back as nothing and the page 404s before
+      # the edit gate runs. Publicizing after the edit write, because
+      # publicize_resource! reads the current envelope and carries the grant
+      # through; the reverse order would drop it.
+      publicize_chain!
+      publicize_resource!(AtlasRb::Work, work, '000000004')
       sign_in user
     end
 
@@ -655,6 +663,10 @@ describe WorksController do
 
     before do
       AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      # Readable as well as editable — see the note in #edit above. This fixture
+      # user carries no NUID, so the ACL read is made as the guest.
+      publicize_chain!
+      publicize_resource!(AtlasRb::Work, work, '000000004')
       sign_in user
     end
 
