@@ -29,6 +29,25 @@ Rails.application.routes.draw do
   # anonymous, reachable POST send/abuse surfaces (authorization audit G5).
   resources :solr_documents, only: [:show], path: '/catalog', controller: 'catalog'
 
+  # DRS v1 object URLs, redirected to the v2 object they became at migration.
+  #
+  # These MUST precede the v2 resources below. Four of the five prefixes are
+  # also v2 routes, and Rails matches in declaration order — declared after,
+  # `/collections/neu:x` would reach CollectionsController and 404 looking for a
+  # NOID by that name. The `neu:` constraint is what makes going first safe: a
+  # v2 NOID never contains a colon, so these can only ever capture a v1 pid.
+  #
+  # `/files` is the exception with no v2 equivalent at the top level, and it is
+  # the most-cited shape of the five — a v1 CoreFile is a v2 Work.
+  #
+  # One action serves all five. The prefix only catches the URL; the mapping
+  # row's `object_type` picks the destination. See LegacyController.
+  LEGACY_PID = /neu:[^\/.?]+/
+  %w[files collections communities downloads sets].each do |v1_prefix|
+    get "/#{v1_prefix}/:pid", to: 'legacy#show', constraints: { pid: LEGACY_PID },
+                              as: :"legacy_#{v1_prefix.singularize}"
+  end
+
   # Creating a child is nested under its destination; everything else stays flat
   # (`shallow: true`). The parent is a route SEGMENT rather than an optional
   # `?parent_id=`, so a create can't reach the controller without one — which is
