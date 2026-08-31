@@ -31,8 +31,11 @@ gem 'turbo-rails'
 # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
 gem 'stimulus-rails'
 
-# Use Redis adapter to run Action Cable in production
-# gem "redis", "~> 4.0"
+# Backs config.cache_store in the environments that have a real one. Rails'
+# :redis_cache_store needs this gem specifically: redis-client alone does not
+# satisfy the `require "redis"` in ActiveSupport::Cache::RedisCacheStore.
+# Version floor matches Atlas, so both apps resolve the same client.
+gem 'redis', '>= 4.8'
 
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
 # gem "kredis"

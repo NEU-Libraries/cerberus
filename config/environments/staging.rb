@@ -1,4 +1,5 @@
 require "active_support/core_ext/integer/time"
+require_relative "../cache_store"
 
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
@@ -63,17 +64,16 @@ Rails.application.configure do
   # way to see the shape of a request that fans out across both services.
   config.log_tags = [:request_id]
 
-  # Caching needs two things that do not exist yet: a Redis client in the bundle,
-  # and a Redis server reachable at REDIS_URL from the staging stack. Until both
-  # land this is :null_store, and MaintenanceMode reads the read-only window from
-  # Atlas on every request — one extra Atlas round trip per request, site-wide.
+  # The store, from one definition — see config/cache_store.rb. Staging needs a
+  # Redis service reachable at REDIS_URL; without one every operation logs a
+  # warning and reads as a miss, so the app stays correct but runs at pre-cache
+  # speed. The warning is the point: a Redis that is simply absent otherwise
+  # looks exactly like a cache that is working.
   #
-  # Configure it against an unreachable server and you get something worse than
-  # no cache: a store passes every "is caching on?" check and then no-ops on each
-  # read and write, so caching reads as on while doing nothing. Redis rather than
-  # :memory_store because the window must not drift between Swarm replicas.
-  config.action_controller.perform_caching = false
-  config.cache_store = :null_store
+  # What it buys: MaintenanceMode reads the read-only window on every request,
+  # so an absent store is one extra Atlas round trip per request, site-wide.
+  config.action_controller.perform_caching = true
+  config.cache_store = CerberusCacheStore.redis
 
   # Store uploaded files on the local file system (see config/storage.yml for options).
 
