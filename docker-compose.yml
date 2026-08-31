@@ -21,7 +21,14 @@ services:
     # this into postgresql.conf when it initialises a *fresh* data dir; because
     # we reuse the existing postgres:14 volume, we pass it as a server flag
     # instead. Inert for Atlas's logical DB (which never CREATEs the extension).
-    command: postgres -c shared_preload_libraries=timescaledb
+    # max_worker_processes is raised well above Postgres's default of 8 because
+    # TimescaleDB claims one background scheduler per database that has the
+    # extension, and the parallel spec lane multiplies those: each worker owns a
+    # primary and a queue database, so a four-way run needs ten rather than four.
+    # Starved of a slot, the scheduler cannot start and Postgres logs "failed to
+    # launch job" once a second forever — noisy, and it never resolves itself.
+    # Only settable at server start, so changing it means recreating this service.
+    command: postgres -c shared_preload_libraries=timescaledb -c max_worker_processes=32
     volumes:
       - db:/var/lib/postgresql/data/pgdata
     restart: always
@@ -155,6 +162,15 @@ services:
   # container, and these services mount no volumes, so each is already its own.
   # The database is created and migrated by the image's entrypoint on boot.
   # Only the Solr core needs provisioning; see bin/parallel-solr-cores.
+  #
+  # DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL is what lets the reset run at all.
+  # Atlas's GET /reset cleans through DatabaseCleaner, whose safeguard refuses any
+  # DATABASE_URL naming a host it cannot recognise as local — and `db` is a
+  # compose service, so every one of these trips it. The guard exists to stop a
+  # suite wiping a real database; here it is redundant, because these services are
+  # pinned to RAILS_ENV=test and Atlas refuses the same reset outside a resettable
+  # env anyway. Worker 1 never needed it: with no DATABASE_URL it reads
+  # database.yml and the safeguard never looks.
   atlas-test-2: &parallel_atlas
     image: nakatomi/atlas_web:${ATLAS:-latest}
     profiles: [parallel]
@@ -166,6 +182,7 @@ services:
       RAILS_ENV: 'test'
       RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
       DATABASE_URL: 'postgresql://postgres:example@db/atlas_test_2'
+      DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL: 'true'
       ATLAS_TEST_SOLR_URL: 'http://solr:8983/solr/blacklight-test-2'
   atlas-test-3:
     <<: *parallel_atlas
@@ -173,6 +190,7 @@ services:
       RAILS_ENV: 'test'
       RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
       DATABASE_URL: 'postgresql://postgres:example@db/atlas_test_3'
+      DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL: 'true'
       ATLAS_TEST_SOLR_URL: 'http://solr:8983/solr/blacklight-test-3'
   atlas-test-4:
     <<: *parallel_atlas
@@ -180,6 +198,7 @@ services:
       RAILS_ENV: 'test'
       RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
       DATABASE_URL: 'postgresql://postgres:example@db/atlas_test_4'
+      DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL: 'true'
       ATLAS_TEST_SOLR_URL: 'http://solr:8983/solr/blacklight-test-4'
   handle:
     # Handle.Net server (independent-service mode, unregistered local prefix).
