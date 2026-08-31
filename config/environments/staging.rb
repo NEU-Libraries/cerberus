@@ -45,31 +45,35 @@ Rails.application.configure do
   # developer.
   config.log_level = :info
 
-  # Show full error reports.
+  # Unlike production, and deliberately. Staging's audience is the team, and a
+  # failure there is worth reading in full rather than reducing to a 500 page.
+  # The cost is that anyone who can reach the host and trigger an exception sees
+  # a backtrace, so staging must not carry data that a backtrace could leak.
   config.consider_all_requests_local = true
 
-  # Enable server timing
+  # Nearly free, and it is how page latency gets measured here at all. Know what
+  # it cannot see: ActionDispatch::ServerTiming collects only notifications
+  # raised on the request thread, so request.atlas_rb excludes the Atlas reads
+  # ParallelAtlasReads issues on other threads — often the largest block on the
+  # page. An unexplained gap in its accounting is the tell.
   config.server_timing = true
 
-  # Caching stays off until a shared cache store is reachable from the staging
-  # stack. The gate below is inherited from development and is never satisfied in
-  # a deployed image, so this resolves to :null_store — chatty rather than wrong,
-  # since MaintenanceMode then reads the window from Atlas once per request. A
-  # store configured against an unreachable server would be worse: it passes
-  # every "is caching on?" check and then no-ops on every read and write.
-  if Rails.root.join("tmp/caching-dev.txt").exist?
-    config.action_controller.perform_caching = true
-    config.action_controller.enable_fragment_cache_logging = true
+  # Prepend all log lines with the following tags. The request id is what makes
+  # a Cerberus log line joinable to the Atlas line it caused, which is the only
+  # way to see the shape of a request that fans out across both services.
+  config.log_tags = [:request_id]
 
-    config.cache_store = :memory_store
-    config.public_file_server.headers = {
-      "Cache-Control" => "public, max-age=#{2.days.to_i}"
-    }
-  else
-    config.action_controller.perform_caching = false
-
-    config.cache_store = :null_store
-  end
+  # Caching needs two things that do not exist yet: a Redis client in the bundle,
+  # and a Redis server reachable at REDIS_URL from the staging stack. Until both
+  # land this is :null_store, and MaintenanceMode reads the read-only window from
+  # Atlas on every request — one extra Atlas round trip per request, site-wide.
+  #
+  # Configure it against an unreachable server and you get something worse than
+  # no cache: a store passes every "is caching on?" check and then no-ops on each
+  # read and write, so caching reads as on while doing nothing. Redis rather than
+  # :memory_store because the window must not drift between Swarm replicas.
+  config.action_controller.perform_caching = false
+  config.cache_store = :null_store
 
   # Store uploaded files on the local file system (see config/storage.yml for options).
 
@@ -81,16 +85,22 @@ Rails.application.configure do
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 
-  # Raise exceptions for disallowed deprecations.
-  config.active_support.disallowed_deprecation = :raise
+  # Log rather than raise. Staging is the last place a deprecation can be caught
+  # before it becomes a production failure, and raising turns that warning into
+  # an outage on the box the team is trying to test against.
+  config.active_support.disallowed_deprecation = :log
 
   # Tell Active Support which deprecation messages to disallow.
   config.active_support.disallowed_deprecation_warnings = []
 
-  # Raise an error on page load if there are pending migrations.
+  # Nothing in the deploy aborts on pending migrations, so this page-load check
+  # is staging's only signal that the image shipped a migration nobody ran. It
+  # costs one schema check per request and measures at zero.
   config.active_record.migration_error = :page_load
 
-  # Highlight code that triggered database queries in logs.
+  # Costs nothing at :info, because the backtrace work only runs when the query
+  # is actually logged. It earns its place the moment someone raises the level
+  # to debug something, which is when query source locations are what they want.
   config.active_record.verbose_query_logs = true
 
   # Suppress logger output for asset requests.
