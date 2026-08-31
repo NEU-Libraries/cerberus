@@ -3,8 +3,25 @@
 require 'rails_helper'
 
 describe XmlController do
-  let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', nuid: '000000004') }
-  let(:collection) { AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004') }
+  # Built once for the file. This is a spec of the MODS editor, so the containers
+  # are scaffolding: somewhere to hang a Work, and an id for two breadcrumb
+  # examples. Nothing here reads, narrows or asserts on them, so building a
+  # Community and a Collection per example cost two Atlas creates — each an OCFL
+  # write plus a Solr index — for a fixture no example looked at.
+  #
+  # The Work stays per-example: it IS the subject, and these examples rewrite its
+  # MODS.
+  #
+  # The `let` wrappers keep examples reading `community` / `collection` rather
+  # than the ivars: sharing state across examples needs before(:all), but that
+  # should not leak into how each example reads.
+  before(:all) do
+    @community  = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', nuid: '000000004')
+    @collection = AtlasRb::Collection.create(@community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004')
+  end
+
+  let(:community) { @community }
+  let(:collection) { @collection }
   let(:work) { AtlasRb::Work.create(collection.id, '/home/cerberus/web/spec/fixtures/files/work-mods.xml', nuid: '000000004') }
   let(:raw_xml) { '<mods><titleInfo><title>Test Title</title></titleInfo></mods>' }
 

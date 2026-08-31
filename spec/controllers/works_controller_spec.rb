@@ -5,8 +5,27 @@ require 'rails_helper'
 RSpec::Matchers.define_negated_matcher :not_have_enqueued_job, :have_enqueued_job
 
 describe WorksController do
-  let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', nuid: '000000004') }
-  let(:collection) { AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004') }
+  # Built once for the file. Nothing here treats the containers as the subject —
+  # they are somewhere to hang a Work and an id to put in params, and no example
+  # reparents, deletes or narrows them. Per-example construction therefore bought
+  # nothing and cost two Atlas creates, each an OCFL write plus a Solr index, on
+  # every example in the file.
+  #
+  # `publicize_chain!` still runs per example where a block needs it: it adds
+  # `public` to the read ACL and carries existing grants through, so widening an
+  # already-public container reaches the same state.
+  #
+  # The `let` wrappers below keep examples reading `community` / `collection`
+  # rather than `@community` / `@collection`: a before(:all) ivar is the only way
+  # to share state across examples, but it should not leak into how each one
+  # reads.
+  before(:all) do
+    @community  = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', nuid: '000000004')
+    @collection = AtlasRb::Collection.create(@community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004')
+  end
+
+  let(:community) { @community }
+  let(:collection) { @collection }
   let(:work) do
     created = AtlasRb::Work.create(collection.id, '/home/cerberus/web/spec/fixtures/files/work-mods.xml', nuid: '000000004')
     AtlasRb::Work.complete(created.id, nuid: '000000004')
