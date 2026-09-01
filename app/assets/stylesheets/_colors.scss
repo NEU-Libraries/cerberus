@@ -46,5 +46,9 @@ $dark:          $gray-800 !default;
 // them only opens if .well is a shade lighter than the #ecf0f1 it inherited.
 // spec/assets/color_contrast_spec.rb asserts every ratio, so moving one of these
 // alone fails there rather than in an audit nobody runs.
-$link-blue: #3370b1 !default;
+//
+// Only the *luminance* is pinned. Contrast ignores hue and saturation, so the
+// link may be any hue at this lightness, and blue can run near-full saturation
+// because it carries just 7% of luminance.
+$link-blue: #066bd7 !default;
 $well-bg:   #edf1f2 !default;
