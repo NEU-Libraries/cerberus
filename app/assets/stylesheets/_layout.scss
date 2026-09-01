@@ -21,7 +21,7 @@ body {
 }
 
 .well {
-  background-color: #ecf0f1;
+  background-color: $well-bg;
 }
 
 a:not(.btn, .dropdown-item, .navbar-brand, .nav-link) {

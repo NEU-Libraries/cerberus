@@ -38,4 +38,13 @@ $light:         $gray-100 !default;
 $dark:          $gray-800 !default;
 
 // cerberus
-$link-blue: #007bff !default;
+// The link colour and the .well fill are a matched pair, both pinned by WCAG
+// contrast rather than chosen freely. A link must clear 4.5:1 against every
+// background it sits on, and 3:1 against surrounding body text because
+// `_layout.scss` removes the underline. Those rules pull opposite ways — darker
+// satisfies the backgrounds, lighter satisfies the text — and the window between
+// them only opens if .well is a shade lighter than the #ecf0f1 it inherited.
+// spec/assets/color_contrast_spec.rb asserts every ratio, so moving one of these
+// alone fails there rather than in an audit nobody runs.
+$link-blue: #3370b1 !default;
+$well-bg:   #edf1f2 !default;
