@@ -68,8 +68,17 @@ lane_up() {
   local profiles=(--profile atlas-test)
   [[ "$workers" -gt 1 ]] && profiles+=(--profile parallel)
 
+  # Held rather than streamed. Bringing up four services narrates about twenty
+  # lines of Creating/Starting/Healthy that say nothing a caller wants while
+  # waiting for a spec run — but they are the first thing worth reading when the
+  # lane does not come up, so they are kept and replayed on failure.
+  local up_output
   # shellcheck disable=SC2046
-  "${COMPOSE[@]}" "${profiles[@]}" up -d $(lane_services "$workers") >/dev/null
+  if ! up_output="$("${COMPOSE[@]}" "${profiles[@]}" up -d $(lane_services "$workers") 2>&1)"; then
+    echo "$up_output" >&2
+    return 1
+  fi
+  [[ -n "${LANE_VERBOSE:-}" ]] && echo "$up_output"
 
   # Bounded, because an instance that never comes up must fail with its own
   # message rather than hang forever behind a run that was never going to start.
@@ -91,6 +100,7 @@ lane_up() {
 
   if [[ "$ready" -ne "$want" ]]; then
     echo "only $ready of $want test Atlas instances answered GET /reset." >&2
+    echo "$up_output" >&2
     echo "Check: ${COMPOSE[*]} --profile atlas-test logs atlas-test" >&2
     return 1
   fi

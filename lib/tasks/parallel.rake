@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'open3'
+
 # One canonical command for the sharded spec run, so a person at a terminal and
 # any future CI job invoke exactly the same thing.
 #
@@ -56,7 +58,10 @@ namespace :parallel do
     strategy = File.exist?(RUNTIME_LOG) ? 'runtime' : 'filesize'
     puts "splitting #{workers} ways by #{strategy}"
 
-    sh "bundle exec parallel_rspec -n #{workers} --group-by #{strategy} --verbose"
+    # verbose: false suppresses rake's echo of the command, which this task has
+    # just described in friendlier terms. Each worker still prints its own seed,
+    # counts and timing — that is the part a reader acts on.
+    sh "bundle exec parallel_rspec -n #{workers} --group-by #{strategy}", verbose: false
   end
 
   desc 'Create and migrate the per-worker Cerberus databases'
@@ -66,10 +71,20 @@ namespace :parallel do
     # Rails' own task rather than parallel_tests' database helpers, because this
     # app has two test databases (primary and queue) and db:test:prepare is what
     # knows to load the schema into both.
+    #
+    # Output is held rather than streamed. Loading the schema narrates a TimescaleDB
+    # best-practice warning per column and a hypertable DEBUG line, which is some
+    # seventy lines across four workers and identical every run. Held, it is still
+    # there to print when a prepare actually fails, which is when it means
+    # something.
     workers.times do |i|
       number = i.zero? ? '' : (i + 1).to_s
-      sh({ 'TEST_ENV_NUMBER' => number, 'RAILS_ENV' => 'test' },
-         'bundle exec rails db:test:prepare')
+      output, status = Open3.capture2e({ 'TEST_ENV_NUMBER' => number, 'RAILS_ENV' => 'test' },
+                                       'bundle exec rails db:test:prepare')
+      next if status.success?
+
+      puts output
+      abort("db:test:prepare failed for worker #{i + 1}")
     end
   end
 end
