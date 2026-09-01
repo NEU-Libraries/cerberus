@@ -1,31 +1,10 @@
 # frozen_string_literal: true
 
-# Per-page multipage loader job. One is enqueued per page row by
-# MultipageItemJob, after that item's Work is minted and work_pid is stamped
-# onto the row (so the row id is the only argument).
+# Per-page multipage loader job: one page becomes one ordered FileSet holding the
+# page binary. Page jobs parallelise safely; each touches only its own FileSet.
 #
-# Each page becomes an ordered FileSet (position = the manifest Sequence)
-# holding the page binary as its Blob. Page jobs run in parallel safely —
-# every job touches only its own FileSet, across all items in the load.
-#
-# Retry safety is the design center. The two Atlas writes differ:
-#
-# - FileSet.create is idempotent (ingest.idempotency_key) and its result
-#   is stamped on file_set_pid, so a retry skips or converges the create.
-# - FileSet.update (the binary PATCH) APPENDS a new Blob on every call.
-#   blob_attached_at is stamped right after a successful PATCH; on resumed
-#   executions only (file_set_pid was already set when the job started —
-#   i.e. a previous attempt got past create), Atlas is consulted before
-#   PATCHing so a lost response can't double-attach the page. The happy
-#   path makes zero extra reads.
-#
-# Page 1 also seeds the WORK-level thumbnails via the existing
-# IiifAssetsJob (it self-guards on an existing thumbnail). Every page
-# additionally gets its own IIIF image-service pointer (JP2 + the
-# FileSet-level iiif_service PATCH) for manifest assembly — see
-# persist_page_service!. ContentCreationJob is never enqueued here: it
-# calls Work.complete, which is CompleteWorkJob's job, exactly once,
-# after every page has landed.
+# `FileSet.update` APPENDS a Blob on every call, so the resume path consults
+# Atlas before PATCHing. See docs/ingest.md for the retry-safety argument.
 class MultipageIngestJob < ApplicationJob
   queue_as :default
 

@@ -1,27 +1,12 @@
 # frozen_string_literal: true
 
-# Attaches a depositor's WebVTT file to a Work as its caption track.
+# Attaches a depositor's WebVTT file to a Work as its caption track, replacing
+# rather than accumulating.
 #
-# Backgrounded like the other Blob writers so the request returns before the
-# bytes cross the wire, and staged to disk first (UploadStaging) for the same
-# reason.
-#
-# Replaces rather than accumulates. A Work has one caption track, so a second
-# upload rewrites the bytes of the Blob already there — Blob.update appends an
-# OCFL revision and preserves the NOID, so the superseded captions stay
-# retrievable and every page already pointing at that Blob keeps working. Only
-# the first upload creates.
-#
-# It waits for the Work's primary file, and that guard is load-bearing rather
-# than defensive. Atlas gives every content Blob the role `original_file`, so a
-# caption satisfies the PrimaryFilePresence test that ConfirmDepositJob waits on
-# — attaching one first would let a deposit complete around captions alone, and
-# Atlas builds the Work's METS structMap at completion, recording a preservation
-# structure that omits the video. Waiting also puts this write after the deposit's
-# own, so the two Blob writers do not race.
-#
-# Attach-only, like AddFileJob: no derivative enrichment runs, so the Work's
-# thumbnail, poster and player are untouched by a caption upload.
+# The wait for the Work's primary file is load-bearing, not defensive: a caption
+# also carries the role `original_file`, so attaching one first lets a deposit
+# complete around captions alone and Atlas writes a METS structMap omitting the
+# video. See docs/derivatives.md.
 class CaptionJob < ApplicationJob
   include PrimaryFilePresence
 

@@ -1,28 +1,12 @@
 # frozen_string_literal: true
 
-# Seeds a Work's IIIF assets from one staged source — an image, or a PDF
-# whose first page MasterJp2 rasterizes (deposited directly or converted
-# from Word/PowerPoint by PdfRenditionJob). MasterJp2 mints two JP2s (a
-# capped display copy + a full-resolution copy); this job PATCHes their
-# Delegate URLs to Atlas.
+# Seeds a Work's IIIF assets from one staged source: an image, or a PDF whose
+# first page MasterJp2 rasterizes.
 #
-# Asset families, each on its own pipe:
-#
-# - Thumbnails (thumbnail / thumbnail_2x / preview): UNIVERSAL, served from
-#   the OPEN (display-capped) JP2. Catalog rows and show pages need them for
-#   every image-bearing Work, so they are generated whenever this job runs.
-# - service_file: the GATED full-resolution IIIF base, PATCHed onto the
-#   content FileSet. It is the deep-zoom source AND the anchor from which
-#   DepositDerivativesJob later recovers the base for opt-in S/M/L.
-# - Small/medium/large: DOWNLOAD RENDITIONS off the GATED base, generated
-#   when the caller passes `derivative_widths:`. IPTC ingest passes per-image
-#   widths (its `widths_for` — v1-parity sizing). The single-file deposit flow
-#   chooses sizes on the metadata page AFTER this job has run, via
-#   DepositDerivativesJob (which recovers the gated base from the service_file
-#   Delegate this job set). Callers that pass nothing at seed time (deposit,
-#   XML loader, multipage page 1) get thumbnails + service only here.
-#   On a `refresh:` the widths come from the Work itself instead — see
-#   #existing_widths.
+# Thumbnails come from the OPEN display-capped JP2 and are universal;
+# service_file and any S/M/L renditions come from the GATED full-resolution one.
+# Which families a call produces depends on `derivative_widths:` —
+# see docs/derivatives.md.
 class IiifAssetsJob < ApplicationJob
   queue_as :default
 

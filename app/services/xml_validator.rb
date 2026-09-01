@@ -2,27 +2,10 @@
 
 require 'open-uri'
 
-# Phased MODS XML validation.
-#
-# Runs syntactic checks first; if the document is unparseable, schema
-# checks are skipped (you can't schema-validate XML that doesn't parse).
-# Returns an Array; the document is valid iff the array is empty. Errors
-# stringify cleanly for display (Nokogiri::XML::SyntaxError responds to
-# to_s, and the rest are plain strings).
-#
-# Phase 3 (business rules — required fields, date formats) is intentionally
-# omitted at this layer. Different consumers (XML editor, IPTC ingest,
-# future bulk loaders) want different rule sets; layering them on top of
-# this generic XSD-floor validator keeps each consumer's contract narrow.
-#
-# Phase 4 (does the MODS-display partial actually render?) is handled by
-# the caller via AtlasRb::Resource.preview, since rendering lives Atlas-side.
-#
-# A character XML 1.0 cannot store is reported ahead of the parse. libxml fails
-# on it too, but answers with "PCDATA invalid Char value 11" -- which names
-# neither the character, nor that Word wrote it as a manual line break, nor what
-# to put in its place. Nothing is lost by pre-empting: such a document never
-# parses, so the phases below could not have run either way.
+# Phased MODS XML validation. Returns an Array; the document is valid iff it is
+# empty. Syntax runs before schema, because unparseable XML cannot be
+# schema-validated. Business rules and render checks are deliberately elsewhere
+# — see docs/ingest.md.
 class XmlValidator < ApplicationService
   def initialize(xml:)
     @xml = xml

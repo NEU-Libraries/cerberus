@@ -1,45 +1,9 @@
 # frozen_string_literal: true
 
-# Routes a staged upload to its post-upload enrichment jobs. The single
-# home for "what does this file type get?" — shared by the single-file
-# deposit (WorksController) and the XML loader (XmlIngestJob) so the two
-# ingest paths can't drift:
-#
-# - image/*          → IiifAssetsJob (JP2 + thumbnail Delegates, as ever)
-# - application/pdf  → IiifAssetsJob (MasterJp2 rasterizes page 1 via vips/poppler)
-# - Word/PowerPoint  → PdfRenditionJob (LibreOffice → PDF rendition Blob,
-#                      then thumbnails from the rendition's first page)
-# - everything       → ContentCreationJob (the primary Blob — enrichment
-#                      never gates or blocks it)
-#
-# Full text rides alongside, for body-text search + the "Full Text Match"
-# snippet: native PDFs and plain text → FullTextExtractionJob here; Office
-# docs get theirs from the PDF rendition instead (PdfRenditionJob enqueues
-# it on the converted PDF, so soffice runs once).
-#
-# `include_primary:` controls that last branch. The deposit/loader paths leave
-# it true (the primary Blob is created here). The admin "replace a file" path
-# passes false: the primary bytes are written separately by Blob.update (NOID
-# preserved), so only the type-routed *derivative* refresh is wanted here —
-# never a second ContentCreationJob/Blob.create.
-#
-# `complete_work:` is a genuinely different fact and not a second name for the
-# one above: it asks whether anything still owes this Work its metadata. A batch
-# loader has already supplied it, so ingest completing the Work is right. An
-# interactive deposit has not — a human confirms on the form's second page — so
-# that path passes false and ConfirmDepositJob completes the Work later.
-#
-# No derivative_widths pass through here: deposits get thumbnails only at
-# upload time. Small/medium/large are opt-in download renditions chosen on
-# the metadata page (DepositDerivativesJob), and per policy documents get
-# thumbnails only, never S/M/L.
-#
-# Detection sniffs the staged file with Marcel rather than trusting a
-# browser-supplied content type (absent in the loader path anyway). Legacy
-# Office files (.doc/.ppt) need a second step: their magic bytes only say
-# "OLE container", and Marcel keeps the magic type because its hierarchy
-# roots msword/ms-powerpoint under x-tika-msoffice, not x-ole-storage — so
-# for those ambiguous container types the filename decides.
+# Routes a staged upload to its post-upload enrichment jobs, and is the single
+# home for "what does this file type get?" so the deposit and loader paths cannot
+# drift. `include_primary:` and `complete_work:` are different facts, not two
+# names for one — read docs/ingest.md before changing either.
 class IngestDispatch < ApplicationService
   CONVERTIBLE_MIME_TYPES = %w[
     application/msword
