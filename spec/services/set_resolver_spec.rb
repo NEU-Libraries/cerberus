@@ -238,7 +238,7 @@ RSpec.describe SetResolver do
     return [] if fqs.nil?
 
     builder = search_service.search_builder.with({}).with_filters(*fqs)
-    Blacklight.default_index.search(builder).documents
+    Blacklight.default_index.search(params: builder).documents
   end
 
   def contents(compilation)
