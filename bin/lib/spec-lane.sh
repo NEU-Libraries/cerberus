@@ -21,7 +21,13 @@ lane_init() {
     echo "not inside a git repository." >&2
     return 1
   fi
-  MAIN_ROOT="$(dirname "$(cd "$REPO_ROOT" && git rev-parse --git-common-dir)")"
+  # git rev-parse --git-common-dir answers RELATIVE from the main checkout (".git")
+  # and ABSOLUTE from a worktree, so it has to be normalised before anything
+  # compares or joins paths with it. Left relative, MAIN_ROOT becomes "." and
+  # every path below silently depends on the caller's cwd.
+  common="$(cd "$REPO_ROOT" && git rev-parse --git-common-dir)"
+  [[ "$common" != /* ]] && common="$REPO_ROOT/$common"
+  MAIN_ROOT="$(cd "$(dirname "$common")" && pwd)"
 
   COMPOSE=(docker compose -p cerberus --project-directory "$MAIN_ROOT"
            --env-file "$MAIN_ROOT/.env"
@@ -29,6 +35,20 @@ lane_init() {
            -f "$MAIN_ROOT/docker-compose.dev.yml")
   # Gitignored, and carries this host's memory limits. Absent on a fresh machine.
   [[ -f "$MAIN_ROOT/docker-compose.local.yml" ]] && COMPOSE+=(-f "$MAIN_ROOT/docker-compose.local.yml")
+
+  # Where this checkout appears INSIDE the web container, which is not where it
+  # appears on the host. The main checkout is bind-mounted onto /home/cerberus/web
+  # by docker-compose.dev.yml, so its host path does not resolve in there at all;
+  # a worktree is reachable only because the gitignored local compose file mounts
+  # the worktrees parent at the same path on both sides. Passing the host path for
+  # the main checkout is what `docker exec -w` rejects with:
+  #
+  #   chdir to cwd ("/home/nakatomi/projects/cerberus") ... no such file or directory
+  if [[ "$REPO_ROOT" == "$MAIN_ROOT" ]]; then
+    CONTAINER_ROOT=/home/cerberus/web
+  else
+    CONTAINER_ROOT="$REPO_ROOT"
+  fi
   return 0
 }
 

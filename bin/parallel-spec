@@ -45,7 +45,7 @@ lane_up "$WORKERS"
 "$REPO_ROOT/bin/parallel-solr-cores" "$WORKERS"
 
 status=0
-docker exec -w "$REPO_ROOT" cerberus-web-1 \
+docker exec -w "$CONTAINER_ROOT" cerberus-web-1 \
   bundle exec rake parallel:spec WORKERS="$WORKERS" || status=$?
 
 if [[ "$EPHEMERAL" == 1 ]]; then

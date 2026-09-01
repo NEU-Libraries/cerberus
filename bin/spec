@@ -42,5 +42,5 @@ lane_up 1
 env_args=()
 [[ $# -gt 0 ]] && env_args=(-e SMOKE=1)
 
-exec docker exec "${env_args[@]}" -w "$REPO_ROOT" cerberus-web-1 \
+exec docker exec "${env_args[@]}" -w "$CONTAINER_ROOT" cerberus-web-1 \
   bundle exec rspec "$@"
