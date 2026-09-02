@@ -1,32 +1,19 @@
 # frozen_string_literal: true
 
 # Re-projects the Solr docs a Set names, driving the Set's recipe rather than
-# its resolved contents.
-#
-# That distinction is the point of the job. SetResolver answers "what is in
-# this Set" out of Solr, so a resource whose Solr doc is missing is invisible
-# to it — which is precisely the resource most in need of a reindex. Atlas's
-# subtree walk reads the authoritative store instead, so it has no such blind
-# spot. Driving the recipe also sidesteps the resolver's export row cap and its
-# need for a request-bound, gated search service, and a job has no request.
-#
-# The trade is deliberate over-reach: walking the recipe also reindexes the
-# included containers themselves and any Work the Set has set aside. A reindex
-# is Solr-only and idempotent, so that costs time, not correctness.
+# its resolved contents. See docs/people-and-routing.md and docs/sets.md.
 class SetReindexJob < ApplicationJob
   queue_as :default
 
-  # atlas_rb sets no Faraday timeout on the system connection, so a large
-  # included collection can hold this thread for a while. A timeout is
-  # transient and the walk is idempotent, so re-running the whole recipe only
-  # repeats work that has already converged.
+  # atlas_rb sets no Faraday timeout on the system connection, so a large included
+  # collection can hold this thread for a while. A timeout is transient and the
+  # walk is idempotent, so re-running the recipe only repeats converged work.
   retry_on Faraday::TimeoutError, wait: :polynomially_longer, attempts: 3
 
-  # @param set_noid [String] the Compilation's NOID.
   def perform(set_noid)
     actor = Current.nuid
-    # Re-read rather than carry the recipe through the queue, so a recipe
-    # edited between the click and the run is the one that gets honoured.
+    # Re-read rather than carried through the queue, so a recipe edited between
+    # the click and the run is the one that gets honoured.
     compilation = AtlasRb::Compilation.find(set_noid)
     return if compilation.nil?
 
@@ -39,9 +26,9 @@ class SetReindexJob < ApplicationJob
 
   private
 
-    # One included collection and everything Atlas gathers beneath it. A
-    # failure here is recorded and the walk continues — one unreachable branch
-    # must not abandon the rest of the recipe.
+    # A failure is recorded and the walk continues. The TimeoutError re-raise has
+    # to stay above the Faraday::Error rescue here and in reindex_one, or retry_on
+    # never sees it.
     def reindex_subtree(noid, result)
       count = AtlasRb::System.reindex_subtree(noid)
       if count.nil?
@@ -55,7 +42,6 @@ class SetReindexJob < ApplicationJob
       result[:failures] << "Collection #{noid}: #{failure_reason(e)}"
     end
 
-    # One directly-added Work.
     def reindex_one(noid, result)
       status = AtlasRb::System.reindex(noid).status
       if status == 204
@@ -70,16 +56,12 @@ class SetReindexJob < ApplicationJob
     end
 
     # atlas_rb does not translate a 404 on the subtree path — the empty body
-    # surfaces as a parse error instead. Report what it means, not what it
-    # raised.
+    # surfaces as a parse error instead. Report what it means, not what it raised.
     def failure_reason(error)
       error.is_a?(JSON::ParserError) ? 'no resource found.' : error.message
     end
 
-    # Whoever clicked has moved on by now, and a partial run is the one outcome
-    # they must not have to discover for themselves — a branch that failed to
-    # reindex is still stale, so failures are named rather than counted. A run
-    # with no actor (a rake task) has nobody to tell and is recorded regardless.
+    # A run with no actor (a rake task) has nobody to tell, and is recorded anyway.
     def report(actor:, set_noid:, title:, result:)
       CompletionNotice.deliver(
         kind:         'set_reindex',
@@ -95,8 +77,7 @@ class SetReindexJob < ApplicationJob
       count = result[:count]
       lines = ["“#{title}”: #{count} resource#{'s' unless count == 1} reindexed."]
       lines += ['', 'These were not reindexed and may still be stale:', *result[:failures]] if result[:failures].any?
-      # A path, not a _url: a job has no request to take a host from, and the
-      # inbox renders these in-app anyway.
+      # A path, not a _url: a job has no request to take a host from.
       lines += ['', Rails.application.routes.url_helpers.set_path(set_noid)]
       lines.join("\n")
     end

@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
+# Request-wide setup, and the breadcrumb builders every controller shares.
+# See docs/people-and-routing.md.
 class ApplicationController < ActionController::Base
-  # Adds a few additional behaviors into the application controller
   include Blacklight::Controller
   include Authorizable
   include UnfinishedDepositGate
@@ -16,31 +17,21 @@ class ApplicationController < ActionController::Base
 
   # Included here, not with the concerns above, because its before_action has to
   # run after set_current_nuid: reading the window from Atlas is an authenticated
-  # read, and Current.nuid is what the signed assertion carries. Included earlier
-  # it would still work, attributed to the guest identity instead of the caller.
+  # read, and Current.nuid is what the signed assertion carries.
   include MaintenanceGate
 
-  # Authorization is evaluated against the effective user, so a view-as
-  # session renders the target's access decisions (acting-as leaves this as
-  # the real admin — only writes are re-attributed). effective_user comes
-  # from ImpersonationSession and is current_user when not impersonating.
+  # Authorization is evaluated against the effective user, so a view-as session
+  # renders the target's access decisions rather than the real admin's.
   def current_ability
     @current_ability ||= Ability.new(effective_user)
   end
 
-  # `match:` is forwarded to loaf so callers can opt into exact path matching.
-  # The default (:inclusive) is loaf's own default, preserved for existing
-  # callers. Cross-resource trails (e.g. a person under their community) pass
-  # :exact so an ancestor whose path is a *prefix* of the current URL
-  # (/communities/:id vs /communities/:id/people) stays a link instead of being
-  # mis-marked as the current crumb.
-  # +result+ lets a caller that already fetched the resource (e.g. to branch on
-  # its ancestry) hand it in, avoiding a second AtlasRb::Resource.find.
+  # `match: :exact` keeps an ancestor whose path is a *prefix* of the current URL
+  # (/communities/:id vs /communities/:id/people) a link, instead of letting loaf
+  # mark it as the current crumb. The default, :inclusive, is loaf's own.
   def breadcrumbs(id, editing: false, match: :inclusive, result: nil)
     result ||= AtlasRb::Resource.find(id)
     item = result.resource
-    # `ancestors` carries each ancestor's title alongside its noid/klass, so
-    # the whole trail is built from this single find — no per-ancestor round-trip.
     Array(item.ancestors).each do |node|
       add_breadcrumb_for(node['noid'], node['klass'], node['title'], match: match)
     end
@@ -52,11 +43,8 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # The tail of an edit-page trail: the resource itself becomes a link back to
-  # its show page (`match: :exact` so loaf doesn't mark it current on the
-  # `/edit` sub-path — inclusive matching otherwise treats `/works/:id/edit` as
-  # "under" `/works/:id`), and a final non-link "Edit <Klass>" crumb is the
-  # you-are-here. Lets an editor back out to the resource via the trail.
+  # `match: :exact` on the resource crumb: inclusive matching treats
+  # /works/:id/edit as "under" /works/:id and would mark it current.
   def edit_breadcrumb_tail(item, klass)
     breadcrumb(item.title, public_send("#{klass.downcase}_path", item.id), match: :exact)
     breadcrumb("Edit #{klass}", public_send("edit_#{klass.downcase}_path", item.id))
@@ -74,17 +62,13 @@ class ApplicationController < ActionController::Base
 
     def set_current_nuid
       Current.nuid = current_user&.nuid || Rails.application.config.x.cerberus.guest_nuid
-      # Only carry an account selection when the person has explicitly switched to
-      # one (AccountsController stores it in the session). Otherwise nil, so
-      # atlas_rb sends no acct claim and Atlas resolves the preferred account —
-      # the default for everyone who hasn't switched.
+      # nil unless the person has explicitly switched accounts, so atlas_rb sends no
+      # acct claim and Atlas resolves the preferred account.
       Current.account_email = session[:account_email]
     end
 
-    # The identity Cerberus-side writes are attributed to: the acting-as
-    # target when an acting-as session is live, otherwise the authenticated
-    # user. Matches the deposit convention — acting-as work belongs wholly
-    # to the target, so their inbox (not the admin's) gets the follow-ups.
+    # The identity Cerberus-side writes are attributed to: the acting-as target
+    # when that session is live, otherwise the authenticated user.
     def attributed_nuid
       Current.on_behalf_of.presence || Current.nuid
     end

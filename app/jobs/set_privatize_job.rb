@@ -1,20 +1,13 @@
 # frozen_string_literal: true
 
 # Strips `public` from the read ACL of every Work a Set denotes.
+# See docs/people-and-routing.md and docs/sets.md.
 #
-# The v1 "make these Core Files private" sweep. It writes the *resource* ACL, not
-# the derivative gate — a different concern, and the Work's own ACL is the outer
-# gate anyway: a Work's FileSets follow the Work (see NarrowingTargets), and the
-# download path authorizes :read on the resource before it consults the per-asset
-# stamp. So privatizing the Work closes its blobs too, and a derivative tier left
-# naming `public` underneath is inert rather than a hole.
+# Group grants are kept: they grant nothing extra while an item is public, and
+# they are what a later flip back to Private falls back to.
 #
-# Group grants are kept. They grant nothing extra while an item is public, but
-# they are what a later flip back to Private falls back to — the same reasoning
-# PermissionsForm#mass_permissions applies to a single resource.
-#
-# Re-running is safe: a Work that is already private is skipped, so a retry after
-# a partial run only finishes the remainder.
+# Re-running is safe. A Work that is already private is skipped, so a retry
+# after a partial run only finishes the remainder.
 class SetPrivatizeJob < ApplicationJob
   include SetSweep
 
@@ -25,11 +18,10 @@ class SetPrivatizeJob < ApplicationJob
   # because the sweep is idempotent.
   retry_on AtlasRb::StaleResourceError, wait: :polynomially_longer, attempts: 5
 
-  # @param set_noid [String] the Compilation's NOID.
   def perform(set_noid:)
     actor = Current.nuid
-    # Re-read rather than carry the title through the queue, so a Set renamed
-    # between the click and the run reports under the name it has now.
+    # Re-read rather than carried through the queue, so a Set renamed between the
+    # click and the run reports under the name it has now.
     compilation = AtlasRb::Compilation.find(set_noid)
     return if compilation.nil?
 
@@ -40,7 +32,6 @@ class SetPrivatizeJob < ApplicationJob
 
   private
 
-    # @return [Symbol] :privatized or :already_private
     def privatize(noid)
       current = AtlasRb::Resource.permissions(noid)
       return :already_private if current.nil?
