@@ -195,4 +195,52 @@ RSpec.describe Metadata::MODSMerge do
       expect(described_class.unchanged?(once, twice)).to be(true)
     end
   end
+
+  # A record can arrive with no primary titleInfo and no abstract at all — a
+  # sparse migrated MODS, or a deposit whose XML the loader built from a manifest
+  # row. Each apply_* has to create the node rather than silently drop the value.
+  describe 'a document with nothing to edit in place' do
+    let(:bare) do
+      <<~XML
+        <?xml version="1.0" encoding="UTF-8"?>
+        <mods:mods xmlns:mods="http://www.loc.gov/mods/v3">
+          <mods:typeOfResource>text</mods:typeOfResource>
+        </mods:mods>
+      XML
+    end
+
+    it 'creates the primary titleInfo for a title, ahead of the other nodes' do
+      d = doc(described_class.call(xml: bare, title: 'Coastal erosion survey'))
+      ti = d.at_xpath("/mods:mods/mods:titleInfo[@usage='primary']", ns)
+
+      expect(ti.at_xpath('mods:title', ns).text).to eq('Coastal erosion survey')
+      expect(d.root.elements.first).to eq(ti)
+    end
+
+    it 'creates a primary titleInfo to hang a title part on' do
+      d = doc(described_class.call(xml: bare, subtitle: 'a five-year record'))
+      ti = d.at_xpath("/mods:mods/mods:titleInfo[@usage='primary']", ns)
+
+      expect(ti.at_xpath('mods:subTitle', ns).text).to eq('a five-year record')
+      expect(ti.at_xpath('mods:title', ns)).to be_nil
+    end
+
+    it 'creates the abstract node for an abstract' do
+      d = doc(described_class.call(xml: bare, abstract: 'Measurements from four sites.'))
+
+      expect(d.at_xpath('/mods:mods/mods:abstract', ns).text).to eq('Measurements from four sites.')
+    end
+
+    it 'leaves the document alone for a blank title or abstract' do
+      out = described_class.call(xml: bare, title: '', abstract: '')
+
+      expect(described_class.unchanged?(bare, out)).to be(true)
+    end
+
+    it 'preserves the nodes it does not own' do
+      d = doc(described_class.call(xml: bare, title: 'Coastal erosion survey'))
+
+      expect(d.at_xpath('/mods:mods/mods:typeOfResource', ns).text).to eq('text')
+    end
+  end
 end
