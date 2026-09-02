@@ -1,27 +1,24 @@
 # frozen_string_literal: true
 
+# Serves one Blob: its raw bytes, or an on-the-fly zip wrapping a Blob Atlas
+# could not identify. See docs/downloads.md.
 class DownloadsController < ApplicationController
   include ProxyUnbuffered
   include RecordsImpressions
   include DerivativesHelper
   include ZipKit::RailsStreaming
 
-  # Atlas's Classification.generic.name: the marker for a blob whose content it
-  # could not identify. The discriminator is the classification, not the "Zip
-  # File" download label — that label is shared with genuine archive uploads
-  # (classification "Archive"), which are already zips and must stream as-is. So
-  # only "File" is wrapped; "Archive" and every typed classification serve raw.
+  # Atlas's Classification.generic.name. Branch on the classification, never on
+  # the "Zip File" download label: that label is shared with genuine archive
+  # uploads, which are already zips and must stream as-is.
   GENERIC_CLASSIFICATION = 'File'
 
   before_action :authorize_show!
   before_action :authorize_derivative_read!, only: :show
-  # After the authz gates, so only authorized downloads are recorded; runs
-  # before the Live stream opens (the job resolves blob → Work off-request).
+  # Declared after the authz gates, so a blocked fetch is never counted, and
+  # before the Live stream opens.
   before_action :record_download_impression, only: :show
 
-  # A blob Atlas could not identify (classification "File") is wrapped in a zip
-  # generated on the fly — a grounded, inert download — while every typed blob
-  # (and real archives, already zips) streams its raw bytes as before.
   def show
     blob = AtlasRb::Blob.find(params[:id])
     wrap_in_zip? ? download_zipped(blob) : download_raw(blob)
@@ -29,7 +26,6 @@ class DownloadsController < ApplicationController
 
   private
 
-    # Stream the true bytes under the blob's own type and download name.
     def download_raw(blob)
       response.headers['Content-Type'] = blob.mime_type
       response.headers['Content-Disposition'] =
@@ -40,46 +36,29 @@ class DownloadsController < ApplicationController
       response.stream.close
     end
 
-    # zip_kit_stream sets the application/zip type + attachment disposition and,
-    # since ProxyUnbuffered pulls in ActionController::Live, writes to and closes
-    # response.stream itself — so no manual Content-* headers or stream.close
-    # here. An on-the-fly archive can't honor Range (served 200, no
-    # Accept-Ranges), which is fine for these rare one-off opaque files.
+    # zip_kit_stream sets the type and disposition and, since ProxyUnbuffered
+    # pulls in ActionController::Live, writes to and closes response.stream
+    # itself — set no Content-* header and do not close the stream here.
     def download_zipped(blob)
       zip_kit_stream(filename: zip_filename(blob)) do |zip|
         BlobZipPacker.new(asset: @derivative_asset).pack(zip)
       end
     end
 
-    # Reads the classification off the assets entry authorize_derivative_read!
-    # already resolved — no extra Atlas round-trip. A nil asset (the gate's
-    # fail-open cases) serves raw.
     def wrap_in_zip?
       @derivative_asset && @derivative_asset['classification'] == GENERIC_CLASSIFICATION
     end
 
-    # `<base>.zip`, base from the blob's download name, else its noid. The inner
-    # entry keeps its real extension via ZipEntryWriter#entry_filename; only the
-    # outer archive is renamed.
     def zip_filename(blob)
       base = blob.filename.presence || blob.original_filename.presence || params[:id]
       "#{File.basename(base.to_s, '.*')}.zip"
     end
 
-    # Beyond the work-level authorize_show!, a Blob can carry its own read gate —
-    # a department reserving the master (or a non-image rendition) while access
-    # copies stay public. That gate lives on the Work's assets payload, not on
-    # the standalone Blob, so resolve the containing Work (the same lookup the
-    # impression path uses) and authorize this Blob's entry against the standard
-    # :read Ability. Declared before record_download_impression so a blocked
-    # fetch is never counted. Fails open only when the asset can't be resolved:
-    # the work-level gate already passed, and a blob absent from the assets list
-    # is an edge case, not a gate to bypass. The resolved entry is memoized
-    # (@derivative_asset) so show can branch zip-vs-raw off its classification
-    # without a second assets fetch. An active embargo on the containing Work
-    # withholds this Blob regardless of its own gate, unless the effective user
-    # can bypass it — a second Atlas round-trip (the Blob's own permissions,
-    # fetched by authorize_show!, don't carry the Work's embargo).
+    # The per-Blob read gate, on top of the work-level authorize_show!. It lives
+    # on the Work's assets payload, not on the standalone Blob, so the Work has
+    # to be resolved first; the embargo needs its own call because the Blob's
+    # permissions do not carry it. An unresolvable asset fails OPEN by design —
+    # see docs/downloads.md before tightening that.
     def authorize_derivative_read!
       work_id = AtlasRb::Blob.work(params[:id], nuid: effective_user&.nuid)
       return if work_id.blank?

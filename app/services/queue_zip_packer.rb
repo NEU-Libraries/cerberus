@@ -1,32 +1,13 @@
 # frozen_string_literal: true
 
-# Streams a Download Queue (a flat list of individually-chosen downloads) into an
-# open zip_kit writer. Unlike SetZipPacker — which resolves whole works and packs
-# all their content — this packs only the *queued* items, grouped into a per-work
-# folder (`<work_noid>/`). Each item is either a content Blob (`'b'`) or an IIIF
-# derivative rendition (`'d'`); both are packed via ZipEntryWriter, the derivative
-# fetched over HTTP from its (signed, internal-host) gated Cantaloupe URL.
-#
-# Gating, in three parts. `Work.assets(nuid:)` re-checks READ at Atlas per work
-# (anon ⇒ public only), so an item queued-then-restricted simply isn't returned.
-# That is not sufficient on its own, twice over:
-#
-# * An embargoed Work is deliberately readable — public metadata, withheld
-#   content — so its assets come back and would be packed. The embargo is
-#   therefore checked here too, per work.
-# * Atlas re-authorizes at the WORK level, not the tier level. The per-asset gate
-#   rides the returned entries as advisory `gated` / `permission` for the display
-#   layer to enforce, so a restricted tier — a Streaming Only video, a gated
-#   master — arrives here looking like any other asset. Without the DerivativeGate
-#   check below, the archive hands out bytes `/downloads/:id` refuses.
+# Streams a Download Queue's individually-chosen items into an open zip_kit
+# writer, grouped into a per-work folder. `Work.assets(nuid:)` re-authorizes
+# each work, but that alone is NOT enough to gate an entry — the embargo and
+# per-asset checks below are both load-bearing. See docs/downloads.md.
 class QueueZipPacker
   include ZipEntryWriter
 
-  # @param items [Array<Hash>] queue entries: { 'w' => work_noid, 'b' => blob_noid }
-  #   for a Blob, or { 'w' => work_noid, 'd' => use } for a derivative rendition.
-  # @param nuid [String, nil] acting NUID (nil for anonymous)
-  # @param ability [Ability] the CALLER's ability, for the per-asset tier gate.
-  # @param bypass_embargo [Boolean] the CALLER's right to receive withheld content.
+  # `ability` and `bypass_embargo` are the CALLER's, never the queue owner's.
   def initialize(items:, nuid:, ability:, bypass_embargo: false)
     @items = items
     @nuid = nuid
@@ -47,10 +28,6 @@ class QueueZipPacker
 
   private
 
-    # Pack one work's queued items: its content Blobs by noid, its derivative
-    # renditions by use. Work.assets(nuid:) is the per-work re-authorization — an
-    # item queued-then-restricted just isn't returned. (In the elsif, the asset
-    # is uri-backed, i.e. a delegate, since it wasn't a content_blob?.)
     def pack_work(zip, work_noid, entries, manifest, errors)
       if (release = withheld_until(work_noid))
         errors << "#{work_noid}: withheld — under embargo until #{release}"
@@ -69,16 +46,14 @@ class QueueZipPacker
       errors << "#{work_noid}: assets unavailable — #{e.class}: #{e.message}"
     end
 
-    # Whether this asset is one the queue actually asked for: content Blobs by
-    # noid, derivative renditions by use.
     def queued?(asset, blob_noids, uses)
       content_blob?(asset) ? blob_noids.include?(asset.noid) : uses.include?(asset[:use])
     end
 
-    # A withheld asset is named rather than dropped in silence, matching how an
-    # embargoed member is already reported: someone who queued a file and did not
-    # get it should be able to see which one, and that access — not a failure —
-    # is the reason.
+    # Atlas re-authorizes at the WORK level only; the per-asset gate rides the
+    # returned entries as advisory, so a restricted tier arrives looking like any
+    # other asset. Without DerivativeGate the archive serves bytes
+    # `/downloads/:id` refuses.
     def pack_queued_asset(zip, work_noid, asset, manifest, errors)
       unless DerivativeGate.readable?(asset, @ability)
         errors << "#{work_noid}: withheld — #{asset[:use].presence || asset.noid} is not available to download"
@@ -92,22 +67,17 @@ class QueueZipPacker
       end
     end
 
-    # The set of a queue-entry key's values (blob noids for 'b', uses for 'd').
     def values_for(entries, key)
       entries.filter_map { |entry| entry[key] }.to_set
     end
 
-    # The release date when this work's content is withheld from THIS caller,
-    # else nil. Unlike SetZipPacker there is no Solr doc to read the date off —
-    # the queue is a bare list of noids — so this costs one Atlas call per
-    # distinct work. Acceptable: a queue is user-curated and short, and the
-    # alternative is handing out embargoed bytes.
+    # An embargoed Work is deliberately READABLE — public metadata, withheld
+    # content — so Atlas returns its assets and they would be packed. Costs one
+    # Atlas call per distinct work; the alternative is serving embargoed bytes.
     def withheld_until(work_noid)
       return nil if @bypass_embargo
 
       release = AtlasRb::Resource.permissions(work_noid)&.embargo
-      # The stored value is a timestamp; the manifest is read by a person, so
-      # give them the date and not `2029-12-31T00:00:00+00:00`.
       Embargo.active?(release) ? Embargo.release_date(release) : nil
     end
 end

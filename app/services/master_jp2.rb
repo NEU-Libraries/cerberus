@@ -1,18 +1,13 @@
 # frozen_string_literal: true
 
 # Mints the two JP2s the gated-derivative model needs from one source: a capped
-# display copy (thumbnails/preview, served openly) and a full-resolution copy
-# (S/M/L downloads + deep-zoom, served only behind the delegate). Both go to the
-# single derivatives root Cantaloupe reads, distinguished by an `open-` /
-# `gated-` filename prefix — the signal the delegate gates on (serve `open-*`
-# freely, require a credential for `gated-*`). A plain hyphen prefix (not an
+# open display copy and a gated full-resolution copy. The `open-` / `gated-`
+# filename prefix is what the delegate gates on, and a plain hyphen (not an
 # `open/…` subpath) keeps the identifier slash-free, so signed-URL paths carry
-# no `%2F` that could desync between Cerberus and the delegate.
+# no `%2F` that could desync from the delegate. See docs/downloads.md.
 class MasterJp2 < ApplicationService
-  # The open (display) JP2 is capped to the `preview` hero WIDTH (its `500,`
-  # request): thumbnails and preview are all downscales of it, and nothing on
-  # the open pipe needs more. Capping here keeps `full/max` on an `open-`
-  # identifier safe by construction — the master's pixels aren't in that file.
+  # Capping the open copy is what keeps `full/max` on an `open-` identifier safe
+  # by construction: the master's pixels are not in that file.
   OPEN_CAP = 500
 
   Result = Struct.new(:open_base, :gated_base, keyword_init: true)
@@ -22,12 +17,9 @@ class MasterJp2 < ApplicationService
   end
 
   def call
-    # Normalise to 3-band sRGB before encoding. A 1-band (grayscale) or CMYK
-    # source otherwise yields a JP2 whose header still parses — so info.json
-    # succeeds — but whose codestream Cantaloupe's JP2 processor can't decode,
-    # making every render 501. Archival material is frequently grayscale, so
-    # this guards real deposits, not just seeds. colourspace is a no-op for an
-    # already-sRGB image and preserves any alpha band.
+    # Normalise to 3-band sRGB before encoding, or a grayscale or CMYK source
+    # yields a JP2 whose header parses — info.json succeeds — but whose
+    # codestream Cantaloupe cannot decode, making every render 501.
     img = Vips::Image.new_from_file(@path, **load_options).colourspace(:srgb)
     Result.new(
       open_base:  mint(capped(img), 'open'),
@@ -37,27 +29,22 @@ class MasterJp2 < ApplicationService
 
   private
 
-    # One derivatives root; the `open-`/`gated-` filename prefix is what the
-    # delegate gates on, and it rides through into the IIIF identifier.
     def mint(img, prefix)
       filename = "#{prefix}-#{SecureRandom.uuid}.jp2"
       img.jp2ksave(File.join(Rails.application.config.x.cerberus.derivatives_root, filename))
       "#{Rails.application.config.iiif_host}/iiif/3/#{filename}"
     end
 
-    # Cap the WIDTH at OPEN_CAP so the `preview` Delegate's `500,` (width-500)
-    # request serves without upscaling in every orientation — a longest-edge
-    # cap would leave portrait sources narrower than 500. Never upscale a
-    # narrower source (a pure downscale, matching DerivativeCreator's posture).
+    # Cap the WIDTH, not the longest edge: the `preview` Delegate asks for
+    # width 500, and a longest-edge cap leaves portrait sources narrower. Never
+    # upscale a narrower source.
     def capped(img)
       scale = OPEN_CAP.to_f / img.width
       scale < 1 ? img.resize(scale) : img
     end
 
-    # PDFs rasterize through vips' poppler loader, first page by default
-    # (page: 0). 150 dpi makes a letter page ~1275px wide — crisp for the
-    # 500px preview tile without an oversized JP2. Image loaders don't
-    # accept dpi, so only pass it when the source really is a PDF.
+    # Image loaders don't accept dpi, so only pass it when the source really is
+    # a PDF.
     def load_options
       pdf? ? { dpi: 150 } : {}
     end

@@ -2,34 +2,18 @@
 
 require 'caxlsx'
 
-# Streams a collection's / set's metadata into an already-open zip_kit writer as
-# a re-ingestable bundle: a `manifest.xlsx` in the exact column shape the XML
-# batch loader reads ({XmlLoader::Manifest}), plus, optionally, one
-# `mods/<noid>.xml` per item. It is the inverse of the XML loader — export the
-# records, edit the MODS offline, re-feed the bundle as updates (every row
-# carries a NOID, so {XmlLoader::Manifest::Row#update?} is true for all of them).
-#
-# Mirrors the SetZipPacker / {ZipEntryWriter} posture (STORE, flat memory,
-# mid-stream error capture) but streams MODS *strings* from Atlas rather than
-# Blob bytes, so it does not include {ZipEntryWriter}. The manifest itself is a
-# small text grid — accrued in memory and written as the final entry once every
-# item has been visited; only the MODS payloads stream.
-#
-# +docs+ is anything responding to `each_content_batch { |solr_docs| ... }`
-# (SetResolver and CollectionContentsResolver both do). The gating lives in that
-# enumerator — it yields only the Works the requesting user can discover — so the
-# packer stays auth-agnostic.
+# Streams a collection's or set's metadata into an already-open zip_kit writer
+# as a bundle the XML batch loader can re-ingest. It streams MODS *strings*
+# rather than Blob bytes, so it does not include {ZipEntryWriter}. Gating lives
+# in the `docs:` enumerator, not here. See docs/downloads.md.
 class MetadataExportPacker
-  # Header row, matching XmlLoader::Manifest::COLUMN_LABELS so the bundle loads
-  # straight back into the XML loader. `PIDs` is v1's column name for what is now
-  # a NOID; the loader accepts either.
+  # Must match XmlLoader::Manifest::COLUMN_LABELS, or the exported bundle no
+  # longer loads back into the XML loader.
   HEADERS = ['PIDs', 'MODS XML File Path', 'File Name', 'Embargoed?', 'Embargo Date'].freeze
 
-  # Every Solr field this packer reads off a doc, so a resolver's `fl` can be taken
-  # from here instead of guessed. A field the packer reads and the query did not
-  # fetch raises nothing — the doc just has no value — so the manifest gets a blank
-  # cell that reads as "nothing to say". The two resolvers had drifted apart exactly
-  # that way on the embargo columns.
+  # Every Solr field this packer reads off a doc, so a resolver's `fl` can be
+  # taken from here instead of guessed. A field read but not fetched raises
+  # nothing — the manifest just gets a blank cell that reads as "nothing to say".
   REQUIRED_DOC_FIELDS = %w[
     id
     alternate_ids_ssim
@@ -37,15 +21,11 @@ class MetadataExportPacker
     embargoed_bsi
   ].freeze
 
-  # @param docs [#each_content_batch] a gated contents resolver.
-  # @param include_mods [Boolean] also bundle one mods/<noid>.xml per item.
   def initialize(docs:, include_mods: true)
     @docs = docs
     @include_mods = include_mods
   end
 
-  # @param zip [ZipKit::Streamer] an open writer (from `zip_kit_stream`).
-  # @return [void]
   def pack(zip)
     rows = []
     errors = []
@@ -66,16 +46,13 @@ class MetadataExportPacker
 
   private
 
-    # Solr stores the noid in `alternate_ids_ssim` as `id-<noid>` (same idiom as
-    # SetZipPacker#noid_of).
+    # Solr stores the noid in `alternate_ids_ssim` as `id-<noid>`.
     def noid_of(doc)
       Array(doc['alternate_ids_ssim']).first.to_s.delete_prefix('id-').presence
     end
 
-    # Stream one Work's MODS into `mods/<noid>.xml`; return the in-bundle path for
-    # the manifest. A fetch failure is recorded, not raised — the archive can't be
-    # un-sent once headers are out (same posture as ZipEntryWriter#write_asset).
-    # @return [String, nil] the manifest path, or nil if the fetch failed.
+    # A fetch failure is recorded, never raised: once the response headers are
+    # out the archive cannot be un-sent.
     def write_mods(zip, noid, errors)
       path = "mods/#{noid}.xml"
       zip.write_stored_file(path) { |sink| sink << AtlasRb::Work.mods(noid, 'xml') }
@@ -85,16 +62,13 @@ class MetadataExportPacker
       nil
     end
 
-    # A manifest row in HEADERS order. File Name is left blank — for an
-    # update-oriented export (every row has a NOID) the loader does not require
-    # it. Embargo columns are best-effort from Solr and otherwise blank, kept so
-    # the spreadsheet stays a faithful re-ingest template.
+    # A row in HEADERS order.
     def manifest_row(doc, noid, xml_path)
       [noid, xml_path, nil, embargoed(doc), embargo_date(doc)]
     end
 
-    # embargoed_bsi is boolean-as-string (Atlas's _bsi convention, matching
-    # TombstoneIndexer/FeaturedIndexer) — compare against the string, not `true`.
+    # embargoed_bsi is boolean-as-string (Atlas's _bsi convention) — compare
+    # against the string, not `true`.
     def embargoed(doc)
       'true' if Array(doc['embargo_release_date_dtsi']).first.present? ||
                 Array(doc['embargoed_bsi']).first.to_s == 'true'
@@ -104,9 +78,7 @@ class MetadataExportPacker
       Array(doc['embargo_release_date_dtsi']).first.to_s[0, 10].presence
     end
 
-    # Build the workbook in memory (small text even at the export cap) and write
-    # it as the final stored entry. The .xlsx is itself a zip — already
-    # compressed — so STORE, not deflate.
+    # The .xlsx is itself a zip — already compressed — so STORE, not deflate.
     def write_manifest(zip, rows)
       package = Axlsx::Package.new
       package.workbook.add_worksheet(name: 'Manifest') do |sheet|
