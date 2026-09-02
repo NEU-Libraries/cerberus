@@ -1,0 +1,116 @@
+# docker-compose.local.yml.example
+#
+# Copy to docker-compose.local.yml (gitignored) and edit for your machine, then
+# name it in every `up`:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml \
+#     -f docker-compose.local.yml up -d
+#
+# It is a separate file with its own name, rather than a plain
+# docker-compose.override.yml, because compose only auto-merges an override when
+# you invoke the base file alone — and Cerberus is brought up with an explicit
+# -f chain. (Atlas has no extra -f files, so it uses a plain override.)
+#
+# Two things live here, and both are specific to one machine:
+#
+# 1. THE WORKTREES MOUNT. The web container bind-mounts only the main checkout,
+#    so a worktree is invisible to it. Mounting the worktrees parent at the SAME
+#    path on both sides is what lets `docker exec -w <worktree>` resolve, and is
+#    what bin/spec relies on to run a branch's specs without copying files.
+#    Set WORKTREES_ROOT in .env; one variable serves both sides of the colon.
+#
+# 2. PER-SERVICE MEMORY LIMITS. THE NUMBERS BELOW ARE SIZED FOR ONE HOST AND
+#    ARE NOT A RECOMMENDATION — size them to your own machine before running the
+#    suite. On cgroup v2 a per-service mem_limit gives the OOM killer a boundary
+#    to act on: it reaps one process inside the offending container and logs the
+#    kill. Without a limit every service can claim the whole ceiling, and the
+#    kernel can thrash to a standstill without ever invoking the OOM killer at
+#    all. The limits are ceilings, not reservations, so their sum may exceed
+#    real memory; the point is that a runaway service dies loudly rather than
+#    stalling the machine.
+#
+# The comments on each service explain what its number is protecting against,
+# which is the part worth keeping when you change the value.
+services:
+  web:
+    # Cerberus, plus the Solid Queue supervisor/worker and the dartsass watcher.
+    # The largest share, because the batch jobs (zip packing, derivative
+    # generation, document conversion) all run in this container.
+    mem_limit: 2500m
+    volumes:
+      - ${WORKTREES_ROOT:?set WORKTREES_ROOT in .env}:${WORKTREES_ROOT}
+  atlas:
+    mem_limit: 2g
+  atlas-test:
+    # Serves only the rspec suite, so it sits below the development instance.
+    mem_limit: 1500m
+  db:
+    mem_limit: 1500m
+  solr:
+    # The image's own default is a fixed `-Xms512m -Xmx512m`, and it also sets
+    # -XX:+AlwaysPreTouch, so the initial heap is committed AND faulted in before
+    # Solr answers a query. Xms is therefore the setting that decides the
+    # resident footprint. A dev-sized index has a live set well under 200 MB, so
+    # a 256 MB initial heap lets G1 grow on demand instead of pinning the full
+    # 512 MB from boot. Xmx stays at 512 MB as headroom for a bulk reindex.
+    # SOLR_JAVA_MEM takes precedence over SOLR_HEAP in bin/solr.
+    #
+    # The limit bounds the JVM's overhead and the off-heap index buffers on top
+    # of that heap: metaspace, code cache and ~78 thread stacks.
+    #
+    # Note that the image runs Solr with -XX:+CrashOnOutOfMemoryError, so an
+    # exhausted heap aborts the process rather than degrading. Xmx is therefore
+    # the line between "slow" and "gone", and it is left at the image's own
+    # figure; only the initial commitment is reduced.
+    mem_limit: 1500m
+    restart: unless-stopped
+    environment:
+      SOLR_JAVA_MEM: '-Xms256m -Xmx512m'
+  iiif:
+    # run_cantaloupe.sh starts the JVM with -XX:MaxRAMPercentage=$HEAP_PERCENTAGE
+    # and then interpolates $JAVA_OPTS, and an explicit -Xmx wins over the
+    # percentage. Pinning the heap matters because a percentage resolves against
+    # the cgroup limit, which lets an idle-but-warm Cantaloupe sit at ~1 GB for a
+    # workload whose live set is a few hundred MB.
+    #
+    # 512 MB is sized for the handful of concurrent requests a dev or staging
+    # box sees. A deep-zoom viewer hammering many tiles at once pushes the live
+    # set past ~330 MB and G1 starts issuing compaction pauses; raise Xmx before
+    # assuming the decoder is at fault.
+    #
+    # The limit is what actually bounds this container, and it must stay well
+    # above the heap: GrokProcessor decodes JP2s by forking grk_decompress, and
+    # each concurrent decode is a separate process whose RSS lands in this cgroup
+    # and which no -Xmx constrains.
+    mem_limit: 1500m
+    restart: unless-stopped
+    environment:
+      HEAP_PERCENTAGE: '65'
+      JAVA_OPTS: '-Xms256m -Xmx512m'
+      # The crash guard. Jetty's default pool lets every inbound request start
+      # its own decode, and each concurrent decode is another grk_decompress
+      # process inside this cgroup, so offered load translates directly into
+      # memory with nothing to stop it. A bounded pool makes the surplus queue
+      # instead, which trades latency for staying alive — the right trade where
+      # a slow viewer reads as a busy environment and a dead one reads as a bug.
+      # A dev-sized viewing session never reaches this bound, so it costs
+      # nothing until the box is genuinely oversubscribed.
+      CANTALOUPE_HTTP_MAX_THREADS: '8'
+  handle:
+    # The image already starts the server with a fixed -Xmx200M and it settles
+    # under 100 MiB, so this is a guard rail rather than a constraint — without
+    # it the service is the one JVM here with no cgroup boundary at all.
+    mem_limit: 512m
+    restart: unless-stopped
+  selenium:
+    # Chrome plus the Selenium Java server, started only under the `test`
+    # profile for the browser spec lane. Both are modest at one tab, but a
+    # runaway renderer has no natural ceiling of its own, so the point of the
+    # limit is that it dies loudly rather than dragging the VM down. The
+    # matching shm_size lives in the committed compose file, because Chrome
+    # crashes without it on any host, not only this one.
+    mem_limit: 1500m
+  redis:
+    # Atlas's response cache. The image, cache-only flags and LRU ceiling live
+    # in the committed compose; this is only the cgroup backstop for this host.
+    mem_limit: 256m

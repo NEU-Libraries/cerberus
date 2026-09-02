@@ -16,7 +16,7 @@ Ruby on the host.
 ```bash
 git clone git@github.com:NEU-Libraries/cerberus.git
 cd cerberus
-cp .env.example .env          # set ARCH=arm64 on Apple Silicon
+cp .env.example .env          # every value in it is optional
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
 
@@ -35,15 +35,20 @@ Then open http://localhost:3000. Port 12345 is the rdbg listener, not the app.
 ### Environment variables
 
 `.env` is gitignored and copied from `.env.example`, which is the authoritative
-list. The ones you are most likely to change:
+list and explains each entry. It carries **overrides only** — every value has a
+working default, so a fresh checkout boots with the file left entirely
+commented out. The service URLs a developer might expect to find there
+(`ATLAS_URL`, the Solr endpoints, the database) are set in
+`docker-compose.yml` instead, because they name services on the compose
+network rather than anything host-specific.
+
+What you are most likely to set:
 
 | Variable | Purpose |
 |---|---|
-| `ARCH` | Set to `arm64` on Apple Silicon. |
-| `ATLAS_URL` | Base URL of the Atlas API, read by atlas_rb. |
-| `DATABASE_URL` | PostgreSQL connection string for Cerberus's own database. |
-| `SOLR_URL` | Solr endpoint for Blacklight queries. |
-| `WORKTREES_ROOT` | Absolute path to the directory holding your worktrees. Only used by `docker-compose.local.yml`, to mount that directory into the `web` container. |
+| `ATLAS` | Pins the Atlas image tag. Unset uses `latest`; the tag this commit was tested against is in `.atlas_version`. |
+| `WORKTREES_ROOT` | Absolute path to the directory holding your worktrees. Read only by `docker-compose.local.yml`, to mount that directory into the `web` container. |
+| `HANDLE_*`, `CERBERUS_IIIF_*` | Handle minting and gated-derivative signing. Both have dev defaults; see the comments in `.env.example`. |
 
 Atlas keeps its own `.env`, on the same pattern.
 
