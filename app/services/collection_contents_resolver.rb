@@ -1,42 +1,24 @@
 # frozen_string_literal: true
 
 # A Collection's member Works as gated Solr documents, in the page-batched shape
-# {MetadataExportPacker} consumes. The collection counterpart of the slice of
-# SetResolver that bulk export needs: same gated `search_builder` chain (so a
-# viewer only ever sees Works they can discover), same `each_content_batch` /
-# `contents_count` surface, same {SetResolver::MAX_EXPORT_ROWS} runaway cap.
+# {MetadataExportPacker} consumes. See docs/discovery.md.
 #
-# Direct members only (structural + linked overlay), matching the Collection
-# show page's browse semantics (CatalogController#find_children with no query) —
-# Works in sub-collections are not pulled. Containers are excluded; only leaf
-# Works are "contents".
+# Gated: every query runs through the controller's `search_service.search_builder`,
+# so a viewer only ever sees Works they can discover.
 class CollectionContentsResolver
-  # @param valkyrie_id [String] the collection's uuid (Solr uniqueKey form), as
-  #   stored in the membership fields. Typically `collection.valkyrie_id`.
-  # @param search_service [Blacklight::SearchService] supplies the gated builder
-  #   + index (the controller's `search_service`).
   def initialize(valkyrie_id:, search_service:)
     @valkyrie_id = valkyrie_id
     @search_service = search_service
   end
 
-  # @return [Integer] gated tally of the collection's member Works.
   def contents_count
     search(*contents_fqs, rows: 0).total
   end
 
-  # Streams the member Works in pages of gated SolrDocuments, capped at
-  # {SetResolver::MAX_EXPORT_ROWS}. Mirrors SetResolver#each_content_batch.
-  #
-  # @yieldparam docs [Array<SolrDocument>] one page of member Works.
-  # @return [void]
-  # `fl` must cover every field MetadataExportPacker reads, which is why it is
-  # taken from the packer rather than written out here. A field the packer reads and
-  # the query does not fetch is not an error anywhere — the doc simply has no value,
-  # and the manifest gets a blank cell. That silently emptied the Embargoed? and
-  # Embargo Date columns on a collection export while a set export of the same Work
-  # filled them, and because a manifest row carrying a PID *updates* that record, a
-  # re-load then cleared an embargo nobody had touched.
+  # `fl` is taken from the packer rather than written out here, and the two must
+  # not drift. A field the packer reads and the query does not fetch is an error
+  # nowhere: the document has no value, the manifest gets a blank cell, and
+  # re-loading that manifest writes the blank back over the record.
   def each_content_batch(batch: 200)
     return if @valkyrie_id.blank?
 

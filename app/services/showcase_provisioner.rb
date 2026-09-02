@@ -1,15 +1,7 @@
 # frozen_string_literal: true
 
-# Provisions a community's genre "showcase" Collections — the featured containers
-# the deposit fork publishes into, one per scholarly genre. Shared by
-# CommunitiesController#create (every new community is provisioned on creation)
-# and the dev/staging reset seed. Each showcase is a featured Collection titled
-# after its genre, via the same structure-safe MODS merge the descriptive forms
-# use. A per-showcase failure is logged and skipped so one bad create can't abort
-# the rest — the community already exists by this point, and a missing showcase
-# can be re-created later. The acting principal comes from the ambient
-# Current.nuid (set by the controller, or the reset seed's Current.set block),
-# but the showcases are recorded as UNOWNED_NUID — see #provision.
+# Provisions a community's genre showcase Collections, one featured Collection
+# per scholarly genre. See docs/discovery.md.
 class ShowcaseProvisioner < ApplicationService
   include AtlasWrite
 
@@ -18,7 +10,6 @@ class ShowcaseProvisioner < ApplicationService
     super()
   end
 
-  # @return [Hash{String => AtlasRb::Mash}] created showcases keyed by genre label.
   def call
     FeaturedContent.genre_labels.each_with_object({}) do |label, map|
       showcase = provision(label)
@@ -28,16 +19,12 @@ class ShowcaseProvisioner < ApplicationService
 
   private
 
-    # AtlasRb::Error covers the typed refusals as well as transport faults —
-    # notably a 403 from the container-create gate, which reaches this path as
-    # an exception rather than the empty envelope an untyped binding returned.
-    # Catching only Faraday/JSON would let it abort the whole provisioning run,
-    # and with it the community create that triggered it.
-    # Recorded as unowned rather than attributed to the acting principal: a
-    # showcase is a per-community institutional container, structurally the same
-    # as the tree above it. Falling through to the creator would make whoever
-    # created the Community the depositor of all seven of its showcases — and,
-    # under depositor-implies-edit, give them edit rights on each.
+    # Record the showcase as unowned. Falling through to the acting principal
+    # would make whoever created the Community the depositor of every showcase
+    # under it, and depositor implies edit.
+    # Rescue AtlasRb::Error alongside the transport faults: the container-create
+    # gate's 403 reaches this path as an exception, and letting it escape aborts
+    # the whole provisioning run and the community create that triggered it.
     def provision(label)
       showcase = AtlasRb::Collection.create(@community_id,
                                             featured:  true,
@@ -50,9 +37,6 @@ class ShowcaseProvisioner < ApplicationService
       nil
     end
 
-    # Title the showcase after its genre via the structure-safe MODS merge (parse
-    # the freshly-minted MODS, merge the title/abstract in, write the raw XML
-    # back) — the same path Transformable#save_descriptive! uses.
     def set_title(id, label)
       xml = AtlasRb::Collection.mods(id, 'xml')
       merged = Metadata::MODSMerge.call(xml: xml, title: label,

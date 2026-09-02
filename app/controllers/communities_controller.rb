@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+# Community browse, show and edit. See docs/discovery.md.
+#
+# Every Solr lookup here runs through the gated `search_service.search_builder`,
+# so a visitor only ever counts and sees what they may discover. Do not swap in
+# a hand-built index query.
 class CommunitiesController < CatalogController
   include Thumbable
   include Transformable
@@ -11,16 +16,11 @@ class CommunitiesController < CatalogController
   authorize_resource_writes!(extra_edit: %i[request_restriction])
   after_action :record_view_impression, only: :show
 
-  # Solr membership fields faceted to decide whether a showcase has content
-  # (structural children + linked-member edges). See #populated_showcase_ids.
   MEMBERSHIP_FIELDS = [MembershipQuery::STRUCTURAL_FIELD, MembershipQuery::LINKED_FIELD].freeze
 
-  # Scope the inherited Blacklight index to Communities only. Without this the
-  # controller inherits CatalogController's unscoped browse, so /communities
-  # lists every resource type (Collections, Works, People) — see
-  # SearchBuilder#scope_to_resource_type. Scoped to :index alone: the :show
-  # page's find_children must still surface child Collections, so it must not be
-  # filtered to Communities.
+  # Scope the inherited Blacklight index to Communities, on :index alone.
+  # Without it /communities lists every resource type; applied to :show it would
+  # strip the child Collections find_children has to surface.
   def search_service_context
     return super unless action_name == 'index'
 
@@ -50,12 +50,8 @@ class CommunitiesController < CatalogController
 
   def edit
     @community = AtlasRb::Community.find(params[:id])
-    # A community narrows its OWN object only. No cascade reaches the
-    # collections inside, which stay exactly as visible and as searchable as
-    # they were. That shallowness is the point — it holds a community's landing
-    # page back without touching its contents — but it is a sharp enough tool to
-    # be admin-only, and the form has to say what it does and does not do.
-    # Everyone else gets the request form instead.
+    # Narrowing a Community is administrator-only, and ResourcePermissions
+    # refuses anyone else server-side. See docs/permissions.md.
     @narrowing_allowed = current_user&.admin? || false
     form_preparation(@permissions, resource: @community)
     load_descriptive!('Community')
@@ -63,7 +59,7 @@ class CommunitiesController < CatalogController
     breadcrumbs(params[:id], editing: true)
   end
 
-  # Showcases are provisioned only once the community exists and is titled, so a
+  # Provision showcases only after the community exists and is titled, so a
   # missing title never leaves orphaned showcases behind.
   def create
     c = mint_titled!('Community', :community)
@@ -79,9 +75,6 @@ class CommunitiesController < CatalogController
 
   private
 
-    # One showcase lookup answers two questions: which showcases to hide from the
-    # listing (the empty ones), and whether Delete may be offered at all (any
-    # showcase is a live member Atlas refuses to tombstone around).
     def load_children_and_deletability
       showcases = featured_showcase_uuids(@community.valkyrie_id)
       @response = find_children(@community.valkyrie_id, params[:id],
@@ -89,42 +82,23 @@ class CommunitiesController < CatalogController
       @deletable = deletable?(showcases)
     end
 
-    # v1-faithful: only show Featured Collections that have content. Provisioning
-    # seeds every community with the full genre showcase set, so without this the
-    # browse would be littered with empty showcase rows. We compute the empty
-    # showcases up front and exclude them from find_children *at query time* (an
-    # fq) — not as a Ruby post-filter on the documents — so the Type facet counts
-    # match what's shown (a post-filter leaves Solr's facets counting the hidden
-    # rows). Ordinary empty user/workspace Collections are left alone (showing an
-    # empty collection one created is intentional); this is scoped to `featured?`
-    # showcases, pairing with the Faculty & Staff node so both curated affordances
-    # appear only when populated.
-    #
-    # @param showcase_uuids [Array<String>] the community's featured showcases.
-    # @return [Array<String>] Solr uniqueKeys of empty featured showcases.
+    # Exclude the empty showcases at query time, as an fq on find_children, and
+    # never as a Ruby post-filter on the returned documents: a post-filter leaves
+    # Solr's Type facet counting the rows it hid.
     def empty_showcase_uuids(showcase_uuids)
       return [] if showcase_uuids.empty?
 
       showcase_uuids - populated_showcase_ids(showcase_uuids).to_a
     end
 
-    # Whether to offer Delete. The listing above is not the whole test: Atlas
-    # refuses a tombstone while any live member remains, and a showcase Collection
-    # is a live member even when it is empty and therefore hidden from the listing.
-    # Asking only the listing offered Delete on a community reading "This community
-    # is empty", then failed the delete and told the reader to withdraw contents
-    # they could not see.
-    #
-    # Provisioning gives every community the full genre showcase set, so in
-    # practice this is false for any community that provisioned normally. It stays
-    # a real test rather than a flat "never": ShowcaseProvisioner tolerates a failed
-    # showcase create, so a community can legitimately have none.
+    # The listing is not the whole test. Atlas refuses a tombstone while any live
+    # member remains, and a showcase Collection is a live member even when it is
+    # empty and hidden from the listing, so testing @response alone offers Delete
+    # on a community that then fails to delete.
     def deletable?(showcase_uuids)
       @response.documents.empty? && showcase_uuids.empty?
     end
 
-    # The Solr uniqueKeys of the community's featured showcase Collections (its
-    # structural children flagged featured).
     def featured_showcase_uuids(community_uuid)
       builder = search_service.search_builder.with({}).with_filters(
         'internal_resource_tesim:Collection', 'featured_bsi:true', '-tombstoned_bsi:true',
@@ -133,11 +107,6 @@ class CommunitiesController < CatalogController
       Blacklight.default_index.search(params: builder).documents.map(&:id)
     end
 
-    # The subset of +showcase_uuids+ (Solr uniqueKeys) that have >=1 member,
-    # structural or linked. One gated, rows-0 facet query over the membership
-    # fields restricted to those showcases; the raw facet_counts (value/hits
-    # pairs, values in `id-<uuid>` form) are read directly so we don't depend on
-    # a configured Blacklight facet. Returns a Set of bare uuids.
     def populated_showcase_ids(showcase_uuids)
       return Set.new if showcase_uuids.empty?
 
@@ -154,19 +123,13 @@ class CommunitiesController < CatalogController
       Blacklight.default_index.search(params: builder).dig('facet_counts', 'facet_fields') || {}
     end
 
-    # Yield each Solr facet value (an `id-<uuid>` string) with a positive count
-    # from a flat [value, hits, value, hits, ...] facet_fields array.
+    # Solr returns facet_fields as a flat [value, hits, value, hits, ...] array.
     def each_positive_facet(pairs)
       Array(pairs).each_slice(2) { |value, hits| yield value.to_s if hits.to_i.positive? }
     end
 
-    # Surface a synthetic "Faculty & Staff" row as the first entry of a community's
-    # browse, rendered through the normal Blacklight pipeline so it matches the
-    # list/gallery rows exactly. Only when there are affiliated People to browse,
-    # and only on the unfiltered first page (mirrors v1's current_page == 1 && no
-    # constraints) so it drops out once the visitor searches-within or facets.
-    # The synthetic isn't in Solr, so we also bump the response total by one to
-    # keep "Displaying N entries" matching the rows actually shown.
+    # The synthetic row is not in Solr, so raise the response total by one or
+    # "Displaying N entries" undercounts the rows on screen.
     def prepend_faculty_staff_entry(community_noid)
       return if params[:page].present? && params[:page].to_i > 1
       return if params[:q].present? || params[:f].present?
@@ -176,8 +139,6 @@ class CommunitiesController < CatalogController
       @response.response['numFound'] = @response.total + 1
     end
 
-    # A non-Solr SolrDocument styled as a Person result row (fa-user icon, type
-    # pill), titled "Faculty & Staff", carrying its own nav_url to the listing.
     def faculty_staff_stub(community_noid)
       SolrDocument.new(
         {
@@ -189,21 +150,17 @@ class CommunitiesController < CatalogController
           # Public directory affordance — keeps document_status_icons from flagging
           # this synthetic row as private (a lock).
           'read_access_group_ssim'  => ['public'],
-          # Pluralize the type pill to "People" — this is a browse-to-many row,
-          # not an individual Person (SolrDocument#people_browse?).
+          # Pluralizes the type pill to "People" (SolrDocument#people_browse?).
           'people_browse_bsi'       => true
         },
-        # Carry the live Blacklight response so the synthetic row behaves like a
-        # real result: SolrDocument#response defaults to nil, and Blacklight's
-        # per-row highlight check (has_highlight_field? → response['highlighting'])
-        # raises NoMethodError on a nil response. Sharing @response makes the
-        # check see a real (query-less, blank) highlighting section and no-op.
+        # Share the live response: SolrDocument#response defaults to nil, and
+        # Blacklight's per-row highlight check reads response['highlighting'],
+        # which raises NoMethodError on nil.
         @response
       )
     end
 
-    # Gated count of Person docs affiliated with this community. Affiliations
-    # index as community NOIDs in affiliated_community_ids_ssim.
+    # Affiliations index as community NOIDs in affiliated_community_ids_ssim.
     def affiliated_people_count(community_noid)
       builder = search_service.search_builder.with({}).with_filters(
         'internal_resource_tesim:Person',

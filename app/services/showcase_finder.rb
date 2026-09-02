@@ -1,33 +1,14 @@
 # frozen_string_literal: true
 
-# Resolves a community's genre "showcase" Collections — the featured containers
-# provisioned by CommunitiesController#provision_showcases — for the deposit
-# fork's publish branch. Two uses:
+# Resolves a community's genre showcase Collections for the deposit fork's
+# publish branch. See docs/discovery.md.
 #
-#   ShowcaseFinder.call(scope:, community_noid:)
-#     => { "Presentations" => "<noid>", "Datasets" => "<noid>", ... }
-#        every showcase that exists under the community, keyed by genre label
-#        (what WorksController#new offers as publish categories).
-#
-#   ShowcaseFinder.call(scope:, community_noid:, genre_label: "Datasets")
-#     => "<noid>"  (or nil)
-#        the single showcase NOID for one genre — the linked-member edge target
-#        WorksController#create writes to on publish.
-#
-# Uses the same `Blacklight.default_index.search(params: SearchBuilder.new(scope))`
-# idiom as ResourceSearch, so it runs through the gated SearchBuilder chain
-# (scope = the controller, supplying current_user) — a private/embargoed
-# showcase the depositor can't see is never offered as a publish target.
-# Showcases are matched within the community's subtree (descendants_fq on the
-# community NOID), restricted to featured Collections whose title is one of the
-# shared scholarly genre labels.
+# Gated: the search runs through the {SearchBuilder} chain with the controller
+# as scope, so a showcase the depositor cannot discover is never offered as a
+# publish target.
 class ShowcaseFinder < ApplicationService
   MAX_SHOWCASES = 50
 
-  # @param scope [#blacklight_config, #current_user] the controller.
-  # @param community_noid [String] the community whose showcases to resolve.
-  # @param genre_label [String, nil] when given, return just that genre's
-  #   showcase NOID; otherwise return the full {label => noid} map.
   def initialize(scope:, community_noid:, genre_label: nil)
     @scope = scope
     @community_noid = community_noid
@@ -46,9 +27,6 @@ class ShowcaseFinder < ApplicationService
 
   private
 
-    # { genre_label => showcase_noid } for the community's featured Collections
-    # whose title is a known genre. A community has one showcase per genre, so
-    # the map is small; last-writer-wins on the (not expected) duplicate title.
     def fetch_showcases
       builder = SearchBuilder.new(@scope).with({}).with_filters(
         'internal_resource_tesim:Collection',
