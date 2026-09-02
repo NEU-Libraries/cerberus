@@ -270,11 +270,38 @@ every push. Do run it when the change is broad enough to warrant it: a bootstrap
 file, a shared concern, a model everything touches.
 
 **The browser.** For anything with a visible surface, check it in the app rather
-than only in a spec. A worktree branch needs its committed diff applied to the
-running checkout first, which is what a preview helper does: apply `HEAD..
-<branch>`, restart the container so Puma, the worker and the watcher all pick
-the new code up, and revert when you are done. In-place edits on your own branch
-need none of that — the bind mount serves them directly.
+than only in a spec. In-place edits on your own branch need nothing special —
+the bind mount serves them directly. A worktree branch does need something: the
+container mounts only the main checkout, so the branch's committed diff has to
+be applied there first.
+
+A preview helper does that. It is a small tool kept outside this repo, because
+the same one drives Atlas and a copy in either `bin/` would drift from the
+other. If you need to install or write one, this is the contract it has to
+satisfy:
+
+- **Diff from the merge-base of HEAD and the branch, not from HEAD.** Otherwise
+  commits made here after the fork are inverted by the patch.
+- **Pass `--binary` and `--no-ext-diff`.** Without the first, added binary
+  fixtures fail to apply with `cannot apply binary patch … without full index
+  line`. Without the second, a configured external differ emits a side-by-side
+  diff that `git apply` rejects as having no valid patches.
+- **Restart the whole `web` container, not just Puma,** so the Solid Queue
+  worker and the dartsass watcher pick the new code up too. Use `restart`, never
+  `up`: `up` re-resolves the compose files and drops the worktrees mount unless
+  the full `-f` chain is passed, while `restart` reuses the container as it
+  stands.
+- **Reverse-apply to clean up, and refuse when the tree has drifted** from the
+  patch rather than guessing at it. A file edited mid-preview is the developer's,
+  not the tool's.
+- **Expect the container's boot to undo part of the revert.** The entrypoint
+  runs `db:migrate`, which re-dumps `db/schema.rb` from a database that still
+  has the branch's migrations applied — reverting a patch cannot un-apply a
+  migration and should not try. Restore the paths the patch touched after the
+  restart, or the tree comes back dirty a second after it was cleaned.
+
+Whatever applies a preview must require a clean tree first, and must be reverted
+before the next one.
 
 **Signing in.** Stock users are recreated on every object reset, so they are
 reliably present. NUID `000000002` carries
