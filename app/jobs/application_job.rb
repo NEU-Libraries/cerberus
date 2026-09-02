@@ -1,28 +1,11 @@
 # frozen_string_literal: true
 
 class ApplicationJob < ActiveJob::Base
-  # Carry the ambient acting NUID across the enqueue → perform boundary.
-  #
-  # Rails 8.1 has no built-in ActiveJob ↔ ActiveSupport::CurrentAttributes
-  # propagation: `Current.nuid` set on the request thread does *not*
-  # automatically reach the worker thread that runs the job. Background
-  # jobs that call `AtlasRb::*` without an explicit `nuid:` kwarg rely on
-  # the configured `default_nuid` resolving to `Current.nuid`; if the
-  # value isn't restored at perform, the request goes out with no `User:`
-  # header and Atlas's `require_auth` rejects it with 400 — surfacing as
-  # an unrelated `NoMethodError` when the gem parses the error envelope
-  # and returns `nil`.
-  #
-  # The fix captures `Current.nuid` at enqueue and re-sets it for the
-  # duration of `perform`. Child jobs enqueued mid-perform inherit the
-  # value the same way, because their own `before_enqueue` runs while
-  # the parent's `around_perform` has Current populated.
-  #
-  # `before_enqueue` does NOT fire on `perform_now` — when a parent job
-  # invokes a child via `perform_now` (e.g. IiifAssetsJob coordinating
-  # ThumbnailCreationJob + DerivativeCreationJob serially), the child's
-  # `current_nuid` is nil. Falling through to the caller's `Current.nuid`
-  # in `around_perform` keeps the inherited NUID instead of wiping it.
+  # Carries the ambient acting NUID across the enqueue → perform boundary;
+  # without it an AtlasRb call from a job goes out with no principal. Note that
+  # `before_enqueue` does NOT fire on `perform_now`, so a child job's
+  # current_nuid is nil — the fallback to the caller's `Current.nuid` in
+  # `around_perform` is what keeps the inherited value. See docs/deposit.md.
   attr_accessor :current_nuid
 
   before_enqueue { |job| job.current_nuid ||= Current.nuid }

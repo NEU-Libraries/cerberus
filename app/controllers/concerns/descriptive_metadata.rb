@@ -1,15 +1,13 @@
 # frozen_string_literal: true
 
 # The simple-form descriptive fields (title, abstract, keywords) for the
-# Metadata tab: parse them out of the resource's raw MODS to pre-fill, validate
-# what comes back, and merge the edits into the existing MODS rather than
-# replacing it — so every curated node the form does not own survives.
+# Metadata tab. Every edit MERGES into the resource's existing MODS, never
+# replaces it, so curated nodes the form does not own survive. See
+# docs/deposit.md.
 module DescriptiveMetadata
   extend ActiveSupport::Concern
   include AtlasWrite
 
-  # Descriptive (MODS) fields the simple Metadata form owns; symbol-keyed for
-  # MODSMerge. `keywords: false` (containers) leaves keyword subjects untouched.
   def descriptive_params(resource_key, keywords: false)
     raw = params.require(resource_key).permit(:title, :description, keywords: [])
     {
@@ -19,18 +17,13 @@ module DescriptiveMetadata
     }
   end
 
-  # True when the request carried the descriptive (Metadata-tab) form rather than
-  # the permissions form — both POST to #update with disjoint fields.
   def descriptive_submitted?(resource_key)
     params[resource_key].respond_to?(:key?) && params[resource_key].key?(:title)
   end
 
-  # `keywords: true` means "this resource must carry at least one subject", and the
-  # Keywords box is how a depositor supplies one. A record whose subjects are all
-  # authority-controlled already satisfies that, and those subjects are curated:
-  # MODSFields keeps them out of the box on purpose and MODSMerge never writes over
-  # them. So the form posts `curated_subjects` and it counts here — otherwise a
-  # curator fixing a title on such a record must invent a redundant keyword to save.
+  # curated_subjects satisfies the keyword requirement and must: authority
+  # subjects are kept out of the Keywords box on purpose, so without it a curator
+  # fixing a title on such a record has to invent a redundant keyword to save.
   def descriptive_valid?(descriptive, keywords: false, curated_subjects: false)
     return false if descriptive[:title].blank?
     return false if keywords && Array(descriptive[:keywords]).empty? && !curated_subjects
@@ -38,21 +31,14 @@ module DescriptiveMetadata
     true
   end
 
-  # Cast the flag the descriptive form posts alongside the MODS fields. Kept out of
-  # descriptive_params because that hash is splatted straight into save_descriptive!
-  # as the MODS payload, and this is not a MODS field.
-  #
-  # Trusting a form value is fine here: the guard is a curation prompt, not a
-  # security boundary — Atlas is that — so the worst a tampered value buys is a Work
-  # saved with no subjects, which the API permits anyway.
+  # Kept OUT of descriptive_params: that hash is splatted straight into
+  # save_descriptive! as the MODS payload, and this is not a MODS field.
   def curated_subjects_posted?(resource_key)
     ActiveModel::Type::Boolean.new.cast(params.dig(resource_key, :curated_subjects)).present?
   end
 
-  # Create-path title guard (containers): flashes and returns true when the
-  # permitted params carry no title, so the controller can redirect back before
-  # minting an Atlas resource — a blank title otherwise yields a silently
-  # untitled object (MODSMerge leaves a blank title untouched).
+  # Must run BEFORE the mint: MODSMerge leaves a blank title untouched, so a
+  # missing title otherwise yields a silently untitled Atlas resource.
   def title_missing?(permitted)
     return false if permitted['title'].present?
 
@@ -64,19 +50,14 @@ module DescriptiveMetadata
     Array(raw).map { |k| k.to_s.strip }.reject(&:empty?).uniq
   end
 
-  # Parse the simple-form descriptive fields out of the resource's raw MODS so
-  # the edit form pre-fills with the BARE title (+ read-only structured parts),
-  # the abstract, and the free-text keywords — exactly what #update merges back.
   def load_descriptive!(klass)
     @descriptive = Metadata::MODSFields.call(xml: resource_mods(klass))
   end
 
-  # Merge the descriptive fields into the existing MODS and write via the raw,
-  # structure-safe update path — preserving every curated node the form does not
-  # own, and skipping the write (and a needless OCFL MODS version) on a no-op.
-  # Wrapped in with_stale_retry: right after a deposit the async ingest/derivative
-  # jobs are still finalizing the same Work, so this read→merge→write can lose an
-  # optimistic-lock race; re-reading picks up the current MODS + token.
+  # The raw, structure-safe update path, and it must stay that way: it preserves
+  # curated nodes and skips a needless OCFL MODS version on a no-op. Keep the
+  # with_stale_retry too — right after a deposit the async ingest jobs are
+  # writing the same Work, so this read→merge→write can lose the lock race.
   def save_descriptive!(klass, id, title:, description:, keywords: nil)
     with_stale_retry do
       xml = AtlasRb.const_get(klass).mods(id, 'xml')
@@ -87,24 +68,13 @@ module DescriptiveMetadata
     end
   end
 
-  # Mint a container and give it its title, in that order and in one place.
+  # Guard, mint, title — in that order, and the title before anything else the
+  # caller does: either Atlas call can fail, and this order leaves a titled
+  # resource holding its minted ACL (correctable on the Permissions tab) rather
+  # than a correctly-restricted resource with no title. See docs/deposit.md.
   #
-  # The two steps belong together because the invariant spans them: MODSMerge
-  # leaves a blank title untouched, so minting first and titling second would
-  # leave an untitled resource in the repository whenever the title is missing.
-  # The guard therefore runs before the mint, and the client-side `required`
-  # attribute is only the first line of it — this is the backstop for JS-off and
-  # for a direct POST.
-  #
-  # The title is written before anything else the caller wants to do, because
-  # either call can fail against Atlas and this order picks the better wreckage:
-  # a titled resource still holding the ACL it was minted with, which the
-  # Permissions tab can correct, rather than a correctly-restricted resource
-  # with no title.
-  #
-  # @return [AtlasRb::Mash, nil] the minted resource, or nil when the title was
-  #   missing — in which case the flash is already set and the caller only has
-  #   to send the reader back to the form.
+  # @return [AtlasRb::Mash, nil] nil when the title was missing; the flash is
+  #   already set, so the caller only sends the reader back to the form.
   def mint_titled!(klass, resource_key)
     permitted = params.expect(resource_key => [:title, :description]).to_h
     return nil if title_missing?(permitted)
