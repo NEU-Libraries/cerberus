@@ -1,20 +1,12 @@
 # frozen_string_literal: true
 
-# Shared depositor context for the curation surfaces — the weighted deposit
-# fork (WorksController) and the My DRS two-space page (MyDrsController). Both
-# need the signed-in depositor's curated Person (for affiliations + the personal
-# root that homes published works) and the list of Collections they own (their
-# workspace).
+# Depositor context shared by the deposit fork and My DRS: the signed-in
+# depositor's curated Person and their workspace. See docs/identity.md.
 module DepositorContext
   extend ActiveSupport::Concern
 
   private
 
-    # The depositor's curated Person — authoritative display name, affiliations,
-    # and personal_root_id — resolved from their NUID and memoised for the
-    # request. nil for anyone without a Person (most depositors), which simply
-    # means no publish branch. Resolution failures degrade to nil rather than
-    # blocking a workspace deposit.
     def deposit_person
       return @deposit_person if defined?(@deposit_person)
 
@@ -23,17 +15,10 @@ module DepositorContext
       @deposit_person = nil
     end
 
-    # The depositor's workspace Collections — those under their Person personal
-    # root, NOT every collection they happen to have deposited into. Scoping to
-    # the root subtree (ancestor_ids_ssim, bare noids) keeps institutional
-    # containers a staff member created out of their personal workspace — without
-    # this, an admin who seeds the whole tree "owns" all of it. nil root (no
-    # curated Person) ⇒ no personal workspace. Featured showcases are excluded;
-    # ungated (own private collections must stay visible). The root subtree is
-    # inherently the person's own, so depositor scoping is unnecessary here.
-    #
-    # Newest first, over Valkyrie's own record timestamp — a depositor reaches
-    # for the collection they just made.
+    # Scope to the Person's personal-root subtree, NOT to every collection this
+    # depositor has deposited into: without the ancestor filter an admin who
+    # seeded the institutional tree "owns" all of it. The query is deliberately
+    # ungated — a depositor's own private collections must stay visible here.
     def workspace_collections(rows: 200)
       root = deposit_person&.[]('personal_root_id').presence
       return [] unless root
@@ -46,17 +31,13 @@ module DepositorContext
       ).documents
     end
 
-    # The signed-in depositor's NUID, escaped for a quoted Solr phrase.
+    # Escaped for a quoted Solr phrase.
     def depositor_phrase
       current_user.nuid.to_s.gsub(/["\\]/, '')
     end
 
-    # Publish destinations for the deposit fork, keyed by community NOID:
-    # { noid => { name:, genres: { label => showcase_noid } } }. Only the
-    # depositor's affiliated communities that actually have showcases appear, and
-    # only when the Person carries a personal_root_id to home published works in.
-    # Empty (publish branch hidden) for anyone without a qualifying Person — the
-    # whole branch is gated behind this being present.
+    # Empty hides the publish branch entirely, so the personal_root_id check is
+    # the gate on publishing, not a display detail.
     def publish_targets
       person = deposit_person
       return {} unless person && person['personal_root_id'].present?
@@ -69,14 +50,9 @@ module DepositorContext
       end
     end
 
-    # Resolve the showcase to promote into from the submitted community + genre,
-    # or nil when it can't be honoured: the depositor must have a curated Person,
-    # the chosen community must be one they're affiliated with, and a showcase
-    # must exist for that genre there (gated, so one they can't see reads nil).
-    #
-    # Only a showcase — placement is the route's business, so this no longer
-    # resolves a structural home. The caller checks separately that the
-    # destination is the depositor's own root before offering promotion at all.
+    # Resolves a showcase only — it does NOT check where the Work is going. The
+    # caller must confirm separately that the destination is the depositor's own
+    # root before offering promotion.
     def publish_showcase_id
       person = deposit_person
       return nil if person.blank?
@@ -88,8 +64,6 @@ module DepositorContext
                           genre_label: params[:publish_genre])
     end
 
-    # A community's title for the publish picker, degrading to its NOID if the
-    # lookup fails (a stale affiliation shouldn't break the deposit form).
     def community_name(noid)
       AtlasRb::Community.find(noid)['title'].presence || noid.to_s
     rescue Faraday::Error, JSON::ParserError

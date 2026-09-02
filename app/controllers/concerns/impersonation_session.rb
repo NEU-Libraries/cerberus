@@ -1,25 +1,7 @@
 # frozen_string_literal: true
 
-# Acting-as / view-as impersonation. Included into ApplicationController so it
-# governs every request —
-# an impersonating admin browses the whole app, not just an admin surface.
-#
-# Two mutually-exclusive modes, both admin-only:
-#
-#   acting-as  WRITE impersonation. The admin stays the authenticated
-#              identity (Current.nuid) but Current.on_behalf_of is set to
-#              the target, so atlas_rb writes carry `On-Behalf-Of: <target>`
-#              (auto-threaded via the default_on_behalf_of callable). Atlas
-#              authorizes the admin and stamps the target as provenance.
-#
-#   view-as    READ-only impersonation. Sets view_as_nuid, which drives
-#              {#effective_user} — the single user that BOTH Ability and
-#              SearchBuilder consult. Writes are rejected
-#              (#reject_writes_in_view_as); the authenticated identity is
-#              untouched.
-#
-# Session state lives in the Rails session cookie with a 30-minute sliding
-# (inactivity) TTL. All termination paths funnel through #end_impersonation.
+# Acting-as (write) and view-as (read-only) impersonation, included into
+# ApplicationController so it governs every request. See docs/identity.md.
 #
 # rubocop:disable Metrics/ModuleLength -- a cohesive state machine (predicates,
 # lifecycle, TTL, context plumbing, hydration); splitting it would scatter the
@@ -58,16 +40,14 @@ module ImpersonationSession
     session[:view_as_nuid]
   end
 
-  # The user whose READ view is rendered. Only view-as diverges from the
-  # authenticated admin. Memoized per request. Fails CLOSED: if the view-as
-  # target can't be hydrated from Atlas, fall back to a least-privilege
-  # guest-shaped user — never leak the admin's view under a view-as banner.
+  # The user whose READ view is rendered, and the single user both Ability and
+  # SearchBuilder must consult — never current_user directly. Fails closed: a
+  # view-as target that will not hydrate falls back to a guest-shaped user
+  # rather than leaking the admin's own view under a view-as banner.
   def effective_user
     @effective_user ||= view_as? ? view_as_target : current_user
   end
 
-  # The hydrated target user (acting-as or view-as), for the banner's
-  # name/NUID display. nil if no session or hydration fails.
   def impersonation_target
     return @impersonation_target if defined?(@impersonation_target)
 
@@ -76,10 +56,8 @@ module ImpersonationSession
 
   def start_acting_as(target_nuid)
     end_impersonation # mutual exclusion + clean clock
-    # Fail-closed: record the session start BEFORE establishing it, so an
-    # admin can never impersonate without an audit trail. A failed emit
-    # raises (Faraday) and the session is never set; the controller rescues
-    # it into a friendly error.
+    # Emit before establishing the session, so an admin can never impersonate
+    # without an audit trail. A failed emit raises and no session is set.
     emit_impersonation_event('impersonation_started', target_nuid, 'acting_as')
     session[:acting_as_nuid] = target_nuid
     stamp_impersonation_clock
@@ -101,46 +79,33 @@ module ImpersonationSession
     session.delete(:impersonation_started_at)
     session.delete(:impersonation_last_active_at)
 
-    # Best-effort: the session is already torn down above, so a failed audit
-    # emit must never trap the admin mid-impersonation. Log and move on.
+    # Best-effort from here: the session is already torn down, so a failed emit
+    # must never trap the admin mid-impersonation.
     return unless mode
 
     begin
       emit_impersonation_event('impersonation_ended', target, mode)
     rescue Faraday::Error, AtlasRb::Error => e
-      # AtlasRb::Error as well as Faraday::Error, because a refusal Atlas states
-      # in an HTTP response is still a failed emit. A read-only maintenance
-      # window is the case that proves it: the session is already gone by this
-      # point, so letting AtlasRb::ReadOnlyModeError escape would land the admin
-      # on the maintenance page instead of their redirect, telling them the exit
-      # failed when it did not.
+      # AtlasRb::Error must stay in this rescue: a read-only maintenance window
+      # raises AtlasRb::ReadOnlyModeError, and letting it escape would land the
+      # admin on the maintenance page and claim an exit failed that succeeded.
       Rails.logger.error("impersonation_ended audit emit failed: #{e.class} #{e.message}")
     end
   end
 
   private
 
-    # Push the impersonation state into the ambient Current context after
-    # ApplicationController#set_current_nuid has set the admin identity.
-    # on_behalf_of drives write attribution; view_as_nuid is read-only
-    # bookkeeping (effective_user is the real consumer).
+    # Runs after ApplicationController#set_current_nuid has set the admin
+    # identity. on_behalf_of drives write attribution; view_as_nuid is read-only
+    # bookkeeping and must never become a write header.
     def set_impersonation_context
       Current.on_behalf_of = acting_as_nuid
       Current.view_as_nuid = view_as_nuid
     end
 
-    # View-as is read-only. A state-changing request ends the session loudly
-    # rather than silently performing (or silently dropping) a write.
-    #
-    # "Loudly" needs help when the write came from inside a turbo-frame — the My
-    # DRS token panel is one. Turbo looks for that frame in the redirect's target,
-    # does not find it on the root page, and discards the entire response: no
-    # token, no error, no flash, and the banner still showing until the next
-    # navigation. The button looks simply dead, so an admin may keep pressing it
-    # while no longer impersonating anyone.
-    #
-    # A turbo-stream is honoured whatever frame the request came from, and a
-    # refresh re-renders the page, which surfaces the flash and drops the banner.
+    # View-as is read-only: a state-changing request ends the session loudly.
+    # A redirect is discarded when the write came from inside a turbo-frame, so
+    # the reply has to be a turbo-stream refresh instead.
     def reject_writes_in_view_as
       return unless view_as?
       return if request.get? || request.head?
@@ -156,8 +121,6 @@ module ImpersonationSession
       render turbo_stream: turbo_stream.refresh(request_id: nil)
     end
 
-    # Sliding 30-minute inactivity window. Each request either expires the
-    # session (last activity older than the TTL) or refreshes the clock.
     def enforce_impersonation_ttl
       return unless impersonating?
 
@@ -169,10 +132,9 @@ module ImpersonationSession
       end
     end
 
-    # Record a session-scoped AuditEvent (no resource to hang it on) via
-    # atlas_rb's emit binding. actor_nuid is passed explicitly (the admin) —
-    # the gem uses it as the User: header and the recorded principal, so the
-    # admin gate holds even on an impersonation_ended emit fired mid-teardown.
+    # actor_nuid is the admin, passed explicitly: the gem sends it as the `User:`
+    # header and records it as the principal, so the admin gate still holds on an
+    # impersonation_ended emit fired after the session is gone.
     def emit_impersonation_event(action, target_nuid, mode)
       AtlasRb::AuditEvent.emit(
         action:            action,
@@ -188,15 +150,10 @@ module ImpersonationSession
       session[:impersonation_last_active_at] = now
     end
 
-    # No DB — User is a session-built ActiveModel. Hydrate role+groups from
-    # Atlas with the same GET /user call SSO sign-in uses.
-    #
-    # Crucially this is a plain profile lookup, NOT an on-behalf-of operation,
-    # so it must not inherit the ambient Current.on_behalf_of set during an
-    # acting-as session. That call sets the `User:` header to the target
-    # (a non-admin); if the leaked On-Behalf-Of rode along, Atlas's admin-gate
-    # on the header would reject the self-lookup and the banner would show
-    # "Unknown user". Suppress on_behalf_of for the duration of the lookup.
+    # A plain profile lookup, NOT an on-behalf-of operation: it must not inherit
+    # the ambient Current.on_behalf_of of an acting-as session. The call sets
+    # `User:` to the target (a non-admin), so a leaked On-Behalf-Of makes Atlas
+    # refuse the self-lookup and the banner reads "Unknown user".
     def hydrate_user(nuid)
       return if nuid.blank?
 
@@ -213,8 +170,7 @@ module ImpersonationSession
       nil
     end
 
-    # Fail-closed view-as target: a hydration miss yields a public-only
-    # guest, not the admin.
+    # Fail-closed: a hydration miss yields a public-only guest, not the admin.
     def view_as_target
       @view_as_target ||= hydrate_user(view_as_nuid) || User.new(groups: [], role: 'guest')
     end
