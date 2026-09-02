@@ -11,6 +11,12 @@ contracts with Atlas, and the reason a design rejected the obvious alternative.
 Each page names the source files it covers. Those files carry a one-line pointer
 back, so you can find either from the other.
 
+One page is not per-component. [`development.md`](development.md) covers the
+environment and the workflow — setup, the spec wrappers, worktrees, verification,
+the migration pause. It lives here because it versions with the scripts it
+describes, and because a developer needs it before any of the other pages make
+sense.
+
 ## What belongs elsewhere
 
 | Audience or need | Home |
