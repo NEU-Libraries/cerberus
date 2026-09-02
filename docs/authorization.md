@@ -1,7 +1,8 @@
 # Authorization
 
-How Cerberus gates a write, how it reports a resource it may not touch or
-cannot find, and how a narrowed audience reaches everything inside a container.
+How Cerberus gates a write, and how it reports a resource it may not touch or
+cannot find. Also, how a narrowed audience reaches everything inside a
+container.
 
 Source files:
 
@@ -22,9 +23,9 @@ courtesy layer over a check Atlas makes again.
 
 `Authorizable.authorize_resource_writes!` declares deny-by-default write gating
 for the standard REST resource controllers — works, collections, communities.
-Declaring the uniform "can this principal do this to this resource?" question
-from one place is the structural fix for the opt-in-per-action drift the
-authorization audit found: a new resource controller that calls this macro
+One place declares the uniform "can this principal do this to this resource?"
+question. That is the structural fix for the opt-in-per-action drift the
+authorization audit found. A new resource controller that calls this macro
 cannot silently ship a write that is gated only at the GET form.
 
 It installs three gates, matching the policy.
@@ -37,9 +38,9 @@ It installs three gates, matching the policy.
 
 `authenticate_user!` also runs on `new` and `create`.
 
-The create surface gates on the destination because creating a child is a write
-to its container, so the right question is "may you edit the thing you are
-adding to?" Atlas asks the same one — `:create_child` against the resolved
+The create surface gates on the destination, because creating a child is a
+write to its container. So the right question is "may you edit the thing you
+are adding to?" Atlas asks the same one: `:create_child` against the resolved
 parent. The destination arrives as a route segment, so it is always present:
 there is no shape of the request that reaches `new` or `create` ungated.
 
@@ -60,18 +61,18 @@ helpers split on which route segment carried the parent.
 | `child_create_path(children)` | the matching POST target for the form `new` renders; `children` is the plural segment — `collections`, `communities`, `works` |
 
 `authorize_edit_for!(id)` is the `:edit` gate keyed on an explicit id rather
-than `params[:id]`, so a caller whose resource id rides a different param can
+than `params[:id]`. So a caller whose resource id rides a different param can
 reuse it. The XML editor needs this: `xml#editor` carries `params[:id]` while
 `xml#validate` and `xml#update` carry `params[:resource_id]`.
 
 ### Show-page affordances
 
 `assign_show_abilities!(klass:)` sets the show-page flags from the already
-loaded `@permissions`, so the Edit and Delete links render if and only if the
-action behind them would be authorized — the same `:edit` and `:tombstone`
-gates `authorize_*!` enforce. Never show a control the user cannot use. It also
-keeps each resource controller's `#show` under the complexity budget and DRYs
-the shared computation.
+loaded `@permissions`. So the Edit and Delete links render if and only if the
+action behind them would be authorized. Those are the same `:edit` and
+`:tombstone` gates `authorize_*!` enforce. Never show a control the user cannot
+use. It also keeps each resource controller's `#show` under the complexity
+budget and DRYs the shared computation.
 
 ## Reporting a resource the user may not have
 
@@ -79,7 +80,7 @@ the shared computation.
 
 `AtlasRb::ForbiddenError` renders the same friendly 403 page that
 `CanCan::AccessDenied` renders. The two gates can diverge — Cerberus said yes,
-Atlas said no — and when they do the write never happened, so this is a plain
+Atlas said no. When they do, the write never happened, so this is a plain
 403 rather than a 500. Left unhandled it would be the default Rails exception
 trace, which leaks the request's params dump and file paths to the end user.
 
@@ -114,7 +115,7 @@ into the right redirect and flash.
 The tombstone bindings return the raw `Faraday::Response`. atlas_rb does **not**
 raise on the tombstone refusal: `RaiseOnResourceError` passes a 422 whose body
 carries `code: "has_live_children"` straight through. Atlas refuses with 422
-when the resource still has live, non-tombstoned members, so a caller that
+when the resource still has live, non-tombstoned members. So a caller that
 ignores the response — the `tombstone; redirect notice:` shape — reports a false
 "deleted" while the resource stays live.
 
@@ -124,9 +125,10 @@ with live showcase Collections, so a Community's tombstone is always refused.
 ## Rendering the permissions form
 
 `PermissionsForm` assembles everything the permissions form needs before it
-renders, and parses the submitted form into an ACL envelope: the pretty grant
-rows, the group picker, the visibility ceiling a resource inherits from its
-container, and the parse of the form's indexed permission rows.
+renders, and parses the submitted form into an ACL envelope. That covers the
+pretty grant rows, the group picker, and the visibility ceiling a resource
+inherits from its container. It also covers the parse of the form's indexed
+permission rows.
 
 This half decides nothing and writes nothing. `ResourcePermissions` owns the
 write and the policy that can refuse it — see
@@ -139,7 +141,7 @@ member of a group may remove its grant.
 
 It reads `current_user`, **not** `effective_user`. The acting NUID Atlas
 resolves its own actor from is signed from `Current.nuid`, which is the
-authenticated user, so consulting the view-as target here would lock rows
+authenticated user. So consulting the view-as target here would lock rows
 against a different principal than the one the write is evaluated as.
 
 A nil user has no membership to appeal to and stays conservative, matching how
@@ -157,16 +159,16 @@ list.
 | `:admin`, or a devolved-admin delegate (`User#admin_delegate?`) | the full known-group registry, for system-wide arbitrary permission adjustment |
 | everyone else | the acting user's own Grouper memberships — you can only grant a group you are yourself in |
 
-Giving full admins the registry also fixes a latent gap: an `:admin` with no
+Giving full admins the registry also fixes a latent gap. An `:admin` with no
 personal Grouper groups is a legitimate shape, because the role itself is the
-grant, and that user previously saw an empty picker.
+grant. That user previously saw an empty picker.
 
 ### The visibility ceiling on an edit form
 
 `assign_visibility_ceiling(resource)` decides whether the Public option may be
 offered at all. Atlas refuses a resource more visible than its container — a
 422 carrying `visibility_exceeds_parent`, surfaced as
-`AtlasRb::PermissionsError` — so offering Public under a private parent would
+`AtlasRb::PermissionsError`. So offering Public under a private parent would
 only produce an error the depositor cannot act on.
 
 `@visibility_parent` names the blocking container so the form can say which one
@@ -180,9 +182,9 @@ falls back to offering Public; Atlas still enforces.
 a *create* form needs.
 
 Atlas copies the destination's read ACL onto a new child wholesale, group grants
-included, so the form opens holding exactly what the resource would be born
-with rather than a blank slate or a fixed default. That is what lets it add a
-choice without moving the outcome: submit it untouched and the ACL is the one
+included. So the form opens holding exactly what the resource would be born
+with, rather than a blank slate or a fixed default. That is what lets it add a
+choice without moving the outcome. Submit it untouched and the ACL is the one
 inheritance would have produced anyway. A form that defaulted to Private instead
 would quietly narrow every child of a public container, and drop the inherited
 group grants with it.
@@ -195,13 +197,13 @@ inside a resource that does not exist to cascade to.
 `assign_visibility_ceiling`. That one walks the resource's ancestors, which a
 resource that does not exist yet has none of. The create gate has already
 loaded the destination's envelope into `@permissions`, and the destination *is*
-the parent whose visibility bounds the child, so the ceiling costs no extra
+the parent whose visibility bounds the child. So the ceiling costs no extra
 call.
 
 Only the private branch needs the parent named, so the lookup for its title is
-paid only there. A failed lookup still withholds Public: the envelope has
-already said the destination is private and Atlas would refuse the write
-regardless, so generic copy beats a choice that cannot succeed.
+paid only there. A failed lookup still withholds Public. The envelope has
+already said the destination is private, and Atlas would refuse the write
+regardless. So generic copy beats a choice that cannot succeed.
 `DESTINATION_TITLE_UNKNOWN` stands in for that title. The sentence it lands in
 is already about a container the reader just navigated through, so it reads as a
 reference rather than a gap.
@@ -225,7 +227,7 @@ would silently keep the item public.
 
 Public keeps the group grants alongside the `public` sentinel rather than
 replacing them. They grant nothing extra while the item is public, but they are
-what a later flip to Private falls back to, so dropping them here would revoke a
+what a later flip to Private falls back to. So dropping them here would revoke a
 grant the curator made in the very submit that added it. Sets compose their read
 ACL the same way — see `SetSharing#build_permissions`.
 
@@ -258,8 +260,8 @@ against its `read` rather than taking a copy of it.
 ### Retrying on a lock conflict
 
 `retry_on AtlasRb::StaleResourceError` backs off polynomially for five
-attempts. Atlas retries its own optimistic-lock conflicts and only surfaces this
-once its budget is exhausted — which during a deposit means finalize jobs are
+attempts. Atlas retries its own optimistic-lock conflicts, and only surfaces this
+once its budget is exhausted. During a deposit that means finalize jobs are
 still touching the same resources. Backing off and re-running is safe precisely
 because the cascade is idempotent.
 
@@ -274,36 +276,37 @@ is collected as a per-target failure.
 said exactly what they wanted, and by that point every descendant is already
 within it.
 
-It is deliberately not clamped: clamping against its own new audience would be a
-no-op, and round-tripping the stored envelope would silently drop the edit-group
+It is deliberately not clamped. Clamping against its own new audience would be a
+no-op. And round-tripping the stored envelope would silently drop the edit-group
 or embargo edits made in the same submit.
 
 The container is tallied separately from the descendants. The report speaks to
-what else changed — "the items inside it" — and the person already knows they
+what else changed — "the items inside it". The person already knows they
 restricted the container, because they just asked for it.
 
 ### Clamping the derivative-access default
 
 A container's derivative-access default lives in Cerberus, not in the ACL Atlas
-holds, so narrowing the container leaves that default untouched and pointing at
+holds. So narrowing the container leaves that default untouched, and pointing at
 an audience the container no longer has. `Sentinel` already refuses that
-combination when someone authors it — `policy_within_resource` — and
+combination when someone authors it — `policy_within_resource`. And
 `clamp_sentinel` keeps the same rule true when the container narrows underneath
 a default that was coherent when written.
 
 It has to hold, not merely look untidy. Atlas refuses a tier more visible than
-its Work, and the default is applied to every new deposit, so a stale default
+its Work, and the default is applied to every new deposit. So a stale default
 made the next deposit into that collection fail outright.
 
 A tier whose audience shares nobody with the container's new one clamps to the
-empty list — withheld from everyone rather than re-pointed at whoever is left.
+empty list. It is withheld from everyone, rather than re-pointed at whoever is
+left.
 That is the same answer `audience_intersect` gives a disjoint child ACL, and the
 right way round for a gate whose purpose is to withhold. The authoring form
 renders it as "Restrict to groups" with none ticked, which is what it is.
 
 ### Reporting the result
 
-A cascade is slow enough that whoever triggered it has moved on, and a partial
+A cascade is slow enough that whoever triggered it has moved on. A partial
 result is the one outcome they must not have to discover for themselves:
 anything that failed to narrow is still exposed. Failures are therefore named
 rather than counted.

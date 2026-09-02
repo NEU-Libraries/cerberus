@@ -1,8 +1,8 @@
 # Discovery surfaces
 
 The pages that ask Solr "what is here, and what may this person see?" — the
-community landing page, My DRS, the admin finders, the genre showcases the
-deposit fork publishes into, and the Google Scholar tags on a Work.
+community landing page and My DRS. Also the admin finders, the genre showcases
+the deposit fork publishes into, and the Google Scholar tags on a Work.
 
 Source files:
 
@@ -92,8 +92,9 @@ Two services own the pair of questions.
 `CommunitiesController#create` provisions every new community, and the
 development and staging reset seed provisions the ones it creates. Each showcase
 is a featured Collection titled after its genre, written through the same
-structure-safe MODS merge the descriptive forms use: parse the freshly minted
-MODS, merge the title and abstract in, write the raw XML back. That is the path
+structure-safe MODS merge the descriptive forms use. That merge parses the
+freshly minted MODS, merges the title and abstract in, and writes the raw XML
+back. That is the path
 `Transformable#save_descriptive!` takes.
 
 A failed showcase create is logged and skipped, so one failure cannot abort the
@@ -153,7 +154,7 @@ browse fills with empty showcase rows.
 
 The controller computes the empty showcases first and passes them to
 `find_children` as an exclusion at query time. It is deliberately not a Ruby
-post-filter over the returned documents: Solr's facet counts are computed
+post-filter over the returned documents. Solr computes its facet counts
 server-side, so a post-filter leaves the Type facet counting rows the reader
 cannot see.
 
@@ -172,12 +173,12 @@ prefix that `docs/search.md` describes.
 ### Whether Delete is offered
 
 The listing is not the whole test. Atlas refuses to tombstone a container while
-any live member remains, and a showcase Collection is a live member even when it
+any live member remains. And a showcase Collection is a live member even when it
 is empty and therefore hidden from the listing.
 
 Testing the listing alone offered Delete on a community reading "This community
-is empty", then failed the delete and told the reader to withdraw contents they
-could not see. `deletable?` therefore tests the showcases as well.
+is empty". It then failed the delete and told the reader to withdraw contents
+they could not see. `deletable?` therefore tests the showcases as well.
 
 In practice that makes Delete unavailable for any community that provisioned
 normally. It stays a real test rather than a flat "never", because
@@ -191,7 +192,7 @@ the top of its browse. It is rendered through the normal Blacklight pipeline, so
 it matches the list and gallery rows exactly.
 
 It appears only on the unfiltered first page, mirroring v1's `current_page == 1
-&& no constraints`, and drops out as soon as the visitor searches within the
+&& no constraints`. It drops out as soon as the visitor searches within the
 community or applies a facet.
 
 The row is a `SolrDocument` built in Ruby; no such document exists in Solr.
@@ -222,7 +223,7 @@ carries that decision to the view.
 A community narrows its own object alone. No cascade reaches the collections
 inside it, which stay exactly as visible and as searchable as they were. That
 shallowness is the feature — it holds a community's landing page back without
-touching its contents — but it is sharp enough to be administrator-only, and the
+touching its contents. But it is sharp enough to be administrator-only, and the
 form has to say what it does and does not do. Everyone else gets the restriction
 request form. `docs/permissions.md` covers the server-side refusal that backs
 this up.
@@ -267,22 +268,22 @@ published work, so an all-empty result is `[]`, which the view renders as the
 column-level empty state.
 
 It gets there in two steps. `showcase_docs` runs one gated query across the
-subtrees of every community the person is affiliated with, and returns
-documents rather than ids, because callers need both the noid for routing and
-the uuid for membership. `works_published_into` then asks, per showcase, for
+subtrees of every community the person is affiliated with. It returns documents
+rather than ids, because callers need both the noid for routing and the uuid for
+membership. `works_published_into` then asks, per showcase, for
 this depositor's works carrying the linked-member edge the publish branch wrote.
 
 ## Exporting a collection's contents
 
 `CollectionContentsResolver` gives `MetadataExportPacker` a Collection's member
 Works as gated Solr documents, page-batched. It is the collection counterpart of
-the slice of `SetResolver` that bulk export needs: the same
+the slice of `SetResolver` that bulk export needs. That is the same
 `each_content_batch` and `contents_count` surface, and the same
 `SetResolver::MAX_EXPORT_ROWS` runaway cap. See `docs/sets.md` for the Set side.
 
 It takes the collection's uuid — the Solr uniqueKey form stored in the
-membership fields, typically `collection.valkyrie_id` — and the controller's
-`search_service`, which supplies the gated builder and the index.
+membership fields, typically `collection.valkyrie_id`. It also takes the
+controller's `search_service`, which supplies the gated builder and the index.
 
 The resolver returns direct members only, structural plus the linked overlay.
 That matches the Collection show page's browse semantics,
@@ -308,7 +309,7 @@ touched.
 show page.
 
 It reads the Work's Solr document and nothing else. Parsing MODS XML on the
-render path is a hard design constraint, so Atlas's `CitationIndexer` projects
+render path is a hard design constraint. So Atlas's `CitationIndexer` projects
 the pieces Scholar needs — `creator_ssim`, `keyword_ssim`, `pub_date_ssim` —
 onto the Work document, where title, abstract and genre already lived. Public
 status and embargo come from the resource permissions the show page has already
@@ -321,8 +322,8 @@ dependency.
 ### What gets tags
 
 Only a public Work whose MODS genre is one of `SCHOLAR_GENRES`: Research
-Publications, Technical Reports, or Theses and Dissertations. v1 restricted the
-tags the same way. Emitting `citation_*` for a photo or an A/V clip would be
+Publications, Technical Reports, or Theses and Dissertations. DRS v1 restricted
+the tags the same way. Emitting `citation_*` for a photo or an A/V clip would be
 noise to Scholar.
 
 The view reads the value object and renders into `<head>`. URL building, meaning

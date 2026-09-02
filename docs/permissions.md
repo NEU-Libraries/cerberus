@@ -22,41 +22,43 @@ the institutional hierarchy, and the per-community genre showcases. Reachability
 there runs through Grouper, as it did in v1.
 
 The specific choice of the anonymous NUID is load-bearing. That principal never
-authenticates and carries no ability, so recording it as depositor grants nothing
-to anyone.
+authenticates and carries no ability, so recording it as depositor grants
+nothing to anyone.
 
-Letting these fall through to the acting user instead would, under the
-depositor-implies-edit rule, quietly hand edit rights over the container to
-whoever created it — or to whoever ran the seed.
+Letting these fall through to the acting user instead would breach the
+depositor-implies-edit rule. It would quietly hand edit rights over the
+container to whoever created it, or to whoever ran the seed.
 
 ## `GrantRow`, and why a row knows if it is revocable
 
 `GrantRow` is one group grant as the permissions editor renders it, in
 `shared/_group_permissions`.
 
-`ability` holds the wire token Atlas expects — `read` or `edit` — rather than the
-human label, so a row round-trips through the form with no label-to-token
+`ability` holds the wire token Atlas expects, `read` or `edit`, rather than the
+human label. A row therefore round-trips through the form with no label-to-token
 translation step.
 
 `revocable` mirrors Atlas's grant-removal rule: a group grant may be withdrawn
 only by a member of that group, operators excepted. Atlas does not refuse a
 non-member's attempted removal — it merges the grant back in. A row the acting
-user cannot revoke is therefore rendered without the controls that would silently
-attempt it.
+user cannot revoke is therefore rendered without the controls that would
+silently attempt it.
 
 ## Clamping audience
 
-`audience_intersect(inner, outer)` returns the portion of `inner`'s audience that
-is also visible under `outer`. It clamps a resource so it can never be more
+`audience_intersect(inner, outer)` returns the portion of `inner`'s audience
+that is also visible under `outer`. It clamps a resource so it can never be more
 visible than its container.
 
 `public` is the universal set on either side. Under a public container nothing
-needs clamping, and a public resource clamps to exactly the container's audience.
+needs clamping, and a public resource clamps to exactly the container's
+audience.
 
-This mirrors Atlas's `TierVisibility.audience_intersect`, which does the same job
-on the derivative-tier axis. It is expressed here as well because the cascade is
-Cerberus workflow: **Atlas validates each write against the parent but does not
-clamp**, so the caller has to decide what the narrowed value should be.
+This mirrors Atlas's `TierVisibility.audience_intersect`, which does the same
+job on the derivative-tier axis. It is expressed here as well because the
+cascade is Cerberus workflow. **Atlas validates each write against the parent
+but does not clamp**, so the caller has to decide what the narrowed value should
+be.
 
 ### The two related predicates
 
@@ -68,10 +70,10 @@ group names count as different audiences even when their memberships happen to
 overlap.
 
 `narrowing?(current:, submitted:)` asks whether a change takes audience away. It
-is phrased as "current is no longer contained by what was submitted", and that
-phrasing is what makes a same-size swap count as a narrowing. Replacing one group
-with another removes access for the outgoing group, so descendants that were
-reachable only through it have to be reconsidered.
+is phrased as "current is no longer contained by what was submitted". That
+phrasing is what makes a same-size swap count as a narrowing. Replacing one
+group with another removes access for the outgoing group, so descendants that
+were reachable only through it have to be reconsidered.
 
 ## Writing an ACL: it must be the whole envelope
 
@@ -79,12 +81,13 @@ reachable only through it have to be reconsidered.
 only `read` replaced.
 
 It has to be the whole envelope. Atlas's permissions setter assigns
-`edit_groups`, `edit_users` and the embargo **unconditionally** from the incoming
-hash. A payload carrying `read` alone therefore collapses `edit_groups` to the
-staff auto-prepend and blanks the embargo release date.
+`edit_groups`, `edit_users` and the embargo **unconditionally** from the
+incoming hash. A payload carrying `read` alone therefore collapses `edit_groups`
+to the staff auto-prepend and blanks the embargo release date.
 
-`depositor` and `proxy_uploader` are the exception, and are deliberately omitted.
-Those are write-once, and the setter only touches them when the key is present.
+`depositor` and `proxy_uploader` are the exception, and are deliberately
+omitted. Those are write-once, and the setter only touches them when the key is
+present.
 
 ## The write, and whether it may happen
 
@@ -112,7 +115,7 @@ the envelope's error code. An unrecognised code falls back to Atlas's own
 message, so a new invariant still says something true rather than nothing.
 
 A refusal is *reported* rather than raised. `apply!` runs **before** the
-descriptive save in the same submit, so raising would discard title and abstract
+descriptive save in the same submit. Raising would discard title and abstract
 edits that are independent of the ACL and perfectly valid.
 
 ### Who defers, and who does not
@@ -126,9 +129,9 @@ edits that are independent of the ACL and perfectly valid.
 Because a Community has no cascade, restricting one would leave every collection
 inside it more visible than its container. The edit form offers Private to
 administrators only, and routes everyone else to an administrator.
-`community_narrowing_refusal` is the server-side backstop: an admin's narrowing
-is written the ordinary way, and anyone else reaching a narrowing here is
-JS-off or hand-crafting a request, so it refuses. Widening is unconstrained.
+`community_narrowing_refusal` is the server-side backstop. An admin's narrowing
+is written the ordinary way. Anyone else reaching a narrowing here is JS-off or
+hand-crafting a request, so it refuses. Widening is unconstrained.
 
 ### Creating is not editing
 
@@ -141,11 +144,11 @@ one line after a create:
   narrowing check would compare against the wrong audience.
 
 The submitted grants are merged into the new resource's own envelope rather than
-replacing it, for the same reason `envelope_with_read` exists: Atlas assigns
-`edit_groups`, `edit_users` and embargo unconditionally, so posting a form that
-names only read would strip the rest.
+replacing it. The reason is the one `envelope_with_read` exists for: Atlas
+assigns `edit_groups`, `edit_users` and embargo unconditionally, so a form
+naming only read would strip the rest.
 
-`minted_permissions` reads back the ACL Atlas gave the resource at create, as the
-symbol-keyed hash the metadata setter expects. Only the grant lists are carried.
-`depositor` and `proxy_uploader` are preserved by Atlas when omitted, and echoing
-them would re-assert attribution this form has no business touching.
+`minted_permissions` reads back the ACL Atlas gave the resource at create, as
+the symbol-keyed hash the metadata setter expects. Only the grant lists are
+carried. `depositor` and `proxy_uploader` are preserved by Atlas when omitted,
+and echoing them would re-assert attribution this form has no business touching.

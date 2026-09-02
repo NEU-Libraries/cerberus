@@ -52,23 +52,23 @@ wrapped are rare one-off opaque files.
 ### The second gate, beyond the Work
 
 `authorize_show!` checks the Work. `authorize_derivative_read!` then checks the
-Blob itself, because a Blob carries its own read gate — a department may reserve
+Blob itself, because a Blob carries its own read gate. A department may reserve
 the master, or a non-image rendition, while access copies stay public.
 
-That gate lives on the Work's assets payload, not on the standalone Blob. So the
-controller resolves the containing Work — the same lookup the impression path
-uses — finds this Blob's entry, and authorizes it against the standard `:read`
-Ability. It also refuses an unfinished deposit, and an embargoed Work unless the
-effective user may bypass the embargo. The embargo needs its own Atlas call: the
-Blob's own permissions, which `authorize_show!` already fetched, do not carry
-the Work's embargo.
+That gate lives on the Work's assets payload, not on the standalone Blob. So
+the controller resolves the containing Work — the same lookup the impression
+path uses. It then finds this Blob's entry, and authorizes it against the
+standard `:read` Ability. It also refuses an unfinished deposit, and an
+embargoed Work unless the effective user may bypass the embargo. The embargo
+needs its own Atlas call: the Blob's own permissions, which `authorize_show!`
+already fetched, do not carry the Work's embargo.
 
-The method memoizes the resolved entry as `@derivative_asset`, so `show` can
+The method memoizes the resolved entry as `@derivative_asset`. So `show` can
 branch zip-versus-raw off its classification without a second assets fetch, and
 `download_zipped` can hand it to `BlobZipPacker`.
 
 **It fails open when the asset cannot be resolved.** The work-level gate has
-already passed at that point, and a Blob absent from the assets list is an edge
+already passed at that point. A Blob absent from the assets list is an edge
 case rather than a gate to bypass. A nil asset also serves raw.
 
 ## Downloading a gated image tier
@@ -78,10 +78,11 @@ derivatives.
 
 Those tiers' Delegate URIs live on the gated Cantaloupe host, which serves only
 a signed request. Rather than link them directly, the downloads UI routes each
-tier through this controller, which re-reads the tier's per-viewer gate,
-authorizes the effective user against it — reusing the app's `:read` Ability via
-`DerivativesHelper` — and then 302s to a short-lived signed URL. The signature
-binds the size, so the recipient cannot edit the request up to `full` or `max`.
+tier through this controller. That controller re-reads the tier's per-viewer
+gate, and authorizes the effective user against it — reusing the app's `:read`
+Ability via `DerivativesHelper`. It then 302s to a short-lived signed URL. The
+signature binds the size, so the recipient cannot edit the request up to `full`
+or `max`.
 
 Deep zoom is a different flow. It is the service tier, driven by a cookie rather
 than a download, and is handled elsewhere.
@@ -180,15 +181,15 @@ Works only.
 That is not sufficient, twice over.
 
 **An embargoed Work is deliberately readable.** Its metadata stays public and
-only its content is withheld, so it clears both Atlas's read check and the
+only its content is withheld. So it clears both Atlas's read check and the
 resolver's gated search, and arrives at the packer looking like any other
 member. Without a packer-side embargo check the archive is assembled with the
 *owner's* reach and hands an anonymous requester bytes that `/downloads/:id`
 refuses them.
 
 **Atlas re-authorizes at the Work level, not the tier level.** The per-asset
-gate rides the returned entries as advisory `gated` and `permission` values for
-the display layer to enforce. A restricted tier — a Streaming Only video, a
+gate rides the returned entries as advisory `gated` and `permission` values.
+The display layer enforces them. A restricted tier — a Streaming Only video, a
 gated master — therefore arrives looking ordinary. `DerivativeGate.readable?` is
 what stops the archive handing out those bytes.
 
@@ -207,8 +208,8 @@ pays that call. It is acceptable: a queue is user-curated and short, and the
 alternative is handing out embargoed bytes.
 
 Both report a withheld item in `ERRORS.txt` rather than dropping it in silence.
-Someone who asked for a set of twelve and got eleven files, or who queued a file
-and did not get it, should be able to see which one and that access — not
+Someone asks for a set of twelve and gets eleven files, or queues a file and
+does not get it. They should be able to see which one, and that access — not
 failure — is the reason. The stored embargo value is a timestamp, and the
 manifest is read by a person, so both render the date rather than
 `2029-12-31T00:00:00+00:00`.
@@ -226,8 +227,8 @@ that prefix.
 ## Exporting metadata as a re-ingestable bundle
 
 `MetadataExportPacker` streams a collection's or Set's metadata as a
-`manifest.xlsx` in the exact column shape the XML batch loader reads
-(`XmlLoader::Manifest`), plus, optionally, one `mods/<noid>.xml` per item.
+`manifest.xlsx`, in the exact column shape the XML batch loader reads
+(`XmlLoader::Manifest`). Optionally it adds one `mods/<noid>.xml` per item.
 
 It is the inverse of the XML loader: export the records, edit the MODS offline,
 re-feed the bundle as updates. Every row carries a NOID, so
@@ -240,7 +241,7 @@ this packer stays auth-agnostic.
 
 ### What it shares with the content packers, and what it does not
 
-It matches their posture — STORE, flat memory, mid-stream error capture — but
+It matches their posture — STORE, flat memory, mid-stream error capture. But it
 streams MODS *strings* from Atlas rather than Blob bytes, so it does not include
 `ZipEntryWriter`.
 
@@ -277,7 +278,7 @@ without breaking the signature. Because the query string is outside the message,
 
 An identifier token authorizes every derived request for that one image —
 `info.json` and all tiles — until it expires. A viewer generates its own tile
-URLs, so they cannot be signed individually, but they all share the image's
+URLs, so they cannot be signed individually. But they all share the image's
 identifier, and a token embedded there rides along on every one. Being carried
 in the URL, it needs neither a cookie nor credentialed CORS, so it works with
 IIIF's mandated cross-origin `ACAO:*`.
@@ -287,7 +288,7 @@ IIIF's mandated cross-origin `ACAO:*`.
 
 ### Why the identifier's expiry is quantized
 
-The expiry is rounded to a `ttl`-sized window aligned to the epoch, so every
+The expiry is rounded to a `ttl`-sized window aligned to the epoch. So every
 view within that window mints a byte-identical identifier — and so a stable
 Cantaloupe derivative-cache key. A fresh wall-clock `exp` per call would give
 each page load a unique identifier, defeat that cache, and re-decode every tile
@@ -302,9 +303,10 @@ The delegate reads whatever `exp` it is handed, so its HMAC message,
 
 ## Minting the JP2s a download serves
 
-`MasterJp2` mints two JP2s from one source: a capped display copy for
-thumbnails and preview, served openly, and a full-resolution copy for
-small/medium/large downloads and deep zoom, served only behind the delegate.
+`MasterJp2` mints two JP2s from one source. The first is a capped display copy
+for thumbnails and preview, served openly. The second is a full-resolution copy
+for small/medium/large downloads and deep zoom, served only behind the
+delegate.
 `IiifAssetsJob` calls it — see `docs/derivatives.md`.
 
 Both files go to the single derivatives root Cantaloupe reads, and are told
@@ -313,7 +315,7 @@ delegate gates on: serve `open-*` freely, require a credential for `gated-*`. It
 rides through into the IIIF identifier.
 
 A plain hyphen prefix, rather than an `open/…` subpath, keeps the identifier
-slash-free, so signed-URL paths carry no `%2F` that could desync between
+slash-free. So signed-URL paths carry no `%2F` that could desync between
 Cerberus and the delegate.
 
 ### The open copy's cap
@@ -325,15 +327,15 @@ Capping there keeps `full/max` on an `open-` identifier safe by construction:
 the master's pixels are not in that file.
 
 `capped` caps the **width**, not the longest edge, so the width-500 request
-serves without upscaling in every orientation — a longest-edge cap would leave
+serves without upscaling in every orientation. A longest-edge cap would leave
 portrait sources narrower than 500. A narrower source is never upscaled, which
 matches `DerivativeCreator`'s posture.
 
 ### Rasterizing a PDF
 
-PDFs rasterize through vips' poppler loader, first page by default. 150 dpi
-makes a letter page about 1275px wide — crisp for the 500px preview tile without
-an oversized JP2.
+PDFs rasterize through vips' poppler loader, first page by default. At 150 dpi
+a letter page comes out about 1275px wide — crisp for the 500px preview tile
+without an oversized JP2.
 
 ## Choosing rendition sizes
 
@@ -358,13 +360,13 @@ proportionate to whatever the depositor uploaded.
 a Work's current renditions from their stored URIs. It returns nil when the Work
 has none.
 
-Replacing a Work's bytes mints a new gated JP2, so every rendition has to be
-rebuilt against the new base at the sizes the Work already carries. Nothing else
+Replacing a Work's bytes mints a new gated JP2. So every rendition has to be
+rebuilt against the new base, at the sizes the Work already carries. Nothing else
 records those sizes: the depositor chose them once, on the metadata page, and
 the URIs are the only place that choice survives.
 
-`ROLES` maps Atlas's stable `role` token for each rendition to the width key, so
-a Work's current set can be read back out of an assets listing. Match on that
+`ROLES` maps Atlas's stable `role` token for each rendition to the width key.
+So a Work's current set can be read back out of an assets listing. Match on that
 token, not on the human display label.
 
 `width_for` does the parsing, and lives beside `iiif_size` so the grammar of a
@@ -399,21 +401,22 @@ That serial-PATCH constraint is documented on `IiifAssetsJob`.
 ## Rendering Word and PowerPoint to PDF
 
 `PdfRenditionJob` enriches a Word or PowerPoint deposit with a PDF rendition —
-v1 parity, `thesis.docx` alongside `thesis.pdf` — and seeds the Work's
+v1 parity, `thesis.docx` alongside `thesis.pdf`. It also seeds the Work's
 thumbnails from the rendition's first page. `IngestDispatch` routes those two
 types here; see `docs/ingest.md`.
 
 ### Convert first, then wait
 
 `ContentCreationJob` owns the primary Blob. Rather than race it with a second
-concurrent Blob writer, this job converts first — the slow part, so the wait is
-overlapped for free — and then waits for that primary Blob to appear. The wait
+concurrent Blob writer, this job converts first. Conversion is the slow part, so
+the wait is overlapped for free. It then waits for that primary Blob to
+appear. The wait
 is the `ServiceNotReady` idiom `DepositDerivativesJob` uses.
 
 The wait keys on the **artifact**: an asset whose role is `original_file`. That
 is the real precondition. Keying it on the Work's `in_progress` flag reads as
-equivalent and is not — that flag means "no depositor has confirmed this
-deposit", which an abandoned deposit never does, so a flag-based wait would
+equivalent and is not. That flag means "no depositor has confirmed this
+deposit", which an abandoned deposit never does. So a flag-based wait would
 strand the rendition on a human rather than on the writer it actually races.
 
 Office documents also get their full text from this rendition rather than from
@@ -421,8 +424,8 @@ the original, so LibreOffice runs once rather than twice.
 
 ### Enrichment never fails a deposit
 
-The failure posture matches v1. A corrupt document, a hung `soffice` — killed at
-120 seconds by `bin/soffice-timeout` — or a primary Blob that never lands all
-exhaust their retries, log, and leave the deposit intact: primary file present,
-no rendition, no thumbnail. A missing `soffice` binary skips the rendition
-outright.
+The failure posture matches v1. A corrupt document, a hung `soffice`, or a
+primary Blob that never lands all exhaust their retries, log, and leave the
+deposit intact. `bin/soffice-timeout` kills a hung `soffice` at 120 seconds.
+The deposit is left with its primary file present, no rendition, no thumbnail.
+A missing `soffice` binary skips the rendition outright.

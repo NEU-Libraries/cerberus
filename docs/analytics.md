@@ -1,7 +1,7 @@
 # Usage analytics
 
 How Cerberus records an impression, filters it down to human traffic, and scopes
-the resulting figures — for the repo-wide `/admin` dashboard and for the
+the resulting figures. That covers the repo-wide `/admin` dashboard and the
 Analytics tab on a Collection or Community edit page.
 
 Source files:
@@ -101,25 +101,25 @@ report for the Analytics tab on a Collection or Community edit page.
 ### Who can see it
 
 Anyone who can reach the edit page at all. The tab uses the same `:edit` ability
-gate as the Metadata and Permissions tabs, with no separate admin check: a group
+gate as the Metadata and Permissions tabs, with no separate admin check. A group
 editor's own container's traffic is not privileged the way the repo-wide
 `/admin` dashboard's cross-container view is.
 
 The shared partial `shared/_container_analytics` gates one thing separately. The
 "Open in Usage Analytics" drill-down link is shown only to an admin or admin
-delegate, because it leads to the admin-only dashboard and would otherwise 403
-for most viewers.
+delegate. That is because it leads to the admin-only dashboard, and would
+otherwise 403 for most viewers.
 
 ### Containment is enforced on the drill-down, not on the search box
 
 The tab offers the same item lookup and facet drill-down the admin dashboard
-has, but permanently contained to this container's own subtree: itself, its
-descendant containers, and every descendant Work. An editor can narrow their own
-view further; they can never escape it.
+has, but permanently contained to this container's own subtree. That subtree is
+the container itself, its descendant containers, and every descendant Work. An
+editor can narrow their own view further; they can never escape it.
 
 `ResourceSearch`'s `within_fq` already keeps the item-lookup search box's results
 inside the subtree. That is not the boundary. A drill-down also arrives as plain
-GET params, which an editor can hand-edit, so `contained_drilldown_item`
+GET params, which an editor can hand-edit. So `contained_drilldown_item`
 re-validates every candidate against the subtree before honouring it — by
 container uuid for a Collection or Community, by Work noid otherwise. That check
 is the actual containment boundary.
@@ -128,7 +128,7 @@ is the actual containment boundary.
 
 `analytics_item_search` bypasses `ResourceSearch`'s own SearchBuilder and its
 gated-discovery chain. A group editor has to be able to find every item in their
-own container's subtree regardless of that item's own visibility, which is the
+own container's subtree, regardless of that item's own visibility. That is the
 same reason the rest of container analytics reads system-wide. It reuses
 `ResourceSearch#filters` — pure, and already covering type, tombstone and
 `within_fq` — without the SearchBuilder path that `#call` would take.
@@ -240,22 +240,22 @@ after a filter keeps the picked option selected.
 - `container_analytics_drilled?` reports whether a drill-down to a descendant is
   active rather than the base container's own scope.
 - `open_in_usage_analytics_params` carries the *effective* item — the
-  drilled-into sub-item if one is active, otherwise the container itself — plus
-  any active facet, so the full dashboard opens already showing what is on
+  drilled-into sub-item if one is active, otherwise the container itself. It
+  adds any active facet, so the full dashboard opens already showing what is on
   screen.
 
 ### The Analytics tab's intro sentence
 
 `container_analytics_scope_blurb` has three shapes, because a fixed sentence
-overclaims. "Everything under this collection" sitting directly above figures
-for a single drilled-into Work, or above facet-narrowed figures, contradicts
-what the reader is looking at. The three subjects are the drilled-into item, the
-facet-matching Works, and the whole subtree.
+overclaims. Consider "Everything under this collection" sitting directly above
+figures for a single drilled-into Work, or above facet-narrowed figures. It
+contradicts what the reader is looking at. The three subjects are the
+drilled-into item, the facet-matching Works, and the whole subtree.
 
 ### The Composition pie's colours
 
 `COMPOSITION_COLORS` leads with the dashboard's already-established view,
-download and visitor hues, so the typically largest categories — Image and Text
+download and visitor hues. So the typically largest categories — Image and Text
 — land on colours an admin has already seen elsewhere on the page. It then
 extends into the rest of the Cerberus palette for the long tail. Chartkick
 repeats the array when there are more slices than colours.
@@ -263,11 +263,12 @@ repeats the array when there are more slices than colours.
 ## Composition counts
 
 `RepositoryCompositionReport` produces the inventory figures behind the
-Composition tab. v1 had a flat table of entity counts plus a file-type
-breakdown; this is the v2-data-shape equivalent in substance, not a literal port.
+Composition tab. In v1 there was a flat table of entity counts plus a file-type
+breakdown. This is the v2-data-shape equivalent in substance, not a literal
+port.
 
-Composition is not a traffic metric. It ignores the date range and the segment
-whatever `scope_fq` is, because there is no "composition of the last 90 days" —
+Composition is not a traffic metric. It ignores the date range and the segment,
+whatever `scope_fq` is. There is no "composition of the last 90 days" —
 only "composition of this subtree, or of the whole repository".
 
 Counts are un-gated. They go through `Blacklight.default_index.search` system-wide

@@ -27,8 +27,8 @@ There are two, because the same string lands in two kinds of place.
 | `enhanced_text` | Element content | A subscript can actually render there |
 | `plain_text` | An attribute, a page `<title>`, a citation meta tag, or anything about to be truncated | Markup can only ever show up as literal characters there, or a cut could sever a tag |
 
-`plain_text` returns an ordinary String, not `html_safe` output, so it composes:
-the caller can interpolate it into a sentence, or hand it to `tag.meta` and let
+`plain_text` returns an ordinary String, not `html_safe` output, so it composes.
+The caller can interpolate it into a sentence, or hand it to `tag.meta` and let
 that escape it once.
 
 Truncation goes through `plain_text` too. `truncate` counts characters and knows
@@ -52,11 +52,11 @@ reader cannot recover from the plain characters.
 
 `ESCAPES` holds the three characters an HTML text node must escape. The quote
 characters are deliberately absent. They matter only inside an attribute value,
-and this output is always element text, so escaping an apostrophe would show up
+and this output is always element text. So escaping an apostrophe would show up
 as `&#39;` in an ordinary possessive title.
 
 `ESCAPED_TAG` matches an allowlisted tag in its escaped form, and bare — no
-attributes. That is what makes the revival safe: the escaped form of a tag
+attributes. That is what makes the revival safe. The escaped form of a tag
 carrying anything (`<sub onmouseover=…>`) cannot match, so it can never come back
 as markup.
 
@@ -82,23 +82,24 @@ character for character. Change them together.
 `Metadata::ControlCharacters` reduces curator text to what XML 1.0 can actually
 store.
 
-XML 1.0's Char production admits tab, newline and carriage return but no other C0
-control, and no noncharacter — not even as a character reference, so there is no
-encoding that smuggles one through. Nokogiri answers by dropping the character
-when it serializes a text node, which is worse than a refusal: a manual line
-break pasted out of Word disappears, the words either side of it run together in
-the stored MODS and in the search index, and nothing on the screen says so.
+XML 1.0's Char production admits tab, newline and carriage return, but no other
+C0 control and no noncharacter. That holds even for a character reference, so
+there is no encoding that smuggles one through. Nokogiri answers by dropping the
+character when it serializes a text node, which is worse than a refusal. A
+manual line break pasted out of Word disappears. The words either side of it run
+together in the stored MODS and in the search index. Nothing on the screen says
+so.
 
 ### Separators are mapped, the rest are dropped
 
 The two separator controls are mapped, not deleted. Word writes a manual line
-break as U+000B and a page break as U+000C, so each one stands for a boundary the
-curator can see in the source document. Whitespace keeps that boundary where
+break as U+000B and a page break as U+000C. So each one stands for a boundary
+the curator can see in the source document. Whitespace keeps that boundary where
 deleting loses it. The rest carry no meaning and are dropped.
 
 `DISCARD_CODEPOINTS` is what is left once tab, newline, carriage return and the
-separators are accounted for: the rest of C0, plus the two noncharacters at the
-top of the BMP that libxml2 rejects alongside them.
+separators are accounted for. That is the rest of C0, plus the two noncharacters
+at the top of the BMP that libxml2 rejects alongside them.
 
 ### What this deliberately does not touch
 
@@ -122,8 +123,8 @@ access-copy normalizer already keeps them out of display and search.
 
 `clean_line` uses a space because those values round-trip through a text input,
 which cannot hold a newline. Pre-filling the edit form with one and saving would
-change the stored value a second time, silently, on a save the curator meant as a
-no-op.
+change the stored value a second time, silently. That happens on a save the
+curator meant as a no-op.
 
 `clean_text` keeps the break the curator made. The gem's access-copy projection
 folds it back to a space for display and search, so nothing downstream has to
@@ -132,7 +133,7 @@ know it is there.
 ### Reporting it to a curator
 
 `ControlCharacters.report` is written for the curator reading a validation panel.
-libxml answers the same input with `PCDATA invalid Char value 11`, which names
+For the same input, libxml answers `PCDATA invalid Char value 11`, which names
 neither the character, nor where it came from, nor what to do about it.
 
 `DESCRIPTIONS` carries plain-language names for the characters a curator
@@ -148,10 +149,10 @@ give.
 `Metadata::DoubleEscapes` finds and repairs an entity reference that was escaped
 a second time on its way into storage.
 
-`&amp;lt;` in the source is the escaped form of the *text* `&lt;`, so the reader
-is shown the escape rather than the `<` the record means. The document is
-perfectly well-formed, which is why nothing else catches it: only a human can see
-that the record meant a character and stored its spelling instead.
+`&amp;lt;` in the source is the escaped form of the *text* `&lt;`. So the reader
+sees the escape rather than the `<` the record means. The document is perfectly
+well-formed, which is why nothing else catches it. Only a human can see that the
+record meant a character and stored its spelling instead.
 
 ### Where it comes from
 
@@ -159,7 +160,7 @@ It arrives from a display pipeline that wrote text into HTML unescaped, where
 escaping twice was the only way to make a `<` visible.
 
 A record can hold both depths at once — a title escaped once, an abstract escaped
-twice — so the record's own correct fields are the reference for what the rest
+twice. So the record's own correct fields are the reference for what the rest
 should hold.
 
 ### Only the five predefined entities
@@ -191,8 +192,8 @@ result in the editor before saving it, which is what makes that breadth safe.
 valid, so this is the only place the problem can be named at all.
 
 `consequence` spells the escape out with the first finding, so the sentence names
-real characters rather than describing a class of them. "`&lt;` where the record
-means `<`" is the whole problem in six words.
+real characters rather than describing a class of them. That wording — "`&lt;`
+where the record means `<`" — is the whole problem in six words.
 
 `first_lines` returns one entry per reference rather than per occurrence. A
 migrated abstract carries the same one in every paragraph, and listing every hit
@@ -200,15 +201,15 @@ buries the fix the message exists to give.
 
 ## The caption track
 
-`CaptionTrack` answers three questions about a video Work's captions: which Blob
-is the caption, whether to offer the field at all, and whether an upload is
-acceptable. `CaptionJob` does the writing — see `docs/derivatives.md`.
+`CaptionTrack` answers three questions about a video Work's captions. They are:
+which Blob is the caption, whether to offer the field at all, and whether an
+upload is acceptable. `CaptionJob` does the writing — see `docs/derivatives.md`.
 
 ### One track, labelled English
 
 That is the whole of what the repository can currently say. A Blob carries a mime
-type and a filename and nothing a `<track>` wants: Atlas has no field for a
-caption's language or its display label, so a second caption could be stored but
+type and a filename and nothing a `<track>` wants. Atlas has no field for a
+caption's language or its display label. So a second caption could be stored but
 never told apart from the first. The offer therefore matches what can be
 described, and a multi-language Work waits on Atlas growing somewhere to put the
 language.
@@ -222,9 +223,9 @@ A browser `<track>` parses no other format, and an SRT conversion is work this
 application does not do. An `.srt` upload is refused at the form rather than
 stored as a file no player will read.
 
-`CaptionTrack.accepted?` tests the extension rather than sniffed content: WebVTT
+`CaptionTrack.accepted?` tests the extension rather than sniffed content. WebVTT
 is plain text, so a sniffer reports `text/plain` for a perfectly good caption
-file, and Atlas itself types the stored Blob `text/vtt` off the name.
+file. Atlas itself types the stored Blob `text/vtt` off the name.
 
 ### Finding the caption Blob
 
@@ -237,8 +238,8 @@ makes.
 
 `CaptionTrack.applicable?` matches what v1 offered and what was asked for. A
 `<track>` would work over the audio player too, so widening this is a decision
-rather than a port, and it belongs to whoever wants transcripts on audio.
+rather than a port. It belongs to whoever wants transcripts on audio.
 
 It is deliberately its own predicate rather than `StreamingOnly.applicable?`,
-which tests the same thing today for an unrelated reason — two features that
-happen to agree, not one rule.
+which tests the same thing today for an unrelated reason. They are two features
+that happen to agree, not one rule.

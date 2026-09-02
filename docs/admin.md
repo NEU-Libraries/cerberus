@@ -58,9 +58,9 @@ This follows the per-view `:container_header` pattern rather than a custom admin
 layout, which would double-render the view through Blacklight's layout.
 
 Both `breadcrumb` calls pass `match: :exact`. Loaf's default inclusive match
-treats `/admin` as current on every `/admin/*` path, which would mark
+treats `/admin` as current on every `/admin/*` path. That would mark
 "Administration" as the current crumb — a dead end instead of a link back to the
-hub — and would do the same to a section on its own sub-pages.
+hub. It would do the same to a section on its own sub-pages.
 
 ## The admin ledger
 
@@ -71,9 +71,10 @@ So there is no lifecycle on these rows and no update path.
 
 ### Why one table
 
-Two families share it because nothing structural separates them. A request
-("somebody asked for this work to be withdrawn") and an event ("a cascade
-finished") are both an attributed fact with a subject and some detail. They
+Two families share it because nothing structural separates them. Take a
+request ("somebody asked for this work to be withdrawn") and an event ("a
+cascade finished"). Both are an attributed fact with a subject and some detail.
+They
 differ only in which question a reader is asking, which is exactly what the two
 ledger tabs are: a filter on `kind`.
 
@@ -92,13 +93,13 @@ itself.
 
 ### The payload
 
-`payload` holds kind-specific detail rather than prose, because two renderers read
-it: the ledger builds paths from the NOIDs it carries, and a mailer would build
-absolute URLs from the same fields. A rendered link could serve neither, since it
-fixes the host — or omits it — at write time.
+`payload` holds kind-specific detail rather than prose, because two renderers
+read it. The ledger builds paths from the NOIDs it carries, and a mailer would
+build absolute URLs from the same fields. A rendered link could serve neither,
+since it fixes the host — or omits it — at write time.
 
 `detail(key)` is the only reader. `jsonb` round-trips to string keys, so a caller
-that wrote `payload: { genre: … }` reads it back as `"genre"`, and going through
+that wrote `payload: { genre: … }` reads it back as `"genre"`. Going through
 one method means no caller has to know which side of the write it is on.
 
 ### Validation
@@ -106,8 +107,8 @@ one method means no caller has to know which side of the write it is on.
 `kind` must be one of `KINDS`, and `subject` and `occurred_on` must be present.
 
 A requester and a subject NOID are required per kind rather than as `NOT NULL`
-columns, because the shared table also holds activity rows, which have no
-requester and often no subject. A request with nobody asking, or nothing asked
+columns. That is because the shared table also holds activity rows, which have
+no requester and often no subject. A request with nobody asking, or nothing asked
 about, is a row nobody could act on.
 
 ### Ordering and filtering
@@ -122,15 +123,15 @@ about, is a row nobody could act on.
 | `of_kind(kind)` | one kind, falling through to everything on an unrecognised value |
 
 Digests use `by_day` because they are ordered by the day they are about, not the
-moment they were written: a re-run, or a backfill of several days at once, must
+moment they were written. A re-run, or a backfill of several days at once, must
 not shuffle them out of calendar order.
 
 `of_kind` falls through to everything rather than to nothing, so a hand-typed
 query string cannot render an empty page with no explanation.
 
 `default_occurred_on` stamps the app-zone date before validation. Bucketing by a
-date column rather than a `created_at` range keeps a job that runs late — or a
-re-run — attributed to the day it is about.
+date column, rather than a `created_at` range, keeps a job that runs late
+attributed to the day it is about. The same is true of a re-run.
 
 ## Which gate each surface uses
 
@@ -195,8 +196,8 @@ because a purge cannot be undone, so a member left behind is orphaned for good.
 The message spells this out, since "empty it first" reads as already done to an
 admin looking at a container whose children are all withdrawn.
 
-Everything else — a 404, a 403, a transport fault — is the generic alert,
-because it is the one failure the admin cannot act on.
+Everything else — a 404, a 403, a transport fault — is the generic alert. That
+is the one failure the admin cannot act on.
 
 ## Replacing a file
 
@@ -221,8 +222,8 @@ reinstated bytes.
 than replaced, and is filtered out.
 
 Version history comes back in one `find_many_versions` call rather than a
-versions-per-noid fan-out, because this page reads every held binary on the
-Work — one per page on a multipage Work. A dropped id renders as a file with no
+versions-per-noid fan-out. That is because this page reads every held binary on
+the Work — one per page on a multipage Work. A dropped id renders as a file with no
 version table, which is what a failed history read already did.
 
 Streaming a superseded version's content is `FileVersionsController`, which is
@@ -250,8 +251,8 @@ pinned to the system NUID.
 | `work` | one call, answered inline | it is a single resource |
 | `set` | enqueues `SetReindexJob` | a Set names collections whose subtrees can run to thousands of resources |
 
-`set` reads the Compilation before it enqueues, so an unknown or unreadable id
-fails in front of the person who clicked rather than inside a job nobody is
+`set` reads the Compilation before it enqueues. So an unknown or unreadable id
+fails in front of the person who clicked, rather than inside a job nobody is
 watching. The result of the job reaches the user through their inbox.
 
 A private Set the caller may not read raises `AtlasRb::ForbiddenError`, and the
@@ -268,13 +269,13 @@ It replaces a group-addressed inbox message, which could never show the queue at
 all, because a message is dismissed per person.
 
 **Activity** is what the repository did — loads, cascades, reindexes, showcase
-promotions — plus the daily digest. Staff read the showcase rows after the fact,
-to catch a work promoted onto a showcase it does not belong on, or filed under
-the wrong genre.
+promotions — plus the daily digest. Staff read the showcase rows after the fact.
+They are looking for a work promoted onto a showcase it does not belong on, or
+filed under the wrong genre.
 
 Neither list is worked here. The tabs are a filter on `kind` and nothing more.
 They are two tabs rather than two cards, because it is one sitting by one
-person, and they are plain links so each list keeps its own paging with no
+person. They are plain links, so each list keeps its own paging with no
 JavaScript.
 
 | Parameter | Effect |
@@ -284,21 +285,21 @@ JavaScript.
 | `on` | narrows the tab to one day, as `YYYY-MM-DD` |
 | `page` | 50 rows a page, or one digest a page |
 
-`on` exists so a digest's figures can link to what they counted. "1 made" on a
-given day means the request made that day, not every request ever made. An
+`on` exists so a digest's figures can link to what they counted. On a given day,
+"1 made" means the request made that day, not every request ever made. An
 unparseable date is ignored rather than raising, because the value comes from a
-query string, and a filtered page that quietly shows everything beats an error
+query string. A filtered page that quietly shows everything beats an error
 page.
 
 Digests page one at a time and sort by `by_day`. A digest is a page-sized report
-of one whole day, so it gets a page, and paging back through them reads the way
+of one whole day, so it gets a page. Paging back through them reads the way
 the mailed summaries will arrive. Everything else is an event and sorts
 `newest_first`.
 
 ## The daily digest's count block
 
 `Admin::DigestHelper` assembles the digest's figures. Every figure that has
-something behind it links to the surface listing what it counted, so the block
+something behind it links to the surface listing what it counted. So the block
 is a way into the day rather than a readout. A zero carries no link, because
 there is nothing there to open.
 
@@ -313,8 +314,8 @@ The deposit figures are the exception and carry no day. They are a live backlog,
 not a figure for the day being summed up, so they point at the deposit triage
 list that works them.
 
-`repository_figures` holds the only two labels that are countable nouns, so they
-are the only two that need agreeing with their figure. "1 reindexes" reads as a
+`repository_figures` holds the only two labels that are countable nouns. They
+are the only two that need agreeing with their figure: "1 reindexes" reads as a
 bug.
 
 ## Linked collection placements
@@ -338,15 +339,15 @@ only; the Work and its home are untouched.
 `add` and `remove` both redirect to `manage`, which re-reads the live linked
 list from Atlas. That is the design's answer to atlas_rb swallowing a rejected
 4xx on these two calls, so the panel always reflects Atlas truth. The `add`
-flash says as much, and names the two common rejections: the Work is already a
-structural member, or the target is not a Collection. The gap is filed against
-atlas_rb's re-parent and linked-member error handling.
+flash says as much, and names the two common rejections. Either the Work is
+already a structural member, or the target is not a Collection. The gap is
+filed against atlas_rb's re-parent and linked-member error handling.
 
 `manage` also computes `@placed_noids`, the home plus the linked collections,
 because a Collection the Work already sits in cannot be added again.
 
 Linked collection NOIDs resolve to `{noid, title}` rows through one batched
-`find_many`. It is unordered and may drop an id it cannot resolve, so the result
+`find_many`. It is unordered and may drop an id it cannot resolve. So the result
 is indexed by NOID, the given order is preserved, and a missing title falls back
 to the bare NOID.
 
@@ -358,7 +359,7 @@ The acting admin's NUID flows ambiently through `Current.nuid`.
 surfaces share, including re-parent, linked members and deposit triage.
 
 `RESOURCE_ICONS` carries the DRS semantic iconography that the breadcrumbs and
-show pages already use: a Collection is an open folder, a Community is users, a
+show pages already use. A Collection is an open folder, a Community is users, a
 Work is a file. `finder_type_chip` renders one as a small, restrained chip of
 icon plus label.
 
@@ -372,12 +373,12 @@ multivalued, and both take the first value.
 | `finder_doc_heading` | enhanced text | an admin table cell or a link label, where a formula's subscript should read as one |
 
 `deposit_last_change` renders when a resource was last written, for the deposit
-triage list. The column is called "last change" and not "waiting since", which
-is what a triage reader actually wants to know but not what the field says.
-`updated_at_dtsi` is the most recent write of any kind, so a derivative job
-touching an abandoned deposit moves it. Naming the column for the field keeps it
-honest, and it still sorts the list usefully: the deposit nothing has touched in
-a month sinks to the top.
+triage list. The column is called "last change" and not "waiting since". That
+second phrase is what a triage reader actually wants to know, but not what the
+field says. `updated_at_dtsi` is the most recent write of any kind, so a
+derivative job touching an abandoned deposit moves it. Naming the column for
+the field keeps it honest, and it still sorts the list usefully. The deposit
+nothing has touched in a month sinks to the top.
 
 ## The rights and MODS history pages
 
@@ -396,7 +397,7 @@ its audit log.
 event's before-and-after ACL snapshot into a two-column diff.
 
 It shows one event a page. The page is reached by a per-row deep link, so it
-shows that single event's diff, and the previous and next walker steps to
+shows that single event's diff. The previous and next walker steps to
 adjacent changes without stacking them.
 
 The events it shows are the initial grant at creation and every later ACL

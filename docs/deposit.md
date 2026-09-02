@@ -30,9 +30,9 @@ It pulls in two Blacklight modules that a plain controller does not have:
 
 `WorksController#search_service_context` plumbs the acting user into the search
 service, as `CatalogController` does for its own subtree. Blacklight 8 scopes
-every `SearchBuilder` to the `SearchService` rather than the controller, so
-without it `SearchBuilder#gated_user` is nil and the associations box gates as
-anonymous — hiding a viewer's own restricted associated Works from them.
+every `SearchBuilder` to the `SearchService` rather than the controller. So
+without it `SearchBuilder#gated_user` is nil, and the associations box gates as
+anonymous. That hides a viewer's own restricted associated Works from them.
 `effective_user` honours a view-as session.
 
 ## Depositing a file
@@ -42,8 +42,8 @@ parent segment, already resolved and `:edit`-gated by
 `authorize_destination!`. There is one destination path: the Work lives where
 the depositor navigated, and nothing later in the request moves it.
 
-`WorksController#new` renders the form. `@create_path` is the POST target;
-without it `form_tag` falls back to the current URL —
+`WorksController#new` renders the form. `@create_path` is the POST target.
+Without it `form_tag` falls back to the current URL —
 `/collections/:id/works/new`, which routes nowhere for POST — and the deposit
 404s on submit.
 
@@ -76,12 +76,13 @@ is not on the image: it degrades, it never blocks.
 
 `WorkDeposit#finalize_new_work` runs after the Work is minted. It seeds the
 title through the structure-safe MODS merge (raw `mods_xml=`, not the flat
-`plain_title=` setter — see `DescriptiveMetadata#save_descriptive!`), applies
-the parent Collection's derivative-permission default, stages the upload, and
-enqueues ingest.
+`plain_title=` setter — see `DescriptiveMetadata#save_descriptive!`). It then
+applies the parent Collection's derivative-permission default, stages the
+upload, and enqueues ingest.
 
 It also holds the filename in `@deposit_title` for the showcase-promotion
-notice, which runs after it and has no file of its own to read the title from.
+notice. That notice runs after it and has no file of its own to read the title
+from.
 
 `WorkDeposit#apply_derivative_default` applies the collection's
 derivative-access default to the new Work, and is a no-op when the collection
@@ -91,12 +92,12 @@ the policy and applies it when the async renditions arrive.
 Atlas refuses a tier more visible than its Work, so a default naming an
 audience the Work does not have is rejected. That should not happen — the
 authoring form checks the default against its collection, and a visibility
-cascade re-clamps it — but the deposit must not die on the Rails error page if
+cascade re-clamps it. But the deposit must not die on the Rails error page if
 it ever does. The Work and its file already exist by that point, so raising
 abandoned a half-made deposit and told the depositor nothing.
 
 It is not silent, though. The default exists to make renditions *more*
-restrictive than the Work, so skipping it leaves them at the Work's own
+restrictive than the Work. So skipping it leaves them at the Work's own
 audience — wider than intended, and the depositor is the one who needs to
 know.
 
@@ -112,7 +113,7 @@ without failing the deposit itself. Neither hides that the file is in.
 
 `WorksController#enqueue_ingest_jobs` passes `complete_work: false`: the
 depositor still owes the metadata page, so ingest must not complete this Work.
-No `derivative_widths` go through this path either — small, medium and large
+No `derivative_widths` go through this path either. Small, medium and large
 are opt-in download renditions chosen on the metadata page and applied later by
 `DepositDerivativesJob`.
 
@@ -124,8 +125,9 @@ is wherever it was just deposited, and promotion does not touch it.
 
 `WorkDeposit#publish_offered?` offers promotion only when the destination is
 the depositor's own personal root. That is what keeps a promoted Work in the
-depositor's own space now that the route, not a publish branch, decides
-placement — the property the old publish branch got by relocating the Work.
+depositor's own space, now that the route, not a publish branch, decides
+placement. It is the property the old publish branch got by relocating the
+Work.
 
 The showcase link is a `:system`-attributed write (`AtlasRb::System::Work`),
 not a call the depositor's own credential could make. Atlas scopes `:system`'s
@@ -157,15 +159,15 @@ already exists and is correctly placed, so there is nothing to roll back.
 `WorkDeposit#record_promotion` writes an `AdminNotice` for every promotion
 attempt, refusals included.
 
-A showcase is a curated public surface that nobody approves onto, so staff read
+A showcase is a curated public surface that nobody approves onto. So staff read
 the list afterwards to catch a Work promoted that belongs on no showcase at
 all, or filed under the wrong genre. That is why it carries every attempt
 rather than only the anomalies.
 
 A refusal is the outcome nobody else can see. The Work deposits correctly, the
 depositor gets one flash and moves on, and the showcase silently does not gain
-it — so without this row, only a log line records that somebody asked to
-publish and did not.
+it. So without this row, only a log line records that somebody asked to publish
+and did not.
 
 The payload carries `work_title`, the filename the deposit was titled with. It
 is the strongest wrong-genre signal available, and it is free: a `.pptx` filed
@@ -182,14 +184,14 @@ from the form, so it can name nothing at all.
 `WorksController#metadata` renders the second page of the deposit, and
 `#update_metadata` is the depositor confirming it.
 
-Both probe the **staged file**, not the Work's assets: `ContentCreationJob`
-may still be in flight when the page renders, and asking Atlas would hide the
+Both probe the **staged file**, not the Work's assets. `ContentCreationJob`
+may still be in flight when the page renders. And asking Atlas would hide the
 streaming-only toggle and the caption field from exactly the deposits that
 want them. `StagedVideoProbe` is called once and shared, since both sections
 ask the same question of the same upload. `StagedImageProbe` gates the opt-in
 Image Derivatives section and is nil for non-image deposits.
 
-By `#edit` time the situation has reversed: the content Blob has landed and
+By `#edit` time the situation has reversed. The content Blob has landed and
 the staged upload is long gone, so that action decides off the Work's own
 assets.
 
@@ -210,10 +212,10 @@ The order inside `#update_metadata` is load-bearing:
    the deposit, and confirmation is what completes the Work. Ingest
    deliberately leaves it `in_progress`. The completion is deferred to a job
    because Atlas asks callers to complete only once the expected children are
-   deposited, and the primary Blob may still be in flight.
+   deposited. The primary Blob may still be in flight.
 
 `WorksController#reject_if_in_progress` blocks `#edit` on an unfinished
-deposit. It is a lock, not housekeeping: an unfinished deposit is probably
+deposit. It is a lock, not housekeeping. An unfinished deposit is probably
 open on its depositor's screen at the metadata page, and this stops a second
 person editing underneath them. The metadata page itself stays reachable to
 anyone with edit rights, because it rides `extra_edit`, so an abandoned
@@ -221,13 +223,13 @@ deposit can always be finished or withdrawn.
 
 `WorksController#requested_work` memoises that read. `#edit` needs the same
 payload the in-progress gate already fetched, and the gate runs as a
-`before_action`, so without the memo the edit page reads it twice.
+`before_action`. So without the memo the edit page reads it twice.
 
 ## Editing descriptive metadata
 
 `DescriptiveMetadata` owns the simple-form fields — title, abstract, keywords
 — on the Metadata tab. It parses them out of the resource's raw MODS to
-pre-fill, validates what comes back, and merges the edits into the existing
+pre-fill, and validates what comes back. It merges the edits into the existing
 MODS rather than replacing it, so every curated node the form does not own
 survives.
 
@@ -242,10 +244,10 @@ arrived, by looking for `:title`.
 leaves keyword subjects untouched.
 
 `curated_subjects_posted?` casts a flag the same form posts, and is
-deliberately kept out of `descriptive_params`: that hash is splatted straight
+deliberately kept out of `descriptive_params`. That hash is splatted straight
 into `save_descriptive!` as the MODS payload, and this is not a MODS field.
 Trusting a form value is fine here. The guard is a curation prompt, not a
-security boundary — Atlas is that — so the worst a tampered value buys is a
+security boundary — Atlas is that. So the worst a tampered value buys is a
 Work saved with no subjects, which the API permits anyway.
 
 ### Validation
@@ -255,7 +257,7 @@ requires that the resource carry at least one subject. The Keywords box is how
 a depositor supplies one.
 
 A record whose subjects are all authority-controlled already satisfies that
-requirement, and those subjects are curated: `MODSFields` keeps them out of
+requirement, and those subjects are curated. `MODSFields` keeps them out of
 the box on purpose, and `MODSMerge` never writes over them. So the form posts
 `curated_subjects` and it counts. Without that, a curator fixing a title on
 such a record would have to invent a redundant keyword to save.
@@ -269,7 +271,7 @@ no-op.
 
 It is wrapped in `with_stale_retry`. Right after a deposit the async
 ingest and derivative jobs are still finalizing the same Work, so this
-read-merge-write can lose an optimistic-lock race; re-reading picks up the
+read-merge-write can lose an optimistic-lock race. Re-reading picks up the
 current MODS and token.
 
 `load_descriptive!` is the read half. It pre-fills the edit form with the bare
@@ -279,8 +281,8 @@ keywords — exactly what `#update` merges back.
 ### Creating a container: mint, then title
 
 `mint_titled!` mints a container and gives it its title, in that order and in
-one place. It returns the minted resource, or nil when the title was missing —
-in which case the flash is already set and the caller only has to send the
+one place. It returns the minted resource, or nil when the title was missing.
+In that case the flash is already set, and the caller only has to send the
 reader back to the form.
 
 The two steps belong together because the invariant spans them. `MODSMerge`
@@ -291,10 +293,10 @@ The guard, `title_missing?`, therefore runs before the mint. The client-side
 JS-off and for a direct POST.
 
 The title is written before anything else the caller wants to do, because
-either call can fail against Atlas and this order picks the better wreckage: a
+either call can fail against Atlas. This order picks the better wreckage: a
 titled resource still holding the ACL it was minted with, which the
-Permissions tab can correct, rather than a correctly-restricted resource with
-no title.
+Permissions tab can correct. The alternative is a correctly-restricted resource
+with no title.
 
 ## Adding a file to a finished Work
 
@@ -316,13 +318,13 @@ sets, and associations.
 `mods` carries no nuid and is gated by `Current.nuid`, the real user. Assets
 and file sets gate on the effective (view-as) user, whose NUID is resolved on
 the request thread because the workers must not touch ActiveRecord.
-`WorkAssociations` is resolved on the request thread for the same reason: its
+`WorkAssociations` is resolved on the request thread for the same reason. Its
 gate is the search service, which reads the acting user, and a worker holds no
 database connection.
 
 `associations_or_none` swallows a failed associations read. The box is
-supplementary, so a failure must not take the page with it — unlike MODS,
-assets and file sets, which the page cannot render without.
+supplementary, so a failure must not take the page with it. That is unlike
+MODS, assets and file sets, which the page cannot render without.
 `parallel_atlas_reads` re-raises any task's error, so the rescue has to be
 inside the task. A nil reads as "no associations" downstream.
 
@@ -330,9 +332,9 @@ inside the task. A nil reads as "no associations" downstream.
 Canvas per page FileSet in page order. It is read-gated like every other view
 of the Work, and the underlying Atlas reads are caller-gated too.
 
-`upload_breadcrumbs` builds the trail for the upload form: the Work's
-structural ancestors, then the Work itself as a link back to its show page,
-then a final "Upload File" you-are-here crumb. It mirrors
+`upload_breadcrumbs` builds the trail for the upload form. The trail is the
+Work's structural ancestors, then the Work itself as a link back to its show
+page. Then comes a final "Upload File" you-are-here crumb. It mirrors
 `ApplicationController#edit_breadcrumb_tail` and differs only in the tail
 label, so an editor can back out to the Work via the trail. The Work crumb
 passes `match: :exact` so loaf does not mark it current on the `/upload`
@@ -345,7 +347,7 @@ It records that a Work's pipeline partly failed, and clears the record when it
 later succeeds.
 
 An enrichment job that exhausts its retries leaves a Work that is complete and
-readable but missing something — a PDF rendition, a poster frame, its
+readable. What it is missing is a PDF rendition, a poster frame, its
 thumbnails, its full text. Enrichment deliberately never fails a deposit, so
 without the flag the only trace was a line in the log, and nobody found out.
 The flag makes that visible without withholding the record.
@@ -377,11 +379,11 @@ symptom is a flag that silently never appears.
 `IncompleteFlag.clear` takes no `nuid:`, deliberately. It runs inside
 `perform`, where the ambient `Current.nuid` is set and is the more correct
 source. A child job invoked with `perform_now` carries no `current_nuid` of
-its own and inherits the caller's through `Current`, so reading the instance
+its own, and inherits the caller's through `Current`. So reading the instance
 attribute would lose it.
 
 `clear` is called on every successful enrichment run, not only after a flagged
-one: asking Atlas whether the flag is set costs the same round trip as
+one. Asking Atlas whether the flag is set costs the same round trip as
 clearing it, and the clear is idempotent. So a re-run that fixes a Work — a
 replaced file re-deriving its assets, say — heals the state on its own.
 
@@ -401,9 +403,9 @@ propagation: `Current.nuid` set on the request thread does *not* automatically
 reach the worker thread that runs the job. Background jobs that call
 `AtlasRb::*` without an explicit `nuid:` kwarg rely on the configured
 `default_nuid` resolving to `Current.nuid`. If the value is not restored at
-perform, the request goes out with no `User:` header and Atlas's
-`require_auth` rejects it with 400 — surfacing as an unrelated `NoMethodError`
-when the gem parses the error envelope and returns nil.
+perform, the request goes out with no `User:` header, and Atlas's
+`require_auth` rejects it with 400. That surfaces as an unrelated
+`NoMethodError` when the gem parses the error envelope and returns nil.
 
 `before_enqueue` captures `Current.nuid`, and `around_perform` re-sets it for
 the duration of `perform`. Child jobs enqueued mid-perform inherit the value

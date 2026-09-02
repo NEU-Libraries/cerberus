@@ -29,9 +29,9 @@ rendition instead: `PdfRenditionJob` enqueues it on the converted PDF, so
 LibreOffice runs once rather than twice.
 
 No `derivative_widths` pass through here. A deposit gets thumbnails at upload
-time only. Small, medium and large are opt-in download renditions chosen later
-on the metadata page, by `DepositDerivativesJob`, and by policy a document gets
-thumbnails only — never S/M/L.
+time only. Small, medium and large are opt-in download renditions, chosen later
+on the metadata page by `DepositDerivativesJob`. By policy a document gets
+thumbnails only, never S/M/L.
 
 ### Two flags that look alike and are not
 
@@ -82,7 +82,7 @@ roots `msword` and `ms-powerpoint` under `x-tika-msoffice` rather than
 ## Multipage pages, and retry safety
 
 `MultipageIngestJob` runs once per page row. `MultipageItemJob` enqueues it
-after that item's Work is minted and `work_pid` is stamped on the row, which is
+after that item's Work is minted and `work_pid` is stamped on the row. That is
 why the row id is the only argument.
 
 Each page becomes an ordered FileSet — position is the manifest Sequence —
@@ -90,9 +90,8 @@ holding the page binary as its Blob. Page jobs parallelise safely, because each
 job touches only its own FileSet, across every item in the load.
 
 The job stops early if the load report has already failed. The unzip job fails
-the report structurally — a sibling page's archive going missing mid-extract,
-for instance — and there is no point building onto a Work the report has given
-up on.
+the report structurally, when a sibling page's archive goes missing mid-extract
+for instance. There is no point building onto a Work the report has given up on.
 
 ### The two Atlas writes behave differently
 
@@ -104,16 +103,16 @@ writes are not alike.
 | `FileSet.create` | Idempotent, keyed on `ingest.idempotency_key`. The result is stamped on `file_set_pid`, so a retry skips or converges |
 | `FileSet.update` (the binary PATCH) | **Appends a new Blob every time it is called** |
 
-`blob_attached_at` is stamped immediately after a successful PATCH. On a
-resumed execution only — meaning `file_set_pid` was already set when the job
-started, so a previous attempt got past the create — the job asks Atlas before
-PATCHing, so a lost response cannot double-attach the page. The happy path makes
-no extra reads.
+`blob_attached_at` is stamped immediately after a successful PATCH. On a resumed
+execution the job asks Atlas before PATCHing, so a lost response cannot
+double-attach the page. A resumed execution is one where `file_set_pid` was
+already set when the job started, meaning a previous attempt got past the
+create. The happy path makes no extra reads.
 
 That asymmetry is why `file_set_has_content?` exists and why it is consulted
-only on a resume. The question it answers is narrow: did a previous attempt's
+only on a resume. The question it answers is narrow. Did a previous attempt's
 PATCH land without being recorded, because the process crashed or the response
-was lost after the server had already processed it?
+was lost after the server had processed it?
 
 ### Staging a page
 
@@ -134,20 +133,20 @@ page filename.
 
 ### Per-page deep zoom
 
-Every page gets its own image-service pointer, not just page 1: a JP2 written
-into Cantaloupe's volume, and a service base PATCHed onto that page's FileSet
-under `Role.service_file`. That is the per-Canvas image service the IIIF
+Every page gets its own image-service pointer, not just page 1. That means a JP2
+written into Cantaloupe's volume, and a service base PATCHed onto that page's
+FileSet under `Role.service_file`. That is the per-Canvas image service the IIIF
 manifest assembles from.
 
 Atlas upserts the Delegate, so re-PATCHing is never additive and a retry is
-safe. `page_service_present?` is consulted only on a resume, and it distinguishes
-a Delegate from content the same way everything else does: Delegates carry a
-`uri` in the listing's polymorphic assets, and content Blobs do not.
+safe. `page_service_present?` is consulted only on a resume. It distinguishes a
+Delegate from content the same way everything else does. Delegates carry a `uri`
+in the listing's polymorphic assets, and content Blobs do not.
 
 ### What page 1 does that other pages do not
 
-Page 1 seeds the Work-level thumbnails through `IiifAssetsJob`, which self-guards
-on an existing thumbnail.
+Page 1 seeds the Work-level thumbnails through `IiifAssetsJob`, which
+self-guards on an existing thumbnail.
 
 `ContentCreationJob` is never enqueued here. It calls `Work.complete`, which is
 `CompleteWorkJob`'s responsibility, exactly once, after every page has landed.
@@ -174,7 +173,7 @@ validator would widen every consumer's contract at once.
 ### Reporting an impossible character before the parse
 
 A character that XML 1.0 cannot store is reported ahead of the parse. libxml
-fails on it too, but answers with `PCDATA invalid Char value 11`, which names
+fails on it too, but answers with `PCDATA invalid Char value 11`. That names
 neither the character, nor the fact that Word wrote it as a manual line break,
 nor what to put in its place.
 

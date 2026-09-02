@@ -1,8 +1,8 @@
 # People, routing and trails
 
 The People discovery surfaces, the breadcrumb trails every controller builds,
-the redirect that catches a DRS v1 URL, the raw-XML editor, and the background
-jobs that sweep or reindex a Set's Works.
+and the redirect that catches a DRS v1 URL. Plus the raw-XML editor, and the
+background jobs that sweep or reindex a Set's Works.
 
 Source files:
 
@@ -41,10 +41,10 @@ fetched, not from params.
 
 ### Scoping to People with a facet, not a hidden filter
 
-`scope_to_people` defaults the Type facet to `type_ssim:Person`. Using the facet
-rather than a hidden `fq` means the scope renders as a constraint chip ("Type ›
-Person") and reads as applied in the Type facet — the same behaviour the genre
-landing pages have. `type_ssim:Person` selects exactly the Person docs.
+`scope_to_people` defaults the Type facet to `type_ssim:Person`. The scope uses
+the facet rather than a hidden `fq`. So it renders as a constraint chip ("Type ›
+Person"), and reads as applied in the Type facet. That is the same behaviour the
+genre landing pages have. `type_ssim:Person` selects exactly the Person docs.
 
 The method is idempotent. A user-supplied `type_ssim` is left alone, though only
 Person docs ever match this surface.
@@ -55,11 +55,11 @@ the action body, is snapshotted away.
 
 ### Keeping the embedded search on the People surface
 
-`search_action_url` is overridden so the facet links, search-within box and
-pagination of the embedded search stay on the People surface — `/people`,
-`/communities/:id/people`, or `/people/:id` — instead of escaping to
-`CatalogController#index`. The override picks the target from whichever id param
-the request carries.
+`PeopleController` overrides `search_action_url` so the facet links,
+search-within box and pagination of the embedded search stay on the People
+surface. That is `/people`, `/communities/:id/people`, or `/people/:id`, instead
+of escaping to `CatalogController#index`. The override picks the target from
+whichever id param the request carries.
 
 ### What a profile lists
 
@@ -98,7 +98,7 @@ The reason is prefix matching. `/communities/:id` is a prefix of
 Under inclusive matching loaf marks the ancestor as the current crumb, so it
 stops being a link and the trail loses its way back.
 
-`edit_breadcrumb_tail` is the tail of an edit-page trail: the resource becomes a
+`edit_breadcrumb_tail` is the tail of an edit-page trail. The resource becomes a
 link to its show page, with `match: :exact` for that reason, followed by a
 non-link "Edit `<Klass>`" you-are-here crumb.
 
@@ -134,7 +134,8 @@ same trail. Clicking the XML tab from an edit page has to keep the personal-root
 prefix rather than falling back to the structural one.
 
 `editing:` swaps the show tail — the collection as the you-are-here crumb — for
-the edit tail, the collection as a link plus an "Edit Collection" current crumb.
+the edit tail. That tail is the collection as a link plus an "Edit Collection"
+current crumb.
 That keeps an edit or XML page on the same prefix as the show page.
 
 `personal_root_owner` resolves the owning Person from the personal root's
@@ -175,21 +176,21 @@ migration.
 
 v1 ran on Fedora, so every object carried a `neu:` pid. v2 mints fresh NOIDs and
 does not carry the pid forward. Ten years of `neu:` pid URLs live in published
-papers, syllabi, finding aids, catalogue records and the search index, and
-without this controller they all land on a 404.
+papers, syllabi, finding aids, catalogue records and the search index. Without
+this controller they all land on a 404.
 
 A hit redirects. A pid that never existed 404s. There is no `410 Gone` branch,
-because every v1 object migrates — including the hand-rolled integer pids, one of
-which, `neu:1`, is the root Northeastern University Community.
+because every v1 object migrates. That includes the hand-rolled integer pids, one
+of which, `neu:1`, is the root Northeastern University Community.
 
 ### The path prefix does not decide the destination
 
 The inbound path prefix is only how the URL is caught. `object_type` on the
 mapping row decides where the request goes, because the prefixes do not
-correspond: a v1 CoreFile at `/files/:pid` is a v2 Work at `/works/:noid`.
+correspond. A v1 CoreFile at `/files/:pid` is a v2 Work at `/works/:noid`.
 
 That also means the request never has to ask Atlas what kind of thing a NOID
-names, which matters when the caller is a crawler working through a decade of
+names. That matters when the caller is a crawler working through a decade of
 links.
 
 ### The redirect status
@@ -263,15 +264,15 @@ that takes effect.
 ### Privatize writes the resource ACL, not the derivative gate
 
 `SetPrivatizeJob` is the v1 "make these Core Files private" sweep. It writes the
-Work's own ACL, which is the outer gate: a Work's FileSets follow the Work (see
-`NarrowingTargets` in `docs/narrowing.md`), and the download path authorizes
+Work's own ACL, which is the outer gate. A Work's FileSets follow the Work — see
+`NarrowingTargets` in `docs/narrowing.md`. And the download path authorizes
 `:read` on the resource before it consults the per-asset stamp.
 
 Privatizing the Work therefore closes its blobs too, and a derivative tier left
 naming `public` underneath is inert rather than a hole.
 
 Group grants are kept. They grant nothing extra while an item is public, and they
-are what a later flip back to Private falls back to — the same reasoning
+are what a later flip back to Private falls back to. That is the same reasoning
 `PermissionsForm#mass_permissions` applies to a single resource.
 
 ### Applying a Set's Sentinel
@@ -285,10 +286,10 @@ Authoring or editing a Collection Sentinel still triggers no sweep.
 Each tier is clamped against the Work it is written to. Clamping is the honest
 reading of the policy as well as a wire requirement: a tier can never widen a
 Work, only narrow it. A tier sharing nobody with its Work clamps to `[]`,
-withheld from everyone, which is the right direction for a gate whose purpose is
+withheld from everyone. That is the right direction for a gate whose purpose is
 to withhold.
 
-A failure leaves a rendition *wider* than intended, so the report's lead names
+A failure leaves a rendition *wider* than intended. So the report's lead names
 what the operator still has to deal with rather than merely saying it failed.
 
 `set_noid` is the Compilation's NOID, which is also the Sentinel's `target_id`.
@@ -298,9 +299,9 @@ what the operator still has to deal with rather than merely saying it failed.
 `SetReindexJob` walks the Set's recipe rather than its resolved contents, and
 that distinction is the point of the job.
 
-`SetResolver` answers "what is in this Set" out of Solr, so a resource whose Solr
-document is missing is invisible to it — which is precisely the resource most in
-need of a reindex. Atlas's subtree walk reads the authoritative store instead, so
+`SetResolver` answers "what is in this Set" out of Solr. So a resource whose Solr
+document is missing is invisible to it — precisely the resource most in need of a
+reindex. Atlas's subtree walk reads the authoritative store instead, so
 it has no such blind spot.
 
 Driving the recipe also sidesteps the resolver's export row cap and its need for
@@ -311,9 +312,9 @@ included containers themselves, and any Work the Set has set aside. A reindex is
 Solr-only and idempotent, so that costs time, not correctness.
 
 A branch that fails is recorded and the walk continues. One unreachable branch
-must not abandon the rest of the recipe. Failures are named rather than counted,
-because a branch that failed to reindex is still stale and the operator has
-moved on by the time the report arrives.
+must not abandon the rest of the recipe. Failures are named rather than counted.
+A branch that failed to reindex is still stale, and the operator has moved on by
+the time the report arrives.
 
 ## One item of a multipage load
 

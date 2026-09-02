@@ -5,8 +5,8 @@ Per-component reference that has to version with the code.
 ## What belongs here
 
 Explanation a developer needs *while changing a specific file*, and that is too
-long to sit inside it: routing tables, retry-safety arguments, wire contracts
-with Atlas, and the reason a design rejected the obvious alternative.
+long to sit inside it. That means routing tables, retry-safety arguments, wire
+contracts with Atlas, and the reason a design rejected the obvious alternative.
 
 Each page names the source files it covers. Those files carry a one-line pointer
 back, so you can find either from the other.
@@ -44,11 +44,11 @@ deleting knowledge. If a comment would cost someone a bug, keep it and go over.
 
 **Files with fewer than 25 lines of code are exempt.** Density measures comments
 against code, so a file that declares rather than computes has no denominator to
-earn a budget with. `app/models/current.rb` is the clearest case: twenty comment
-lines over seven lines of code, and each one names a header's behaviour on the
-wire, including that `view_as_nuid` is never sent as a write header. Forcing that
-file under the target would make it worse at the thing the target exists to
-improve.
+earn a budget with. `app/models/current.rb` is the clearest case. Twenty comment
+lines sit over seven lines of code, and each one names a header's behaviour on
+the wire. One of them records that `view_as_nuid` is never sent as a write
+header. Forcing that file under the target would make it worse at the thing the
+target exists to improve.
 
 ## Adding a page
 

@@ -44,31 +44,31 @@ ancestor chain includes any of the anchors. The anchors themselves are excluded,
 because a node is not its own ancestor. It takes bare noids, and tolerates and
 strips a leading `id-` for callers passing values from `alternate_ids_ssim`.
 
-**`identity_fq(uuids)`** matches documents by Solr's uniqueKey, the bare uuid. It
-splices individually-named resources — a Set's directly-added Works — into a
+**`identity_fq(uuids)`** matches documents by Solr's uniqueKey, the bare uuid.
+It splices individually-named resources — a Set's directly-added Works — into a
 membership `{!bool}`, or subtracts them via `excluding_fq`.
 
 **`members_fq(container_uuids, include_linked:)`** matches documents that are
 members of any of the containers. Structural membership only by default, ORing
 in the linked overlay when asked.
 
-**`member_clauses(...)`** exposes those membership clauses individually, so a
-caller needing to OR them alongside *other* clauses — the subtree search's
-container clause, for instance — can splice everything into one flat `{!bool}`.
+**`member_clauses(...)`** exposes those membership clauses individually. A
+caller can then OR them alongside *other* clauses, such as the subtree search's
+container clause, splicing everything into one flat `{!bool}`.
 
-**`term_list(uuids)`** maps bare uuids to the `id-<uuid>` term form Solr indexes,
-comma-joined for the `{!terms}` parser. An empty list yields an empty term
-string, which matches no documents. That is the correct answer for "members of
-nothing".
+**`term_list(uuids)`** maps bare uuids to the `id-<uuid>` term form Solr
+indexes, comma-joined for the `{!terms}` parser. An empty list yields an empty
+term string, which matches no documents. That is the correct answer for "members
+of nothing".
 
 ## Two Solr parser constraints that shape the code
 
 **A bare leading `-` cannot precede a localparams clause.** `{!terms}` has to
-open the parameter in order to be its parser. So `excluding_fq` builds the
-subtraction as a `{!bool}` with an explicit `must="*:*"` anchor — a `must_not`
-needs a positive base to subtract from.
+open the parameter to be its parser. So `excluding_fq` builds the subtraction as
+a `{!bool}` with an explicit `must="*:*"` anchor — a `must_not` needs a positive
+base to subtract from.
 
 **A `{!bool}` cannot be nested inside another bool's quoted `should=`.** Solr's
-parser rejects it. Build one flat `{!bool}` from all the clauses instead, which
+parser rejects it. Build one flat `{!bool}` from all the clauses instead. That
 is why `any_of` returns a single clause bare rather than wrapping it, and why
 `member_clauses` exists at all.

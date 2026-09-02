@@ -1,8 +1,8 @@
 # Edit surfaces
 
 The tab set every resource-edit page offers, the audit rows those pages render,
-the typed associations between Works, and the shared `#update` that all the
-edit forms PATCH.
+and the typed associations between Works. Plus the shared `#update` that all
+the edit forms PATCH.
 
 Source files:
 
@@ -25,7 +25,7 @@ partial.
 
 It is one declaration because it was once four — the three edit views plus the
 XML editor's hand-mirrored copy — with nothing coupling them. The XML editor's
-row went stale silently every time a tab was added: it was missing Derivative
+row went stale silently every time a tab was added. It was missing Derivative
 access, Export and Analytics, and it put XML in the wrong position for
 containers.
 
@@ -53,10 +53,10 @@ than growing a path-guessing convention.
 `edit_tab_open_key(klass, open:)` decides. The tab row and the panes both ask
 it, rather than each deciding for itself, so they cannot disagree.
 
-`open` names a pane explicitly. A re-render needs that: a rejected save must
+`open` names a pane explicitly. A re-render needs that. A rejected save must
 come back on the tab the reader was working in, and it cannot rely on the URL
-fragment, because Turbo follows a redirect with `fetch` and the Fetch spec drops
-the fragment from the resolved URL. The `Location` header carries the fragment
+fragment. Turbo follows a redirect with `fetch`, and the Fetch spec drops the
+fragment from the resolved URL. The `Location` header carries the fragment
 and the browser never sees it.
 
 An unknown or hidden key falls back to the default rather than opening nothing.
@@ -96,8 +96,8 @@ placeholder.
 
 `audit_event_actor` stacks the name above that pill, mirroring the inbox sender
 cell. A ledger that answers "who did this" with `000000003` answers it only for
-a reader who can read NUIDs: the name carries the meaning and the chip keeps the
-identifier to hand for a ticket. Each call is a `Rails.cache` read, and the
+a reader who can read NUIDs. The name carries the meaning, and the chip keeps
+the identifier to hand for a ticket. Each call is a `Rails.cache` read. The
 history view primes a page's NUIDs with one `NuidResolver.names_for` batch, so
 these are hits rather than a request per row.
 
@@ -130,10 +130,10 @@ transition worth a page. `PERMISSION_VIEW_ACTIONS` is shared with
 `HistoriesController#permission_events`.
 
 Every metadata update writes a new `descMetadata.xml` OCFL version, so all of
-them get a MODS-diff link: a full MODS upload via `mods_xml=`
+them get a MODS-diff link. That means a full MODS upload via `mods_xml=`
 (`{ source: 'mods' }`) and a title or description field-patch (`{ fields: }`)
-alike, since Atlas's `plain_title=` and `plain_description=` edit the MODS
-document and call `mods_xml=` too, in `MODSAssignment`. The MODS document's
+alike. This is because Atlas's `plain_title=` and `plain_description=` edit the
+MODS document and call `mods_xml=` too, in `MODSAssignment`. The MODS document's
 `create` row has no prior version to diff against, so it stays update-only.
 
 The link is deep-linked to the event. `audit_event_dom_id` derives an anchor
@@ -159,8 +159,8 @@ action. The shapes mirror what Atlas emits:
 `acl_diff_summary` prints a per-grant added and removed summary across the
 audited ACL keys — `read +public · edit −staff +editors` — and appends the
 embargo transition when it moved. `embargo_summary_clause` uses ISO dates rather
-than the Rights page's prose form, because this clause shares a dense table cell
-with grant tokens where a spelled-out month would crowd them out.
+than the Rights page's prose form. This clause shares a dense table cell with
+grant tokens, where a spelled-out month would crowd them out.
 
 `tier_diff_summary` prints the same grammar per download tier —
 `large −public +staff` — because both are group grants moving on and off a slot.
@@ -171,7 +171,7 @@ A permissions event describes either the resource ACL or the per-rendition
 download gate. Atlas tags the gate change with `source:
 'derivative_permissions'` (`DERIVATIVE_PERMISSIONS_SOURCE`). The two share a
 change\_type and an action, so the payload's `source` is the only thing telling
-them apart, and both the audit-log summary and the Rights page have to check it
+them apart. Both the audit-log summary and the Rights page have to check it
 before reading either one. The gate's before and after are a sparse
 `{ tier => [read groups] }` map, not an ACL envelope.
 
@@ -197,9 +197,9 @@ before column. An empty slot renders a muted em-dash.
 
 `EMBARGO_KEY` names the embargo slot in the same permissions snapshot. An
 embargo is a rights decision a human makes and revises — withholding downloads
-until a chosen date — so it belongs in the rights diff, just not in the
+until a chosen date. So it belongs in the rights diff, just not in the
 grant-pill register. `embargo_diff_cell` therefore tints it with the same tone
-tokens as the pills but renders it as plain text: a date is a value, not an
+tokens as the pills, but renders it as plain text. A date is a value, not an
 identifier, and the monospace chip register is reserved for things you could
 paste into a lookup.
 
@@ -209,8 +209,8 @@ raising mid-table, because the payload is a remote snapshot.
 ### The version picker
 
 `mods_version_options` builds the `<option>` list for the MODS-history version
-picker: the version label, a compact timestamp and the actor NUID joined by
-middots, with the opaque OCFL version id as the value. The actor may be blank,
+picker. Each option joins the version label, a compact timestamp and the actor
+NUID by middots. The value is the opaque OCFL version id. The actor may be blank,
 and an absent or unparseable timestamp drops out of the label so the option
 still reads cleanly.
 
@@ -220,20 +220,20 @@ still reads cleanly.
 Community Metadata, Permissions and Advanced tabs. They are separate forms that
 all PATCH the same action with disjoint fields.
 
-Each piece it composes owns one half of a job: `PermissionsForm` parses and
-presents the permissions form while `ResourcePermissions` writes it,
+Each piece it composes owns one half of a job. `PermissionsForm` parses and
+presents the permissions form while `ResourcePermissions` writes it.
 `DescriptiveMetadata` and `AdvancedMetadata` merge MODS, and `AtlasWrite` makes
 a write survive the wire. What is left in `Transformable` is the routing between
 them.
 
-`handle_metadata_update` sends permissions to Atlas's metadata endpoint, and
+`handle_metadata_update` sends permissions to Atlas's metadata endpoint. It
 validates descriptive fields before merging them into the existing MODS and
 writing them through the structure-safe raw `update` path.
 
 `resource_mods` reads the resource's raw MODS once per request. Both form
-loaders parse the same document — `DescriptiveMetadata` for the bare title,
-abstract and keywords, `AdvancedMetadata` for the structured title parts and
-names — and the Work edit page runs both, so without the memo the page fetched
+loaders parse the same document: `DescriptiveMetadata` for the bare title,
+abstract and keywords, and `AdvancedMetadata` for the structured title parts
+and names. The Work edit page runs both, so without the memo the page fetched
 the same XML from Atlas twice.
 
 ### The two ACL writes
@@ -262,14 +262,14 @@ Two surfaces read those edges, and they resolve titles differently on purpose.
 ### The public box
 
 `WorkAssociations` resolves Atlas's edges to Solr documents the viewer is
-allowed to see, and takes one Solr query to cover both directions and every
+allowed to see. It takes one Solr query to cover both directions and every
 predicate, however many edges a Work has.
 
 Atlas answers with noids, and that is what makes this safe. Atlas's read floor
 is unconditional: the association endpoint reports every edge, including edges
 to Works the viewer must not see. Resolving those noids through the gated search
-turns the ungated edge list into only the rows this viewer may have — a noid
-that resolves to no document simply does not render. The same lookup drops
+turns the ungated edge list into only the rows this viewer may have. A noid that
+resolves to no document simply does not render. The same lookup drops
 tombstoned Works for free, since `-tombstoned_bsi:true` sits in the catalog's
 `default_solr_params`.
 
@@ -279,7 +279,7 @@ the controller's `search_service`, which supplies the gated search builder and
 index.
 
 `Result` holds one Hash of predicate to documents per direction, in
-`AtlasRb::Work::ASSOCIATION_TYPES` order rather than Atlas's hash order, so the
+`AtlasRb::Work::ASSOCIATION_TYPES` order rather than Atlas's hash order. So the
 box lists its groups the same way on every Work. `Result#size` counts every
 document across both directions, for a jump-link count that matches what
 actually renders.
@@ -309,7 +309,7 @@ adding a predicate is one entry rather than three edits in three files.
 
 Icons are the restrained Font Awesome solid set the rest of the site uses,
 chosen for the *kind of thing* the associated Work is. There is deliberately no
-colour per predicate: a relationship is a label, not a status, and a
+colour per predicate. A relationship is a label, not a status, and a
 five-colour legend would outrank the Embargoed and Incomplete pills, which do
 carry status.
 
@@ -331,21 +331,20 @@ Nothing moves in the containment tree and no permissions change. An association
 is descriptive.
 
 It is admin-only because Atlas is. Atlas gates the write to admin and the
-devolved tier, because the claim renders on the *target's* page too and the
-asserter often holds no rights over it. That is stricter than "descriptive"
-suggests, and it is why this is an `/admin/*` surface rather than a tab on the
-Work edit page: a tab would be dead chrome for every depositor and editor who
-could reach it.
+devolved tier. The claim renders on the *target's* page too, and the asserter
+often holds no rights over it. That is stricter than "descriptive" suggests, and
+it is why this is an `/admin/*` surface rather than a tab on the Work edit page.
+A tab would be dead chrome for every depositor and editor who could reach it.
 
 `add` always writes from the managed Work outward, because the edge is stored on
 the Work that asserts it. To assert the reverse claim, manage the other Work.
 `remove` takes the holder explicitly and so retracts either direction from one
 panel, which an admin can do because they hold rights on both ends.
 
-`manage` passes `exclude_node_uuid` to `ResourceSearch`, which keeps the managed
-Work out of its own candidate list and pre-empts Atlas's `self_association`
+`manage` passes `exclude_node_uuid` to `ResourceSearch`. That keeps the managed
+Work out of its own candidate list, and pre-empts Atlas's `self_association`
 rejection at the point of choice.
 
 `REFUSALS` phrases Atlas's 422 codes on an association write in the admin's
-terms. The vocabulary is atlas\_rb's; the wording is Cerberus's. A `Faraday::Error`
-is logged by `log_failure` and reported as `GENERIC_REFUSAL`.
+terms. The vocabulary is atlas\_rb's; the wording is Cerberus's. `log_failure`
+logs a `Faraday::Error` and reports it as `GENERIC_REFUSAL`.

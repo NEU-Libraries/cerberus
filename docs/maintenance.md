@@ -11,15 +11,16 @@ Source files:
 ## Atlas owns the window
 
 Atlas owns the flag and enforces it. While the window is open, every write Atlas
-receives is refused with a 503 carrying `error: "read_only_mode"`, which atlas_rb
-raises as `AtlasRb::ReadOnlyModeError`.
+receives is refused with a 503 carrying `error: "read_only_mode"`, which
+atlas_rb raises as `AtlasRb::ReadOnlyModeError`.
 
 `MaintenanceMode` is the read side: what Cerberus consults to render its banner
 and to refuse a write before it leaves the app. `MaintenanceGate` is the refusal
 itself. Both are a courtesy layer over Atlas's floor. Neither is the boundary.
 
-The gate exists so a librarian meets a page that explains the window instead of
-an exception, and so a write never travels to Atlas just to be turned back.
+The gate exists for two reasons. A librarian meets a page that explains the
+window rather than an exception, and a write never travels to Atlas just to be
+turned back.
 
 ## Reading the window
 
@@ -33,9 +34,9 @@ an exception, and so a write never travels to Atlas just to be turned back.
 | `retry_after` | seconds Atlas asks a refused caller to wait |
 
 Reads are cached for `config.x.cerberus.maintenance_ttl`. Where the cache store
-is a null store — test, and any environment with caching off — that degrades to
-one call per request, which is correct but chatty. In test it also keeps one
-example's window from leaking into the next.
+is a null store, that degrades to one call per request. It is correct but
+chatty. Test is such an environment, as is any environment with caching off. In
+test it also keeps one example's window from leaking into the next.
 
 `reset_cache!` drops the cached state. It is called after a write so the
 flipping request sees its own effect rather than waiting out the TTL.
@@ -69,13 +70,13 @@ rescue turns that into the same page.
 through `AtlasRb::Maintenance.write`, and both drop the cache in an `ensure`.
 
 `source:` is either `'operator'` or `'deploy'`, and says which door is acting.
-Atlas records it and enforces one rule with it: a `deploy` close is refused when
-an operator opened the window, so a deploy that finishes cannot end a window a
-human opened by hand. An operator close clears either.
+Atlas records it and enforces one rule with it. A `deploy` close is refused when
+an operator opened the window. A deploy that finishes therefore cannot end a
+window a human opened by hand. An operator close clears either.
 
-Atlas answers that refusal with **200 and the unchanged state**, not an error,
-so a caller that needs to know whether the close landed must read `read_only`
-off the return value.
+Atlas answers that refusal with **200 and the unchanged state**, not an error. A
+caller that needs to know whether the close landed must read `read_only` off the
+return value.
 
 ## Refusing a write
 
@@ -83,14 +84,14 @@ off the return value.
 everything that is not exempt.
 
 It keys on the HTTP method rather than an action list, which makes it
-fail-closed by construction: a controller added later inherits the refusal
+fail-closed by construction. A controller added later inherits the refusal
 without being enumerated anywhere. The usual objection to method filtering —
 that a GET can write — does not apply, because this is not the boundary.
 
 `rescue_from AtlasRb::ReadOnlyModeError` is the backstop. Anything the method
-gate lets through — a GET-shaped write, or an allowlisted action that turns out
-to reach Atlas — still fails, and fails with the same page rather than an
-unhandled exception.
+gate lets through still fails, and fails with the same page rather than an
+unhandled exception. That covers a GET-shaped write, and an allowlisted action
+that turns out to reach Atlas.
 
 ### The response renders, it does not redirect
 
@@ -133,7 +134,7 @@ Each of these is the sibling of an allowed action and must not be added.
 | Starting an impersonation — neither `view_as` nor `act_as` | both record a session-start `AuditEvent` in Atlas first and fail closed if it does not land, so neither can work during a window whatever this gate does. Refusing them here makes the message clear and saves a round trip |
 
 `admin/impersonations#destroy` is exempt because it is exiting only. The session
-is torn down before the end event is emitted, so an admin must always be able to
+is torn down before the end event is emitted. An admin must always be able to
 leave a session they have already left. The end event itself is lost during a
 window: an impersonation exited inside one leaves no end row in the ledger.
 

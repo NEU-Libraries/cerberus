@@ -1,8 +1,8 @@
 # Identity
 
-Who Cerberus thinks the current request belongs to: how a `User` is built at
-sign-in, what each role predicate gates, how discovery abilities follow from it,
-and how an administrator acts or looks as somebody else.
+Who Cerberus thinks the current request belongs to. How a `User` is built at
+sign-in, and what each role predicate gates. How discovery abilities follow from
+it, and how an administrator acts or looks as somebody else.
 
 Source files:
 
@@ -40,8 +40,8 @@ which implements the underlying strategy logic, and is based on
 
 Warden calls `authenticate!`. On success the strategy calls `success!` with an
 instance of the model class Devise is configured with — `mapping.to`, the `User`
-class — built from `authentication_hash`, which the base class populates with the
-fields the login form submitted. On failure it calls `fail!`.
+class. The strategy builds it from `authentication_hash`, which the base class
+populates with the fields the login form submitted. On failure it calls `fail!`.
 
 `credentials_valid?` returns `true`. Nothing is checked. The shape the source
 records as intended is: take the NUID, send it to Atlas, and merge the returned
@@ -52,8 +52,8 @@ app actually uses builds the `User` in `AtlasController` instead.
 
 `pretty_name` runs the stored name through Namae, which understands only
 person-shaped names. A descriptive or organisational one — "Law Library Staffer"
-— parses to nothing. The raw-name fallback is load-bearing: an empty display
-name blanks the whole user block in the navbar, and that block holds Log Out, so
+— parses to nothing. The raw-name fallback is load-bearing. An empty display
+name blanks the whole user block in the navbar, and that block holds Log Out. So
 the only way out of the session was to clear it by hand.
 
 ## What each role predicate gates
@@ -106,14 +106,14 @@ For a signed-in non-admin:
 `edit_equivalent?` is an ACL edit-group match **or** ownership.
 
 Granting read from it is the fix for two ordinary states that otherwise locked a
-person out of their own material: a depositor who set their collection Private
-with no group rows, and a group granted Manage but not View. Both kept the Edit
-page and got a 403 on the object itself.
+person out of their own material. Those are a depositor who set their collection
+Private with no group rows, and a group granted Manage but not View. Both kept
+the Edit page and got a 403 on the object itself.
 
 It cannot widen disclosure, because it only admits people who could already
-alter the thing. Atlas says the same of Sets — edit implies read — and its read
-floor admits any authenticated principal, so nothing here outruns what the
-backend will serve.
+alter the thing. Atlas says the same of Sets — edit implies read. Its read floor
+admits any authenticated principal, so nothing here outruns what the backend
+will serve.
 
 Ownership has to be tested separately because the ACL does not represent it. A
 personal root and everything beneath it carries `edit: [repository:staff]` with
@@ -126,8 +126,8 @@ operator action, not an owner one.
 
 ### Ownership and proxy deposits
 
-`depositor?` is not Work-scoped, because a depositor owns their Collections too:
-the whole workspace subtree inherits their NUID, since creators copy
+`depositor?` is not Work-scoped, because a depositor owns their Collections too.
+The whole workspace subtree inherits their NUID, since creators copy
 `parent.permissions` and that carries `depositor`. A Collection they own is
 theirs to edit and, once empty, to withdraw. Emptiness needs no check here —
 Atlas refuses the tombstone while live children remain.
@@ -167,14 +167,14 @@ without a trail. A failed emit raises a Faraday error and no session is set;
 emits `impersonation_ended` best-effort, logging a failure. The rescue covers
 `AtlasRb::Error` as well as `Faraday::Error`, because a refusal Atlas states in
 an HTTP response is still a failed emit. A read-only maintenance window is the
-case that proves it — the session is already gone by that point, so letting
+case that proves it. The session is already gone by that point. So letting
 `AtlasRb::ReadOnlyModeError` escape would land the admin on the maintenance page
 and tell them an exit failed that had in fact succeeded.
 
 `emit_impersonation_event` records a session-scoped `AuditEvent` — there is no
 resource to hang it on — through atlas_rb's emit binding. It passes the admin as
 `actor_nuid` explicitly. The gem uses that value as the `User:` header and as the
-recorded principal, so the admin gate still holds on an `impersonation_ended`
+recorded principal. So the admin gate still holds on an `impersonation_ended`
 emit fired mid-teardown.
 
 ### Context plumbing
@@ -191,10 +191,10 @@ request, rather than silently performing or silently dropping the write.
 
 "Loudly" needs help when the write came from inside a turbo-frame — the My DRS
 token panel is one. Turbo looks for that frame in the redirect's target, does not
-find it on the root page, and discards the entire response: no token, no error,
-no flash, and the banner still showing until the next navigation. The button
-looks simply dead, so an admin may keep pressing it while no longer impersonating
-anyone.
+find it on the root page, and discards the entire response. That means no token,
+no error, no flash, and the banner still showing until the next navigation. The
+button looks simply dead, so an admin may keep pressing it while no longer
+impersonating anyone.
 
 The reply to a turbo-frame request is therefore a turbo-stream refresh. A
 turbo-stream is honoured whatever frame the request came from, and a refresh
@@ -221,9 +221,9 @@ hydration live in the concern.
 | everything else — `new`, `recipients`, `create_view_as`, `destroy` | `require_admin_or_delegate` |
 
 Act-as stays `:admin`-only even for a delegate who cleared the broader gate to
-reach the controller, which matches the view: `_start.html.haml` renders the "Act
-as" control for a full admin only. Atlas gates acting-as server-side too — it
-authorizes the `On-Behalf-Of` header against the admin role — so the Cerberus
+reach the controller, which matches the view. `_start.html.haml` renders the "Act
+as" control for a full admin only. Atlas gates acting-as server-side too,
+authorizing the `On-Behalf-Of` header against the admin role. So the Cerberus
 gate is defense in depth rather than the only backstop. Atlas's own
 devolved-admin grant opens `:create AuditEvent` for the session-start emit that
 view-as needs, and does not touch on-behalf-of or acting-as at all.
@@ -233,9 +233,9 @@ impersonation session itself. `enforce_impersonation_ttl` and
 `set_impersonation_context` still run.
 
 `new` renders the NUID-entry start form, reached from the admin dashboard's
-Impersonation card, matching the other admin actions — Re-parent, Linked members
-— which open onto their own page. `recipients` is the typeahead JSON for the
-target-user picker, from `UserDirectorySearchable`; that directory's role
+Impersonation card. That matches the other admin actions — Re-parent, Linked
+members — which open onto their own page. `recipients` is the typeahead JSON for
+the target-user picker, from `UserDirectorySearchable`. That directory's role
 exclusions are apt here too, since impersonation targets real human users and
 never the self, system or anonymous principals. `resolve_target` returns `nil`
 for a blank entry without calling Atlas.
@@ -267,7 +267,7 @@ Person carries a `personal_root_id`. `community_name` degrades to the NOID when
 the lookup fails, so a stale affiliation cannot break the deposit form.
 
 `publish_showcase_id` resolves the showcase to promote into from the submitted
-community and genre. It returns `nil` when the request cannot be honoured: no
-curated Person, a community the depositor is not affiliated with, or no showcase
-for that genre there. The showcase lookup is gated, so one the depositor cannot
-see reads `nil` as well.
+community and genre. It returns `nil` when the request cannot be honoured. That
+covers no curated Person, a community the depositor is not affiliated with, or
+no showcase for that genre there. The showcase lookup is gated, so one the
+depositor cannot see reads `nil` as well.
