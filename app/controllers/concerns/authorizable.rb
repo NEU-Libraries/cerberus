@@ -1,38 +1,21 @@
 # frozen_string_literal: true
 
+# Write gating for the standard resource controllers, and the translation of
+# Atlas's refusals into friendly pages. See docs/authorization.md.
 module Authorizable
   extend ActiveSupport::Concern
 
   # Raised by the `authorize_*!` helpers when AtlasRb hands back nothing for an
-  # id. Two reads produce that: `/resources/:id/permissions` answers 200 with no
-  # `"resource"` key for an unknown id, and the guarded read bindings return nil
-  # on a 404. Neither raises by itself, so an unguarded unwrap trips a
-  # NoMethodError on the nil somewhere downstream of the actual cause.
-  # Translating both into one sentinel puts them on the same rescue_from path as
-  # the write-side AtlasRb::NotFoundError.
+  # id. Neither nil-returning read raises by itself, so an unguarded unwrap
+  # trips a NoMethodError on the nil downstream of the actual cause.
+  # See docs/authorization.md.
   class ResourceNotFound < StandardError; end
 
   class_methods do
-    # Deny-by-default write gating for the standard REST resource
-    # controllers (works / collections / communities). Declaring the
-    # uniform "can this principal do this to this resource?" gates from
-    # one place is the structural fix for the opt-in-per-action drift the
-    # authorization audit found: a new resource controller that calls this
-    # can't silently ship a write that's gated only at the GET form.
-    #
-    # Three gates, matching the policy:
-    #   - the :edit ability on the DESTINATION for the create surface
-    #     (new/create). Creating a child is a write to its container, so the
-    #     right question is "may you edit the thing you're adding to?" — Atlas
-    #     asks the same one (:create_child against the resolved parent). The
-    #     destination is a route segment, so it is always present; there is no
-    #     shape of the request that reaches these actions ungated.
-    #   - the :edit ability on BOTH the edit form and the write that
-    #     follows (edit/update), closing the "form gated, write open" gap.
-    #   - the tombstone gate on tombstone.
-    #
-    # `extra_edit:` folds controller-specific edit-gated actions into the
-    # :edit gate (Works' metadata / update_metadata tabs).
+    # Deny-by-default write gating for works / collections / communities: the
+    # :edit ability on the DESTINATION for new/create, on the resource for both
+    # edit and update (never the form alone), and the tombstone gate on
+    # tombstone. See docs/authorization.md.
     def authorize_resource_writes!(extra_edit: [])
       # The filtered actions live in the including controller, not this concern,
       # so the lexical-scope cop can't see them — that indirection is the whole
@@ -51,33 +34,17 @@ module Authorizable
       render template: 'errors/forbidden', status: :forbidden
     end
 
-    # Atlas is the real authorization boundary; Cerberus's own gates are UX/
-    # defense-in-depth (see Ability's class comment). When the two diverge —
-    # Cerberus's gate said yes, Atlas's said no — the write never happened, so
-    # this is a plain 403, not a 500: the same friendly page CanCan::AccessDenied
-    # renders, rather than the default Rails exception trace (which, unhandled,
-    # leaks the request's params dump and file paths to the end user).
+    # When Cerberus's gate says yes and Atlas's says no the write never
+    # happened, so this is a plain 403, not a 500. Unhandled, the default Rails
+    # exception trace leaks the params dump and file paths to the end user.
     rescue_from AtlasRb::ForbiddenError do
       render template: 'errors/forbidden', status: :forbidden
     end
 
-    # Three shapes of "resource doesn't exist" land here, because reads and
-    # writes report a missing id differently:
-    #
-    #   1. `AtlasRb::NotFoundError` — a WRITE against a stale id. The guarded
-    #      write bindings raise rather than return, since a caller that asked
-    #      to change something and silently got nil is the worse outcome.
-    #   2. `ResourceNotFound` — a READ that came back empty. The guarded read
-    #      bindings return nil on a 404, and `permissions` returns nil for an
-    #      unknown id, so the `authorize_*!` helpers raise this sentinel.
-    #   3. `JSON::ParserError` — the pre-guard shape, from a binding that still
-    #      parses a response body without consulting the status. Only the
-    #      `/user` authentication reads are left on that path; keep this until
-    #      they are guarded too, or a stale id there becomes a 500.
-    #
-    # All three render the same friendly 404 page rather than the default Rails
-    # exception trace, with the singularized controller name giving the template
-    # a sensible `obj_type` default ("work" / "collection" / "download" / etc.).
+    # Reads and writes report a missing id differently, so three shapes land
+    # here. Keep JSON::ParserError until the `/user` authentication reads are
+    # guarded too — they still parse a body without consulting the status, so
+    # without it a stale id there becomes a 500. See docs/authorization.md.
     rescue_from AtlasRb::NotFoundError, JSON::ParserError, ResourceNotFound do
       render template: 'errors/not_found',
              status:   :not_found,
@@ -91,16 +58,10 @@ module Authorizable
       render template: 'errors/gone', status: :gone, locals: { record: record }
     end
 
-    # Translate an Atlas tombstone response into the right redirect + flash.
-    #
-    # The tombstone bindings return the raw Faraday::Response (atlas_rb does NOT
-    # raise on the tombstone refusal — RaiseOnResourceError passes a 422 whose
-    # body carries `code: "has_live_children"` straight through). Atlas refuses
-    # with 422 when the resource still has live (non-tombstoned) members, so a
-    # caller that ignores the response (the old `tombstone; redirect notice:` shape)
-    # reports a false "deleted" while the resource stays live. This is guaranteed
-    # for Communities: ShowcaseProvisioner seeds every Community with live
-    # showcase Collections, so its tombstone is always refused.
+    # atlas_rb does NOT raise on the tombstone refusal — RaiseOnResourceError
+    # passes the 422 (`code: "has_live_children"`) straight through as a raw
+    # Faraday::Response. A caller that ignores it reports a false "deleted"
+    # while the resource stays live. See docs/authorization.md.
     def perform_tombstone!(response, type:)
       if response.success?
         redirect_to root_path, notice: "#{type} deleted."
@@ -123,10 +84,8 @@ module Authorizable
       authorize_edit_for!(params[:id])
     end
 
-    # The create gate: :edit on the destination container, which the nested
-    # route supplies as :collection_id or :community_id depending on which
-    # parent type the child hangs from. Leaves @destination_id for the action,
-    # so it doesn't re-derive which segment carried the parent.
+    # The create gate: :edit on the destination container. Leaves
+    # @destination_id for the action. See docs/authorization.md.
     def authorize_destination!
       @destination_id = params[:collection_id].presence || params[:community_id].presence
       raise ResourceNotFound if @destination_id.blank?
@@ -134,10 +93,6 @@ module Authorizable
       authorize_edit_for!(@destination_id)
     end
 
-    # The nested `new` path for +child+ under the destination this request came
-    # in on — for bouncing a rejected create back to its own form. A Collection
-    # can hang from either container, so the helper name depends on which
-    # segment carried the parent.
     def new_child_path(child)
       if params[:community_id].present?
         public_send(:"new_community_#{child}_path", params[:community_id])
@@ -146,9 +101,6 @@ module Authorizable
       end
     end
 
-    # The matching POST target, for the form the `new` action renders. Same
-    # parent-type split as {#new_child_path}; +children+ is the plural segment
-    # ("collections" / "communities" / "works").
     def child_create_path(children)
       if params[:community_id].present?
         public_send(:"community_#{children}_path", params[:community_id])
@@ -157,10 +109,6 @@ module Authorizable
       end
     end
 
-    # The :edit gate keyed on an explicit id rather than params[:id], so
-    # callers whose resource id rides a different param can reuse it. The
-    # XML editor needs this: `xml#editor` carries params[:id] while
-    # `xml#validate`/`xml#update` carry params[:resource_id].
     def authorize_edit_for!(id)
       @permissions = AtlasRb::Resource.permissions(id)
       raise ResourceNotFound if @permissions.nil?
@@ -179,11 +127,8 @@ module Authorizable
       controller_name.classify
     end
 
-    # Set the show-page affordance flags from the already-loaded @permissions,
-    # so the Edit / Delete links render iff the action behind them would be
-    # authorized (the same `:edit` / `:tombstone` gates `authorize_*!` enforce —
-    # no showing a control the user can't use). Keeps each resource controller's
-    # #show under the complexity budget and DRYs the shared computation.
+    # Renders the Edit / Delete links iff the action behind them would be
+    # authorized — never show a control the user can't use.
     def assign_show_abilities!(klass:)
       doc = solr_doc_from_permissions(@permissions, klass: klass)
       @can_edit = current_ability.can?(:edit, doc)

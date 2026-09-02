@@ -2,29 +2,16 @@
 
 # Applies a container's narrowed read audience down its subtree, deepest first.
 #
-# The caller does NOT write the container before enqueuing — this job narrows
-# the container last, after everything beneath it (see NarrowingTargets for why
-# the order is load-bearing). It is handed the intended audience, not a fait
-# accompli.
-#
-# Re-running is safe: each resource is clamped against the container's audience
-# and skipped when that changes nothing, so a retry after a partial run only
-# finishes the remainder.
+# The caller does NOT write the container before enqueuing — this job narrows it
+# last, after everything beneath it (see NarrowingTargets for why the order is
+# load-bearing). Re-running is safe: every write is clamped and skipped when it
+# changes nothing. See docs/authorization.md.
 class VisibilityCascadeJob < ApplicationJob
   queue_as :default
 
-  # Atlas retries its own optimistic-lock conflicts and only surfaces this once
-  # its budget is exhausted — which during a deposit means finalize jobs are
-  # still touching the same resources. Backing off and re-running is safe here
-  # precisely because the cascade is idempotent.
+  # Safe to back off and re-run only because the cascade is idempotent.
   retry_on AtlasRb::StaleResourceError, wait: :polynomially_longer, attempts: 5
 
-  # @param noid [String] the container being narrowed.
-  # @param uuid [String] its Solr id, for the subtree lookup.
-  # @param permissions [Hash] the container's whole submitted ACL envelope. The
-  #   container is written from this verbatim, so an edit-group or embargo
-  #   change made in the same submit rides along; descendants are clamped
-  #   against its `read` rather than taking a copy of it.
   def perform(noid:, uuid:, permissions:)
     actor = Current.nuid
     tally = { narrowed: 0, unchanged: 0, container: 0 }
@@ -34,8 +21,7 @@ class VisibilityCascadeJob < ApplicationJob
     NarrowingTargets.new(noid: noid, uuid: uuid).each do |target|
       tally[target.noid == noid ? write_container(target, permissions) : apply(target, read_groups)] += 1
     # Let a lock conflict escape to retry_on rather than recording it as a
-    # failure — it is transient, and the job is idempotent, so re-running the
-    # whole cascade costs only the writes it already made being skipped.
+    # failure — it is transient, and the job is idempotent.
     rescue AtlasRb::StaleResourceError
       raise
     rescue AtlasRb::Error => e
@@ -47,16 +33,9 @@ class VisibilityCascadeJob < ApplicationJob
 
   private
 
-    # The container itself, written last and taken verbatim from what was
-    # submitted — the person editing it said exactly what they wanted, and by
-    # this point every descendant is already within it. Deliberately not
-    # clamped: clamping against its own new audience would be a no-op, and
-    # round-tripping the stored envelope would silently drop the edit-group or
-    # embargo edits made in the same submit.
-    #
-    # Tallied separately from the descendants: the report speaks to what else
-    # changed ("the items inside it"), and the person already knows they
-    # restricted the container — they just asked for it.
+    # The container is written last, verbatim from what was submitted, and is
+    # deliberately NOT clamped: round-tripping the stored envelope instead would
+    # silently drop edit-group or embargo edits made in the same submit.
     #
     # @return [Symbol]
     def write_container(target, permissions)
@@ -78,22 +57,10 @@ class VisibilityCascadeJob < ApplicationJob
       :narrowed
     end
 
-    # A container's derivative-access default lives in Cerberus, not in the ACL
-    # Atlas holds, so narrowing the container leaves it untouched and pointing at
-    # an audience the container no longer has. Sentinel already refuses that
-    # combination when someone authors it (policy_within_resource); this keeps the
-    # same rule true when the container narrows underneath a default that was
-    # coherent when written.
-    #
-    # It has to hold, not merely look untidy: Atlas refuses a tier more visible
-    # than its Work, and the default is applied to every new deposit — so a stale
-    # default made the next deposit into that collection fail outright.
-    #
-    # A tier whose audience shares nobody with the container's new one clamps to
-    # the empty list — withheld from everyone rather than re-pointed at whoever is
-    # left. Same answer audience_intersect gives a disjoint child ACL, and the
-    # right way round for a gate whose purpose is to withhold. The authoring form
-    # renders it as "Restrict to groups" with none ticked, which is what it is.
+    # The derivative-access default lives in Cerberus, not in the ACL Atlas
+    # holds, so it must be clamped here too: Atlas refuses a tier more visible
+    # than its Work, and a stale default makes the next deposit into that
+    # collection fail outright. See docs/authorization.md.
     def clamp_sentinel(noid, read_groups)
       sentinel = Sentinel.find_by(target_id: noid)
       return if sentinel.nil?
@@ -106,12 +73,8 @@ class VisibilityCascadeJob < ApplicationJob
       sentinel.update(policy: clamped)
     end
 
-    # A cascade is slow enough that whoever triggered it has moved on, and a
-    # partial result is the one outcome they must not have to discover for
-    # themselves — anything that failed to narrow is still exposed, so failures
-    # are named rather than counted. A cascade with no actor (a rake task) has
-    # nobody to tell and is recorded on the admin ledger regardless — an item
-    # left exposed matters whether or not a person triggered the run.
+    # Anything that failed to narrow is still exposed, so failures are named
+    # rather than counted. See docs/authorization.md.
     def report(actor:, noid:, tally:, failures:)
       CompletionNotice.deliver(
         kind:         'visibility_cascade',
