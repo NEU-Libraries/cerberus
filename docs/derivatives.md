@@ -7,6 +7,7 @@ Source files:
 
 - `app/jobs/iiif_assets_job.rb`
 - `app/jobs/caption_job.rb`
+- `app/services/streaming_only.rb`
 
 ## Seeding a Work's IIIF assets
 
@@ -91,3 +92,81 @@ missing video.
 
 Like `AddFileJob`, this job runs no derivative enrichment. A caption upload
 leaves the Work's thumbnail, poster and player untouched.
+
+## Streaming-only video
+
+`StreamingOnly` decides whether a Work's video may be played but not taken away.
+
+It is a **licensing affordance, not a security boundary**. Anyone who can play a
+file can capture it, and nothing here pretends otherwise. What it owes the
+depositor is that the repository makes no offer it should not: no download row,
+no "download it instead" line under the player, nothing in a bulk zip, and a
+refusal on the download route itself.
+
+### It is expressed in vocabulary Atlas already has
+
+There is no flag of its own. A video Blob is reachable by two routes that are
+gated differently:
+
+| Route | Gated by |
+|---|---|
+| `MediaController` — playback | the Work's own read ACL |
+| `DownloadsController` — download | the Work's read ACL **and** the per-asset derivative gate |
+
+So "may I watch this" is a property of the Work, and "may I keep a copy" is a
+property of the `video` tier. Restricting that tier is the whole feature.
+
+An absent `video` key means the tier rides the Work's own visibility, which is
+what "not streaming only" means. Turning the toggle off therefore **removes** the
+key rather than setting it public.
+
+### Computing the audience
+
+Atlas refuses a tier more visible than its Work, so the audience is computed
+against the Work's own read ACL rather than assumed. Naming the admin group on a
+Work that does not grant it would be refused outright as
+`tier_exceeds_resource`.
+
+Intersecting instead always yields a legal policy, and errs restrictive:
+
+- On a public Work, the admin group survives.
+- On a group-restricted Work, the tier collapses to `[]` — private, reachable
+  only through a full admin's blanket ability.
+
+A restricted Work's video is already limited to the people who can read it, so
+that is a coherent floor rather than a degradation.
+
+`ADMIN_AUDIENCE` names only the group. Full admins reach a restricted tier
+through `Ability`'s `can :manage, :all`, and a devolved admin is by definition a
+member of that group — so naming the group alone covers both, and `Ability` never
+has to learn about `User#admin_delegate?`, which it deliberately does not consult.
+
+### Reading the toggle back
+
+`on?` is an exact match on purpose. A `video` tier written by something else — a
+Collection's Sentinel default, say — leaves the toggle reading "off", so turning
+it off can never quietly widen a restriction this feature did not impose.
+
+The `key?` test is not redundant with the comparison. On a Work that does not
+grant the admin group, `audience_for` is `[]`, and an **absent** tier would
+compare equal to it. Without the key test the toggle would read stuck-on for
+every restricted Work, and `apply!` would believe it had nothing to write.
+
+### Writing it back
+
+The Atlas write is a whole-object REPLACE, so `apply!` reads the stored policy
+back and merges rather than posting bare. Posting bare would silently drop the
+Work's image-ladder tiers. It returns without writing when nothing would change,
+which keeps a no-op save out of the audit log.
+
+`stored_policy` reads the tier map off the Work payload, because there is no
+dedicated reader on the API. The write's own response carries the map too, but
+nests it under `work` rather than at the top level the gem's docstring promises,
+so it is not used.
+
+### When the toggle is offered at all
+
+`applicable?` asks whether the Work has a video Blob. Both the deposited master
+and any remuxed MP4 are `video/*`, so a Work matches from the moment its content
+lands rather than only once it is playable. Delegates — the image tiers — carry a
+`uri` and are not content.
