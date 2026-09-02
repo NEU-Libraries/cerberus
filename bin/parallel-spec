@@ -39,10 +39,15 @@ if [[ "$ACTION" == down ]]; then
   exit 0
 fi
 
-lane_up "$WORKERS"
-
-# Cheap when the cores already exist, and they do not survive a solr recreate.
+# Before lane_up, not after. lane_up's readiness probe is GET /reset, and a
+# worker whose core is missing answers 500 there rather than 204: the reset
+# deletes by query against blacklight-test-<n> and Solr 404s the unknown core.
+# Ordered the other way the lane can never come up after a solr recreate, since
+# the step that would fix the cores sits behind the wait that is failing on
+# them. Safe this early because it needs only the solr container.
 "$REPO_ROOT/bin/parallel-solr-cores" "$WORKERS"
+
+lane_up "$WORKERS"
 
 status=0
 docker exec -w "$CONTAINER_ROOT" cerberus-web-1 \
