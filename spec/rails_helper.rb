@@ -12,8 +12,6 @@ SimpleCov.start 'rails' do
   skip 'spec'
   skip 'vendor'
   skip 'app/channels'
-  skip 'lib/cerberus/vocab'
-  skip 'app/indexers'
   # The floor is a property of the whole suite, so it can only be judged by a
   # run of the whole suite. Any subset — `rake smoke`, or the handful of files
   # that cover a patch in progress — would fail on coverage alone and say
