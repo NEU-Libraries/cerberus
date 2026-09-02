@@ -1,33 +1,21 @@
 # frozen_string_literal: true
 
 module Admin
-  # On-demand Solr re-projection, reachable by :admin and by the devolved-admin
-  # tier (User#admin_delegate?). The buttons sit on the Work and Set show pages,
-  # because that is where someone notices a record has gone stale, but the
-  # actions are mounted here so the role gate stays in one place.
+  # On-demand Solr re-projection for a Work or a Set. See docs/admin.md.
   #
-  # That placement is load-bearing rather than tidy: AtlasRb::System.reindex
-  # runs on the Atlas system token with the principal pinned to the system
-  # NUID, so Atlas applies no per-user check on this path. The gate here is the
-  # only thing standing in front of it.
-  #
-  # A reindex re-derives a resource's Solr doc from Atlas's authoritative store.
-  # It is Solr-only — no lifecycle transition, no audit event, no minting — and
-  # idempotent, so a double-click costs time and nothing else.
+  # AtlasRb::System.reindex runs on the Atlas system token with the principal
+  # pinned to the system NUID, so Atlas applies no per-user check on this path.
+  # The gate here — :admin or the devolved-admin tier — is the only one.
   class ReindexController < BaseController
     skip_before_action :require_admin
     before_action :require_admin_or_delegate
 
-    # A private Set the caller may not read: Atlas says 403, the user sees the
-    # standard forbidden page. Mirrors SetsController, which is the surface the
-    # Set button is reached from.
     rescue_from AtlasRb::ForbiddenError do
       render template: 'errors/forbidden', status: :forbidden
     end
 
-    # One Work, answered inline — it is a single call. Atlas's subtree walk
-    # (SubtreeResourcesQuery) stops at Works and never descends into FileSets,
-    # so a subtree call here would reindex the same one resource.
+    # One call, answered inline. Atlas's subtree walk stops at Works, so a
+    # subtree reindex here would re-project the same single resource.
     def work
       noid = params[:noid]
 
@@ -43,10 +31,8 @@ module Admin
       redirect_to work_path(noid)
     end
 
-    # A Set names collections whose subtrees can run to thousands of resources,
-    # so this only enqueues. The Set is read first so an unknown or unreadable
-    # id fails here, in front of the person who clicked, rather than inside a
-    # job nobody is watching.
+    # Read the Set before enqueueing, so an unknown or unreadable id fails in
+    # front of the person who clicked rather than inside a job.
     def set
       noid = params[:noid]
       compilation = AtlasRb::Compilation.find(noid)
