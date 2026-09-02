@@ -107,8 +107,41 @@ lane_up() {
   return 0
 }
 
+# Which of the run locks covering these workers are currently held. The locks
+# live inside the web container, one file per worker on the same suffix scheme as
+# the services (see spec/support/exclusive_run_lock.rb), and the kernel drops
+# each one when its run dies — so a held lock means a live run, never a stale
+# file. `flock -n ... true` takes and releases in one go, which is exactly the
+# question being asked. A container that is not running cannot be holding
+# anything, so that case reports nothing rather than guessing.
+lane_held_locks() {
+  local workers="$1" n suffix path
+  docker ps --format '{{.Names}}' | grep -qx cerberus-web-1 || return 0
+  for ((n = 1; n <= workers; n++)); do
+    [[ "$n" -eq 1 ]] && suffix="" || suffix="-$n"
+    path="/tmp/cerberus-rspec-run${suffix}.lock"
+    docker exec cerberus-web-1 flock -n "$path" true 2>/dev/null || echo "$path"
+  done
+}
+
+# Refuses while a run holds one of the locks. The lock serializes rspec against
+# rspec, but the lane is a container and tearing it down is not an rspec run, so
+# nothing else stands between `--down` and a run whose fixtures are already
+# seeded — and the damage reads as a cluster of unrelated failures in whatever
+# file was executing, which is the exact confusion the lock exists to prevent.
 lane_down() {
-  local workers="$1"
+  local workers="$1" held
+  held="$(lane_held_locks "$workers")"
+  if [[ -n "$held" && -z "${LANE_FORCE:-}" ]]; then
+    echo "refusing to tear down the test Atlas lane: an rspec run holds" >&2
+    echo "$held" | sed 's/^/  /' >&2
+    echo >&2
+    echo "A run reseeds the lane at startup, so removing it now would destroy" >&2
+    echo "the fixtures that run has already written. Wait for it to finish." >&2
+    echo "Set LANE_FORCE=1 to tear down anyway." >&2
+    return 1
+  fi
+
   # shellcheck disable=SC2046
   "${COMPOSE[@]}" rm -sf $(lane_services "$workers") >/dev/null 2>&1 || true
   echo "released the test Atlas lane"
