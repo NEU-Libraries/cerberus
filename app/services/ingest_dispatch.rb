@@ -18,10 +18,6 @@ class IngestDispatch < ApplicationService
     application/x-tika-msoffice
   ].freeze
 
-  # rubocop:disable Metrics/ParameterLists -- all six are keywords, so there is no
-  # positional-order hazard for the cop to protect against, and each names one
-  # independent fact about the dispatch. Bundling them into an options object
-  # would hide the two flags that callers actually vary.
   def initialize(work_id:, staged_path:, original_filename:, idempotency_key:, include_primary: true,
                  complete_work: true)
     @work_id = work_id
@@ -31,7 +27,6 @@ class IngestDispatch < ApplicationService
     @include_primary = include_primary
     @complete_work = complete_work
   end
-  # rubocop:enable Metrics/ParameterLists
 
   def call
     if mime_type.start_with?('image/') || mime_type == 'application/pdf'

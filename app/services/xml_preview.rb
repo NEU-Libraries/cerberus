@@ -33,10 +33,6 @@ class XmlPreview < ApplicationService
     @load_report = load_report
   end
 
-  # rubocop:disable Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
-  # The early-return guards (no manifest / unparseable / no rows) read as one
-  # linear preview flow; extracting them would scatter the structural-error
-  # handling that is the method's whole point.
   def call
     archive = XmlLoader::Archive.new(XmlLoader::Paths.archive_path(@load_report))
 
@@ -66,7 +62,6 @@ class XmlPreview < ApplicationService
       decorated_html:    errors.empty? && mods ? decorated(mods) : nil
     )
   end
-  # rubocop:enable Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
   private
 

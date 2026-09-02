@@ -9,7 +9,7 @@ module Blacklight
     # indent — the template gives each value its own full-width row — so the
     # argument is accepted and dropped. It must stay in the signature: the
     # caller always sends it, and an unknown keyword raises.
-    renders_many :values, (lambda do |value: nil, index: nil, &block| # rubocop:disable Lint/UnusedBlockArgument
+    renders_many :values, (lambda do |value: nil, index: nil, &block|
       if @value_tag.nil?
         block&.call || value
       elsif block

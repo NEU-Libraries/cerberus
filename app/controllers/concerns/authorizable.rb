@@ -17,15 +17,10 @@ module Authorizable
     # edit and update (never the form alone), and the tombstone gate on
     # tombstone. See docs/authorization.md.
     def authorize_resource_writes!(extra_edit: [])
-      # The filtered actions live in the including controller, not this concern,
-      # so the lexical-scope cop can't see them — that indirection is the whole
-      # point of the macro.
-      # rubocop:disable Rails/LexicallyScopedActionFilter
       before_action :authenticate_user!,       only: %i[new create]
       before_action :authorize_destination!,   only: %i[new create]
       before_action :authorize_edit!,          only: %i[edit update] + Array(extra_edit)
       before_action :authorize_tombstone!,     only: %i[tombstone]
-      # rubocop:enable Rails/LexicallyScopedActionFilter
     end
   end
 

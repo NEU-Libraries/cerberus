@@ -23,7 +23,7 @@ module EnhancedTextHelper
     value.to_s
          .gsub(ESCAPE_PATTERN, ESCAPES)
          .gsub(ESCAPED_TAG) { "<#{Regexp.last_match(1)}#{Regexp.last_match(2).downcase}>" }
-         .html_safe # rubocop:disable Rails/OutputSafety
+         .html_safe
   end
 
   def plain_text(value)

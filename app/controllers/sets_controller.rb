@@ -23,8 +23,7 @@ class SetsController < CatalogController
   # Declared here rather than in SetBulkActions so it lands after the two gates
   # above: an anonymous request has to reach authenticate_user! and be sent to
   # sign in, not be told it is forbidden. The three actions it names live in that
-  # concern, which is all the cop below is objecting to.
-  # rubocop:disable-next Rails/LexicallyScopedActionFilter
+  # concern.
   before_action :require_bulk_operator, only: %i[sentinel apply_sentinel privatize]
 
   # A private Set read (or any write) the caller may not perform: Atlas says

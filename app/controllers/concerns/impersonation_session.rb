@@ -2,10 +2,6 @@
 
 # Acting-as (write) and view-as (read-only) impersonation, included into
 # ApplicationController so it governs every request. See docs/identity.md.
-#
-# rubocop:disable Metrics/ModuleLength -- a cohesive state machine (predicates,
-# lifecycle, TTL, context plumbing, hydration); splitting it would scatter the
-# session logic across files for no readability gain.
 module ImpersonationSession
   extend ActiveSupport::Concern
 
@@ -175,4 +171,3 @@ module ImpersonationSession
       @view_as_target ||= hydrate_user(view_as_nuid) || User.new(groups: [], role: 'guest')
     end
 end
-# rubocop:enable Metrics/ModuleLength

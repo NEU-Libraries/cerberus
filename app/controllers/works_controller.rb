@@ -3,7 +3,7 @@
 # Spans the whole Work lifecycle — deposit, show, edit, tombstone, manifest,
 # downloads — as one cohesive controller rather than being split by verb, which
 # is why it runs past the default class-length budget. See docs/deposit.md.
-class WorksController < ApplicationController # rubocop:disable Metrics/ClassLength
+class WorksController < ApplicationController
   include Thumbable
   include Transformable
   include DepositorContext

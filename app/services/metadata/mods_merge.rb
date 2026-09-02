@@ -24,14 +24,8 @@ module Metadata
   # words either side of it, with nothing to show it happened. Cleaning here
   # covers both forms and every other caller in one place, and nil survives it, so
   # "leave it untouched" still means that.
-  #
-  # rubocop:disable Metrics/ClassLength
-  # The length is one apply_* per field the forms own plus one normalisation per
-  # field shape, so it tracks the size of the two forms rather than the difficulty
-  # of any one method. Collapsing the near-identical creator pair behind a lookup
-  # table would buy the metric back and cost the reader indirection.
   class MODSMerge < ApplicationService
-    def initialize(xml:, title: nil, abstract: nil, keywords: nil, # rubocop:disable Metrics/ParameterLists
+    def initialize(xml:, title: nil, abstract: nil, keywords: nil,
                    subtitle: nil, part_name: nil, part_number: nil, non_sort: nil,
                    personal_creators: nil, corporate_creators: nil)
       @doc = Nokogiri::XML(xml.to_s, &:noblanks)
@@ -202,5 +196,4 @@ module Metadata
         arr.map { |s| canonical_line(s) }.sort
       end
   end
-  # rubocop:enable Metrics/ClassLength
 end

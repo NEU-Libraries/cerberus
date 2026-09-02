@@ -147,7 +147,6 @@ module ApplicationHelper
   # valkyrie_id in hand); re-deriving it from params[:id] would be a noid and
   # need a noid→uuid Solr lookup, defeating the zero-query design — so reading
   # the ivar is deliberate here.
-  # rubocop:disable-next Rails/HelperInstanceVariable
   def linked_member_here?(document)
     container = (@collection || @community)&.valkyrie_id
     container.present? && Array(document['a_linked_member_of_ssim']).include?("id-#{container}")

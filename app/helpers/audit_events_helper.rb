@@ -3,8 +3,6 @@
 # Shared formatting for audit-event rows. Each per-action partial
 # (`_event_create.html.haml`, etc.) renders one row through these helpers and
 # varies only the row's audit-event--<tone> class. See docs/edit-surfaces.md.
-# rubocop:disable Metrics/ModuleLength
-# (Cohesive view-formatting for one component.)
 module AuditEventsHelper
   # Action descriptor — colour token + icon + label. An action this helper
   # hasn't been taught about MUST still render: unknown verbs fall through
@@ -334,4 +332,3 @@ module AuditEventsHelper
       nil
     end
 end
-# rubocop:enable Metrics/ModuleLength

@@ -163,7 +163,7 @@ class LedgerSeeder
         day = Date.current - ago
         digest = DailyDigestJob.perform_now(day)
         written_at = day.next_day.in_time_zone.change(hour: 5, min: 5)
-        digest&.update_columns(created_at: written_at, updated_at: written_at) # rubocop:disable Rails/SkipsModelValidations
+        digest&.update_columns(created_at: written_at, updated_at: written_at)
       end
     end
 
@@ -172,13 +172,10 @@ class LedgerSeeder
       @seed_nuids ||= %w[000000002 000000010 000000011 000000012]
     end
 
-    # rubocop:disable Metrics/ParameterLists -- all keywords, each naming one
-    # independent fact about the row; an options hash would only re-hide them.
     def notice(kind:, days_ago:, subject:, actor: nil, noid: nil, body: nil, payload: {})
       at = days_ago.days.ago
       AdminNotice.create!(kind: kind, subject: subject, body: body, actor_nuid: actor,
                           subject_noid: noid, payload: payload, occurred_on: at.to_date,
                           created_at: at, updated_at: at)
     end
-  # rubocop:enable Metrics/ParameterLists
 end

@@ -42,7 +42,7 @@ class MultipageItemJob < ApplicationJob
   # explicitly.
   def self.fail_item_rows(report, item_index, message)
     report.multipage_ingests.where(item_index: item_index).where.not(status: :failed)
-          .update_all(status: MultipageIngest.statuses[:failed], error_message: message, updated_at: Time.current) # rubocop:disable Rails/SkipsModelValidations
+          .update_all(status: MultipageIngest.statuses[:failed], error_message: message, updated_at: Time.current)
     report.maybe_finalize!
   end
 
@@ -54,7 +54,7 @@ class MultipageItemJob < ApplicationJob
       Sentinel.apply_default(report.parent_collection_id, work_pid)
       page_rows = report.multipage_ingests.where(item_index: item_index).where.not(sequence: nil)
       # One UPDATE stamps every page row of the item, so updated_at is set explicitly.
-      page_rows.update_all(work_pid: work_pid, updated_at: Time.current) # rubocop:disable Rails/SkipsModelValidations
+      page_rows.update_all(work_pid: work_pid, updated_at: Time.current)
       page_rows.find_each { |ingest| MultipageIngestJob.perform_later(ingest.id) }
     end
 end

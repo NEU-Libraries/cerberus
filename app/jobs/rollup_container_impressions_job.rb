@@ -22,7 +22,7 @@ class RollupContainerImpressionsJob < ApplicationJob
         rows = container_totals(noid, uuid, window_start)
         next if rows.empty?
 
-        ImpressionContainerDailyCount.insert_all(rows) # rubocop:disable Rails/SkipsModelValidations
+        ImpressionContainerDailyCount.insert_all(rows)
       end
     end
   end

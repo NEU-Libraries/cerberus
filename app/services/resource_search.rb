@@ -8,7 +8,7 @@
 class ResourceSearch < ApplicationService
   DEFAULT_PER_PAGE = 25
 
-  def initialize(scope:, query: nil, types: %w[Collection Community], # rubocop:disable Metrics/ParameterLists
+  def initialize(scope:, query: nil, types: %w[Collection Community],
                  exclude_node_uuid: nil, exclude_subtree_noid: nil, within_fq: nil)
     @scope = scope
     @query = query
