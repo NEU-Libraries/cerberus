@@ -68,6 +68,14 @@ RSpec.describe ImpressionSeeder do
     expect { described_class.new.send(:refresh_continuous_aggregate) }.not_to raise_error
   end
 
+  it 'is callable as a class method, which is how reset.rake invokes it' do
+    allow(Blacklight).to receive(:default_index)
+      .and_return(instance_double(Blacklight::Solr::Repository,
+                                  search: instance_double(Blacklight::Solr::Response, documents: [])))
+
+    expect(described_class.call(days: 1)).to eq(0)
+  end
+
   def solr_doc(alt_id)
     doc = instance_double(SolrDocument)
     allow(doc).to receive(:[]).with('alternate_ids_ssim').and_return([alt_id])
