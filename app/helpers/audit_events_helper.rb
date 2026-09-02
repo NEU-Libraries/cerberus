@@ -1,21 +1,14 @@
 # frozen_string_literal: true
 
 # Shared formatting for audit-event rows. Each per-action partial
-# (`_event_create.html.haml`, etc.) renders one row of three cells —
-# when / action / who — via these helpers, and varies only the row's
-# audit-event--<tone> class. The action cell carries both the tone chip
-# and (inline, right of it) the quiet change_type + payload summary.
-# Adding a new action type is still a new file, not a case-statement
-# edit — these helpers are the scaffolding around that variation, not
-# the variation itself.
+# (`_event_create.html.haml`, etc.) renders one row through these helpers and
+# varies only the row's audit-event--<tone> class. See docs/edit-surfaces.md.
 # rubocop:disable Metrics/ModuleLength
-# (Cohesive view-formatting for one component; length is mostly the rationale
-# comments that make the chip / pill / summary choices legible.)
+# (Cohesive view-formatting for one component.)
 module AuditEventsHelper
-  # Action descriptor — colour token + Font Awesome icon + display label.
-  # Used by the action cell on every event row. Unknown actions fall
-  # through to a neutral "generic" descriptor so an action type the helper
-  # hasn't been taught about still renders sensibly.
+  # Action descriptor — colour token + icon + label. An action this helper
+  # hasn't been taught about MUST still render: unknown verbs fall through
+  # to GENERIC_ACTION rather than raising or rendering an empty chip.
   ACTION_DESCRIPTORS = {
     'create'        => { tone: 'create',    icon: 'fa-circle-plus',  label: 'Created' },
     'update'        => { tone: 'update',    icon: 'fa-pen',          label: 'Updated' },
@@ -28,10 +21,6 @@ module AuditEventsHelper
 
   GENERIC_ACTION = { tone: 'generic', icon: 'fa-circle-info', label: nil }.freeze
 
-  # change_type display labels. Surfaced as a quiet secondary qualifier on
-  # rows whose action verb is ambiguous on its own — chiefly `update`, where
-  # the same verb covers both a metadata edit and a permissions change. The
-  # action chip stays the primary signal; this rides alongside it, muted.
   CHANGE_TYPE_LABELS = {
     'metadata'    => 'Metadata',
     'permissions' => 'Permissions',
@@ -40,29 +29,17 @@ module AuditEventsHelper
     'session'     => 'Session'
   }.freeze
 
-  # ACL *grant* slots diffed for a permissions-change summary. A subset of
-  # Atlas's AUDITED_ACL_KEYS: that snapshot also carries `embargo`, but every
-  # renderer here treats a key's value as a set of group tokens, and an embargo
-  # is a scalar date. Diffing it as a one-element set would print an ISO
-  # timestamp inside a monospace identifier pill, so it gets its own row and its
-  # own formatting (see EMBARGO_KEY).
+  # The ACL *grant* slots diffed for a permissions summary — a subset of
+  # Atlas's AUDITED_ACL_KEYS. Do not add `embargo`: every renderer here treats
+  # a key's value as a set of group tokens, and an embargo is a scalar date.
   ACL_DIFF_KEYS = %w[read edit edit_users].freeze
 
-  # The embargo slot in the same permissions snapshot. A rights decision a human
-  # makes and revises — withholding downloads until a chosen date — so it belongs
-  # in the rights diff, just not in the grant-pill register.
   EMBARGO_KEY = 'embargo'
 
-  # Permission audit actions that carry a viewable before/after ACL snapshot:
-  # the initial grant at creation (`create`, emitted by Atlas's service objects)
-  # and every later ACL change (`update`). Atlas suppresses no-op permission
-  # writes, so each is a real transition worth a Rights-diff page. Shared by the
-  # audit-log "View" link and HistoriesController#permission_events.
+  # Shared with HistoriesController#permission_events: both the initial grant
+  # and every later ACL change carry a before/after snapshot worth a diff page.
   PERMISSION_VIEW_ACTIONS = %w[create update].freeze
 
-  # Human labels for the ACL slots, used by the dedicated Rights-history diff
-  # page (the expanded two-column before/after view). The audit-log one-liner
-  # uses the bare key; the full page reads better with prose labels.
   ACL_LEVEL_LABELS = {
     'read'       => 'Read',
     'edit'       => 'Edit',
@@ -70,16 +47,13 @@ module AuditEventsHelper
     'embargo'    => 'Embargo'
   }.freeze
 
-  # Atlas tags a per-rendition gate change with this `source`. It rides the same
-  # `permissions` change_type as an ACL edit, but its before/after are a sparse
-  # { tier => [read groups] } map rather than the ACL envelope — so both the
-  # audit-log summary and the Rights page have to tell the two apart before
-  # reading either one.
+  # Atlas's tag for a per-rendition gate change. It rides the same
+  # `permissions` change_type and action as an ACL edit, so `source` is the
+  # only thing telling the two payload shapes apart — check it before reading.
   DERIVATIVE_PERMISSIONS_SOURCE = 'derivative_permissions'
 
-  # Prose labels for the download tiers. The vocabulary and its narrowing order
-  # come from Sentinel::TIERS, which is where Cerberus authors these policies —
-  # naming the ladder twice would let the two drift.
+  # Prose for the download tiers. The vocabulary and its narrowing order come
+  # from Sentinel::TIERS; naming the ladder twice would let the two drift.
   TIER_LABELS = {
     'small'   => 'Small image',
     'medium'  => 'Medium image',
@@ -97,9 +71,6 @@ module AuditEventsHelper
     end
   end
 
-  # Date stacked above time, full ISO in title attribute. tabular-nums
-  # via CSS so digits align column-to-column even though Bootstrap's
-  # body font isn't monospace.
   def audit_event_timestamp(event)
     parsed = Time.iso8601(event['occurred_at'])
     content_tag(:div, class: 'audit-event__when', title: parsed.iso8601) do
@@ -110,8 +81,6 @@ module AuditEventsHelper
     end
   end
 
-  # NUID chip — monospace pill that reads as an identifier rather than
-  # body copy. Nil / blank renders as a muted em-dash placeholder.
   def audit_event_nuid(nuid)
     if nuid.present?
       content_tag(:span, nuid, class: 'audit-event__nuid')
@@ -120,12 +89,6 @@ module AuditEventsHelper
     end
   end
 
-  # The action chip — tinted soft-badge containing icon + label. The
-  # chip's background/border/text colours are driven by
-  # `--audit-action-color`, set on the row via the audit-event--<tone>
-  # class, so per-action partials don't need to repeat the colour. The
-  # chip is the row's primary chromatic signal; the left rail
-  # reinforces it for at-a-glance column scanning.
   def audit_event_action_badge(event)
     descriptor = audit_event_action(event['action'])
     content_tag(:span, class: 'audit-event__action') do
@@ -137,11 +100,8 @@ module AuditEventsHelper
     end
   end
 
-  # change_type category — a quiet uppercase micro-label (NOT a chip; a second
-  # box would compete with the action chip). Returns nil when change_type is
-  # blank so callers can render it unconditionally. The `--<change_type>`
-  # modifier stays as a semantic/styling hook — notably permissions, the
-  # eventual Permission-History link target (see _event_update.html.haml).
+  # Returns nil when change_type is blank, so callers can render it
+  # unconditionally.
   def audit_event_change_type_badge(change_type)
     change_type = change_type.to_s
     return if change_type.blank?
@@ -151,18 +111,11 @@ module AuditEventsHelper
                 class: "audit-event__change-type audit-event__change-type--#{change_type}")
   end
 
-  # The DETAIL column cell: the change_type category label + payload summary,
-  # in their own column so they left-align consistently across rows (trailing
-  # a variable-width action chip, they wouldn't). A muted em-dash holds the
-  # column for the rare event that carries no change_type or payload.
   def audit_event_detail_cell(event)
     audit_event_detail_line(event) ||
       content_tag(:span, '—', class: 'audit-event__detail-empty', 'aria-hidden': 'true')
   end
 
-  # The change_type category label + a human summary of the event's payload
-  # (changed fields, an ACL diff, a move target). Returns nil when there's
-  # nothing to add.
   def audit_event_detail_line(event)
     badge   = audit_event_change_type_badge(event['change_type'])
     summary = audit_event_payload_summary(event)
@@ -171,10 +124,6 @@ module AuditEventsHelper
     safe_join([badge, summary].compact, ' ')
   end
 
-  # The WHO cell — actor NUID pill, and (only in the rare proxy / acting-as
-  # case) a muted "for <target>" beneath it. Merges what were two columns:
-  # on-behalf-of is null on the overwhelming majority of rows, so a dedicated
-  # column was pure horizontal tax. Actor + target are the same kind of fact.
   def audit_event_who(event)
     actor = audit_event_actor(event['actor_nuid'])
     return actor if event['on_behalf_of_nuid'].blank?
@@ -185,16 +134,6 @@ module AuditEventsHelper
     content_tag(:div, safe_join([actor, on_behalf]), class: 'audit-event__who')
   end
 
-  # Name above its NUID chip, mirroring the inbox sender cell. A ledger that
-  # answers "who did this" with `000000003` answers it only for a reader who
-  # can read NUIDs; the name carries the meaning, and the chip keeps the
-  # identifier to hand for a ticket. Falls back to the bare chip when the NUID
-  # doesn't resolve — the system and anonymous principals have no directory
-  # entry, and a departed user must not blank the column.
-  #
-  # Each call is a Rails.cache read. The history view primes a page's NUIDs
-  # with one NuidResolver.names_for batch, so these are hits rather than a
-  # request per row.
   def audit_event_actor(nuid)
     chip = audit_event_nuid(nuid)
     return chip if nuid.blank?
@@ -208,14 +147,6 @@ module AuditEventsHelper
     safe_join([content_tag(:span, name, class: 'audit-event__actor'), chip])
   end
 
-  # The per-row "View" affordance in the audit log — the bridge from the
-  # unified ledger to a dedicated diff page. On a permissions row (the initial
-  # grant or a later change) it links to the Rights-history diff page; on a
-  # MODS-document `update` row, to the MODS-history diff page — deep-linked to
-  # this event so the page lands on (and scrolls to) the right entry. Every
-  # other row returns nil, so the column renders an empty cell and stays
-  # aligned. This is the v2 successor to v1's per-object Rights / MODS History
-  # pages.
   def audit_event_view_cell(event, resource_id)
     path = audit_event_view_path(event, resource_id)
     return if path.nil?
@@ -229,32 +160,20 @@ module AuditEventsHelper
   end
 
   # Where a row's "View" button points, or nil if the row has no deep view.
-  # Permissions → Rights diff (on `create` grant + `update` change rows);
-  # metadata-from-a-MODS-document → MODS diff (`update` rows only). Every other
-  # row returns nil.
+  # A nil renders an empty cell, which is what keeps the column aligned.
   def audit_event_view_path(event, resource_id)
     case event['change_type']
     when 'permissions'
-      # The initial grant (`create`) and every later ACL change (`update`) both
-      # carry a before/after snapshot, so both link to the Rights diff.
       return unless PERMISSION_VIEW_ACTIONS.include?(event['action'])
 
       rights_history_path(resource_id, at: event['occurred_at'], anchor: audit_event_dom_id(event))
     when 'metadata'
-      # Every metadata update writes a new descMetadata.xml OCFL version, so all
-      # of them get a MODS-diff link: a full MODS upload via mods_xml=
-      # ({ source: 'mods' }) AND a title/description field-patch ({ fields: }),
-      # since Atlas's plain_title= / plain_description= edit the MODS document
-      # and call mods_xml= too (MODSAssignment). The MODS document's create row
-      # has no prior version to diff, so it stays update-only.
       return unless event['action'] == 'update'
 
       mods_history_path(resource_id, at: event['occurred_at'])
     end
   end
 
-  # <option>s for the MODS-history version picker: "v5 · 2026-05-26 14:02 ·
-  # 000000002", value = the opaque OCFL version id. Actor may be blank.
   def mods_version_options(versions)
     Array(versions).map do |version|
       label = [
@@ -266,21 +185,14 @@ module AuditEventsHelper
     end
   end
 
-  # A DOM-id anchor for an event, derived from its (per-resource unique)
-  # timestamp — lets the "View" deep-link scroll to the exact entry via :target.
   def audit_event_dom_id(event)
     "evt-#{event['occurred_at'].to_s.gsub(/[^0-9]/, '')}"
   end
 
-  # Prose label for an ACL slot on the Rights-history diff page.
   def acl_level_label(key)
     ACL_LEVEL_LABELS.fetch(key.to_s) { key.to_s.humanize }
   end
 
-  # Render one ACL slot's grants as monospace identifier pills (reusing the
-  # audit-log NUID-pill register). `marked` grants get a `state` tint — used to
-  # flag the +added (after column) and −removed (before column) grants in the
-  # two-column diff. Empty slot → a muted em-dash placeholder.
   def acl_grant_pills(grants, marked: [], state: nil)
     grants = Array(grants)
     return content_tag(:span, '—', class: 'rights-diff__empty', 'aria-hidden': 'true') if grants.empty?
@@ -293,26 +205,18 @@ module AuditEventsHelper
     end, ' ')
   end
 
-  # Whether a snapshot pair says anything at all about an embargo. Two cases
-  # answer no, and both must keep the row off the page: events written before
-  # Atlas audited the key carry neither side, and the great majority of ACL
-  # edits never touch an embargo. Showing "None → None" on those would add a
-  # row to every historical entry that reads as a change and is not one.
+  # Whether a snapshot pair says anything at all about an embargo. Both no
+  # cases must keep the row off the page: "None → None" reads as a change.
   def embargo_recorded?(before, after)
     before[EMBARGO_KEY].present? || after[EMBARGO_KEY].present?
   end
 
-  # Whether the embargo actually moved. Compared through `presence` because
-  # "no embargo" reaches us as nil, '', or an absent key depending on how the
-  # resource was created and when the event was written — all the same fact.
+  # Compared through `presence` because "no embargo" reaches us as nil, '', or
+  # an absent key depending on how the resource was created — all one fact.
   def embargo_changed?(before, after)
     before[EMBARGO_KEY].presence != after[EMBARGO_KEY].presence
   end
 
-  # One side of the embargo diff, as prose for the expanded Rights page. Tinted
-  # with the same tone tokens as the grant pills, but rendered as plain text: a
-  # date is a value, not an identifier, and the monospace chip register is
-  # reserved for things you could paste into a lookup.
   def embargo_diff_cell(value, state: nil)
     date = embargo_date(value)
     return content_tag(:span, 'None', class: 'rights-diff__empty') if date.nil?
@@ -322,32 +226,21 @@ module AuditEventsHelper
     content_tag(:span, date.strftime('%B %-d, %Y'), class: classes.join(' '))
   end
 
-  # Whether a permissions event describes the per-rendition download gate rather
-  # than the resource ACL. The two share a change_type and an action, so the
-  # payload's `source` is the only thing that distinguishes them.
   def derivative_permissions_payload?(payload)
     payload['source'] == DERIVATIVE_PERMISSIONS_SOURCE
   end
 
-  # The tiers worth a row for one rendition-gate event: those either side of the
-  # diff mentions, in Sentinel's narrowing order. The stored policy is sparse —
-  # only gated tiers appear — so listing all eight would bury the change under
-  # empty rows. Unknown tiers sort last rather than vanishing, so a vocabulary
-  # Atlas grows before Cerberus does still shows up.
+  # Only the tiers either side mentions, in Sentinel's narrowing order. An
+  # unknown tier sorts last rather than vanishing, so a vocabulary Atlas grows
+  # before Cerberus does still shows up.
   def derivative_tier_rows(before, after)
     (before.keys | after.keys).sort_by { |tier| Sentinel::TIERS.index(tier) || Sentinel::TIERS.length }
   end
 
-  # Prose label for a download tier, falling back to the raw token.
   def tier_label(tier)
     TIER_LABELS.fetch(tier.to_s) { tier.to_s.humanize }
   end
 
-  # Human one-liner derived from the event payload, by action. Returns a muted
-  # span or nil. Shapes mirror what Atlas emits: update → { fields: [...] } |
-  # { source: 'mods' } | { before:, after: } (ACL); reparent → { to: noid };
-  # link/unlink → { collection: noid }. Create / tombstone / restore carry no
-  # payload, so they render the category pill alone.
   def audit_event_payload_summary(event)
     text = payload_summary_text(event['action'].to_s, event['payload'] || {})
     return if text.blank?
@@ -357,8 +250,6 @@ module AuditEventsHelper
 
   private
 
-    # Compact "YYYY-MM-DD HH:MM" for a version-picker option; blank for an
-    # absent/unparseable timestamp so the option still reads cleanly.
     def mods_version_timestamp(created)
       return if created.blank?
 
@@ -391,8 +282,6 @@ module AuditEventsHelper
       permissions_diff_summary(payload)
     end
 
-    # Both permission shapes land here; `source` picks which vocabulary to read
-    # the before/after through.
     def permissions_diff_summary(payload)
       before = payload['before'] || {}
       after  = payload['after']  || {}
@@ -401,9 +290,6 @@ module AuditEventsHelper
       acl_diff_summary(before, after)
     end
 
-    # Per-tier +added / −removed summary for a rendition-gate change, e.g.
-    # "large −public +staff". Same grammar as the ACL clauses it sits beside in
-    # the log, since both are group grants moving on and off a slot.
     def tier_diff_summary(before, after)
       derivative_tier_rows(before, after).filter_map do |tier|
         added   = Array(after[tier]) - Array(before[tier])
@@ -415,9 +301,6 @@ module AuditEventsHelper
       end.join(' · ').presence
     end
 
-    # Per-grant +added / −removed summary across the audited ACL keys, e.g.
-    # "read +public · edit −staff +editors", with the embargo transition
-    # appended when it moved. Empty when nothing actually moved.
     def acl_diff_summary(before, after)
       clauses = grant_diff_clauses(before, after)
       clauses << embargo_summary_clause(before, after) if embargo_changed?(before, after)
@@ -435,9 +318,6 @@ module AuditEventsHelper
       end
     end
 
-    # Compact "embargo none → 2027-12-31" for the audit-log row. ISO dates here
-    # rather than the Rights page's prose form — this clause shares a dense table
-    # cell with grant tokens, where a spelled-out month would crowd them out.
     def embargo_summary_clause(before, after)
       "embargo #{embargo_summary_value(before[EMBARGO_KEY])} → #{embargo_summary_value(after[EMBARGO_KEY])}"
     end
@@ -446,8 +326,6 @@ module AuditEventsHelper
       embargo_date(value)&.iso8601 || 'none'
     end
 
-    # The payload is a remote snapshot, so a blank or unparseable date degrades
-    # to "no embargo" rather than raising mid-table.
     def embargo_date(value)
       return if value.blank?
 
