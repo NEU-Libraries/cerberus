@@ -1,40 +1,23 @@
 # frozen_string_literal: true
 
-# The ACL write for a resource, and the policy that decides whether it may
-# happen at all.
-#
-# This is the half of the permissions story that can fail. PermissionsForm
-# decides what the submitted envelope *is*, reading params; this decides whether
-# Atlas may be told about it, reading the resource's current audience and the
-# actor's role. Keeping them apart means the controller holds neither: it hands
-# over an envelope and reports whatever comes back.
-#
-# Three things can happen to a submitted ACL. It is written. It is deferred to
-# VisibilityCascadeJob, because taking audience away from a Collection has to
-# reach everything inside it and the container must be written last. Or it is
-# refused, either by Atlas's own invariants or by the rule that only an
-# administrator may restrict a Community.
+# The ACL write for a resource, and the policy deciding whether it may happen.
+# PermissionsForm decides what the envelope is; this decides whether Atlas may
+# be told. A submit is written, deferred to VisibilityCascadeJob, or refused.
+# See docs/permissions.md.
 class ResourcePermissions
   include AtlasWrite
 
-  # Atlas's ACL invariants, phrased for the depositor and keyed on the envelope's
-  # error code. An unrecognised code falls back to Atlas's own message, so a new
-  # invariant still says something true rather than nothing.
+  # An unrecognised code falls back to Atlas's own message.
   PERMISSIONS_REFUSED = {
     'visibility_exceeds_parent' => "Visibility wasn't changed — an item can't be more visible " \
                                    'than the collection or community it sits in. Make the ' \
                                    'container public first.'
   }.freeze
 
-  # Communities have no cascade, so restricting one would leave every collection
-  # inside it more visible than its container. The edit form routes this to an
-  # administrator instead; this is the message when the form is bypassed.
   COMMUNITY_NARROWING_REFUSED = 'Restricting a community needs DRS administrators — it does not reach the ' \
                                 'collections inside it. Nothing has been changed.'
 
-  # What the caller should tell the user, if anything. A nil level means the
-  # write went through and there is nothing to report — the ordinary case, and
-  # the reason the controller side is two lines.
+  # A nil level means the write went through and there is nothing to report.
   Result = Struct.new(:level, :message, keyword_init: true) do
     def self.silent = new(level: nil, message: nil)
 
@@ -54,9 +37,8 @@ class ResourcePermissions
     @actor        = actor
   end
 
-  # The edit path. A refusal is reported rather than raised: this runs BEFORE the
-  # descriptive save in the same submit, so raising would discard title and
-  # abstract edits that are independent of the ACL and perfectly valid.
+  # A refusal is reported, not raised: this runs BEFORE the descriptive save in
+  # the same submit, so raising would discard valid title/abstract edits.
   def apply!
     return Result.silent if @envelope.blank?
 
@@ -66,19 +48,9 @@ class ResourcePermissions
     write(@envelope)
   end
 
-  # The create path, for an ACL written onto a resource that was just minted.
-  #
-  # Deliberately not #apply!. Two of that method's assumptions are false one line
-  # after a create: there is no cascade to run, since nothing is inside a
-  # resource this new, and current_read still describes the DESTINATION rather
-  # than this resource — so the narrowing check would compare against the wrong
-  # audience.
-  #
-  # The submitted grants are merged into the new resource's own envelope rather
-  # than replacing it. Atlas assigns edit_groups, edit_users and embargo
-  # unconditionally from the payload, so posting a form that names only read
-  # groups would strip the grants Atlas gave the resource at create — including
-  # the one the creator reaches it through.
+  # The create path. Deliberately not #apply!: there is no cascade one line
+  # after a create, and current_read still describes the DESTINATION.
+  # See docs/permissions.md.
   def apply_minted!
     submitted = @envelope[:permissions]
     return Result.silent if submitted.blank?
@@ -95,12 +67,8 @@ class ResourcePermissions
       Result.refused(PERMISSIONS_REFUSED.fetch(e.code, e.message))
     end
 
-    # Whether this change is handed off instead of written here, and what to say
-    # about it. Returns nil when the ordinary write should go ahead.
-    #
-    # Works have nothing beneath them to strip, so they never defer. Communities
-    # do, but they never cascade: narrowing one changes that object alone and
-    # deliberately leaves its collections as visible as they were.
+    # nil when the ordinary write should go ahead. Works never defer; Communities
+    # never cascade.
     def narrowing_deferral
       return nil if @klass == 'Work'
       return community_narrowing_refusal if @klass == 'Community'
@@ -112,10 +80,7 @@ class ResourcePermissions
       Result.new(level: outcome.dispatched? ? :notice : :alert, message: outcome.message)
     end
 
-    # A server-side backstop for the Community form, which offers Private to
-    # administrators only. An admin's narrowing is written the ordinary way, with
-    # no cascade. Anyone else reaching a narrowing here is JS-off or a hand-made
-    # request, so it refuses rather than writing. Widening is unconstrained.
+    # Server-side backstop: the form offers Private to administrators only.
     def community_narrowing_refusal
       submitted = Array(@envelope.dig(:permissions, :read))
       return nil unless Permissions.narrowing?(current: @current_read, submitted: submitted)
@@ -124,10 +89,8 @@ class ResourcePermissions
       Result.refused(COMMUNITY_NARROWING_REFUSED)
     end
 
-    # The ACL Atlas gave a resource at create, as the symbol-keyed hash the
-    # metadata setter reads back. Only the grant lists are carried: `depositor`
-    # and `proxy_uploader` are preserved by Atlas when omitted, and echoing them
-    # would re-assert attribution this form has no business touching.
+    # Grant lists only -- echoing depositor/proxy_uploader would re-assert
+    # attribution this form has no business touching.
     def minted_permissions
       envelope = AtlasRb::Resource.permissions(@id)
       %i[read edit edit_users embargo].index_with { |key| envelope&.dig(key.to_s) }.compact

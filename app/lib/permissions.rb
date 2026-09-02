@@ -3,38 +3,19 @@
 module Permissions
   STAFF_EDIT_GROUP = 'northeastern:drs:repository:staff'
 
-  # Gates the My DRS "Programmatic access" section — membership means a user
-  # may mint a personal-access JWT to drive the Atlas API directly. Purely a
-  # Cerberus-side policy on who sees the feature; Atlas doesn't check this group.
+  # Cerberus-side policy only: Atlas does not check this group.
   API_GROUP = 'northeastern:drs:repository:api'
 
-  # The group half of the devolved-admin tier's :privileged-role + group pair
-  # (see User#admin_delegate?). Mirrors the matching Atlas-side constant in
-  # Atlas's own Permissions concern — both sides gate on the same identifier.
+  # Mirrors Atlas's own constant -- both sides gate on this identifier.
   ADMIN_GROUP = 'northeastern:drs:repository:admin'
 
-  # Depositor stamp for containers nobody personally owns — the institutional
-  # hierarchy and the per-community genre showcases. Reachability there is via
-  # Grouper, as it was in v1.
-  #
-  # It matters that this is the anonymous NUID specifically: that principal never
-  # authenticates and carries no ability, so recording it as depositor grants
-  # nothing to anyone. Letting these fall through to the acting user instead
-  # would, under the depositor-implies-edit rule, quietly hand whoever created
-  # the container (or ran the seed) edit rights over it.
+  # Depositor stamp for containers nobody personally owns. The ANONYMOUS nuid
+  # specifically: it never authenticates, so depositor-implies-edit grants
+  # nothing. Falling back to the acting user would hand them edit rights.
   UNOWNED_NUID = '000000099'
 
-  # One group grant as the permissions editor renders it
-  # (shared/_group_permissions). `ability` is the wire token Atlas expects
-  # ('read' / 'edit'), not the human label, so a row round-trips through the
-  # form without a label-to-token translation step.
-  #
-  # `revocable` mirrors Atlas's grant-removal rule: a group grant may only be
-  # withdrawn by a member of that group (operators excepted), and Atlas merges a
-  # non-member's attempted removal back in rather than refusing the write. A row
-  # the acting user cannot revoke is therefore rendered without the controls that
-  # would silently attempt it — the same reasoning that hides STAFF_EDIT_GROUP
-  # rather than dangling a dead delete control.
+  # `ability` is the wire token Atlas expects, not the human label.
+  # See docs/permissions.md for the revocable rule.
   GrantRow = Struct.new(:group_id, :label, :ability, :revocable, keyword_init: true) do
     def revocable?
       !!revocable
@@ -45,22 +26,8 @@ module Permissions
     end
   end
 
-  # The portion of `inner`'s audience that is also visible under `outer` —
-  # clamping a resource so it can never be more visible than its container.
-  # `public` is the universal set on either side: under a public container
-  # nothing needs clamping, and a public resource clamps to exactly the
-  # container's audience.
-  #
-  # Mirrors Atlas's TierVisibility.audience_intersect, which does this on the
-  # derivative-tier axis. Expressed here too because the cascade is Cerberus
-  # workflow: Atlas validates each write against the parent but does not clamp,
-  # so the caller decides what the narrowed value should be.
-  #
-  # Note that disjoint audiences intersect to `[]` — fully private. That is the
-  # honest answer (the two audiences share no one), but it means narrowing a
-  # container to a group makes a child readable only by some *other* group
-  # private rather than re-pointing it, which is worth saying out loud wherever
-  # this is surfaced to a person.
+  # Clamps a resource so it can never out-visible its container. Atlas
+  # validates against the parent but does NOT clamp -- see docs/permissions.md.
   def self.audience_intersect(inner, outer)
     return Array(inner) if Array(outer).include?('public')
     return Array(outer) if Array(inner).include?('public')
@@ -68,19 +35,10 @@ module Permissions
     Array(inner) & Array(outer)
   end
 
-  # A resource's whole ACL envelope with only `read` replaced, ready for the
-  # metadata PATCH.
-  #
-  # It has to be the whole envelope. Atlas's permissions setter assigns
-  # edit_groups, edit_users and the embargo unconditionally from the incoming
-  # hash, so a payload carrying `read` alone collapses edit_groups to the staff
-  # auto-prepend and blanks the embargo release date. `depositor` and
-  # `proxy_uploader` are the exception and are deliberately omitted: those are
-  # write-once, and the setter only touches them when the key is present.
-  #
-  # @param current [#read, #edit, #edit_users, #embargo] the stored envelope, as
-  #   AtlasRb::Resource.permissions returns it.
-  # @param read [Array<String>] the read audience to write.
+  # The WHOLE envelope, never `read` alone: Atlas assigns edit_groups,
+  # edit_users and embargo unconditionally from the payload, so a partial
+  # hash silently blanks them. depositor/proxy_uploader are write-once and
+  # are omitted on purpose. See docs/permissions.md.
   def self.envelope_with_read(current, read)
     { 'embargo'    => current.embargo,
       'read'       => Array(read),
@@ -88,10 +46,7 @@ module Permissions
       'edit_users' => Array(current.edit_users) }
   end
 
-  # Whether everyone who can see `inner` can also see `outer` — `public` being
-  # the universal audience on either side. Conservative-correct without
-  # resolving Grouper membership: two different group names count as different
-  # audiences even if their memberships happen to overlap.
+  # Two group names are different audiences even if their memberships overlap.
   def self.audience_subset?(inner, outer)
     return true  if Array(outer).include?('public')
     return false if Array(inner).include?('public')
@@ -99,12 +54,7 @@ module Permissions
     Array(inner).to_set.subset?(Array(outer).to_set)
   end
 
-  # Whether moving from `current` to `submitted` takes audience away.
-  #
-  # Phrased as "current is no longer contained by what was submitted", which is
-  # what makes a same-size swap count as a narrowing too: replacing one group
-  # with another removes access for the outgoing group, so descendants that were
-  # reachable only through it have to be reconsidered.
+  # A same-size swap counts: the outgoing group loses access. See docs/permissions.md.
   def self.narrowing?(current:, submitted:)
     !audience_subset?(current, submitted)
   end
