@@ -43,7 +43,6 @@
 
 /docker-compose.local.yml
 
-CLAUDE.md
 /.playwright-mcp/
 
 /.claude

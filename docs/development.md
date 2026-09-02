@@ -32,6 +32,21 @@ docker exec cerberus-web-1 bundle exec rake reset:data
 
 Then open http://localhost:3000. Port 12345 is the rdbg listener, not the app.
 
+### Environment variables
+
+`.env` is gitignored and copied from `.env.example`, which is the authoritative
+list. The ones you are most likely to change:
+
+| Variable | Purpose |
+|---|---|
+| `ARCH` | Set to `arm64` on Apple Silicon. |
+| `ATLAS_URL` | Base URL of the Atlas API, read by atlas_rb. |
+| `DATABASE_URL` | PostgreSQL connection string for Cerberus's own database. |
+| `SOLR_URL` | Solr endpoint for Blacklight queries. |
+| `WORKTREES_ROOT` | Absolute path to the directory holding your worktrees. Only used by `docker-compose.local.yml`, to mount that directory into the `web` container. |
+
+Atlas keeps its own `.env`, on the same pattern.
+
 ### Encrypted credentials
 
 `config/master.key` is gitignored. Without it every credential resolves to
