@@ -1,71 +1,31 @@
 # frozen_string_literal: true
 
-# Resolves a Set's (Compilation's) recipe against Solr: included collections
-# (transitively, via a two-step reverse-ancestry recipe — find the descendant
-# containers, then their member Works), plus individually-added Works, minus
-# set-aside exclusions.
-#
-# The recipe arrives as the three noid lists off the AtlasRb::Compilation
-# response (`included_collections` / `included_works` / `excluded_works`);
-# everything else — uuid resolution, descendant lookup, the membership fq —
-# is derived here from gated Solr queries, so a restricted recipe noun is
-# silently invisible to a user who may not discover it. (Every step runs
-# through the gated SearchBuilder chain; a future surface may want step 1
-# ungated so a restricted intermediate container doesn't hide permitted Works
-# beneath it — revisit if that need arises.)
-#
-# Not an ApplicationService: there is no single #call product. The resolver
-# is instantiated once per render and read piecemeal — {#contents_fqs} for
-# the controller to layer onto a builder seeded with the live search state
-# (mirroring CatalogController#find_children), then the per-chip counts,
-# provenance lookups, and aside-zone documents the Set page renders around
-# the results. Every Solr round-trip is memoized on the instance.
+# Resolves a Set's (Compilation's) recipe against Solr into its contents.
+# Every query here runs through the gated SearchBuilder chain, so a restricted
+# recipe noun stays invisible to a user who may not discover it.
+# See docs/sets.md.
 class SetResolver
-  # A Set's flat contents are leaf Works; intermediate containers are enumerated
-  # during resolution but are not themselves "contents", so they're excluded.
   DEFAULT_TYPE_FILTERS = [
     'internal_resource_tesim:Work',
     '-tombstoned_bsi:true'
   ].freeze
 
-  # Coarse cap on a single bulk-export pull (see {#each_content_batch}); a
-  # proper cumulative-size cap + async job fallback is deferred (the
-  # bulk-set-download plan), this just bounds a runaway recipe meanwhile.
   MAX_EXPORT_ROWS = 10_000
 
-  # The packers state their own requirements and this asks for them, rather than
-  # keeping a separate list that has to be remembered alongside. They were
-  # separate: the packer gained an embargo check while the field list still
-  # said "just the noid", so the check read nil on every document and withheld
-  # nothing. That failure is silent and it fails towards serving content.
-  #
-  # The UNION of both packers, because this resolver feeds both — SetZipPacker for
-  # the content download and MetadataExportPacker for the manifest. Asking for only
-  # one packer's fields reintroduces the same silent-nil bug on whichever path was
-  # left out; `embargoed_bsi` was missing that way, so a Work embargoed by flag
-  # rather than by release date exported as not embargoed.
+  # The UNION of both packers' fields, asked of them rather than listed here:
+  # a field one packer needs and this list omits reads nil on every document,
+  # silently, and that failure serves content it should withhold.
   PACKER_FIELDS = (SetZipPacker::REQUIRED_DOC_FIELDS | MetadataExportPacker::REQUIRED_DOC_FIELDS).join(',')
 
-  # One included collection, with its gated contents tally.
-  # +live+ is what the Set currently shows from this collection; +total+ is
-  # what it would show with nothing set aside. They diverge only when a
-  # set-aside hole overlaps this collection ("4,998 of 5,000").
   Chip = Struct.new(:noid, :uuid, :live, :total, keyword_init: true)
 
-  # @param compilation [#[]] the AtlasRb::Compilation response (carries the
-  #   three bare-noid recipe arrays).
-  # @param search_service [Blacklight::SearchService] supplies the gated search
-  #   builder + index (typically the controller's `search_service`).
   def initialize(compilation:, search_service:)
     @compilation = compilation
     @search_service = search_service
   end
 
-  # fq fragments for the contents search, or nil when the recipe has no
-  # positive clause (a brand-new Set must render empty — no fq at all would
-  # match the whole index).
-  #
-  # @return [Array<String>, nil]
+  # nil, never [], when the recipe has no positive clause: a Set with no fq at
+  # all matches the whole index instead of rendering empty.
   def contents_fqs
     return nil if positive_clauses.empty?
 
@@ -74,10 +34,6 @@ class SetResolver
     fqs + DEFAULT_TYPE_FILTERS
   end
 
-  # Gated tally of the Set's current contents (the index page's Works
-  # column). Zero for a recipe with no positive clause.
-  #
-  # @return [Integer]
   def contents_count
     fqs = contents_fqs
     return 0 if fqs.nil?
@@ -85,26 +41,9 @@ class SetResolver
     search(*fqs, rows: 0).total
   end
 
-  # Streams the Set's resolved content Works for bulk export, yielding gated
-  # SolrDocuments in pages. It is the *same* gated contents search the show
-  # page runs ({#contents_fqs}), so a viewer only ever exports what they can
-  # discover — per-member permission gating comes free, exactly as on the
-  # page. No-ops (no yield) when the recipe has no positive clause.
-  #
-  # `fl` is trimmed to what SetZipPacker needs — see {PACKER_FIELDS}. Paged
-  # rather than one giant fetch; capped at {MAX_EXPORT_ROWS} as a coarse runaway
-  # guard until the deferred cumulative size cap + job fallback lands (see the
-  # bulk-set-download plan).
-  #
-  # Discovery gating is NOT the whole of the packer's job. An embargoed Work is
-  # deliberately discoverable — public metadata, withheld content — so it clears
-  # this search and the packer has to withhold it itself. That is why the embargo
-  # date is in the field list: trimming it away silently disabled the check and
-  # put embargoed bytes into anonymous archives.
-  #
-  # @param batch [Integer] page size
-  # @yieldparam docs [Array<SolrDocument>] one page of content Works
-  # @return [void]
+  # The *same* gated contents search the show page runs, so a viewer exports
+  # only what they can discover. Discovery is not the whole rule: an embargoed
+  # Work is discoverable, and the packer withholds it using PACKER_FIELDS.
   def each_content_batch(batch: 200)
     fqs = contents_fqs
     return if fqs.nil?
@@ -120,8 +59,6 @@ class SetResolver
     end
   end
 
-  # @return [Array<Chip>] one per included collection the current user can
-  #   discover, in recipe order.
   def chips
     @chips ||= collection_uuids.map do |noid, uuid|
       total = count(MembershipQuery.members_fq(container_sets[noid].to_a, include_linked: true))
@@ -129,13 +66,6 @@ class SetResolver
     end
   end
 
-  # Why a result row is in the Set: +:direct+ for an individually-added Work,
-  # otherwise the noid of the first included collection whose subtree covers
-  # one of the document's membership edges (nil when nothing matches — e.g. a
-  # row reached via an edge the user cannot trace).
-  #
-  # @param document [SolrDocument]
-  # @return [Symbol, String, nil]
   def provenance_for(document)
     return :direct if included_work_uuids.include?(document.id)
 
@@ -143,8 +73,6 @@ class SetResolver
     chips.find { |chip| edges.intersect?(container_sets[chip.noid]) }&.noid
   end
 
-  # The set-aside Works, as gated Solr documents for the aside zone.
-  # @return [Array<SolrDocument>]
   def aside_documents
     return [] if excluded_uuids.empty?
 
@@ -156,8 +84,7 @@ class SetResolver
 
     # ---- recipe-noun resolution (noid → uuid, gated) ----------------------
 
-    # All three noid lists resolved to uuids in one gated lookup, keyed by
-    # bare noid. Solr stores the noid in `alternate_ids_ssim` as `id-<noid>`.
+    # Solr stores the noid in `alternate_ids_ssim` as `id-<noid>`.
     def noun_uuids
       @noun_uuids ||= begin
         noids = recipe_collections + recipe_works + recipe_exclusions
@@ -171,7 +98,6 @@ class SetResolver
       end
     end
 
-    # Ordered [noid, uuid] pairs for the included collections the user can see.
     def collection_uuids
       @collection_uuids ||= recipe_collections.filter_map do |noid|
         uuid = noun_uuids[noid]
@@ -193,10 +119,6 @@ class SetResolver
 
     # ---- descendant containers (step 1, one query for all chips) -----------
 
-    # Container uuids per chip noid: the chip itself plus every descendant
-    # container whose ancestor chain names the chip. One reverse-ancestry
-    # query covers all chips; each descendant doc self-reports which chips
-    # cover it via its own `ancestor_ids_ssim`.
     def container_sets
       @container_sets ||= begin
         sets = collection_uuids.to_h { |noid, uuid| [noid, Set[uuid]] }
@@ -226,8 +148,6 @@ class SetResolver
       end
     end
 
-    # The document's outbound membership edges (structural parent + linked
-    # overlay), as bare container uuids.
     def membership_edges(document)
       refs = Array(document['a_member_of_ssi']) + Array(document['a_linked_member_of_ssim'])
       refs.to_set { |ref| ref.to_s.delete_prefix('id-') }
@@ -235,7 +155,6 @@ class SetResolver
 
     # ---- per-chip tallies ---------------------------------------------------
 
-    # How many of this chip's works are currently set aside (gated count).
     def excluded_overlap(noid)
       return 0 if excluded_uuids.empty?
 
