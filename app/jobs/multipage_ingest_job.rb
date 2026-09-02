@@ -22,9 +22,7 @@ class MultipageIngestJob < ApplicationJob
   def perform(multipage_ingest_id)
     ingest = MultipageIngest.find(multipage_ingest_id)
     return if terminal?(ingest)
-    # The unzip job structurally failed the report (e.g. a sibling page's
-    # archive went missing mid-extract) — don't keep building onto a Work
-    # the report has already given up on.
+    # The report has already given up on this Work -- don't build onto it.
     return if ingest.load_report.failed?
 
     ingest.update!(status: :processing)
@@ -83,31 +81,17 @@ class MultipageIngestJob < ApplicationJob
       return if ingest.blob_attached_at.present?
       return ingest.update!(blob_attached_at: Time.current) if verify && file_set_has_content?(ingest)
 
-      # Record the manifest's page filename on the Blob. The binary PATCHes as
-      # octet-stream carrying no name, so without this Atlas mints an
-      # extensionless placeholder (master_<token>) that surfaces in the
-      # download box — pass source_filename so the page keeps its real name.
+      # Without a name Atlas mints an extensionless master_<token> placeholder,
+      # which then surfaces in the download box.
       AtlasRb::FileSet.update(ingest.file_set_pid, staged, original_filename: ingest.source_filename)
       ingest.update!(blob_attached_at: Time.current)
     end
 
-    # Only consulted on resumed executions: did a previous attempt's PATCH
-    # land without being recorded (crash or lost response after the server
-    # processed it)? Key asymmetry is deliberate — FileSet.create returns
-    # the noid under "id", the Work.file_sets listing under "noid".
     def file_set_has_content?(ingest)
       entry = AtlasRb::Work.file_sets(ingest.work_pid).find { |fs| fs['noid'] == ingest.file_set_pid }
       entry.present? && entry['assets'].present?
     end
 
-    # Each page gets its deep-zoom pointer: JP2 into Cantaloupe's volume,
-    # service base PATCHed onto the page FileSet (Role.service_file — the
-    # per-Canvas image service for manifest assembly). Atlas upserts, so a
-    # re-PATCH never duplicates a Delegate; the JP2 mint itself is guarded
-    # on resumed executions (same posture as attach_blob!) because
-    # MasterJp2 mints a fresh identifier per call and regenerating would
-    # orphan the previous file. Unreadable page bytes must not fail the
-    # page — the blob is already attached; the page just won't deep-zoom.
     def persist_page_service!(ingest, staged, verify:)
       return if verify && page_service_present?(ingest)
 

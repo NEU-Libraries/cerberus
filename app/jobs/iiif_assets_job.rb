@@ -21,13 +21,6 @@ class IiifAssetsJob < ApplicationJob
     IncompleteFlag.set(job.arguments.first, nuid: job.current_nuid, reason: IncompleteReasons::THUMBNAILS)
   end
 
-  # `refresh:` distinguishes "seed the assets" from "re-derive them". The
-  # existing-thumbnail guard makes a *deposit* idempotent under Solid Queue
-  # retries, but it reads as "already done" on a Work whose bytes have since
-  # been replaced — where a thumbnail is always present and is precisely what
-  # must change. Left unguarded there, the job returned immediately and the
-  # page kept showing the superseded image while the download served the new
-  # one, which is indistinguishable from the replace having failed.
   def perform(work_id, source_path, derivative_widths: nil, refresh: false)
     return if !refresh && AtlasRb::Work.find(work_id).thumbnail.present?
     return unless File.exist?(source_path)
@@ -49,19 +42,10 @@ class IiifAssetsJob < ApplicationJob
 
   private
 
-    # A replace passes no widths: the sizes were chosen once, at deposit, and
-    # only the Work's stored rendition URIs still record them. Reading them back
-    # keeps the download renditions in step with everything else the refresh
-    # rebuilds. Left out, the thumbnail, the deep zoom and the displayed image
-    # all move to the new bytes while every sized download goes on serving the
-    # superseded picture.
     def existing_widths(work_id)
       DerivativeCreator.existing_widths(AtlasRb::Work.assets(work_id))
     end
 
-    # The gated full-res base rides a service_file Delegate on the (single)
-    # content FileSet, so DepositDerivativesJob can recover it for deferred
-    # download renditions. Skipped if the FileSet isn't listed yet.
     def persist_service!(work_id, gated_base)
       file_set_pid = AtlasRb::Work.file_sets(work_id).first&.[]('noid')
       AtlasRb::FileSet.set_iiif_service(file_set_pid, gated_base) if file_set_pid

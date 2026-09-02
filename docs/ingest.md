@@ -23,9 +23,10 @@ call it, so the two ingest paths cannot drift apart.
 | everything | `ContentCreationJob` — the primary Blob. Enrichment never gates or blocks it |
 
 Full text rides alongside, for body-text search and the "Full Text Match"
-snippet. Native PDFs and plain text get `FullTextExtractionJob` from here.
-Office documents get theirs from the PDF rendition instead: `PdfRenditionJob`
-enqueues it on the converted PDF, so LibreOffice runs once rather than twice.
+snippet. Native PDFs and plain text get `FullTextExtractionJob` from here, which
+is what `extractable_text?` selects. Office documents get theirs from the PDF
+rendition instead: `PdfRenditionJob` enqueues it on the converted PDF, so
+LibreOffice runs once rather than twice.
 
 No `derivative_widths` pass through here. A deposit gets thumbnails at upload
 time only. Small, medium and large are opt-in download renditions chosen later
@@ -52,6 +53,22 @@ second name for the other will break a path.
 - An interactive deposit has not: a human confirms on the form's second page.
   That path passes `false`, and `ConfirmDepositJob` completes the Work later.
 
+### Why `refreshing?` reads `include_primary:` rather than taking a flag
+
+The two conditions coincide by construction. The only callers that skip the
+primary Blob are replace and rollback, and both are re-deriving the assets of a
+Work that already has them. A separate flag would be a second name for the same
+fact, and two names drift.
+
+### Idempotency keys are derived, never minted
+
+`rendition_key` derives its key with `uuid_v5` rather than minting a fresh one.
+That makes the rendition Blob converge on the same Atlas idempotency key across
+two different repeats: a Solid Queue retry, and a re-dispatched loader row. It
+is the same dedup story as the primary Blob's key.
+
+Minting a key here would create a second Blob on every retry.
+
 ### Detecting the type
 
 Detection sniffs the staged file with Marcel rather than trusting a
@@ -72,6 +89,11 @@ Each page becomes an ordered FileSet — position is the manifest Sequence —
 holding the page binary as its Blob. Page jobs parallelise safely, because each
 job touches only its own FileSet, across every item in the load.
 
+The job stops early if the load report has already failed. The unzip job fails
+the report structurally — a sibling page's archive going missing mid-extract,
+for instance — and there is no point building onto a Work the report has given
+up on.
+
 ### The two Atlas writes behave differently
 
 Retry safety is the design centre of this job, and it exists because the two
@@ -88,14 +110,44 @@ started, so a previous attempt got past the create — the job asks Atlas before
 PATCHing, so a lost response cannot double-attach the page. The happy path makes
 no extra reads.
 
+That asymmetry is why `file_set_has_content?` exists and why it is consulted
+only on a resume. The question it answers is narrow: did a previous attempt's
+PATCH land without being recorded, because the process crashed or the response
+was lost after the server had already processed it?
+
+### Staging a page
+
+`stage_page` moves the extracted page under `uploads_root/<work_pid>/`. Within
+one filesystem that is a rename; across filesystems it is a streaming copy. It
+is never a read-then-write, because a page binary can be large.
+
+A destination that already exists means a previous attempt staged it. The job
+reuses it rather than redoing the move, because the earlier `mv` may already
+have consumed the source.
+
+### Recording the page filename
+
+The binary PATCH goes up as `octet-stream` and carries no name. Without an
+explicit `original_filename:`, Atlas mints an extensionless placeholder
+(`master_<token>`) that then surfaces in the download box. Pass the manifest's
+page filename.
+
+### Per-page deep zoom
+
+Every page gets its own image-service pointer, not just page 1: a JP2 written
+into Cantaloupe's volume, and a service base PATCHed onto that page's FileSet
+under `Role.service_file`. That is the per-Canvas image service the IIIF
+manifest assembles from.
+
+Atlas upserts the Delegate, so re-PATCHing is never additive and a retry is
+safe. `page_service_present?` is consulted only on a resume, and it distinguishes
+a Delegate from content the same way everything else does: Delegates carry a
+`uri` in the listing's polymorphic assets, and content Blobs do not.
+
 ### What page 1 does that other pages do not
 
 Page 1 seeds the Work-level thumbnails through `IiifAssetsJob`, which self-guards
 on an existing thumbnail.
-
-Every page, page 1 included, gets its own IIIF image-service pointer: a JP2 plus
-the FileSet-level `iiif_service` PATCH, for manifest assembly. See
-`persist_page_service!`.
 
 `ContentCreationJob` is never enqueued here. It calls `Work.complete`, which is
 `CompleteWorkJob`'s responsibility, exactly once, after every page has landed.

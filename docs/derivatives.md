@@ -27,7 +27,8 @@ This job PATCHes their Delegate URLs to Atlas.
 
 `service_file` does double duty. It is the deep-zoom source, and it is the
 anchor from which `DepositDerivativesJob` later recovers the gated base for
-opt-in S/M/L.
+opt-in S/M/L. `persist_service!` writes it onto the single content FileSet, and
+skips when that FileSet is not listed yet.
 
 ### Who passes widths, and who does not
 
@@ -38,8 +39,19 @@ opt-in S/M/L.
   from the `service_file` Delegate this job set.
 - **Callers that pass nothing** at seed time — deposit, XML loader, multipage
   page 1 — get thumbnails and `service_file` only.
-- **On a `refresh:`** the widths come from the Work itself instead. See
-  `#existing_widths`.
+- **A replace passes no widths either**, but it is not a first seed. The sizes
+  were chosen once, at deposit, and only the Work's stored rendition URIs still
+  record them, so `existing_widths` reads them back. That keeps the download
+  renditions in step with everything else the refresh rebuilds.
+
+### `refresh:` versus a first seed
+
+`refresh:` distinguishes "seed the assets" from "re-derive them".
+
+The existing-thumbnail guard is what makes a *deposit* idempotent under Solid
+Queue retries. But that same guard reads as "already done" on a Work whose bytes
+have since been replaced, which is exactly when the assets most need rebuilding.
+`refresh: true` is how a replace or rollback says the guard does not apply.
 
 ## Attaching a caption track
 
@@ -67,6 +79,13 @@ structure that omits the video.
 
 Waiting also orders this write after the deposit's own, so the two Blob writers
 do not race.
+
+### What happens when the wait runs out
+
+Exhausting the retry budget leaves the Work with no captions, and says so in the
+log. That is the right outcome. A Work whose video never landed has nothing to
+caption, and the deposit itself is already on the needs-attention list for the
+missing video.
 
 ### Attach-only
 

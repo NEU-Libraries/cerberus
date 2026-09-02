@@ -50,17 +50,10 @@ class IngestDispatch < ApplicationService
 
   private
 
-    # The two conditions coincide by construction: the only callers that skip
-    # the primary Blob are replace and rollback, and both are re-deriving the
-    # assets of a Work that already has them. A separate flag would be a second
-    # name for the same fact.
     def refreshing?
       !@include_primary
     end
 
-    # Direct full-text candidates: native PDFs and plain text. Office docs are
-    # excluded here — their text comes from the PDF rendition (PdfRenditionJob),
-    # so soffice converts once.
     def extractable_text?
       mime_type == 'application/pdf' || mime_type.start_with?('text/')
     end
@@ -72,9 +65,7 @@ class IngestDispatch < ApplicationService
       end
     end
 
-    # Derived (uuid_v5), not minted, so the rendition Blob converges on the
-    # same Atlas idempotency key across Solid Queue retries AND a
-    # re-dispatched loader row — same dedup story as the primary Blob's key.
+    # Derived, never minted: a retry must converge on the same Atlas key.
     def rendition_key
       Digest::UUID.uuid_v5(Digest::UUID::URL_NAMESPACE, "cerberus:rendition:#{@idempotency_key}")
     end

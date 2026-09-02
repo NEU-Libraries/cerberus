@@ -14,9 +14,6 @@ class CaptionJob < ApplicationJob
 
   class PrimaryFileMissing < StandardError; end
 
-  # Exhausting the budget leaves the Work with no captions and says so in the
-  # log. That is the right outcome: a Work whose video never landed has nothing
-  # to caption, and the deposit itself is already on the needs-attention list.
   retry_on PrimaryFileMissing, attempts: 6, wait: :polynomially_longer do |job, _exception|
     Rails.logger.warn(
       "CaptionJob: work #{job.arguments.first} never received its primary file — captions not attached"
