@@ -8,7 +8,7 @@
 class GoogleScholarMetadata
   SCHOLAR_GENRES = ['Research Publications', 'Technical Reports', 'Theses & Dissertations'].freeze
 
-  CITATION_FL = 'genre_ssim,creator_ssim,keyword_ssim,pub_date_ssim,description_tsim'
+  CITATION_FL = 'genre_ssim,creator_ssim,subject_ssim,pub_date_ssim,description_tsim'
 
   # A Solr failure degrades to no tags rather than breaking the show page, which
   # otherwise has no Solr dependency.
@@ -36,7 +36,7 @@ class GoogleScholarMetadata
 
   def authors = Array(@doc['creator_ssim'])
 
-  def keywords = Array(@doc['keyword_ssim'])
+  def keywords = Array(@doc['subject_ssim'])
 
   def abstract = Array(@doc['description_tsim']).first.presence
 

@@ -15,7 +15,7 @@ RSpec.describe GoogleScholarMetadata do
   let(:solr_doc) do
     { 'genre_ssim'       => ['Theses & Dissertations'],
       'creator_ssim'     => ['Lee, Wen-Han', 'Northeastern University Libraries'],
-      'keyword_ssim'     => %w[Bioprinting Rheology],
+      'subject_ssim'     => %w[Bioprinting Rheology],
       'pub_date_ssim'    => ['2023'],
       'description_tsim' => ['An abstract about the work.'] }
   end

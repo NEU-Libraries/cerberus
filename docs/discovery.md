@@ -310,10 +310,14 @@ show page.
 
 It reads the Work's Solr document and nothing else. Parsing MODS XML on the
 render path is a hard design constraint. So Atlas's `CitationIndexer` projects
-the pieces Scholar needs — `creator_ssim`, `keyword_ssim`, `pub_date_ssim` —
-onto the Work document, where title, abstract and genre already lived. Public
-status and embargo come from the resource permissions the show page has already
-loaded.
+`creator_ssim` and `pub_date_ssim` onto the Work document, where title, abstract
+and genre already lived, and its `MODSIndexer` projects `subject_ssim`, which
+feeds the `keywords` tag. Public status and embargo come from the resource
+permissions the show page has already loaded.
+
+`subject_ssim` is also the Topic facet's field. One indexer writes the concept
+and both consumers read it, so a subject cannot be browsable and absent from the
+citation tags at the same time.
 
 `CITATION_FL` keeps the lookup to the fields the tags need. A Solr failure
 degrades to no tags rather than breaking a show page that otherwise has no Solr

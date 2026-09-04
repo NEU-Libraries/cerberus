@@ -3,8 +3,9 @@
 require 'rails_helper'
 
 # End-to-end over the real test Atlas + Solr: a created Work is completed (which
-# runs Atlas's CitationIndexer, projecting creator_ssim/keyword_ssim/pub_date_ssim
-# onto its Solr doc), then its show page is fetched and the <head> inspected.
+# runs Atlas's CitationIndexer, projecting creator_ssim/pub_date_ssim onto its
+# Solr doc, and its MODSIndexer, projecting subject_ssim), then its show page is
+# fetched and the <head> inspected.
 # The gating/field-mapping logic is unit-specced (google_scholar_metadata_spec);
 # this proves the controller's Solr lookup + the content_for(:head) partial
 # actually emit the tags, and that the genre gate holds.
