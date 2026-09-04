@@ -5,6 +5,15 @@ require 'rails_helper'
 describe CatalogController do
   let!(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', nuid: '000000004') }
 
+  def public_work(parent_id, fixture)
+    AtlasRb::Work.create(parent_id, fixture_mods(fixture), nuid: '000000004').tap do |work|
+      AtlasRb::Work.complete(work.id, nuid: '000000004')
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+    end
+  end
+
+  def fixture_mods(kind) = Rails.root.join('spec/fixtures/files', "#{kind}-mods.xml").to_s
+
   describe 'index' do
     render_views
     it 'renders the index partial' do
@@ -65,6 +74,47 @@ describe CatalogController do
     end
   end
 
+  # Every field the config names has to be one Atlas actually writes. Blacklight
+  # renders no section for a field with no values, so a config over a dead field
+  # is silent — no error, no empty heading, just a facet or a metadata row that
+  # never appears. Only a query against a real corpus catches that, so this runs
+  # against the test Atlas + Solr rather than asserting the config strings.
+  describe 'field coverage' do
+    # A field the config may name while the test corpus carries no value for it,
+    # mapped to the reason. Keep it short: every entry is a field this spec
+    # cannot vouch for.
+    let(:unprovable_in_test) do
+      { 'classification_ssim' => 'projected from a FileSet Classification, and the test env deposits none' }
+    end
+
+    let!(:collection) do
+      publicize_ancestry!(community: community)
+      AtlasRb::Collection.create(community.id, fixture_mods('collection'), nuid: '000000004').tap do |created|
+        AtlasRb::Collection.metadata(created.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      end
+    end
+
+    it 'names only fields the index carries' do
+      work = public_work(collection.id, 'work')
+
+      expect(unindexed_configured_fields).to be_empty
+    ensure
+      AtlasRb::Work.tombstone(work.id) if work
+      AtlasRb::Collection.tombstone(collection.id)
+    end
+
+    def configured_fields
+      config = described_class.blacklight_config
+      (config.facet_fields.keys + config.index_fields.keys + config.show_fields.keys).uniq
+    end
+
+    def unindexed_configured_fields
+      (configured_fields - unprovable_in_test.keys).reject do |field|
+        Blacklight.default_index.search(q: "#{field}:*", rows: 0).total.positive?
+      end
+    end
+  end
+
   describe 'facets' do
     # The "Content" facet rides Atlas's classification_ssim projection (the
     # ClassificationIndexer rolls each Work's FileSet Classifications onto the
@@ -75,6 +125,27 @@ describe CatalogController do
       field = described_class.blacklight_config.facet_fields['classification_ssim']
       expect(field).to be_present
       expect(field.label).to eq('Content')
+    end
+
+    # Assert the values Blacklight renders, not the config strings. A facet over
+    # an empty field renders no section at all, so a config-only assertion is
+    # green while the sidebar shows nothing.
+    render_views
+
+    it 'renders the Creator and Topic facets with the values Atlas indexed' do
+      publicize_ancestry!(community: community)
+      collection = AtlasRb::Collection.create(community.id, fixture_mods('collection'), nuid: '000000004')
+      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      work = public_work(collection.id, 'work')
+
+      get :index, params: { q: "What's New" }
+
+      body = CGI.unescapeHTML(response.body)
+      expect(body).to include('id="facet-creator_ssim"').and include('Cohen, Daniel J.')
+      expect(body).to include('id="facet-subject_ssim"').and include('Civil society')
+    ensure
+      AtlasRb::Work.tombstone(work.id) if work
+      AtlasRb::Collection.tombstone(collection.id) if collection
     end
   end
 
@@ -155,14 +226,5 @@ describe CatalogController do
         fq: "id:(#{ids.map { |id| %("#{id}") }.join(' OR ')})"
       ).documents.map(&:id)
     end
-
-    def public_work(parent_id, fixture)
-      AtlasRb::Work.create(parent_id, fixture_mods(fixture), nuid: '000000004').tap do |work|
-        AtlasRb::Work.complete(work.id, nuid: '000000004')
-        AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
-      end
-    end
-
-    def fixture_mods(kind) = Rails.root.join('spec/fixtures/files', "#{kind}-mods.xml").to_s
   end
 end
