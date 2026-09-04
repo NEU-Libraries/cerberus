@@ -173,24 +173,23 @@ class CatalogController < ApplicationController
 
     # solr fields to be displayed in the index (search results) view
     #   The ordering of the field names is the order of the display
-    config.add_index_field 'creator_ssim', label: 'Creator'
-    # join: true renders a field's values as one sentence in a single row.
-    # Without it each value gets its own row, which here would also mean its own
-    # expand/collapse control (see the MetadataFieldLayoutComponent template) —
-    # several truncation toggles stacked under one label. Atlas projects a
-    # single abstract today, so this only bites on a Work that carries more
-    # than one.
+    # Every multi-valued field here joins. MetadataFieldLayoutComponent emits one
+    # <dt> and one <dd> per value into a Bootstrap `.row`, so a second <dd> wraps
+    # onto a fresh flex line and the *next* field's <dt> fills the gap beside it —
+    # a label rendered next to another field's value. Joining also spares each
+    # value its own truncation toggle under one shared label.
+    config.add_index_field 'creator_ssim', label: 'Creator', join: true
     config.add_index_field 'description_tsim', label: 'Description', join: true
-    config.add_index_field 'language_ssim', label: 'Language'
+    config.add_index_field 'language_ssim', label: 'Language', join: true
 
     # A container browse (a community, collection or set listing its members)
     # renders its member rows from the show config, not the index config, so
     # these two lists have to be kept in step. Blacklight's own single-document
     # show page is dead surface here — SolrDocument#to_param routes every
     # document link to Cerberus's own /works/:noid and friends.
-    config.add_show_field 'creator_ssim', label: 'Creator'
+    config.add_show_field 'creator_ssim', label: 'Creator', join: true
     config.add_show_field 'description_tsim', label: 'Description', join: true
-    config.add_show_field 'language_ssim', label: 'Language'
+    config.add_show_field 'language_ssim', label: 'Language', join: true
 
     # "fielded" search configuration. Used by pulldown among other places.
     # For supported keys in hash, see rdoc for Blacklight::SearchFields

@@ -103,6 +103,19 @@ describe CatalogController do
       AtlasRb::Collection.tombstone(collection.id)
     end
 
+    # A displayed field that does not join emits one <dd> per value into a
+    # Bootstrap `.row`, and the second <dd> wraps onto a line the next field's
+    # <dt> then shares — so that label renders beside another field's value. The
+    # Solr dynamic-field suffix ends in `m` when multi-valued, so the name alone
+    # rules a field in, no document needed.
+    it 'joins every displayed field that can carry more than one value' do
+      config = described_class.blacklight_config
+      displayed = config.index_fields.values + config.show_fields.values
+      multivalued = displayed.select { |field| field.field.end_with?('m') }
+
+      expect(multivalued).to all(satisfy(&:join))
+    end
+
     def configured_fields
       config = described_class.blacklight_config
       (config.facet_fields.keys + config.index_fields.keys + config.show_fields.keys).uniq

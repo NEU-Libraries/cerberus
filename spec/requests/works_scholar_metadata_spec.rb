@@ -25,7 +25,7 @@ RSpec.describe 'Work Google Scholar metadata', type: :request do
       .and include('name="citation_author"')
       .and include('name="citation_publication_date"')
       .and include('content="2017"')
-      .and include('name="keywords"')
+      .and match(/name="keywords" content="[^"]*Civil society/)
   end
 
   it 'emits no citation_* tags for a non-scholarly genre' do
