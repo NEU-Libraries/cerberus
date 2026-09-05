@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A Work carrying more topical subjects than config.default_facet_limit, so
+     one deposit is enough to overflow the Topic facet and make the sidebar
+     render its "See more" link. Depositing one work per value instead would
+     cost six Atlas round-trips to prove the same thing. -->
+<mods:mods xmlns:mods="http://www.loc.gov/mods/v3"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+
+    <mods:titleInfo usage="primary">
+        <mods:title>Mill Towns of the Merrimack</mods:title>
+    </mods:titleInfo>
+
+    <mods:name type="personal" usage="primary">
+        <mods:namePart type="given">Ada</mods:namePart>
+        <mods:namePart type="family">Whitfield</mods:namePart>
+        <mods:role>
+            <mods:roleTerm authority="marcrelator" type="text">Creator</mods:roleTerm>
+        </mods:role>
+    </mods:name>
+
+    <mods:typeOfResource>text</mods:typeOfResource>
+
+    <mods:originInfo>
+        <mods:dateCreated encoding="w3cdtf" keyDate="yes">1974</mods:dateCreated>
+    </mods:originInfo>
+
+    <mods:subject><mods:topic>Textile industry</mods:topic></mods:subject>
+    <mods:subject><mods:topic>Canals</mods:topic></mods:subject>
+    <mods:subject><mods:topic>Labor unions</mods:topic></mods:subject>
+    <mods:subject><mods:topic>Water power</mods:topic></mods:subject>
+    <mods:subject><mods:topic>Company housing</mods:topic></mods:subject>
+    <mods:subject><mods:topic>Immigration</mods:topic></mods:subject>
+    <mods:subject><mods:topic>Railroads</mods:topic></mods:subject>
+
+    <mods:recordInfo>
+        <mods:recordContentSource>Northeastern University Libraries</mods:recordContentSource>
+        <mods:recordOrigin>Created for the scoped facet modal spec.</mods:recordOrigin>
+    </mods:recordInfo>
+</mods:mods>
