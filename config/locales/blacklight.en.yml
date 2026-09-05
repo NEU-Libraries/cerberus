@@ -13,11 +13,13 @@ en:
           one: 'Displaying <strong>%{start_num}</strong> to <strong>%{end_num}</strong> of <strong>%{total_num}</strong>'
           other: 'Displaying <strong>%{start_num}</strong> to <strong>%{end_num}</strong> of <strong>%{total_num}</strong>'
       facets:
-        # Blacklight's own label is a bare "more »", which reads as a fragment
-        # next to the facet values above it and gives a screen reader nothing to
-        # act on. The field name stays visually hidden, so the accessible name
-        # is "See more Topic" while the sighted label stays short.
-        more_html: 'See more <span class="visually-hidden">%{field_name}</span>'
+        # Blacklight's own label is a bare "more", which reads as a fragment next
+        # to the facet values above it. The field name stays visually hidden, so
+        # the accessible name is "See more Topic" -- three identical "See more"
+        # links in one sidebar are indistinguishable in a screen reader's link
+        # list -- while the sighted label stays short. The guillemet is
+        # Blacklight's own and carries the affordance that this opens something.
+        more_html: 'See more <span class="visually-hidden">%{field_name}</span> &raquo;'
       zero_results:
         # Blacklight's own wording ends "then refine your search using the links
         # on the left". On a zero-result search the facet panel still renders,
