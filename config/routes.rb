@@ -58,6 +58,15 @@ Rails.application.routes.draw do
   # (Atlas raises on a nil one), and a root Community is a seed-time concern, not
   # something the UI offers. Dropping the top-level new/create removes the
   # parentless route rather than patching the links that reached it.
+  # The facet-suggest box inside the scoped "more" modal. Blacklight's JS builds
+  # this URL itself, from the first path segment of the box's search context
+  # plus the facet key — so the container cannot ride the path, and arrives as
+  # ?id= instead. Declared ahead of the resource blocks so a facet key can never
+  # be read as a member action. See ShowScopedSearch and docs/discovery.md.
+  get 'communities/facet_suggest/:facet_field', to: 'communities#facet_suggest', as: :community_facet_suggest
+  get 'collections/facet_suggest/:facet_field', to: 'collections#facet_suggest', as: :collection_facet_suggest
+  get 'sets/facet_suggest/:facet_field',        to: 'sets#facet_suggest',        as: :set_facet_suggest
+
   resources :communities, except: %i[new create destroy], shallow: true do
     resources :communities, only: %i[new create]
     resources :collections, only: %i[new create]

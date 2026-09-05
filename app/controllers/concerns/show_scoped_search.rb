@@ -25,7 +25,7 @@ module ShowScopedSearch
     # Blacklight ships search_facet_path in a helper *module*. A method defined
     # on the controller's own _helpers module shadows one from an included
     # module, so helper_method is what lets the override below win.
-    helper_method :search_facet_path
+    helper_method :search_facet_path, :facet_suggest_context
   end
 
   def search_action_url(options = {})
@@ -78,6 +78,34 @@ module ShowScopedSearch
     render 'catalog/facet'
   end
 
+  # The type-ahead behind the modal's filter box: the same scoped counts as
+  # #facet, narrowed by the typed fragment, rendered as the values list alone
+  # because the JS swaps it into the open modal.
+  def facet_suggest
+    filters = facet_scope_filters
+    @facet = scoped_facet_config(params[:facet_field])
+    raise ActionController::RoutingError, 'Not Found' if @facet.nil?
+
+    @response = scoped_facet_response(@facet.key, filters, params[:query_fragment])
+    @display_facet = @response.aggregations[@facet.field]
+    @presenter = @facet.presenter.new(@facet, @display_facet, view_context)
+    @pagination = @presenter.paginator
+
+    render 'catalog/facet_values', layout: false
+  end
+
+  # The search context Blacklight's suggest JS reads off the input. It rebuilds
+  # the fetch URL as `/<first path segment>/facet_suggest/<key>` plus this URL's
+  # query string, so the context has to BE the suggest route: the container
+  # survives only because ?id= is a query param, and the path it is dropped from
+  # is one this route does not have. Anything moved into the path here is lost.
+  def facet_suggest_context(key)
+    return if params[:id].blank?
+
+    opts = search_state.to_h.merge(only_path: true).except(:page)
+    url_for(opts.merge(action: 'facet_suggest', facet_field: key, id: params[:id]))
+  end
+
   private
 
     # The fqs bounding this page's contents, or nil when the page denotes
@@ -92,26 +120,28 @@ module ShowScopedSearch
     # SearchService#facet_field_response cannot stand in: it offers only an
     # extra-params merge, and a merged :fq replaces the gated-discovery clause
     # the builder already assembled rather than adding to it. Use with_filters.
-    def scoped_facet_response(key, filters)
+    def scoped_facet_response(key, filters, query_fragment = nil)
       return Blacklight::Solr::Response.new({}, {}) if filters.nil?
 
       builder = search_service.search_builder
                               .with(search_state)
                               .with_filters(*filters)
                               .facet(key)
+      # facet.contains, applied by the builder's own suggestion step. Blank is
+      # not the same as absent: an empty fragment must count everything, which
+      # is what the modal shows before anyone types.
+      builder = builder.facet_suggestion_query(query_fragment) if query_fragment.present?
       Blacklight.default_index.search(params: builder)
     end
 
-    # A per-request copy of the facet config with suggest switched off.
-    # Blacklight's facet-suggest box builds its fetch URL in JavaScript from the
-    # first path segment alone — /collections/facet_suggest/<key> — which drops
-    # the container this modal is scoped to and matches no route. Mutating the
-    # shared blacklight_config instead would leak the change into every later
-    # request served by the process.
+    # A per-request copy of this facet's config. Duplicated rather than used in
+    # place because the modal renders from the shared blacklight_config, and any
+    # per-request adjustment made to it would leak into every later request the
+    # process serves.
     def scoped_facet_config(key)
       config = blacklight_config.facet_fields[key]
       return if config.nil?
 
-      config.deep_dup.tap { |facet| facet.suggest = false }
+      config.deep_dup
     end
 end

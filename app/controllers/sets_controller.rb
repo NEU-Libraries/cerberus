@@ -19,8 +19,8 @@ class SetsController < CatalogController
 
   # :facet is the show page's facet modal, so it is as public as the show page
   # itself — load_set below is what gates a private Set, for both.
-  before_action :authenticate_user!, except: %i[show facet]
-  before_action :require_curator,    except: %i[show facet]
+  before_action :authenticate_user!, except: %i[show facet facet_suggest]
+  before_action :require_curator,    except: %i[show facet facet_suggest]
   before_action :load_set,           except: [:index, :new, :create, :picker, :recipients]
   # Declared here rather than in SetBulkActions so it lands after the two gates
   # above: an anonymous request has to reach authenticate_user! and be sent to

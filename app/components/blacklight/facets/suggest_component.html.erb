@@ -1,0 +1,23 @@
+<%# Blacklight's own template points the box at search_facet_path, whose container
+    sits in the path — and the suggest JS keeps only the first path segment, so the
+    scope is lost before the request is made. Point it at the suggest route, which
+    carries the container as a query param instead. helpers.facet_suggest_context
+    is nil off a scoped page, where Blacklight's default is right. %>
+<% search_context = helpers.try(:facet_suggest_context, key) || helpers.search_facet_path(id: key) %>
+<div class="input-group">
+  <label class="input-group-text" for="facet_suggest_<%= key %>">
+    <%= I18n.t('blacklight.search.facets.suggest.label', field_label: label.downcase.pluralize) %>
+  </label>
+  <%= search_field_tag "facet_suggest_#{key}",
+    nil,
+    class: "facet-suggest form-control",
+    data: {
+      facet_field: key,
+      facet_search_context: search_context
+    },
+    placeholder: I18n.t('blacklight.search.facets.suggest.placeholder')
+  %>
+  <span class="input-group-text">
+    <%= render Blacklight::Icons::SearchComponent.new %>
+  </span>
+</div>
