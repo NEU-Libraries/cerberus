@@ -7,7 +7,10 @@
     <mods:abstract>A short scanned document of a few pages, included as sample multipage material so the repository's paged (Tify) viewer and per-page deep-zoom can be exercised on seed data.</mods:abstract>
 
     <mods:originInfo>
-        <mods:dateCreated keyDate="yes" encoding="w3cdtf">1900-01-01</mods:dateCreated>
+        <mods:dateCreated keyDate="yes" encoding="w3cdtf" point="start" qualifier="approximate">1900</mods:dateCreated>
+        <mods:dateCreated encoding="w3cdtf" point="end" qualifier="approximate">1912</mods:dateCreated>
+        <mods:publisher>Boott Cotton Mills</mods:publisher>
+        <mods:place><mods:placeTerm type="text">Lowell</mods:placeTerm></mods:place>
     </mods:originInfo>
 
     <mods:genre authority="aat" authorityURI="http://vocab.getty.edu/aat/" valueURI="http://vocab.getty.edu/aat/300028569">manuscripts (documents)</mods:genre>

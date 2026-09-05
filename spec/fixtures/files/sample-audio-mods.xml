@@ -12,6 +12,13 @@
 
     <mods:genre authority="aat" authorityURI="http://vocab.getty.edu/aat/" valueURI="http://vocab.getty.edu/aat/300028633">sound recordings</mods:genre>
 
+    <mods:subject>
+        <mods:name type="personal">
+            <mods:namePart type="family">Bunker</mods:namePart>
+            <mods:namePart type="given">Ellen</mods:namePart>
+        </mods:name>
+    </mods:subject>
+    <mods:subject><mods:temporal>1970-1979</mods:temporal></mods:subject>
     <mods:typeOfResource>sound recording</mods:typeOfResource>
     <mods:physicalDescription>
         <mods:form authority="marcform">electronic</mods:form>

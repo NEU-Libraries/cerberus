@@ -18,6 +18,9 @@
         <mods:languageTerm authority="iso639-2b" authorityURI="http://id.loc.gov/vocabulary/iso639-2" type="text" valueURI="http://id.loc.gov/vocabulary/iso639-2/eng">English</mods:languageTerm>
     </mods:language>
     <mods:genre authority="aat" authorityURI="http://vocab.getty.edu/aat/" valueURI="http://vocab.getty.edu/aat/300046300">photographs</mods:genre>
+    <mods:subject><mods:geographic>Walden Pond (Mass.)</mods:geographic></mods:subject>
+    <mods:subject><mods:temporal>2020-2029</mods:temporal></mods:subject>
+    <mods:classification>landscapes</mods:classification>
     <mods:typeOfResource>still image</mods:typeOfResource>
     <mods:physicalDescription>
         <mods:form authority="marcform">electronic</mods:form>

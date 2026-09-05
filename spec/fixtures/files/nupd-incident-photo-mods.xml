@@ -23,6 +23,13 @@
         <mods:topic>Salt marshes</mods:topic>
     </mods:subject>
 
+    <mods:subject><mods:geographic>Belle Isle Marsh (Mass.)</mods:geographic></mods:subject>
+    <mods:subject>
+        <mods:name type="corporate">
+            <mods:namePart>Northeastern University Department of Public Safety</mods:namePart>
+        </mods:name>
+    </mods:subject>
+    <mods:classification>public safety</mods:classification>
     <mods:typeOfResource>still image</mods:typeOfResource>
     <mods:physicalDescription>
         <mods:form authority="marcform">electronic</mods:form>
