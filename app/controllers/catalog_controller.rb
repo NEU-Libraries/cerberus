@@ -136,6 +136,16 @@ class CatalogController < ApplicationController
     # :index_range can be an array or range of prefixes that will be used to
     #  create the navigation (note: It is case sensitive when searching values)
 
+    # Five values before the "more" link, against Blacklight's default of ten. The
+    # sidebar carries a dozen facets, so a long tail on each one pushes the rest
+    # off the screen and buries the axes a reader has not thought to scroll to.
+    # Five is enough to show what a facet is FOR; the modal behind "more" is
+    # where browsing a long list belongs, and index_range gives it an alphabet.
+    #
+    # Facets say `limit: true` rather than a number of their own, which is what
+    # makes this one line the single place to change it.
+    config.default_facet_limit = 5
+
     # Cerberus defined facets lead — Type first as the discovery anchor: it is
     # always populated for any search (Work/Collection/Community) and renders
     # open (collapse:false), so users always see a facet there to learn the
@@ -146,13 +156,13 @@ class CatalogController < ApplicationController
     # FileSets' Classification by Atlas's ClassificationIndexer. Multivalued —
     # a mixed-media Work surfaces under each of its formats; values are
     # display-ready Classification#name strings (no i18n mapping needed).
-    config.add_facet_field 'classification_ssim', label: 'Content'
+    config.add_facet_field 'classification_ssim', label: 'Content', limit: true
     # Genre / scholarly category (Research Publications, Presentations, Datasets,
     # Technical Reports, Monographs, Theses & Dissertations, …) projected onto the
     # Work from MODS <genre> by Atlas's GenreIndexer. Multivalued; values are the
     # genre strings as authored (no i18n mapping needed). Works only — empty for
     # Collections/Communities and for Works without a genre.
-    config.add_facet_field 'genre_ssim', label: 'Genre'
+    config.add_facet_field 'genre_ssim', label: 'Genre', limit: true
     # No facet over MODS <typeOfResource>. Content above answers the same question
     # a reader is asking, in words they use: it offers Image / Video / Text /
     # Presentation where typeOfResource offers "still image" and "mixed material".
@@ -162,13 +172,13 @@ class CatalogController < ApplicationController
     # Creator names in citation display form, projected onto the Work by Atlas's
     # CitationIndexer from the MODS names carrying a MARC creator relator.
     # Multivalued — a co-authored Work is browsable under each of its creators.
-    config.add_facet_field 'creator_ssim', label: 'Creator', limit: 20, index_range: 'A'..'Z'
+    config.add_facet_field 'creator_ssim', label: 'Creator', limit: true, index_range: 'A'..'Z'
     config.add_facet_field 'pub_date_ssim', label: 'Publication Year', single: true
     # Topical subject and language, projected by Atlas's MODSIndexer for every
     # Modsable resource rather than for Works alone. subject_ssim carries MODS
     # <topic>, which is a wider set than the citation keywords GoogleScholarMetadata
     # reads off the same field.
-    config.add_facet_field 'subject_ssim', label: 'Topic', limit: 20, index_range: 'A'..'Z'
+    config.add_facet_field 'subject_ssim', label: 'Topic', limit: true, index_range: 'A'..'Z'
     # The other four MODS subject axes, labelled as Atlas's WorkDecorator::DISPLAY
     # labels them so a facet and the metadata row beneath a result agree. Kept
     # apart rather than merged into Topic: a place, a period and a person are
@@ -179,10 +189,10 @@ class CatalogController < ApplicationController
     # <hierarchicalGeographic> — Atlas composes that down to "Parksville" rather
     # than indexing every level, since a continent every record shares would bury
     # the useful value.
-    config.add_facet_field 'subject_geo_ssim', label: 'Places', limit: 20, index_range: 'A'..'Z'
+    config.add_facet_field 'subject_geo_ssim', label: 'Places', limit: true, index_range: 'A'..'Z'
     config.add_facet_field 'subject_era_ssim', label: 'Time periods', limit: true
-    config.add_facet_field 'subject_person_ssim', label: 'People', limit: 20, index_range: 'A'..'Z'
-    config.add_facet_field 'subject_corporate_ssim', label: 'Organizations', limit: 20, index_range: 'A'..'Z'
+    config.add_facet_field 'subject_person_ssim', label: 'People', limit: true, index_range: 'A'..'Z'
+    config.add_facet_field 'subject_corporate_ssim', label: 'Organizations', limit: true, index_range: 'A'..'Z'
 
     # Origin, not subject. Place of publication is where the resource was
     # published; Places above is what it is *about*, and one record commonly
@@ -193,7 +203,7 @@ class CatalogController < ApplicationController
     # text — so near-duplicates ("Boston" and "Boston, Mass.") are two buckets.
     # Acceptable for narrowing a result set; it would not be for a primary browse.
     config.add_facet_field 'place_ssim', label: 'Place of publication', limit: true
-    config.add_facet_field 'publisher_ssim', label: 'Publisher', limit: 20, index_range: 'A'..'Z'
+    config.add_facet_field 'publisher_ssim', label: 'Publisher', limit: true, index_range: 'A'..'Z'
     config.add_facet_field 'language_ssim', label: 'Language', limit: true
 
     # MODS <classification>, which in DRS holds IPTC photo categories rather than
@@ -205,7 +215,7 @@ class CatalogController < ApplicationController
     #
     # A supplemental category is appended to the primary one, so a value can read
     # 'classroom -- engineering'. That is a compound bucket, not a hierarchy.
-    config.add_facet_field 'photo_category_ssim', label: 'Photo category', limit: 20
+    config.add_facet_field 'photo_category_ssim', label: 'Photo category', limit: true
 
     # Have BL send all facet field names to Solr, which has been the default
     # previously. Simply remove these lines if you'd rather use Solr request
