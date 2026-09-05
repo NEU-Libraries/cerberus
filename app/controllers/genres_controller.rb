@@ -11,6 +11,8 @@
 # the embedded search-within / pagination links on this surface (carrying the
 # category) rather than escaping to the global catalog.
 class GenresController < CatalogController
+  include WithoutFacetModal
+
   def show
     @genre = params[:category].presence || Array(params.dig(:f, :genre_ssim)).first
     @response = FeaturedCategory.call(scope: self, label: @genre, search_state: search_state)

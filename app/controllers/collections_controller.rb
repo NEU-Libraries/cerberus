@@ -80,6 +80,18 @@ class CollectionsController < CatalogController
 
   private
 
+    # The same children #show lists, gated the same way: the modal's counts
+    # describe this Collection's contents, so a caller who may not read the
+    # Collection must not be able to count them either. A tombstoned Collection
+    # has no browsable contents, so it 404s rather than rendering an empty modal.
+    def facet_scope_filters
+      @collection = AtlasRb::Collection.find(params[:id])
+      raise ResourceNotFound if @collection.nil? || @collection.tombstoned
+
+      authorize_show!
+      child_membership_filters(@collection.valkyrie_id, params[:id])
+    end
+
     # Everything the edit page renders. Shared with the rejected-save path,
     # which re-renders the same page rather than redirecting to it.
     def load_edit_state!

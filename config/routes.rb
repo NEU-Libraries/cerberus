@@ -63,6 +63,10 @@ Rails.application.routes.draw do
     resources :collections, only: %i[new create]
     member do
       post :tombstone
+      # The facet "more" modal over this container's contents. The facet key
+      # rides :facet_field because :id already names the container — see
+      # ShowScopedSearch, which builds the link and serves the action.
+      get 'facet/:facet_field', to: 'communities#facet', as: :facet
       # Ask DRS administrators to restrict this community. The form offers no
       # Private option — narrowing a community does not reach what is inside it
       # — so this is the only route. Edit-gated via authorize_resource_writes!.
@@ -74,6 +78,10 @@ Rails.application.routes.draw do
     resources :works,       only: %i[new create]
     member do
       post :tombstone
+      # The facet "more" modal over this container's contents. The facet key
+      # rides :facet_field because :id already names the container — see
+      # ShowScopedSearch, which builds the link and serves the action.
+      get 'facet/:facet_field', to: 'collections#facet', as: :facet
       # Bulk metadata export (streamed ZIP) — dedicated Live controller, like sets.
       get 'export', to: 'collection_exports#show'
       # The collection's derivative-access default (Sentinel) — the per-tier policy
@@ -170,6 +178,9 @@ Rails.application.routes.draw do
       get :recipients
     end
     member do
+      # The facet "more" modal over the Set's resolved contents — see
+      # ShowScopedSearch. :facet_field, not :id, because :id is the Set.
+      get    'facet/:facet_field',         to: 'sets#facet',             as: :facet
       get    'download',                   to: 'set_downloads#show',     as: :download
       get    'export',                     to: 'set_exports#show',       as: :export
       get    'works_count',                to: 'sets#works_count',       as: :works_count

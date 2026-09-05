@@ -380,6 +380,16 @@ class CatalogController < ApplicationController
   def find_children(uuid, noid, exclude_uuids: [])
     return Blacklight::Solr::Response.new({}, {}) if uuid.blank?
 
+    filters = child_membership_filters(uuid, noid, exclude_uuids: exclude_uuids)
+    builder = search_service.search_builder.with(search_state).with_filters(*filters)
+    Blacklight.default_index.search(params: builder)
+  end
+
+  # The fqs that select an anchor's contents, split out from #find_children so
+  # the scoped facet modal counts over exactly the set the listing shows (see
+  # ShowScopedSearch#facet). A modal built on a different filter would report
+  # counts the page beneath it cannot reproduce.
+  def child_membership_filters(uuid, noid, exclude_uuids: [])
     # Direct members (browse), or the whole subtree when a keyword query is active.
     membership = if params[:q].present?
                    subtree_membership_fq(uuid, noid)
@@ -388,8 +398,7 @@ class CatalogController < ApplicationController
                  end
     filters = [membership]
     filters << MembershipQuery.excluding_fq(MembershipQuery.identity_fq(exclude_uuids)) if exclude_uuids.present?
-    builder = search_service.search_builder.with(search_state).with_filters(*filters)
-    Blacklight.default_index.search(params: builder)
+    filters
   end
 
   # fq matching everything in the anchor's subtree: every descendant

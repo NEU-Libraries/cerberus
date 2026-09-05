@@ -17,8 +17,10 @@ class SetsController < CatalogController
   include SetSharing
   include SetBulkActions
 
-  before_action :authenticate_user!, except: [:show]
-  before_action :require_curator,    except: [:show]
+  # :facet is the show page's facet modal, so it is as public as the show page
+  # itself — load_set below is what gates a private Set, for both.
+  before_action :authenticate_user!, except: %i[show facet]
+  before_action :require_curator,    except: %i[show facet]
   before_action :load_set,           except: [:index, :new, :create, :picker, :recipients]
   # Declared here rather than in SetBulkActions so it lands after the two gates
   # above: an anonymous request has to reach authenticate_user! and be sent to
@@ -148,6 +150,16 @@ class SetsController < CatalogController
       return true if Array(@set['edit_users']).include?(current_user.nuid)
 
       Array(current_user.groups).intersect?(Array(@set['edit_groups']))
+    end
+
+    # The Set's resolved contents, which is what #show lists. load_set has
+    # already fetched and authorized the Set itself, so a private Set refuses
+    # here exactly as it refuses on the show page. A recipe with no positive
+    # clause yields nil, and the modal renders empty rather than counting the
+    # whole index.
+    def facet_scope_filters
+      @resolver = SetResolver.new(compilation: @set, search_service: search_service)
+      @resolver.contents_fqs
     end
 
     def require_curator

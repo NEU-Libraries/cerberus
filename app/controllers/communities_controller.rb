@@ -75,6 +75,20 @@ class CommunitiesController < CatalogController
 
   private
 
+    # The same children #show lists — empty showcases excluded, exactly as the
+    # listing excludes them — gated the same way. A caller who may not read the
+    # Community must not be able to count its contents. A tombstoned Community
+    # has no browsable contents, so it 404s rather than rendering an empty modal.
+    def facet_scope_filters
+      @community = AtlasRb::Community.find(params[:id])
+      raise ResourceNotFound if @community.nil? || @community.tombstoned
+
+      authorize_show!
+      showcases = featured_showcase_uuids(@community.valkyrie_id)
+      child_membership_filters(@community.valkyrie_id, params[:id],
+                               exclude_uuids: empty_showcase_uuids(showcases))
+    end
+
     def load_children_and_deletability
       showcases = featured_showcase_uuids(@community.valkyrie_id)
       @response = find_children(@community.valkyrie_id, params[:id],

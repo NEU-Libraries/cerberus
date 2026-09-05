@@ -6,6 +6,8 @@
 # A Person is addressed by NOID. Their NUID is resolved server-side and must
 # never reach a URL or a rendered page — no NUID enumeration surface.
 class PeopleController < CatalogController
+  include WithoutFacetModal
+
   # Prepended so it runs before Blacklight memoizes search_state: search_state
   # dups params at construction, so a mutation made in the action body is lost.
   prepend_before_action :scope_to_people, only: :index
