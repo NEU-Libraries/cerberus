@@ -62,14 +62,7 @@ module ShowScopedSearch
   # The scoped equivalent of Blacklight::Catalog#facet: the "more" modal for one
   # facet, counted over this container's contents rather than the whole index.
   def facet
-    filters = facet_scope_filters
-    @facet = scoped_facet_config(params[:facet_field])
-    raise ActionController::RoutingError, 'Not Found' if @facet.nil?
-
-    @response = scoped_facet_response(@facet.key, filters)
-    @display_facet = @response.aggregations[@facet.field]
-    @presenter = @facet.presenter.new(@facet, @display_facet, view_context)
-    @pagination = @presenter.paginator
+    load_scoped_facet!
 
     # The modal fetches this over XHR and splices the fragment in; the bare
     # route is the no-JavaScript fallback and wants the full page.
@@ -80,21 +73,14 @@ module ShowScopedSearch
 
   # The type-ahead behind the modal's filter box: the same scoped counts as
   # #facet, narrowed by the typed fragment, rendered as the values list alone
-  # because the JS swaps it into the open modal.
+  # because the JS swaps that into the modal already on screen.
   def facet_suggest
     # The container rides the query string here rather than the path, so unlike
     # #facet the router cannot vouch for it. Without this the includers'
     # facet_scope_filters resolve a nil id and fail well below the controller.
     raise ActionController::RoutingError, 'Not Found' if params[:id].blank?
 
-    filters = facet_scope_filters
-    @facet = scoped_facet_config(params[:facet_field])
-    raise ActionController::RoutingError, 'Not Found' if @facet.nil?
-
-    @response = scoped_facet_response(@facet.key, filters, params[:query_fragment])
-    @display_facet = @response.aggregations[@facet.field]
-    @presenter = @facet.presenter.new(@facet, @display_facet, view_context)
-    @pagination = @presenter.paginator
+    load_scoped_facet!(query_fragment: params[:query_fragment])
 
     render 'catalog/facet_values', layout: false
   end
@@ -112,6 +98,20 @@ module ShowScopedSearch
   end
 
   private
+
+    # Everything both facet actions render from. Kept together because the
+    # authorization lives in facet_scope_filters: a caller who may not read the
+    # container must not reach the counts by either route.
+    def load_scoped_facet!(query_fragment: nil)
+      filters = facet_scope_filters
+      @facet = scoped_facet_config(params[:facet_field])
+      raise ActionController::RoutingError, 'Not Found' if @facet.nil?
+
+      @response = scoped_facet_response(@facet.key, filters, query_fragment)
+      @display_facet = @response.aggregations[@facet.field]
+      @presenter = @facet.presenter.new(@facet, @display_facet, view_context)
+      @pagination = @presenter.paginator
+    end
 
     # The fqs bounding this page's contents, or nil when the page denotes
     # nothing. Each includer implements it, and is also responsible for loading
