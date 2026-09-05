@@ -9,8 +9,6 @@
     <mods:originInfo>
         <mods:dateCreated keyDate="yes" encoding="w3cdtf" point="start" qualifier="approximate">1900</mods:dateCreated>
         <mods:dateCreated encoding="w3cdtf" point="end" qualifier="approximate">1912</mods:dateCreated>
-        <mods:publisher>Boott Cotton Mills</mods:publisher>
-        <mods:place><mods:placeTerm type="text">Lowell</mods:placeTerm></mods:place>
     </mods:originInfo>
 
     <mods:genre authority="aat" authorityURI="http://vocab.getty.edu/aat/" valueURI="http://vocab.getty.edu/aat/300028569">manuscripts (documents)</mods:genre>

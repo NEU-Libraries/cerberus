@@ -8,7 +8,6 @@
 
     <mods:originInfo>
         <mods:publisher>Northeastern University Libraries</mods:publisher>
-        <mods:place><mods:placeTerm type="text">Boston</mods:placeTerm></mods:place>
         <mods:dateCreated keyDate="yes" encoding="w3cdtf">2020-09-15</mods:dateCreated>
     </mods:originInfo>
 
