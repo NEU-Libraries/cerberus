@@ -82,6 +82,11 @@ module ShowScopedSearch
   # #facet, narrowed by the typed fragment, rendered as the values list alone
   # because the JS swaps it into the open modal.
   def facet_suggest
+    # The container rides the query string here rather than the path, so unlike
+    # #facet the router cannot vouch for it. Without this the includers'
+    # facet_scope_filters resolve a nil id and fail well below the controller.
+    raise ActionController::RoutingError, 'Not Found' if params[:id].blank?
+
     filters = facet_scope_filters
     @facet = scoped_facet_config(params[:facet_field])
     raise ActionController::RoutingError, 'Not Found' if @facet.nil?

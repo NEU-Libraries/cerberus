@@ -123,12 +123,80 @@ RSpec.describe 'Scoped facet modal', type: :request do
       expect(response).to have_http_status(:not_found)
     end
 
-    # Blacklight's suggest box builds its fetch URL from the first path segment
-    # alone, which would drop the container. The scoped modal turns it off.
-    it 'renders no facet-suggest box' do
+    # Blacklight's suggest JS keeps only the first path segment of this context
+    # and appends /facet_suggest/<key>. The container therefore has to be in the
+    # query string to survive, which is what the dedicated route buys.
+    it 'points the suggest box at a context whose container is a query param' do
       get facet_collection_path(id: collection.id, facet_field: 'subject_ssim')
 
-      expect(response.body).not_to include('facet-suggest')
+      expect(response.body).to include('facet-suggest')
+      expect(response.body).to include(
+        CGI.escapeHTML(collection_facet_suggest_path(facet_field: 'subject_ssim', id: collection.id))
+      )
+    end
+  end
+
+  # The type-ahead behind the modal's filter box. It is a second read surface
+  # over the same counts, so it repeats the scope and gating assertions rather
+  # than trusting the modal's.
+  describe 'GET the scoped facet suggest' do
+    def suggest(id:, facet_field: 'subject_ssim', **params)
+      get collection_facet_suggest_path(facet_field: facet_field, id: id, **params)
+    end
+
+    it 'lists the values held by this collection' do
+      suggest(id: collection.id)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(IN_SCOPE_TOPIC)
+    end
+
+    it 'omits values held only outside this collection' do
+      suggest(id: collection.id)
+
+      expect(response.body).not_to include(OUT_OF_SCOPE_TOPIC)
+    end
+
+    it 'narrows the list to the typed fragment' do
+      suggest(id: collection.id, query_fragment: IN_SCOPE_TOPIC[0, 6])
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(IN_SCOPE_TOPIC)
+    end
+
+    it 'drops values the fragment does not match' do
+      suggest(id: collection.id, query_fragment: 'zzzznotatopic')
+
+      expect(response.body).not_to include(IN_SCOPE_TOPIC)
+    end
+
+    # The fragment is a filter, not a requirement: the box is empty until
+    # someone types, and that request must still count everything.
+    it 'counts everything when no fragment is given' do
+      suggest(id: collection.id, query_fragment: '')
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(IN_SCOPE_TOPIC)
+    end
+
+    it '404s a facet the catalog does not configure' do
+      suggest(id: collection.id, facet_field: 'not_a_facet_ssim')
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it '404s an unknown collection' do
+      suggest(id: 'zzzzzzzzz')
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    # This route's container is a query param, so unlike the modal's the router
+    # cannot vouch for it being there at all.
+    it '404s when no container is given' do
+      get collection_facet_suggest_path(facet_field: 'subject_ssim')
+
+      expect(response).to have_http_status(:not_found)
     end
   end
 
@@ -149,11 +217,9 @@ RSpec.describe 'Scoped facet modal', type: :request do
       w
     end
 
-    # The modal must be no more permissive than the page it hangs off. This
-    # asserts that parity rather than a status code: atlas_rb raises a bare
-    # ResourceError for a refused read and nothing rescues it, so both surfaces
-    # fail closed with a 500 where a 404 belongs. Pinning 500 here would cement
-    # the wrong contract; pinning 404 would fail on the shared defect.
+    # The modal must be no more permissive than the page it hangs off. Asserted
+    # as parity with the show page rather than as a literal status, so the pair
+    # stays coupled wherever the refusal contract lands.
     it 'refuses the modal exactly as the show page refuses' do
       get collection_path(private_collection.id)
       show_status = response.status
@@ -167,6 +233,27 @@ RSpec.describe 'Scoped facet modal', type: :request do
     it 'serves it to a caller who can read the collection' do
       sign_in curator
       get facet_collection_path(id: private_collection.id, facet_field: 'subject_ssim')
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    # The suggest route reaches the same counts by a different path, so it needs
+    # its own gate assertion — a modal that refuses is worth little if the box
+    # inside it answers.
+    it 'refuses the suggest exactly as the show page refuses' do
+      get collection_path(private_collection.id)
+      show_status = response.status
+
+      get collection_facet_suggest_path(facet_field: 'subject_ssim', id: private_collection.id,
+                                        query_fragment: 'a')
+
+      expect(response.status).to eq(show_status)
+      expect(response).not_to have_http_status(:ok)
+    end
+
+    it 'serves the suggest to a caller who can read the collection' do
+      sign_in curator
+      get collection_facet_suggest_path(facet_field: 'subject_ssim', id: private_collection.id)
 
       expect(response).to have_http_status(:ok)
     end
