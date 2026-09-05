@@ -153,6 +153,13 @@ class CatalogController < ApplicationController
     # genre strings as authored (no i18n mapping needed). Works only — empty for
     # Collections/Communities and for Works without a genre.
     config.add_facet_field 'genre_ssim', label: 'Genre'
+    # MODS <typeOfResource>, a closed vocabulary of about ten values, so it needs
+    # neither a limit nor an alphabet bar. Deliberately distinct from Content
+    # above: Content is derived from the FileSets' MIME classification and says
+    # what the *files* are, while this says what the *resource* is. A scanned
+    # book is Content "Image" and Resource type "text", and a reader narrowing by
+    # one does not mean the other.
+    config.add_facet_field 'resource_type_ssim', label: 'Resource type'
 
     # Creator names in citation display form, projected onto the Work by Atlas's
     # CitationIndexer from the MODS names carrying a MARC creator relator.
@@ -164,6 +171,31 @@ class CatalogController < ApplicationController
     # <topic>, which is a wider set than the citation keywords GoogleScholarMetadata
     # reads off the same field.
     config.add_facet_field 'subject_ssim', label: 'Topic', limit: 20, index_range: 'A'..'Z'
+    # The other four MODS subject axes, labelled as Atlas's WorkDecorator::DISPLAY
+    # labels them so a facet and the metadata row beneath a result agree. Kept
+    # apart rather than merged into Topic: a place, a period and a person are
+    # different questions, and collapsing them buries the small axes under the
+    # large one.
+    #
+    # Places carries MODS <subject><geographic> AND the narrowest level of a
+    # <hierarchicalGeographic> — Atlas composes that down to "Parksville" rather
+    # than indexing every level, since a continent every record shares would bury
+    # the useful value.
+    config.add_facet_field 'subject_geo_ssim', label: 'Places', limit: 20, index_range: 'A'..'Z'
+    config.add_facet_field 'subject_era_ssim', label: 'Time periods', limit: true
+    config.add_facet_field 'subject_person_ssim', label: 'People', limit: 20, index_range: 'A'..'Z'
+    config.add_facet_field 'subject_corporate_ssim', label: 'Organizations', limit: 20, index_range: 'A'..'Z'
+
+    # Origin, not subject. Place of publication is where the resource was
+    # published; Places above is what it is *about*, and one record commonly
+    # carries both with different values. The labels have to keep saying which
+    # is which.
+    #
+    # Neither this nor Publisher is authority-controlled — MODS leaves both free
+    # text — so near-duplicates ("Boston" and "Boston, Mass.") are two buckets.
+    # Acceptable for narrowing a result set; it would not be for a primary browse.
+    config.add_facet_field 'place_ssim', label: 'Place of publication', limit: true
+    config.add_facet_field 'publisher_ssim', label: 'Publisher', limit: 20, index_range: 'A'..'Z'
     config.add_facet_field 'language_ssim', label: 'Language', limit: true
 
     # Have BL send all facet field names to Solr, which has been the default
