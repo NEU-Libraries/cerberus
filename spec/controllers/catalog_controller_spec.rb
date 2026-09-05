@@ -94,8 +94,11 @@ describe CatalogController do
       end
     end
 
+    # Its own fixture rather than the general-purpose work-mods.xml: this spec
+    # needs ONE record carrying every faceted field at once, and sixteen spec
+    # files read work-mods.xml with several asserting its exact projection.
     it 'names only fields the index carries' do
-      work = public_work(collection.id, 'work')
+      work = public_work(collection.id, 'work-facets')
 
       expect(unindexed_configured_fields).to be_empty
     ensure

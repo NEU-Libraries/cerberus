@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A Work carrying one value for every descriptive field the catalog config
+     facets on. The catalog field-coverage spec deposits this and asserts the
+     resulting Solr document carries each configured field, which only works if
+     one record exercises them all. work-mods.xml stays the general-purpose
+     Work fixture; sixteen spec files read it, and several assert its exact
+     projection. -->
+<mods:mods xmlns:mods="http://www.loc.gov/mods/v3"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+
+    <mods:titleInfo usage="primary">
+        <mods:title>Fieldwork in the Merrimack Valley</mods:title>
+    </mods:titleInfo>
+    <mods:abstract>Survey notes and photographs from a season of fieldwork along the Merrimack, with an account of the mill towns as they stood at the time.</mods:abstract>
+
+    <mods:name type="personal" usage="primary">
+        <mods:namePart type="given">Ada</mods:namePart>
+        <mods:namePart type="family">Whitfield</mods:namePart>
+        <mods:affiliation>Department of History, Northeastern University</mods:affiliation>
+        <mods:role>
+            <mods:roleTerm authority="marcrelator" type="text">Creator</mods:roleTerm>
+        </mods:role>
+    </mods:name>
+
+    <mods:typeOfResource>text</mods:typeOfResource>
+    <mods:genre>Research Publications</mods:genre>
+
+    <!-- publisher_ssim and place_ssim. Place of publication is deliberately a
+         different value from the geographic subject below, so a spec asserting
+         one cannot pass on the other's value. -->
+    <mods:originInfo>
+        <mods:dateCreated encoding="w3cdtf" keyDate="yes">1974</mods:dateCreated>
+        <mods:publisher>Northeastern University Press</mods:publisher>
+        <mods:place>
+            <mods:placeTerm type="text">Boston</mods:placeTerm>
+        </mods:place>
+    </mods:originInfo>
+
+    <mods:language>
+        <mods:languageTerm authority="iso639-2b" type="text">English</mods:languageTerm>
+    </mods:language>
+
+    <mods:physicalDescription>
+        <mods:form authority="marcform">electronic</mods:form>
+        <mods:extent>42 pages</mods:extent>
+        <mods:digitalOrigin>reformatted digital</mods:digitalOrigin>
+    </mods:physicalDescription>
+
+    <!-- One subject per faceted axis. The two name subjects carry @type, which
+         is what routes them to the personal and corporate projections ; an
+         untyped subject/name reaches neither. -->
+    <mods:subject authority="lcsh">
+        <mods:topic>Textile industry</mods:topic>
+    </mods:subject>
+    <mods:subject>
+        <mods:geographic>Lowell (Mass.)</mods:geographic>
+    </mods:subject>
+    <mods:subject>
+        <mods:temporal>1870-1910</mods:temporal>
+    </mods:subject>
+    <mods:subject>
+        <mods:name type="personal">
+            <mods:namePart type="family">Lawrence</mods:namePart>
+            <mods:namePart type="given">Abbott</mods:namePart>
+        </mods:name>
+    </mods:subject>
+    <mods:subject>
+        <mods:name type="corporate">
+            <mods:namePart>Boott Cotton Mills</mods:namePart>
+        </mods:name>
+    </mods:subject>
+
+    <mods:identifier type="hdl" displayLabel="Permanent URL">http://hdl.handle.net/2047/D20999999</mods:identifier>
+
+    <mods:accessCondition type="use and reproduction">Copyright restrictions may apply.</mods:accessCondition>
+
+    <mods:recordInfo>
+        <mods:recordContentSource>Northeastern University Libraries</mods:recordContentSource>
+        <mods:recordOrigin>Created for the catalog field-coverage spec.</mods:recordOrigin>
+        <mods:descriptionStandard authority="marcdescription">RDA</mods:descriptionStandard>
+    </mods:recordInfo>
+</mods:mods>
