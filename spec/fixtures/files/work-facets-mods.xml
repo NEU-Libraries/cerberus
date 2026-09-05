@@ -26,6 +26,12 @@
     <mods:typeOfResource>text</mods:typeOfResource>
     <mods:genre>Research Publications</mods:genre>
 
+    <!-- MODS defines classification for a classification-scheme value, but DRS
+         writes IPTC photo categories into it ; see Iptc::MODSBuilder. The
+         supplemental category is appended to the primary one, which is the
+         compound shape the facet buckets on. -->
+    <mods:classification>research ; fieldwork</mods:classification>
+
     <!-- publisher_ssim and place_ssim. Place of publication is deliberately a
          different value from the geographic subject below, so a spec asserting
          one cannot pass on the other's value. -->

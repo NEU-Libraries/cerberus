@@ -198,6 +198,17 @@ class CatalogController < ApplicationController
     config.add_facet_field 'publisher_ssim', label: 'Publisher', limit: 20, index_range: 'A'..'Z'
     config.add_facet_field 'language_ssim', label: 'Language', limit: true
 
+    # MODS <classification>, which in DRS holds IPTC photo categories rather than
+    # the classification-scheme value the element is defined for: Iptc::MODSBuilder
+    # maps the IPTC Category tag ('POR', 'HEA') to a label ('portraits',
+    # 'headshots') on every photo ingest. Atlas names the Solr field for what it
+    # holds; classification_ssim was unavailable, since that carries the FileSet
+    # content vocabulary behind the Content facet above.
+    #
+    # A supplemental category is appended to the primary one, so a value can read
+    # 'classroom -- engineering'. That is a compound bucket, not a hierarchy.
+    config.add_facet_field 'photo_category_ssim', label: 'Photo category', limit: 20
+
     # Have BL send all facet field names to Solr, which has been the default
     # previously. Simply remove these lines if you'd rather use Solr request
     # handler defaults, or have no facets.
