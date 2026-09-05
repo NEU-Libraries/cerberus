@@ -46,6 +46,13 @@ module ShowScopedSearch
   # the link at the scoped route instead, which carries the container in :id and
   # the facet key in :facet_field.
   def search_facet_path(options = {})
+    # These controllers also serve an :index — /collections, /communities — which
+    # renders the same sidebar with no container to scope to. There is no modal
+    # for an unscoped listing, and building one would put a nil in the :id
+    # segment and raise. nil is what FacetFieldPresenter#modal_path wants for
+    # "render no link".
+    return if params[:id].blank?
+
     opts = search_state.to_h.merge(only_path: true).merge(options).except(:page)
     facet_field = opts.delete(:id)
 

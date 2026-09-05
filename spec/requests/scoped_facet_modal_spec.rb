@@ -49,6 +49,11 @@ RSpec.describe 'Scoped facet modal', type: :request do
     @sibling    = public_container(AtlasRb::Collection, @community.id)
     @work       = public_work(@collection.id, 'work-many-topics')
     @neighbour  = public_work(@sibling.id, 'work-one-topic')
+    # Containers of their own carrying the many-topic MODS, so the :index
+    # listings below — which facet over containers, not Works — overflow the
+    # Topic facet too and would render a "more" link if one were offered.
+    @topical_collection = public_container(AtlasRb::Collection, @community.id, 'work-many-topics')
+    @topical_community  = public_container(AtlasRb::Community, nil, 'work-many-topics')
   end
 
   let(:community)  { @community }
@@ -190,6 +195,25 @@ RSpec.describe 'Scoped facet modal', type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(response.body).not_to include(IN_SCOPE_TOPIC)
+    end
+  end
+
+  # The same controllers also serve an unscoped :index. There is no container
+  # there, so there is no modal — and a link built anyway would put a nil in the
+  # :id segment and take the listing down.
+  describe 'the unscoped index listings' do
+    it 'renders /collections with no "more" link' do
+      get collections_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).not_to include('more_facets')
+    end
+
+    it 'renders /communities with no "more" link' do
+      get communities_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).not_to include('more_facets')
     end
   end
 
