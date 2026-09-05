@@ -84,6 +84,37 @@ Atlas said no. When they do, the write never happened, so this is a plain
 403 rather than a 500. Left unhandled it would be the default Rails exception
 trace, which leaks the request's params dump and file paths to the end user.
 
+### A read Atlas refuses
+
+A resource the caller may not read is a **403**, not a 404. DRS has never hidden
+a resource's existence: v1 rendered 403 for a non-public record whether or not
+the caller was signed in, reserving 404 for a genuine miss and 410 for a
+tombstone. The 403 page is also the only one that tells a signed-out reader to
+log in, which is the actual remedy.
+
+Atlas refuses the read with a 403, and the guarded read bindings raise the bare
+`AtlasRb::ResourceError` carrying that status. `Authorizable` renders the
+forbidden page for a 403 and **re-raises everything else**. A 401 there means
+Cerberus's own bearer token is wrong; dressed as a permission page it would read
+as "this resource does not exist" on every page at once, so it keeps the loud
+default handler.
+
+Two ordering constraints hold this together, and both are load-bearing.
+
+1. The `ResourceError` handler must be declared **above** the not-found handler.
+   `rescue_from` matches the last registered handler first, and
+   `AtlasRb::NotFoundError` subclasses `ResourceError`. Registered below, it
+   swallows every write-side 404 and the not-found page becomes unreachable.
+2. `#show` must keep loading the resource before `authorize_show!`. The
+   403 arrives on the `find`, not on the gate.
+
+**Only `#show` reports this correctly today.** Every surface reached through
+`authorize_show!` / `authorize_edit_for!` still answers 404, because
+`AtlasRb::Resource.permissions` parses the body without consulting the status
+and unwraps a 403 envelope to the same `nil` a missing id gives. Cerberus cannot
+recover a status the binding discarded. Closing that is an atlas_rb change, not
+a Cerberus one.
+
 ### Not found
 
 Three shapes of "resource does not exist" land on one `rescue_from`, because

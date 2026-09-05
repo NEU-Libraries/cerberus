@@ -36,6 +36,21 @@ module Authorizable
       render template: 'errors/forbidden', status: :forbidden
     end
 
+    # A read Atlas refuses raises the bare ResourceError, which carries the
+    # status; only a 403 is a refusal to render. A 401 or 422 here is our own
+    # misconfiguration (a bad bearer token reads as "this resource does not
+    # exist" on every page), so it keeps the loud default handler.
+    #
+    # MUST stay above the not-found handler. rescue_from matches the LAST
+    # registered handler first, and AtlasRb::NotFoundError subclasses
+    # ResourceError, so registering this below would swallow every write-side
+    # 404 and make the not-found page unreachable.
+    rescue_from AtlasRb::ResourceError do |e|
+      raise e unless e.status == 403
+
+      render template: 'errors/forbidden', status: :forbidden
+    end
+
     # Reads and writes report a missing id differently, so three shapes land
     # here. Keep JSON::ParserError until the `/user` authentication reads are
     # guarded too — they still parse a body without consulting the status, so

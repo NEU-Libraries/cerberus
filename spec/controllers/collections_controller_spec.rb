@@ -250,6 +250,49 @@ describe CollectionsController do
     end
   end
 
+  # v1 answered 403 for a record the caller could not read, signed in or not
+  # (cerberus-classic lib/cerberus/controller_helpers/editable_objects.rb).
+  # v2 must match: DRS has no policy of hiding a resource's existence, and the
+  # 403 page is the one that tells a signed-out reader to log in.
+  describe 'show on a Collection the caller may not read' do
+    render_views
+
+    # No stub. The Collection is left private, so Atlas refuses the guest's read
+    # with a 403 and AtlasRb::Collection.find raises the bare ResourceError.
+    it 'renders the forbidden template with status 403 instead of a Rails 500' do
+      get :show, params: { id: collection.id }
+
+      expect(response).to have_http_status(:forbidden)
+      expect(response).to render_template('errors/forbidden')
+      expect(CGI.unescapeHTML(response.body)).to include("you don't have permission")
+    end
+
+    it 'offers a signed-out reader the sign-in link rather than a dead end' do
+      get :show, params: { id: collection.id }
+
+      expect(response.body).to include(new_user_session_path)
+    end
+
+    # The ordering trap in Authorizable: NotFoundError subclasses ResourceError,
+    # and rescue_from matches the last registered handler first. Registered in
+    # the wrong order, the 403 handler swallows this and the 404 page dies.
+    it 'still renders 404 for a missing id, not the forbidden page' do
+      get :show, params: { id: 'does-not-exist-1234' }
+
+      expect(response).to have_http_status(:not_found)
+      expect(response).to render_template('errors/not_found')
+    end
+
+    # A 401 means our own bearer token is wrong. Presenting that as a polite
+    # permission page would hide a misconfiguration on every page at once.
+    it 'lets a non-403 ResourceError bubble rather than dressing it as a refusal' do
+      allow(AtlasRb::Collection).to receive(:find)
+        .and_raise(AtlasRb::ResourceError.new('GET /collections/x → 401', response: nil))
+
+      expect { get :show, params: { id: collection.id } }.to raise_error(AtlasRb::ResourceError)
+    end
+  end
+
   describe 'new' do
     # #new now requires authentication (audit G3, deny-by-default macro).
     let(:user) { User.new(email: 'dep@example.com', nuid: '000000004', role: 'standard', groups: []) }
