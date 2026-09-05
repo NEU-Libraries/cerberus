@@ -153,13 +153,11 @@ class CatalogController < ApplicationController
     # genre strings as authored (no i18n mapping needed). Works only — empty for
     # Collections/Communities and for Works without a genre.
     config.add_facet_field 'genre_ssim', label: 'Genre'
-    # MODS <typeOfResource>, a closed vocabulary of about ten values, so it needs
-    # neither a limit nor an alphabet bar. Deliberately distinct from Content
-    # above: Content is derived from the FileSets' MIME classification and says
-    # what the *files* are, while this says what the *resource* is. A scanned
-    # book is Content "Image" and Resource type "text", and a reader narrowing by
-    # one does not mean the other.
-    config.add_facet_field 'resource_type_ssim', label: 'Resource type'
+    # No facet over MODS <typeOfResource>. Content above answers the same question
+    # a reader is asking, in words they use: it offers Image / Video / Text /
+    # Presentation where typeOfResource offers "still image" and "mixed material".
+    # Two controls that sort results the same way, one of them worded worse, is a
+    # cost with no return. Atlas still indexes resource_type_ssim.
 
     # Creator names in citation display form, projected onto the Work by Atlas's
     # CitationIndexer from the MODS names carrying a MARC creator relator.
