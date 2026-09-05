@@ -108,12 +108,21 @@ Two ordering constraints hold this together, and both are load-bearing.
 2. `#show` must keep loading the resource before `authorize_show!`. The
    403 arrives on the `find`, not on the gate.
 
-**Only `#show` reports this correctly today.** Every surface reached through
-`authorize_show!` / `authorize_edit_for!` still answers 404, because
-`AtlasRb::Resource.permissions` parses the body without consulting the status
-and unwraps a 403 envelope to the same `nil` a missing id gives. Cerberus cannot
-recover a status the binding discarded. Closing that is an atlas_rb change, not
-a Cerberus one.
+Every surface reports this the same way, including the ones reached through
+`authorize_show!` / `authorize_edit_for!` rather than a `find`. That needs
+atlas_rb 1.15.1 or newer: earlier versions parsed the permissions body without
+consulting the status, so a 403 envelope unwrapped to the same `nil` a missing
+id gives and the page 404'd. Cerberus cannot recover a status the binding
+discarded.
+
+**An unknown id still answers 404, and not for the reason it looks like.**
+Atlas's `permissions` action authorizes before its nil check, against
+`resource || Resource`. The class reaches CanCan as a bare class check, which
+cannot evaluate the block-form `can :read, Resource` rule and therefore passes;
+the request then falls through to `head :not_found`. So absence is reported as
+absence, but by way of a pass-through rather than by the ordering. Anyone
+tightening that rule on the Atlas side should re-check this, or a mistyped NOID
+starts rendering a permission page.
 
 ### Not found
 
