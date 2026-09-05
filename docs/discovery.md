@@ -233,6 +233,76 @@ this up.
 `create` mints and titles the community first, then provisions the showcases. A
 community that fails to get a title never leaves orphaned showcases behind.
 
+## The scoped facet modal
+
+Collection, Community and Set show pages embed Blacklight's facet sidebar over
+their own contents. `ShowScopedSearch` gives all three the "more" modal and the
+filter box inside it, counting the container's contents rather than the whole
+index. Each includer supplies `facet_scope_filters`.
+
+### Why the routes look the way they do
+
+`Blacklight::FacetFieldPresenter#modal_path` calls `search_facet_path(id: key)`,
+which merges `action: "facet"` onto the current controller and hands the facet
+key over as `:id`. On a show page `:id` already names the container, so the key
+overwrites it and `url_for` raises **inside the view** — the whole page 500s,
+not just the link. The scoped routes therefore carry the container in `:id` and
+the facet key in `:facet_field`:
+
+```
+/collections/:id/facet/:facet_field
+```
+
+Overriding `search_facet_path` works because `helper_method` defines it on the
+controller's own `_helpers` module, which shadows the one Blacklight includes
+from `Blacklight::FacetsHelperBehavior`. Surfaces that embed the sidebar but own
+no facet route include `WithoutFacetModal` instead, which returns `nil` — the
+supported off switch, passed straight through to render no link.
+
+### The suggest box needs a second route, and cannot share the first
+
+The filter box builds its own fetch URL in JavaScript. Blacklight reads the
+box's search context, keeps **only the first path segment**, and appends the
+facet key:
+
+```js
+const basePathComponent = url.pathname.split('/')[1];
+const urlToFetch = `/${basePathComponent}/facet_suggest/${facetField}?${facetSearchParams}`;
+```
+
+Everything else in the path is discarded, so a container sitting in `:id` never
+reaches the request. The query string, by contrast, is carried over intact.
+
+So the box points at a route with **no `:id` segment**, and the container rides
+the query string:
+
+```
+/collections/facet_suggest/:facet_field?id=<noid>
+```
+
+The context handed to the box is that same URL, which is why the JS can rebuild
+it: it re-derives `/collections/facet_suggest/<key>` from the first segment and
+re-attaches the query string, adding `query_fragment`. **Anything moved from the
+query string into the path here is silently lost.**
+
+Three consequences worth knowing before editing this:
+
+1. **The container is unverified by the router.** On the modal route Rails
+   guarantees `:id` is present; on the suggest route it does not, so
+   `facet_suggest` rejects a blank one itself. Without that the includers
+   resolve a nil id and fail well below the controller.
+2. **The suggest routes are declared ahead of the resource blocks**, so a facet
+   key can never be read as a member action.
+3. **Both actions load through `load_scoped_facet!`**, which runs
+   `facet_scope_filters` — and that is where the container is fetched and
+   authorized. A modal that refuses is worth little if the box inside it
+   answers, so the gate has to sit on the shared path rather than on either
+   action.
+
+An empty `query_fragment` is not the same as an absent one for the reader, but
+it is here: the box is empty until someone types, and that request must still
+count everything.
+
 ## My DRS
 
 `MyDrsController` renders the depositor's two-space home.
