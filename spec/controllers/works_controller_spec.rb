@@ -51,7 +51,7 @@ describe WorksController do
     end
 
     it 'renders the show partial' do
-      expect(work.title).to eq("What's New - How We Respond to Disaster, Episode 1")
+      expect(work.title).to eq("What's New, Episode 1 - How We Respond to Disaster")
 
       get :show, params: { id: work.id }
       expect(response).to render_template('works/show')
