@@ -211,7 +211,7 @@ GEM
     jbuilder (2.15.1)
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
-    json (3.0.0)
+    json (2.21.2)
     jwt (2.10.3)
       base64
     kaminari (1.2.2)
@@ -512,6 +512,7 @@ DEPENDENCIES
   fix-db-schema-conflicts
   haml
   importmap-rails
+  json (~> 2.21)
   kataba (>= 1.1.2)
   libreconv
   loaf

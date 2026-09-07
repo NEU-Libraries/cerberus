@@ -85,6 +85,11 @@ gem 'devise'
 gem 'devise-i18n'
 gem 'diffy' # line-diff for the MODS version-history page (wraps system diff)
 gem 'haml'
+# json 3.0 dropped the positional options argument that ActiveSupport::JSON.decode
+# still passes, so every decode raises ArgumentError — Solid Queue cannot register
+# a process and the schema dumper cannot write a jsonb default. Nothing here needs
+# 3.x; lift the pin once Rails passes those options as keywords.
+gem 'json', '~> 2.21'
 gem 'kataba', '>= 1.1.2'
 gem 'libreconv'
 gem 'loaf'
