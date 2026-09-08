@@ -265,7 +265,7 @@ end
 # end
 
 Rack::Attack.blocklist("CN Block") do |req|
-  if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 2
+  if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 4
     if !req.env["HTTP_ACCEPT_LANGUAGE"].blank?
       req.env["HTTP_ACCEPT_LANGUAGE"].include?("zh-CN")
     end
@@ -472,25 +472,27 @@ Rack::Attack.throttle("content scraper mini wave", limit: 1, period: 5) do |requ
 end
 
 Rack::Attack.throttle("CN Scrapers", limit: 1, period: 10) do |request|
-  result = false
-  if !request.env["HTTP_ACCEPT_LANGUAGE"].blank?
-    raw_langs = request.env["HTTP_ACCEPT_LANGUAGE"]
-    langs = raw_langs.to_s.split(",").map do |lang|
-      l, q = lang.split(";q=")
-      [l, (q || '1').to_f]
-    end
-    langs.each do |l|
-      if l[0].downcase == "zh-cn"
-        result = true
+  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 2
+    result = false
+    if !request.env["HTTP_ACCEPT_LANGUAGE"].blank?
+      raw_langs = request.env["HTTP_ACCEPT_LANGUAGE"]
+      langs = raw_langs.to_s.split(",").map do |lang|
+        l, q = lang.split(";q=")
+        [l, (q || '1').to_f]
+      end
+      langs.each do |l|
+        if l[0].downcase == "zh-cn"
+          result = true
+        end
       end
     end
+    result
   end
-  result
 end
 
 # Bring back region throttle
 Rack::Attack.throttle("requests by region - china", limit: 1, period: 10) do |request|
-  if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 1
+  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 2
     request.region == "China"
   end
 end
