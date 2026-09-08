@@ -123,7 +123,7 @@ Rack::Attack.safelist("robots txt") do |req|
 end
 
 Rack::Attack.safelist("homepage") do |req|
-  req.fullpath == "/"
+  req.fullpath == "/" && !req.user_agent.blank? && req.env["HTTP_ACCEPT"].to_s.include?("text/html") && !req.env["HTTP_ACCEPT_LANGUAGE"].blank?
 end
 
 Rack::Attack.safelist("logging in") do |req|

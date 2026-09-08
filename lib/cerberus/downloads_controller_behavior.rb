@@ -23,7 +23,9 @@ module Cerberus
           render_410(Exceptions::TombstonedObject.new) and return
         end
         if (asset.class == VideoFile || asset.class == AudioFile || asset.class == AudioMasterFile || asset.class == VideoMasterFile) && cf_doc.stream_only?
-          render_403 and return
+          if (current_user.blank? || !current_user.repo_staff?)
+            render_403 and return
+          end
         end
       end
       # Fuzzy thumbnails with send_file for some reason...small kludge. Everything else, don't use Hydra
