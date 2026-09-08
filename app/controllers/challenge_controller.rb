@@ -18,6 +18,8 @@ class ChallengeController < ApplicationController
     result = Cerberus::TurnstileVerifier.verify(token, request.remote_ip)
 
     if result.success?
+      clear_challenge_markers
+
       Rails.logger.warn("[turnstile] pass ip=#{request.remote_ip} target=#{target}")
       redirect_to(target, status: 302)
     else
@@ -28,6 +30,18 @@ class ChallengeController < ApplicationController
   end
 
   private
+
+  # Retire the pending-challenge tally set by Rack::Attack.throttled_response and
+  # record the pass, so this IP is not challenged again for 24 hours.
+  # Deletes before writing: if Redis dies mid-way, the IP goes unchallenged
+  # rather than getting banned for a failure that was ours.
+  def clear_challenge_markers
+    $redis.auth(ENV["REDIS_PASSWD"])
+    $redis.del("rack_attack:challenge_pending:#{request.remote_ip}")
+    $redis.setex("rack_attack:challenge_passed:#{request.remote_ip}", 86_400, "1")
+  rescue => e
+    Rails.logger.warn("[turnstile] could not clear markers ip=#{request.remote_ip}: #{e.class}: #{e.message}")
+  end
 
   def sanitize_target(url)
     return root_path if url.blank?

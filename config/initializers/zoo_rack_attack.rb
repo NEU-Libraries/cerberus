@@ -554,7 +554,9 @@ end
 
 Rack::Attack.throttle("challenged", limit: 0, period: 60) do |req|
   $redis.auth(ENV["REDIS_PASSWD"])
-  seen = $redis.zscore("rack_attack:unique_ips", req.remote_ip)
+  seen    = $redis.zscore("rack_attack:unique_ips", req.remote_ip)
+  pending = $redis.get("rack_attack:challenge_pending:#{req.remote_ip}").to_i
+  passed  = $redis.get("rack_attack:challenge_passed:#{req.remote_ip}")
 
   facet = req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creator") || req.fullpath.include?("rss")
 
@@ -569,8 +571,9 @@ Rack::Attack.throttle("challenged", limit: 0, period: 60) do |req|
         File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-challenge.log", "#{req.remote_ip} - #{req.asn} - #{req.asn_org} - #{req.path} - #{req.fingerprint} - #{Time.now}" + "\n", mode: 'a')
       end
 
-      # Challenge only if never seen
-      req.remote_ip unless seen
+      # Challenge if never seen, or if an earlier challenge went unanswered.
+      # Cleared by ChallengeController#verify on a verified pass.
+      req.remote_ip if passed.blank? && (!seen || pending > 0)
     end
   end
 end
@@ -584,12 +587,35 @@ Rack::Attack.throttle("facet scrape", limit: 1, period: 10) do |req|
   end
 end
 
+# Turnstile challenge enforcement tunables.
+# CHALLENGE_MAXRETRY  - challenges served to one IP before it is banned
+# CHALLENGE_PENDING_TTL - forgiveness window; an IP slower than this resets
+# CHALLENGE_BANTIME   - how long the "block IP" key survives
+CHALLENGE_MAXRETRY = 3
+CHALLENGE_PENDING_TTL = 3600
+CHALLENGE_BANTIME = 24.hours
+
 THROTTLE_HTML = ActionView::Base.new.render(file: 'public/429.html').freeze
 THROTTLED_RESPONSE = [503, {'Set-Cookie' => 'cerberus_throttled=true', 'Content-Type' => 'text/html', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, [THROTTLE_HTML]].freeze
 BLOCKED_RESPONSE = [403, {'Content-Type' => 'text/plain', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, ["Forbidden\n"]].freeze
 
 Rack::Attack.throttled_response = lambda do |env|
   if (`cut -d ' ' -f2 /proc/loadavg`.strip.to_f < 5) && (env['rack.attack.matched'] == "challenged")
+    # Tally challenges served to this IP. A browser clears the tally by solving
+    # the widget; a client that never runs the JS climbs to the threshold and
+    # gets picked up by the "block IP" blocklist above.
+    req = Rack::Attack::Request.new(env)
+    pending_key = "rack_attack:challenge_pending:#{req.remote_ip}"
+
+    $redis.auth(ENV["REDIS_PASSWD"]) rescue nil
+    pending = $redis.incr(pending_key)
+    $redis.expire(pending_key, CHALLENGE_PENDING_TTL)
+
+    if pending >= CHALLENGE_MAXRETRY
+      File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-challenge-ignored.log", "#{req.remote_ip} - #{req.asn} - #{req.asn_org} - #{req.fingerprint} - #{Time.now}" + "\n", mode: 'a')
+      Rails.cache.write("block #{req.remote_ip}", true, expires_in: CHALLENGE_BANTIME)
+    end
+
     u = "#{Rails.application.routes.url_helpers.root_url.chomp('/')}#{env["ORIGINAL_FULLPATH"]}"
     uri = URI(u)
     # uri.query = "challenged=true" # dropping this addition due to the inclusion of datastream_id
