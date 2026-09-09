@@ -106,6 +106,13 @@ gem 'mission_control-jobs'
 gem 'namae'
 gem 'neu-mods'
 gem 'pg'
+# The per-request backstop under the per-client deadlines. `require:` is the
+# load-bearing part: the gem's default entry point installs a railtie that
+# inserts Rack::Timeout into the stack for EVERY request, which would put a
+# wall-clock deadline on the streaming downloads and truncate them. Requiring
+# only the base class leaves insertion to us — see
+# config/initializers/request_deadline.rb.
+gem 'rack-timeout', require: 'rack/timeout/base'
 gem 'roo'
 gem 'rsolr', '>= 1.0', '< 3'
 gem 'ruby-vips'
