@@ -1,13 +1,32 @@
 load_defaults: 9.0
+# `open_timeout` / `timeout` are seconds, and they are the only bound on a Solr
+# call: RSolr passes them to Faraday only when given, and Faraday falls through
+# to Net::HTTP's 60s defaults, so an unset pair lets one slow query hold a Puma
+# thread for a minute. A healthy `select` here runs in 26-61ms, so 10s is ample
+# headroom for a cold cache or a large facet query while still failing inside a
+# user's patience. Blacklight raises Blacklight::Exceptions::RepositoryTimeout,
+# which is deliberately unrescued: we have never seen one, and a 500 naming Solr
+# beats a friendly page that hides it.
+#
+# Use `timeout`, not `read_timeout` — RSolr 2.6 deprecates the latter and drops
+# it in 3.
 development:
   adapter: solr
   url: <%= ENV['SOLR_URL'] || "http://solr:8983/solr/blacklight-core" %>
+  open_timeout: 2
+  timeout: 10
 staging:
   adapter: solr
   url: <%= ENV['SOLR_URL'] || "http://solr:8983/solr/blacklight-core" %>
+  open_timeout: 2
+  timeout: 10
 test: &test
   adapter: solr
   url: <%= ENV['SOLR_URL'] || "http://solr:8983/solr/blacklight-test" %>
+  open_timeout: 2
+  timeout: 10
 production:
   adapter: solr
   url: <%= ENV['SOLR_URL'] || "http://solr:8983/solr/blacklight-core" %>
+  open_timeout: 2
+  timeout: 10
