@@ -63,7 +63,8 @@ class AtlasController < ApplicationController
     # nuid is passed explicitly rather than read from Current: set_current_nuid
     # ran before sign_in, so Current.nuid is still the guest fallback here.
     def multiple_accounts?(nuid)
-      AtlasRb::User.accounts(nuid, nuid: nuid)['accounts'].size > 1
+      accounts = AtlasRb::User.accounts(nuid, nuid: nuid)
+      Array(accounts && accounts['accounts']).size > 1
     rescue Faraday::Error, JSON::ParserError => e
       Rails.logger.error("Account lookup failed for #{nuid}: #{e.class} #{e.message}")
       false

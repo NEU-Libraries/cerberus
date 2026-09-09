@@ -58,7 +58,10 @@ class MaintenanceMode
       # on any Atlas hiccup and block deploying Cerberus ahead of Atlas.
       # See docs/maintenance.md.
       def fetch_window
-        AtlasRb::Maintenance.read(nuid: acting_nuid)
+        # `|| no_window`, because the rescues below only cover a raise: an Atlas
+        # that does not serve the endpoint answers 404, which reads back as nil,
+        # and a nil window would NoMethodError on every `read_only?`.
+        AtlasRb::Maintenance.read(nuid: acting_nuid) || no_window
       rescue Faraday::ConnectionFailed, Faraday::TimeoutError => e
         Rails.logger.error("[maintenance] Atlas did not answer, holding the window: #{e.class}: #{e.message}")
         unreachable_window

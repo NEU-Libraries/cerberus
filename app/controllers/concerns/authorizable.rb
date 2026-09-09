@@ -51,11 +51,14 @@ module Authorizable
       render template: 'errors/forbidden', status: :forbidden
     end
 
-    # Reads and writes report a missing id differently, so three shapes land
-    # here. Keep JSON::ParserError until the `/user` authentication reads are
-    # guarded too — they still parse a body without consulting the status, so
-    # without it a stale id there becomes a 500. See docs/authorization.md.
-    rescue_from AtlasRb::NotFoundError, JSON::ParserError, ResourceNotFound do
+    # Reads and writes report a missing id differently, so two shapes land here:
+    # a write raises NotFoundError, and a read returns nil for the caller to
+    # turn into ResourceNotFound. A read no longer surfaces a missing id as a
+    # parse error, so JSON::ParserError is deliberately absent — every atlas_rb
+    # read consults the status before parsing, which means an unparseable body
+    # is now our own bug rather than Atlas saying "no such thing", and it must
+    # not be reported as a 404. See docs/authorization.md.
+    rescue_from AtlasRb::NotFoundError, ResourceNotFound do
       render template: 'errors/not_found',
              status:   :not_found,
              locals:   { obj_type: controller_name.singularize }

@@ -24,7 +24,8 @@ class MyDrsController < CatalogController
 
     # An Atlas fault degrades to an empty list rather than a broken My DRS.
     def account_list
-      AtlasRb::User.accounts(current_user.nuid, nuid: current_user.nuid)['accounts']
+      accounts = AtlasRb::User.accounts(current_user.nuid, nuid: current_user.nuid)
+      Array(accounts && accounts['accounts'])
     rescue Faraday::Error, JSON::ParserError => e
       Rails.logger.error("My DRS account lookup failed for #{current_user.nuid}: #{e.class} #{e.message}")
       []

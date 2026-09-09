@@ -54,6 +54,17 @@ RSpec.describe MaintenanceMode do
     end
   end
 
+  # A nil is not a raise, so neither rescue above covers it: atlas_rb returns
+  # nil for a 404, which is what an Atlas that does not serve the endpoint
+  # answers. Without the fallback every read_only? call NoMethodErrors on nil.
+  describe 'when Atlas does not serve the endpoint' do
+    before { allow(AtlasRb::Maintenance).to receive(:read).and_return(nil) }
+
+    it 'assumes there is no window rather than failing' do
+      expect(described_class.read_only?).to be false
+    end
+  end
+
   describe '.open!' do
     it 'names the operator door by default' do
       allow(AtlasRb::Maintenance).to receive(:write).and_return(window(read_only: true))

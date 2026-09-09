@@ -36,11 +36,14 @@ class HistoriesController < ApplicationController
       authorize! :read, :audit_event
     end
 
-    # Also validates the id: an unknown one raises JSON::ParserError, which
-    # Authorizable turns into a friendly 404.
+    # Also the id gate for both actions: an unknown id reads back as nil, and
+    # raising here is what keeps the later history / mods_versions reads from
+    # having to nil-check an id this already rejected.
     def load_resource!
       @resource_id    = params[:id]
       found           = AtlasRb::Resource.find(@resource_id)
+      raise ResourceNotFound if found.nil?
+
       @resource_klass = found.klass
       @resource_title = found.resource.title
     end
