@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'open-uri'
-
 # Phased MODS XML validation. Returns an Array; the document is valid iff it is
 # empty. Syntax runs before schema, because unparseable XML cannot be
 # schema-validated. Business rules and render checks are deliberately elsewhere
@@ -46,19 +44,18 @@ class XmlValidator < ApplicationService
       schemas.values.flat_map { |xsd_uri| validate_against(xsd_uri) }
     end
 
+    # kataba raises FetchError for every failure it can name — a non-2xx, a
+    # redirect loop, a refused HTTPS->HTTP downgrade, and, as the FetchTimeout
+    # subclass, a host that goes quiet. It does not wrap a DNS or connect
+    # failure, so those keep their own branch; SystemCallError covers
+    # Errno::ECONNREFUSED, Errno::ETIMEDOUT and friends in one.
+    #
+    # An unfetchable schema is a reportable validation outcome, never a 500:
+    # the librarian gets a row saying which schema could not be read.
     def validate_against(xsd_uri)
       Kataba.fetch_schema(xsd_uri).validate(doc)
-    rescue OpenURI::HTTPError, SocketError, SystemCallError => e
-      # Schema service unreachable or returned non-200. SystemCallError catches
-      # Errno::ETIMEDOUT, Errno::ECONNREFUSED, and friends in one branch.
+    rescue Kataba::Fetcher::FetchError, SocketError, SystemCallError => e
       ["Could not fetch schema #{xsd_uri} (#{e.class}: #{e.message})"]
-    rescue RuntimeError => e
-      # open-uri raises a plain RuntimeError ("redirection forbidden: https → http")
-      # when a server tries to downgrade the scheme on redirect. Catch only that
-      # specific case so we don't swallow unrelated runtime errors.
-      raise unless e.message.start_with?('redirection forbidden')
-
-      ["Could not fetch schema #{xsd_uri} (#{e.message})"]
     end
 
     def schema_locations

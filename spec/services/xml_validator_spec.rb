@@ -93,9 +93,19 @@ describe XmlValidator do
 
     it 'surfaces a friendly error when the schema service returns an HTTP error' do
       allow(Kataba).to receive(:fetch_schema).with(schema_uri)
-                                             .and_raise(OpenURI::HTTPError.new('503 Service Unavailable', nil))
+                                             .and_raise(Kataba::Fetcher::FetchError.new('503 Service Unavailable fetching x.xsd'))
       errors = XmlValidator.call(xml: valid_mods)
       expect(errors).to include(a_string_matching(/Could not fetch schema.*503/))
+    end
+
+    # The reason the timeout is worth its own example rather than folding into
+    # the FetchError one: a quiet third-party host is the failure this bound was
+    # added for, and the whole point is that it is reported rather than raised.
+    it 'surfaces a friendly error when the schema host goes quiet' do
+      allow(Kataba).to receive(:fetch_schema).with(schema_uri)
+                                             .and_raise(Kataba::Fetcher::FetchTimeout.new('timed out fetching x.xsd'))
+      errors = XmlValidator.call(xml: valid_mods)
+      expect(errors).to include(a_string_matching(/Could not fetch schema.*timed out/))
     end
 
     it 'surfaces a friendly error when the schema service is unreachable' do
@@ -105,14 +115,15 @@ describe XmlValidator do
       expect(errors).to include(a_string_matching(/Could not fetch schema.*SocketError/))
     end
 
-    it 'surfaces a friendly error when open-uri refuses a HTTPS→HTTP redirect' do
-      allow(Kataba).to receive(:fetch_schema).with(schema_uri)
-                                             .and_raise(RuntimeError.new('redirection forbidden: https://example.com -> http://example.com'))
+    it 'surfaces a friendly error when kataba refuses a cross-origin HTTPS→HTTP redirect' do
+      allow(Kataba).to receive(:fetch_schema).with(schema_uri).and_raise(
+        Kataba::Fetcher::FetchError.new('cross-origin HTTPS->HTTP redirect refused: https://a -> http://b')
+      )
       errors = XmlValidator.call(xml: valid_mods)
-      expect(errors).to include(a_string_matching(/redirection forbidden/))
+      expect(errors).to include(a_string_matching(/redirect refused/))
     end
 
-    it 're-raises RuntimeErrors that are not open-uri redirect refusals' do
+    it 're-raises a RuntimeError that is not a fetch failure' do
       allow(Kataba).to receive(:fetch_schema).with(schema_uri)
                                              .and_raise(RuntimeError.new('some unrelated bug'))
       expect { XmlValidator.call(xml: valid_mods) }.to raise_error(RuntimeError, 'some unrelated bug')
@@ -129,7 +140,7 @@ describe XmlValidator do
         </mods:mods>
       XML
       allow(Kataba).to receive(:fetch_schema).with(schema_uri)
-                                             .and_raise(OpenURI::HTTPError.new('503 Service Unavailable', nil))
+                                             .and_raise(Kataba::Fetcher::FetchError.new('503 Service Unavailable'))
       allow(Kataba).to receive(:fetch_schema).with(other_uri).and_return(passing_schema)
 
       errors = XmlValidator.call(xml: xml)

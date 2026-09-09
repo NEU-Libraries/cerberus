@@ -92,7 +92,13 @@ gem 'haml'
 # a process and the schema dumper cannot write a jsonb default. Nothing here needs
 # 3.x; lift the pin once Rails passes those options as keywords.
 gem 'json', '~> 2.21'
-gem 'kataba', '>= 1.1.2'
+# 1.1.3 is a floor, not a preference: it added the open_timeout / read_timeout
+# the initializer sets. Before it, a schema host that went quiet held the
+# fetching thread on Net::HTTP's 60s defaults, paid per redirect hop and again
+# on the alternate-scheme attempt — minutes, on a librarian's request thread.
+# It also wraps a timeout as Kataba::Fetcher::FetchTimeout, which is what lets
+# XmlValidator report it rather than 500.
+gem 'kataba', '>= 1.1.3'
 gem 'libreconv'
 gem 'loaf'
 gem 'mini_exiftool'
