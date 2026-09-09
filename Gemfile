@@ -64,13 +64,15 @@ gem 'bootsnap', require: false
 # the UI reports success. It also adds `depositor:` to Collection.create /
 # Community.create, which reset.rake needs to attribute the institutional tree
 # to the anonymous NUID rather than to whoever ran the seed.
-# 1.13.1 is a floor, not a preference: it added AtlasRb::Maintenance (the
-# read-only window's flag) and, more importantly, the middleware that raises
-# AtlasRb::ReadOnlyModeError on Atlas's maintenance 503. Under an older binding
-# that 503 matches no middleware, the response carries no resource key, and the
-# binding returns nil — so a refused write silently no-ops and the UI reports
-# success.
-gem 'atlas_rb', '>= 1.13.1'
+# 1.16.0 is a floor, not a preference. It makes every read binding consult the
+# HTTP status before parsing, so an Atlas error reaches us as a typed
+# AtlasRb::ResourceError instead of a JSON::ParserError, a NoMethodError on an
+# error envelope, or — worst — an error body returned as data. Authorizable
+# rescues the typed error and no longer rescues JSON::ParserError, so an older
+# binding would report every unparseable Atlas response as 404 again. It also
+# sets per-connection deadlines, without which a hung Atlas holds a Puma thread
+# for minutes.
+gem 'atlas_rb', '>= 1.16.0'
 gem 'blacklight', '~> 9.0'
 # 6.x is the first line that allows Blacklight 9; its gemspec pins the 9.0.0
 # betas, which 9.0.0 final satisfies.

@@ -84,11 +84,12 @@ GEM
     addressable (2.9.0)
       public_suffix (>= 2.0.2, < 8.0)
     ast (2.4.3)
-    atlas_rb (1.15.1)
+    atlas_rb (1.16.0)
       faraday (~> 2.7)
       faraday-follow_redirects (~> 0.3.0)
       faraday-multipart (~> 1)
       faraday-net_http_persistent (~> 2.3)
+      faraday-retry (~> 2.4)
       hashie (~> 5.0)
       jwt (~> 2.7)
     base64 (0.3.0)
@@ -177,6 +178,8 @@ GEM
     faraday-net_http_persistent (2.3.1)
       faraday (~> 2.5)
       net-http-persistent (>= 4.0.4, < 5)
+    faraday-retry (2.4.0)
+      faraday (~> 2.0)
     ffi (1.17.4-x86_64-linux-gnu)
     fix-db-schema-conflicts (3.1.2)
       rubocop (>= 0.38.0)
@@ -492,7 +495,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord-session_store
-  atlas_rb (>= 1.13.1)
+  atlas_rb (>= 1.16.0)
   blacklight (~> 9.0)
   blacklight-gallery (~> 6.0)
   bootsnap
