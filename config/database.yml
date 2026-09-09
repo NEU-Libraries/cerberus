@@ -23,6 +23,21 @@ default: &default
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  # Seconds to wait for the server to accept a connection. Rails'
+  # checkout_timeout (5s, default) bounds waiting for a POOLED connection, not
+  # opening a new one — so without this a wedged (rather than refused) database
+  # blocks the connect indefinitely.
+  connect_timeout: 5
+  variables:
+    # The database enforces this, which is more reliable than anything in Ruby:
+    # a runaway query is cancelled server-side rather than running until the
+    # client disconnects. Deliberately generous — it applies to web, jobs and
+    # rake alike, because both databases share this block and database.yml
+    # cannot tell the processes apart. 30s is far above any interactive query
+    # (a Work show page reads no Postgres beyond its session row) while still
+    # catching the pathological case. A task that legitimately needs longer
+    # opts out for its own session with `SET statement_timeout = 0`.
+    statement_timeout: 30s
 
 development:
   primary:
