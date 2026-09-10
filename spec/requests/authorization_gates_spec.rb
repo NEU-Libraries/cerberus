@@ -42,9 +42,25 @@ RSpec.describe 'Authorization gates', type: :request do
 
   # Grant edit to the staff group so the in-group editor passes authorize_edit!
   # (and Atlas authorizes its write); the outsider does not. Set as admin.
+  #
+  # Public read as well, because Atlas gates reads on the resource's own ACL: a
+  # private resource is invisible to anyone outside its read audience, so the
+  # request 404s before reaching the gate and proves only that the resource is
+  # hidden. These examples exist to prove the gate refuses, so the resource has
+  # to be visible to the caller being refused.
+  #
+  # Widening runs top-down — Atlas refuses a resource more visible than its
+  # container — so the containers above the resource go first. A Community has
+  # none, and a Collection's is the Community alone.
   def grant_edit!(klass, id)
+    publicize_ancestry!(
+      community:  (community unless klass == 'Community'),
+      collection: (collection if klass == 'Work')
+    )
     AtlasRb.const_get(klass).metadata(
-      id, { 'permissions' => { 'edit' => [Permissions::STAFF_EDIT_GROUP] } }, nuid: '000000004'
+      id,
+      { 'permissions' => { 'read' => ['public'], 'edit' => [Permissions::STAFF_EDIT_GROUP] } },
+      nuid: '000000004'
     )
   end
 
@@ -88,6 +104,12 @@ RSpec.describe 'Authorization gates', type: :request do
   # with no rights on the container was able to create Collections and Works
   # inside it.
   describe 'POST #create (edit on the destination)' do
+    # The destination is readable but grants edit to nobody, which is the state
+    # these examples need: the caller can see the container and is still refused.
+    # Left private, Atlas's read gate hides it and the request 404s before the
+    # :edit gate runs, so the example would pass for the wrong reason.
+    before { publicize_resource!(AtlasRb::Community, community, '000000004') }
+
     it 'redirects the unauthenticated to sign in (works)' do
       post collection_works_path(collection.id)
       expect(response).to redirect_to(new_user_session_path)
@@ -191,5 +213,37 @@ RSpec.describe 'Authorization gates', type: :request do
         expect(response).to have_http_status(:forbidden)
       end
     end
+
+    # Repair reads a resource and echoes a cleaned buffer back into the editor.
+    # It writes nothing, but it is still a pane of the edit surface and it reads
+    # the resource, so it gates with its siblings rather than being treated as
+    # harmless. It answers a Turbo Stream, so the admitted example asks for one --
+    # a plain HTML request gets 406, which is a format answer, not a gate answer.
+    describe 'PUT /xml/repair (echoes a cleaned buffer back into the editor)' do
+      let(:dirty_xml) { "<mods><titleInfo><title>Simple#{[0x000B].pack('U')}form</title></titleInfo></mods>" }
+      let(:stream) { { 'Accept' => 'text/vnd.turbo-stream.html' } }
+
+      it 'redirects the unauthenticated to sign in' do
+        put '/xml/repair', params: { resource_id: work.id, raw_xml: dirty_xml }, headers: stream
+        expect(response).to redirect_to(new_user_session_path)
+      end
+
+      it 'forbids an authenticated non-editor' do
+        sign_in outsider
+        put '/xml/repair', params: { resource_id: work.id, raw_xml: dirty_xml }, headers: stream
+        expect(response).to have_http_status(:forbidden)
+      end
+
+      it 'admits an in-group editor' do
+        sign_in editor
+        put '/xml/repair', params: { resource_id: work.id, raw_xml: dirty_xml }, headers: stream
+        expect(response).to have_http_status(:ok)
+      end
+    end
   end
+
+  # This file leaves Works waiting on a depositor, which the admin triage registry
+  # lists. Purging them keeps that registry's own specs measuring its filter rather
+  # than the size of the suite (see spec/support/work_cleanup.rb).
+  after(:all) { purge_stuck_works! }
 end

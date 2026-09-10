@@ -28,15 +28,15 @@
         you restrict it to groups — a rendition is never more visible than the collection. Image
         visibility must also narrow as resolution grows, so a rendition can't be more open than a
         smaller one above it. Audio, video, and PDF renditions gate on their own.
-    %section.my-3{ data: { controller: "derivative-policy" } }
+    %section.my-3{ data: { controller: "derivative-policy", "derivative-policy-groups-value": derivative_group_registry(groups) } }
       %h6.derivative-group-heading Image renditions
       %ol.derivative-ladder.list-unstyled.mb-4
         - Sentinel::IMAGE_LADDER.each do |tier|
-          = render "collections/derivative_tier", tier: tier, sentinel: sentinel, groups: groups
+          = render "shared/derivative_tier", tier: tier, sentinel: sentinel, groups: groups, open_label: "Inherit from collection"
       %h6.derivative-group-heading Other renditions
       %ul.derivative-independent.list-unstyled.mb-0
         - Sentinel::INDEPENDENT.each do |tier|
-          = render "collections/derivative_tier", tier: tier, sentinel: sentinel, groups: groups
+          = render "shared/derivative_tier", tier: tier, sentinel: sentinel, groups: groups, open_label: "Inherit from collection"
     .well.p-3.my-3.rounded-3
       = f.button "Save default", type: :submit, class: "btn btn-success"
       = link_to "Cancel", collection_path(collection_id), class: "btn btn-warning"

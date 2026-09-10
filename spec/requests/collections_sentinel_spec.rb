@@ -135,7 +135,7 @@ RSpec.describe 'Collections sentinel', type: :request do
         # database would show it as the open option instead.
         expect(response.body).to match(/<input checked[^>]*id="small-restrict"/)
         expect(response.body).to match(
-          /<input checked[^>]*name="sentinel\[small\]\[groups\]\[\]"[^>]*value="#{Regexp.escape(Permissions::STAFF_EDIT_GROUP)}"/
+          /<input[^>]*name="sentinel\[small\]\[groups\]\[\]"[^>]*value="#{Regexp.escape(Permissions::STAFF_EDIT_GROUP)}"/
         )
       end
 

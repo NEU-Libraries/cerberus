@@ -1,20 +1,15 @@
 # frozen_string_literal: true
 
-# Shared internals for the streaming-zip packers (SetZipPacker, QueueZipPacker,
-# BlobZipPacker). They differ only in how they enumerate what to pack; this keeps
-# the per-asset write — STORE compression, the labeled consumer-facing naming,
-# manifest accrual, and mid-stream error capture — identical and in one place so
-# they can't drift. Folder is the caller's choice: the set/queue packers group
-# each work's content under its noid; a lone blob passes nil to sit at the root.
+# Shared per-asset write for the streaming-zip packers (SetZipPacker,
+# QueueZipPacker, BlobZipPacker), which differ only in what they enumerate.
+# Folder is the caller's choice; nil puts the entry at the archive root.
+# See docs/downloads.md.
 module ZipEntryWriter
   private
 
-    # Stream one content Blob into `<folder>/<labeled-filename>` (or the archive
-    # root when folder is nil), chunk-by-chunk from Atlas (flat memory). STORE,
-    # not deflate: DRS payloads (JP2/PDF/images/curated zips) are already
-    # compressed, so deflating burns CPU for ~0 gain — do NOT switch to
-    # write_file/write_deflated_file. A fetch failure mid-stream is recorded (the
-    # archive can't be un-sent once headers are out), not raised.
+    # Chunk-by-chunk from Atlas: never read a Blob into memory. STORE, not
+    # deflate — do NOT switch to write_file/write_deflated_file. A mid-stream
+    # failure is recorded, never raised; the archive can't be un-sent.
     def write_asset(zip, folder, asset, manifest, errors)
       entry = [folder, entry_filename(asset)].compact.join('/')
       zip.write_stored_file(entry) do |sink|
@@ -25,13 +20,10 @@ module ZipEntryWriter
       errors << "#{folder}: #{asset.noid} failed — #{e.class}: #{e.message}"
     end
 
-    # Stream one IIIF derivative rendition (S/M/L) into `<folder>/<use>.jpg`,
-    # chunk-by-chunk over HTTP from its gated Cantaloupe URL. The delegate is
-    # pointer-only (no noid-backed bytes), so sign the URL (path signature,
-    # 5-min TTL) and rewrite its host to the container-internal Cantaloupe — the
-    # packer runs server-side, mirroring IiifManifest's info.json fetch. on_data
-    # streams chunks into the sink (never buffers the whole JPEG); a failure
-    # mid-stream is recorded, not raised (the archive can't be un-sent).
+    # A delegate is pointer-only, so its bytes come over HTTP from the gated
+    # Cantaloupe host and the URL must be signed. on_data streams chunks into the
+    # sink — never buffer the whole JPEG. A mid-stream failure is recorded, not
+    # raised.
     def write_derivative(zip, folder, delegate, manifest, errors)
       entry = [folder, derivative_filename(delegate)].compact.join('/')
       url = IiifSigner.sign_url(internal_iiif_url(delegate[:uri]))
@@ -43,20 +35,17 @@ module ZipEntryWriter
       errors << "#{folder}: #{delegate[:use]} failed — #{e.class}: #{e.message}"
     end
 
-    # Blob-backed content only — Delegates (the downloadable S/M/L derivatives)
-    # are pointer-only and carry a `uri`; Blobs do not.
+    # Delegates are pointer-only and carry a `uri`; content Blobs do not.
     def content_blob?(asset)
       asset[:uri].blank?
     end
 
-    # Derivatives have no filename; name by the slugged use, e.g. "small-image.jpg".
     def derivative_filename(delegate)
       "#{delegate[:use].to_s.parameterize.presence || 'derivative'}.jpg"
     end
 
-    # Delegate URIs carry Cantaloupe's PUBLIC host; the packer runs server-side and
-    # (in compose/staging) reaches Cantaloupe by its internal service name — mirror
-    # IiifManifest#info_base. Only the host changes; the signed path is unaffected.
+    # Delegate URIs carry Cantaloupe's PUBLIC host, but the packer runs
+    # server-side. Only the host changes; the signed path is unaffected.
     def internal_iiif_url(uri)
       internal = Rails.application.config.x.cerberus.iiif_internal_host
       public_host = Rails.application.config.iiif_host
@@ -65,20 +54,19 @@ module ZipEntryWriter
       uri.sub(/\A#{Regexp.escape(public_host)}/, internal)
     end
 
-    # Labeled `<prefix><noid>.<ext>` when Atlas serves it, else a neutral
-    # `<noid>.<ext>` — collision-free, never the (often offputting) original_filename.
+    # Never name an entry from original_filename: prefer Atlas's labeled name,
+    # else a neutral `<noid>.<ext>`.
     def entry_filename(asset)
       asset[:filename].presence || "#{asset.noid}.#{extension_of(asset)}"
     end
 
-    # Extension only (not the name): from original_filename, else a mime guess, else bin.
     def extension_of(asset)
       from_name = asset[:original_filename].to_s[/\.([^.]+)\z/, 1]
       from_mime = Rack::Mime::MIME_TYPES.key(asset[:mime_type].to_s)&.delete_prefix('.')
       from_name.presence || from_mime.presence || 'bin'
     end
 
-    # Trailing entries, written last so a truncated/partial archive is self-describing.
+    # Written last, so a truncated archive is still self-describing.
     def write_manifest(zip, manifest, errors)
       write_text(zip, 'MANIFEST.txt', manifest_body(manifest))
       write_text(zip, 'ERRORS.txt', errors.join("\n")) if errors.any?

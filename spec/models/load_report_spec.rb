@@ -90,6 +90,32 @@ RSpec.describe LoadReport, type: :model do
     end
   end
 
+  describe '#status_tally' do
+    it 'tallies every ingest table under the enum label' do
+      report = create(:load_report)
+      create_list(:xml_ingest, 2, load_report: report, status: :completed)
+      create(:iptc_ingest, load_report: report, status: :completed)
+      create(:multipage_ingest, load_report: report, status: :failed)
+      expect(report.status_tally).to eq('completed' => 3, 'failed' => 1)
+    end
+
+    it 'reads 0 for a status with no rows' do
+      expect(create(:load_report).status_tally['failed']).to eq(0)
+    end
+
+    # The tally is memoized, so anything holding a report across row writes
+    # needs an invalidation hook. reload is that hook.
+    it 'is dropped by reload' do
+      report = create(:load_report)
+      create(:iptc_ingest, load_report: report, status: :completed)
+      expect(report.completed_ingests).to eq(1)
+
+      create(:iptc_ingest, load_report: report, status: :completed)
+      expect(report.completed_ingests).to eq(1)
+      expect(report.reload.completed_ingests).to eq(2)
+    end
+  end
+
   describe '#total_ingests' do
     it 'sums xml, iptc, and multipage ingests' do
       report = create(:load_report)
@@ -143,7 +169,7 @@ RSpec.describe LoadReport, type: :model do
     end
   end
 
-  describe '#maybe_finalize! inbox notification' do
+  describe '#maybe_finalize! notification' do
     let(:loader) { create(:loader) }
 
     it 'messages the creator when the load reaches a terminal state' do
@@ -169,12 +195,28 @@ RSpec.describe LoadReport, type: :model do
       expect(report.reload).to be_processing
     end
 
-    it 'does not message when the report has no creator (pre-inbox rows)' do
+    it 'records the load on the admin ledger, with the counts and the report path parts' do
+      report = create(:load_report, loader: loader, creator_nuid: '000000003', status: :processing)
+      create(:iptc_ingest, load_report: report, status: :completed)
+
+      expect { report.maybe_finalize! }.to change(AdminNotice, :count).by(1)
+
+      notice = AdminNotice.last
+      expect(notice.kind).to eq('load_report')
+      expect(notice.actor_nuid).to eq('000000003')
+      expect(notice.detail(:load_report_id)).to eq(report.id)
+      expect(notice.detail(:loader_slug)).to eq(loader.slug)
+      expect(notice.detail(:completed)).to eq(1)
+    end
+
+    it 'sends no message when the report has no creator, and records the notice anyway' do
       report = create(:load_report, status: :processing)
       create(:iptc_ingest, load_report: report, status: :completed)
 
-      expect { report.maybe_finalize! }.not_to change(Message, :count)
+      expect { report.maybe_finalize! }.to change(AdminNotice, :count).by(1)
+                                                                      .and(not_change(Message, :count))
       expect(report.reload).to be_completed
+      expect(AdminNotice.last.actor_nuid).to be_nil
     end
 
     it 'does not double-send when a retried row job re-triggers finalization' do
@@ -182,7 +224,7 @@ RSpec.describe LoadReport, type: :model do
       create(:iptc_ingest, load_report: report, status: :completed)
 
       report.maybe_finalize!
-      expect { report.maybe_finalize! }.not_to change(Message, :count)
+      expect { report.maybe_finalize! }.to not_change(Message, :count).and(not_change(AdminNotice, :count))
     end
   end
 

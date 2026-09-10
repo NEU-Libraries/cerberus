@@ -6,8 +6,8 @@ require 'rails_helper'
 # Runs against the live Atlas test backend like the resource controller specs:
 # a real Work is created and a real edit ACL granted to the staff group, so the
 # authorize_resource_writes! gate (which reads Atlas permissions) is exercised
-# end-to-end. The request itself mutates nothing in Atlas — it creates a
-# Cerberus Message to the DRS staff group inbox.
+# end-to-end. The request itself mutates nothing in Atlas — it writes one
+# AdminNotice row on the admin ledger.
 RSpec.describe 'Works request_change', type: :request do
   include Devise::Test::IntegrationHelpers
 
@@ -26,7 +26,18 @@ RSpec.describe 'Works request_change', type: :request do
   end
 
   def grant_edit!
-    AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => [Permissions::STAFF_EDIT_GROUP] } }, nuid: '000000004')
+    # Public read alongside the edit grant, so the :edit gate is what the
+    # authorization examples exercise. Atlas gates reads on the resource's own
+    # ACL, so a private Work is invisible to a guest and the request 404s before
+    # reaching the gate — proving the resource is hidden, not that the write is
+    # refused. Widening runs top-down; Atlas refuses a resource more visible than
+    # its container. Read and edit go in one call, since Atlas assigns the edit
+    # grants unconditionally from the payload.
+    publicize_ancestry!(community: community, collection: collection)
+    AtlasRb::Work.metadata(work.id,
+                           { 'permissions' => { 'read' => ['public'],
+                                                'edit' => [Permissions::STAFF_EDIT_GROUP] } },
+                           nuid: '000000004')
   end
 
   before { grant_edit! }
@@ -34,18 +45,18 @@ RSpec.describe 'Works request_change', type: :request do
   describe 'authorization' do
     # request_change is edit-gated (not the authn-gated create surface), so an
     # unauthenticated caller is a clean 403 — same as PATCH #update.
-    it 'forbids the unauthenticated and sends nothing' do
+    it 'forbids the unauthenticated and records nothing' do
       expect do
         post request_change_work_path(work.id), params: { request_action: 'withdraw' }
-      end.not_to change(Message, :count)
+      end.not_to change(AdminNotice, :count)
       expect(response).to have_http_status(:forbidden)
     end
 
-    it 'forbids an authenticated non-editor and sends nothing' do
+    it 'forbids an authenticated non-editor and records nothing' do
       sign_in outsider
       expect do
         post request_change_work_path(work.id), params: { request_action: 'withdraw' }
-      end.not_to change(Message, :count)
+      end.not_to change(AdminNotice, :count)
       expect(response).to have_http_status(:forbidden)
     end
   end
@@ -53,42 +64,58 @@ RSpec.describe 'Works request_change', type: :request do
   describe 'as an in-group editor' do
     before { sign_in editor }
 
-    it 'sends a withdraw request to the staff group inbox' do
+    it 'records a withdraw request, snapshotting the title' do
       expect do
         post request_change_work_path(work.id), params: { request_action: 'withdraw', request_note: 'No longer authoritative.' }
-      end.to change(Message, :count).by(1)
+      end.to change(AdminNotice, :count).by(1)
 
-      message = Message.last
-      expect(message.recipient_group).to eq(Permissions::STAFF_EDIT_GROUP)
-      expect(message.sender_nuid).to eq('000000002')
-      expect(message.subject).to start_with('Request to withdraw')
-      expect(message.body).to include('No longer authoritative.')
+      notice = AdminNotice.last
+      expect(notice.kind).to eq('request_withdraw')
+      expect(notice).to be_request
+      expect(notice.subject_noid).to eq(work.id)
+      expect(notice.actor_nuid).to eq('000000002')
+      expect(notice.detail(:subject_type)).to eq('Work')
+      expect(notice.detail(:subject_title)).to be_present
+      expect(notice.detail(:note)).to eq('No longer authoritative.')
       expect(response).to redirect_to(work_path(work.id))
       expect(flash[:notice]).to include('DRS staff')
     end
 
-    it 'sends a move request carrying the destination' do
+    # Nothing is addressed to anybody: staff read the ledger, and reply to the
+    # depositor off-site.
+    it 'sends no inbox message' do
       expect do
-        post request_change_work_path(work.id), params: { request_action: 'move', request_note: 'Engineering Theses collection' }
-      end.to change(Message, :count).by(1)
-
-      expect(Message.last.subject).to start_with('Request to move')
-      expect(Message.last.body).to include('Engineering Theses collection')
+        post request_change_work_path(work.id), params: { request_action: 'withdraw' }
+      end.not_to change(Message, :count)
     end
 
-    it 'rejects a move with no destination and sends nothing' do
+    it 'records a move request carrying the destination' do
+      expect do
+        post request_change_work_path(work.id), params: { request_action: 'move', request_note: 'Engineering Theses collection' }
+      end.to change(AdminNotice, :count).by(1)
+
+      expect(AdminNotice.last.kind).to eq('request_move')
+      expect(AdminNotice.last.detail(:note)).to eq('Engineering Theses collection')
+    end
+
+    it 'rejects a move with no destination and records nothing' do
       expect do
         post request_change_work_path(work.id), params: { request_action: 'move', request_note: '' }
-      end.not_to change(Message, :count)
+      end.not_to change(AdminNotice, :count)
       expect(response).to redirect_to(edit_work_path(work.id))
       expect(flash[:alert]).to include('where this work should move to')
     end
 
-    it 'rejects an unknown request action and sends nothing' do
+    it 'rejects an unknown request action and records nothing' do
       expect do
         post request_change_work_path(work.id), params: { request_action: 'destroy_everything' }
-      end.not_to change(Message, :count)
+      end.not_to change(AdminNotice, :count)
       expect(flash[:alert]).to include('withdrawal or a move')
     end
   end
+
+  # This file leaves Works waiting on a depositor, which the admin triage registry
+  # lists. Purging them keeps that registry's own specs measuring its filter rather
+  # than the size of the suite (see spec/support/work_cleanup.rb).
+  after(:all) { purge_stuck_works! }
 end

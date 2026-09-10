@@ -22,9 +22,6 @@
 class MultipageUnzipJob < ApplicationJob
   queue_as :default
 
-  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
-  # Linear shape (guard → extract → parse → group → scaffold) mirrors the
-  # other unzip jobs and reads as one flow; the branches are structural gates.
   def perform(load_report_id)
     load_report = LoadReport.find(load_report_id)
     return unless load_report.pending?
@@ -55,7 +52,6 @@ class MultipageUnzipJob < ApplicationJob
     Rails.logger.error("MultipageUnzipJob failed for LoadReport #{load_report_id}: #{e.class} #{e.message}")
     LoadReport.find_by(id: load_report_id)&.fail_load
   end
-  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   private
 

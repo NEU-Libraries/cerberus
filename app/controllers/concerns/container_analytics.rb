@@ -1,38 +1,17 @@
 # frozen_string_literal: true
 
 # Loads the scoped ImpressionsReport + Composition report for a
-# Collection/Community edit page's Analytics tab — shared by
-# CollectionsController and CommunitiesController. Visible to anyone who can
-# reach the edit page at all (the same :edit ability gate as the
-# Metadata/Permissions tabs — no separate admin check): a group editor's own
-# container's traffic isn't privileged information the way the repo-wide
-# /admin dashboard's cross-container view is. The shared partial
-# (shared/_container_analytics) separately gates the "Open in Usage
-# Analytics" drill-down link on admin/admin_delegate, since that link leads
-# to the admin-only dashboard and would otherwise 403 for most viewers.
-#
-# Adds the same item-lookup + facet drill-down the admin dashboard has, but
-# permanently CONTAINED to this container's own subtree (self + descendant
-# containers + every descendant Work) — an editor can narrow their own view
-# further, never escape it. The item-lookup search box only ever returns
-# subtree-contained results (ResourceSearch's within_fq), but a drill-down
-# also arrives as plain GET params an editor could hand-edit, so
-# #contained_drilldown_item re-validates every drill-down against the
-# subtree before honoring it — that check, not the search box, is the actual
-# containment boundary.
-#
-# Composition, unlike Overview/Top files/Top collections, ignores the
-# drill-down entirely — mirrors the admin dashboard's own Composition tab,
-# which is always unscoped by item/facet; here it's always "composition of
-# this container's own subtree," regardless of what's drilled into above it.
+# Collection/Community edit page's Analytics tab. Gated on the same :edit
+# ability as the other edit tabs, with the item lookup and facet drill-down
+# permanently contained to this container's own subtree. See
+# docs/analytics.md.
 module ContainerAnalytics
   extend ActiveSupport::Concern
 
   private
 
-    # @param resource [AtlasRb::Collection, AtlasRb::Community] the container
-    #   being edited — needs .id (noid), .valkyrie_id (Solr uuid), and .title.
-    # @param klass [String] 'Collection' or 'Community'.
+    # `resource` needs .id (noid), .valkyrie_id (Solr uuid) and .title;
+    # `klass` is 'Collection' or 'Community'.
     def load_container_analytics(resource, klass)
       @analytics_base_item = { noid: resource.id, uuid: resource.valkyrie_id, klass:, title: resource.title }
       descendants = ContainerDescendantsQuery.new(noid: @analytics_base_item[:noid], uuid: @analytics_base_item[:uuid])
@@ -52,9 +31,9 @@ module ContainerAnalytics
         klass: params[:analytics_item_klass], title: params[:analytics_item_title] }
     end
 
-    # @return [Hash, nil] the drill-down item params, but only when the
-    #   candidate actually resolves inside this container's subtree — the
-    #   real containment check (see the class comment above).
+    # THE containment boundary, not the search box: a drill-down arrives as
+    # plain GET params an editor can hand-edit, so every candidate is
+    # re-validated against the subtree before it is honoured.
     def contained_drilldown_item(descendants)
       candidate = analytics_item_params
       return nil if candidate.blank?
@@ -76,12 +55,9 @@ module ContainerAnalytics
       { type:, value: }
     end
 
-    # Accepts either the packed single-select analytics_facet param
-    # ("content::Image") the facet <select> itself submits, or the canonical
-    # analytics_facet_type/analytics_facet_value pair every link this tab
-    # renders uses (clear links) — mirrors Admin::ImpressionsController's
-    # #parsed_facet for the same reason: a bookmarked or shared URL round-trips
-    # cleanly even though the picker only ever emits the packed form.
+    # Both shapes are needed: the <select> emits only the packed
+    # analytics_facet ("content::Image"), while every link this tab renders
+    # uses the type/value pair — dropping either breaks a shared URL.
     def parsed_analytics_facet
       if params[:analytics_facet].present?
         params[:analytics_facet].to_s.split('::', 2)
@@ -90,17 +66,10 @@ module ContainerAnalytics
       end
     end
 
-    # Un-gated (bypasses ResourceSearch's own SearchBuilder/gated-discovery
-    # chain) — a group editor must be able to find every item in their own
-    # container's subtree regardless of that item's own visibility, the same
-    # reason the rest of container analytics reads system-wide. Reuses
-    # ResourceSearch#filters (pure, already covers type + tombstone + within_fq)
-    # without its #call's gated-discovery SearchBuilder path.
-    #
-    # Reads the bare `q` param (not analytics_q) — the item-lookup box is
-    # rendered via the shared admin/finder/_search_form partial, which submits
-    # a field literally named `q`; every other analytics param is our own and
-    # gets the analytics_ prefix, but this one field name isn't ours to pick.
+    # Deliberately un-gated: reuses ResourceSearch#filters without #call's
+    # gated-discovery SearchBuilder, so an editor finds every item in their
+    # own subtree whatever its visibility. Reads the bare `q` param, not
+    # analytics_q — the shared admin/finder/_search_form partial names it.
     def analytics_item_search(descendants)
       return nil if params[:q].blank?
 
@@ -109,10 +78,8 @@ module ContainerAnalytics
       Blacklight.default_index.search(q: params[:q].to_s, fq: filters, rows: ResourceSearch::DEFAULT_PER_PAGE)
     end
 
-    # Grouped <select> options for the facet picker, restricted to
-    # classifications that actually occur within this subtree (Featured
-    # Content genres aren't Solr-derived, so they're never subtree-filterable
-    # — same as the admin dashboard's own picker).
+    # Only the Content type group is subtree-filtered; Featured Content
+    # genres aren't Solr-derived, so they cannot be.
     def analytics_facet_groups(descendants)
       content_values = SolrFacetValues.call(
         field: 'classification_ssim', extra_fq: ['internal_resource_tesim:Work', descendants.subtree_fq]

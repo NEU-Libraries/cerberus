@@ -13,7 +13,7 @@ module WorkBreadcrumbs
   private
 
     # Builds the trail from the already-loaded @work rather than re-fetching the
-    # same record: the Work digest carries ancestor_chain and depositor, and the
+    # same record: the Work digest carries ancestors and depositor, and the
     # show action has already resolved @work as a Work (so klass is 'Work').
     # Mirrors ApplicationController#breadcrumbs(result:), which accepts a
     # pre-fetched resource for exactly this reason. The +_id+ arg is unused.
@@ -24,7 +24,7 @@ module WorkBreadcrumbs
       if person
         build_personal_work_breadcrumbs(item, 'Work', person)
       else
-        Array(item.ancestor_chain).each { |node| add_breadcrumb_for(node['noid'], node['klass'], node['title']) }
+        Array(item.ancestors).each { |node| add_breadcrumb_for(node['noid'], node['klass'], node['title']) }
         add_breadcrumb_for(item.id, 'Work', item.title)
       end
     end
@@ -41,7 +41,7 @@ module WorkBreadcrumbs
       person = AtlasRb::Person.resolve([nuid]).first
       return nil unless person && person['personal_root_id'].present?
 
-      parent_noid = Array(item.ancestor_chain).last&.dig('noid')
+      parent_noid = Array(item.ancestors).last&.dig('noid')
       person if person['personal_root_id'] == parent_noid
     rescue Faraday::Error, JSON::ParserError
       nil

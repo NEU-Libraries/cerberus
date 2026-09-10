@@ -96,6 +96,30 @@ describe ApplicationHelper do
     end
   end
 
+  # Atlas stores the bare handle, so the resolver base is Cerberus's to supply.
+  # The nil case is the load-bearing one: minting is best-effort, so an unminted
+  # Work must produce no URL at all rather than a link to the resolver's root.
+  describe '#handle_url' do
+    def with_resolver(base)
+      allow(Rails.application.config.x.cerberus).to receive(:handle_resolver_base).and_return(base)
+    end
+
+    it 'joins the configured resolver base to the bare handle' do
+      with_resolver('https://hdl.handle.net')
+      expect(helper.handle_url('2047/gq67jr519')).to eq('https://hdl.handle.net/2047/gq67jr519')
+    end
+
+    it 'does not double the separator when the base carries a trailing slash' do
+      with_resolver('http://localhost:8000/')
+      expect(helper.handle_url('DRSDEV/gq67jr519')).to eq('http://localhost:8000/DRSDEV/gq67jr519')
+    end
+
+    it 'returns nil for a Work that has not been minted' do
+      expect(helper.handle_url(nil)).to be_nil
+      expect(helper.handle_url('')).to be_nil
+    end
+  end
+
   describe '#document_url' do
     it 'uses the typed url helper when document.klass is a model class' do
       document = double('Document', klass: Community)

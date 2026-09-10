@@ -44,7 +44,7 @@ RSpec.describe TombstonedItems do
 
       described_class.call(scope: scope)
 
-      expect(Blacklight.default_index).to have_received(:search).with(an_instance_of(TombstonedSearchBuilder))
+      expect(Blacklight.default_index).to have_received(:search).with(params: an_instance_of(TombstonedSearchBuilder))
     end
   end
 end

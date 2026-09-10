@@ -8,8 +8,11 @@ require 'rails_helper'
 RSpec.describe SetZipPacker do
   # FakeZip lives in spec/support/fake_zip.rb (shared with queue_zip_packer_spec).
   let(:zip) { FakeZip.new }
+  # These fixtures' assets carry no gate, so DerivativeGate resolves them public
+  # and a guest ability reads them. The tier gate has its own examples below.
+  let(:ability) { Ability.new(nil) }
   let(:resolver) { instance_double(SetResolver) }
-  let(:packer) { described_class.new(resolver: resolver, nuid: '000000002') }
+  let(:packer) { described_class.new(resolver: resolver, nuid: '000000002', ability: ability) }
 
   def work_doc(noid, embargo: nil)
     SolrDocument.new('alternate_ids_ssim'        => ["id-#{noid}"],
@@ -43,22 +46,22 @@ RSpec.describe SetZipPacker do
     end
 
     it 'packs none of its bytes for a caller who cannot bypass' do
-      described_class.new(resolver: resolver, nuid: nil).pack(zip)
+      described_class.new(resolver: resolver, nuid: nil, ability: ability).pack(zip)
       expect(names).not_to include('work1/a.jpg')
     end
 
     it 'names it as withheld rather than dropping it silently' do
-      described_class.new(resolver: resolver, nuid: nil).pack(zip)
+      described_class.new(resolver: resolver, nuid: nil, ability: ability).pack(zip)
       expect(names).to include('ERRORS.txt')
     end
 
     it 'packs it for a caller who may bypass' do
-      described_class.new(resolver: resolver, nuid: '000000006', bypass_embargo: true).pack(zip)
+      described_class.new(resolver: resolver, nuid: '000000006', ability: ability, bypass_embargo: true).pack(zip)
       expect(names).to include('work1/a.jpg')
     end
 
     it 'does not even ask Atlas for assets it will not pack' do
-      described_class.new(resolver: resolver, nuid: nil).pack(zip)
+      described_class.new(resolver: resolver, nuid: nil, ability: ability).pack(zip)
       expect(AtlasRb::Work).not_to have_received(:assets)
     end
   end
@@ -122,5 +125,35 @@ RSpec.describe SetZipPacker do
     errors = zip.entries.find { |e| e.name == 'ERRORS.txt' }
     expect(errors).to be_present
     expect(errors.body).to include('blob1')
+  end
+
+  # Atlas re-authorizes a member at the WORK level only; the per-asset gate rides
+  # its assets as advisory metadata, so a Streaming Only video reaches the packer
+  # looking ordinary and must be refused here or the archive leaks it.
+  it 'withholds an asset whose derivative tier this caller cannot read, and names it' do
+    gated = blob(noid: 'vid1', filename: 'video.mp4', mime_type: 'video/mp4')
+    gated['gated'] = true
+    gated['permission'] = ['northeastern:drs:repository:admin']
+    allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000002').and_return([gated])
+    allow(AtlasRb::Blob).to receive(:content)
+
+    packer.pack(zip)
+
+    expect(names).not_to include('bc1234/video.mp4')
+    expect(names).to include('ERRORS.txt')
+    expect(AtlasRb::Blob).not_to have_received(:content)
+  end
+
+  it 'packs a gated asset for a caller whose ability does reach the tier' do
+    gated = blob(noid: 'vid1', filename: 'video.mp4', mime_type: 'video/mp4')
+    gated['gated'] = true
+    gated['permission'] = ['northeastern:drs:repository:admin']
+    allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000002').and_return([gated])
+    allow(AtlasRb::Blob).to receive(:content).with('vid1').and_yield('MP4')
+
+    described_class.new(resolver: resolver, nuid: '000000002',
+                        ability: Ability.new(User.new(email: 'a@example.com', role: 'admin'))).pack(zip)
+
+    expect(names).to include('bc1234/video.mp4')
   end
 end

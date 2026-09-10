@@ -1,13 +1,13 @@
 // ---------------------------------------------------------------------
 // Impersonation surfaces. A safety-critical status banner plus
 // the admin start form. Same forensic register as audit-history: a single
-// tone token drives a left rail + tinted field + chip via color-mix, so
-// the two modes (acting-as / view-as) differ by one variable.
+// tone token drives a tinted field + chip via color-mix, so the two modes
+// (acting-as / view-as) differ by one variable.
 //
 // Design intent: UNMISTAKABLE but CALM. An admin operating as another user
 // must never forget it, but this is an institutional repository, not a
-// klaxon — the persistent left rail + badge carry the signal; the field
-// stays quiet enough to work in front of all day.
+// klaxon — the persistent badge carries the signal; the field stays quiet
+// enough to work in front of all day.
 //   acting-as  red    — you are WRITING as someone; highest danger.
 //   view-as    amber  — read-only; caution, not alarm.
 // ---------------------------------------------------------------------
@@ -22,7 +22,6 @@ $impersonation-tone-view:   #b8801f; // desaturated amber — caution, but read-
   top: 0;
   z-index: 1080; // above the topbar; below Bootstrap modals (1055+ sits under this on purpose)
   border-bottom: 1px solid color-mix(in srgb, var(--impersonation-color) 35%, white);
-  border-left: 4px solid var(--impersonation-color);
   background-color: color-mix(in srgb, var(--impersonation-color) 13%, white);
   color: color-mix(in srgb, var(--impersonation-color) 78%, black);
   animation: impersonation-banner-in 180ms ease-out;

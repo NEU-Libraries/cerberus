@@ -159,6 +159,25 @@ RSpec.describe 'Admin::Reparent', type: :request do
         expect(response.body).to include('Confirm move', 'Node Collection', 'Parent Community')
       end
 
+      # The current-parent chip is named straight off the node's own ancestors,
+      # which carry each ancestor's title — so only the node and the destination
+      # are fetched, never the parent as a third call.
+      it 'names the current parent from the ancestor node, with no extra fetch' do
+        chain = [{ 'noid' => 'root', 'klass' => 'Community', 'title' => 'Northeastern University' },
+                 { 'noid' => 'home', 'klass' => 'Collection', 'title' => 'Home Collection' }]
+        allow(AtlasRb::Resource).to receive(:find).with('node')
+                                                  .and_return(atlas_node(noid: 'node', title: 'Node Collection',
+                                                                         ancestors: chain))
+        allow(AtlasRb::Resource).to receive(:find).with('par')
+                                                  .and_return(atlas_node(noid: 'par', klass: 'Community', title: 'Parent Community'))
+        expect(AtlasRb::Collection).not_to receive(:find)
+
+        get '/admin/reparent/confirm', params: { node_id: 'node', parent_id: 'par' }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('Home Collection', 'home')
+      end
+
       it 'redirects back to choose_parent when no destination was given' do
         allow(AtlasRb::Resource).to receive(:find).with('node')
                                                   .and_return(atlas_node(noid: 'node', title: 'Node Collection'))

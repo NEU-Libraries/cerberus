@@ -15,6 +15,18 @@
     Repository-structure operations. These actions change how objects are arranged and surfaced across the repository, so they apply repository-wide and live behind the admin gate.
 
   .admin-actions__grid{role: 'list'}
+    -# First in the grid: it is the surface somebody opens daily, and the only
+    -# one that says what is waiting on the team rather than offering a tool.
+    = link_to admin_ledger_path, class: 'admin-action-card admin-action-card--ledger', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-list-check{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Requests & activity
+      %span.admin-action-card__desc
+        What depositors have asked staff to do — withdraw, move, restrict — with who claimed each one and what is still open. Alongside it, the record of what the repository did, including every work published to a community showcase, and a digest of each day.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
     = link_to admin_reparent_path, class: 'admin-action-card admin-action-card--structure', role: 'listitem' do
       %span.admin-action-card__icon
         %i.fa-solid.fa-sitemap{'aria-hidden' => 'true'}
@@ -32,6 +44,16 @@
         %span.admin-action-card__title Linked members
         %span.admin-action-card__desc
           Surface a single Work in additional Collections without duplicating it. Adds discovery placement only — it never changes the Work's permissions.
+        %span.admin-action-card__cta
+          Open
+          %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
+      = link_to admin_associations_path, class: 'admin-action-card admin-action-card--link', role: 'listitem' do
+        %span.admin-action-card__icon
+          %i.fa-solid.fa-diagram-project{'aria-hidden' => 'true'}
+        %span.admin-action-card__title Associated works
+        %span.admin-action-card__desc
+          Record that one Work is the codebook, figure, transcription, instructional material or supplemental material for another. Both works keep their own page; each shows the relationship from its own end.
         %span.admin-action-card__cta
           Open
           %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
@@ -72,6 +94,8 @@
       %span.admin-action-card__title Restore a tombstoned item
       %span.admin-action-card__desc
         Review every tombstoned Work, Collection and Community, and reverse a tombstone — the item becomes discoverable again, with the restore recorded in its History.
+        - if current_user&.admin?
+          An admin can also delete a tombstoned item permanently.
       %span.admin-action-card__cta
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
@@ -114,6 +138,17 @@
         %span.admin-action-card__title Group names
         %span.admin-action-card__desc
           Give a Grouper group a friendly display name (raw colon-separated identifier → readable label) shown wherever the group surfaces — inbox recipients, sharing, permissions.
+        %span.admin-action-card__cta
+          Open
+          %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
+    - if current_user&.admin?
+      = link_to admin_maintenance_path, class: 'admin-action-card admin-action-card--maintenance', role: 'listitem' do
+        %span.admin-action-card__icon
+          %i.fa-solid.fa-screwdriver-wrench{'aria-hidden' => 'true'}
+        %span.admin-action-card__title Maintenance window
+        %span.admin-action-card__desc
+          Make the whole repository read-only while a migration or a risky deploy runs. Searching and downloading carry on; depositing and editing are refused until the window is closed.
         %span.admin-action-card__cta
           Open
           %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}

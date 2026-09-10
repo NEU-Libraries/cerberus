@@ -1,0 +1,75 @@
+-# locals: tier (String), sentinel (Sentinel|nil), groups (Array<[id, name]>),
+-#         open_label (String)
+-#
+-# One tier row in the Derivative access form: the open option / Restrict radios
+-# and the group picker revealed under "Restrict to groups". Shared by the image
+-# ladder and the independent-media list so both render identically — only their
+-# grouping and ordering differ.
+-#
+-# `open_label` names what the unrestricted option inherits from, because that
+-# differs by host and the difference is load-bearing rather than cosmetic. On a
+-# Collection it is the collection (a rendition is never more visible than its
+-# container, whose own visibility is shown once as the chip in the header). On a
+-# Set there is no such container — a Set's ACL governs the Set object, not the
+-# Works in it — so the tier inherits each Work's own visibility at apply time.
+- state = derivative_tier_form_state(sentinel, tier)
+- meta = derivative_tier_meta(tier)
+-# A stored group the registry no longer names still has to render, hidden field
+-# and all, or saving the form would silently drop it. It falls back to its raw
+-# Grouper identifier.
+- labels = groups.to_h
+%li.derivative-tier
+  .derivative-tier__head
+    %span.derivative-tier__name= meta[:label]
+    %span.derivative-tier__note= meta[:note]
+  .derivative-tier__controls
+    .form-check.form-check-inline
+      %input.form-check-input{ type: "radio", id: "#{tier}-public", name: "sentinel[#{tier}][mode]", value: "public", checked: state[:mode] == "public", data: { action: "change->derivative-policy#toggle" } }
+      %label.form-check-label{ for: "#{tier}-public" }= open_label
+    .form-check.form-check-inline
+      %input.form-check-input{ type: "radio", id: "#{tier}-restrict", name: "sentinel[#{tier}][mode]", value: "restrict", checked: state[:mode] == "restrict", data: { action: "change->derivative-policy#toggle" } }
+      %label.form-check-label{ for: "#{tier}-restrict" } Restrict to groups
+  .derivative-tier__groups{ class: ("d-none" unless state[:mode] == "restrict") }
+    - if groups.present?
+      -# A restricted tier with no rows means "restricted to nobody", which is a
+      -# real policy rather than an unfinished one — the tier submits its mode
+      -# either way, and the empty group list is what makes it stick.
+      .derivative-tier__rows
+        - state[:groups].each do |gid|
+          .row.py-1.derivative-tier__row
+            .col-sm-auto.form-text Group
+            .col-sm
+              -# form-control-plaintext gives the read-only name the height and
+              -# baseline of the entry row's input below it, so the stack keeps
+              -# one rhythm. It zeroes horizontal padding, hence ps-2.
+              .form-control-plaintext.form-control-sm.ps-2.js-label= labels.fetch(gid, gid)
+              = hidden_field_tag "sentinel[#{tier}][groups][]", gid, id: nil, class: "js-field"
+            .col-sm-2
+              %button.btn.btn-danger.form-control.btn-sm{ type: "button", "aria-label" => "Remove group from #{meta[:label]}", data: { action: "click->derivative-policy#remove" } }
+                %i.fa-solid.fa-minus{ "aria-hidden" => "true" }
+      -# Per tier, not per page: the hidden field's name carries the tier, so one
+      -# shared template would need its name rewritten on every clone.
+      %template
+        .row.py-1.derivative-tier__row
+          .col-sm-auto.form-text Group
+          .col-sm
+            .form-control-plaintext.form-control-sm.ps-2.js-label
+            %input.js-field{ type: "hidden", name: "sentinel[#{tier}][groups][]" }
+          .col-sm-2
+            %button.btn.btn-danger.form-control.btn-sm{ type: "button", "aria-label" => "Remove group from #{meta[:label]}", data: { action: "click->derivative-policy#remove" } }
+              %i.fa-solid.fa-minus{ "aria-hidden" => "true" }
+      .row.py-1.derivative-tier__entry
+        .col-sm-auto.form-text Group
+        .col-sm.position-relative
+          %input.form-control.form-control-sm.js-group-query{ type: "text", autocomplete: "off", placeholder: "Start typing a group…", "aria-label" => "Add a group to #{meta[:label]}", data: { action: "input->derivative-policy#search keydown->derivative-policy#commit" } }
+          -# The entry row submits too, so a group picked from the list but not
+          -# "+"-ed still saves. It is blank until something is picked, and blank
+          -# values are dropped server-side.
+          %input.js-group-id{ type: "hidden", name: "sentinel[#{tier}][groups][]" }
+          .list-group.inbox-typeahead{ hidden: true }
+        .col-sm-2
+          %button.btn.btn-success.form-control.btn-sm{ type: "button", "aria-label" => "Add group to #{meta[:label]}", data: { action: "click->derivative-policy#add" } }
+            %i.fa-solid.fa-plus{ "aria-hidden" => "true" }
+      .form-text.text-muted Search for a group, then press + to add it.
+    - else
+      %p.small.text-muted.mb-0 You aren't a member of any groups to restrict this tier to.

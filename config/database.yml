@@ -23,6 +23,21 @@ default: &default
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  # Seconds to wait for the server to accept a connection. Rails'
+  # checkout_timeout (5s, default) bounds waiting for a POOLED connection, not
+  # opening a new one — so without this a wedged (rather than refused) database
+  # blocks the connect indefinitely.
+  connect_timeout: 5
+  variables:
+    # The database enforces this, which is more reliable than anything in Ruby:
+    # a runaway query is cancelled server-side rather than running until the
+    # client disconnects. Deliberately generous — it applies to web, jobs and
+    # rake alike, because both databases share this block and database.yml
+    # cannot tell the processes apart. 30s is far above any interactive query
+    # (a Work show page reads no Postgres beyond its session row) while still
+    # catching the pathological case. A task that legitimately needs longer
+    # opts out for its own session with `SET statement_timeout = 0`.
+    statement_timeout: 30s
 
 development:
   primary:
@@ -45,13 +60,18 @@ staging:
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
+# Suffixed per parallel worker. parallel_tests leaves TEST_ENV_NUMBER empty for
+# the first worker and numbers the rest from 2, so an unsharded run keeps the
+# unsuffixed names it has always used. Workers cannot share these: the suite
+# runs inside a transaction per example, and two workers on one database would
+# deadlock on each other's uncommitted rows.
 test:
   primary:
     <<: *default
-    database: cerberus_test
+    database: cerberus_test<%= ENV['TEST_ENV_NUMBER'] %>
   queue:
     <<: *default
-    database: cerberus_queue_test
+    database: cerberus_queue_test<%= ENV['TEST_ENV_NUMBER'] %>
     migrations_paths: db/queue_migrate
 
 atlas_test:

@@ -1,4 +1,5 @@
 require "active_support/core_ext/integer/time"
+require_relative "../cache_store"
 
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
@@ -31,35 +32,48 @@ Rails.application.configure do
 
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 
-  # In the development environment your application's code is reloaded any time
-  # it changes. This slows down response time but is perfect for development
-  # since you don't have to restart the web server when you make code changes.
-  config.cache_classes = false
+  # Staging is deployed from an image and never edited in place, so reloading
+  # buys nothing here and costs a great deal. Rails' reload interlock serialises
+  # concurrent requests, which defeats ParallelAtlasReads: the four Atlas reads a
+  # Work show page issues at once stop overlapping, and the batch costs more than
+  # running them one after another. Eager loading also turns a load error into a
+  # boot failure rather than a 500 on whichever request first reaches the file.
+  config.cache_classes = true
+  config.eager_load = true
 
-  # Do not eager load code on boot.
-  config.eager_load = false
+  # Match production. :debug writes every SQL statement and every partial render
+  # to disk, which is a real cost on a box serving requests rather than one
+  # developer.
+  config.log_level = :info
 
-  # Show full error reports.
+  # Unlike production, and deliberately. Staging's audience is the team, and a
+  # failure there is worth reading in full rather than reducing to a 500 page.
+  # The cost is that anyone who can reach the host and trigger an exception sees
+  # a backtrace, so staging must not carry data that a backtrace could leak.
   config.consider_all_requests_local = true
 
-  # Enable server timing
+  # Nearly free, and it is how page latency gets measured here at all. Know what
+  # it cannot see: ActionDispatch::ServerTiming collects only notifications
+  # raised on the request thread, so request.atlas_rb excludes the Atlas reads
+  # ParallelAtlasReads issues on other threads — often the largest block on the
+  # page. An unexplained gap in its accounting is the tell.
   config.server_timing = true
 
-  # Enable/disable caching. By default caching is disabled.
-  # Run rails dev:cache to toggle caching.
-  if Rails.root.join("tmp/caching-dev.txt").exist?
-    config.action_controller.perform_caching = true
-    config.action_controller.enable_fragment_cache_logging = true
+  # Prepend all log lines with the following tags. The request id is what makes
+  # a Cerberus log line joinable to the Atlas line it caused, which is the only
+  # way to see the shape of a request that fans out across both services.
+  config.log_tags = [:request_id]
 
-    config.cache_store = :memory_store
-    config.public_file_server.headers = {
-      "Cache-Control" => "public, max-age=#{2.days.to_i}"
-    }
-  else
-    config.action_controller.perform_caching = false
-
-    config.cache_store = :null_store
-  end
+  # The store, from one definition — see config/cache_store.rb. Staging needs a
+  # Redis service reachable at REDIS_URL; without one every operation logs a
+  # warning and reads as a miss, so the app stays correct but runs at pre-cache
+  # speed. The warning is the point: a Redis that is simply absent otherwise
+  # looks exactly like a cache that is working.
+  #
+  # What it buys: MaintenanceMode reads the read-only window on every request,
+  # so an absent store is one extra Atlas round trip per request, site-wide.
+  config.action_controller.perform_caching = true
+  config.cache_store = CerberusCacheStore.redis
 
   # Store uploaded files on the local file system (see config/storage.yml for options).
 
@@ -71,16 +85,22 @@ Rails.application.configure do
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 
-  # Raise exceptions for disallowed deprecations.
-  config.active_support.disallowed_deprecation = :raise
+  # Log rather than raise. Staging is the last place a deprecation can be caught
+  # before it becomes a production failure, and raising turns that warning into
+  # an outage on the box the team is trying to test against.
+  config.active_support.disallowed_deprecation = :log
 
   # Tell Active Support which deprecation messages to disallow.
   config.active_support.disallowed_deprecation_warnings = []
 
-  # Raise an error on page load if there are pending migrations.
+  # Nothing in the deploy aborts on pending migrations, so this page-load check
+  # is staging's only signal that the image shipped a migration nobody ran. It
+  # costs one schema check per request and measures at zero.
   config.active_record.migration_error = :page_load
 
-  # Highlight code that triggered database queries in logs.
+  # Costs nothing at :info, because the backtrace work only runs when the query
+  # is actually logged. It earns its place the moment someone raises the level
+  # to debug something, which is when query source locations are what they want.
   config.active_record.verbose_query_logs = true
 
   # Suppress logger output for asset requests.

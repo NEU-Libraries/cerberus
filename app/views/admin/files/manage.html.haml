@@ -15,7 +15,7 @@
 
   %p.admin-actions__lede
     Replacing a file in
-    %strong= @work.title
+    %strong= enhanced_text(@work.title)
     adds a new version and keeps the same identifier — nothing is overwritten. The original filename is preserved; prior versions stay below, downloadable and revertible.
 
 - if @blobs.empty?

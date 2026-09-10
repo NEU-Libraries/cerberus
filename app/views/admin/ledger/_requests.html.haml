@@ -1,0 +1,50 @@
+-# What depositors have asked staff to do. A log, not a queue with state: staff
+-# read it, act on the object's own surface, and coordinate with each other and
+-# with the depositor off-site.
+-#
+-# One partial for all three kinds, unlike the activity tab's per-kind dispatch.
+-# A request always has the same shape — who asked, about what, what they said,
+-# where it gets done — and only the chip, the tone and the remedy vary, which
+-# the helper already keys off the kind.
+.p-3
+  %p.text-muted.small.mb-0
+    What depositors have asked staff to do for them, because they cannot do it themselves. Each row says what was asked and points at the tool that does it.
+
+%nav.px-3.pb-2{'aria-label' => 'Request kind'}
+  = link_to 'All', admin_ledger_path(tab: 'requests', on: @on),
+    class: "btn btn-sm me-1 #{@kind.blank? ? 'btn-secondary' : 'btn-outline-secondary'}",
+    'aria-current': ('page' if @kind.blank?)
+  - AdminNotice::REQUEST_KINDS.each do |kind|
+    - current = kind == @kind
+    = link_to Admin::LedgerHelper::KINDS.dig(kind, :label), admin_ledger_path(tab: 'requests', kind: kind, on: @on),
+      class: "btn btn-sm me-1 #{current ? 'btn-secondary' : 'btn-outline-secondary'}",
+      'aria-current': ('page' if current)
+
+= render 'admin/ledger/day_filter'
+
+- if @notices.any?
+  .table-responsive
+    %table.table.table-borderless.admin-registry-table.ledger-table
+      %thead
+        %tr
+          %th.text-nowrap{scope: 'col'} Asked
+          %th{scope: 'col'} For
+          %th{scope: 'col'} About
+          %th{scope: 'col'} Who asked
+      %tbody
+        - @notices.each do |notice|
+          = render partial: 'admin/ledger/request', locals: { notice: notice }
+  %nav.paginate-section{ 'aria-label' => 'Request pages' }
+    = paginate @notices, theme: 'blacklight'
+- else
+  .admin-registry__empty
+    %i.fa-solid.fa-clipboard-check.admin-registry__empty-icon{'aria-hidden' => 'true'}
+    -# Say which emptiness this is. Narrowed to a day, "nothing asked for yet"
+    -# would be a plain lie about the repository.
+    - if @on
+      %p.mb-1.fw-semibold.text-body= "Nothing asked for on #{@on.strftime('%B %-d, %Y')}"
+      %p.mb-0.small.text-muted= link_to 'Show every day', admin_ledger_path(tab: 'requests')
+    - else
+      %p.mb-1.fw-semibold.text-body Nothing asked for yet
+      %p.mb-0.small.text-muted
+        Requests to withdraw or move a work, and to restrict a collection or community, appear here.

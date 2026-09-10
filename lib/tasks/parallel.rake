@@ -1,0 +1,90 @@
+# frozen_string_literal: true
+
+require 'open3'
+
+# One canonical command for the sharded spec run, so a person at a terminal and
+# any future CI job invoke exactly the same thing.
+#
+# The shard is bounded by the compose topology, not by this task: each worker
+# talks to its own atlas-test-N service, and only workers 2..4 exist (behind the
+# `parallel` compose profile). Asking for more workers than there are Atlas
+# instances would point several of them at the same one, and a run resets
+# whichever Atlas it points at — so the ceiling is checked here rather than
+# discovered as a cluster of unattributable failures.
+#
+# Prerequisites, both cheap and both idempotent:
+#
+#   docker compose --profile parallel up -d   # the extra Atlas instances
+#   bin/parallel-solr-cores                   # the core each of them indexes to
+#
+# Split by recorded runtime rather than by file count. This suite's cost is
+# extremely concentrated — a handful of controller and request files carry most
+# of it — so an even split of *files* leaves one worker running long after the
+# others have finished.
+namespace :parallel do
+  # Matches the atlas-test-2..4 services in docker-compose.yml.
+  MAX_WORKERS = 4
+
+  # Written by the RuntimeLogger formatter in .rspec_parallel. Under tmp/, so it
+  # is per-checkout and gitignored: a committed one would be a snapshot of one
+  # machine's timings, going stale from the moment it landed.
+  RUNTIME_LOG = 'tmp/parallel_runtime_rspec.log'
+
+  desc "Run the whole suite across N workers (default #{MAX_WORKERS})"
+  # No :environment prerequisite, matching :smoke and :browser — this task only
+  # shells out, and each worker boots the app itself.
+  task :spec do # rubocop:disable Rails/RakeEnvironment
+    workers = Integer(ENV.fetch('WORKERS', MAX_WORKERS))
+
+    if workers > MAX_WORKERS
+      abort <<~MSG
+        Asked for #{workers} workers, but only #{MAX_WORKERS} Atlas instances exist.
+
+        Workers beyond #{MAX_WORKERS} would share an atlas-test service with a lower-numbered
+        worker, and a run wipes whichever Atlas it points at — so they would delete
+        each other's fixtures mid-run.
+
+        Add an atlas-test-#{MAX_WORKERS + 1} service (and its Solr core) to raise the ceiling.
+      MSG
+    end
+
+    Rake::Task['parallel:prepare'].invoke(workers)
+
+    # Balance on recorded runtime once there is a recording to balance on, and
+    # fall back to file size for the very first run on a fresh checkout. Size is
+    # a poor proxy here — the heaviest file is not close to the largest — so the
+    # first run may finish lopsided. It only happens once: .rspec_parallel has
+    # every worker write its timings, so the next run splits on real numbers.
+    strategy = File.exist?(RUNTIME_LOG) ? 'runtime' : 'filesize'
+    puts "splitting #{workers} ways by #{strategy}"
+
+    # verbose: false suppresses rake's echo of the command, which this task has
+    # just described in friendlier terms. Each worker still prints its own seed,
+    # counts and timing — that is the part a reader acts on.
+    sh "bundle exec parallel_rspec -n #{workers} --group-by #{strategy}", verbose: false
+  end
+
+  desc 'Create and migrate the per-worker Cerberus databases'
+  task :prepare, [:workers] do |_t, args| # rubocop:disable Rails/RakeEnvironment
+    workers = Integer(args[:workers] || ENV.fetch('WORKERS', MAX_WORKERS))
+
+    # Rails' own task rather than parallel_tests' database helpers, because this
+    # app has two test databases (primary and queue) and db:test:prepare is what
+    # knows to load the schema into both.
+    #
+    # Output is held rather than streamed. Loading the schema narrates a TimescaleDB
+    # best-practice warning per column and a hypertable DEBUG line, which is some
+    # seventy lines across four workers and identical every run. Held, it is still
+    # there to print when a prepare actually fails, which is when it means
+    # something.
+    workers.times do |i|
+      number = i.zero? ? '' : (i + 1).to_s
+      output, status = Open3.capture2e({ 'TEST_ENV_NUMBER' => number, 'RAILS_ENV' => 'test' },
+                                       'bundle exec rails db:test:prepare')
+      next if status.success?
+
+      puts output
+      abort("db:test:prepare failed for worker #{i + 1}")
+    end
+  end
+end

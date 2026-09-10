@@ -14,7 +14,7 @@
 -# block edit-page render.
 - if can?(:read, :audit_event)
   - history = AtlasRb::Resource.history(resource_id, nuid: Current.nuid)
-  - events = Array(history['events'])
+  - events = Array(history && history['events'])
   .audit-history.my-3
     %header.audit-history__head
       %div

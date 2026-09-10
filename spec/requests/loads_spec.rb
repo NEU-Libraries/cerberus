@@ -100,6 +100,32 @@ RSpec.describe 'Loads', type: :request do
     end
   end
 
+  describe 'GET /loaders/:slug/loads (history) with past runs' do
+    before { sign_in admin_user }
+
+    it 'summarises each run from the report-level counters' do
+      report = LoadReport.create!(loader: marcom_loader, source_filename: 'jpgs.zip',
+                                  parent_collection_id: 'neu:c1', status: :completed_with_warnings)
+      create_list(:iptc_ingest, 4, load_report: report, status: :completed)
+      create(:iptc_ingest, load_report: report, status: :completed_with_warnings)
+      create(:iptc_ingest, load_report: report, status: :failed)
+
+      get loader_loads_path(marcom_loader)
+
+      expect(response.body).to include('4 of 6 completed', '1 with warnings', '1 failed')
+    end
+
+    it 'reads "N pending" when nothing has finished yet' do
+      report = LoadReport.create!(loader: marcom_loader, source_filename: 'jpgs.zip',
+                                  parent_collection_id: 'neu:c1', status: :pending)
+      create_list(:iptc_ingest, 2, load_report: report, status: :pending)
+
+      get loader_loads_path(marcom_loader)
+
+      expect(response.body).to include('2 pending')
+    end
+  end
+
   # The never-run empty state tells an operator what to bring, so it has to
   # describe the loader in front of them rather than one fixed kind.
   describe 'GET /loaders/:slug/loads (history) with no past runs' do
@@ -317,6 +343,17 @@ RSpec.describe 'Loads', type: :request do
         expect(response.body).to include('of 3')
         expect(response.body).to include('aria-valuenow="1"')
         expect(response.body).to include('aria-valuemax="3"')
+      end
+
+      it 'gives every summary tile the count for its status' do
+        get "/loaders/marcom/loads/#{load_report.id}"
+
+        tiles = response.parsed_body.css('.ingest-summary__tile').to_h do |tile|
+          [tile['class'][/ingest-summary__tile--(\w+)/, 1], tile.css('.ingest-summary__count').text.strip]
+        end
+
+        expect(tiles).to eq('total' => '3', 'completed' => '1', 'pending' => '1', 'processing' => '1',
+                            'completed_with_warnings' => '0', 'failed' => '0')
       end
     end
 

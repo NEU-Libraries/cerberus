@@ -11,7 +11,7 @@
   .p-3
     %p.text-muted.small.mb-3
       Add a file to
-      %strong= @work.title
+      %strong= enhanced_text(@work.title)
       \. It is attached as an additional download and doesn't change the work's thumbnail, viewer, or existing files.
     = form_with url: upload_work_path(@work.id), method: :post, multipart: true do
       %label.form-label{for: 'binary'} File

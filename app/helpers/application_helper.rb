@@ -99,6 +99,19 @@ module ApplicationHelper
     "https://northeastern.libanswers.com/form?#{query}"
   end
 
+  # The citable URL for a Work's minted handle. `handle` is the bare identifier
+  # ("2047/gq67jr519"), not a URL — a resolver turns it into one, and which
+  # resolver is deployment config (config.x.cerberus.handle_resolver_base).
+  #
+  # Minting is best-effort in Atlas, so a complete Work can carry no handle.
+  # That means "not minted yet", not an error: this returns nil and the caller
+  # renders nothing rather than a link that goes nowhere.
+  def handle_url(handle)
+    return if handle.blank?
+
+    "#{Rails.application.config.x.cerberus.handle_resolver_base.chomp('/')}/#{handle}"
+  end
+
   def document_url(document)
     if document.respond_to?(:klass) && document.klass.present?
       model_str = ActiveModel::Naming.singular_route_key(document.klass)
@@ -134,12 +147,10 @@ module ApplicationHelper
   # valkyrie_id in hand); re-deriving it from params[:id] would be a noid and
   # need a noid→uuid Solr lookup, defeating the zero-query design — so reading
   # the ivar is deliberate here.
-  # rubocop:disable Rails/HelperInstanceVariable
   def linked_member_here?(document)
     container = (@collection || @community)&.valkyrie_id
     container.present? && Array(document['a_linked_member_of_ssim']).include?("id-#{container}")
   end
-  # rubocop:enable Rails/HelperInstanceVariable
 
   def result_status_icon(icon_class, title)
     content_tag(:span, class: 'text-body-tertiary align-middle me-2', tabindex: '0',
@@ -148,4 +159,11 @@ module ApplicationHelper
         content_tag(:span, title, class: 'visually-hidden')
     end
   end
+
+  # The read-only maintenance window, for the standing banner. Wrapped in
+  # helpers rather than called on MaintenanceMode from the template so the
+  # cached Atlas read has one entry point from the view layer.
+  def maintenance_window? = MaintenanceMode.read_only?
+
+  def maintenance_message = MaintenanceMode.message
 end

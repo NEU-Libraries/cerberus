@@ -84,14 +84,38 @@
 
   // The group picker, revealed under "Restrict to groups": inset and hairline-
   // bracketed so it reads as belonging to the restrict choice above it.
+  // Held to a reading measure rather than page width: eight tiers of
+  // full-width rows would turn the ladder into a column of stretched controls,
+  // and nothing in a row past the group name earns the space. The cap sits
+  // here, on the block that holds both stacks, rather than on each stack. A
+  // committed row is a .row nested in a plain container, while the entry row is
+  // itself a .row — so capping the two directly would set them 1.5rem apart
+  // (the grid's negative side margins) and leave the − and + misaligned.
   &__groups {
     margin-top: 0.5rem;
     padding: 0.5rem 0 0.15rem 0.9rem;
     border-left: 2px solid $gray-200;
+    max-width: 47rem;
   }
 
-  &__group {
-    font-size: 0.9rem;
-    color: $gray-800;
+  // A result stacks the cosmetic name over the raw Grouper identifier rather
+  // than setting them side by side as the person typeaheads do. A group
+  // identifier runs past sixty characters, so on one line the two fight for
+  // width: either the name wraps, or the identifier truncates at the shared
+  // `northeastern:drs:` prefix — precisely the part that carries no
+  // information.
+  &__entry .inbox-typeahead__item {
+    display: block;
+  }
+
+  &__result-name {
+    display: block;
+  }
+
+  &__entry .inbox-typeahead__nuid {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }

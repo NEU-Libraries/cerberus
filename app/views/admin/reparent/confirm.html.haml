@@ -20,7 +20,7 @@
       .reparent-preview__node
         %span.reparent-preview__caption Moving
         = finder_type_chip(@node.klass)
-        %span.reparent-preview__title= @node.resource.title
+        %span.reparent-preview__title= enhanced_text(@node.resource.title)
         %span.admin-registry-table__id= @node.resource.id
 
       .reparent-preview__flow
@@ -28,7 +28,7 @@
           %span.reparent-preview__caption From
           - if @current_parent
             = finder_type_chip(@current_parent.klass)
-            %span.reparent-preview__title= @current_parent.title
+            %span.reparent-preview__title= enhanced_text(@current_parent.title)
             %span.admin-registry-table__id= @current_parent.noid
           - else
             %span.reparent-preview__title.text-muted Top level
@@ -36,7 +36,7 @@
         .reparent-preview__endpoint
           %span.reparent-preview__caption To
           = finder_type_chip(@destination.klass)
-          %span.reparent-preview__title= @destination.resource.title
+          %span.reparent-preview__title= enhanced_text(@destination.resource.title)
           %span.admin-registry-table__id= @destination.resource.id
 
     %p.text-muted.small.mt-3.mb-3

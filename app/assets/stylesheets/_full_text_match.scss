@@ -23,7 +23,7 @@
     font-size: 0.85rem;
     line-height: 1.5;
     color: $gray-800;
-    background-color: #ecf0f1; // matches .well
+    background-color: $well-bg;
     border: 1px solid $gray-300;
     border-radius: 0.375rem;
     padding: 0.5rem 0.75rem;

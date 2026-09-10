@@ -13,6 +13,14 @@ describe CollectionsController do
 
     before do
       AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      # Readable as well as editable. Atlas gates reads on the resource's own ACL,
+      # and this fixture user carries no NUID, so the ACL read is made as the
+      # guest — a private resource comes back as nothing and the page 404s before
+      # the edit gate runs. Publicizing after the edit write, because
+      # publicize_resource! reads the current envelope and carries the grant
+      # through; the reverse order would drop it.
+      publicize_ancestry!(community: community)
+      publicize_resource!(AtlasRb::Collection, collection, '000000004')
       sign_in user
     end
 
@@ -242,6 +250,49 @@ describe CollectionsController do
     end
   end
 
+  # v1 answered 403 for a record the caller could not read, signed in or not
+  # (cerberus-classic lib/cerberus/controller_helpers/editable_objects.rb).
+  # v2 must match: DRS has no policy of hiding a resource's existence, and the
+  # 403 page is the one that tells a signed-out reader to log in.
+  describe 'show on a Collection the caller may not read' do
+    render_views
+
+    # No stub. The Collection is left private, so Atlas refuses the guest's read
+    # with a 403 and AtlasRb::Collection.find raises the bare ResourceError.
+    it 'renders the forbidden template with status 403 instead of a Rails 500' do
+      get :show, params: { id: collection.id }
+
+      expect(response).to have_http_status(:forbidden)
+      expect(response).to render_template('errors/forbidden')
+      expect(CGI.unescapeHTML(response.body)).to include("you don't have permission")
+    end
+
+    it 'offers a signed-out reader the sign-in link rather than a dead end' do
+      get :show, params: { id: collection.id }
+
+      expect(response.body).to include(new_user_session_path)
+    end
+
+    # The ordering trap in Authorizable: NotFoundError subclasses ResourceError,
+    # and rescue_from matches the last registered handler first. Registered in
+    # the wrong order, the 403 handler swallows this and the 404 page dies.
+    it 'still renders 404 for a missing id, not the forbidden page' do
+      get :show, params: { id: 'does-not-exist-1234' }
+
+      expect(response).to have_http_status(:not_found)
+      expect(response).to render_template('errors/not_found')
+    end
+
+    # A 401 means our own bearer token is wrong. Presenting that as a polite
+    # permission page would hide a misconfiguration on every page at once.
+    it 'lets a non-403 ResourceError bubble rather than dressing it as a refusal' do
+      allow(AtlasRb::Collection).to receive(:find)
+        .and_raise(AtlasRb::ResourceError.new('GET /collections/x → 401', response: nil))
+
+      expect { get :show, params: { id: collection.id } }.to raise_error(AtlasRb::ResourceError)
+    end
+  end
+
   describe 'new' do
     # #new now requires authentication (audit G3, deny-by-default macro).
     let(:user) { User.new(email: 'dep@example.com', nuid: '000000004', role: 'standard', groups: []) }
@@ -263,6 +314,68 @@ describe CollectionsController do
     it 'targets the nested create path for the destination it was opened from' do
       get :new, params: { collection_id: collection.id }
       expect(assigns(:create_path)).to eq(collection_collections_path(collection.id))
+    end
+
+    # The create form carries the same two controls the Permissions tab does, so
+    # a Collection is born with a chosen audience rather than a silent one.
+    context 'permissions section' do
+      render_views
+
+      it 'renders the group grant editor' do
+        get :new, params: { community_id: community.id }
+
+        expect(response.body).to include('Group Permissions')
+        expect(response.body).to include('collection[permissions][new][group_id]')
+      end
+
+      # Atlas copies the destination's read ACL onto a new child, so the form has
+      # to open holding it. Showing a blank slate would invite a curator to
+      # submit one and silently drop grants they never saw.
+      it 'prefills the grants the new collection would inherit' do
+        AtlasRb::Community.metadata(community.id,
+                                    { 'permissions' => { 'read' => ['editors'] } }, nuid: '000000004')
+
+        get :new, params: { community_id: community.id }
+
+        expect(assigns(:permissions).map(&:group_id)).to include('editors')
+        expect(response.body).to include('collection[permissions][1][group_id]')
+      end
+
+      # A brand-new Collection has nothing inside it, so the cascade warning the
+      # edit tab carries must not appear — and leaving @narrowing_allowed unset
+      # is what keeps _visibility_control off its locked branch.
+      it 'leaves the narrowing state unset' do
+        get :new, params: { community_id: community.id }
+
+        expect(assigns(:narrowing_allowed)).to be_nil
+        expect(response.body).not_to include('narrowing-confirm')
+      end
+
+      it 'withholds Public under a private destination and names it' do
+        get :new, params: { community_id: community.id }
+
+        control = response.parsed_body.at_css('[name="mass"]')
+        expect(assigns(:public_allowed)).to be(false)
+        expect(control.name).to eq('input')
+        expect(control['value']).to eq('private')
+        expect(CGI.unescapeHTML(response.body)).to include("#{community.title}” is private")
+      end
+
+      # Public is what the Collection would inherit, so preselecting it is what
+      # lets the control add a choice without moving the outcome for a reader
+      # who ignores it. Preselecting Private would narrow every child of a
+      # public container instead.
+      it 'offers the choice under a public destination and preselects the inherited Public' do
+        publicize_ancestry!(community: community)
+
+        get :new, params: { community_id: community.id }
+
+        control = response.parsed_body.at_css('[name="mass"]')
+        expect(assigns(:public_allowed)).to be(true)
+        expect(assigns(:public)).to be(true)
+        expect(control.name).to eq('select')
+        expect(control.at_css('option[selected]')['value']).to eq('public')
+      end
     end
   end
 
@@ -324,6 +437,72 @@ describe CollectionsController do
       expect(response).to redirect_to(new_community_collection_path(community.id))
     end
 
+    # Atlas copies the destination's ACL onto a new child, and the form opens
+    # holding that copy — so submitting it untouched has to land where a bare
+    # create would. Otherwise adding the control would itself change what
+    # creating a Collection does.
+    it 'lands on the inherited ACL when the prefilled controls are submitted untouched' do
+      publicize_ancestry!(community: community)
+      reference = AtlasRb::Collection.create(community.id, nuid: '000000004')
+      inherited = Array(AtlasRb::Resource.permissions(reference.id)&.read)
+
+      post :create, params: { community_id: community.id, mass: 'public',
+                              collection: { title: 'InheritedCollection', description: 'D' } }
+
+      created_id = response.location.split('/').last
+      expect(Array(AtlasRb::Resource.permissions(created_id)&.read)).to match_array(inherited)
+    ensure
+      [reference&.id, created_id].compact.each { |id| AtlasRb::Collection.tombstone(id) }
+    end
+
+    it 'applies the submitted visibility and group grants to the new collection' do
+      publicize_ancestry!(community: community)
+
+      post :create, params: { community_id: community.id, mass: 'public',
+                              collection: { title: 'PermissionedCollection', description: 'D',
+                                            permissions: { '1' => { group_id: 'editors', ability: 'read' } } } }
+
+      created_id = response.location.split('/').last
+      expect(Array(AtlasRb::Resource.permissions(created_id)&.read)).to contain_exactly('public', 'editors')
+    ensure
+      AtlasRb::Collection.tombstone(created_id) if created_id
+    end
+
+    # Atlas assigns edit_groups, edit_users and embargo unconditionally from the
+    # payload, so the submitted grants have to be merged into the envelope the
+    # new Collection was minted with. Replacing it would strip the edit grants
+    # Atlas just gave it — a form naming only read groups names no edit ones.
+    it 'merges the submitted grants into the minted envelope rather than replacing it' do
+      allow(AtlasRb::Collection).to receive(:metadata).and_call_original
+
+      post :create, params: { community_id: community.id, mass: 'private',
+                              collection: { title: 'EnvelopeCollection', description: 'D',
+                                            permissions: { '1' => { group_id: 'editors', ability: 'read' } } } }
+
+      created_id = response.location.split('/').last
+      expect(AtlasRb::Collection).to have_received(:metadata).with(
+        created_id, hash_including(permissions: hash_including(edit: [Permissions::STAFF_EDIT_GROUP],
+                                                               read: ['editors']))
+      )
+    ensure
+      AtlasRb::Collection.tombstone(created_id) if created_id
+    end
+
+    # #apply_permissions would address params[:id] — nil on this path — and
+    # compare against the DESTINATION's envelope, which is what @permissions
+    # still holds here. A Collection one line old has nothing to cascade to.
+    it 'does not consult the narrowing cascade for a collection it has just created' do
+      allow(NarrowingRequest).to receive(:call)
+
+      post :create, params: { community_id: community.id, mass: 'private',
+                              collection: { title: 'NoCascadeCollection', description: 'D' } }
+
+      created_id = response.location.split('/').last
+      expect(NarrowingRequest).not_to have_received(:call)
+    ensure
+      AtlasRb::Collection.tombstone(created_id) if created_id
+    end
+
     # The destination is a route segment, so there is no request shape that
     # reaches create without one. (GET /collections still routes — that's the
     # index; only the unparented POST is gone.)
@@ -338,8 +517,8 @@ describe CollectionsController do
   describe '#collection_breadcrumbs (private)' do
     def stub_collection(parent_noid:)
       item = OpenStruct.new(id: 'cnoid', title: 'Working Files',
-                            ancestor_chain: [{ 'noid' => 'people', 'klass' => 'Community', 'title' => 'People' },
-                                             { 'noid' => parent_noid, 'klass' => 'Collection', 'title' => 'Personal Root' }])
+                            ancestors: [{ 'noid' => 'people', 'klass' => 'Community', 'title' => 'People' },
+                                        { 'noid' => parent_noid, 'klass' => 'Collection', 'title' => 'Personal Root' }])
       allow(AtlasRb::Resource).to receive(:find).with('cnoid').and_return(OpenStruct.new(resource: item, klass: 'Collection'))
     end
 
@@ -403,6 +582,84 @@ describe CollectionsController do
       expect(controller).to receive(:breadcrumbs).with('cnoid', editing: true, result: anything)
 
       controller.send(:collection_breadcrumbs, 'cnoid', editing: true)
+    end
+  end
+
+  # #update is the shared entry point for the Metadata and Permissions tabs,
+  # which are separate forms posting disjoint fields to the same action. The
+  # branches worth pinning are the ones that decide whether Atlas is written at
+  # all: a refused ACL must not take the descriptive edit down with it, and a
+  # narrowing must reach the cascade rather than being written here.
+  describe 'update' do
+    let(:user) { User.new(email: 'ed@example.com', nuid: '000000002', groups: ['editors']) }
+
+    before do
+      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      sign_in user
+    end
+
+    it 'merges the descriptive fields into the existing MODS and redirects to show' do
+      patch :update, params: { id:         collection.id,
+                               collection: { title: 'NewCollectionTitle', description: 'NewCollectionAbstract' } }
+
+      expect(response).to redirect_to(collection_path(collection.id))
+      updated = AtlasRb::Collection.find(collection.id, nuid: '000000004')
+      expect(updated.title).to start_with('NewCollectionTitle')
+      expect(updated.description).to include('NewCollectionAbstract')
+    end
+
+    it 'refuses a blank title and returns to the edit page without writing MODS' do
+      allow(AtlasRb::Collection).to receive(:update)
+
+      patch :update, params: { id: collection.id, collection: { title: '', description: 'Whatever' } }
+
+      expect(AtlasRb::Collection).not_to have_received(:update)
+      expect(flash[:alert]).to eq('Please provide a title.')
+      expect(response).to redirect_to(edit_collection_path(collection.id))
+    end
+
+    # The parent has to be public first. Atlas refuses a child grant that would
+    # make it more visible than its container, and that refusal is the subject
+    # of the next example rather than this one.
+    it 'writes a submitted group grant to the read ACL' do
+      publicize_ancestry!(community: community)
+
+      patch :update, params: { id:         collection.id,
+                               collection: { permissions: { '1' => { group_id: 'editors', ability: 'read' } } } }
+
+      expect(Array(AtlasRb::Resource.permissions(collection.id, nuid: '000000004')&.read)).to include('editors')
+    end
+
+    # apply_permissions runs BEFORE the descriptive save, so a raise rather than
+    # a flash would discard title and abstract edits that are independent of the
+    # ACL and perfectly valid on their own.
+    #
+    # Atlas refuses this one for real, with no stub: the parent community is not
+    # public, so a read grant on the child would make it more visible than its
+    # container.
+    it 'reports a refused ACL write and still saves the descriptive fields beside it' do
+      patch :update, params: { id:         collection.id,
+                               collection: { title:       'TitleSurvivesRefusal',
+                                             description: 'AbstractSurvivesRefusal',
+                                             permissions: { '1' => { group_id: 'editors', ability: 'read' } } } }
+
+      expect(flash[:alert]).to eq(ResourcePermissions::PERMISSIONS_REFUSED['visibility_exceeds_parent'])
+      expect(AtlasRb::Collection.find(collection.id, nuid: '000000004').title).to start_with('TitleSurvivesRefusal')
+    end
+
+    # Taking audience away from a Collection has to reach everything inside it,
+    # and the container is written last, so the synchronous write is skipped
+    # entirely and the whole change goes to VisibilityCascadeJob.
+    it 'hands a narrowing to NarrowingRequest instead of writing it here' do
+      allow(NarrowingRequest).to receive(:call)
+        .and_return(NarrowingRequest::Outcome.new(status: :dispatched, message: 'Queued.'))
+      allow(AtlasRb::Collection).to receive(:metadata)
+
+      patch :update, params: { id:         collection.id,
+                               collection: { permissions: { '1' => { group_id: 'editors', ability: 'read' } } } }
+
+      expect(AtlasRb::Collection).not_to have_received(:metadata)
+      expect(flash[:notice]).to eq('Queued.')
     end
   end
 end

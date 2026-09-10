@@ -10,12 +10,27 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_02_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_31_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
   enable_extension "timescaledb"
   enable_extension "uuid-ossp"
+
+  create_table "admin_notices", force: :cascade do |t|
+    t.string "actor_nuid"
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.string "kind", null: false
+    t.date "occurred_on", null: false
+    t.jsonb "payload", default: {}, null: false
+    t.string "subject", null: false
+    t.string "subject_noid"
+    t.datetime "updated_at", null: false
+    t.index ["kind", "created_at"], name: "index_admin_notices_on_kind_and_created_at"
+    t.index ["kind", "occurred_on"], name: "index_admin_notices_on_kind_and_occurred_on"
+    t.index ["kind", "occurred_on"], name: "index_admin_notices_one_digest_per_day", unique: true, where: "((kind)::text = 'daily_digest'::text)"
+  end
 
   create_table "bookmarks", id: :serial, force: :cascade do |t|
     t.datetime "created_at", precision: nil, null: false
@@ -87,6 +102,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_02_000001) do
     t.text "warnings", default: "[]"
     t.string "work_pid"
     t.index ["load_report_id"], name: "index_iptc_ingests_on_load_report_id"
+  end
+
+  create_table "legacy_identifiers", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "noid", null: false
+    t.string "object_type", null: false
+    t.string "pid", null: false
+    t.datetime "updated_at", null: false
+    t.index ["noid"], name: "index_legacy_identifiers_on_noid"
+    t.index ["pid"], name: "index_legacy_identifiers_on_pid", unique: true
   end
 
   create_table "load_reports", force: :cascade do |t|

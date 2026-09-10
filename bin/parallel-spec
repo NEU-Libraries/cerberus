@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+#
+# Run the whole suite sharded across worker processes, bringing the test Atlas
+# lane up first if it is not already.
+#
+#   bin/parallel-spec              # four workers
+#   bin/parallel-spec -n 2         # two
+#   bin/parallel-spec --down       # release the lane, run nothing
+#   bin/parallel-spec --ephemeral  # run, then release the lane again
+#
+# The lane is left running by default. Bringing it up costs about fourteen
+# seconds and tearing it down about eleven, which is a fifth of a run to repay on
+# every invocation while iterating — but it holds roughly 1.3 GB of RAM idle, so
+# the tail of the run says so and names the way out.
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/spec-lane.sh
+source "$SCRIPT_DIR/lib/spec-lane.sh"
+
+WORKERS=4
+ACTION=run
+EPHEMERAL=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -n) WORKERS="$2"; shift 2 ;;
+    --down) ACTION=down; shift ;;
+    --ephemeral) EPHEMERAL=1; shift ;;
+    -h|--help) sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) echo "unknown argument: $1" >&2; exit 2 ;;
+  esac
+done
+
+lane_init
+
+if [[ "$ACTION" == down ]]; then
+  lane_down "$WORKERS"
+  exit 0
+fi
+
+# Before lane_up, not after. lane_up's readiness probe is GET /reset, and a
+# worker whose core is missing answers 500 there rather than 204: the reset
+# deletes by query against blacklight-test-<n> and Solr 404s the unknown core.
+# Ordered the other way the lane can never come up after a solr recreate, since
+# the step that would fix the cores sits behind the wait that is failing on
+# them. Safe this early because it needs only the solr container.
+"$REPO_ROOT/bin/parallel-solr-cores" "$WORKERS"
+
+lane_up "$WORKERS"
+
+status=0
+docker exec -w "$CONTAINER_ROOT" cerberus-web-1 \
+  bundle exec rake parallel:spec WORKERS="$WORKERS" || status=$?
+
+if [[ "$EPHEMERAL" == 1 ]]; then
+  lane_down "$WORKERS"
+else
+  echo
+  echo "test Atlas lane left running (~1.3 GB). Release it with: bin/parallel-spec --down"
+fi
+
+exit "$status"

@@ -25,6 +25,13 @@ production:
     class: RollupContainerImpressionsJob
     queue: background
     schedule: every day at 4:10am
+  # Runs after the nightly rollups, so the day it sums up has settled.
+  # Re-runnable by hand with `rake admin:digest[YYYY-MM-DD]`; a partial unique
+  # index keeps a day to one digest however many times it fires.
+  daily_digest:
+    class: DailyDigestJob
+    queue: background
+    schedule: every day at 5:05am
   reclassify_user_agents:
     class: ReclassifyUserAgentsJob
     queue: background

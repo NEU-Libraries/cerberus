@@ -82,4 +82,9 @@ RSpec.describe 'XML loader create-mode flow', type: :request do
     expect(ContentCreationJob).to have_received(:perform_later)
       .with('w-created', a_string_ending_with('flower.jpg'), 'flower.jpg', kind_of(String), complete_work: true)
   end
+
+  # The loaders under test create Works and do not confirm them, so this file
+  # leaves rows on the admin triage registry. Purging them keeps that registry's
+  # own specs measuring its filter (see spec/support/work_cleanup.rb).
+  after(:all) { purge_stuck_works! }
 end

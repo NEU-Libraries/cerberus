@@ -209,4 +209,65 @@ describe Iptc::MODSBuilder do
       expect(xml).to include('mods-3-5.xsd')
     end
   end
+  # MarCom types captions in an image editor, so a paste out of Word arrives here
+  # too, and exiftool hands the control character straight back. This path had it
+  # worse than the forms: Nokogiri::XML::Builder writes the raw byte into its
+  # output instead of dropping it, and nothing on the ingest validates -- so a
+  # document that does not parse strictly reached Atlas and the words merged, in a
+  # batch nobody reads field by field. Codepoints, not literals, so this file
+  # stays ASCII.
+  describe 'characters XML cannot store' do
+    def cp(*codepoints) = codepoints.pack('U*')
+
+    let(:vt) { cp(0x000B) }
+
+    it 'separates the words in a Headline instead of merging them' do
+      iptc = minimum_iptc.merge(Headline: "Simple#{vt}form VT test")
+      expect(doc(iptc).at_xpath('//mods/titleInfo/title').text).to eq('Simple form VT test')
+    end
+
+    it 'separates a keyword' do
+      iptc = minimum_iptc.merge(Keywords: ["Civil#{vt}society"])
+      expect(doc(iptc).xpath('//mods/subject/topic').map(&:text)).to eq(['Civil society'])
+    end
+
+    # The one that gives the game away: a city turns into a different real word.
+    it 'separates a geographic subject' do
+      iptc = minimum_iptc.merge(City: "Bos#{vt}ton", State: 'Massachusetts')
+      expect(doc(iptc).at_xpath('//mods/subject/geographic').text).to eq('Bos ton, Massachusetts')
+    end
+
+    it 'keeps the break as a line break in the abstract, which is prose' do
+      iptc = minimum_iptc.merge(Description: "Para one#{vt}Para two")
+      expect(doc(iptc).at_xpath('//mods/abstract').text).to eq("Para one\nPara two")
+    end
+
+    it 'drops a control that carries no meaning rather than separating on it' do
+      iptc = minimum_iptc.merge(Headline: "Bell#{cp(0x0007)}test")
+      expect(doc(iptc).at_xpath('//mods/titleInfo/title').text).to eq('Belltest')
+    end
+
+    it 'leaves a Time tag alone' do
+      iptc = minimum_iptc.merge(DateTimeOriginal: Time.utc(2026, 8, 22))
+      expect(doc(iptc).at_xpath('//mods/originInfo/dateCreated').text).to eq('2026-08-22')
+    end
+
+    # The builder emits the document the job hands to Atlas, so it has to be
+    # well-formed by the strict parser -- Builder#to_xml wrote the raw byte
+    # through, and a lenient parse downstream was all that hid it.
+    it 'emits a document that parses strictly' do
+      iptc = minimum_iptc.merge(Headline: "Simple#{vt}form", City: "Bos#{vt}ton")
+      xml = described_class.call(iptc: iptc).xml
+
+      expect { Nokogiri::XML(xml, &:strict) }.not_to raise_error
+      expect(Metadata::ControlCharacters.any?(xml)).to be(false)
+    end
+
+    # A Headline of nothing but control characters used to pass the required-field
+    # check and then emit an empty title.
+    it 'refuses a Headline that is only control characters' do
+      expect { described_class.call(iptc: minimum_iptc.merge(Headline: vt)) }
+        .to raise_error(described_class::MissingRequiredField, 'Headline')
+    end
+  end
 end

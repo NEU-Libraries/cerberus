@@ -2,11 +2,12 @@
 
 # The editor-facing "Request withdraw / move" action on the Work edit page.
 #
-# Cerberus has no request/approval model: a request is a user-sent Message to
-# the DRS staff group inbox (read-time group delivery, see Message.inbox_for),
-# which staff fulfill with the existing tools — the show-page tombstone, or the
-# admin re-parent finder. Mixed into WorksController, where request_change is an
-# edit-gated action (see authorize_resource_writes!).
+# Cerberus has no approval model and no request lifecycle: a request is one
+# write-once row on the admin ledger, which staff read and then fulfil with the
+# tools that already exist — the show-page tombstone, or the admin re-parent
+# finder. They coordinate with each other, and reply to the depositor, off-site.
+# Mixed into WorksController, where request_change is an edit-gated action (see
+# authorize_resource_writes!).
 module WorkChangeRequest
   extend ActiveSupport::Concern
 
@@ -23,7 +24,7 @@ module WorkChangeRequest
 
     deliver_change_request(action, note)
     redirect_to work_path(params[:id]),
-                notice: 'Your request has been sent to the DRS staff — they will follow up in your inbox.'
+                notice: 'Your request has been sent to the DRS staff — they will be in touch.'
   end
 
   private
@@ -35,22 +36,19 @@ module WorkChangeRequest
       'Tell the staff where this work should move to.' if action == 'move' && note.blank?
     end
 
-    # Compose the staff-group inbox message. A user-sent message (sender = the
-    # requester, attribution-aware like the deposit / set-sharing paths), so
-    # staff see who asked and can reply.
+    # The requester is attribution-aware (attributed_nuid), like the deposit and
+    # set-sharing paths, so an impersonated request names the person acted for.
+    # The title is snapshotted because the ledger lists many rows at once and
+    # must not cost one Atlas call each; the row links by noid, so a later
+    # rename leaves the link correct.
     def deliver_change_request(action, note)
       work = AtlasRb::Work.find(params[:id])
-      requester = current_user.try(:name).presence || current_user&.nuid
-      verb = action == 'withdraw' ? 'withdrawn' : 'moved'
-      lines = ["#{requester} has requested that this work be #{verb}.",
-               '', %(Work: “#{work.title}”), work_url(params[:id])]
-      lines += ['', "#{action == 'move' ? 'Requested destination' : 'Note'}: #{note}"] if note.present?
-
-      Message.create!(
-        sender_nuid:     attributed_nuid,
-        recipient_group: Permissions::STAFF_EDIT_GROUP,
-        subject:         %(Request to #{action} “#{work.title}”),
-        body:            lines.join("\n")
+      AdminNotice.create!(
+        kind:         "request_#{action}",
+        subject:      %(Request to #{action} “#{work.title}”),
+        actor_nuid:   attributed_nuid,
+        subject_noid: params[:id],
+        payload:      { subject_type: 'Work', subject_title: work.title, note: note.presence }
       )
     end
 end

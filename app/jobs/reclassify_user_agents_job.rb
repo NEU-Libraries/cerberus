@@ -15,7 +15,7 @@ class ReclassifyUserAgentsJob < ApplicationJob
       verdict = UserAgent.bot?(user_agent.ua_string)
       next if user_agent.is_bot == verdict
 
-      user_agent.update_columns(is_bot: verdict, classified_at: Time.current) # rubocop:disable Rails/SkipsModelValidations
+      user_agent.update_columns(is_bot: verdict, classified_at: Time.current)
     end
   end
 end

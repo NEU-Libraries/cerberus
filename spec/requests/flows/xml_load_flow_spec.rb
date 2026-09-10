@@ -72,4 +72,9 @@ RSpec.describe 'XML loader end-to-end flow', type: :request do
     expect(lr.xml_ingests.failed.count).to eq(1)
     expect(lr.reload).to be_failed
   end
+
+  # The loaders under test create Works and do not confirm them, so this file
+  # leaves rows on the admin triage registry. Purging them keeps that registry's
+  # own specs measuring its filter (see spec/support/work_cleanup.rb).
+  after(:all) { purge_stuck_works! }
 end

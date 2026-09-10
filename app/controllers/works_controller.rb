@@ -1,37 +1,34 @@
 # frozen_string_literal: true
 
 # Spans the whole Work lifecycle — deposit, show, edit, tombstone, manifest,
-# downloads — as one cohesive controller rather than being split by verb, so it
-# runs past the default class-length budget.
-class WorksController < ApplicationController # rubocop:disable Metrics/ClassLength
+# downloads — as one cohesive controller rather than being split by verb, which
+# is why it runs past the default class-length budget. See docs/deposit.md.
+class WorksController < ApplicationController
   include Thumbable
   include Transformable
   include DepositorContext
   include WorkDeposit
   include WorkBreadcrumbs
   include WorkChangeRequest
+  include WorkCaptions
+  include WorkStreamingOnly
+  include WorkDerivativeWidths
   include UploadStaging
   include RecordsImpressions
   include ZoomViewer
   include ParallelAtlasReads
-  # The weighted deposit fork's context queries (the depositor's own workspace
-  # Collections, a community's publish showcases via ShowcaseFinder) run through
-  # the Blacklight SearchBuilder, so this controller needs the catalog config —
-  # the same wiring Admin::PeopleController uses for its community picker.
+  # The deposit context queries run through the Blacklight SearchBuilder, so
+  # this controller needs the catalog config.
   include Blacklight::Configurable
+  # `search_service` lives in Searchable, NOT in Blacklight::Controller, and
+  # this controller does not inherit from CatalogController.
+  include Blacklight::Searchable
 
   copy_blacklight_config_from(CatalogController)
 
   IN_PROGRESS_NOTICE = 'This work is still being processed and cannot be edited yet.'
-  # Covers both promotion failures — an unresolvable showcase and a refused
-  # link. Either way the deposit itself succeeded, which is what the depositor
-  # needs to know; the distinction only matters in the log.
   PUBLISH_LINK_FAILED = "File uploaded — please review the metadata. It couldn't be added to the " \
                         'community showcase; contact DRS staff if this persists.'
-  # The deposit stands; only the collection's per-rendition default was refused,
-  # which leaves this work's renditions at its own visibility rather than the
-  # narrower one the collection asked for. Named to the depositor because that is
-  # wider access than intended, even though it is never wider than the work.
   DERIVATIVE_DEFAULT_FAILED = 'File uploaded — please review the metadata. The collection\'s download ' \
                               'restrictions could not be applied to it; contact DRS staff before sharing it.'
   UNSUPPORTED_AV = 'DRS streams H.264/AAC video and AAC/MP3 audio — please convert your file first.'
@@ -40,6 +37,13 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
   authorize_resource_writes!(extra_edit: %i[metadata update_metadata request_change upload add_file])
   before_action :reject_if_in_progress, only: [:edit]
   after_action :record_view_impression, only: :show
+
+  # Blacklight 8 scopes every SearchBuilder to the SearchService, not the
+  # controller, so without this SearchBuilder#gated_user is nil and the
+  # associations box silently gates as anonymous.
+  def search_service_context
+    { current_user: current_user, effective_user: effective_user }
+  end
 
   def show
     @work = AtlasRb::Work.find(params[:id])
@@ -56,9 +60,7 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     perform_tombstone!(AtlasRb::Work.tombstone(params[:id]), type: 'Work')
   end
 
-  # IIIF Presentation 3.0 manifest — one Canvas per page FileSet, in page
-  # order. Read-gated like every other view of the Work; the underlying
-  # Atlas reads are caller-gated too.
+  # IIIF Presentation 3.0 manifest, one Canvas per page FileSet in page order.
   def manifest
     work = AtlasRb::Work.find(params[:id])
     return head :not_found if work.tombstoned
@@ -73,26 +75,28 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
   end
 
   # The form asks what to deposit, never where: the destination is the route's
-  # parent segment, already resolved and :edit-gated by authorize_destination!.
-  # Its one option is promotion into a community genre showcase, offered only
-  # from the depositor's own personal root — see #publish_offered?.
+  # parent segment, already :edit-gated by authorize_destination!.
   def new
     @work = Work.new
     @parent = AtlasRb::Collection.find(@destination_id)
     raise ResourceNotFound if @parent.nil?
 
-    # The POST target for the form this renders. Without it form_tag falls back
-    # to the current URL — /collections/:id/works/new, which routes nowhere for
-    # POST — and the deposit 404s on submit.
+    # Required: without it form_tag posts back to /collections/:id/works/new,
+    # which routes nowhere for POST, and the deposit 404s on submit.
     @create_path = child_create_path('works')
     @publish_targets = publish_offered? ? publish_targets : {}
   end
 
   def edit
-    @work = AtlasRb::Work.find(params[:id])
+    @work = requested_work
     form_preparation(@permissions, resource: @work)
     load_descriptive!('Work')
     load_advanced!('Work')
+    # The Work's own assets, not the staged upload #metadata probes: by edit
+    # time the content Blob has landed and the staged file is long gone.
+    assets = AtlasRb::Work.assets(params[:id], nuid: effective_user&.nuid)
+    load_streaming_only!(offered: StreamingOnly.applicable?(assets))
+    load_caption!(offered: CaptionTrack.applicable?(assets), files: assets)
     breadcrumbs(params[:id], editing: true)
   end
 
@@ -107,39 +111,44 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     redirect_to metadata_work_path(@work.id), notice: create_notice
   end
 
-  # Metadata + Permissions tabs are separate forms that both PATCH here with
-  # disjoint fields; descriptive edits are merged into the existing MODS in place
-  # (MODSMerge) so curated title structure is never flattened. Title + at least
-  # one keyword are required.
+  # The Metadata and Permissions tabs are separate forms that both PATCH here
+  # with disjoint fields. See docs/deposit.md.
   def update
     handle_metadata_update(klass: 'Work', resource_key: :work, keywords: true)
+    apply_streaming_only!
+    apply_caption!
   end
 
   def metadata
     @work = AtlasRb::Work.find(params[:id])
-    # Gates the opt-in Image Derivatives section (nil for non-image deposits).
     @image_probe = StagedImageProbe.call(work_id: params[:id])
     form_preparation(@permissions, resource: @work)
     load_descriptive!('Work')
+    # Probe the STAGED file, never the Work's assets: ContentCreationJob may
+    # still be in flight here, and Atlas would hide the toggle and the caption
+    # field from exactly the deposits that want them.
+    video = StagedVideoProbe.call(work_id: params[:id])
+    load_streaming_only!(offered: video)
+    load_caption!(offered: video)
   end
 
   def update_metadata
     handle_metadata_update(klass: 'Work', resource_key: :work, keywords: true)
-    # AFTER the descriptive save, deliberately: with a live worker,
-    # DepositDerivativesJob can execute within this same request, and its
-    # Delegate PATCH bumps the Work's optimistic lock — enqueueing first
-    # raced save_descriptive! into AtlasRb::StaleResourceError (seen live;
-    # invisible to specs, whose test adapter never runs the job inline).
+    # AFTER the descriptive save, deliberately: with a live worker
+    # DepositDerivativesJob runs inside this request and its Delegate PATCH
+    # bumps the lock, racing save_descriptive! into StaleResourceError. Specs
+    # never see it — the test adapter does not run the job inline.
     process_derivative_widths
-    # This save is the depositor confirming the deposit, and confirmation is what
-    # completes the Work — ingest deliberately leaves it in_progress. Deferred to a
-    # job because Atlas asks callers to complete only once the expected children
-    # are deposited, and the primary Blob may still be in flight.
+    apply_streaming_only!
+    # Before the confirm, so the caption Blob queues behind the deposit's own
+    # finalization rather than ahead of it.
+    apply_caption!
+    # This save is the depositor's confirmation, and confirmation completes the
+    # Work; ingest deliberately leaves it in_progress. See docs/deposit.md.
     ConfirmDepositJob.perform_later(params[:id])
   end
 
-  # The "Upload File" affordance on the show page: add an arbitrary binary to
-  # this already-complete Work. GET renders the form; #add_file handles the POST.
+  # The "Upload File" affordance on the show page; #add_file handles the POST.
   def upload
     @work = AtlasRb::Work.find(params[:id])
     raise ResourceNotFound if @work.nil?
@@ -147,11 +156,9 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
     upload_breadcrumbs
   end
 
-  # Attach the uploaded binary as an additional download. The file is staged to
-  # disk and the Blob create is deferred to AddFileJob so the request returns
-  # immediately (the upload may be multi-GB). Attach-only: no derivative
-  # enrichment, so the Work's thumbnail / viewer / existing files are untouched —
-  # the added file simply appears in the Downloads card once processing finishes.
+  # ATTACH-ONLY: never enrich here. The added file appears in Downloads and the
+  # Work's thumbnail, viewer and existing files stay untouched. See
+  # docs/deposit.md.
   def add_file
     file = params[:binary]
     return redirect_to(upload_work_path(params[:id]), alert: 'Choose a file to upload.') if file.blank?
@@ -164,76 +171,11 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
 
   private
 
-    # Promotion is offered only when the destination IS the depositor's own
-    # personal root. That is what keeps a promoted Work in the depositor's own
-    # space now that the route, not the publish branch, decides placement — and
-    # it keys on the destination rather than on which button you arrived by, so
-    # it can't be sidestepped by typing a URL.
-    def publish_offered?
-      root = deposit_person&.[]('personal_root_id').presence
-      root.present? && root.to_s == @destination_id.to_s
-    end
-
-    # Add the showcase edge when the form asked for one. A promotion that can't
-    # be honoured leaves the deposit standing and flags the flash — the Work
-    # already exists and is correctly placed, so there is nothing to roll back.
-    def promote_if_requested
-      return unless ActiveModel::Type::Boolean.new.cast(params[:publish])
-      return @publish_link_failed = true unless publish_offered?
-
-      showcase_id = publish_showcase_id
-      return @publish_link_failed = true if showcase_id.blank?
-
-      promote_to_showcase(showcase_id)
-    end
-
-    # Server backstop for the metadata page's opt-in download sizes. The
-    # Stimulus controller is the primary enforcement, so a violation here
-    # means JS-off or tampering — in that case the metadata still saves and
-    # only the optional derivatives are skipped, with the reason flashed
-    # (never bounce the whole form over decoration). Known interplay: if
-    # descriptive validation also fails, apply_descriptive overwrites this
-    # flash (last writer wins) — acceptable; valid derivatives enqueued
-    # here are independent of the title and harmless.
-    def process_derivative_widths
-      raw = params[:derivative_widths]
-      return unless raw.is_a?(ActionController::Parameters)
-
-      probe = StagedImageProbe.call(work_id: params[:id])
-      return flash[:alert] = 'Download sizes were skipped: no staged image was found for this work.' if probe.nil?
-
-      enqueue_valid_widths(raw, probe)
-    end
-
-    def enqueue_valid_widths(raw, probe)
-      result = DerivativeWidths.call(raw:          raw.permit(:small, :medium, :large).to_h,
-                                     longest_edge: probe.longest_edge)
-      unless result.valid?
-        return flash[:alert] = "Download sizes were not generated: #{result.error} " \
-                               'Your other changes were saved — revisit this page to configure download sizes.'
-      end
-      return if result.widths.empty?
-
-      DepositDerivativesJob.perform_later(params[:id], result.widths)
-    end
-
-    # Resolve the depositor NUID for a new Work.
-    #
-    # During an acting-as session this is PURE IMPERSONATION: the Work is
-    # attributed wholly to the target (depositor = target; proxy_uploader is
-    # left empty server-side, so the resource reads exactly as if the target
-    # deposited it). The operating admin's hand is recorded in the AuditEvent
-    # (actor = admin, on_behalf_of = target), not stamped on the Work. The
-    # proxy radio is hidden while acting-as (see works/new), so this
-    # branch wins unconditionally and the radio value is irrelevant.
-    #
-    # Outside acting-as, the deposit form's "upload as" radio governs:
-    # `"proxy"` → attribute to the collection's configured depositor (the
-    # acting user becomes proxy_uploader server-side); any other value
-    # (including the default `"myself"`) explicitly attributes to the acting
-    # user — passing nil would let Atlas fall through to the collection's
-    # configured depositor, silently flipping "myself" into a collection-
-    # default attribution on collections that have one set.
+    # The acting-as branch wins unconditionally, and must: the proxy radio is
+    # hidden while acting-as, so its value is meaningless there. The last line
+    # has to name the acting user explicitly — passing nil lets Atlas fall
+    # through to the collection's configured depositor, silently flipping
+    # "myself" into a collection-default attribution. See docs/deposit.md.
     def deposit_attribution(parent)
       return acting_as_nuid if acting_as?
       return parent['depositor'].presence if params[:upload_as] == 'proxy'
@@ -247,26 +189,39 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
       @files = reads[:files]
       @scholar = GoogleScholarMetadata.for(work: @work, permissions: @permissions, files: @files)
       @av_file = MediaRemux.playable_file(@files)
+      @caption = CaptionTrack.for(@files)
+      # On the request thread, never in a worker: the gate is the search
+      # service, and a worker holds no database connection.
+      @associations = WorkAssociations.call(associations:   reads[:associations],
+                                            search_service: search_service)
       prepare_zoom_view(params[:id], pages: reads[:file_sets])
       assign_show_abilities!(klass: 'Work')
       work_breadcrumbs(params[:id])
     end
 
-    # The show page's three independent Atlas reads, run concurrently. mods carries
-    # no nuid (gated by Current.nuid, the real user); assets and file_sets gate on
-    # the effective (view-as) user, resolved here on the request thread because the
-    # workers must not touch ActiveRecord.
+    # mods deliberately carries no nuid — Current.nuid, the real user, gates it.
+    # The view-as NUID is resolved here rather than inside a task because the
+    # workers must not touch ActiveRecord. See docs/deposit.md.
     def parallel_show_reads
       viewer_nuid = effective_user&.nuid
       parallel_atlas_reads(
-        mods:      -> { AtlasRb::Work.mods(params[:id], 'html') },
-        files:     -> { AtlasRb::Work.assets(params[:id], nuid: viewer_nuid) },
-        file_sets: -> { AtlasRb::Work.file_sets(params[:id], nuid: viewer_nuid) }
+        mods:         -> { AtlasRb::Work.mods(params[:id], 'html') },
+        files:        -> { AtlasRb::Work.assets(params[:id], nuid: viewer_nuid) },
+        file_sets:    -> { AtlasRb::Work.file_sets(params[:id], nuid: viewer_nuid) },
+        associations: -> { associations_or_none(params[:id]) }
       )
     end
 
-    # Both post-deposit steps that can fail without failing the deposit itself.
-    # Each names what did not happen; neither hides that the file is in.
+    # parallel_atlas_reads re-raises any task's error, so this rescue has to
+    # live INSIDE the task; the associations box is supplementary and must not
+    # take the page with it. nil reads as "no associations" downstream.
+    def associations_or_none(id)
+      AtlasRb::Work.associations(id)
+    rescue StandardError => e
+      Rails.logger.error("WorksController: associations read failed for #{id}: #{e.class} #{e.message}")
+      nil
+    end
+
     def create_notice
       return PUBLISH_LINK_FAILED if @publish_link_failed
       return DERIVATIVE_DEFAULT_FAILED if @derivative_default_failed
@@ -274,13 +229,9 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
       'File uploaded — please review the metadata.'
     end
 
-    # Per-type enrichment routing (thumbnails, PDF renditions) lives in
-    # IngestDispatch, shared with the XML loader. No derivative_widths from
-    # this path: small/medium/large are opt-in download renditions chosen on
-    # the metadata page's checkbox/slider section, which arrives post-hoc via
-    # DepositDerivativesJob (see #process_derivative_widths).
     # complete_work: false — the depositor still owes the metadata page, so
-    # ingest must not complete this Work. #update_metadata does, once they save.
+    # ingest must not complete this Work; #update_metadata does, once they save.
+    # No derivative_widths from this path either. See docs/ingest.md.
     def enqueue_ingest_jobs(file, staged_path)
       IngestDispatch.call(work_id: @work.id, staged_path: staged_path,
                           original_filename: file.original_filename,
@@ -288,24 +239,26 @@ class WorksController < ApplicationController # rubocop:disable Metrics/ClassLen
                           complete_work: false)
     end
 
-    # A lock, not housekeeping: an unfinished deposit is probably open on its
-    # depositor's screen at the metadata page, and this stops a second person
-    # editing underneath them. The metadata page itself stays reachable to anyone
-    # with edit rights (it rides `extra_edit`), so an abandoned deposit can always
-    # be finished or withdrawn.
+    # A lock, not housekeeping: it stops a second person editing underneath the
+    # depositor still sitting on the metadata page. Gate #edit only — the
+    # metadata page rides `extra_edit` and must stay reachable.
     def reject_if_in_progress
-      return unless AtlasRb::Work.find(params[:id]).in_progress
+      return unless requested_work.in_progress
 
       redirect_to work_path(params[:id]), alert: IN_PROGRESS_NOTICE
     end
 
-    # Trail for the upload form: the Work's structural ancestors, then the Work
-    # itself as a link back to its show page (match: :exact so loaf doesn't mark
-    # it current on the /upload sub-path), then a final "Upload File" you-are-here
-    # crumb. Mirrors ApplicationController#edit_breadcrumb_tail, differing only in
-    # the tail label — an editor can back out to the Work via the trail.
+    # Keep the memo: the in-progress gate runs as a before_action and #edit
+    # needs the same payload, so without it the edit page reads Atlas twice.
+    def requested_work
+      @requested_work ||= AtlasRb::Work.find(params[:id])
+    end
+
+    # Mirrors ApplicationController#edit_breadcrumb_tail, differing only in the
+    # tail label. `match: :exact` keeps loaf from marking the Work crumb current
+    # on the /upload sub-path, which is what makes it a link back.
     def upload_breadcrumbs
-      Array(@work.ancestor_chain).each do |node|
+      Array(@work.ancestors).each do |node|
         add_breadcrumb_for(node['noid'], node['klass'], node['title'])
       end
       breadcrumb(@work.title, work_path(@work.id), match: :exact)

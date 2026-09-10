@@ -19,7 +19,7 @@
     .reparent-node-summary
       %span.reparent-node-summary__label Moving
       = finder_type_chip(@node.klass)
-      %span.reparent-node-summary__title= @node.resource.title
+      %span.reparent-node-summary__title= enhanced_text(@node.resource.title)
       %span.admin-registry-table__id= @node.resource.id
 
     %p.text-muted.small.mt-3.mb-3

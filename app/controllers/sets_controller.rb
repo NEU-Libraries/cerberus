@@ -15,10 +15,18 @@ class SetsController < CatalogController
   include ShowScopedSearch
   include SetRecipe
   include SetSharing
+  include SetBulkActions
 
-  before_action :authenticate_user!, except: [:show]
-  before_action :require_curator,    except: [:show]
+  # :facet is the show page's facet modal, so it is as public as the show page
+  # itself — load_set below is what gates a private Set, for both.
+  before_action :authenticate_user!, except: %i[show facet facet_suggest]
+  before_action :require_curator,    except: %i[show facet facet_suggest]
   before_action :load_set,           except: [:index, :new, :create, :picker, :recipients]
+  # Declared here rather than in SetBulkActions so it lands after the two gates
+  # above: an anonymous request has to reach authenticate_user! and be sent to
+  # sign in, not be told it is forbidden. The three actions it names live in that
+  # concern.
+  before_action :require_bulk_operator, only: %i[sentinel apply_sentinel privatize]
 
   # A private Set read (or any write) the caller may not perform: Atlas says
   # 403, the user sees the standard forbidden page. Unknown ids surface as
@@ -36,8 +44,7 @@ class SetsController < CatalogController
   def index
     @scope = params[:scope].presence_in(SCOPES)
     page = AtlasRb::Compilation.list(scope: @scope, page: params[:page].presence)
-    # Unlike .find/.create, .list entries arrive wrapped: {"compilation" => {...}}.
-    @sets = Array(page['compilations']).pluck('compilation')
+    @sets = Array(page['compilations'])
     @pagination = page['pagination']
     # Grant-scoped tabs list other people's Sets, so name each owner.
     @owner_names = @scope ? NuidResolver.names_for(@sets.pluck('depositor')) : {}
@@ -78,10 +85,13 @@ class SetsController < CatalogController
   end
 
   # Details tab is open to any editor; the Sharing tab is owner/admin-only
-  # (gated in the view + on the sharing write path).
+  # (gated in the view + on the sharing write path); the two bulk-action tabs
+  # are operator-only (SetBulkActions#require_bulk_operator, mirrored in the
+  # view by #bulk_operator?).
   def edit
     edit_breadcrumbs
     prepare_sharing_form if @owned
+    @sentinel = Sentinel.find_by(target_id: params[:id]) if bulk_operator?
   end
 
   def create
@@ -142,6 +152,16 @@ class SetsController < CatalogController
       Array(current_user.groups).intersect?(Array(@set['edit_groups']))
     end
 
+    # The Set's resolved contents, which is what #show lists. load_set has
+    # already fetched and authorized the Set itself, so a private Set refuses
+    # here exactly as it refuses on the show page. A recipe with no positive
+    # clause yields nil, and the modal renders empty rather than counting the
+    # whole index.
+    def facet_scope_filters
+      @resolver = SetResolver.new(compilation: @set, search_service: search_service)
+      @resolver.contents_fqs
+    end
+
     def require_curator
       return if current_user&.curates_sets?
 
@@ -178,7 +198,7 @@ class SetsController < CatalogController
       return Blacklight::Solr::Response.new({}, {}) if fqs.nil?
 
       builder = search_service.search_builder.with(search_state).with_filters(*fqs)
-      Blacklight.default_index.search(builder)
+      Blacklight.default_index.search(params: builder)
     end
 
     # Display digests (title / klass) for every recipe noun, keyed by noid —

@@ -1,14 +1,12 @@
 # frozen_string_literal: true
 
+# The raw-XML metadata editor. See docs/people-and-routing.md.
 class XmlController < ApplicationController
   include DepositorContext
   include CollectionBreadcrumbs
 
-  # The raw-XML editor is a sibling of the Metadata/Permissions edit tabs and
-  # must gate the same way they do — it was the lone ungated hole in the edit
-  # surface (authorization audit G1). authenticate first, then the :edit
-  # ability keyed on the resource. editor carries params[:id]; validate/update
-  # carry params[:resource_id], so authorize_xml_edit! reads whichever is set.
+  # A sibling of the Metadata and Permissions edit tabs, and gated the same way:
+  # authenticate first, then the :edit ability keyed on the resource.
   before_action :authenticate_user!
   before_action :authorize_xml_edit!
 
@@ -17,6 +15,7 @@ class XmlController < ApplicationController
     @resource = item.resource
     @klass = item.klass
     resource_mods(item.klass)
+    @double_escapes = Metadata::DoubleEscapes.report(@raw_xml)
     editor_breadcrumbs(item.klass, params[:id])
   end
 
@@ -25,17 +24,24 @@ class XmlController < ApplicationController
     @resource = item.resource
 
     @errors = XmlValidator.call(xml: params[:raw_xml])
+    @repairable = Metadata::ControlCharacters.any?(params[:raw_xml])
+    @double_escapes = Metadata::DoubleEscapes.report(params[:raw_xml])
     @mods = AtlasRb::Resource.preview(create_temp_xml) if @errors.empty?
   end
 
-  # Save re-runs the same validation Validate + Preview does, and refuses on
-  # failure. It used to write whatever it was given: malformed MODS was accepted
-  # with no error and no flash, and stored truncated at the parse error —
-  # silently discarding every element after it. The audit log recorded that as
-  # an ordinary metadata update, so the loss was invisible afterwards.
-  #
-  # Nothing forces a curator through Validate first, and nothing should have to:
-  # the destructive path is the one that must check.
+  # Offers the repair; does not apply it. Nothing is written until the curator
+  # presses Save, and nothing re-validates, so the preview pane keeps its last
+  # render rather than one taken from the changed buffer.
+  def repair
+    @resource = AtlasRb::Resource.find(params[:resource_id]).resource
+    @repaired = repair_kind
+    @raw_xml = apply_repair(@repaired, params[:raw_xml])
+    @double_escapes = Metadata::DoubleEscapes.report(@raw_xml)
+  end
+
+  # Re-runs the same validation Validate does, and refuses on failure. Atlas
+  # stores malformed MODS truncated at the parse error, discarding every element
+  # after it, with no error and an ordinary-looking audit entry.
   def update
     item = AtlasRb::Resource.find(params[:resource_id])
     klass = item.klass
@@ -49,34 +55,37 @@ class XmlController < ApplicationController
 
   private
 
-    # Re-render the editor holding the curator's OWN submission, not the stored
-    # document. A rejected save that reverts the textarea to what is on the
-    # server throws away the work that prompted the save — nearly as bad as the
-    # truncation it is protecting against. The preview pane keeps the last good
-    # render, since there is nothing valid to draw from the rejected text.
+    def repair_kind
+      params[:kind] == 'double_escapes' ? :double_escapes : :control_characters
+    end
+
+    def apply_repair(kind, xml)
+      case kind
+      when :double_escapes then Metadata::DoubleEscapes.decode(xml)
+      else Metadata::ControlCharacters.clean_text(xml)
+      end
+    end
+
+    # Re-render holding the curator's OWN submission, not the stored document:
+    # reverting the textarea throws away the work that prompted the save.
     def render_invalid(item)
       @resource = item.resource
       @klass = item.klass
       @raw_xml = params[:raw_xml]
+      @repairable = Metadata::ControlCharacters.any?(params[:raw_xml])
+      @double_escapes = Metadata::DoubleEscapes.report(params[:raw_xml])
       @mods = AtlasRb.const_get(item.klass).mods(params[:resource_id], 'html')
       editor_breadcrumbs(item.klass, params[:resource_id])
       render :editor, status: :unprocessable_content
     end
 
-    # :edit gate for whichever id param this action carries (editor → :id,
-    # validate/update → :resource_id), mirroring the resource controllers'
-    # authorize_edit!.
+    # editor carries :id; validate, repair and update carry :resource_id.
     def authorize_xml_edit!
       authorize_edit_for!(params[:id] || params[:resource_id])
     end
 
-    # The XML editor is a sub-tab of the resource's edit page, so its trail mirrors
-    # that edit page: a Collection reuses the personal-root-aware trail (My DRS / …
-    # for the owner), while a Work uses the structural edit trail — matching
-    # WorksController#edit and CollectionsController#edit respectively.
-    # Takes the id rather than reading params, because the two actions that
-    # render this view carry it under different names — `editor` as :id, a
-    # rejected `update` as :resource_id.
+    # Takes the id rather than reading params, because the two actions that render
+    # this view carry it under different names.
     def editor_breadcrumbs(klass, id)
       if klass == 'Collection'
         collection_breadcrumbs(id, editing: true)

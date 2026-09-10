@@ -73,6 +73,19 @@ RSpec.describe 'Admin::FileVersions', type: :request do
       expect(response.headers['Content-Disposition']).to include('attachment', version_id)
     end
 
+    # The refusal has to land before any bytes move. Atlas answers an unknown
+    # version with a 404 whose body the streaming binding cannot raise on —
+    # chunks reach the client before the status is known — so a late check
+    # would deliver the error body as the file, under a 200 and the download
+    # filename. Asserting the absent Content-Disposition is what pins "refused
+    # before the download headers were applied" rather than merely "404".
+    it 'refuses an unknown version id before applying the download headers' do
+      get "/admin/files/#{noid}/versions/v99/content"
+
+      expect(response).to have_http_status(:not_found)
+      expect(response.headers['Content-Disposition']).to be_nil
+    end
+
     context 'as a devolved-admin delegate' do
       before { sign_in delegate_user }
 
@@ -86,4 +99,9 @@ RSpec.describe 'Admin::FileVersions', type: :request do
       end
     end
   end
+
+  # This file leaves Works waiting on a depositor, which the admin triage registry
+  # lists. Purging them keeps that registry's own specs measuring its filter rather
+  # than the size of the suite (see spec/support/work_cleanup.rb).
+  after(:all) { purge_stuck_works! }
 end

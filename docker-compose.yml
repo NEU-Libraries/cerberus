@@ -6,6 +6,7 @@ volumes:
   iiif:
   iiif-cache:
   uploads:
+  handle-data:
 services:
   db:
     # TimescaleDB is a Postgres extension; this image is vanilla Postgres 14
@@ -20,7 +21,14 @@ services:
     # this into postgresql.conf when it initialises a *fresh* data dir; because
     # we reuse the existing postgres:14 volume, we pass it as a server flag
     # instead. Inert for Atlas's logical DB (which never CREATEs the extension).
-    command: postgres -c shared_preload_libraries=timescaledb
+    # max_worker_processes is raised well above Postgres's default of 8 because
+    # TimescaleDB claims one background scheduler per database that has the
+    # extension, and the parallel spec lane multiplies those: each worker owns a
+    # primary and a queue database, so a four-way run needs ten rather than four.
+    # Starved of a slot, the scheduler cannot start and Postgres logs "failed to
+    # launch job" once a second forever — noisy, and it never resolves itself.
+    # Only settable at server start, so changing it means recreating this service.
+    command: postgres -c shared_preload_libraries=timescaledb -c max_worker_processes=32
     volumes:
       - db:/var/lib/postgresql/data/pgdata
     restart: always
@@ -29,31 +37,228 @@ services:
       POSTGRES_PASSWORD: example
     ports:
       - 5432:5432
+    # Nothing here is slow to start, but Postgres accepts connections a moment
+    # after its container does, and the services below prepare their databases
+    # on boot. Without a gate, whichever of them wins the race asks a socket
+    # that is not listening yet, gives up, and then serves 500s for the life of
+    # the stack -- a caller sees "We could not find your database", which reads
+    # as a missing database rather than a service that started too early.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+  redis:
+    image: redis:7-alpine
+    # Backs Atlas's response cache, which is what keeps a Work show page off the
+    # jbuilder path for every read after the first.
+    #
+    # An ordinary service rather than one behind a compose profile. Caching in
+    # development is already opt-in behind `rails dev:cache`, so gating the
+    # container on a second flag would leave the cache path unexercised locally
+    # — the trap the handle service hit — and this is the cheapest service in
+    # the stack, so withholding it saves nothing worth having.
+    #
+    # Cache-only: persistence is off because every key is reconstructible from
+    # Postgres, and the LRU ceiling means a runaway key count evicts instead of
+    # growing into the host's memory.
+    command: >
+      redis-server --save "" --appendonly no
+      --maxmemory 192mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
   web:
     image: nakatomi/cerberus_web
+    depends_on:
+      db:
+        condition: service_healthy
     entrypoint: /home/cerberus/web/docker-entrypoint.sh
     environment:
       ATLAS_URL: 'http://atlas:3000/'
       # Container-internal Cantaloupe route for server-side info.json reads
       # (IiifManifest dimensions); browsers keep using the public iiif_host.
       CERBERUS_IIIF_INTERNAL_HOST: ${CERBERUS_IIIF_INTERNAL_HOST:-}
+      # Resolver a minted handle is linked against on the Work page. Defaults to
+      # the sibling handle service rather than to CNRI's global proxy: this
+      # stack mints under an unregistered prefix, which is in no Global Handle
+      # Registry, so hdl.handle.net cannot answer for it and every dev link
+      # would look broken. Both ends run the same CNRI proxy, so the local one
+      # is a true rehearsal. Production sets this to the global proxy.
+      HANDLE_RESOLVER_BASE: ${HANDLE_RESOLVER_BASE:-http://localhost:8000}
     ports:
       - 3000:3000
   atlas:
-    image: nakatomi/atlas_web:${ATLAS}
+    image: nakatomi/atlas_web:${ATLAS:-latest}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     entrypoint: /home/atlas/web/docker-entrypoint.sh
     environment:
       RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
+      # Handle minting. Atlas owns the client and the admin credential; Cerberus
+      # only reads the handle back off the Work. The client is inert unless the
+      # URL, prefix and secret are all set, and an unminted Work is a supported
+      # state — /complete succeeds either way.
+      HANDLE_SERVER_URL: ${HANDLE_SERVER_URL:-https://handle:8000}
+      HANDLE_PREFIX: ${HANDLE_PREFIX:-DRSDEV}
+      # This default MUST match the handle service's ADMIN_SECRET below. They
+      # are the two ends of one credential: leave this empty while the server
+      # has a value and Atlas cannot authenticate a write, so it silently mints
+      # nothing — a stack that looks healthy and produces no handles.
+      HANDLE_ADMIN_SECRET: ${HANDLE_ADMIN_SECRET:-cerberus-dev-handle-admin}
+      # The handle server's certificate is self-signed CN=anonymous with no SAN,
+      # so no hostname verifies against it and a CA bundle is no help. Left
+      # unset elsewhere, so a real certificate is verified normally.
+      HANDLE_SSL_VERIFY: 'false'
+      # Where a handle sends a reader. Atlas does not know Cerberus's public
+      # host, so it arrives as config.
+      CERBERUS_PUBLIC_BASE: ${CERBERUS_PUBLIC_BASE:-http://localhost:3000}
+      # Atlas writes the citable URL, not the bare handle, into the MODS `hdl`
+      # identifier, so it needs the resolver too. Its own default is the global
+      # proxy, which is right for production and wrong here — an unregistered
+      # prefix is in no registry. Shares one value with the web service above,
+      # or the Work page header and the metadata table name different hosts for
+      # the same object.
+      HANDLE_RESOLVER_BASE: ${HANDLE_RESOLVER_BASE:-http://localhost:8000}
     ports:
       - 3001:3000
+  # Behind a profile, so a plain `up` does not start it: nothing but the specs
+  # talks to this instance, and an always-on container the specs need only
+  # occasionally holds ~340 MB around the clock for nothing. bin/spec and
+  # bin/parallel-spec bring it up on demand, and SpecPreflight names them when a
+  # run finds it missing.
+  #
+  # Its own profile rather than `test`, which selenium already carries: CI runs
+  # the unsharded suite and must start this, but must NOT pull a browser image on
+  # every push for a lane it does not run. One profile covering both would force
+  # that choice.
   atlas-test:
-    image: nakatomi/atlas_web:${ATLAS}
+    image: nakatomi/atlas_web:${ATLAS:-latest}
+    profiles: [atlas-test]
+    depends_on:
+      db:
+        condition: service_healthy
     entrypoint: /home/atlas/web/docker-entrypoint.sh
+    # Deliberately given none of the HANDLE_* / CERBERUS_PUBLIC_BASE variables
+    # above. Atlas mints only when a client is configured, so withholding them
+    # is what keeps the suite from writing live records into a handle server —
+    # a spec that finalizes a Work would otherwise mint one every run.
     environment:
       RAILS_ENV: 'test'
       RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
     ports:
       - 3002:3000
+  # Workers 2-4 of the parallel spec lane. Worker 1 is the atlas-test service
+  # above, so an unsharded run needs none of these. Nothing here starts by
+  # default; bin/parallel-spec brings the lane up on demand and bin/parallel-spec
+  # --down puts it away, which is what keeps roughly a gigabyte of idle
+  # containers off a developer's machine.
+  #
+  # `parallel` only, deliberately NOT `atlas-test`. CI runs the suite unsharded
+  # and brings worker 1 up with `--profile atlas-test`, so folding these into that
+  # profile would start three Atlas instances CI never uses — and whose Solr cores
+  # it has not provisioned. bin/parallel-spec asks for both when it wants them.
+  #
+  # Each worker owns a whole Atlas: its own logical database, its own Solr core,
+  # and its own OCFL root. That is not tidiness. A run's before(:suite) calls
+  # GET /reset, which wipes the database, empties the OCFL root and deletes the
+  # instance's Solr core by query — so two workers sharing any one of the three
+  # would destroy each other's fixtures mid-run.
+  #
+  # No host ports: Cerberus reaches these by service name on the compose
+  # network, and publishing four would collide for nothing.
+  #
+  # The OCFL root needs no configuration — it is Rails.root/tmp/files inside the
+  # container, and these services mount no volumes, so each is already its own.
+  # The database is created and migrated by the image's entrypoint on boot.
+  # Only the Solr core needs provisioning; see bin/parallel-solr-cores.
+  #
+  # DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL is what lets the reset run at all.
+  # Atlas's GET /reset cleans through DatabaseCleaner, whose safeguard refuses any
+  # DATABASE_URL naming a host it cannot recognise as local — and `db` is a
+  # compose service, so every one of these trips it. The guard exists to stop a
+  # suite wiping a real database; here it is redundant, because these services are
+  # pinned to RAILS_ENV=test and Atlas refuses the same reset outside a resettable
+  # env anyway. Worker 1 never needed it: with no DATABASE_URL it reads
+  # database.yml and the safeguard never looks.
+  atlas-test-2: &parallel_atlas
+    image: nakatomi/atlas_web:${ATLAS:-latest}
+    profiles: [parallel]
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: /home/atlas/web/docker-entrypoint.sh
+    environment:
+      RAILS_ENV: 'test'
+      RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
+      DATABASE_URL: 'postgresql://postgres:example@db/atlas_test_2'
+      DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL: 'true'
+      ATLAS_TEST_SOLR_URL: 'http://solr:8983/solr/blacklight-test-2'
+  atlas-test-3:
+    <<: *parallel_atlas
+    environment:
+      RAILS_ENV: 'test'
+      RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
+      DATABASE_URL: 'postgresql://postgres:example@db/atlas_test_3'
+      DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL: 'true'
+      ATLAS_TEST_SOLR_URL: 'http://solr:8983/solr/blacklight-test-3'
+  atlas-test-4:
+    <<: *parallel_atlas
+    environment:
+      RAILS_ENV: 'test'
+      RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
+      DATABASE_URL: 'postgresql://postgres:example@db/atlas_test_4'
+      DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL: 'true'
+      ATLAS_TEST_SOLR_URL: 'http://solr:8983/solr/blacklight-test-4'
+  handle:
+    # Handle.Net server (independent-service mode, unregistered local prefix).
+    # Built from ~/projects/cerberus-handles, whose README is the reference.
+    #
+    # An ordinary service, started by a plain `up` like every other one. It was
+    # briefly opt-in behind a compose profile; that made the default dev stack
+    # one where no Work is ever minted, so the whole path went unexercised
+    # unless someone remembered a flag — and profiles are excluded from `down`
+    # as well as `up`, so the container outlived the stack it belonged to.
+    image: nakatomi/cerberus-handles:9.3.2
+    # Listed variable by variable rather than through `env_file: .env`. That
+    # keeps unrelated Cerberus config out of the container, and — the sharper
+    # reason — the IMAGE's defaults are not the defaults in cerberus-handles'
+    # .env.example: omit STORAGE_TYPE and SQL_URL and the server falls back to
+    # the embedded BDB-JE store, which skips the admin seed. Reads and homing
+    # still work, so it looks fine until the first write, which can then never
+    # authenticate.
+    environment:
+      HANDLE_PREFIX: ${HANDLE_PREFIX:-DRSDEV}
+      # The admin identity must name the same prefix or it is not
+      # authoritative for it — hence the one variable in both places.
+      SERVER_ADMINS: "300:${HANDLE_PREFIX:-DRSDEV}/ADMIN"
+      # Renamed on the way in: a bare ADMIN_SECRET in Cerberus's .env reads as
+      # Cerberus's own. The server refuses to boot on an empty one, which as an
+      # always-on service would fail a plain `up` for anyone who has not set it
+      # — hence the dev fallback. It authenticates administrative writes to a
+      # local, unregistered handle store, so a known value costs nothing here.
+      # This file is developer-only; staging and production are Swarm stacks
+      # that carry their own secret. Do not promote this default to either.
+      ADMIN_SECRET: ${HANDLE_ADMIN_SECRET:-cerberus-dev-handle-admin}
+      STORAGE_TYPE: sql
+      SQL_URL: jdbc:sqlite:/var/handle/svr/handles.db
+      SQL_DRIVER: org.sqlite.JDBC
+    ports:
+      # HTTP and HTTPS are port-unified: reads answer over plain HTTP,
+      # administrative writes need TLS on this same port. The native Handle
+      # protocol (2641/tcp+udp) stays on the compose network — publish it only
+      # if you want the hdl-* tools from the host.
+      - 8000:8000/tcp
+    volumes:
+      # Config and the server keypair regenerate from the environment on every
+      # boot, so this carries only the handle store and the seeded admin
+      # record. Wiping it is a full reset.
+      - handle-data:/var/handle/svr
   iiif:
     image: uclalibrary/cantaloupe:5.0.6-2
     ports:
@@ -95,3 +300,32 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+  selenium:
+    # Headless Chrome for the browser spec lane. Capybara drives it over the
+    # remote WebDriver protocol, so no browser and no chromedriver is installed
+    # in the web image — which matters because that image is the one published
+    # and deployed, and a browser has no business in it.
+    #
+    # The tag tracks the selenium-webdriver version in Gemfile.lock. Client and
+    # server negotiate the same W3C protocol across a version gap, but holding
+    # both ends on one minor removes the gap as a suspect when a session fails
+    # to start.
+    image: selenium/standalone-chrome:4.10
+    # Behind a profile so an ordinary `up` never starts it: the browser is only
+    # needed while the browser specs run, and it is the heaviest service here
+    # per unit of use.
+    profiles:
+      - test
+    # Chrome maps its renderer heap into /dev/shm, and Docker's 64 MB default is
+    # far under what a page needs. Exhausting it aborts the tab, which surfaces
+    # as "session deleted because of page crash" rather than as a memory error.
+    shm_size: 1gb
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - "-f"
+      - http://localhost:4444/status
+      interval: 10s
+      timeout: 5s
+      retries: 5

@@ -41,7 +41,8 @@ RSpec.describe 'Admin::LinkedMembers', type: :request do
   def work_resource(noid:, title: 'A Work', home: 'home')
     OpenStruct.new(
       klass:    'Work',
-      resource: OpenStruct.new(id: noid, title: title, ancestors: [[home, 'Collection']])
+      resource: OpenStruct.new(id: noid, title: title,
+                               ancestors: [{ 'noid' => home, 'klass' => 'Collection', 'title' => 'Home' }])
     )
   end
 

@@ -15,6 +15,10 @@ jobs:
     - name: Make env file
       run: |
         cp .env.example .env
+        # The Atlas image both atlas services run, from the one file that pins it.
+        # .env.example deliberately carries no version: it is documentation, and a
+        # test run must not change because someone edited a comment in it.
+        echo "ATLAS=$(cat .atlas_version)" >> .env
         echo "ATLAS_RAILS_MASTER_KEY=${{ secrets.ATLAS_RAILS_MASTER_KEY }}" >> .env
         # Cerberus's own master key, so the web container can decrypt
         # credentials and sign Atlas assertions (config/master.key is
@@ -43,7 +47,7 @@ jobs:
     - name: Start server
       run: |
         set -x
-        docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d
+        docker compose -f docker-compose.yml -f docker-compose.ci.yml --profile atlas-test up -d
     # - name: Create database and migrate
     #   run: |
     #     docker compose exec -T web bundle exec rake db:migrate

@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------
-// Error pages — 403 / 404 / 410 / 500
+// Error pages — 403 / 404 / 410 / 500 / 503
 //
 // Same card-shell pattern as audit-history and the deposit form. The
 // HTTP status code is treated as identifier typography (tabular
@@ -16,6 +16,10 @@ $error-tone-missing:   #6c757d;  // 404 — matches $audit-tone-generic
 $error-tone-info:      #2666a6;  // 403 — matches $audit-tone-update / $blue
 $error-tone-gone:      #a73a31;  // 410 — matches $audit-tone-tombstone
 $error-tone-warn:      #c46410;  // 500 — matches $audit-tone-restore
+// 503 — a muted slate-teal. Planned maintenance is not a fault and not an
+// alarm, so it deliberately sits away from the warn/gone end of the
+// vocabulary while staying as desaturated as the rest.
+$error-tone-planned:   #3f7d86;
 
 .error-page {
   --error-tone-color: #{$error-tone-missing};
@@ -32,7 +36,8 @@ $error-tone-warn:      #c46410;  // 500 — matches $audit-tone-restore
   &--not-found { --error-tone-color: #{$error-tone-missing}; }
   &--forbidden { --error-tone-color: #{$error-tone-info}; }
   &--gone      { --error-tone-color: #{$error-tone-gone}; }
-  &--error     { --error-tone-color: #{$error-tone-warn}; }
+  &--error       { --error-tone-color: #{$error-tone-warn}; }
+  &--maintenance { --error-tone-color: #{$error-tone-planned}; }
 
   // Header strip — soft off-white, status code + textual label rendered
   // as a single identifier-typography element with the FA glyph as the
@@ -94,6 +99,19 @@ $error-tone-warn:      #c46410;  // 500 — matches $audit-tone-restore
     margin: 0;
     color: $gray-700;
     font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  // The operator's own note for the window, when they left one. Quieter than
+  // the lede and set off by a tone-coloured rule, so it reads as a message
+  // from a person rather than as part of the standing explanation.
+  &__note {
+    margin: 1rem 0 0 0;
+    padding: 0.6rem 0.85rem;
+    border-left: 3px solid var(--error-tone-color);
+    background-color: #f6f8fa;
+    color: $gray-700;
+    font-size: 0.9rem;
     line-height: 1.5;
   }
 

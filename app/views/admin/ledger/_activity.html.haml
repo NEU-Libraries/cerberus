@@ -1,0 +1,46 @@
+-# The write-once record. Newest first, and nothing here is worked: a librarian
+-# reads it and acts elsewhere. Rows dispatch to _notice_<kind> with
+-# _notice_generic as the fallback, so a new kind is a new file rather than a
+-# case statement — the same dispatch the audit log uses.
+.p-3
+  %p.text-muted.small.mb-0
+    What the repository did — loads, visibility changes, reindexes, and every work published to a community showcase. One row per event; the Digests tab sums each day up.
+
+%nav.px-3.pb-2{'aria-label' => 'Activity kind'}
+  = link_to 'All', admin_ledger_path(tab: 'activity', on: @on),
+    class: "btn btn-sm me-1 #{@kind.blank? ? 'btn-secondary' : 'btn-outline-secondary'}",
+    'aria-current': ('page' if @kind.blank?)
+  - AdminNotice::ACTIVITY_KINDS.each do |kind|
+    - current = kind == @kind
+    = link_to Admin::LedgerHelper::KINDS.dig(kind, :label), admin_ledger_path(tab: 'activity', kind: kind, on: @on),
+      class: "btn btn-sm me-1 #{current ? 'btn-secondary' : 'btn-outline-secondary'}",
+      'aria-current': ('page' if current)
+
+= render 'admin/ledger/day_filter'
+
+- if @notices.any?
+  .table-responsive
+    %table.table.table-borderless.admin-registry-table.ledger-table.ledger-table--activity
+      %thead
+        %tr
+          %th.text-nowrap{scope: 'col'} When
+          %th{scope: 'col'} What
+          %th{scope: 'col'} Detail
+          %th{scope: 'col'} Who
+      %tbody
+        - @notices.each do |notice|
+          - partial = "admin/ledger/notice_#{notice.kind}"
+          - resolved = lookup_context.exists?(partial, [], true) ? partial : 'admin/ledger/notice_generic'
+          = render partial: resolved, locals: { notice: notice }
+  %nav.paginate-section{ 'aria-label' => 'Activity pages' }
+    = paginate @notices, theme: 'blacklight'
+- else
+  .admin-registry__empty
+    %i.fa-solid.fa-book.admin-registry__empty-icon{'aria-hidden' => 'true'}
+    - if @on
+      %p.mb-1.fw-semibold.text-body= "Nothing recorded on #{@on.strftime('%B %-d, %Y')}"
+      %p.mb-0.small.text-muted= link_to 'Show every day', admin_ledger_path(tab: 'activity', kind: @kind)
+    - else
+      %p.mb-1.fw-semibold.text-body Nothing recorded yet
+      %p.mb-0.small.text-muted
+        Loads, visibility changes, reindexes and showcase publications are recorded here as they happen.

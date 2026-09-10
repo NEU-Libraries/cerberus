@@ -15,6 +15,7 @@
     </mods:name>
 
     <mods:originInfo>
+        <mods:publisher>Northeastern University Press</mods:publisher>
         <mods:dateCreated keyDate="yes" encoding="w3cdtf">2026-02-20</mods:dateCreated>
     </mods:originInfo>
 

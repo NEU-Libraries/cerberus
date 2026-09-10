@@ -1,29 +1,18 @@
 # frozen_string_literal: true
 
-# Generates the opt-in download renditions a depositor chose on the metadata
-# page — AFTER the deposit's IIIF assets already exist.
-#
-# The chosen S/M/L sizes render from the Work's GATED full-resolution JP2,
-# whose base is recoverable from the `service_file` Delegate that
-# IiifAssetsJob set at ingest. The thumbnail Delegate is NOT usable here: it
-# points at the OPEN capped JP2, which is too small to produce download
-# renditions — hence the service_file, not the thumbnail, is the anchor.
-#
-# Race: the user can submit the metadata form before IiifAssetsJob has
-# PATCHed the service. ServiceNotReady rides retry_on (≈16 minutes of
-# polynomially-longer cover); if it never appears (MasterJp2 failure, dead
-# queue), attempts exhaust and the block logs and swallows — the deposit and
-# its metadata are untouched, and the user can revisit the metadata page to
-# request sizes again. There is no ingest row to mark failed here, so the
-# log line is the whole exhaustion story.
+# Generates the opt-in S/M/L download renditions a depositor chose on the
+# metadata page, AFTER the deposit's IIIF assets already exist. They render from
+# the Work's GATED JP2, anchored on the `service_file` Delegate: the thumbnail
+# Delegate is NOT usable, since it points at the open capped JP2. The form can
+# be submitted before that service exists, hence ServiceNotReady.
+# See docs/downloads.md.
 class DepositDerivativesJob < ApplicationJob
   queue_as :default
 
   class ServiceNotReady < StandardError; end
 
-  # Also absorbs transient Atlas failures, including the optimistic-lock
-  # 500 if another job is still PATCHing the same FileSet (the serial-PATCH
-  # concern documented in IiifAssetsJob).
+  # Also absorbs the optimistic-lock 500 if another job is still PATCHing the
+  # same FileSet (the serial-PATCH concern documented in IiifAssetsJob).
   retry_on StandardError, attempts: 3, wait: :polynomially_longer do |job, exception|
     Rails.logger.warn(
       "DepositDerivativesJob gave up for work #{job.arguments.first}: #{exception.class}: #{exception.message}"

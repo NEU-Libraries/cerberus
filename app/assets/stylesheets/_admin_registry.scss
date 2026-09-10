@@ -217,6 +217,16 @@
       color: #138f76;
     }
 
+    // Purge borrows the audit ledger's tombstone red rather than minting a
+    // deeper one. A withdrawal and a purge are the same kind of act at
+    // different depths, so they share a hue; the weight that separates them
+    // belongs to the confirm modal and the label, which a shade cannot carry.
+    &--purge:hover {
+      background-color: color-mix(in srgb, #{$audit-tone-tombstone} 10%, white);
+      border-color: color-mix(in srgb, #{$audit-tone-tombstone} 28%, white);
+      color: $audit-tone-tombstone;
+    }
+
     .fa-solid { font-size: 0.85em; }
   }
 }

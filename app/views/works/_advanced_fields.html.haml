@@ -75,5 +75,5 @@
     - advanced[:preserved_names].each do |n|
       %li.mb-1
         = n[:name]
-        - if n[:role].present?
-          %span.badge.text-bg-light.border.ms-1.fw-normal= n[:role]
+        - Array(n[:roles]).each do |role|
+          %span.badge.text-bg-light.border.ms-1.fw-normal= role

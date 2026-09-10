@@ -2,19 +2,35 @@
 
 require 'simplecov'
 
+# Each parallel worker covers only its own slice, so it needs its own result
+# name: SimpleCov keys .resultset.json by command name, and workers sharing one
+# would overwrite each other instead of merging. With distinct names the last
+# worker to exit writes a report merged across all of them.
+SimpleCov.command_name("rspec#{ENV['TEST_ENV_NUMBER']}") if ENV.key?('TEST_ENV_NUMBER')
+
 SimpleCov.start 'rails' do
-  add_filter 'spec'
-  add_filter 'vendor'
-  add_filter 'app/channels'
-  add_filter 'lib/cerberus/vocab'
-  add_filter 'app/indexers'
+  skip 'spec'
+  skip 'vendor'
+  skip 'app/channels'
   # The floor is a property of the whole suite, so it can only be judged by a
   # run of the whole suite. Any subset — `rake smoke`, or the handful of files
   # that cover a patch in progress — would fail on coverage alone and say
   # nothing about the code under test. SMOKE lifts the floor; it does not
   # disable the report.
-  minimum_coverage 90 unless ENV['SMOKE']
+  #
+  # A parallel worker is lifted for the same reason: it checks the floor when it
+  # exits, and every worker but the last exits holding a partial merge. The floor
+  # therefore stays with the unsharded run, which is what CI executes.
+  minimum_coverage 90 unless ENV['SMOKE'] || ENV.key?('TEST_ENV_NUMBER')
 end
+
+# libvips writes glib warnings straight to stderr, outside the Rails logger, and
+# ruby-vips cannot forward them to one (its log handler deadlocks on the GIL).
+# The specs deliberately feed corrupt images to the probe and derivative paths to
+# assert the graceful-degradation branches, so those warnings are expected output
+# and only obscure the rspec report. libvips reads this at init and suppresses the
+# VIPS log domain when it is set to any value.
+ENV['VIPS_WARNING'] ||= '1'
 
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 require 'spec_helper'
@@ -77,6 +93,17 @@ RSpec.configure do |config|
   # exclude them entirely rather than dumping seven "pending" lines per run.
   # See spec/integration/kataba_loc_regression_spec.rb for the rationale.
   config.filter_run_excluding :loc_smoke unless ENV['RUN_LOC_SMOKE']
+
+  # The Atlas round-trip profile reports numbers rather than asserting anything,
+  # so a default run (and CI) skips it. Opt in with RUN_PROFILE=1 or by naming the
+  # tag. See spec/integration/atlas_roundtrip_profile_spec.rb.
+  config.filter_run_excluding :profile unless ENV['RUN_PROFILE']
+
+  # Browser specs need the `selenium` service, which an ordinary `up` does not
+  # start. A default run and CI's full suite therefore skip them rather than
+  # fail on a browser that was never meant to be there; `rake browser` sets
+  # RUN_BROWSER and brings them back in.
+  config.filter_run_excluding :browser unless ENV['RUN_BROWSER']
 
   config.include Devise::Test::ControllerHelpers, type: :controller
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures

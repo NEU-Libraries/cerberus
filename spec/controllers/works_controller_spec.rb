@@ -5,8 +5,27 @@ require 'rails_helper'
 RSpec::Matchers.define_negated_matcher :not_have_enqueued_job, :have_enqueued_job
 
 describe WorksController do
-  let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', nuid: '000000004') }
-  let(:collection) { AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004') }
+  # Built once for the file. Nothing here treats the containers as the subject —
+  # they are somewhere to hang a Work and an id to put in params, and no example
+  # reparents, deletes or narrows them. Per-example construction therefore bought
+  # nothing and cost two Atlas creates, each an OCFL write plus a Solr index, on
+  # every example in the file.
+  #
+  # `publicize_chain!` still runs per example where a block needs it: it adds
+  # `public` to the read ACL and carries existing grants through, so widening an
+  # already-public container reaches the same state.
+  #
+  # The `let` wrappers below keep examples reading `community` / `collection`
+  # rather than `@community` / `@collection`: a before(:all) ivar is the only way
+  # to share state across examples, but it should not leak into how each one
+  # reads.
+  before(:all) do
+    @community  = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', nuid: '000000004')
+    @collection = AtlasRb::Collection.create(@community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004')
+  end
+
+  let(:community) { @community }
+  let(:collection) { @collection }
   let(:work) do
     created = AtlasRb::Work.create(collection.id, '/home/cerberus/web/spec/fixtures/files/work-mods.xml', nuid: '000000004')
     AtlasRb::Work.complete(created.id, nuid: '000000004')
@@ -32,7 +51,7 @@ describe WorksController do
     end
 
     it 'renders the show partial' do
-      expect(work.title).to eq("What's New - How We Respond to Disaster, Episode 1")
+      expect(work.title).to eq("What's New, Episode 1 - How We Respond to Disaster")
 
       get :show, params: { id: work.id }
       expect(response).to render_template('works/show')
@@ -396,6 +415,101 @@ describe WorksController do
         AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
       end
     end
+
+    # Nobody approves a work onto a showcase, so staff read the list afterwards
+    # to catch one that belongs on no showcase or sits under the wrong genre.
+    # The refusals matter most: they are invisible to everyone but the depositor,
+    # who sees one flash and moves on.
+    context 'the showcase-promotion ledger' do
+      def stub_person_rooted_at(collection_id)
+        person = AtlasRb::Mash.new('nuid' => user.nuid, 'personal_root_id' => collection_id,
+                                   'affiliated_community_ids' => ['comm1'])
+        allow(AtlasRb::Person).to receive(:resolve).and_return([person])
+      end
+
+      before do
+        # Scoped to the one noid: a blanket stub also intercepts the lookup that
+        # builds the fixture community, which then has no id to parent under.
+        allow(AtlasRb::Community).to receive(:find).and_call_original
+        allow(AtlasRb::Community).to receive(:find).with('comm1')
+                                                   .and_return(AtlasRb::Mash.new('id'    => 'comm1',
+                                                                                 'title' => 'Marine Science'))
+        allow(AtlasRb::Work).to receive(:create).and_call_original
+      end
+
+      def deposit(**overrides)
+        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+                                collection_id: collection.id, publish: '1',
+                                publish_community_id: 'comm1', publish_genre: 'Datasets' }.merge(overrides)
+      end
+
+      it 'records a promotion with the community, the genre and the uploaded filename' do
+        stub_person_rooted_at(collection.id)
+        allow(ShowcaseFinder).to receive(:call).and_return('showcasenoid')
+        allow(AtlasRb::System::Work).to receive(:add_linked_member)
+
+        expect { deposit }.to change(AdminNotice, :count).by(1)
+
+        notice = AdminNotice.last
+        expect(notice.kind).to eq('showcase_promotion')
+        expect(notice.subject).to include('Datasets')
+        expect(notice.actor_nuid).to eq(user.nuid)
+        expect(notice.subject_noid).to eq(assigns(:work).id)
+        expect(notice.detail(:outcome)).to eq('promoted')
+        expect(notice.detail(:community_name)).to eq('Marine Science')
+        expect(notice.detail(:showcase_noid)).to eq('showcasenoid')
+        # The filename is the wrong-genre signal — a .pptx under "Datasets"
+        # reads wrong at a glance.
+        expect(notice.detail(:work_title)).to eq('image.png')
+      ensure
+        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
+      it 'records a refusal when Atlas forbids the link' do
+        stub_person_rooted_at(collection.id)
+        allow(ShowcaseFinder).to receive(:call).and_return('showcasenoid')
+        allow(AtlasRb::System::Work).to receive(:add_linked_member).and_raise(AtlasRb::ForbiddenError.new('nope'))
+
+        expect { deposit }.to change(AdminNotice, :count).by(1)
+
+        expect(AdminNotice.last.detail(:outcome)).to eq('refused')
+        expect(AdminNotice.last.detail(:reason)).to eq('atlas_forbidden')
+      ensure
+        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
+      it 'records a refusal when the destination is not the depositor’s root' do
+        stub_person_rooted_at('some-other-root')
+        allow(AtlasRb::System::Work).to receive(:add_linked_member)
+
+        expect { deposit }.to change(AdminNotice, :count).by(1)
+
+        expect(AdminNotice.last.detail(:reason)).to eq('not_personal_root')
+      ensure
+        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
+      it 'records a refusal when the genre has no showcase the depositor can see' do
+        stub_person_rooted_at(collection.id)
+        allow(ShowcaseFinder).to receive(:call).and_return(nil)
+        allow(AtlasRb::System::Work).to receive(:add_linked_member)
+
+        expect { deposit }.to change(AdminNotice, :count).by(1)
+
+        expect(AdminNotice.last.detail(:reason)).to eq('no_showcase')
+        expect(AdminNotice.last.detail(:genre)).to eq('Datasets')
+      ensure
+        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
+      it 'records nothing when the deposit asked for no promotion' do
+        stub_person_rooted_at(collection.id)
+
+        expect { deposit(publish: '0') }.not_to change(AdminNotice, :count)
+      ensure
+        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+      end
+    end
   end
 
   describe 'new' do
@@ -462,6 +576,14 @@ describe WorksController do
 
     before do
       AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      # Readable as well as editable. Atlas gates reads on the resource's own ACL,
+      # and this fixture user carries no NUID, so the ACL read is made as the
+      # guest — a private resource comes back as nothing and the page 404s before
+      # the edit gate runs. Publicizing after the edit write, because
+      # publicize_resource! reads the current envelope and carries the grant
+      # through; the reverse order would drop it.
+      publicize_chain!
+      publicize_resource!(AtlasRb::Work, work, '000000004')
       sign_in user
     end
 
@@ -504,6 +626,28 @@ describe WorksController do
       end
     end
 
+    # The in-progress gate is a before_action and the action needs the same
+    # payload, so the read is memoized rather than made twice.
+    it 'reads the Work from Atlas once' do
+      loaded = AtlasRb::Work.find(work.id, nuid: '000000004')
+      expect(AtlasRb::Work).to receive(:find).once.with(work.id).and_return(loaded)
+
+      get :edit, params: { id: work.id }
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    # The Metadata and Advanced tabs parse the same document — one for the bare
+    # title, the other for its structured parts — and #edit loads both.
+    it 'reads the MODS from Atlas once' do
+      xml = AtlasRb::Work.mods(work.id, 'xml', nuid: '000000004')
+      expect(AtlasRb::Work).to receive(:mods).once.with(work.id, 'xml').and_return(xml)
+
+      get :edit, params: { id: work.id }
+
+      expect(response).to have_http_status(:ok)
+    end
+
     context 'audit history tab' do
       let(:history_envelope) do
         AtlasRb::Mash.new('resource_id' => work.id, 'events' => [])
@@ -538,6 +682,10 @@ describe WorksController do
 
     before do
       AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      # Readable as well as editable — see the note in #edit above. This fixture
+      # user carries no NUID, so the ACL read is made as the guest.
+      publicize_chain!
+      publicize_resource!(AtlasRb::Work, work, '000000004')
       sign_in user
     end
 
@@ -593,6 +741,28 @@ describe WorksController do
       expect(updated.title).to include('Episode')     # partNumber preserved
       expect(updated.description).to eq('NewAbstract')
       expect(subject).to redirect_to action: :show, id: work.id
+    end
+
+    # A Word manual line break (U+000B) has no XML 1.0 representation, so it used
+    # to vanish when Nokogiri serialized the text node and run the words either
+    # side of it together -- HTTP 200, no warning, and the merge propagated into
+    # the index. Asserted end to end against the stored MODS, because the whole
+    # defect lived between the form post and what Atlas kept. Built from the
+    # codepoint so this file stays ASCII.
+    it 'separates the words a pasted Word line break sat between, in the stored title' do
+      patch :update_metadata, params: { id: work.id, work: { title: "Simple#{[0x000B].pack('U')}form",
+                                                             description: 'D', keywords: %w[alpha] } }
+
+      doc = NEU::MODS::Document.parse(AtlasRb::Work.mods(work.id, 'xml', nuid: '000000004'))
+      expect(doc.title_parts[:title]).to eq('Simple form')
+    end
+
+    it 'keeps the break as a line break in the stored abstract, which a textarea round-trips' do
+      patch :update_metadata, params: { id: work.id, work: { title: 'T', keywords: %w[alpha],
+                                                             description: "Para one#{[0x000B].pack('U')}Para two" } }
+
+      doc = NEU::MODS::Document.parse(AtlasRb::Work.mods(work.id, 'xml', nuid: '000000004'))
+      expect(doc.abstract_nodes.first.text).to eq("Para one\nPara two")
     end
 
     it 'rejects a save with no keywords (keywords are mandatory)' do
@@ -666,6 +836,13 @@ describe WorksController do
       expect(doc.editable_personal_creators).to eq([{ given: 'Jenny', family: 'Smith' }])
       expect(doc.preserved_names.size).to eq(3) # Cohen, NU, Flynn untouched
       expect(subject).to redirect_to action: :show, id: work.id
+    end
+
+    it 'separates a title part where a pasted Word line break was' do
+      patch :update, params: { id: work.id, work: { form: 'advanced', subtitle: "a#{[0x000B].pack('U')}b" } }
+
+      doc = NEU::MODS::Document.parse(AtlasRb::Work.mods(work.id, 'xml', nuid: '000000004'))
+      expect(doc.title_parts[:subtitle]).to eq('a b')
     end
 
     it 'edits a structured title part (subtitle) in place, leaving the bare title' do
@@ -792,16 +969,16 @@ describe WorksController do
   # the already-loaded @work (it makes no Atlas fetch of its own) plus one
   # Person.resolve; here we set @work and stub the resolve, then assert the crumbs.
   describe '#work_breadcrumbs (private)' do
-    def work_result(parent_noid:, chain:)
+    def work_result(parent_noid:, ancestors:)
       controller.instance_variable_set(:@work,
                                        AtlasRb::Mash.new('id' => 'wnoid', 'title' => 'Coastal Survey',
-                                                         'depositor' => '000000007', 'ancestor_chain' => chain))
-      parent_noid # documents intent; the chain's last node carries it
+                                                         'depositor' => '000000007', 'ancestors' => ancestors))
+      parent_noid # documents intent; the last ancestor node carries it
     end
 
     it 'trails community / Person / work for a work homed in the depositor Person root' do
       work_result(parent_noid: 'jane-root',
-                  chain:       [{ 'noid' => 'people', 'klass' => 'Community', 'title' => 'People' },
+                  ancestors:   [{ 'noid' => 'people', 'klass' => 'Community', 'title' => 'People' },
                                 { 'noid' => 'jane-root', 'klass' => 'Collection', 'title' => 'Personal Root' }])
       person = AtlasRb::Mash.new('id' => 'janenoid', 'display_name' => 'Jane Doe',
                                  'personal_root_id' => 'jane-root', 'affiliated_community_ids' => ['libnoid'])
@@ -817,7 +994,7 @@ describe WorksController do
 
     it 'keeps the plain structural trail for a workspace work (not in a personal root)' do
       work_result(parent_noid: 'col',
-                  chain:       [{ 'noid' => 'col', 'klass' => 'Collection', 'title' => 'My Collection' }])
+                  ancestors:   [{ 'noid' => 'col', 'klass' => 'Collection', 'title' => 'My Collection' }])
       # Depositor has a Person, but its root is not this work's parent.
       person = AtlasRb::Mash.new('id' => 'janenoid', 'personal_root_id' => 'jane-root',
                                  'affiliated_community_ids' => ['libnoid'])

@@ -7,6 +7,7 @@
     <mods:abstract>A Word document included as sample office material so the Word/PowerPoint to PDF rendition and first-page thumbnail enrichment can be exercised on seed data.</mods:abstract>
 
     <mods:originInfo>
+        <mods:publisher>Northeastern University Libraries</mods:publisher>
         <mods:dateCreated keyDate="yes" encoding="w3cdtf">2020-09-15</mods:dateCreated>
     </mods:originInfo>
 

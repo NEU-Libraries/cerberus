@@ -1,0 +1,27 @@
+<%# Standing banner for the read-only maintenance window. Renders on every %>
+<%# page while the window is open, so a librarian who meets the 503 has %>
+<%# already been told why. Reads keep working throughout, which is what the %>
+<%# note says rather than implying the site is down. %>
+<% if maintenance_window? %>
+  <aside class="maintenance-banner" role="status" aria-live="polite">
+    <div class="<%= container_classes %> maintenance-banner__inner">
+      <span class="maintenance-banner__badge">
+        <i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i>
+        Read-only
+      </span>
+
+      <span class="maintenance-banner__note">
+        Maintenance is under way. Searching and downloading still work;
+        depositing and editing are paused.
+      </span>
+
+      <% if maintenance_message.present? %>
+        <span class="maintenance-banner__message"><%= maintenance_message %></span>
+      <% end %>
+
+      <% if current_user&.admin? %>
+        <%= link_to 'Manage', admin_maintenance_path, class: 'maintenance-banner__manage' %>
+      <% end %>
+    </div>
+  </aside>
+<% end %>

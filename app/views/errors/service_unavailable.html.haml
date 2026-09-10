@@ -1,0 +1,21 @@
+- content_for(:head) { tag.meta(name: "turbo-cache-control", content: "no-cache") }
+- note = local_assigns.fetch(:message, nil).presence || MaintenanceMode.message
+- wait = MaintenanceMode.retry_after
+.error-page.error-page--maintenance
+  %header.error-page__head
+    %i.fa-solid.fa-screwdriver-wrench.error-page__icon{'aria-hidden' => 'true'}
+    %span.error-page__status
+      %span.error-page__status-code 503
+      %span.error-page__status-label Maintenance
+  .error-page__body
+    %h1.error-page__title The repository is read-only while maintenance is under way.
+    %p.error-page__lede
+      Searching, browsing and downloading all still work. Depositing and editing
+      are paused, and nothing you had saved before now has been lost.
+    - if note.present?
+      %p.error-page__note= note
+  .error-page__actions
+    - if wait.present?
+      Please try again in about #{distance_of_time_in_words(wait)}.
+      %span.sep ·
+    = link_to "Return to the catalogue", root_path

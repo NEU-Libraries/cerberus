@@ -1,24 +1,10 @@
 # frozen_string_literal: true
 
-# Enriches a Word/PowerPoint deposit with a PDF rendition (v1 parity:
-# thesis.docx → thesis.pdf attached alongside the original) and seeds the
-# Work's thumbnails from the rendition's first page.
-#
-# Ordering: ContentCreationJob owns the primary Blob. Rather than racing it with
-# a second concurrent Blob writer, this job converts first (the slow part —
-# overlapping the wait for free) and then waits for that primary Blob to appear —
-# the ServiceNotReady idiom from DepositDerivativesJob.
-#
-# The wait keys on the ARTIFACT — an asset whose role is `original_file` — because
-# that is the real precondition. Keying it on the Work's in_progress flag instead
-# reads as equivalent and is not: that flag means "no depositor has confirmed this
-# deposit", which an abandoned deposit never does, so a flag-based wait would
-# strand the rendition on a human rather than on the writer it actually races.
-#
-# Failure posture matches v1: enrichment never fails a deposit. A corrupt
-# document, a hung soffice (killed at 120s by bin/soffice-timeout), or a primary
-# Blob that never lands all exhaust their retries, log, and leave the deposit
-# intact — primary file present, no rendition, no thumbnail.
+# Enriches a Word/PowerPoint deposit with a PDF rendition and seeds the Work's
+# thumbnails from its first page. Converts first, THEN waits for the primary
+# Blob, so it never races ContentCreationJob. The wait keys on the artifact — an
+# asset whose role is `original_file` — never on the Work's in_progress flag,
+# which reads as equivalent and is not. See docs/downloads.md.
 class PdfRenditionJob < ApplicationJob
   include PrimaryFilePresence
 
@@ -33,7 +19,7 @@ class PdfRenditionJob < ApplicationJob
     IncompleteFlag.set(job.arguments.first, nuid: job.current_nuid, reason: IncompleteReasons::PDF_RENDITION)
   end
   # Declared after StandardError so it takes precedence (ActiveJob matches
-  # rescue handlers in reverse declaration order). ~16 minutes of cover.
+  # rescue handlers in reverse declaration order).
   retry_on PrimaryFileMissing, attempts: 6, wait: :polynomially_longer do |job, _exception|
     Rails.logger.warn(
       "PdfRenditionJob: work #{job.arguments.first} never received its primary file — PDF rendition skipped"
@@ -48,8 +34,7 @@ class PdfRenditionJob < ApplicationJob
     end
 
     pdf_path = rendition_path(staged_path)
-    # The rendition lives next to the staged original (same lifecycle), so a
-    # retry that already converted skips straight to the attach.
+    # Retry-safe: an attempt that already converted skips to the attach.
     WordToPdf.call(source_path: staged_path, target_path: pdf_path) unless File.exist?(pdf_path)
 
     raise PrimaryFileMissing, "work #{work_id} has no primary file yet" unless primary_file?(work_id)
@@ -57,7 +42,6 @@ class PdfRenditionJob < ApplicationJob
     AtlasRb::Blob.create(work_id, pdf_path, File.basename(pdf_path), idempotency_key: rendition_key)
     # perform_now so the ambient acting NUID carries through (see ApplicationJob).
     IiifAssetsJob.perform_now(work_id, pdf_path)
-    # Office docs get their full text from this rendition (so soffice ran once).
     FullTextExtractionJob.perform_later(work_id, pdf_path)
     IncompleteFlag.clear(work_id)
   end

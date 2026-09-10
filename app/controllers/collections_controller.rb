@@ -41,6 +41,7 @@ class CollectionsController < CatalogController
   def new
     @collection = OpenStruct.new
     @create_path = child_create_path('collections')
+    new_form_permissions!(@destination_id)
   end
 
   def edit
@@ -48,14 +49,10 @@ class CollectionsController < CatalogController
   end
 
   def create
-    permitted = params.expect(collection: [:title, :description]).to_h
-    # Guard before minting: a blank title would otherwise produce an untitled
-    # Collection (MODSMerge leaves a blank title untouched). Client-side
-    # `required` is the first line; this is the backstop.
-    return redirect_to(new_child_path('collection')) if title_missing?(permitted)
+    c = mint_titled!('Collection', :collection)
+    return redirect_to(new_child_path('collection')) if c.nil?
 
-    c = AtlasRb::Collection.create(@destination_id)
-    save_descriptive!('Collection', c.id, title: permitted['title'], description: permitted['description'])
+    apply_new_permissions('Collection', c.id, :collection)
     redirect_to collection_path(c.id)
   end
 
@@ -82,6 +79,18 @@ class CollectionsController < CatalogController
   # lives in CollectionBreadcrumbs, shared with XmlController's raw-XML editor.
 
   private
+
+    # The same children #show lists, gated the same way: the modal's counts
+    # describe this Collection's contents, so a caller who may not read the
+    # Collection must not be able to count them either. A tombstoned Collection
+    # has no browsable contents, so it 404s rather than rendering an empty modal.
+    def facet_scope_filters
+      @collection = AtlasRb::Collection.find(params[:id])
+      raise ResourceNotFound if @collection.nil? || @collection.tombstoned
+
+      authorize_show!
+      child_membership_filters(@collection.valkyrie_id, params[:id])
+    end
 
     # Everything the edit page renders. Shared with the rejected-save path,
     # which re-renders the same page rather than redirecting to it.
@@ -135,8 +144,10 @@ class CollectionsController < CatalogController
         entry = permitted[tier]
         next if entry.blank?
 
+        # Committed rows and the entry row share one field name, so `uniq` keeps
+        # a group named twice from reaching Atlas twice.
         if entry[:mode] == 'restrict'
-          policy[tier] = Array(entry[:groups]).compact_blank
+          policy[tier] = Array(entry[:groups]).compact_blank.uniq
         elsif public_collection
           policy[tier] = ['public']
         end

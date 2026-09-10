@@ -1,45 +1,9 @@
 # frozen_string_literal: true
 
-# Routes a staged upload to its post-upload enrichment jobs. The single
-# home for "what does this file type get?" — shared by the single-file
-# deposit (WorksController) and the XML loader (XmlIngestJob) so the two
-# ingest paths can't drift:
-#
-# - image/*          → IiifAssetsJob (JP2 + thumbnail Delegates, as ever)
-# - application/pdf  → IiifAssetsJob (MasterJp2 rasterizes page 1 via vips/poppler)
-# - Word/PowerPoint  → PdfRenditionJob (LibreOffice → PDF rendition Blob,
-#                      then thumbnails from the rendition's first page)
-# - everything       → ContentCreationJob (the primary Blob — enrichment
-#                      never gates or blocks it)
-#
-# Full text rides alongside, for body-text search + the "Full Text Match"
-# snippet: native PDFs and plain text → FullTextExtractionJob here; Office
-# docs get theirs from the PDF rendition instead (PdfRenditionJob enqueues
-# it on the converted PDF, so soffice runs once).
-#
-# `include_primary:` controls that last branch. The deposit/loader paths leave
-# it true (the primary Blob is created here). The admin "replace a file" path
-# passes false: the primary bytes are written separately by Blob.update (NOID
-# preserved), so only the type-routed *derivative* refresh is wanted here —
-# never a second ContentCreationJob/Blob.create.
-#
-# `complete_work:` is a genuinely different fact and not a second name for the
-# one above: it asks whether anything still owes this Work its metadata. A batch
-# loader has already supplied it, so ingest completing the Work is right. An
-# interactive deposit has not — a human confirms on the form's second page — so
-# that path passes false and ConfirmDepositJob completes the Work later.
-#
-# No derivative_widths pass through here: deposits get thumbnails only at
-# upload time. Small/medium/large are opt-in download renditions chosen on
-# the metadata page (DepositDerivativesJob), and per policy documents get
-# thumbnails only, never S/M/L.
-#
-# Detection sniffs the staged file with Marcel rather than trusting a
-# browser-supplied content type (absent in the loader path anyway). Legacy
-# Office files (.doc/.ppt) need a second step: their magic bytes only say
-# "OLE container", and Marcel keeps the magic type because its hierarchy
-# roots msword/ms-powerpoint under x-tika-msoffice, not x-ole-storage — so
-# for those ambiguous container types the filename decides.
+# Routes a staged upload to its post-upload enrichment jobs, and is the single
+# home for "what does this file type get?" so the deposit and loader paths cannot
+# drift. `include_primary:` and `complete_work:` are different facts, not two
+# names for one — read docs/ingest.md before changing either.
 class IngestDispatch < ApplicationService
   CONVERTIBLE_MIME_TYPES = %w[
     application/msword
@@ -54,10 +18,6 @@ class IngestDispatch < ApplicationService
     application/x-tika-msoffice
   ].freeze
 
-  # rubocop:disable Metrics/ParameterLists -- all six are keywords, so there is no
-  # positional-order hazard for the cop to protect against, and each names one
-  # independent fact about the dispatch. Bundling them into an options object
-  # would hide the two flags that callers actually vary.
   def initialize(work_id:, staged_path:, original_filename:, idempotency_key:, include_primary: true,
                  complete_work: true)
     @work_id = work_id
@@ -67,7 +27,6 @@ class IngestDispatch < ApplicationService
     @include_primary = include_primary
     @complete_work = complete_work
   end
-  # rubocop:enable Metrics/ParameterLists
 
   def call
     if mime_type.start_with?('image/') || mime_type == 'application/pdf'
@@ -86,17 +45,10 @@ class IngestDispatch < ApplicationService
 
   private
 
-    # The two conditions coincide by construction: the only callers that skip
-    # the primary Blob are replace and rollback, and both are re-deriving the
-    # assets of a Work that already has them. A separate flag would be a second
-    # name for the same fact.
     def refreshing?
       !@include_primary
     end
 
-    # Direct full-text candidates: native PDFs and plain text. Office docs are
-    # excluded here — their text comes from the PDF rendition (PdfRenditionJob),
-    # so soffice converts once.
     def extractable_text?
       mime_type == 'application/pdf' || mime_type.start_with?('text/')
     end
@@ -108,9 +60,7 @@ class IngestDispatch < ApplicationService
       end
     end
 
-    # Derived (uuid_v5), not minted, so the rendition Blob converges on the
-    # same Atlas idempotency key across Solid Queue retries AND a
-    # re-dispatched loader row — same dedup story as the primary Blob's key.
+    # Derived, never minted: a retry must converge on the same Atlas key.
     def rendition_key
       Digest::UUID.uuid_v5(Digest::UUID::URL_NAMESPACE, "cerberus:rendition:#{@idempotency_key}")
     end

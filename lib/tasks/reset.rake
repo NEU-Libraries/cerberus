@@ -479,6 +479,10 @@ namespace :reset do
     # Runs after the object seed has indexed into Solr (it keys on the Works now
     # present there) and writes only to Cerberus's own analytics tables.
     ImpressionSeeder.call
+
+    # Same reason, for /admin/ledger: an empty ledger teaches nobody what the
+    # ledger is for. Also keys on what is now in Solr, so every row links out.
+    LedgerSeeder.call
   end
 
   desc 'Seed representative usage impressions for the Usage Analytics dashboard'
@@ -487,6 +491,14 @@ namespace :reset do
 
     count = ImpressionSeeder.call
     puts "Seeded #{count} impressions across the indexed Works."
+  end
+
+  desc 'Seed requests, activity and daily digests for the admin ledger'
+  task ledger: :environment do
+    raise "Wrong env - #{Rails.env} - must be development" unless Rails.env.development? || Rails.env.staging?
+
+    count = LedgerSeeder.call
+    puts "Seeded #{count} ledger rows (requests, activity and the digests derived from them)."
   end
 
   desc 'Clean Solr and Atlas (AR tables are reset by db:replant)'

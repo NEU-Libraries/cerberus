@@ -77,15 +77,19 @@ module Admin
       # Resolve each affiliated community NOID to a {noid, title} for display. A
       # stale/unreadable id degrades to its NOID rather than breaking the page.
       def load_affiliations
-        @affiliations = Array(@person['affiliated_community_ids']).map do |noid|
-          { noid: noid, title: community_title(noid) }
-        end
+        noids = Array(@person['affiliated_community_ids'])
+        titles = noids.empty? ? {} : community_titles(noids)
+        @affiliations = noids.map { |noid| { noid: noid, title: titles[noid].presence || noid } }
       end
 
-      def community_title(noid)
-        AtlasRb::Community.find(noid, nuid: Current.nuid)&.title.presence || noid
+      # Every affiliated community's title in one batched find_many rather than
+      # a find-per-noid fan-out. find_many is unordered and drops an
+      # unresolvable id, so index by noid and let the caller re-impose the
+      # person's own order.
+      def community_titles(noids)
+        AtlasRb::Resource.find_many(noids, nuid: Current.nuid).to_h { |node| [node['noid'], node['title']] }
       rescue Faraday::Error, JSON::ParserError
-        noid
+        {}
       end
 
       # Community picker for the affiliation finder — the same gated Solr search

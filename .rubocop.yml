@@ -13,6 +13,13 @@ Lint/MissingSuper:
     - 'app/services/**/*'
     # BL Code
     - 'app/components/blacklight/**/*'
+Lint/UnusedBlockArgument:
+  Exclude:
+    # The Blacklight metadata layouts accept `index` (a value's position within
+    # its field) because Blacklight always sends it and an unknown keyword
+    # raises. A layout that gives every value its own full-width row has no use
+    # for it, so it is accepted and dropped.
+    - 'app/components/blacklight/metadata_field_layout_component.rb'
 Metrics/ClassLength:
   Max: 120
   Exclude:
@@ -21,6 +28,42 @@ Metrics/ClassLength:
     # controller. Its length tracks the size of the Solr index, not the
     # complexity of the class.
     - 'app/controllers/catalog_controller.rb'
+    # Spans the whole Work lifecycle — deposit, show, edit, tombstone, manifest,
+    # downloads — as one cohesive controller rather than being split by verb.
+    - 'app/controllers/works_controller.rb'
+    # Mostly constants (category labels, namespace URIs) and one short emit_*
+    # helper per MODS element. Each emitter is focused, so moving them to a
+    # sibling class would trade the metric for indirection and earn nothing.
+    - 'app/services/iptc/mods_builder.rb'
+    # One apply_* per field the metadata forms own plus one normalisation per
+    # field shape, so the length tracks the size of those forms rather than the
+    # difficulty of any one method. Collapsing the near-identical creator pair
+    # behind a lookup table would buy the metric back and cost the reader.
+    - 'app/services/metadata/mods_merge.rb'
+Metrics/ModuleLength:
+  Exclude:
+    # Cohesive view-formatting for a single component: every per-action audit
+    # partial renders its row through these helpers.
+    - 'app/helpers/audit_events_helper.rb'
+    # A cohesive state machine — predicates, lifecycle, TTL, context plumbing,
+    # hydration. Splitting it would scatter the impersonation session across
+    # files for no readability gain.
+    - 'app/controllers/concerns/impersonation_session.rb'
+Metrics/MethodLength:
+  Max: 15
+  AllowedMethods: ['role_permissions', 'convert_xml_to_json']
+  Exclude:
+    # Each of these entry points is one linear flow — guard, extract, parse,
+    # fan out, rescue — and the branches in it are structural gates rather than
+    # independent decisions. Extracting the steps would scatter the failure
+    # handling that is the whole point of the method, so the same reasoning
+    # covers their AbcSize and complexity exclusions below.
+    - 'app/jobs/iptc_ingest_job.rb'
+    - 'app/jobs/multipage_unzip_job.rb'
+    - 'app/jobs/unzip_job.rb'
+    - 'app/jobs/xml_ingest_job.rb'
+    - 'app/jobs/xml_unzip_job.rb'
+    - 'app/services/xml_preview.rb'
 Metrics/AbcSize:
   Max: 22
   Exclude:
@@ -31,12 +74,33 @@ Metrics/AbcSize:
     - 'app/models/breadcrumb_trail.rb'
     # Nature of object conversion, lots of assignment
     - 'app/lib/mods_to_json.rb'
+    # Linear ingest flows; see Metrics/MethodLength.
+    - 'app/jobs/iptc_ingest_job.rb'
+    - 'app/jobs/multipage_unzip_job.rb'
+    - 'app/jobs/xml_ingest_job.rb'
+    - 'app/jobs/xml_unzip_job.rb'
 Metrics/CyclomaticComplexity:
   Exclude:
     - 'app/decorators/*'
+    # Linear ingest and preview flows; see Metrics/MethodLength.
+    - 'app/jobs/xml_ingest_job.rb'
+    - 'app/services/xml_preview.rb'
 Metrics/PerceivedComplexity:
   Exclude:
     - 'app/decorators/*'
+    # Linear ingest and preview flows; see Metrics/MethodLength.
+    - 'app/jobs/xml_ingest_job.rb'
+    - 'app/services/xml_preview.rb'
+Metrics/ParameterLists:
+  # Every long signature this cop objects to in app/ is keyword-only. Keywords
+  # name themselves at the call site, so there is no positional-order hazard for
+  # the cop to protect against, and folding them into an options object would
+  # only hide the arguments that callers actually vary.
+  CountKeywordArgs: false
+  Exclude:
+    # Devise deserializes the session array positionally, so the arity of
+    # serialize_from_session has to mirror serialize_into_session.
+    - 'app/lib/devise/models/custom_authenticatable.rb'
 Style/OpenStructUse:
   Enabled: false
 Lint/AmbiguousBlockAssociation:
@@ -55,9 +119,6 @@ Layout/LineLength:
   Max: 120
   Include:
     - 'app/**/*'
-Metrics/MethodLength:
-  Max: 15
-  AllowedMethods: ['role_permissions', 'convert_xml_to_json']
 AllCops:
   NewCops: enable
   TargetRubyVersion: 3.2
@@ -85,6 +146,34 @@ Rails/UnknownEnv:
 Rails/OutputSafety:
   Exclude:
     - 'app/helpers/application_helper.rb'
+    # The helper's whole job is to re-emit a caller-escaped subset of markup, so
+    # it escapes everything itself and then marks the result safe.
+    - 'app/helpers/enhanced_text_helper.rb'
+Rails/HelperInstanceVariable:
+  Exclude:
+    # The container a page is rendering is request-scoped controller state that
+    # is already loaded with its valkyrie_id in hand. Re-deriving it from
+    # params[:id] would yield a noid and need a noid-to-uuid Solr lookup,
+    # defeating the zero-query design these helpers exist for.
+    - 'app/helpers/application_helper.rb'
+Rails/LexicallyScopedActionFilter:
+  Exclude:
+    # Both files declare a before_action for actions that live elsewhere — in an
+    # included concern, or in the controller that calls the macro. That
+    # indirection is deliberate: it is what lets the filter order relative to
+    # the gates around it, and in the macro's case it is the whole point.
+    - 'app/controllers/sets_controller.rb'
+    - 'app/controllers/concerns/authorizable.rb'
+Rails/SkipsModelValidations:
+  Exclude:
+    # Bulk writers. Each one stamps or inserts many rows in a single statement
+    # to keep an ingest, a rollup or a seed run cheap, and sets the timestamps
+    # explicitly because the callback that normally would is skipped.
+    - 'app/jobs/multipage_item_job.rb'
+    - 'app/jobs/reclassify_user_agents_job.rb'
+    - 'app/jobs/rollup_container_impressions_job.rb'
+    - 'app/services/impression_seeder.rb'
+    - 'app/services/ledger_seeder.rb'
 Rails/DynamicFindBy:
   Whitelist:
     - find_by_alternate_identifier

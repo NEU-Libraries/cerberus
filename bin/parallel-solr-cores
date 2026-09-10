@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+#
+# Provision the per-worker Solr cores that the parallel spec lane needs.
+#
+# Each parallel worker owns an Atlas instance, and each of those instances
+# indexes into its own core: worker 2 into blacklight-test-2, and so on. Worker 1
+# uses the plain blacklight-test core that already exists, so this script only
+# ever adds.
+#
+# Runs on the HOST, not inside the web container. Creating a core means putting a
+# conf/ directory on Solr's disk before calling the CoreAdmin API, and only the
+# host can reach into the solr container to do that.
+#
+# The cores live on the container filesystem rather than in the `solr` named
+# volume (which only covers blacklight-core's data dir), so a `docker compose up`
+# that recreates solr loses them. That is why this is idempotent and cheap to
+# re-run: after any stack rebuild, just run it again.
+#
+#   bin/parallel-solr-cores [worker_count]   # default 4
+#
+set -euo pipefail
+
+WORKERS="${1:-4}"
+SOLR_CONTAINER="${SOLR_CONTAINER:-cerberus-solr-1}"
+SOLR_URL="${SOLR_HOST_URL:-http://localhost:8983}"
+TEMPLATE="blacklight-test"
+SOLR_DATA="/var/solr/data"
+
+if ! docker ps --format '{{.Names}}' | grep -qx "$SOLR_CONTAINER"; then
+  echo "solr container '$SOLR_CONTAINER' is not running — bring the stack up first" >&2
+  exit 1
+fi
+
+# The template must exist, or every core below would be created with no schema
+# and fail confusingly on the first index write rather than here.
+if ! docker exec "$SOLR_CONTAINER" test -d "$SOLR_DATA/$TEMPLATE/conf"; then
+  echo "template core '$TEMPLATE' has no conf/ in $SOLR_CONTAINER — nothing to copy from" >&2
+  exit 1
+fi
+
+created=0
+for n in $(seq 2 "$WORKERS"); do
+  core="${TEMPLATE}-${n}"
+
+  if curl -sf "$SOLR_URL/solr/$core/admin/ping" >/dev/null 2>&1; then
+    echo "  $core already loaded"
+    continue
+  fi
+
+  # Copy the schema but not the index or the core marker: core.properties is what
+  # makes Solr treat a directory as a core, and a copied one would carry the
+  # template's name and collide on load.
+  docker exec "$SOLR_CONTAINER" bash -c "
+    rm -rf '$SOLR_DATA/$core'
+    cp -r '$SOLR_DATA/$TEMPLATE' '$SOLR_DATA/$core'
+    rm -rf '$SOLR_DATA/$core/data' '$SOLR_DATA/$core/core.properties'
+  "
+
+  curl -sf "$SOLR_URL/solr/admin/cores?action=CREATE&name=$core&instanceDir=$core&config=solrconfig.xml&schema=schema.xml&wt=json" \
+    >/dev/null
+  echo "  $core created"
+  created=$((created + 1))
+done
+
+echo "parallel Solr cores ready (workers 2..$WORKERS, $created created this run)"

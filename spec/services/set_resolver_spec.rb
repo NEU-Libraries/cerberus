@@ -48,7 +48,9 @@ RSpec.describe SetResolver do
 
   let(:user) { nil }
   let(:search_service) do
-    GatedSearchService.new(config: CatalogController.blacklight_config, context: { current_user: user })
+    GatedSearchService.new(config:       CatalogController.blacklight_config,
+                           search_state: Blacklight::SearchState.new({}, CatalogController.blacklight_config),
+                           current_user: user)
   end
 
   describe '#contents_fqs' do
@@ -169,14 +171,20 @@ RSpec.describe SetResolver do
     # unit spec cannot catch that: it builds its own documents, so it asserts
     # its own assumption about their shape.
     it 'carries the embargo date through to the packer, which withholds on it' do
-      embargoed = public_work(collection_b.id)
+      # Its own collection, not one of the shared pair. The recipe reaches this
+      # Work by direct add, so the parent is arbitrary — but the before(:all)
+      # hierarchy is shared by every example in the file, and the chip tallies
+      # assert exactly how many Works each shared collection holds. A public
+      # Work left in one of them is counted by whichever chip example runs later.
+      embargoed = public_work(public_collection(community.id).id)
       AtlasRb::Work.metadata(embargoed.id,
                              { 'permissions' => { 'read'    => ['public'],
                                                   'embargo' => (Date.current + 365).to_s } },
                              nuid: nuid)
 
       zip = FakeZip.new
-      SetZipPacker.new(resolver: resolver(recipe(works: [embargoed])), nuid: nil).pack(zip)
+      SetZipPacker.new(resolver: resolver(recipe(works: [embargoed])), nuid: nil,
+                       ability: Ability.new(nil)).pack(zip)
 
       expect(zip.entries.map(&:name)).to include('ERRORS.txt')
       expect(zip.entries.map(&:name).grep_v(/\.txt\z/)).to be_empty
@@ -230,7 +238,7 @@ RSpec.describe SetResolver do
     return [] if fqs.nil?
 
     builder = search_service.search_builder.with({}).with_filters(*fqs)
-    Blacklight.default_index.search(builder).documents
+    Blacklight.default_index.search(params: builder).documents
   end
 
   def contents(compilation)

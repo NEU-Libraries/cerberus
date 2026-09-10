@@ -101,8 +101,9 @@ RSpec.describe 'Admin::People', type: :request do
     describe 'GET /admin/people/:noid/edit' do
       it 'renders the identity form and resolves affiliations to community titles' do
         allow(AtlasRb::Person).to receive(:find).with('cz8wbpk', anything).and_return(person)
-        allow(AtlasRb::Community).to receive(:find).with('jm640df', anything)
-                                                   .and_return(OpenStruct.new(title: 'Communications'))
+        allow(AtlasRb::Resource).to receive(:find_many).with(['jm640df'], anything)
+                                                       .and_return([AtlasRb::Mash.new('noid'  => 'jm640df',
+                                                                                      'title' => 'Communications')])
 
         get edit_admin_person_path('cz8wbpk')
 
@@ -112,9 +113,35 @@ RSpec.describe 'Admin::People', type: :request do
         expect(response.body).to include('Communications') # resolved affiliation title
       end
 
+      # find_many drops an id it cannot resolve, so a stale affiliation comes
+      # back absent rather than nil-titled. The row must still render.
+      it 'falls back to the bare NOID when an affiliation no longer resolves' do
+        allow(AtlasRb::Person).to receive(:find).with('cz8wbpk', anything).and_return(person)
+        allow(AtlasRb::Resource).to receive(:find_many).and_return([])
+
+        get edit_admin_person_path('cz8wbpk')
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('jm640df')
+      end
+
+      it 'resolves every affiliation in one call rather than one per NOID' do
+        many = { 'id' => 'cz8wbpk', 'nuid' => '000000004', 'display_name' => 'David Cliff',
+                 'affiliated_community_ids' => %w[aaa1111 bbb2222 ccc3333] }
+        allow(AtlasRb::Person).to receive(:find).with('cz8wbpk', anything).and_return(many)
+        expect(AtlasRb::Resource).to receive(:find_many).once
+                                                        .with(%w[aaa1111 bbb2222 ccc3333], anything)
+                                                        .and_return([])
+
+        get edit_admin_person_path('cz8wbpk')
+
+        expect(response).to have_http_status(:ok)
+      end
+
       it 'runs the community picker when a query is present' do
         allow(AtlasRb::Person).to receive(:find).and_return(person)
-        allow(AtlasRb::Community).to receive(:find).and_return(OpenStruct.new(title: 'Communications'))
+        allow(AtlasRb::Resource).to receive(:find_many)
+          .and_return([AtlasRb::Mash.new('noid' => 'jm640df', 'title' => 'Communications')])
         results = instance_double(Blacklight::Solr::Response, documents: [])
         expect(ResourceSearch).to receive(:call)
           .with(hash_including(query: 'art', types: %w[Community])).and_return(results)

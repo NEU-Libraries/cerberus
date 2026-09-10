@@ -1,82 +1,43 @@
 # frozen_string_literal: true
 
-# Builds Solr *filter-query* (`fq`) fragments for tree + DAG membership resolution.
+# Builds Solr filter-query (`fq`) fragments for tree + DAG membership.
 #
-# ⚠️ EVERY fragment here belongs in `:fq`, NEVER in `:q`.
-#
-# The `/select` handler runs `q` through edismax with a minimum-should-match (~2) and
-# a title/text `qf`. A multi-id membership OR placed in `q` parses to
-# `+(clause clause clause)~2` and silently returns WRONG results (a doc must match
-# 2+ of the ids), while a `{!terms}` query in `q` is swallowed as full-text across the
-# `qf` fields. Filter queries are parsed by the lucene parser — no mm, no qf — so the
-# fragments below behave exactly as written. Always match the untokenized string
-# projections (`_ssi`/`_ssim`) with `{!terms}`, never the tokenized `_tesim`.
-#
-# Verified against live Solr (2026-06-01). See CatalogController#find_children for the
-# canonical fq-position usage.
+# EVERY fragment here belongs in `:fq`, NEVER in `:q`. In `:q` edismax applies
+# minimum-should-match, so a multi-id OR silently requires 2+ matches, and a
+# {!terms} query is swallowed as full text. Match the untokenized `_ssi`/`_ssim`
+# projections, never the tokenized `_tesim`. See docs/search.md.
 class MembershipQuery
   # Scalar single-parent edge (the structural tree). Value shape: `id-<uuid>`.
   STRUCTURAL_FIELD = 'a_member_of_ssi'
   # Leaves-only DAG overlay (Works linked into additional collections). `id-<uuid>`.
   LINKED_FIELD = 'a_linked_member_of_ssim'
-  # Transitive ancestor chain, denormalized onto Collections/Communities only.
-  # Value shape: BARE noids (no `id-` prefix); excludes the doc itself.
+  # Transitive ancestor chain. BARE noids -- no `id-` prefix, unlike the two above.
   ANCESTOR_FIELD = 'ancestor_ids_ssim'
 
   class << self
-    # fq matching every Collection/Community whose ancestor chain includes any of
-    # +anchor_noids+ — i.e. all descendants of the anchor(s) (the anchors themselves
-    # excluded, since a node is not its own ancestor).
-    #
-    # @param anchor_noids [String, Array<String>] bare noid(s) as stored in
-    #   {ANCESTOR_FIELD}. A leading `id-` (as carried by `alternate_ids_ssim`) is
-    #   tolerated and stripped.
-    # @return [String] an fq fragment (for `:fq`, never `:q`).
+    # Descendants of the anchor(s), anchors excluded. Takes BARE noids.
     def descendants_fq(anchor_noids)
       "{!terms f=#{ANCESTOR_FIELD}}#{Array(anchor_noids).map { |n| normalize_noid(n) }.join(',')}"
     end
 
-    # fq matching documents by Solr uniqueKey (`id`, the bare uuid). Used to splice
-    # individually-named resources (a Set's directly-added Works) into a membership
-    # {!bool}, or — via {.excluding_fq} — to subtract them.
-    #
-    # @param uuids [Array<String>] bare uuids (no `id-` prefix).
-    # @return [String] an fq fragment (for `:fq`, never `:q`).
     def identity_fq(uuids)
       "{!terms f=id}#{Array(uuids).join(',')}"
     end
 
-    # Wrap a clause as a subtractive fq: everything EXCEPT what +clause+ matches.
-    # A bare leading `-` cannot precede a localparams clause (`{!terms}` must open
-    # the param to be its parser), so the subtraction is a {!bool} with an explicit
-    # `must="*:*"` anchor — a must_not needs a positive base to subtract from.
-    #
-    # @param clause [String] an fq fragment to negate.
-    # @return [String] an fq fragment (for `:fq`, never `:q`).
+    # Everything EXCEPT what +clause+ matches. A bare leading `-` cannot precede a
+    # localparams clause, so this is a {!bool} with an explicit must="*:*" anchor:
+    # a must_not needs a positive base to subtract from.
     def excluding_fq(clause)
       %({!bool must="*:*" must_not="#{clause}"})
     end
 
-    # fq matching docs that are members of any of +container_uuids+. Structural
-    # membership only by default; OR-s in the linked-member overlay when
-    # +include_linked+ is true.
-    #
-    # @param container_uuids [Array<String>] bare uuids (no `id-` prefix) of the
-    #   containers whose members to match.
-    # @param include_linked [Boolean] also match Works linked into the containers
-    #   via {LINKED_FIELD}.
-    # @return [String] an fq fragment (for `:fq`, never `:q`).
+    # Members of any of +container_uuids+ (bare uuids).
     def members_fq(container_uuids, include_linked: false)
       any_of(member_clauses(container_uuids, include_linked: include_linked))
     end
 
-    # The individual membership should-clauses (structural, plus the linked
-    # overlay when +include_linked+). Exposed so a caller that needs to OR these
-    # alongside *other* clauses — e.g. the subtree search's container clause —
-    # can splice them into a single flat {!bool} rather than nesting one bool
-    # inside another's quoted `should=`, which Solr's parser rejects.
-    #
-    # @return [Array<String>] one or two {!terms} fragments.
+    # Exposed so a caller can splice these into ONE flat {!bool} alongside other
+    # clauses -- Solr rejects a bool nested in another bool's quoted `should=`.
     def member_clauses(container_uuids, include_linked: false)
       terms = term_list(container_uuids)
       clauses = ["{!terms f=#{STRUCTURAL_FIELD}}#{terms}"]
@@ -84,12 +45,8 @@ class MembershipQuery
       clauses
     end
 
-    # OR a set of fq clauses into one flat {!bool}. A single clause is returned
-    # bare (no redundant wrapper); never nest the result inside another bool's
-    # quoted `should=` — build one flat {!bool} from all clauses instead.
-    #
-    # @param clauses [Array<String>] fq fragments.
-    # @return [String] a single fq fragment.
+    # OR clauses into one flat {!bool}; a single clause is returned bare. Never
+    # nest the result inside another bool's quoted `should=`.
     def any_of(clauses)
       clauses = Array(clauses).compact
       return clauses.first if clauses.one?
@@ -99,9 +56,8 @@ class MembershipQuery
 
     private
 
-      # Map bare uuids to the `id-<uuid>` term form Solr indexes, comma-joined for the
-      # {!terms} parser. An empty list yields an empty term string, which matches no
-      # documents (the correct answer for "members of nothing").
+      # An empty list yields an empty term string, matching no documents -- the
+      # correct answer for "members of nothing".
       def term_list(uuids)
         Array(uuids).map { |uuid| "id-#{uuid}" }.join(',')
       end

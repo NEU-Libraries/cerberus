@@ -1,5 +1,5 @@
 - content_for(:page_title) do
-  = @work.title
+  = plain_text(@work.title)
 - content_for(:container_header) do
   = render 'shared/breadcrumbs'
 
@@ -23,7 +23,7 @@
   .row
     .col-12
       .d-flex.flex-column.flex-md-row.justify-content-md-between.align-items-md-end
-        %h3= @work.title
+        %h3= enhanced_text(@work.title)
         - if user_signed_in?
           .text-end.small.pb-2.flex-shrink-0.text-nowrap
             - if @can_edit && !@work.in_progress
@@ -37,16 +37,30 @@
                        kind:          'work',
                        path:          tombstone_work_path(@work.id),
                        trigger_class: 'px-2'
+            -# Rebuilds this work's search record from Atlas. Solr-only and
+            -# idempotent, so it is safe to offer as a one-click repair for a
+            -# record that has gone stale against a changed indexer.
+            -#
+            -# A POST, so button_to rather than link_to. `link-action` strips the
+            -# button chrome back to a plain link, because the rest of this row
+            -# is plain links and a repair action should not outrank Edit.
+            - if current_user&.admin? || current_user&.admin_delegate?
+              = button_to 'Reindex', admin_reindex_work_path(@work.id),
+                          class:      'btn btn-link link-action px-2',
+                          form_class: 'd-inline',
+                          title:      'Rebuild this work’s search record'
       %hr.section-divider
-      .d-flex.justify-content-between.align-items-center.mb-3.small
-        %span
-          %i.fa-solid.fa-link.text-muted{'aria-hidden' => 'true'}
-          %span.text-muted.ms-1 Permanent URL:
-          = link_to @work.permanent_url, @work.permanent_url, class: 'ms-1'
-        - if downloads.present?
-          = link_to '#downloads' do
-            %span.text-muted= "Downloads (#{downloads.size})"
-            %i.fa-solid.fa-arrow-down.ms-1{'aria-hidden' => 'true'}
+      -# Both halves of this row are conditional, so the row itself goes when
+      -# neither has anything to say — an empty flex row would still carry its
+      -# bottom margin and open a gap under the divider.
+      - permanent_url = handle_url(@work.handle)
+      - if permanent_url.present? || downloads.present?
+        .d-flex.justify-content-between.align-items-center.mb-3.small
+          = render 'permanent_url', url: permanent_url
+          - if downloads.present?
+            = link_to '#downloads' do
+              %span.text-muted= "Downloads (#{downloads.size})"
+              %i.fa-solid.fa-arrow-down.ms-1{'aria-hidden' => 'true'}
   .row
     .col-md-6.order-md-1.order-2
       - if @multipage && @can_zoom
@@ -62,15 +76,21 @@
         -# In-page audio/video player. Like Tify, the skin CSS ships separately
         -# and video.js arrives via dynamic import, so other pages never pay.
         = stylesheet_link_tag 'video-js', 'data-turbo-track': 'false'
-        = render partial: 'av_player', locals: { file: @av_file }
+        -# The player offers a download link only where this viewer could follow
+        -# one, decided by the same per-asset gate as the downloads card.
+        = render partial: 'av_player',
+                 locals: { file:         @av_file,
+                           caption:      @caption,
+                           downloadable: derivative_readable?(@av_file, embargo_date: @permissions&.embargo) }
       - else
         = render partial: "thumbnail"
     .col-md-6.order-md-2.order-1
-      = @mods.html_safe
+      = @mods&.html_safe
 
 .clearfix.mb-4
 
 .container
   .row
     .col-md-12
+      = render partial: 'associations', locals: { associations: @associations }
       = render partial: 'downloads', locals: { files: downloads }

@@ -34,10 +34,6 @@ class XmlIngestJob < ApplicationJob
     ingest.load_report&.maybe_finalize!
   end
 
-  # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
-  # The linear flow (guard → resolve row → read+validate MODS → update/create →
-  # embargo → finalize) reads as one idempotency story; splitting it would
-  # scatter the per-row failure handling.
   def perform(xml_ingest_id, row)
     ingest = XmlIngest.find(xml_ingest_id)
     return if terminal?(ingest)
@@ -77,7 +73,6 @@ class XmlIngestJob < ApplicationJob
     # round-trip and covers the embargo write on the same row.
     finalize_failure(ingest, "No object with identifier '#{identifier}' exists in this repository.")
   end
-  # rubocop:enable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
   private
 

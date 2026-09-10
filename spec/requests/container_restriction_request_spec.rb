@@ -6,8 +6,8 @@ require 'rails_helper'
 # controller specs don't load Warden.
 #
 # Atlas is stubbed rather than seeded. The concern only reads a title and writes
-# a Message, so standing up real containers would cost two resources per example
-# in the shared test store to prove nothing extra.
+# an AdminNotice, so standing up real containers would cost two resources per
+# example in the shared test store to prove nothing extra.
 RSpec.describe 'Container restriction requests', type: :request do
   include Devise::Test::IntegrationHelpers
 
@@ -31,51 +31,44 @@ RSpec.describe 'Container restriction requests', type: :request do
   end
 
   describe 'POST /collections/:id/request_restriction' do
-    it 'messages the administrators and says who asked for what' do
+    it 'records a restrict request and says who asked for what' do
       expect do
         post request_restriction_collection_path('c1'), params: { request_note: 'Archives staff only' }
-      end.to change(Message, :count).by(1)
+      end.to change(AdminNotice, :count).by(1)
 
-      message = Message.last
-      expect(message.recipient_group).to eq(Permissions::ADMIN_GROUP)
-      expect(message.sender_nuid).to eq(nuid)
-      expect(message.subject).to include('Reading Room')
-      expect(message.body).to include('Doe, Jane', 'Should still be able to see it: Archives staff only')
+      notice = AdminNotice.last
+      expect(notice.kind).to eq('request_restrict')
+      expect(notice).to be_request
+      expect(notice.subject_noid).to eq('c1')
+      expect(notice.actor_nuid).to eq(nuid)
+      expect(notice.detail(:subject_type)).to eq('Collection')
+      expect(notice.detail(:subject_title)).to eq('Reading Room')
+      expect(notice.detail(:note)).to eq('Archives staff only')
     end
 
-    # The point of the affordance is reaching someone who can act. Only the
-    # :admin role may cascade, and the requester here IS staff, so addressing
-    # the staff group would send it to their own inbox.
-    it 'does not address the staff group' do
-      post request_restriction_collection_path('c1'), params: { request_note: 'Archives staff only' }
-
-      expect(Message.last.recipient_group).not_to eq(Permissions::STAFF_EDIT_GROUP)
+    # Nothing is addressed to anybody. Staff read the ledger; the requester
+    # hears back off-site.
+    it 'sends no inbox message' do
+      expect do
+        post request_restriction_collection_path('c1'), params: { request_note: 'Archives staff only' }
+      end.not_to change(Message, :count)
     end
 
-    it 'refuses an empty note rather than sending a blank request' do
+    it 'refuses an empty note rather than recording a blank request' do
       expect do
         post request_restriction_collection_path('c1'), params: { request_note: '  ' }
-      end.not_to change(Message, :count)
+      end.not_to change(AdminNotice, :count)
 
       expect(flash[:alert]).to include('Say who this should still be able to see')
     end
   end
 
   describe 'POST /communities/:id/request_restriction' do
-    # A community restriction cannot be fulfilled in one action — no cascade
-    # exists for one — so the message has to carry the route or its recipient is
-    # as stuck as the requester.
-    it 'tells the administrator how to actually carry it out' do
-      post request_restriction_community_path('m1'), params: { request_note: 'nobody' }
-
-      expect(Message.last.body).to include('Restrict each collection within it first')
-    end
-
     it 'names the community, not a collection' do
       post request_restriction_community_path('m1'), params: { request_note: 'nobody' }
 
-      expect(Message.last.subject).to include('Archives')
-      expect(Message.last.body).to include('Community: “Archives”')
+      expect(AdminNotice.last.detail(:subject_type)).to eq('Community')
+      expect(AdminNotice.last.detail(:subject_title)).to eq('Archives')
     end
   end
 end

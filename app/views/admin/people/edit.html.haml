@@ -46,11 +46,11 @@
             %li.d-flex.align-items-center.justify-content-between.border.rounded-3.p-2.mb-2
               %span
                 %i.fa-solid.fa-users.text-primary.me-2{'aria-hidden' => 'true'}
-                = aff[:title]
+                = enhanced_text(aff[:title])
                 %span.admin-registry-table__id.ms-2= aff[:noid]
               = button_to remove_affiliation_admin_person_path(@noid, community_id: aff[:noid]),
                           method: :delete, class: 'btn btn-sm btn-outline-danger',
-                          form: { data: { turbo_confirm: "Remove the affiliation with #{aff[:title]}?" } } do
+                          form: { data: { turbo_confirm: "Remove the affiliation with #{plain_text(aff[:title])}?" } } do
                 %i.fa-solid.fa-xmark.me-1{'aria-hidden' => 'true'}
                 Remove
       - else
@@ -72,7 +72,7 @@
             %tbody
               - @results.documents.each do |doc|
                 %tr
-                  %td.admin-registry-table__name= finder_doc_title(doc)
+                  %td.admin-registry-table__name= finder_doc_heading(doc)
                   %td= finder_type_chip(doc.klass_type)
                   %td
                     %span.admin-registry-table__id= doc.to_param

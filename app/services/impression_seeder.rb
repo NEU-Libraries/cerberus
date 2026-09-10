@@ -86,7 +86,7 @@ class ImpressionSeeder
           rand(0..(3 * weight).ceil).times { rows << row(noid, 'download', midnight) }
         end
       end
-      rows.each_slice(1_000) { |slice| Impression.insert_all(slice) } # rubocop:disable Rails/SkipsModelValidations
+      rows.each_slice(1_000) { |slice| Impression.insert_all(slice) }
       rows.size
     end
 

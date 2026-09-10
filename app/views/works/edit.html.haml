@@ -1,7 +1,12 @@
 - content_for(:container_header) do
   = render 'shared/breadcrumbs', show_add: false
 
-%h3.py-3 Edit Work
+-# The heading names the resource, so the page says what is being edited rather
+-# than restating the trail's last crumb. Matches the XML editor, which is a
+-# sub-tab of this page and has always named its resource.
+%h3.py-3
+  Edit Work -
+  = enhanced_text(@work.title)
 
 = render 'shared/edit_tabs', klass: 'Work', id: params[:id], active: nil
 
@@ -14,6 +19,8 @@
         %input#thumbnail.form-control.mb-3{:name => "thumbnail", :type => "file"}/
         = bootstrap_fields_for :work do |c|
           = render 'shared/descriptive_fields', f: c, descriptive: @descriptive, keywords: true
+        - if @caption_offered
+          = render 'works/captions', caption: @caption
         .well.p-3.my-3.rounded-3
           = f.button :submit, class: "btn btn-success"
           = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"
@@ -37,6 +44,8 @@
             %input.form-select.form-select-sm#embargo{name: "work[permissions][embargo]", type: "date", value: @embargo}/
             %label.small.py-3{for: "embargo"} If this item is embargoed, please enter the release date.
         = render 'shared/group_permissions', resource: 'work'
+        - if @streaming_only_offered
+          = render 'works/streaming_only', enabled: @streaming_only
         %div
           .well.p-3.my-3.rounded-3
             = f.button :submit, class: "btn btn-success"
@@ -44,7 +53,7 @@
   #move.tab-pane{"aria-labelledby" => "move-tab", role: "tabpanel"}
     .py-2.px-1
       %p.text-muted.small.mb-3
-        Ask the DRS staff to move this work to a different collection. Your request is sent to the staff inbox — they will follow up with you there.
+        Ask the DRS staff to move this work to a different collection. They will be in touch.
       = form_with url: request_change_work_path(params[:id]), method: :post do
         = hidden_field_tag :request_action, "move"
         .well.p-3.my-3.rounded-3
@@ -58,7 +67,7 @@
   #delete.tab-pane{"aria-labelledby" => "delete-tab", role: "tabpanel"}
     .py-2.px-1
       %p.text-muted.small.mb-3
-        Ask the DRS staff to delete (withdraw) this work. Your request is sent to the staff inbox — they will follow up with you there.
+        Ask the DRS staff to delete (withdraw) this work. They will be in touch.
       = form_with url: request_change_work_path(params[:id]), method: :post do
         = hidden_field_tag :request_action, "withdraw"
         .well.p-3.my-3.rounded-3

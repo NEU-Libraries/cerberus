@@ -16,6 +16,8 @@
         <mods:topic>Beaches</mods:topic>
     </mods:subject>
 
+    <mods:subject><mods:geographic>Florida</mods:geographic></mods:subject>
+    <mods:classification>landscapes</mods:classification>
     <mods:typeOfResource>still image</mods:typeOfResource>
     <mods:physicalDescription>
         <mods:form authority="marcform">electronic</mods:form>

@@ -65,7 +65,7 @@
   -# pt-2/mb-3 matches the rhythm the explanatory %ul gives the unconstrained
   -# branch, so the following section doesn't crowd the sentence.
   %p.small.text-muted.pt-2.mb-3
-    = "“#{@visibility_parent['title']}” is private, so this #{resource} can't be made public."
+    = "“#{plain_text(@visibility_parent['title'])}” is private, so this #{resource} can't be made public."
     - if @public
       = "This #{resource} is public and will become private when you save."
     - else

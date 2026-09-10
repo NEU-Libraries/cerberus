@@ -1,40 +1,19 @@
 # frozen_string_literal: true
 
+# Builds one rendition URI per role from a gated IIIF base and a set of widths.
+# See docs/downloads.md for the width grammar.
 class DerivativeCreator < ApplicationService
-  # Default size for each role, as a fraction of the source image. Override
-  # with `widths:` to pass custom values per role. Each value may be:
-  #
-  # - Integer       → longest-edge pixels, emitted as IIIF `!N,N` (fit
-  #                   within an N×N box, aspect preserved). No `^`, so it
-  #                   never upscales — a pure downscale for N ≤ the
-  #                   source's longest edge, which the deposit opt-in UI
-  #                   guarantees by capping its sliders at that edge.
-  # - Numeric ≤ 1   → fraction of source, emitted as IIIF `pct:N` (or
-  #                   `^pct:N` for values above 1). A pure downscale
-  #                   path that never trips Cantaloupe's upscale guard.
-  # - nil           → IIIF `full` (source dimensions, no scaling).
-  #
-  # Ratio defaults are the sane choice for varying source sizes — they
-  # always downscale, never trigger upscaling, and produce derivatives
-  # proportionate to whatever the user uploaded.
+  # Ratios, so every default is a pure downscale that never trips Cantaloupe's
+  # upscale guard. Override per role with `widths:`.
   DEFAULT_WIDTHS = { small: Rational(1, 3), medium: Rational(1, 2), large: Rational(3, 4) }.freeze
 
-  # Atlas's role token for each rendition, so a Work's current set can be read
-  # back out of an assets listing.
+  # Match on Atlas's stable `role` token, never the human `use` label.
   ROLES = { 'small_image' => :small, 'medium_image' => :medium, 'large_image' => :large }.freeze
 
-  # The widths that produced a Work's current renditions — the inverse of #call,
-  # recovered from the stored URIs. nil when the Work has none.
-  #
-  # Replacing a Work's bytes mints a new gated JP2, so every rendition must be
-  # rebuilt against the new base at the sizes the Work already carries. Nothing
-  # else records those sizes: the depositor chose them once, on the metadata
-  # page, and the URIs are the only place that choice survives.
-  #
-  # The inverse lives beside iiif_size so the grammar of a rendition URI is
-  # written down once. A tier whose size does not parse is left out rather than
-  # defaulted: defaulting rebuilds Small at full resolution, which is a
-  # permission leak rather than a cosmetic error.
+  # The widths that produced a Work's current renditions, recovered from the
+  # stored URIs — the only place the depositor's size choice survives. A tier
+  # whose size does not parse is LEFT OUT rather than defaulted: defaulting
+  # rebuilds Small at full resolution, which is a permission leak.
   def self.existing_widths(assets)
     widths = {}
     assets.each do |asset|
@@ -51,9 +30,8 @@ class DerivativeCreator < ApplicationService
     widths.presence
   end
 
-  # Inverse of #iiif_size, reading the size segment out of
-  # "<base>/full/<size>/0/default.jpg". :unknown for a token this class does not
-  # emit, which the caller must treat as "leave this tier alone".
+  # Inverse of #iiif_size. :unknown for a token this class does not emit, which
+  # the caller must treat as "leave this tier alone".
   def self.width_for(uri)
     case uri.split('/')[-3].to_s
     when 'full' then nil

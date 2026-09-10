@@ -1,4 +1,66 @@
 // ============================================================
+// Facet card chrome
+//
+// The facet panels are Bootstrap cards (see the
+// Blacklight::Facets::FieldComponent template override). Blacklight
+// styles accordion items instead, so the spacing, the focus ring and
+// the expand/collapse chevron that used to come from the framework are
+// ours to draw. Everything in this block is card scaffolding; the
+// tinting below it is the part that is a design choice.
+// ============================================================
+.facet-limit {
+  margin-bottom: $spacer;
+
+  .card-body {
+    padding: $spacer;
+  }
+
+  // Focus ring on the expand/collapse button. The button is a bare .btn
+  // inside a card header, so it inherits no visible focus treatment.
+  .btn {
+    --bs-btn-focus-shadow-rgb: 50, 50, 50;
+
+    &:focus-visible {
+      border-color: var(--bs-btn-hover-border-color);
+      outline: 0;
+      box-shadow: var(--bs-btn-focus-box-shadow);
+    }
+  }
+}
+
+// The open/closed indicator. Bootstrap draws one for accordion buttons
+// and nothing for a plain button in a card header, so the glyph and its
+// rotation are set here: pointing down when the panel is open, right
+// when it is collapsed.
+.facet-field-heading {
+  border-bottom: 0;
+  position: relative;
+
+  a {
+    color: inherit;
+  }
+
+  button {
+    font-weight: $headings-font-weight;
+
+    &::after {
+      content: "❯";
+      float: right;
+      transform: rotate(90deg);
+    }
+
+    &.collapsed {
+      border-bottom: 0;
+
+      &::after {
+        transform: rotate(0deg);
+        transition: transform 0.1s ease;
+      }
+    }
+  }
+}
+
+// ============================================================
 // Active-facet muting
 //
 // Blacklight's default .facet-limit-active treatment fills the
@@ -11,10 +73,10 @@
 // background foregrounds a saturated label.
 // ============================================================
 .facet-limit-active {
-  // Blacklight reads --bl-facet-active-bg as the .card-header
-  // background. A 12% wash of $success on white reads as "this
-  // panel is in a different state" without competing with the
-  // page surface.
+  // A 12% wash of $success on white reads as "this panel is in a
+  // different state" without competing with the page surface. Kept as a
+  // custom property so the value has one name, and applied to the header
+  // below — nothing in the framework consumes it for a card.
   --bl-facet-active-bg: #{color-mix(in srgb, $success 12%, $white)};
 
   // The 1px card border carries more saturation than the header
@@ -24,14 +86,15 @@
   // of standing apart from them.
   border-color: color-mix(in srgb, $success 35%, $white);
 
-  // Blacklight applies color-contrast() to the .card-header .btn
-  // (the collapse toggle around "Type"), which against the
-  // original strong-$success bg resolved to $white. With our
-  // soft tint underneath that would leave the header text and
-  // chevron invisible — force back to body color so the panel
-  // header reads as text on a tinted surface, not a hero strip.
-  .card-header .btn {
-    color: var(--bs-body-color);
+  .card-header {
+    background-color: var(--bl-facet-active-bg);
+
+    // Body colour, not a contrast-picked one. Against the soft tint the
+    // header is a tinted surface carrying ordinary text, not a hero strip
+    // that needs its label inverted to stay legible.
+    .btn {
+      color: var(--bs-body-color);
+    }
   }
 
   // × dismiss on the selected row — neutral at rest, $danger on

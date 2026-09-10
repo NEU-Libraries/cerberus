@@ -2,29 +2,22 @@
 
 # A per-tier derivative-permission policy bound (by noid) to a Collection or a
 # Compilation (Set). `policy` maps each gated tier to the read groups that may
-# fetch it; #apply_to pushes it to Atlas's per-tier gate. Two uses, both Cerberus
-# orchestration: a Collection's Sentinel is the default applied to Works created
-# under it, and a Set's Sentinel is bulk-applied across the Set's Works.
+# fetch it; #apply_to pushes it to Atlas's per-tier gate. See docs/narrowing.md.
 class Sentinel < ApplicationRecord
-  # The image resolution ladder, in narrowing order: `small` (lowest res / widest
-  # audience) → `master` (full-res source / narrowest). Monotonicity is checked
-  # along this order only — a higher-res image can't be more open than a smaller
-  # one below it, with `master` as the floor.
+  # The image resolution ladder, in narrowing order: `small` (widest audience)
+  # to `master` (narrowest). Monotonicity is checked along this order, so
+  # reordering this array changes what the validation below means.
   IMAGE_LADDER = %w[small medium large service master].freeze
 
-  # Non-image renditions gate independently — there is no meaningful resolution
-  # ordering between an audio file and a PDF, so no monotonicity ties them.
   INDEPENDENT = %w[audio video pdf].freeze
 
-  # Every gateable tier. `master` and the independent media reach non-image /
-  # original binaries, which Atlas maps onto the matching assets; thumbnails are
-  # never gateable (the open display pipe, public by construction).
+  # Every gateable tier. Thumbnails are deliberately absent — they are the open
+  # display pipe, public by construction.
   TIERS = (IMAGE_LADDER + INDEPENDENT).freeze
 
   # The read groups of the Collection/Set this Sentinel defaults for, set by the
-  # authoring controller so the policy can be checked against its container. A
-  # tier can't be more visible than the container it belongs to; nil elsewhere
-  # (create-path / bulk-apply), where this container-relative check is skipped.
+  # authoring controller. nil means the container-relative check below is
+  # skipped, so leaving it unset silently drops that ceiling.
   attr_accessor :resource_read_groups
 
   validates :target_id, presence: true, uniqueness: true
@@ -32,15 +25,10 @@ class Sentinel < ApplicationRecord
   validate :policy_monotonic
   validate :policy_within_resource
 
-  # The Collection default: apply that Collection's Sentinel to a Work just
-  # created under it. No-op when the Collection has no Sentinel, so every create
-  # path can call it unconditionally. Acts as the ambient Current principal (the
-  # depositor / loader user), which holds edit rights on the fresh Work.
   def self.apply_default(collection_id, work_id)
     find_by(target_id: collection_id)&.apply_to(work_id)
   end
 
-  # Apply this policy to a Work's derivatives via Atlas's per-tier gate.
   def apply_to(work_id, nuid: nil)
     AtlasRb::Work.set_derivative_permissions(work_id, policy: tier_policy, nuid: nuid)
   end
@@ -52,7 +40,6 @@ class Sentinel < ApplicationRecord
 
   private
 
-    # Each present tier maps to an array of read-group strings.
     def policy_well_formed
       return errors.add(:policy, 'must be a hash') unless policy.is_a?(Hash)
 
@@ -64,10 +51,8 @@ class Sentinel < ApplicationRecord
 
     # Visibility must narrow as image resolution grows: each rung's audience ⊆
     # the next-lower-res rung's (master ⊆ service ⊆ large ⊆ medium ⊆ small). A
-    # permissive higher-res tier would void a stricter lower one — and the
-    # enforcement side's coarse zoom cookie relies on this ordering. Only the
-    # image ladder is ordered; the independent media (audio/video/pdf) are not
-    # tied to it or to each other.
+    # permissive higher-res tier voids a stricter lower one, and the enforcement
+    # side's coarse zoom cookie relies on this ordering.
     def policy_monotonic
       return unless policy.is_a?(Hash)
 
@@ -79,10 +64,8 @@ class Sentinel < ApplicationRecord
       end
     end
 
-    # A tier can't be more visible than the container it defaults for: each
-    # present tier's audience ⊆ the container's read groups. This keeps the
-    # authored default coherent (Atlas still enforces tier ⊆ the actual Work at
-    # apply-time). Skipped when the container's groups weren't supplied.
+    # A tier can't be more visible than the container it defaults for. Skipped
+    # when the container's groups weren't supplied.
     def policy_within_resource
       return if resource_read_groups.nil?
       return unless policy.is_a?(Hash)

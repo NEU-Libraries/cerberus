@@ -401,7 +401,7 @@ describe Transformable do
       host.apply_permissions('Community', 'm-1', :community)
 
       expect(AtlasRb::Community).not_to have_received(:metadata)
-      expect(host.flash[:alert]).to eq(Transformable::COMMUNITY_NARROWING_REFUSED)
+      expect(host.flash[:alert]).to eq(ResourcePermissions::COMMUNITY_NARROWING_REFUSED)
     end
 
     it 'refuses a group-ACL editor, who is not an admin' do
@@ -461,7 +461,7 @@ describe Transformable do
         .and_raise(AtlasRb::PermissionsError.new('nope', code: 'visibility_exceeds_parent'))
 
       expect { host.apply_permissions('Work', 'w-1', :work) }.not_to raise_error
-      expect(host.flash[:alert]).to eq(Transformable::PERMISSIONS_REFUSED['visibility_exceeds_parent'])
+      expect(host.flash[:alert]).to eq(ResourcePermissions::PERMISSIONS_REFUSED['visibility_exceeds_parent'])
     end
 
     it 'falls back to Atlas’s own message for a code Cerberus doesn’t map yet' do

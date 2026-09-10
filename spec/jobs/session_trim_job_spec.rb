@@ -9,9 +9,8 @@ RSpec.describe SessionTrimJob do
   # us pin updated_at (what the job filters on) directly.
   def session_aged(session_id, age)
     t = age.ago
-    # rubocop:disable Rails/SkipsModelValidations -- deliberate: skip the SessionStore marshaling save
+    # rubocop:disable-next Rails/SkipsModelValidations -- deliberate: skip the SessionStore marshaling save
     model.insert_all([{ session_id: session_id, data: '', created_at: t, updated_at: t }])
-    # rubocop:enable Rails/SkipsModelValidations
     model.find_by!(session_id: session_id)
   end
 

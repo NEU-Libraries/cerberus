@@ -20,7 +20,7 @@ class DerivativeWidths < ApplicationService
   # raw: plain Hash of role => String (already permitted by the controller).
   def initialize(raw:, longest_edge:)
     @raw = raw.to_h.symbolize_keys.slice(*ROLES).transform_values { |v| v.to_s.strip }
-                                                .reject { |_, v| v.empty? }
+              .reject { |_, v| v.empty? }
     @longest_edge = longest_edge
   end
 

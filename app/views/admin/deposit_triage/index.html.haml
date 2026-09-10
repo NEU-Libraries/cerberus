@@ -52,7 +52,7 @@
           - documents.each do |doc|
             %tr
               %td
-                .admin-registry-table__name= finder_doc_title(doc)
+                .admin-registry-table__name= finder_doc_heading(doc)
               %td= audit_event_actor(doc['depositor_ssi'])
               %td
                 %span.admin-registry-table__id= doc.to_param

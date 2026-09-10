@@ -60,7 +60,7 @@ RSpec.describe ResourceSearch do
 
       described_class.new(scope: scope, query: 'arch').call
 
-      expect(Blacklight.default_index).to have_received(:search).with(an_instance_of(SearchBuilder))
+      expect(Blacklight.default_index).to have_received(:search).with(params: an_instance_of(SearchBuilder))
     end
   end
 end

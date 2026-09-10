@@ -31,8 +31,11 @@ gem 'turbo-rails'
 # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
 gem 'stimulus-rails'
 
-# Use Redis adapter to run Action Cable in production
-# gem "redis", "~> 4.0"
+# Backs config.cache_store in the environments that have a real one. Rails'
+# :redis_cache_store needs this gem specifically: redis-client alone does not
+# satisfy the `require "redis"` in ActiveSupport::Cache::RedisCacheStore.
+# Version floor matches Atlas, so both apps resolve the same client.
+gem 'redis', '>= 4.8'
 
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
 # gem "kredis"
@@ -61,9 +64,19 @@ gem 'bootsnap', require: false
 # the UI reports success. It also adds `depositor:` to Collection.create /
 # Community.create, which reset.rake needs to attribute the institutional tree
 # to the anonymous NUID rather than to whoever ran the seed.
-gem 'atlas_rb', '>= 1.9.3'
-gem 'blacklight', '>= 8.0', '< 9.0'
-gem 'blacklight-gallery'
+# 1.16.0 is a floor, not a preference. It makes every read binding consult the
+# HTTP status before parsing, so an Atlas error reaches us as a typed
+# AtlasRb::ResourceError instead of a JSON::ParserError, a NoMethodError on an
+# error envelope, or — worst — an error body returned as data. Authorizable
+# rescues the typed error and no longer rescues JSON::ParserError, so an older
+# binding would report every unparseable Atlas response as 404 again. It also
+# sets per-connection deadlines, without which a hung Atlas holds a Puma thread
+# for minutes.
+gem 'atlas_rb', '>= 1.16.0'
+gem 'blacklight', '~> 9.0'
+# 6.x is the first line that allows Blacklight 9; its gemspec pins the 9.0.0
+# betas, which 9.0.0 final satisfies.
+gem 'blacklight-gallery', '~> 6.0'
 gem 'bootstrap'
 gem 'bootstrap_form'
 gem 'cancancan'
@@ -74,7 +87,18 @@ gem 'devise'
 gem 'devise-i18n'
 gem 'diffy' # line-diff for the MODS version-history page (wraps system diff)
 gem 'haml'
-gem 'kataba', '>= 1.1.2'
+# json 3.0 dropped the positional options argument that ActiveSupport::JSON.decode
+# still passes, so every decode raises ArgumentError — Solid Queue cannot register
+# a process and the schema dumper cannot write a jsonb default. Nothing here needs
+# 3.x; lift the pin once Rails passes those options as keywords.
+gem 'json', '~> 2.21'
+# 1.1.3 is a floor, not a preference: it added the open_timeout / read_timeout
+# the initializer sets. Before it, a schema host that went quiet held the
+# fetching thread on Net::HTTP's 60s defaults, paid per redirect hop and again
+# on the alternate-scheme attempt — minutes, on a librarian's request thread.
+# It also wraps a timeout as Kataba::Fetcher::FetchTimeout, which is what lets
+# XmlValidator report it rather than 500.
+gem 'kataba', '>= 1.1.3'
 gem 'libreconv'
 gem 'loaf'
 gem 'mini_exiftool'
@@ -82,6 +106,13 @@ gem 'mission_control-jobs'
 gem 'namae'
 gem 'neu-mods'
 gem 'pg'
+# The per-request backstop under the per-client deadlines. `require:` is the
+# load-bearing part: the gem's default entry point installs a railtie that
+# inserts Rack::Timeout into the stack for EVERY request, which would put a
+# wall-clock deadline on the streaming downloads and truncate them. Requiring
+# only the base class leaves insertion to us — see
+# config/initializers/request_deadline.rb.
+gem 'rack-timeout', require: 'rack/timeout/base'
 gem 'roo'
 gem 'rsolr', '>= 1.0', '< 3'
 gem 'ruby-vips'
@@ -97,6 +128,12 @@ group :development, :test do
   gem 'fix-db-schema-conflicts'
   gem 'rspec'
   gem 'rspec-rails'
+
+  # Shards the suite across worker processes. Each worker needs its own Atlas
+  # instance, because a run's before(:suite) resets whichever one it points at
+  # and would otherwise wipe its neighbours' fixtures mid-run; TEST_ENV_NUMBER
+  # is what config/environments/test.rb reads to pick that instance.
+  gem 'parallel_tests', require: false
 
   # QA gems
   gem 'rubocop', require: false

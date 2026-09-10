@@ -66,6 +66,15 @@ module Cerberus
     # delegate (signed download URLs + deep-zoom identifier tokens).
     config.x.cerberus.iiif_signing_secret = ENV.fetch('CERBERUS_IIIF_SIGNING_SECRET', nil)
 
+    # Where a Work's minted handle resolves. Atlas stores the bare identifier
+    # ("<prefix>/<noid>"), so a resolver base is what turns it into a link.
+    # CNRI's global proxy answers only for prefixes in the Global Handle
+    # Registry; an unregistered prefix must name its own server, which mounts
+    # that same proxy. An empty value reads as unset, because compose passes
+    # the variable through whether or not .env defines it.
+    config.x.cerberus.handle_resolver_base = ENV.fetch('HANDLE_RESOLVER_BASE', nil).presence ||
+                                             'https://hdl.handle.net'
+
     # Acting-NUID sentinel for unauthenticated Cerberus traffic. The
     # logged-out path threads this NUID as the acting user, so the signed
     # assertion Cerberus mints carries sub = guest_nuid and Atlas resolves to
@@ -86,6 +95,22 @@ module Cerberus
     # Phase 2 derived human-counts layer (not exercised by raw capture).
     config.x.cerberus.impression_volume_threshold = 150
     config.x.cerberus.impression_ip_allowlist     = %w[155.33.16.26]
+
+    # Every queue the app can enqueue to. Declared rather than discovered:
+    # SolidQueue::Queue.all derives its names from DISTINCT queue_name over the
+    # jobs table, so a queue with no rows at that moment is invisible — and
+    # `clear_finished_in_batches` runs hourly, so an idle repository really does
+    # reach that state. Pausing by discovery would then pause nothing and say so
+    # in the same breath. A spec asserts this list covers every `queue_as` in
+    # app/jobs.
+    config.x.cerberus.job_queues = %w[default background]
+
+    # Read-only maintenance window. Atlas owns the flag; this is how long
+    # Cerberus caches its answer, so the whole app picks a flip up within one
+    # TTL without asking Atlas once per request. Short on purpose: the window
+    # opens seconds before a migration starts, and a stale "open" is far less
+    # costly than a stale "closed".
+    config.x.cerberus.maintenance_ttl = ENV.fetch('CERBERUS_MAINTENANCE_TTL', '5').to_i.seconds
 
     # Route exceptions through ErrorsController so error pages share the
     # application layout (header, footer, search bar). Rails dispatches

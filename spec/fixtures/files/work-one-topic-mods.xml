@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The out-of-scope neighbour for the scoped facet modal spec: one topic that
+     appears nowhere else, so a modal that leaked past its container's contents
+     would surface this value and fail the assertion. -->
+<mods:mods xmlns:mods="http://www.loc.gov/mods/v3"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+
+    <mods:titleInfo usage="primary">
+        <mods:title>Shipyards of the Fore River</mods:title>
+    </mods:titleInfo>
+
+    <mods:typeOfResource>text</mods:typeOfResource>
+
+    <mods:originInfo>
+        <mods:dateCreated encoding="w3cdtf" keyDate="yes">1961</mods:dateCreated>
+    </mods:originInfo>
+
+    <mods:subject><mods:topic>Shipbuilding</mods:topic></mods:subject>
+
+    <mods:recordInfo>
+        <mods:recordContentSource>Northeastern University Libraries</mods:recordContentSource>
+        <mods:recordOrigin>Created for the scoped facet modal spec.</mods:recordOrigin>
+    </mods:recordInfo>
+</mods:mods>

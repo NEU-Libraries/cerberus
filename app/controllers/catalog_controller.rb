@@ -9,6 +9,14 @@ class CatalogController < ApplicationController
     config.search_service_class = GatedSearchService
     config.view.gallery(document_component: Blacklight::Gallery::DocumentComponent, icon: Blacklight::Gallery::Icons::GalleryComponent)
 
+    # The layout renders whatever this names and nothing else, so the DRS
+    # header has to be reachable from here to appear at all.
+    config.header_component = Cerberus::HeaderComponent
+
+    # Facet panels are cards here, not Bootstrap accordion items — see the
+    # Blacklight::Facets::FieldComponent template override.
+    config.index.facet_group_component = Cerberus::FacetGroupComponent
+
     # Retain the genres `category` param in the search state. Blacklight's
     # permit_search_params strips any param not in search_state_fields, so without
     # this the view-type toggle (whose URL is url_for(search_state.to_h.merge(view:)))
@@ -22,6 +30,14 @@ class CatalogController < ApplicationController
     config.track_search_session.storage = false
     config.autocomplete_enabled = false
     config.autocomplete_path = nil
+
+    # Blacklight ships an advanced search form at /catalog/advanced and enables
+    # it by default. It is off here because the form enumerates every facet
+    # field with no value limit, and several of ours are descriptive fields
+    # whose value lists are unbounded. Turning it on is a deliberate piece of
+    # work — curate which facets appear, and cap the ones that stay — not a
+    # default to inherit.
+    config.advanced_search.enabled = false
     ## Class for sending and receiving requests from a search index
     # config.repository_class = Blacklight::Solr::Repository
     #
@@ -56,9 +72,25 @@ class CatalogController < ApplicationController
 
     # solr field configuration for search results/index views
     config.index.title_field = 'title_tsim'
+    # Both presenters differ from Blacklight's only in rendering a heading's
+    # sub/sup markup. Set on config.index rather than per view because
+    # view_config merges the named view over these defaults, so list and gallery
+    # both inherit it.
+    config.index.document_presenter_class = EnhancedIndexPresenter
+    config.show.document_presenter_class = EnhancedShowPresenter
     # config.index.display_type_field = 'format'
     # config.index.thumbnail_field = 'thumbnail_path_ss'
     config.index.thumbnail_method = :iiif_thumbnail
+
+    # Container browses — a community, collection, set or genre listing its
+    # members — render a result list from a `show` action, so their rows are
+    # built against config.show. Most of what they need falls through from
+    # config.index, because a view config reverse-merges it. This key does not:
+    # Blacklight sets it to nil on config.show so its own single-document page
+    # draws no thumbnail, and a key that is present-but-nil blocks the merge.
+    # Naming it here is what puts the thumbnail and its type pill back on every
+    # container row.
+    config.show.document_thumbnail_component = Blacklight::Document::ThumbnailComponent
 
     # config.add_results_document_tool(:bookmark, partial: 'bookmark_control', if: :render_bookmarks_control?)
     config.index.document_actions.delete(:bookmark)
@@ -104,6 +136,16 @@ class CatalogController < ApplicationController
     # :index_range can be an array or range of prefixes that will be used to
     #  create the navigation (note: It is case sensitive when searching values)
 
+    # Five values before the "more" link, against Blacklight's default of ten. The
+    # sidebar carries a dozen facets, so a long tail on each one pushes the rest
+    # off the screen and buries the axes a reader has not thought to scroll to.
+    # Five is enough to show what a facet is FOR; the modal behind "more" is
+    # where browsing a long list belongs, and index_range gives it an alphabet.
+    #
+    # Facets say `limit: true` rather than a number of their own, which is what
+    # makes this one line the single place to change it.
+    config.default_facet_limit = 5
+
     # Cerberus defined facets lead — Type first as the discovery anchor: it is
     # always populated for any search (Work/Collection/Community) and renders
     # open (collapse:false), so users always see a facet there to learn the
@@ -114,30 +156,66 @@ class CatalogController < ApplicationController
     # FileSets' Classification by Atlas's ClassificationIndexer. Multivalued —
     # a mixed-media Work surfaces under each of its formats; values are
     # display-ready Classification#name strings (no i18n mapping needed).
-    config.add_facet_field 'classification_ssim', label: 'Content'
+    config.add_facet_field 'classification_ssim', label: 'Content', limit: true
     # Genre / scholarly category (Research Publications, Presentations, Datasets,
     # Technical Reports, Monographs, Theses & Dissertations, …) projected onto the
     # Work from MODS <genre> by Atlas's GenreIndexer. Multivalued; values are the
     # genre strings as authored (no i18n mapping needed). Works only — empty for
     # Collections/Communities and for Works without a genre.
-    config.add_facet_field 'genre_ssim', label: 'Genre'
+    config.add_facet_field 'genre_ssim', label: 'Genre', limit: true
+    # No facet over MODS <typeOfResource>. Content above answers the same question
+    # a reader is asking, in words they use: it offers Image / Video / Text /
+    # Presentation where typeOfResource offers "still image" and "mixed material".
+    # Two controls that sort results the same way, one of them worded worse, is a
+    # cost with no return. Atlas still indexes resource_type_ssim.
 
-    config.add_facet_field 'format', label: 'Format'
+    # Creator names in citation display form, projected onto the Work by Atlas's
+    # CitationIndexer from the MODS names carrying a MARC creator relator.
+    # Multivalued — a co-authored Work is browsable under each of its creators.
+    config.add_facet_field 'creator_ssim', label: 'Creator', limit: true, index_range: 'A'..'Z'
     config.add_facet_field 'pub_date_ssim', label: 'Publication Year', single: true
-    config.add_facet_field 'subject_ssim', label: 'Topic', limit: 20, index_range: 'A'..'Z'
+    # Topical subject and language, projected by Atlas's MODSIndexer for every
+    # Modsable resource rather than for Works alone. subject_ssim carries MODS
+    # <topic>, which is a wider set than the citation keywords GoogleScholarMetadata
+    # reads off the same field.
+    config.add_facet_field 'subject_ssim', label: 'Topic', limit: true, index_range: 'A'..'Z'
+    # The other four MODS subject axes, labelled as Atlas's WorkDecorator::DISPLAY
+    # labels them so a facet and the metadata row beneath a result agree. Kept
+    # apart rather than merged into Topic: a place, a period and a person are
+    # different questions, and collapsing them buries the small axes under the
+    # large one.
+    #
+    # Places carries MODS <subject><geographic> AND the narrowest level of a
+    # <hierarchicalGeographic> — Atlas composes that down to "Parksville" rather
+    # than indexing every level, since a continent every record shares would bury
+    # the useful value.
+    config.add_facet_field 'subject_geo_ssim', label: 'Places', limit: true, index_range: 'A'..'Z'
+    config.add_facet_field 'subject_era_ssim', label: 'Time periods', limit: true
+    config.add_facet_field 'subject_person_ssim', label: 'People', limit: true, index_range: 'A'..'Z'
+    config.add_facet_field 'subject_corporate_ssim', label: 'Organizations', limit: true, index_range: 'A'..'Z'
+
+    # Origin, not subject. Place of publication is where the resource was
+    # published; Places above is what it is *about*, and one record commonly
+    # carries both with different values. The labels have to keep saying which
+    # is which.
+    #
+    # Neither this nor Publisher is authority-controlled — MODS leaves both free
+    # text — so near-duplicates ("Boston" and "Boston, Mass.") are two buckets.
+    # Acceptable for narrowing a result set; it would not be for a primary browse.
+    config.add_facet_field 'place_ssim', label: 'Place of publication', limit: true
+    config.add_facet_field 'publisher_ssim', label: 'Publisher', limit: true, index_range: 'A'..'Z'
     config.add_facet_field 'language_ssim', label: 'Language', limit: true
-    config.add_facet_field 'lc_1letter_ssim', label: 'Call Number'
-    config.add_facet_field 'subject_geo_ssim', label: 'Region'
-    config.add_facet_field 'subject_era_ssim', label: 'Era'
 
-    config.add_facet_field 'example_pivot_field', label: 'Pivot Field', pivot: %w[format language_ssim],
-                                                  collapsing: true
-
-    config.add_facet_field 'example_query_facet_field', label: 'Publish Date', query: {
-      years_5:  { label: 'within 5 Years', fq: "pub_date_ssim:[#{Time.zone.now.year - 5} TO *]" },
-      years_10: { label: 'within 10 Years', fq: "pub_date_ssim:[#{Time.zone.now.year - 10} TO *]" },
-      years_25: { label: 'within 25 Years', fq: "pub_date_ssim:[#{Time.zone.now.year - 25} TO *]" }
-    }
+    # MODS <classification>, which in DRS holds IPTC photo categories rather than
+    # the classification-scheme value the element is defined for: Iptc::MODSBuilder
+    # maps the IPTC Category tag ('POR', 'HEA') to a label ('portraits',
+    # 'headshots') on every photo ingest. Atlas names the Solr field for what it
+    # holds; classification_ssim was unavailable, since that carries the FileSet
+    # content vocabulary behind the Content facet above.
+    #
+    # A supplemental category is appended to the primary one, so a value can read
+    # 'classroom -- engineering'. That is a compound bucket, not a hierarchy.
+    config.add_facet_field 'photo_category_ssim', label: 'Photo category', limit: true
 
     # Have BL send all facet field names to Solr, which has been the default
     # previously. Simply remove these lines if you'd rather use Solr request
@@ -146,34 +224,23 @@ class CatalogController < ApplicationController
 
     # solr fields to be displayed in the index (search results) view
     #   The ordering of the field names is the order of the display
-    # config.add_index_field 'title_tsim', label: 'Title'
-    # config.add_index_field 'title_vern_ssim', label: 'Title'
-    config.add_index_field 'author_tsim', label: 'Author'
-    config.add_index_field 'author_vern_ssim', label: 'Author'
-    config.add_index_field 'format', label: 'Format'
-    config.add_index_field 'language_ssim', label: 'Language'
-    config.add_index_field 'published_ssim', label: 'Published'
-    config.add_index_field 'published_vern_ssim', label: 'Published'
-    config.add_index_field 'lc_callnum_ssim', label: 'Call number'
-    config.add_index_field 'description_tsim', label: 'Description'
+    # Every multi-valued field here joins. MetadataFieldLayoutComponent emits one
+    # <dt> and one <dd> per value into a Bootstrap `.row`, so a second <dd> wraps
+    # onto a fresh flex line and the *next* field's <dt> fills the gap beside it —
+    # a label rendered next to another field's value. Joining also spares each
+    # value its own truncation toggle under one shared label.
+    config.add_index_field 'creator_ssim', label: 'Creator', join: true
+    config.add_index_field 'description_tsim', label: 'Description', join: true
+    config.add_index_field 'language_ssim', label: 'Language', join: true
 
-    # solr fields to be displayed in the show (single result) view
-    #   The ordering of the field names is the order of the display
-    # config.add_show_field 'title_tsim', label: 'Title'
-    # config.add_show_field 'title_vern_ssim', label: 'Title'
-    config.add_show_field 'description_tsim', label: 'Description'
-    config.add_show_field 'subtitle_tsim', label: 'Subtitle'
-    config.add_show_field 'subtitle_vern_ssim', label: 'Subtitle'
-    config.add_show_field 'author_tsim', label: 'Author'
-    config.add_show_field 'author_vern_ssim', label: 'Author'
-    config.add_show_field 'format', label: 'Format'
-    config.add_show_field 'url_fulltext_ssim', label: 'URL'
-    config.add_show_field 'url_suppl_ssim', label: 'More Information'
-    config.add_show_field 'language_ssim', label: 'Language'
-    config.add_show_field 'published_ssim', label: 'Published'
-    config.add_show_field 'published_vern_ssim', label: 'Published'
-    config.add_show_field 'lc_callnum_ssim', label: 'Call number'
-    config.add_show_field 'isbn_ssim', label: 'ISBN'
+    # A container browse (a community, collection or set listing its members)
+    # renders its member rows from the show config, not the index config, so
+    # these two lists have to be kept in step. Blacklight's own single-document
+    # show page is dead surface here — SolrDocument#to_param routes every
+    # document link to Cerberus's own /works/:noid and friends.
+    config.add_show_field 'creator_ssim', label: 'Creator', join: true
+    config.add_show_field 'description_tsim', label: 'Description', join: true
+    config.add_show_field 'language_ssim', label: 'Language', join: true
 
     # "fielded" search configuration. Used by pulldown among other places.
     # For supported keys in hash, see rdoc for Blacklight::SearchFields
@@ -313,6 +380,16 @@ class CatalogController < ApplicationController
   def find_children(uuid, noid, exclude_uuids: [])
     return Blacklight::Solr::Response.new({}, {}) if uuid.blank?
 
+    filters = child_membership_filters(uuid, noid, exclude_uuids: exclude_uuids)
+    builder = search_service.search_builder.with(search_state).with_filters(*filters)
+    Blacklight.default_index.search(params: builder)
+  end
+
+  # The fqs that select an anchor's contents, split out from #find_children so
+  # the scoped facet modal counts over exactly the set the listing shows (see
+  # ShowScopedSearch#facet). A modal built on a different filter would report
+  # counts the page beneath it cannot reproduce.
+  def child_membership_filters(uuid, noid, exclude_uuids: [])
     # Direct members (browse), or the whole subtree when a keyword query is active.
     membership = if params[:q].present?
                    subtree_membership_fq(uuid, noid)
@@ -321,8 +398,7 @@ class CatalogController < ApplicationController
                  end
     filters = [membership]
     filters << MembershipQuery.excluding_fq(MembershipQuery.identity_fq(exclude_uuids)) if exclude_uuids.present?
-    builder = search_service.search_builder.with(search_state).with_filters(*filters)
-    Blacklight.default_index.search(builder)
+    filters
   end
 
   # fq matching everything in the anchor's subtree: every descendant
@@ -357,7 +433,7 @@ class CatalogController < ApplicationController
       'internal_resource_tesim:(Collection OR Community)'
     ).merge(rows: 100_000, fl: 'id')
 
-    Blacklight.default_index.search(builder).documents.map(&:id)
+    Blacklight.default_index.search(params: builder).documents.map(&:id)
   end
 
   # Type pill overlay — keeps the resource type legible even when a custom

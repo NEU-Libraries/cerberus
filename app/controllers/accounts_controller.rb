@@ -52,8 +52,12 @@ class AccountsController < ApplicationController
       email.present? && my_account_emails.include?(email)
     end
 
+    # A NUID Atlas has never seen reads back as nil, not as a raise, so the
+    # rescue_from above does not cover it — and an empty list is the right
+    # answer for "you have no other accounts to switch to".
     def my_account_emails
-      AtlasRb::User.accounts(current_user.nuid, nuid: current_user.nuid)['accounts'].pluck('email')
+      accounts = AtlasRb::User.accounts(current_user.nuid, nuid: current_user.nuid)
+      Array(accounts && accounts['accounts']).pluck('email')
     end
 
     def reject(message)

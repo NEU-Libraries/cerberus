@@ -1,0 +1,11 @@
+-# Shown when a digest figure sent you here. Without it the list is silently
+-# short and there is no way back to the whole thing — the reader has no idea a
+-# filter is on, only that there is less here than they expected.
+- if @on
+  .px-3.pb-2
+    %span.ledger-day-filter
+      %i.fa-solid.fa-calendar-day{'aria-hidden' => 'true'}
+      = "Only #{@on.strftime('%B %-d, %Y')}"
+      = link_to admin_ledger_path(tab: @tab, kind: @kind), class: 'ledger-day-filter__clear',
+        'aria-label' => 'Show every day' do
+        %i.fa-solid.fa-xmark{'aria-hidden' => 'true'}

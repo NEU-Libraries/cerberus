@@ -15,6 +15,15 @@
 class IiifManifest < ApplicationService
   CONTEXT = 'http://iiif.io/api/presentation/3/context.json'
 
+  # Cantaloupe is read inline while assembling a manifest, once per page, so an
+  # unbounded fetch is a per-page minute of a request thread — and this is the
+  # dependency here most likely to stop answering rather than fail cleanly under
+  # concurrent load, which is the shape a deadline exists for. An info.json is a
+  # few hundred bytes; a host that has not sent it in five seconds is not going
+  # to. A miss degrades to a canvas without dimensions, never a failed manifest.
+  INFO_OPEN_TIMEOUT = 2
+  INFO_READ_TIMEOUT = 5
+
   # @param work [Hash] the AtlasRb::Work response (title riding on it).
   # @param pages [Array<Hash>] AtlasRb::Work.file_sets entries, page order.
   # @param url [String] this manifest's own canonical URL (its IIIF id).
@@ -88,7 +97,10 @@ class IiifManifest < ApplicationService
 
     def dimensions(service)
       Rails.cache.fetch(['iiif-info', service]) do
-        response = Faraday.get(signed_info_url(service))
+        response = Faraday.get(signed_info_url(service)) do |req|
+          req.options.open_timeout = INFO_OPEN_TIMEOUT
+          req.options.timeout      = INFO_READ_TIMEOUT
+        end
         response.success? ? JSON.parse(response.body).slice('width', 'height') : nil
       end
     rescue Faraday::Error, JSON::ParserError => e

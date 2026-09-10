@@ -26,7 +26,7 @@
           %tr
             %td.admin-registry-table__name
               %i.fa-regular.fa-file.text-muted.me-2{ 'aria-hidden' => 'true' }
-              = Array(work['title_tsim']).first.presence || '(untitled)'
+              = finder_doc_heading(work)
             %td.text-end
               = link_to metadata_work_path(work), class: 'btn btn-sm btn-warning' do
                 %i.fa-solid.fa-pen-to-square.me-1{ 'aria-hidden' => 'true' }

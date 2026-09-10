@@ -7,7 +7,7 @@
 # resolves every featured showcase Collection titled like the category (across
 # all communities) and returns the works that are linked-members of them.
 #
-# Mirrors the gated `Blacklight.default_index.search(SearchBuilder.new(scope))`
+# Mirrors the gated `Blacklight.default_index.search(params: SearchBuilder.new(scope))`
 # idiom of ResourceSearch / ShowcaseFinder; scope = the controller (current_user
 # for gated discovery). search_state threads live q / facets / sort / page so the
 # landing is browsable and search-within stays on the surface.
@@ -43,7 +43,7 @@ class FeaturedCategory < ApplicationService
         'internal_resource_tesim:Collection', 'featured_bsi:true', '-tombstoned_bsi:true',
         %(title_tsim:"#{@label.gsub(/["\\]/, '')}")
       ).merge(rows: MAX_SHOWCASES)
-      Blacklight.default_index.search(builder).documents
+      Blacklight.default_index.search(params: builder).documents
                 .select { |doc| Array(doc['title_tsim']).first == @label }
                 .map(&:id)
     end
@@ -54,7 +54,7 @@ class FeaturedCategory < ApplicationService
                              .with(@search_state || {})
                              .with_filters('internal_resource_tesim:Work', '-tombstoned_bsi:true',
                                            MembershipQuery.members_fq(uuids, include_linked: true))
-      Blacklight.default_index.search(builder)
+      Blacklight.default_index.search(params: builder)
     end
 
     def empty_response

@@ -29,6 +29,25 @@ Rails.application.routes.draw do
   # anonymous, reachable POST send/abuse surfaces (authorization audit G5).
   resources :solr_documents, only: [:show], path: '/catalog', controller: 'catalog'
 
+  # DRS v1 object URLs, redirected to the v2 object they became at migration.
+  #
+  # These MUST precede the v2 resources below. Four of the five prefixes are
+  # also v2 routes, and Rails matches in declaration order — declared after,
+  # `/collections/neu:x` would reach CollectionsController and 404 looking for a
+  # NOID by that name. The `neu:` constraint is what makes going first safe: a
+  # v2 NOID never contains a colon, so these can only ever capture a v1 pid.
+  #
+  # `/files` is the exception with no v2 equivalent at the top level, and it is
+  # the most-cited shape of the five — a v1 CoreFile is a v2 Work.
+  #
+  # One action serves all five. The prefix only catches the URL; the mapping
+  # row's `object_type` picks the destination. See LegacyController.
+  LEGACY_PID = /neu:[^\/.?]+/
+  %w[files collections communities downloads sets].each do |v1_prefix|
+    get "/#{v1_prefix}/:pid", to: 'legacy#show', constraints: { pid: LEGACY_PID },
+                              as: :"legacy_#{v1_prefix.singularize}"
+  end
+
   # Creating a child is nested under its destination; everything else stays flat
   # (`shallow: true`). The parent is a route SEGMENT rather than an optional
   # `?parent_id=`, so a create can't reach the controller without one — which is
@@ -39,11 +58,24 @@ Rails.application.routes.draw do
   # (Atlas raises on a nil one), and a root Community is a seed-time concern, not
   # something the UI offers. Dropping the top-level new/create removes the
   # parentless route rather than patching the links that reached it.
+  # The facet-suggest box inside the scoped "more" modal. Blacklight's JS builds
+  # this URL itself, from the first path segment of the box's search context
+  # plus the facet key — so the container cannot ride the path, and arrives as
+  # ?id= instead. Declared ahead of the resource blocks so a facet key can never
+  # be read as a member action. See ShowScopedSearch and docs/discovery.md.
+  get 'communities/facet_suggest/:facet_field', to: 'communities#facet_suggest', as: :community_facet_suggest
+  get 'collections/facet_suggest/:facet_field', to: 'collections#facet_suggest', as: :collection_facet_suggest
+  get 'sets/facet_suggest/:facet_field',        to: 'sets#facet_suggest',        as: :set_facet_suggest
+
   resources :communities, except: %i[new create destroy], shallow: true do
     resources :communities, only: %i[new create]
     resources :collections, only: %i[new create]
     member do
       post :tombstone
+      # The facet "more" modal over this container's contents. The facet key
+      # rides :facet_field because :id already names the container — see
+      # ShowScopedSearch, which builds the link and serves the action.
+      get 'facet/:facet_field', to: 'communities#facet', as: :facet
       # Ask DRS administrators to restrict this community. The form offers no
       # Private option — narrowing a community does not reach what is inside it
       # — so this is the only route. Edit-gated via authorize_resource_writes!.
@@ -55,6 +87,10 @@ Rails.application.routes.draw do
     resources :works,       only: %i[new create]
     member do
       post :tombstone
+      # The facet "more" modal over this container's contents. The facet key
+      # rides :facet_field because :id already names the container — see
+      # ShowScopedSearch, which builds the link and serves the action.
+      get 'facet/:facet_field', to: 'collections#facet', as: :facet
       # Bulk metadata export (streamed ZIP) — dedicated Live controller, like sets.
       get 'export', to: 'collection_exports#show'
       # The collection's derivative-access default (Sentinel) — the per-tier policy
@@ -151,6 +187,9 @@ Rails.application.routes.draw do
       get :recipients
     end
     member do
+      # The facet "more" modal over the Set's resolved contents — see
+      # ShowScopedSearch. :facet_field, not :id, because :id is the Set.
+      get    'facet/:facet_field',         to: 'sets#facet',             as: :facet
       get    'download',                   to: 'set_downloads#show',     as: :download
       get    'export',                     to: 'set_exports#show',       as: :export
       get    'works_count',                to: 'sets#works_count',       as: :works_count
@@ -160,6 +199,13 @@ Rails.application.routes.draw do
       delete 'works/:work_id',             to: 'sets#remove_work',       as: :remove_work
       post   'aside',                      to: 'sets#set_aside',         as: :set_aside
       delete 'aside/:work_id',             to: 'sets#put_back',          as: :put_back
+      # The bulk actions. `sentinel` authors the Set's derivative-access policy
+      # (the same verb the Collection tab uses); the two POSTs enqueue a sweep
+      # over the Works the Set denotes. Both sweeps are operator-only — see
+      # SetsController#require_bulk_operator.
+      patch  'sentinel',                   to: 'sets#sentinel',          as: :sentinel
+      post   'apply_sentinel',             to: 'sets#apply_sentinel',    as: :apply_sentinel
+      post   'privatize',                  to: 'sets#privatize',         as: :privatize
     end
   end
 
@@ -171,6 +217,15 @@ Rails.application.routes.draw do
     # Group names — the cosmetic display name for a Grouper group (raw → pretty),
     # consulted by ApplicationController#pretty_group wherever a group surfaces.
     resources :groups, only: [:index, :new, :create, :edit, :update, :destroy]
+
+    # The read-only maintenance window. One noun, two verbs: POST opens it,
+    # DELETE closes it. This is the door a human uses; a rake task and the
+    # deploy orchestrator are the other two, and all three write the same flag
+    # in Atlas. Closing must stay reachable while the window is open — see
+    # Admin::MaintenanceController.
+    get    'maintenance',      to: 'maintenance#show',         as: :maintenance
+    post   'maintenance/open', to: 'maintenance#open_window',  as: :open_maintenance
+    delete 'maintenance',      to: 'maintenance#close_window', as: :close_maintenance
 
     # Usage analytics — repository-wide impression rollups (views/downloads),
     # with CSV/Excel export of the top-N tables (the quarterly-report artifact).
@@ -191,6 +246,16 @@ Rails.application.routes.draw do
     post   'linked_members/add',    to: 'linked_members#add',     as: :linked_members_add
     delete 'linked_members/remove', to: 'linked_members#remove',  as: :linked_members_remove
 
+    # Associated works — find a Work, then assert or retract the typed edges
+    # between it and other Works (codebook / figure / transcription / …).
+    # Admin-only because Atlas gates the write that way: the claim renders on
+    # the target's page too. `remove` carries holder_id, because the edge lives
+    # on whichever Work asserted it and either direction is retractable here.
+    get    'associations',        to: 'associations#index'
+    get    'associations/manage', to: 'associations#manage',  as: :associations_manage
+    post   'associations/add',    to: 'associations#add',     as: :associations_add
+    delete 'associations/remove', to: 'associations#remove',  as: :associations_remove
+
     # People — the curatorial Person registry: create a Person by NUID, edit the
     # authoritative display_name / title / bio / orcid, and manage community
     # affiliations (the edges that drive the Faculty & Staff browse). Keyed by
@@ -208,11 +273,21 @@ Rails.application.routes.draw do
     # points at is gated on its own surface.
     get 'deposit_triage', to: 'deposit_triage#index', as: :deposit_triage
 
-    # Restore a withdrawal — a registry of every tombstoned Work / Collection /
-    # Community, each with a Restore action (reverses the show-page tombstone via
-    # atlas_rb's operator-only Admin.restore). :id is the resource NOID; the
-    # `type` body param selects the right Admin restorer.
-    resources :tombstones, only: [:index] do
+    # The ledger — `?tab=requests` (what depositors asked staff to do) and
+    # `?tab=activity` (what the repository did). Two tabs on one surface, like
+    # deposit triage, because they are read together; both are a filter on
+    # AdminNotice#kind. Read-only: every remedy a row points at already exists
+    # elsewhere and is gated there.
+    get 'ledger', to: 'ledger#index'
+
+    # The tombstone registry — every tombstoned Work / Collection / Community,
+    # with the two ways out of a withdrawal: Restore reverses the show-page
+    # tombstone, and DELETE purges the item for good (both via atlas_rb's
+    # operator-only Admin namespace). :id is the resource NOID; the `type` body
+    # param selects the right Admin class. The two verbs are gated differently
+    # in the controller, matching Atlas: restore reaches the devolved-admin
+    # tier, destroy is :admin only.
+    resources :tombstones, only: %i[index destroy] do
       member { post :restore }
     end
 
@@ -235,6 +310,14 @@ Rails.application.routes.draw do
     post 'files/rollback', to: 'files#rollback', as: :files_rollback
     get  'files/:id/versions/:version_id/content', to: 'file_versions#content',
                                                    as: :file_version_content
+
+    # Reindex — rebuild a resource's Solr doc from Atlas's authoritative store,
+    # the in-app counterpart to lib/tasks/reindex.rake. A Work is one call and
+    # answers inline; a Set walks its recipe in a job and reports to the inbox.
+    # Mounted here rather than on the show-page controllers because the Atlas
+    # endpoint behind them is system-gated and applies no per-user check.
+    post 'reindex/work/:noid', to: 'reindex#work', as: :reindex_work
+    post 'reindex/set/:noid',  to: 'reindex#set',  as: :reindex_set
   end
 
   get '/downloads/:id', to: 'downloads#show', as: :download
@@ -253,6 +336,7 @@ Rails.application.routes.draw do
   # xml
   get '/xml/editor/:id' => 'xml#editor', as: 'xml_editor'
   put '/xml/validate' => 'xml#validate'
+  put '/xml/repair' => 'xml#repair'
   put '/xml/update' => 'xml#update'
 
   # atlas
@@ -282,4 +366,5 @@ Rails.application.routes.draw do
   match '/404', to: 'errors#not_found',             via: :all
   match '/410', to: 'errors#gone',                  via: :all
   match '/500', to: 'errors#internal_server_error', via: :all
+  match '/503', to: 'errors#service_unavailable', via: :all
 end
