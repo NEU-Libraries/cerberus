@@ -2,6 +2,13 @@
 // Color system
 //
 
+// Bootstrap's Reboot puts `scroll-behavior: smooth` on :root, so every Turbo
+// navigation animates its scroll back to the top — a slow slide on a page the
+// reader has already left. Off, so a page change lands instantly. The one
+// surface that wants the animation as a state-change cue asks for it
+// explicitly; see ApplicationHelper#scroll_to_top_js.
+$enable-smooth-scroll: false;
+
 $min-contrast-ratio: 2.5;
 
 $white:    #fff !default;

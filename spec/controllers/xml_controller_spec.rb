@@ -138,6 +138,20 @@ describe XmlController do
         expect(response.body).to include('XML validation failed')
       end
     end
+
+    # The scroll is the cue that the preview pane is new, so it has to be in the
+    # stream rather than left to a CSS default — `$enable-smooth-scroll` is off,
+    # and a reader who asked for less motion gets the jump instead.
+    context 'the scroll that signals the refreshed preview' do
+      render_views
+
+      it 'asks for the animation explicitly, gated on the motion preference' do
+        allow(XmlValidator).to receive(:call).and_return([])
+        put :validate, params: { resource_id: work.id, raw_xml: raw_xml }, xhr: true
+
+        expect(response.body).to include('window.scrollTo(', 'prefers-reduced-motion: reduce')
+      end
+    end
   end
 
   # Save re-runs the validator and refuses on failure. It used to write whatever

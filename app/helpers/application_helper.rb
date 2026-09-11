@@ -112,6 +112,20 @@ module ApplicationHelper
     "#{Rails.application.config.x.cerberus.handle_resolver_base.chomp('/')}/#{handle}"
   end
 
+  # Scrolls the viewport to the top, animating unless the reader asked for less
+  # motion. The XML editor calls this after a Validate or a repair: a metadata
+  # change in the preview pane can be too subtle to notice, and the movement is
+  # what tells the curator the pane is new.
+  #
+  # Smooth is requested here rather than inherited. `$enable-smooth-scroll` is
+  # off, so CSS no longer animates any scroll — and a `behavior` passed to
+  # scrollTo overrides the CSS property *and* ignores prefers-reduced-motion,
+  # so the gate cannot be left to the media query Bootstrap used.
+  def scroll_to_top_js
+    reduced = 'window.matchMedia("(prefers-reduced-motion: reduce)").matches'
+    %(window.scrollTo({ top: 0, behavior: #{reduced} ? "auto" : "smooth" });)
+  end
+
   def document_url(document)
     if document.respond_to?(:klass) && document.klass.present?
       model_str = ActiveModel::Naming.singular_route_key(document.klass)
