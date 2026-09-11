@@ -8,6 +8,7 @@ Source files:
 - `app/controllers/works_controller.rb`
 - `app/controllers/concerns/work_deposit.rb`
 - `app/controllers/concerns/descriptive_metadata.rb`
+- `app/controllers/concerns/parallel_atlas_reads.rb`
 - `app/services/incomplete_flag.rb`
 - `app/jobs/application_job.rb`
 
@@ -339,6 +340,55 @@ page. Then comes a final "Upload File" you-are-here crumb. It mirrors
 label, so an editor can back out to the Work via the trail. The Work crumb
 passes `match: :exact` so loaf does not mark it current on the `/upload`
 sub-path.
+
+### The parallel read batch
+
+`ParallelAtlasReads` — `app/controllers/concerns/parallel_atlas_reads.rb` —
+runs a handful of independent, read-only Atlas calls at once and returns their
+results keyed the way they were passed in. It exists because a page like the
+Work show would otherwise make several sequential atlas_rb GETs that do not
+depend on each other. Run concurrently, the wall time tracks the slowest call
+instead of their sum.
+
+Three rules govern it, and none of them is enforced by anything but this page.
+
+**Per-request context is re-established inside each worker.** `Current`
+(`ActiveSupport::CurrentAttributes`) is thread-local and does not cross into a
+spawned thread. atlas_rb's auth resolver reads `Current.nuid` and
+`Current.on_behalf_of`, so a worker with a blank `Current` calls Atlas as no
+one. The batch snapshots `Current` on the caller thread and restores it in each
+worker.
+
+**A task that raises aborts the batch, after every worker is joined.** Joining
+first means a failure never orphans a sibling mid-flight. Only then is the
+first error in task order re-raised, carrying its original backtrace, so a
+failing read surfaces exactly as it would have if the calls had run
+sequentially. Raising inside the step that collects the thread values would be
+shorter and would orphan a sibling.
+
+**Tasks must be pure Atlas reads.** A worker checks out no database
+connection, so a task touching ActiveRecord is a bug. Resolve anything
+DB-backed — the viewer's NUID, for instance — on the caller thread and close
+over the value. No spec catches this one: a task touching ActiveRecord passes
+under test, where the pool has connections to hand out, and fails only under
+load in a real request.
+
+The batch reports itself to `Server-Timing` as `parallel_reads.cerberus`, and
+the event is raised around the batch rather than inside each worker. That is
+not a style choice either. `ActionDispatch::ServerTiming` collects
+notifications into a store held in `ActiveSupport::IsolatedExecutionState`,
+which is per-thread, so an event raised in a worker finds no store and is
+discarded silently. That is also why atlas_rb's own `request.atlas_rb` events
+from the workers never appear, and why `request.atlas_rb` in the panel counts
+only main-thread calls. Without the wrapper the batch is the largest block on
+the page and the only one with no row, so the timings visibly fail to add up to
+`process_action`.
+
+The payload carries the task count, which reaches the log and any other
+subscriber but not the browser: Rails' middleware emits only `name;dur=`. Per
+call timings stay in the Atlas logs. A single-task batch is deliberately not
+wrapped, because it runs inline on the request thread and atlas_rb's event
+already accounts for it.
 
 ## Recording a partly-failed pipeline
 
