@@ -328,6 +328,23 @@ MODS, assets and file sets, which the page cannot render without.
 `parallel_atlas_reads` re-raises any task's error, so the rescue has to be
 inside the task. A nil reads as "no associations" downstream.
 
+The batch reports itself to `Server-Timing` as `parallel_reads.cerberus`, and
+the event is raised around the batch rather than inside each worker. That is
+not a style choice. `ActionDispatch::ServerTiming` collects notifications into
+a store held in `ActiveSupport::IsolatedExecutionState`, which is per-thread,
+so an event raised in a worker finds no store and is discarded silently —
+which is also why atlas_rb's own `request.atlas_rb` events from these four
+calls never appear, and why `request.atlas_rb` in the panel counts only
+main-thread calls. Without the wrapper the batch is the largest block on the
+page and the only one with no row, so the timings visibly fail to add up to
+`process_action`.
+
+The payload carries the task count, which reaches the log and any other
+subscriber but not the browser: Rails' middleware emits only `name;dur=`. Per
+call timings stay in the Atlas logs. A single-task batch is deliberately not
+wrapped, because it runs inline on the request thread and atlas_rb's event
+already accounts for it.
+
 `WorksController#manifest` renders an IIIF Presentation 3.0 manifest, one
 Canvas per page FileSet in page order. It is read-gated like every other view
 of the Work, and the underlying Atlas reads are caller-gated too.

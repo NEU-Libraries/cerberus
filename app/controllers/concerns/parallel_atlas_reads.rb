@@ -24,13 +24,26 @@
 module ParallelAtlasReads
   extend ActiveSupport::Concern
 
+  # Raise this on the CALLER thread, never inside a worker: ServerTiming's
+  # collection lives in ActiveSupport::IsolatedExecutionState, which is
+  # per-thread, so an event from a worker is dropped without a word. See
+  # docs/deposit.md.
+  INSTRUMENTATION_EVENT = 'parallel_reads.cerberus'
+
   private
 
     def parallel_atlas_reads(tasks)
       return {} if tasks.empty?
-      # A single task needs no thread — run it inline for identical semantics.
+      # A single task needs no thread — run it inline for identical semantics,
+      # and uninstrumented, because atlas_rb's own event already covers it.
       return { tasks.keys.first => tasks.values.first.call } if tasks.size == 1
 
+      ActiveSupport::Notifications.instrument(INSTRUMENTATION_EVENT, count: tasks.size) do
+        run_atlas_reads(tasks)
+      end
+    end
+
+    def run_atlas_reads(tasks)
       context = Current.attributes
       threads = tasks.transform_values { |task| spawn_atlas_read(task, context) }
       results = threads.transform_values(&:value)
