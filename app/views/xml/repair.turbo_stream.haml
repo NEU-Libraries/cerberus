@@ -25,4 +25,4 @@
   #editor_buffer
     :javascript
       ace.edit("editor").getSession().setValue(#{@raw_xml.to_json});
-      window.scrollTo(0, 0);
+      #{scroll_to_top_js}

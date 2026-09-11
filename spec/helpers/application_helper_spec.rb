@@ -120,6 +120,23 @@ describe ApplicationHelper do
     end
   end
 
+  describe '#scroll_to_top_js' do
+    subject(:snippet) { helper.scroll_to_top_js }
+
+    it 'scrolls the viewport to the top' do
+      expect(snippet).to include('window.scrollTo(', 'top: 0')
+    end
+
+    it 'animates by default and jumps when the reader asked for less motion' do
+      expect(snippet).to include('prefers-reduced-motion: reduce', '"auto" : "smooth"')
+    end
+
+    it 'emits a single statement, so a filter can interpolate it inline' do
+      expect(snippet.lines.length).to eq(1)
+      expect(snippet).to end_with(';')
+    end
+  end
+
   describe '#document_url' do
     it 'uses the typed url helper when document.klass is a model class' do
       document = double('Document', klass: Community)
