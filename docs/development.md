@@ -48,6 +48,7 @@ What you are most likely to set:
 |---|---|
 | `ATLAS` | Pins the Atlas image tag. Unset uses `latest`; the tag this commit was tested against is in `.atlas_version`. |
 | `WORKTREES_ROOT` | Absolute path to the directory holding your worktrees. Read only by `docker-compose.local.yml`, to mount that directory into the `web` container. |
+| `REQUEST_DEADLINE_SECONDS` | Puts the per-request deadline back in development, where it is off by default. See [The request deadline](#the-request-deadline). |
 | `HANDLE_*`, `CERBERUS_IIIF_*` | Handle minting and gated-derivative signing. Both have dev defaults; see the comments in `.env.example`. |
 
 Atlas keeps its own `.env`, on the same pattern.
@@ -58,6 +59,22 @@ Atlas keeps its own `.env`, on the same pattern.
 `nil`, which fails late and obscurely rather than at boot — a request signs with
 a missing key and Atlas answers 401. Get the key from a maintainer before you
 run anything.
+
+### The request deadline
+
+`RequestDeadline` (`lib/request_deadline.rb`) holds a wall-clock limit over
+every non-streaming request. It is the backstop beneath the per-client
+deadlines, and it is mounted first in the stack in every environment.
+
+**Development runs without a deadline.** Rack::Timeout counts wall time on a
+thread of its own, and a breakpoint pauses only the request thread. With a
+deadline in force, sitting on a breakpoint for longer than it allows ends the
+request with `Rack::Timeout::RequestTimeoutException` while you are still
+standing on the line.
+
+Set `REQUEST_DEADLINE_SECONDS` in `.env` and restart `web` to exercise the
+deadline in development; zero means none. The middleware is mounted either way,
+so the stack has the same shape whatever the deadline is.
 
 ### Host memory limits
 
