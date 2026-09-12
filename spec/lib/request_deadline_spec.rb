@@ -63,4 +63,33 @@ describe RequestDeadline do
       expect(names).not_to include('Rack::Timeout')
     end
   end
+
+  # A breakpoint pauses the request thread and not Rack::Timeout's clock, so a
+  # deadline in development expires the very request the developer is sitting
+  # in. Nothing else may lose the backstop, which is why the environment is an
+  # argument here rather than a global read.
+  describe '.seconds' do
+    let(:development) { ActiveSupport::StringInquirer.new('development') }
+    let(:production) { ActiveSupport::StringInquirer.new('production') }
+
+    it 'gives the backstop outside development' do
+      expect(described_class.seconds(production, nil)).to eq(described_class::DEFAULT_SECONDS)
+    end
+
+    it 'gives no deadline in development, so a breakpoint cannot expire the request' do
+      expect(described_class.seconds(development, nil)).to eq(0)
+    end
+
+    it 'takes an override, so the deadline can still be exercised in development' do
+      expect(described_class.seconds(development, '5')).to eq(5)
+    end
+
+    it 'reads a blank override as absent rather than as zero' do
+      expect(described_class.seconds(production, ' ')).to eq(described_class::DEFAULT_SECONDS)
+    end
+
+    it 'refuses a non-numeric override rather than dropping the deadline silently' do
+      expect { described_class.seconds(production, 'twenty') }.to raise_error(ArgumentError)
+    end
+  end
 end

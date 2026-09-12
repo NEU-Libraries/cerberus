@@ -8,11 +8,9 @@
 #
 # Inserted at position 0 so the deadline covers the whole stack rather than
 # whatever sits below it. Streaming routes are exempt, which is the reason this
-# is mounted by hand instead of by the gem's railtie — see lib/request_deadline.rb.
-#
-# 20s is about forty-five times the measured p50 of the heaviest page. It is
-# deliberately above every per-client deadline so those fire first: they name
-# the dependency that failed, while this one only says the request ran too long.
+# is mounted by hand instead of by the gem's railtie — see lib/request_deadline.rb,
+# which also holds the default and why development runs without a deadline.
 require 'request_deadline'
 
-Rails.application.config.middleware.insert 0, RequestDeadline, service_timeout: 20
+Rails.application.config.middleware.insert 0, RequestDeadline,
+                                           service_timeout: RequestDeadline.seconds(Rails.env)
