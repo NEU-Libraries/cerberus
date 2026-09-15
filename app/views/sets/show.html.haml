@@ -155,8 +155,8 @@
       - provenance = @resolver.provenance_for(doc)
       .result-row
         .thumb
-          - if doc.thumbnail_ssi.present?
-            = image_tag doc.thumbnail_ssi, alt: '', loading: 'lazy'
+          - if (thumb = renderable_thumbnail(doc.thumbnail_ssi))
+            = image_tag thumb, alt: '', loading: 'lazy'
           - else
             %i.fa-regular.fa-image{'aria-hidden' => 'true'}
         .flex-grow-1

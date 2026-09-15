@@ -17,8 +17,8 @@
           - documents.each do |doc|
             .work-association
               .work-association__thumb
-                - if doc.thumbnail_ssi.present?
-                  = image_tag doc.thumbnail_ssi, alt: '', loading: 'lazy'
+                - if (thumb = renderable_thumbnail(doc.thumbnail_ssi))
+                  = image_tag thumb, alt: '', loading: 'lazy'
                 - else
                   %i.fa-regular.fa-image{'aria-hidden' => 'true'}
               .work-association__body

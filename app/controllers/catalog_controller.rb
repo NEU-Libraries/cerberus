@@ -471,7 +471,7 @@ class CatalogController < ApplicationController
     icon_class = helpers.document_type_icon(document.klass_type)
     icon_html  = view_context.content_tag(:i, '', class: "fa-solid #{icon_class} fa-2xl text-black-50")
 
-    src = document.thumbnail_2x_ssi.presence || document.thumbnail_ssi
+    src = helpers.renderable_thumbnail(document.thumbnail_2x_ssi.presence || document.thumbnail_ssi)
     return view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback') if src.blank?
 
     fallback = view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback d-none')
