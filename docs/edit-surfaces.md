@@ -149,7 +149,7 @@ action. The shapes mirror what Atlas emits:
 | Action | Payload | Summary |
 |---|---|---|
 | `update` | `{ fields: [...] }` | the field names, joined |
-| `update` | `{ source: 'mods' }` | "MODS document" |
+| `update` | `{ source: 'mods' }` | "MODS document", plus the origin when the event has one |
 | `update` | `{ before:, after: }` | an ACL or rendition-gate diff |
 | `reparent` | `{ to: noid }` | "moved to &lt;noid&gt;" |
 | `link_member` | `{ collection: noid }` | "to &lt;noid&gt;" |
@@ -164,6 +164,36 @@ grant tokens, where a spelled-out month would crowd them out.
 
 `tier_diff_summary` prints the same grammar per download tier —
 `large −public +staff` — because both are group grants moving on and off a slot.
+
+### Which surface made a MODS upload
+
+Three Cerberus surfaces write a full MODS document through the same
+`AtlasRb::<Klass>.update` call: the simple Metadata form, the Advanced tab and
+the raw XML editor. The first two merge into the stored document and the third
+replaces it wholesale, so a curator reading the audit log needs to know which
+one an entry came from.
+
+Each surface tags its own write with an `origin:` keyword, and Atlas records the
+string verbatim beside `source` in the payload:
+
+| Surface | Write site | Tag |
+|---|---|---|
+| Metadata form | `DescriptiveMetadata#save_descriptive!` | `metadata_form` |
+| Advanced tab | `AdvancedMetadata#save_advanced!` | `advanced_form` |
+| Raw XML editor | `XmlController#update` | `xml_editor` |
+
+`AuditEventsHelper::ORIGIN_LABELS` maps each tag to the prose the row shows, and
+`origin_label` humanizes a tag the map has not been taught rather than dropping
+it. Atlas never branches on the value, so a new surface needs no Atlas change.
+
+The renderer must tolerate an absent origin, and two kinds of event have none:
+every row written before the field existed, and the programmatic writes that
+still send no tag — `ShowcaseProvisioner` and `XmlIngestJob`. Atlas omits the
+key rather than sending it empty, so those events look exactly as they always
+did and the row falls back to the bare "MODS document".
+
+Requires atlas\_rb 1.16.1 or later, which is where the `origin:` keyword
+arrived on the three MODS upload bindings.
 
 ### The two permission payloads
 

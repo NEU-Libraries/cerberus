@@ -203,6 +203,21 @@ describe 'audit_events/_history.html.haml' do
       expect(rendered).to have_css('.audit-event__detail-summary', text: 'edit +editors')
     end
 
+    it 'names the surface a full MODS upload came from' do
+      render_with(events: [event(action: 'update', change_type: 'metadata',
+                                 payload: { 'source' => 'mods', 'origin' => 'metadata_form' })])
+      expect(rendered).to have_css('.audit-event__detail-summary', text: 'MODS document · via Metadata form')
+    end
+
+    # Programmatic MODS writes send no origin, and neither did any write made
+    # before the field existed — those rows keep their original label.
+    it 'labels a MODS upload with no origin as the bare document' do
+      render_with(events: [event(action: 'update', change_type: 'metadata',
+                                 payload: { 'source' => 'mods' })])
+      expect(rendered).to have_css('.audit-event__detail-summary', text: 'MODS document')
+      expect(rendered).to have_no_css('.audit-event__detail-summary', text: 'via')
+    end
+
     it 'humanises an unknown change_type rather than dropping it' do
       render_with(events: [event(action: 'update', change_type: 'provenance')])
       expect(rendered).to have_css('.audit-event--update .audit-event__change-type', text: 'Provenance')
