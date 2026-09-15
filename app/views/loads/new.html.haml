@@ -8,7 +8,12 @@
       %i.fa-solid.fa-folder-tree{'aria-hidden' => 'true'}
       = @loader.slug
   .admin-registry__body
-    = form_with model: [@loader, @load_report], url: loader_loads_path(@loader), local: true, html: { class: 'admin-registry-form', multipart: true } do |f|
+    -# archive-upload intercepts the submit to report real upload bytes; see
+    -# the controller for why Turbo's own bar cannot be used here.
+    = form_with model: [@loader, @load_report], url: loader_loads_path(@loader), local: true,
+                html: { class: 'admin-registry-form', multipart: true,
+                        data: { controller: 'archive-upload',
+                                action: 'submit->archive-upload#submit' } } do |f|
       - if @load_report.errors.any?
         .alert.alert-danger
           %p.fw-semibold.mb-1
@@ -27,7 +32,8 @@
           = f.label :archive, class: 'admin-registry-form__label' do
             %i.fa-solid.fa-file-zipper{'aria-hidden' => 'true'}
             Archive file
-          = f.file_field :archive, class: 'form-control', accept: '.tar,.zip', required: true
+          = f.file_field :archive, class: 'form-control', accept: '.tar,.zip', required: true,
+                          data: { 'archive-upload-target' => 'file' }
           - if @loader.multipage?
             .admin-registry-form__hint
               Accepted formats:
@@ -90,7 +96,26 @@
               .admin-registry-form__hint
                 Where newly-created Works land — any collection. Rows that update an existing object by PID ignore this.
 
+      -# Hidden until a submit starts. role=progressbar without aria-valuenow reads
+      -# as indeterminate, which is exactly the state after the last byte is sent
+      -# and before the server answers.
+      .archive-upload.mt-4{ hidden: true, role: 'progressbar',
+        'aria-valuemin' => 0, 'aria-valuemax' => 100,
+        data: { 'archive-upload-target' => 'panel' } }
+        .archive-upload__head
+          %span.archive-upload__label{ data: { 'archive-upload-target' => 'label' } } Uploading
+          %span.archive-upload__percent{ data: { 'archive-upload-target' => 'percent' } } 0%
+        .archive-upload__track
+          .archive-upload__fill{ style: 'width: 0%', data: { 'archive-upload-target' => 'fill' } }
+        -# The icon sits outside the target, because the controller rewrites the
+        -# note with textContent and would otherwise delete it.
+        .archive-upload__note
+          %i.fa-solid.fa-circle-info.me-1{'aria-hidden' => 'true'}
+          %span{ data: { 'archive-upload-target' => 'note' } } Keep this tab open until the upload finishes.
+
       .d-flex.gap-2.align-items-center.mt-4
-        = f.submit 'Upload', class: 'btn btn-primary', disabled: (@loader.iptc? && @destinations.empty?)
+        = f.submit 'Upload', class: 'btn btn-primary',
+                   disabled: (@loader.iptc? && @destinations.empty?),
+                   data: { 'archive-upload-target' => 'submit' }
         = link_to loader_loads_path(@loader), class: 'btn btn-warning' do
           Cancel

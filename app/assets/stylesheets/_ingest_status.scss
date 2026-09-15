@@ -281,3 +281,104 @@ turbo-frame#load_report[busy] .admin-registry {
   from { background-position: -40% 0; }
   to   { background-position: 140% 0; }
 }
+
+// ---------------------------------------------------------------------
+// Upload meter on the loader's New upload form — the bytes leaving the
+// browser, before any LoadReport exists to poll. Deliberately the same
+// track/fill vocabulary as .load-report-progress above, since the two
+// read as consecutive stages of one operation, but taller (6px, against
+// that one's 4px) because this is the page's only active element while
+// it runs rather than one readout among summary tiles.
+// ---------------------------------------------------------------------
+.archive-upload {
+  max-width: 34rem;
+
+  &__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.85rem;
+    margin-bottom: 0.35rem;
+  }
+
+  &__label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    color: $ingest-tone-processing;
+  }
+
+  // Tabular figures so the digits do not shuffle sideways as the count
+  // climbs through 9% to 10% to 100%.
+  &__percent {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: $gray-800;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  &__track {
+    height: 6px;
+    border-radius: 999px;
+    background-color: color-mix(in srgb, #{$ingest-tone-processing} 12%, white);
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    min-width: 2px;
+    border-radius: inherit;
+    background-color: $ingest-tone-processing;
+    transition: width 0.25s ease;
+  }
+
+  &__note {
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+    color: $gray-700;
+  }
+
+  // Bytes are all sent and the server is still working, so there is no
+  // fraction left to show. A sweeping band says "working" without
+  // claiming a position; the fill is widened to full first so the
+  // animation has something to travel across.
+  &--indeterminate &__fill {
+    width: 100% !important;
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in srgb, #{$ingest-tone-processing} 35%, white) 50%,
+      transparent 100%
+    );
+    background-color: color-mix(in srgb, #{$ingest-tone-processing} 18%, white);
+    background-size: 40% 100%;
+    background-repeat: no-repeat;
+    animation: archive-upload-sweep 1.4s linear infinite;
+  }
+
+  &--failed &__label {
+    color: $ingest-tone-failed;
+  }
+
+  &--failed &__fill {
+    animation: none;
+    background-image: none;
+    background-color: $ingest-tone-failed;
+  }
+}
+
+// Honours a reduced-motion preference by holding the band still; the
+// label still changes, so the state is never carried by motion alone.
+@keyframes archive-upload-sweep {
+  from { background-position: -40% 0; }
+  to   { background-position: 140% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archive-upload--indeterminate .archive-upload__fill {
+    animation: none;
+    background-position: 50% 0;
+  }
+}
