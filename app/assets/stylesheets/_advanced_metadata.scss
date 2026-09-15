@@ -3,33 +3,21 @@
 //
 // A <details> holding the title-part and creator inputs. No card chrome
 // and no fill: the deposit page sets its sections off with a heading and
-// spacing alone (see "Permissions"), so this summary is styled to read as
-// one more of those headings that happens to be clickable. The only
-// affordance added is the caret, because a heading that does nothing and
-// a heading that opens a section must not look identical.
+// spacing alone ("Image Derivatives", "Permissions"), so this summary is
+// styled to read as one more of those headings that happens to be
+// clickable. The only affordance added is the caret, because a heading
+// that opens a section and one that does not must not look identical.
 // ---------------------------------------------------------------------
 
 .advanced-metadata {
   &__summary {
     cursor: pointer;
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-    // Matches the page's h5 section headings rather than introducing a
-    // third heading weight.
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: $gray-900;
-    // Suppress the UA marker; the caret below replaces it, so the icon
-    // and the open state stay in one place we control.
+    // Suppress the UA marker; the caret replaces it, so the icon and the
+    // open state stay in one place we control.
     list-style: none;
 
     &::-webkit-details-marker {
       display: none;
-    }
-
-    &:hover {
-      color: $blue;
     }
 
     &:focus-visible {
@@ -39,9 +27,24 @@
     }
   }
 
+  // Sibling sections on this page are `%h4.pb-2`, so the heading inherits
+  // Bootstrap's h4 and only the bottom padding is restated here — the
+  // body supplies the gap when open, and a closed disclosure should not
+  // leave a dangling one.
+  &__heading {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  &__summary:hover &__heading {
+    color: $blue;
+  }
+
   &__caret {
     color: $gray-600;
-    font-size: 0.9em;
+    font-size: 0.8em;
     transition: transform 0.12s ease;
   }
 
