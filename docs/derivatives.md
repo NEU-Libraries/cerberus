@@ -5,6 +5,7 @@ has to wait.
 
 Source files:
 
+- `app/helpers/thumbnails_helper.rb`
 - `app/jobs/iiif_assets_job.rb`
 - `app/jobs/caption_job.rb`
 - `app/services/streaming_only.rb`
@@ -25,6 +26,15 @@ This job PATCHes their Delegate URLs to Atlas.
 | Thumbnails (`thumbnail`, `thumbnail_2x`, `preview`) | the **open**, display-capped copy | always. Catalog rows and show pages need them for every image-bearing Work |
 | `service_file` | the **gated** full-resolution copy | always. PATCHed onto the content FileSet |
 | Small, medium, large | the **gated** base | only when the caller passes `derivative_widths:` |
+
+Every thumbnail Atlas stores is an **absolute** IIIF URL, and the views depend on
+that. `image_tag` passes a URL straight through, but resolves a relative value
+through Propshaft, which raises `Propshaft::MissingAssetError` rather than
+emitting a broken image. A catalog row, a Set row and an association tile each
+render whatever the index holds, so one malformed value would take the whole page
+down instead of degrading its own tile. `ThumbnailsHelper#renderable_thumbnail`
+is the guard: it returns the value only when it looks like a URL, and every
+caller treats nil as "no thumbnail" and falls back to the type icon.
 
 `service_file` does double duty. It is the deep-zoom source, and it is the
 anchor from which `DepositDerivativesJob` later recovers the gated base for

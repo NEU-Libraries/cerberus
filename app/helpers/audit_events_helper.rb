@@ -50,6 +50,16 @@ module AuditEventsHelper
   # only thing telling the two payload shapes apart — check it before reading.
   DERIVATIVE_PERMISSIONS_SOURCE = 'derivative_permissions'
 
+  # Prose for the editing surface a MODS write came from. Atlas records `origin`
+  # verbatim and never branches on it, so this map is Cerberus naming its own
+  # surfaces: a token it has not been taught about MUST still render, and an
+  # event with no origin at all is every row written before the field existed.
+  ORIGIN_LABELS = {
+    'metadata_form' => 'Metadata form',
+    'advanced_form' => 'Advanced form',
+    'xml_editor'    => 'XML editor'
+  }.freeze
+
   # Prose for the download tiers. The vocabulary and its narrowing order come
   # from Sentinel::TIERS; naming the ladder twice would let the two drift.
   TIER_LABELS = {
@@ -239,6 +249,14 @@ module AuditEventsHelper
     TIER_LABELS.fetch(tier.to_s) { tier.to_s.humanize }
   end
 
+  # nil for an event carrying no origin, so a caller can fall back on absence.
+  def origin_label(origin)
+    origin = origin.to_s
+    return if origin.blank?
+
+    ORIGIN_LABELS.fetch(origin) { origin.humanize }
+  end
+
   def audit_event_payload_summary(event)
     text = payload_summary_text(event['action'].to_s, event['payload'] || {})
     return if text.blank?
@@ -274,10 +292,18 @@ module AuditEventsHelper
     # as the MODS marker labelled a rendition-gate change "MODS document".
     def update_payload_summary(payload)
       return payload['fields'].join(', ') if payload['fields'].present?
-      return 'MODS document'              if payload['source'] == 'mods'
+      return mods_summary(payload)        if payload['source'] == 'mods'
       return if payload['before'].nil? && payload['after'].nil?
 
       permissions_diff_summary(payload)
+    end
+
+    # The editing surface rides beside `source` in `origin`, and is absent on a
+    # write no Cerberus surface made and on every event predating the field, so
+    # the label has to read on its own without it.
+    def mods_summary(payload)
+      surface = origin_label(payload['origin'])
+      surface.present? ? "MODS document · via #{surface}" : 'MODS document'
     end
 
     def permissions_diff_summary(payload)

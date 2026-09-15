@@ -55,17 +55,15 @@ module DescriptiveMetadata
   end
 
   # The raw, structure-safe update path, and it must stay that way: it preserves
-  # curated nodes and skips a needless OCFL MODS version on a no-op. Keep the
-  # with_stale_retry too — right after a deposit the async ingest jobs are
-  # writing the same Work, so this read→merge→write can lose the lock race.
-  def save_descriptive!(klass, id, title:, description:, keywords: nil)
-    with_stale_retry do
-      xml = AtlasRb.const_get(klass).mods(id, 'xml')
-      merged = Metadata::MODSMerge.call(xml: xml, title: title, abstract: description, keywords: keywords)
-      break if Metadata::MODSMerge.unchanged?(xml, merged)
-
-      AtlasRb.const_get(klass).update(id, write_tmp_xml(merged))
-    end
+  # curated nodes and skips a needless OCFL MODS version on a no-op.
+  #
+  # `advanced` folds the Advanced field set into the SAME merge, for a form that
+  # carries both — the deposit page. Two sequential saves would mint two OCFL
+  # MODS versions and two audit rows for one submit.
+  def save_descriptive!(klass, id, title:, description:, keywords: nil, advanced: nil)
+    merge_mods!(klass, id, origin: 'metadata_form',
+                           title: title, abstract: description, keywords: keywords,
+                           **(advanced || {}))
   end
 
   # Guard, mint, title — in that order, and the title before anything else the
@@ -84,7 +82,7 @@ module DescriptiveMetadata
     resource
   end
 
-  def apply_descriptive(klass, id, resource_key, keywords, show_path)
+  def apply_descriptive(klass, id, resource_key, keywords, show_path, advanced: nil)
     descriptive = descriptive_params(resource_key, keywords: keywords)
     unless descriptive_valid?(descriptive, keywords:         keywords,
                                            curated_subjects: curated_subjects_posted?(resource_key))
@@ -92,7 +90,7 @@ module DescriptiveMetadata
       return redirect_back_or_to(public_send("edit_#{klass.downcase}_path", id))
     end
 
-    save_descriptive!(klass, id, **descriptive)
+    save_descriptive!(klass, id, **descriptive, advanced: advanced)
     redirect_to show_path
   end
 end

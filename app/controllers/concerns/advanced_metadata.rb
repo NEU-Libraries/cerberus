@@ -47,14 +47,10 @@ module AdvancedMetadata
   end
 
   # Merge the Advanced-tab fields into the existing MODS via the structure-safe
-  # raw update path, skipping the write on a no-op (same spine as save_descriptive!).
+  # raw update path. The Advanced TAB submits these alone; the deposit page
+  # submits them alongside the descriptive fields and goes through
+  # save_descriptive!(advanced:) instead, so one submit is one write.
   def save_advanced!(klass, id, **fields)
-    with_stale_retry do
-      xml = AtlasRb.const_get(klass).mods(id, 'xml')
-      merged = Metadata::MODSMerge.call(xml: xml, **fields)
-      break if Metadata::MODSMerge.unchanged?(xml, merged)
-
-      AtlasRb.const_get(klass).update(id, write_tmp_xml(merged))
-    end
+    merge_mods!(klass, id, origin: 'advanced_form', **fields)
   end
 end

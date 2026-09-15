@@ -23,6 +23,18 @@
         </mods:role>
     </mods:name>
 
+    <!-- A second name carrying a non-Creator relator, so contributor_ssim has a
+         value. Atlas splits the MODS names on the relator: Creator feeds
+         creator_ssim and everything else feeds contributor_ssim, so a fixture
+         with creators alone leaves the Contributor facet unprovable. -->
+    <mods:name type="personal">
+        <mods:namePart type="given">Marcus</mods:namePart>
+        <mods:namePart type="family">Ferrell</mods:namePart>
+        <mods:role>
+            <mods:roleTerm authority="marcrelator" type="text">Contributor</mods:roleTerm>
+        </mods:role>
+    </mods:name>
+
     <mods:typeOfResource>text</mods:typeOfResource>
     <mods:genre>Research Publications</mods:genre>
 

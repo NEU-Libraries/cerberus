@@ -72,6 +72,21 @@ describe CatalogController do
       expect(html).to include('>Embargoed</span>')
       expect(html).to include('thumb-type-pill--embargoed')
     end
+
+    # A result row renders whatever the index holds. A thumbnail that is not a
+    # URL reaches Propshaft, which raises rather than emitting a broken image, so
+    # one such document used to 500 the entire page of results rather than
+    # degrading its own tile.
+    it 'falls back to the type icon for a thumbnail that is not a URL' do
+      get :index
+      doc = SolrDocument.new('id' => 'w2', 'internal_resource_tesim' => ['Work'],
+                             'thumbnail_2x_ssi' => 't2', 'thumbnail_ssi' => 't')
+
+      html = controller.view_context.iiif_thumbnail(doc)
+
+      expect(html).to include('thumbnail-fallback')
+      expect(html).not_to include('<img')
+    end
   end
 
   # Every field the config names has to be one Atlas actually writes. Blacklight

@@ -173,6 +173,11 @@ class CatalogController < ApplicationController
     # CitationIndexer from the MODS names carrying a MARC creator relator.
     # Multivalued — a co-authored Work is browsable under each of its creators.
     config.add_facet_field 'creator_ssim', label: 'Creator', limit: true, index_range: 'A'..'Z'
+    # Contributor names — every other MARC relator, projected by Atlas from the
+    # same MODS names as creator_ssim. Its own axis rather than folded into
+    # Creator: a reader looking for someone's own work is asking a different
+    # question from one looking for everything they touched.
+    config.add_facet_field 'contributor_ssim', label: 'Contributor', limit: true, index_range: 'A'..'Z'
     config.add_facet_field 'pub_date_ssim', label: 'Publication Year', single: true
     # Topical subject and language, projected by Atlas's MODSIndexer for every
     # Modsable resource rather than for Works alone. subject_ssim carries MODS
@@ -466,7 +471,7 @@ class CatalogController < ApplicationController
     icon_class = helpers.document_type_icon(document.klass_type)
     icon_html  = view_context.content_tag(:i, '', class: "fa-solid #{icon_class} fa-2xl text-black-50")
 
-    src = document.thumbnail_2x_ssi.presence || document.thumbnail_ssi
+    src = helpers.renderable_thumbnail(document.thumbnail_2x_ssi.presence || document.thumbnail_ssi)
     return view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback') if src.blank?
 
     fallback = view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback d-none')

@@ -173,6 +173,16 @@ describe XmlController do
         put :update, params: { resource_id: work.id, raw_xml: raw_xml }
         expect(response).to redirect_to(work_path(work.id))
       end
+
+      # What tells this write apart from the Metadata tab's merge in the
+      # History tab. Read off the recorded event, because the tag has to
+      # survive the multipart upload to be worth anything.
+      it 'records the raw-XML editor as the edit origin' do
+        resource_id = work.id
+        put :update, params: { resource_id: resource_id, raw_xml: raw_xml }
+
+        expect(mods_edit_origins(resource_id)).to include('xml_editor')
+      end
     end
 
     context 'when the submitted XML is invalid' do

@@ -26,6 +26,25 @@ module AtlasWrite
     end
   end
 
+  # Read -> merge -> write, the spine every MODS form save shares. A nil field
+  # means "leave it untouched", so a caller passes only what its own form owns
+  # and one call can carry two forms' worth of fields.
+  #
+  # The read sits INSIDE with_stale_retry deliberately: a retry needs the
+  # current MODS and its lock token, not a memo from the first attempt.
+  #
+  # The unchanged? guard is what keeps a no-op submit from minting an OCFL MODS
+  # version and an audit row. Do not hoist it: `update` writes unconditionally.
+  def merge_mods!(klass, id, origin:, **fields)
+    with_stale_retry do
+      xml = AtlasRb.const_get(klass).mods(id, 'xml')
+      merged = Metadata::MODSMerge.call(xml: xml, **fields)
+      break if Metadata::MODSMerge.unchanged?(xml, merged)
+
+      AtlasRb.const_get(klass).update(id, write_tmp_xml(merged), origin: origin)
+    end
+  end
+
   def write_tmp_xml(xml)
     path = Rails.root.join('tmp', "#{SecureRandom.uuid}.xml").to_s
     File.write(path, xml)

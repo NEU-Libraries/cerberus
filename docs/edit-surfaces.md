@@ -149,7 +149,7 @@ action. The shapes mirror what Atlas emits:
 | Action | Payload | Summary |
 |---|---|---|
 | `update` | `{ fields: [...] }` | the field names, joined |
-| `update` | `{ source: 'mods' }` | "MODS document" |
+| `update` | `{ source: 'mods' }` | "MODS document", plus the origin when the event has one |
 | `update` | `{ before:, after: }` | an ACL or rendition-gate diff |
 | `reparent` | `{ to: noid }` | "moved to &lt;noid&gt;" |
 | `link_member` | `{ collection: noid }` | "to &lt;noid&gt;" |
@@ -164,6 +164,36 @@ grant tokens, where a spelled-out month would crowd them out.
 
 `tier_diff_summary` prints the same grammar per download tier —
 `large −public +staff` — because both are group grants moving on and off a slot.
+
+### Which surface made a MODS upload
+
+Three Cerberus surfaces write a full MODS document through the same
+`AtlasRb::<Klass>.update` call: the simple Metadata form, the Advanced tab and
+the raw XML editor. The first two merge into the stored document and the third
+replaces it wholesale, so a curator reading the audit log needs to know which
+one an entry came from.
+
+Each surface tags its own write with an `origin:` keyword, and Atlas records the
+string verbatim beside `source` in the payload:
+
+| Surface | Write site | Tag |
+|---|---|---|
+| Metadata form | `DescriptiveMetadata#save_descriptive!` | `metadata_form` |
+| Advanced tab | `AdvancedMetadata#save_advanced!` | `advanced_form` |
+| Raw XML editor | `XmlController#update` | `xml_editor` |
+
+`AuditEventsHelper::ORIGIN_LABELS` maps each tag to the prose the row shows, and
+`origin_label` humanizes a tag the map has not been taught rather than dropping
+it. Atlas never branches on the value, so a new surface needs no Atlas change.
+
+The renderer must tolerate an absent origin, and two kinds of event have none:
+every row written before the field existed, and the programmatic writes that
+still send no tag — `ShowcaseProvisioner` and `XmlIngestJob`. Atlas omits the
+key rather than sending it empty, so those events look exactly as they always
+did and the row falls back to the bare "MODS document".
+
+Requires atlas\_rb 1.16.1 or later, which is where the `origin:` keyword
+arrived on the three MODS upload bindings.
 
 ### The two permission payloads
 
@@ -222,13 +252,24 @@ all PATCH the same action with disjoint fields.
 
 Each piece it composes owns one half of a job. `PermissionsForm` parses and
 presents the permissions form while `ResourcePermissions` writes it.
-`DescriptiveMetadata` and `AdvancedMetadata` merge MODS, and `AtlasWrite` makes
-a write survive the wire. What is left in `Transformable` is the routing between
+`DescriptiveMetadata` and `AdvancedMetadata` decide *which* MODS fields a form
+owns; `AtlasWrite#merge_mods!` is the read-merge-write spine both of them call,
+and makes the write survive the wire. What is left in `Transformable` is the routing between
 them.
 
 `handle_metadata_update` sends permissions to Atlas's metadata endpoint. It
 validates descriptive fields before merging them into the existing MODS and
 writing them through the structure-safe raw `update` path.
+
+`advanced_submitted?` and `include_advanced:` mean opposite things and must not
+be confused. The first reads the Advanced **tab's** own hidden marker, which
+says "the advanced fields and nothing else" and short-circuits to
+`save_advanced!`. The second is a caller's statement that the form it rendered
+carries the advanced fields **inline, beside** the descriptive ones — the
+deposit page — so both sets fold into one `save_descriptive!` and one MODS
+write. It is a kwarg rather than another params sniff precisely because the two
+signals look alike and reading the wrong one would make a deposit submit skip
+its keywords, permissions and confirmation. See `docs/deposit.md`.
 
 `resource_mods` reads the resource's raw MODS once per request. Both form
 loaders parse the same document: `DescriptiveMetadata` for the bare title,

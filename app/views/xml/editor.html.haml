@@ -43,6 +43,13 @@
   .container
     .row
       .col
+        -# Off by default, so a curator's first sight of the document keeps one
+        -# line per XML line and the indentation still reads as depth. Ace owns a
+        -# virtual DOM over #editor, so wrapping has to be asked of the session
+        -# rather than set in CSS.
+        .form-check.form-check-reverse.mb-2
+          %input.form-check-input#toggle_word_wrap{type: 'checkbox'}/
+          %label.form-check-label.small.text-muted{for: 'toggle_word_wrap'} Word wrap
         #editor<
           = @raw_xml
       .col#content{"data-controller" => "preview"}

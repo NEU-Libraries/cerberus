@@ -215,6 +215,37 @@ The order inside `#update_metadata` is load-bearing:
    because Atlas asks callers to complete only once the expected children are
    deposited. The primary Blob may still be in flight.
 
+### The Advanced metadata disclosure
+
+The deposit page carries the Advanced field set — title parts and repeatable
+plain creators — in a `<details>` disclosure, not only the simple fields. A
+depositor has the subtitle and the second creator in front of them at the
+moment they deposit, and nobody returns to a record to look for fields they
+were never shown.
+
+The disclosure is **closed by default** and opens when the record already
+carries parts or creators (`WorksHelper#advanced_metadata_present?`). This
+page's job is confirmation and it already runs long, so the ordinary deposit
+pays a click rather than vertical space. A record that arrived with values
+already in those fields must not hide them behind a click the depositor has no
+reason to make.
+
+Three things about the wiring are easy to get wrong:
+
+- **`marker: false` is required.** `works/_advanced_fields` normally emits a
+  hidden `form: advanced` field, which routes a submit to `save_advanced!`
+  *alone*. On this page that would skip the keywords, the permissions, the
+  derivative widths, the captions and the deposit confirmation.
+- **`#metadata` must call `load_advanced!`.** A blank title-part input means
+  "remove this part" to `MODSMerge`, and an empty creator array means "replace
+  the editable set with nothing". Without the pre-fill, an XML-loaded deposit
+  loses its parts and creators on the depositor's first confirm. It costs no
+  extra Atlas read, because `resource_mods` memoises.
+- **The read-only caption yields.** `shared/_descriptive_fields` lists existing
+  title parts as a muted caption, because the simple form cannot edit them.
+  Here they *are* editable, so the page passes `parts_editable: true` and the
+  caption is suppressed rather than printing the same values twice.
+
 `WorksController#reject_if_in_progress` blocks `#edit` on an unfinished
 deposit. It is a lock, not housekeeping. An unfinished deposit is probably
 open on its depositor's screen at the metadata page, and this stops a second
@@ -274,6 +305,20 @@ It is wrapped in `with_stale_retry`. Right after a deposit the async
 ingest and derivative jobs are still finalizing the same Work, so this
 read-merge-write can lose an optimistic-lock race. Re-reading picks up the
 current MODS and token.
+
+Both `save_descriptive!` and `save_advanced!` are thin calls over
+`AtlasWrite#merge_mods!`, which is the read-merge-write spine itself: read the
+current MODS inside the retry, merge, skip the write when nothing changed, and
+tag the event with the calling surface's origin. The read sits *inside* the
+retry deliberately, because a retry needs the current MODS and its lock token
+rather than a memo from the first attempt.
+
+`save_descriptive!` takes an `advanced:` hash so a form carrying **both** field
+sets is **one** write. `MODSMerge` already accepts every field in a single
+call, and a nil field means "leave it untouched". The deposit page is that
+form: `#update_metadata` passes `include_advanced: true` to
+`handle_metadata_update`. Two sequential saves would mint two OCFL MODS
+versions and two audit rows for a single confirmation.
 
 `load_descriptive!` is the read half. It pre-fills the edit form with the bare
 title plus read-only structured parts, the abstract, and the free-text

@@ -5,7 +5,18 @@
 -#   stacked-input +/- idiom as the keyword widget. Authority-controlled /
 -#   non-Creator names are preserved and listed read-only below. Sections are
 -#   separated by the Works-show divider rather than card chrome.
-= f.hidden_field :form, value: 'advanced'
+-#
+-#   locals:
+-#     f        - a bootstrap_form builder scoped to the resource
+-#     advanced - Hash from load_advanced!
+-#     marker   - Boolean, default true: emit the hidden `form: advanced` field.
+-#
+-#   The marker routes the submit to save_advanced! ALONE. The deposit page
+-#   renders these fields beside the descriptive ones and must pass false, or
+-#   its submit skips the keywords, permissions, derivative widths, captions and
+-#   the deposit confirmation.
+- if local_assigns.fetch(:marker, true)
+  = f.hidden_field :form, value: 'advanced'
 
 %h5.mb-3
   %i.fa-solid.fa-heading.me-2.text-secondary{ 'aria-hidden' => 'true' }

@@ -7,7 +7,26 @@
   -# multipart because the Captions section carries a file input.
   = bootstrap_form_tag(url: metadata_work_path(params[:id]), method: :patch, multipart: true) do |f|
     = bootstrap_fields_for :work do |c|
-      = render 'shared/descriptive_fields', f: c, descriptive: @descriptive, keywords: true
+      = render 'shared/descriptive_fields', f: c, descriptive: @descriptive, keywords: true, parts_editable: true
+      -# Closed by default: this page's job is confirmation and it already runs
+      -# long, so the fields cost a click rather than vertical space. They still
+      -# POST while closed, which is what lets an XML-loaded deposit's existing
+      -# parts and creators survive a submit that never opened the disclosure.
+      -# `marker: false` keeps the Advanced TAB's routing field out of this form.
+      %details.advanced-metadata.my-4{ open: advanced_metadata_present?(@advanced) }
+        -# An h4 inside the summary, because this is a peer of the page's other
+        -# sections ("Image Derivatives", "Permissions") and has to read like
+        -# one — a parent heading lighter than the "Title parts" h5 it contains
+        -# inverts the outline. It also puts the section in the heading outline
+        -# for a screen reader. The caret is the only added affordance: a
+        -# heading that opens a section must not look like one that does not.
+        %summary.advanced-metadata__summary
+          %h4.advanced-metadata__heading
+            %i.fa-solid.fa-caret-right.advanced-metadata__caret.me-2{ 'aria-hidden' => 'true' }
+            Advanced metadata
+            %span.advanced-metadata__hint title parts and creators
+        .advanced-metadata__body
+          = render 'works/advanced_fields', f: c, advanced: @advanced, marker: false
 
     - if @image_probe
       = render 'derivative_fields', longest_edge: @image_probe.longest_edge

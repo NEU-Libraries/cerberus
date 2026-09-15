@@ -215,6 +215,35 @@ RSpec.describe AuditEventsHelper, type: :helper do
         expect(text).to include('MODS document')
       end
 
+      # Three Cerberus surfaces make the identical MODS upload, so without the
+      # origin a curator cannot tell a merge of the form-owned fields from a
+      # hand-replacement of the whole document.
+      it 'names the editing surface the upload came from' do
+        text = helper.audit_event_payload_summary(
+          event(action: 'update', change_type: 'metadata',
+                payload: { 'source' => 'mods', 'origin' => 'xml_editor' })
+        )
+        expect(text).to include('MODS document · via XML editor')
+      end
+
+      # Atlas omits the key rather than sending it empty, so an event from a
+      # programmatic write or from before the field existed has to keep reading.
+      it 'labels a MODS update carrying no origin exactly as before' do
+        text = helper.audit_event_payload_summary(
+          event(action: 'update', change_type: 'metadata', payload: { 'source' => 'mods' })
+        )
+        expect(text).to include('MODS document')
+        expect(text).not_to include('via')
+      end
+
+      it 'humanises an origin token it has not been taught' do
+        text = helper.audit_event_payload_summary(
+          event(action: 'update', change_type: 'metadata',
+                payload: { 'source' => 'mods', 'origin' => 'bulk_loader' })
+        )
+        expect(text).to include('MODS document · via Bulk loader')
+      end
+
       it 'reports a newly gated tier' do
         text = helper.audit_event_payload_summary(tier_event({}, { 'master' => %w[staff] }))
         expect(text).to include('master +staff')

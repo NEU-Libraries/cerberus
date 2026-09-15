@@ -124,6 +124,13 @@ class WorksController < ApplicationController
     @image_probe = StagedImageProbe.call(work_id: params[:id])
     form_preparation(@permissions, resource: @work)
     load_descriptive!('Work')
+    # Pre-fill for the Additional metadata disclosure, and it is load-bearing
+    # rather than cosmetic: a blank title-part input means "remove this part" to
+    # MODSMerge and an empty creator array means "replace the editable set with
+    # nothing". An XML-loaded deposit can arrive already carrying both, so
+    # without this the depositor's first confirm strips them. Costs no Atlas
+    # read — resource_mods memoizes what load_descriptive! just fetched.
+    load_advanced!('Work')
     # Probe the STAGED file, never the Work's assets: ContentCreationJob may
     # still be in flight here, and Atlas would hide the toggle and the caption
     # field from exactly the deposits that want them.
@@ -133,7 +140,8 @@ class WorksController < ApplicationController
   end
 
   def update_metadata
-    handle_metadata_update(klass: 'Work', resource_key: :work, keywords: true)
+    handle_metadata_update(klass: 'Work', resource_key: :work, keywords: true,
+                           include_advanced: true)
     # AFTER the descriptive save, deliberately: with a live worker
     # DepositDerivativesJob runs inside this request and its Delegate PATCH
     # bumps the lock, racing save_descriptive! into StaleResourceError. Specs
@@ -185,7 +193,7 @@ class WorksController < ApplicationController
 
     def prepare_show_view
       reads = parallel_show_reads
-      @mods = reads[:mods]
+      @mods = browsable_mods(reads[:mods])
       @files = reads[:files]
       @scholar = GoogleScholarMetadata.for(work: @work, permissions: @permissions, files: @files)
       @av_file = MediaRemux.playable_file(@files)
@@ -197,6 +205,13 @@ class WorksController < ApplicationController
       prepare_zoom_view(params[:id], pages: reads[:file_sets])
       assign_show_abilities!(klass: 'Work')
       work_breadcrumbs(params[:id])
+    end
+
+    # The facet list comes from the live Blacklight config rather than a second
+    # list here, so a facet dropped from CatalogController stops producing links.
+    # See docs/discovery.md.
+    def browsable_mods(html)
+      MODSBrowseLinks.call(html: html, facet_fields: blacklight_config.facet_fields.keys)
     end
 
     # mods deliberately carries no nuid — Current.nuid, the real user, gates it.

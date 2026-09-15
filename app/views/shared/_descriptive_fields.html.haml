@@ -2,11 +2,15 @@
 -#   f           — a bootstrap_form builder scoped to the resource (work/collection/community)
 -#   descriptive — Hash from Metadata::MODSFields (bare title, structured parts, abstract, keywords)
 -#   keywords    — Boolean: show the (mandatory) Keywords field (Works only)
+-#   parts_editable — Boolean, default false: the page carries editable title-part
+-#                    inputs of its own, so suppress the read-only caption below
+-#                    rather than showing the same parts twice.
 -#
 -# The Title field edits only the bare primary <mods:title>; structured parts
 -# (subtitle / part name / part number / non-sort) are shown read-only and edited
 -# via the XML editor, so saving here never flattens a curated title.
 - parts = { 'Subtitle' => descriptive[:subtitle], 'Part name' => descriptive[:part_name], 'Part number' => descriptive[:part_number], 'Non-sort' => descriptive[:non_sort] }.compact
+- parts = {} if local_assigns.fetch(:parts_editable, false)
 - parts_note_id = 'title-parts-note' if parts.any?
 
 = f.text_field :title, value: descriptive[:title], required: true, label: 'Title', aria: ({ describedby: parts_note_id } if parts_note_id)
