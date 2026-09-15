@@ -63,8 +63,13 @@ describe WorksController do
     # repository describes what a preview depicts, so it is named by its work.
     context 'the preview image' do
       it 'names the work it previews' do
-        AtlasRb::Work.set_thumbnails(work.id, thumbnail: 't', thumbnail_2x: 't2',
-                                              preview: 'http://example.com/preview.jpg')
+        # Absolute URLs, as Atlas writes them. A relative value here persists to
+        # the shared test corpus and raises Propshaft::MissingAssetError in any
+        # later catalog render that happens to include this Work.
+        AtlasRb::Work.set_thumbnails(work.id,
+                                     thumbnail:    'http://example.com/t.jpg',
+                                     thumbnail_2x: 'http://example.com/t2.jpg',
+                                     preview:      'http://example.com/preview.jpg')
 
         get :show, params: { id: work.id }
 
@@ -987,7 +992,9 @@ describe WorksController do
     # genuinely reaches set_thumbnails. Only MasterJp2's vips/JP2 minting is stubbed.
     it 'mints the uploaded poster and persists it via set_thumbnails' do
       allow(MasterJp2).to receive(:call).and_return(MasterJp2::Result.new(open_base: 'BASE', gated_base: 'G'))
-      urls = { thumbnail: 't', thumbnail_2x: 't2', preview: 'p' }
+      urls = { thumbnail:    'http://example.com/t.jpg',
+               thumbnail_2x: 'http://example.com/t2.jpg',
+               preview:      'http://example.com/p.jpg' }
       allow(ThumbnailCreator).to receive(:call).with(base: 'BASE').and_return(urls)
       allow(AtlasRb::Work).to receive(:set_thumbnails)
 
