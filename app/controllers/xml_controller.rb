@@ -49,7 +49,7 @@ class XmlController < ApplicationController
     @errors = XmlValidator.call(xml: params[:raw_xml])
     return render_invalid(item) if @errors.any?
 
-    AtlasRb.const_get(klass).update(params[:resource_id], create_temp_xml)
+    AtlasRb.const_get(klass).update(params[:resource_id], create_temp_xml, origin: 'xml_editor')
     redirect_to public_send("#{klass.downcase}_path", params[:resource_id])
   end
 

@@ -772,6 +772,16 @@ describe WorksController do
       expect(AtlasRb::Work.find(work.id, nuid: '000000004').title).not_to start_with('NewTitle')
     end
 
+    # The simple form and the Advanced tab both merge into the existing MODS
+    # and the raw editor replaces it, so the audit event needs the tag to say
+    # which of the three a curator is reading.
+    it 'records the simple Metadata form as the edit origin' do
+      patch :update_metadata, params: { id: work.id, work: { title: 'NewTitle', description: 'D',
+                                                             keywords: %w[alpha] } }
+
+      expect(mods_edit_origins(work.id)).to include('metadata_form')
+    end
+
     describe 'opt-in download sizes' do
       include ActiveJob::TestHelper
 
@@ -851,6 +861,14 @@ describe WorksController do
       doc = NEU::MODS::Document.parse(AtlasRb::Work.mods(work.id, 'xml', nuid: '000000004'))
       expect(doc.title_parts[:subtitle]).to eq('A New Subtitle')
       expect(doc.title_parts[:title]).to eq("What's New")
+    end
+
+    # Three surfaces make the identical MODS upload, so the audit event needs
+    # the tag to say which one a curator is looking at.
+    it 'records the Advanced tab as the edit origin' do
+      patch :update, params: { id: work.id, work: { form: 'advanced', subtitle: 'A New Subtitle' } }
+
+      expect(mods_edit_origins(work.id)).to include('advanced_form')
     end
   end
 

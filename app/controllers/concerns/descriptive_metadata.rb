@@ -64,7 +64,7 @@ module DescriptiveMetadata
       merged = Metadata::MODSMerge.call(xml: xml, title: title, abstract: description, keywords: keywords)
       break if Metadata::MODSMerge.unchanged?(xml, merged)
 
-      AtlasRb.const_get(klass).update(id, write_tmp_xml(merged))
+      AtlasRb.const_get(klass).update(id, write_tmp_xml(merged), origin: 'metadata_form')
     end
   end
 

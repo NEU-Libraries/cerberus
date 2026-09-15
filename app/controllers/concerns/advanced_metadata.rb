@@ -54,7 +54,7 @@ module AdvancedMetadata
       merged = Metadata::MODSMerge.call(xml: xml, **fields)
       break if Metadata::MODSMerge.unchanged?(xml, merged)
 
-      AtlasRb.const_get(klass).update(id, write_tmp_xml(merged))
+      AtlasRb.const_get(klass).update(id, write_tmp_xml(merged), origin: 'advanced_form')
     end
   end
 end
