@@ -193,7 +193,7 @@ class WorksController < ApplicationController
 
     def prepare_show_view
       reads = parallel_show_reads
-      @mods = reads[:mods]
+      @mods = browsable_mods(reads[:mods])
       @files = reads[:files]
       @scholar = GoogleScholarMetadata.for(work: @work, permissions: @permissions, files: @files)
       @av_file = MediaRemux.playable_file(@files)
@@ -205,6 +205,13 @@ class WorksController < ApplicationController
       prepare_zoom_view(params[:id], pages: reads[:file_sets])
       assign_show_abilities!(klass: 'Work')
       work_breadcrumbs(params[:id])
+    end
+
+    # The facet list comes from the live Blacklight config rather than a second
+    # list here, so a facet dropped from CatalogController stops producing links.
+    # See docs/discovery.md.
+    def browsable_mods(html)
+      MODSBrowseLinks.call(html: html, facet_fields: blacklight_config.facet_fields.keys)
     end
 
     # mods deliberately carries no nuid — Current.nuid, the real user, gates it.

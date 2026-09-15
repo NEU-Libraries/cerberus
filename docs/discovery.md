@@ -2,10 +2,12 @@
 
 The pages that ask Solr "what is here, and what may this person see?" — the
 community landing page and My DRS. Also the admin finders, the genre showcases
-the deposit fork publishes into, and the Google Scholar tags on a Work.
+the deposit fork publishes into, the Google Scholar tags on a Work, and the
+browsable values in a Work's metadata block.
 
 Source files:
 
+- `app/services/mods_browse_links.rb`
 - `app/services/resource_search.rb`
 - `app/services/showcase_finder.rb`
 - `app/services/showcase_provisioner.rb`
@@ -416,3 +418,85 @@ noid into an absolute download URL.
 | `permissions:` | The resource permissions loaded by `authorize_show!`. `read` carries `public`; `embargo` carries a date string |
 | `files:` | The Work's assets, from `AtlasRb::Work.assets` |
 | `solr_doc:` | The Work's Solr document, or nil |
+
+## Browsable values in the MODS block
+
+`MODSBrowseLinks` turns values in a Work's metadata block into links to the
+catalog facet that browses them. A reader clicking `Civil society` lands on
+`/catalog?f[subject_ssim][]=Civil+society`.
+
+Atlas renders that block and Cerberus injects it whole at
+`app/views/works/show.html.haml:88`, so Cerberus has no per-value handle on it
+and cannot derive one. Two facts rule out reading the rendered text:
+
+- **One `<dt>` spans several facet fields.** Atlas merges every subject axis
+  under "Subjects and keywords". One record there carries `Salt marshes`
+  (`subject_ssim`) beside `Belle Isle Marsh (Mass.)` (`subject_geo_ssim`).
+- **The rendered string is not the indexed string.** The view normalises for a
+  reader — it capitalises `Type of resource`, joins a subdivided heading with
+  ` -- `, and steps out a hierarchical place. Matching on display text is
+  unsound by construction, not merely fragile.
+
+So Atlas marks each value instead:
+
+```html
+<span data-browse-axis="topic"
+      data-browse-value="Civil society"
+      data-browse-authority="lcsh">Civil society</span>
+```
+
+Atlas states what the value **is**. Cerberus decides whether and where it
+links. No Solr field name crosses the wire, so renaming a facet needs no Atlas
+release.
+
+### Three predicates, kept separate
+
+A value links only when all three hold:
+
+| Predicate | Kind |
+|---|---|
+| Its axis is in `AXES` | policy — the field allowlist |
+| That field is in `blacklight_config.facet_fields` | **correctness** |
+| It carries `data-browse-authority` | policy — the eligibility rule |
+
+Keep them separate in the code. The middle one is the reason no link ever
+reaches an empty result set, and it stays. The other two are librarian
+decisions that will move, and collapsing all three into one condition turns the
+next such conversation into code archaeology.
+
+Everything that fails a predicate stays plain text, silently. There is no "not
+browsable" affordance, because a reader who never had a link does not need to
+be told one is missing.
+
+### Why the allowlist omits three axes Atlas marks
+
+Atlas emits ten axes. `AXES` maps nine, and the omissions are decisions:
+
+- **`publisher` and `place_of_publication`.** Both have facets, and MODS 3.8
+  permits an authority on `publisher` and on `placeTerm`, so the authority
+  predicate alone would let them through. DRS controls neither in practice, so
+  "Boston" and "Boston, Mass." would browse as unrelated values.
+- **`photo_category`.** It would never qualify anyway. `Iptc::MODSBuilder`
+  writes `<classification>` with no authority attribute, so no photo category
+  passes the authority predicate.
+
+`resource_type` is absent from both sides: Cerberus configures no
+`resource_type_ssim` facet, because the Content facet answers the same question
+in a reader's own words.
+
+### One link per value, and no collection-scoped second link
+
+The UAT elaboration asked for a collection-level link beside the
+repository-level one, and the reference implementation models the collection
+axis as a facet value. Cerberus does not follow it. A Collection show page
+carries its own facet sidebar, and `ShowScopedSearch` keeps its facet links on
+the page, so `/collections/:noid?f[subject_ssim][]=Civil+society` already works
+by clicking the facet where the reader is standing. Turning a collection into a
+facet value duplicates a page that does the job better.
+
+### The trap when a link comes back empty
+
+Read Solr before reading this service. Atlas indexes a subdivided heading as
+one composed value — `Emergency management -- Planning`, not its two topics —
+so a repository that has not been reindexed since that change produces exactly
+the symptom a wrong `AXES` entry would.
