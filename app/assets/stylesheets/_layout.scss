@@ -24,6 +24,17 @@ body {
   background-color: $well-bg;
 }
 
+// A container's abstract, rendered as the paragraphs its author typed (see
+// EnhancedTextHelper#enhanced_paragraphs). The last paragraph drops its margin
+// because the block sits between two .clearfix.pt-3 spacers that already own
+// the gap — without this a multi-paragraph description pushes the Edit row down
+// and a one-paragraph one does not, so the card height depends on the text.
+.container-description {
+  p:last-child {
+    margin-bottom: 0;
+  }
+}
+
 a:not(.btn, .dropdown-item, .navbar-brand, .nav-link) {
   color: $link-blue;
 

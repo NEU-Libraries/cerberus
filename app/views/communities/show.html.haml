@@ -17,7 +17,8 @@
           %span.fa-solid.fa-users.ps-2.pe-1
           Community
         .clearfix.pt-3
-        = enhanced_text(@community.description)
+        .container-description
+          = enhanced_paragraphs(@community.description)
         .clearfix.pt-3
           - if user_signed_in?
             .float-end

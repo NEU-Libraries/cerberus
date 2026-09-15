@@ -138,6 +138,53 @@ RSpec.describe EnhancedTextHelper, type: :helper do
     end
   end
 
+  # The two rules here are Atlas's, verified against its decorator on a live
+  # record: a blank line breaks a paragraph, a lone newline is a wrap. A Work's
+  # show page renders its abstract through Atlas and a container's renders the
+  # same stored value through this helper, so a disagreement shows up as one
+  # description laid out two ways.
+  describe '#enhanced_paragraphs' do
+    it 'breaks a paragraph on a blank line' do
+      expect(helper.enhanced_paragraphs("First para.\n\nSecond para."))
+        .to eq('<p>First para.</p><p>Second para.</p>')
+    end
+
+    it 'treats a lone newline as a wrap, not a break' do
+      expect(helper.enhanced_paragraphs("Line A.\nLine B.")).to eq('<p>Line A. Line B.</p>')
+    end
+
+    it 'collapses a run of blank lines into one break' do
+      expect(helper.enhanced_paragraphs("One.\n\n\n\nTwo.")).to eq('<p>One.</p><p>Two.</p>')
+    end
+
+    it 'ignores the trailing spaces a textarea collects on a blank line' do
+      expect(helper.enhanced_paragraphs("One.\n   \nTwo.")).to eq('<p>One.</p><p>Two.</p>')
+    end
+
+    it 'wraps a single paragraph, matching what Atlas emits for one abstract' do
+      expect(helper.enhanced_paragraphs('Just the one.')).to eq('<p>Just the one.</p>')
+    end
+
+    it 'keeps enhanced markup inside a paragraph' do
+      expect(helper.enhanced_paragraphs("H<sub>2</sub>O.\n\nAnd more."))
+        .to eq('<p>H<sub>2</sub>O.</p><p>And more.</p>')
+    end
+
+    it 'escapes a tag outside the allowlist rather than emitting it' do
+      expect(helper.enhanced_paragraphs('a <b>bold</b> claim'))
+        .to eq('<p>a &lt;b&gt;bold&lt;/b&gt; claim</p>')
+    end
+
+    it 'renders nothing for a blank value rather than an empty paragraph' do
+      expect(helper.enhanced_paragraphs(nil)).to eq('')
+      expect(helper.enhanced_paragraphs("\n\n")).to eq('')
+    end
+
+    it 'returns a string the view will not escape again' do
+      expect(helper.enhanced_paragraphs('Plain.')).to be_html_safe
+    end
+  end
+
   describe 'truncating through #plain_text' do
     # "Bi<sub>2</sub>Sr<sub>2</sub>" is 28 characters of string but 6 of text,
     # so the limit has to be measured after the markup comes off.
