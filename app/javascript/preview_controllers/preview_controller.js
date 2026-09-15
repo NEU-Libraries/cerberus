@@ -21,6 +21,18 @@ export default class extends Controller {
       });
     }
 
+    // Word wrap, off until asked for. Reached by id like the form and the
+    // Validate button below, because this controller is mounted on the preview
+    // pane and the checkbox lives in the editor's column. Nothing resets it: no
+    // turbo-stream on this page replaces the editor column, so the choice
+    // survives a Validate and a repair.
+    const wrapToggle = document.getElementById('toggle_word_wrap');
+    if (wrapToggle) {
+      wrapToggle.addEventListener('change', () => {
+        editor.getSession().setUseWrapMode(wrapToggle.checked);
+      });
+    }
+
     // Fade the loading-state spinner in when Validate is clicked. The
     // turbo_stream response template handles fading it back out.
     const validateBtn = document.getElementById('validate_button');
