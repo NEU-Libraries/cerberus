@@ -1,0 +1,69 @@
+// ---------------------------------------------------------------------
+// Advanced metadata disclosure (deposit metadata page)
+//
+// A <details> holding the title-part and creator inputs. No card chrome
+// and no fill: the deposit page sets its sections off with a heading and
+// spacing alone (see "Permissions"), so this summary is styled to read as
+// one more of those headings that happens to be clickable. The only
+// affordance added is the caret, because a heading that does nothing and
+// a heading that opens a section must not look identical.
+// ---------------------------------------------------------------------
+
+.advanced-metadata {
+  &__summary {
+    cursor: pointer;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    // Matches the page's h5 section headings rather than introducing a
+    // third heading weight.
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: $gray-900;
+    // Suppress the UA marker; the caret below replaces it, so the icon
+    // and the open state stay in one place we control.
+    list-style: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &:hover {
+      color: $blue;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $blue;
+      outline-offset: 2px;
+      border-radius: 0.2rem;
+    }
+  }
+
+  &__caret {
+    color: $gray-600;
+    font-size: 0.9em;
+    transition: transform 0.12s ease;
+  }
+
+  // Rotate rather than swap icons, so no second Font Awesome glyph has to
+  // load and the two states cannot drift apart.
+  &[open] &__caret {
+    transform: rotate(90deg);
+  }
+
+  &__hint {
+    font-size: 0.82rem;
+    color: $gray-600;
+    font-weight: 400;
+  }
+
+  &__body {
+    padding-top: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .advanced-metadata__caret {
+    transition: none;
+  }
+}

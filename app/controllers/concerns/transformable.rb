@@ -18,7 +18,13 @@ module Transformable
     @resource_mods ||= AtlasRb.const_get(klass).mods(params[:id], 'xml')
   end
 
-  def handle_metadata_update(klass:, resource_key:, keywords:)
+  # `include_advanced` says this form carries the Advanced field set INLINE,
+  # beside the descriptive fields, rather than on its own tab — the deposit
+  # page. It is a caller's fact about the form it rendered, not something to
+  # sniff out of params: the Advanced tab's own marker means the opposite
+  # thing (advanced fields and nothing else), and confusing the two would make
+  # a deposit submit skip its keywords, permissions and confirmation.
+  def handle_metadata_update(klass:, resource_key:, keywords:, include_advanced: false)
     id = params[:id]
     show_path = public_send("#{klass.downcase}_path", id)
 
@@ -31,7 +37,8 @@ module Transformable
     apply_thumbnail(klass, id)
     return redirect_to(show_path) unless descriptive_submitted?(resource_key)
 
-    apply_descriptive(klass, id, resource_key, keywords, show_path)
+    advanced = advanced_params(resource_key) if include_advanced
+    apply_descriptive(klass, id, resource_key, keywords, show_path, advanced: advanced)
   end
 
   # @permissions is the resource's CURRENT envelope, loaded by the authorization

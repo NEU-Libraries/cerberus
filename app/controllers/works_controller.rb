@@ -124,6 +124,13 @@ class WorksController < ApplicationController
     @image_probe = StagedImageProbe.call(work_id: params[:id])
     form_preparation(@permissions, resource: @work)
     load_descriptive!('Work')
+    # Pre-fill for the Additional metadata disclosure, and it is load-bearing
+    # rather than cosmetic: a blank title-part input means "remove this part" to
+    # MODSMerge and an empty creator array means "replace the editable set with
+    # nothing". An XML-loaded deposit can arrive already carrying both, so
+    # without this the depositor's first confirm strips them. Costs no Atlas
+    # read — resource_mods memoizes what load_descriptive! just fetched.
+    load_advanced!('Work')
     # Probe the STAGED file, never the Work's assets: ContentCreationJob may
     # still be in flight here, and Atlas would hide the toggle and the caption
     # field from exactly the deposits that want them.
@@ -133,7 +140,8 @@ class WorksController < ApplicationController
   end
 
   def update_metadata
-    handle_metadata_update(klass: 'Work', resource_key: :work, keywords: true)
+    handle_metadata_update(klass: 'Work', resource_key: :work, keywords: true,
+                           include_advanced: true)
     # AFTER the descriptive save, deliberately: with a live worker
     # DepositDerivativesJob runs inside this request and its Delegate PATCH
     # bumps the lock, racing save_descriptive! into StaleResourceError. Specs

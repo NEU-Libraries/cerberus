@@ -722,6 +722,59 @@ describe WorksController do
 
       expect(CGI.unescapeHTML(response.body)).not_to include('Image Derivatives')
     end
+
+    # A depositor will not return to a record to look for fields they were
+    # never shown, so the Advanced field set has to be reachable here and not
+    # only from the Work edit page's Advanced tab.
+    describe 'the Advanced metadata disclosure' do
+      it 'renders the title-part and creator inputs inside a disclosure' do
+        get :metadata, params: { id: work.id }
+
+        body = CGI.unescapeHTML(response.body)
+        expect(body).to include('Advanced metadata')
+        expect(body).to include('work[subtitle]')
+        expect(body).to include('work[part_name]')
+        expect(body).to include('work[personal_creators][][first]')
+        expect(body).to include('work[corporate_creators][]')
+      end
+
+      # The trap: the Advanced TAB's hidden marker routes a submit to
+      # save_advanced! alone. Here it would skip the keywords, permissions,
+      # derivative widths, captions and the deposit confirmation.
+      it 'does not carry the Advanced tab routing marker' do
+        get :metadata, params: { id: work.id }
+
+        expect(response.body).not_to include('name="work[form]"')
+      end
+
+      # The parts are editable on this page now, so the simple form's read-only
+      # caption would be the same values printed twice.
+      it 'suppresses the read-only title-parts caption' do
+        get :metadata, params: { id: work.id }
+
+        expect(CGI.unescapeHTML(response.body)).not_to include('Additional title parts')
+      end
+
+      # The fixture MODS carries a partName and partNumber. Closed is right for
+      # the ordinary deposit, but a record that arrived with parts must not hide
+      # them behind a click the depositor has no reason to make.
+      it 'starts open when the record already carries title parts' do
+        get :metadata, params: { id: work.id }
+
+        expect(response.body).to match(/<details[^>]*\bopen\b/)
+      end
+
+      it 'starts closed for a deposit with nothing in the Advanced fields' do
+        bare = AtlasRb::Work.create(collection.id, nuid: '000000004')
+        AtlasRb::Work.metadata(bare.id, { 'permissions' => { 'edit' => ['editors'], 'read' => ['public'] } },
+                               nuid: '000000004')
+
+        get :metadata, params: { id: bare.id }
+
+        expect(response.body).to include('advanced-metadata')
+        expect(response.body).not_to match(/<details[^>]*\bopen\b/)
+      end
+    end
   end
 
   describe 'update_metadata' do
@@ -770,6 +823,55 @@ describe WorksController do
 
       expect(flash[:alert]).to be_present
       expect(AtlasRb::Work.find(work.id, nuid: '000000004').title).not_to start_with('NewTitle')
+    end
+
+    # The depositor's own Advanced values, typed at deposit rather than on a
+    # later visit to the edit page.
+    describe 'the Advanced fields submitted at deposit' do
+      it 'stores a subtitle typed into the disclosure' do
+        patch :update_metadata, params: { id:   work.id,
+                                          work: { title: 'T', description: 'D', keywords: %w[alpha],
+                                                  subtitle: 'A Deposited Subtitle' } }
+
+        doc = NEU::MODS::Document.parse(AtlasRb::Work.mods(work.id, 'xml', nuid: '000000004'))
+        expect(doc.title_parts[:subtitle]).to eq('A Deposited Subtitle')
+      end
+
+      it 'stores a personal creator added at deposit, preserving the authority-controlled names' do
+        patch :update_metadata, params: { id:   work.id,
+                                          work: { title: 'T', description: 'D', keywords: %w[alpha],
+                                                  personal_creators: [{ first: 'Jenny', last: 'Smith' }] } }
+
+        doc = NEU::MODS::Document.parse(AtlasRb::Work.mods(work.id, 'xml', nuid: '000000004'))
+        expect(doc.editable_personal_creators).to eq([{ given: 'Jenny', family: 'Smith' }])
+        expect(doc.preserved_names.size).to eq(3)
+      end
+
+      # A blank title-part input means "remove this part" to MODSMerge, so a
+      # depositor who never opens the disclosure must still post the values
+      # #metadata pre-filled. Without load_advanced! this strips them.
+      it "keeps the record's existing parts through a submit that changed nothing else" do
+        before_parts = NEU::MODS::Document.parse(AtlasRb::Work.mods(work.id, 'xml', nuid: '000000004')).title_parts
+
+        patch :update_metadata, params: { id:   work.id,
+                                          work: { title: 'T', description: 'D', keywords: %w[alpha],
+                                                  part_name: before_parts[:part_name],
+                                                  part_number: before_parts[:part_number] } }
+
+        doc = NEU::MODS::Document.parse(AtlasRb::Work.mods(work.id, 'xml', nuid: '000000004'))
+        expect(doc.title_parts[:part_name]).to eq(before_parts[:part_name])
+        expect(doc.title_parts[:part_number]).to eq(before_parts[:part_number])
+      end
+
+      # One submit is one write. Two sequential saves would mint two OCFL MODS
+      # versions and two audit rows for a single confirmation.
+      it 'merges the descriptive and Advanced fields in a single MODS write' do
+        patch :update_metadata, params: { id:   work.id,
+                                          work: { title: 'Both At Once', description: 'D',
+                                                  keywords: %w[alpha], subtitle: 'And A Subtitle' } }
+
+        expect(mods_edit_origins(work.id).count('metadata_form')).to eq(1)
+      end
     end
 
     # The simple form and the Advanced tab both merge into the existing MODS

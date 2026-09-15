@@ -252,13 +252,24 @@ all PATCH the same action with disjoint fields.
 
 Each piece it composes owns one half of a job. `PermissionsForm` parses and
 presents the permissions form while `ResourcePermissions` writes it.
-`DescriptiveMetadata` and `AdvancedMetadata` merge MODS, and `AtlasWrite` makes
-a write survive the wire. What is left in `Transformable` is the routing between
+`DescriptiveMetadata` and `AdvancedMetadata` decide *which* MODS fields a form
+owns; `AtlasWrite#merge_mods!` is the read-merge-write spine both of them call,
+and makes the write survive the wire. What is left in `Transformable` is the routing between
 them.
 
 `handle_metadata_update` sends permissions to Atlas's metadata endpoint. It
 validates descriptive fields before merging them into the existing MODS and
 writing them through the structure-safe raw `update` path.
+
+`advanced_submitted?` and `include_advanced:` mean opposite things and must not
+be confused. The first reads the Advanced **tab's** own hidden marker, which
+says "the advanced fields and nothing else" and short-circuits to
+`save_advanced!`. The second is a caller's statement that the form it rendered
+carries the advanced fields **inline, beside** the descriptive ones — the
+deposit page — so both sets fold into one `save_descriptive!` and one MODS
+write. It is a kwarg rather than another params sniff precisely because the two
+signals look alike and reading the wrong one would make a deposit submit skip
+its keywords, permissions and confirmation. See `docs/deposit.md`.
 
 `resource_mods` reads the resource's raw MODS once per request. Both form
 loaders parse the same document: `DescriptiveMetadata` for the bare title,
