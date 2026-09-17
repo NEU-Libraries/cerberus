@@ -20,7 +20,7 @@ class NarrowingTargets
   LEAF_DEPTH = Float::INFINITY
 
   Target = Struct.new(:noid, :klass, :depth, keyword_init: true) do
-    def atlas_class = AtlasRb.const_get(klass)
+    def atlas_class = AtlasRb::Resource.class_for(klass)
   end
 
   def initialize(noid:, uuid:)
