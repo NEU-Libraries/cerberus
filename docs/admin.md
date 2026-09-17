@@ -391,6 +391,21 @@ serves Work, Collection and Community without branching on type.
 `load_resource!` fetches the resource for the page heading and the back-link to
 its audit log.
 
+### Three types, not any type
+
+`load_resource!` also gates on the type, refusing anything outside
+`ModsableTypes::TYPES` with a 404. "Type-agnostic" means one controller serves
+the three, not that any Atlas id may address it.
+
+Nothing upstream refuses the others. Atlas answers `/resources/:id`,
+`/history` and a MODS-version list for every resource type, so a FileSet, Blob,
+Delegate or Person NOID read cleanly and then raised in the view — both pages
+render a back link to the resource's **edit** page, and only these three have
+one. The reads had already run by then.
+
+The XML editor carries the same gate, for the same reason. See
+`docs/people-and-routing.md`.
+
 ### The rights page
 
 `#rights` is a paginated access-control ledger. Each entry expands one audit
