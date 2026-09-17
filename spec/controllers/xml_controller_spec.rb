@@ -34,6 +34,36 @@ describe XmlController do
 
   before { sign_in admin }
 
+  # Atlas answers /resources/:id/permissions for every resource type, so the
+  # :edit gate alone lets a hand-typed FileSet, Blob, Delegate or Person NOID
+  # into the editor. The MODS read then succeeds too, because atlas_rb defines
+  # Resource.mods on the base class. Each of those types used to reach the
+  # breadcrumb builder, which has no route for them, and 500.
+  describe 'a type with no MODS editing surface' do
+    let(:file_set) { AtlasRb::FileSet.create(work.id, 'image', position: 1, nuid: '000000004') }
+
+    it 'is a 404 on the editor, not a 500' do
+      get :editor, params: { id: file_set.id }
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it 'is a 404 on the save, so nothing reaches the FileSet binary endpoint' do
+      allow(AtlasRb::FileSet).to receive(:update)
+
+      patch :update, params: { resource_id: file_set.id, raw_xml: raw_xml }
+
+      expect(response).to have_http_status(:not_found)
+      expect(AtlasRb::FileSet).not_to have_received(:update)
+    end
+
+    it 'still admits a Work, so the gate reads the type and not the action' do
+      get :editor, params: { id: work.id }
+
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
   describe 'editor' do
     render_views
     it 'renders the editor partial' do

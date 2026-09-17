@@ -9,9 +9,10 @@ class XmlController < ApplicationController
   # authenticate first, then the :edit ability keyed on the resource.
   before_action :authenticate_user!
   before_action :authorize_xml_edit!
+  before_action :require_modsable_resource!
 
   def editor
-    item = AtlasRb::Resource.find(params[:id])
+    item = resolved_resource
     @resource = item.resource
     @klass = item.klass
     resource_mods(item.klass)
@@ -20,7 +21,7 @@ class XmlController < ApplicationController
   end
 
   def validate
-    item = AtlasRb::Resource.find(params[:resource_id])
+    item = resolved_resource
     @resource = item.resource
 
     @errors = XmlValidator.call(xml: params[:raw_xml])
@@ -33,7 +34,7 @@ class XmlController < ApplicationController
   # presses Save, and nothing re-validates, so the preview pane keeps its last
   # render rather than one taken from the changed buffer.
   def repair
-    @resource = AtlasRb::Resource.find(params[:resource_id]).resource
+    @resource = resolved_resource.resource
     @repaired = repair_kind
     @raw_xml = apply_repair(@repaired, params[:raw_xml])
     @double_escapes = Metadata::DoubleEscapes.report(@raw_xml)
@@ -43,7 +44,7 @@ class XmlController < ApplicationController
   # stores malformed MODS truncated at the parse error, discarding every element
   # after it, with no error and an ordinary-looking audit entry.
   def update
-    item = AtlasRb::Resource.find(params[:resource_id])
+    item = resolved_resource
     klass = item.klass
 
     @errors = XmlValidator.call(xml: params[:raw_xml])
@@ -79,9 +80,30 @@ class XmlController < ApplicationController
       render :editor, status: :unprocessable_content
     end
 
-    # editor carries :id; validate, repair and update carry :resource_id.
     def authorize_xml_edit!
-      authorize_edit_for!(params[:id] || params[:resource_id])
+      authorize_edit_for!(xml_resource_id)
+    end
+
+    # Refuse a type that has no MODS editing surface, before anything reads or
+    # renders it. Atlas answers /resources/:id/permissions for every type, so
+    # the :edit gate above passes on a FileSet, Blob, Delegate or Person, and
+    # the MODS read then succeeds too because atlas_rb defines it on the base
+    # class. Without this the editor opens on a resource it could never save and
+    # dies in the breadcrumb builder, which has no route for those types.
+    def require_modsable_resource!
+      resource = require_resource!(resolved_resource)
+      raise ResourceNotFound unless ModsableTypes.include?(resource.klass)
+    end
+
+    # One Resource.find per request. The type gate needs the payload before any
+    # action runs and every action needs it again, so this must not re-read.
+    def resolved_resource
+      @resolved_resource ||= AtlasRb::Resource.find(xml_resource_id)
+    end
+
+    # editor carries :id; validate, repair and update carry :resource_id.
+    def xml_resource_id
+      params[:id] || params[:resource_id]
     end
 
     # Takes the id rather than reading params, because the two actions that render

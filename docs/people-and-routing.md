@@ -10,6 +10,7 @@ Source files:
 - `app/controllers/legacy_controller.rb`
 - `app/controllers/application_controller.rb`
 - `app/lib/atlas_routes.rb`
+- `app/lib/modsable_types.rb`
 - `app/controllers/concerns/collection_breadcrumbs.rb`
 - `app/controllers/xml_controller.rb`
 - `app/jobs/set_sentinel_apply_job.rb`
@@ -110,6 +111,11 @@ all. See `docs/edit-surfaces.md`.
 `route_for` raises on a type it has not been taught, rather than returning a
 default. The map has no `edit_person_path` to offer either: People have no edit
 page, so `edit_resource_path('Person', id)` raises as it always has.
+
+That raise is a backstop, not the gate. A surface that resolves an arbitrary
+NOID should refuse a type it cannot serve before it builds a path — see [Only
+three types may reach it](#only-three-types-may-reach-it) for the XML editor's
+version of that check.
 
 ### `match:` and the prefix problem
 
@@ -233,6 +239,49 @@ check the `:edit` ability on the resource, mirroring the resource controllers'
 `authorize_edit!`. `authorize_xml_edit!` reads whichever id param the action
 carries, because `editor` carries `params[:id]` and `validate`, `repair` and
 `update` carry `params[:resource_id]`.
+
+### Only three types may reach it
+
+`require_modsable_resource!` refuses a type that has no MODS editing surface,
+before anything reads or renders. `ModsableTypes::TYPES` is the set: Work,
+Collection and Community. Atlas names the same set with its own `Modsable`
+concern, and atlas_rb's `mods_versions` doc names the same three.
+
+The `:edit` gate above it is not enough on its own, and neither is the read
+succeeding:
+
+| Step | Why it admits a FileSet, Blob, Delegate or Person |
+|---|---|
+| `authorize_xml_edit!` | Atlas answers `/resources/:id/permissions` for **every** resource type, so a hand-typed NOID of any type passes |
+| The MODS read | atlas_rb defines `Resource.mods` on the base class, so every subclass answers it and the read returns |
+| The breadcrumb tail | `ApplicationController#edit_breadcrumb_tail` asks for a show route, and those four types have none — so this is where it died |
+
+Each of the four used to reach that last step and 500. A `FileSet` asked for
+`fileset_path`; a `Person` has a `person_path` but no title, so the crumb
+builder refused a nil name. Nothing in the UI links to any of them, and nothing
+refused them either.
+
+The set is stated rather than inferred. Only these three take a MODS write —
+theirs is the `update` that accepts `origin:` — and a curator sent back after
+saving needs a show route to land on. `ModsableTypes.include?` takes a type
+*name* rather than a class, so a caller hands over whatever Atlas or Solr gave
+it, and a type atlas_rb does not map answers false rather than raising.
+
+`resolved_resource` memoizes the one `AtlasRb::Resource.find` per request. The
+gate needs the payload before any action runs, and every action needs it again.
+
+### Resolving the type
+
+The four sites that dispatch on the resolved type call
+`AtlasRb::Resource.class_for`, not `AtlasRb.const_get`. The gem owns that
+mapping as of atlas_rb 1.17.0, over a stated closed set, and it accepts every
+spelling the stack produces — Atlas's wire key, Solr's `internal_resource`, and
+the pre-1.17.0 `"klass"`.
+
+Before 1.17.0 `Resource.find` derived `"klass"` by capitalizing Atlas's JSON
+key, which made a FileSet `"File_set"` and `const_get` raise `NameError`. Do not
+reach into the `AtlasRb` namespace by string here again; the naming convention
+that appeared to hold was never promised.
 
 ### Repair offers, it does not apply
 
