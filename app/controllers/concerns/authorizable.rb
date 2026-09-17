@@ -67,6 +67,16 @@ module Authorizable
 
   private
 
+    # The one place where "an atlas_rb read returned nil" becomes a Rails 404.
+    # It converts nil and nothing else: a tombstoned resource is often a 410
+    # instead, and only the caller knows which it wants. See
+    # docs/authorization.md.
+    def require_resource!(resource)
+      raise ResourceNotFound if resource.nil?
+
+      resource
+    end
+
     def render_gone(record)
       render template: 'errors/gone', status: :gone, locals: { record: record }
     end
@@ -87,9 +97,7 @@ module Authorizable
     end
 
     def authorize_show!
-      @permissions = AtlasRb::Resource.permissions(params[:id])
-      raise ResourceNotFound if @permissions.nil?
-
+      @permissions = require_resource!(AtlasRb::Resource.permissions(params[:id]))
       authorize! :read, solr_doc_from_permissions(@permissions)
     end
 
@@ -123,16 +131,12 @@ module Authorizable
     end
 
     def authorize_edit_for!(id)
-      @permissions = AtlasRb::Resource.permissions(id)
-      raise ResourceNotFound if @permissions.nil?
-
+      @permissions = require_resource!(AtlasRb::Resource.permissions(id))
       authorize! :edit, solr_doc_from_permissions(@permissions)
     end
 
     def authorize_tombstone!
-      @permissions = AtlasRb::Resource.permissions(params[:id])
-      raise ResourceNotFound if @permissions.nil?
-
+      @permissions = require_resource!(AtlasRb::Resource.permissions(params[:id]))
       authorize! :tombstone, solr_doc_from_permissions(@permissions, klass: solr_type)
     end
 

@@ -69,8 +69,7 @@ module Admin
       end
 
       def load_work
-        @work = AtlasRb::Resource.find(params[:work_id])
-        raise ResourceNotFound if @work.nil?
+        @work = require_resource!(AtlasRb::Resource.find(params[:work_id]))
 
         edges = AtlasRb::Work.associations(params[:work_id])
         @outbound = rows_for(edges['outbound'])

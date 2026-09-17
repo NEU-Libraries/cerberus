@@ -41,8 +41,7 @@ class HistoriesController < ApplicationController
     # having to nil-check an id this already rejected.
     def load_resource!
       @resource_id    = params[:id]
-      found           = AtlasRb::Resource.find(@resource_id)
-      raise ResourceNotFound if found.nil?
+      found           = require_resource!(AtlasRb::Resource.find(@resource_id))
 
       @resource_klass = found.klass
       @resource_title = found.resource.title

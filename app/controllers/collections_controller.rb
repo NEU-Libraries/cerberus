@@ -25,8 +25,7 @@ class CollectionsController < CatalogController
   end
 
   def show
-    @collection = AtlasRb::Collection.find(params[:id])
-    raise ResourceNotFound if @collection.nil?
+    @collection = require_resource!(AtlasRb::Collection.find(params[:id]))
     return render_gone(@collection) if @collection.tombstoned
 
     authorize_show!

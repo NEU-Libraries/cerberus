@@ -22,8 +22,7 @@ module Admin
     # under a 200 and the download filename. A refusal has to happen up front or
     # not at all.
     def content
-      blob = AtlasRb::Blob.find(params[:id])
-      raise ResourceNotFound if blob.nil?
+      blob = require_resource!(AtlasRb::Blob.find(params[:id]))
       raise ResourceNotFound unless known_version?(params[:id], params[:version_id])
 
       apply_download_headers(blob)

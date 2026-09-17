@@ -48,8 +48,7 @@ class WorksController < ApplicationController
   end
 
   def show
-    @work = AtlasRb::Work.find(params[:id])
-    raise ResourceNotFound if @work.nil?
+    @work = require_resource!(AtlasRb::Work.find(params[:id]))
     return render_gone(@work) if @work.tombstoned
 
     authorize_show!
@@ -80,8 +79,7 @@ class WorksController < ApplicationController
   # parent segment, already :edit-gated by authorize_destination!.
   def new
     @work = Work.new
-    @parent = AtlasRb::Collection.find(@destination_id)
-    raise ResourceNotFound if @parent.nil?
+    @parent = require_resource!(AtlasRb::Collection.find(@destination_id))
 
     # Required: without it form_tag posts back to /collections/:id/works/new,
     # which routes nowhere for POST, and the deposit 404s on submit.
@@ -159,9 +157,7 @@ class WorksController < ApplicationController
 
   # The "Upload File" affordance on the show page; #add_file handles the POST.
   def upload
-    @work = AtlasRb::Work.find(params[:id])
-    raise ResourceNotFound if @work.nil?
-
+    @work = require_resource!(AtlasRb::Work.find(params[:id]))
     upload_breadcrumbs
   end
 
