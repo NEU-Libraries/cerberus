@@ -82,7 +82,8 @@ module DescriptiveMetadata
     resource
   end
 
-  def apply_descriptive(id, keywords:, advanced: nil)
+  def apply_descriptive(id, advanced: nil)
+    keywords = DescriptivePolicy.keywords_required?(atlas_class)
     descriptive = descriptive_params(keywords: keywords)
     unless descriptive_valid?(descriptive, keywords:         keywords,
                                            curated_subjects: curated_subjects_posted?)

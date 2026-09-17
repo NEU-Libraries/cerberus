@@ -116,7 +116,7 @@ class WorksController < ApplicationController
   # The Metadata and Permissions tabs are separate forms that both PATCH here
   # with disjoint fields. See docs/deposit.md.
   def update
-    handle_metadata_update(keywords: true)
+    handle_metadata_update
     apply_streaming_only!
     apply_caption!
   end
@@ -142,7 +142,7 @@ class WorksController < ApplicationController
   end
 
   def update_metadata
-    handle_metadata_update(keywords: true, include_advanced: true)
+    handle_metadata_update(include_advanced: true)
     # AFTER the descriptive save, deliberately: with a live worker
     # DepositDerivativesJob runs inside this request and its Delegate PATCH
     # bumps the lock, racing save_descriptive! into StaleResourceError. Specs

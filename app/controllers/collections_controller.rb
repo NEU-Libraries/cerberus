@@ -58,7 +58,7 @@ class CollectionsController < CatalogController
   end
 
   def update
-    handle_metadata_update(keywords: false)
+    handle_metadata_update
   end
 
   # Upsert this collection's derivative-access default (Sentinel). The container's

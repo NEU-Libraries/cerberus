@@ -26,7 +26,7 @@ module Transformable
   # rendered, not about the type: the Advanced tab's own marker means the
   # opposite thing (advanced fields and nothing else), and confusing the two
   # would make a deposit submit skip its keywords, permissions and confirmation.
-  def handle_metadata_update(keywords:, include_advanced: false)
+  def handle_metadata_update(include_advanced: false)
     id = params[:id]
 
     if advanced_submitted?
@@ -39,7 +39,7 @@ module Transformable
     return redirect_to(show_path(id)) unless descriptive_submitted?
 
     advanced = advanced_params if include_advanced
-    apply_descriptive(id, keywords: keywords, advanced: advanced)
+    apply_descriptive(id, advanced: advanced)
   end
 
   # @permissions is the resource's CURRENT envelope, loaded by the authorization

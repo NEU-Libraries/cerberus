@@ -6,6 +6,8 @@ the edit forms PATCH.
 
 Source files:
 
+- `app/controllers/concerns/atlas_resource_type.rb`
+- `app/lib/descriptive_policy.rb`
 - `app/helpers/edit_tabs_helper.rb`
 - `app/helpers/audit_events_helper.rb`
 - `app/controllers/concerns/transformable.rb`
@@ -243,6 +245,77 @@ picker. Each option joins the version label, a compact timestamp and the actor
 NUID by middots. The value is the opaque OCFL version id. The actor may be blank,
 and an absent or unparseable timestamp drops out of the label so the option
 still reads cleanly.
+
+## Declaring the resource type
+
+Each resource controller states which Atlas type it edits, once, in its class
+body:
+
+```ruby
+class WorksController < ApplicationController
+  atlas_resource AtlasRb::Work, key: :work, route: :work
+end
+```
+
+`AtlasResourceType` turns that into four readers the shared concerns use:
+
+| Reader | Answers |
+|---|---|
+| `atlas_class` | Which `AtlasRb::*` class to call |
+| `resource_key` | The strong-params and form key |
+| `show_path(id)` | The resource's own page |
+| `edit_path(id)` | Its edit page |
+
+`solr_type` is the fifth, and it is derived rather than declared:
+`atlas_class.name.demodulize`. It is the type name Atlas writes into
+`internal_resource`, which is what the Solr documents CanCan gates on carry.
+`Authorizable` feeds it into the synthetic `SolrDocument` for the tombstone gate
+and the show page's Edit and Delete links.
+
+### Why all three arguments are stated
+
+A macro cannot derive `key:` or `route:` from the class name. The Atlas
+vocabulary and the UI vocabulary diverge on purpose: Atlas's `Compilation` is
+the UI's Set, `SetsController`, `set_path`. A convention that holds for Work,
+Collection and Community breaks on the fourth type, and it breaks by resolving
+the wrong constant or route rather than by raising.
+
+`solr_type` must follow Atlas's vocabulary for the same reason, in the other
+direction. Deriving it from the route or the params key would make a Set's gate
+read `Set` when its Solr document says `Compilation`. `Ability` compares that
+string, so a mismatch evaluates the wrong rule instead of failing.
+
+`atlas_class` raises `NotImplementedError` by default. A Ruby module cannot
+force an includer to declare anything, and without the raise a controller that
+mixes in the edit concerns and forgets the declaration fails deep inside a
+metadata save rather than on its first request.
+
+### What stays an argument
+
+A declaration answers what varies by *type*. An argument answers what varies by
+*call*.
+
+`include_advanced:` therefore stays a keyword argument to
+`handle_metadata_update`. Both Works actions pass through the same controller
+and the same type, and differ only in whether the form rendered the Advanced
+field set inline. No declaration can answer that.
+
+`AtlasWrite#merge_mods!` reads `atlas_class` from whatever includes it, so only
+something carrying a declaration may call it. `with_stale_retry` and
+`write_tmp_xml` carry no such requirement, which is what lets
+`ShowcaseProvisioner` and `ResourcePermissions` mix the module in.
+
+### The keyword rule is policy, not identity
+
+`DescriptivePolicy.keywords_required?` decides whether a form must carry at
+least one keyword. Works must; containers need not.
+
+That looks like a fourth fact for the declaration and is not. It is a DRS
+editorial rule enforced by a Cerberus form validator — Atlas accepts a MODS
+document either way — so it sits beside `app/lib/permissions.rb`, which holds
+the other Cerberus-only rules. Keeping it in the declaration would flatten a
+policy into a row of identity facts and invite the next reader to take it for a
+MODS constraint.
 
 ## The shared `#update`
 

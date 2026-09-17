@@ -71,7 +71,7 @@ class CommunitiesController < CatalogController
   end
 
   def update
-    handle_metadata_update(keywords: false)
+    handle_metadata_update
   end
 
   private
