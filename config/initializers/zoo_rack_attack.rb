@@ -254,7 +254,7 @@ end
 
 Rack::Attack.blocklist("progressive throttle to block") do |req|
   if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase) && req.env["HTTP_SEC_FETCH_SITE"].blank?)
-    if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 1
+    if File.read("/proc/loadavg").split[1].to_f > 1
       !req.env["HTTP_COOKIE"].blank? && req.env["HTTP_COOKIE"].include?("cerberus_throttled")
     end
   end
@@ -265,7 +265,7 @@ end
 # end
 
 Rack::Attack.blocklist("CN Block") do |req|
-  if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 4
+  if File.read("/proc/loadavg").split[0].to_f > 4
     if !req.env["HTTP_ACCEPT_LANGUAGE"].blank?
       req.env["HTTP_ACCEPT_LANGUAGE"].include?("zh-CN")
     end
@@ -289,7 +289,7 @@ Rack::Attack.blocklist("range fraud") do |request|
 end
 
 Rack::Attack.blocklist("china region block") do |req|
-  if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 2
+  if File.read("/proc/loadavg").split[0].to_f > 2
     req.region == "China"
   end
 end
@@ -472,7 +472,7 @@ Rack::Attack.throttle("content scraper mini wave", limit: 1, period: 5) do |requ
 end
 
 Rack::Attack.throttle("CN Scrapers", limit: 1, period: 10) do |request|
-  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 2
+  if File.read("/proc/loadavg").split[1].to_f > 2
     result = false
     if !request.env["HTTP_ACCEPT_LANGUAGE"].blank?
       raw_langs = request.env["HTTP_ACCEPT_LANGUAGE"]
@@ -492,13 +492,13 @@ end
 
 # Bring back region throttle
 Rack::Attack.throttle("requests by region - china", limit: 1, period: 10) do |request|
-  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 2
+  if File.read("/proc/loadavg").split[1].to_f > 2
     request.region == "China"
   end
 end
 
 Rack::Attack.throttle("requests for pdf", limit: 2, period: 1) do |request|
-  if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 2
+  if File.read("/proc/loadavg").split[0].to_f > 2
     if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
       if request.fullpath.include?("fulltext.pdf")
         if request.env["HTTP_RANGE"].blank?
@@ -523,9 +523,9 @@ end
 # Throttle attempts for a given octet to 1 reqs/10 seconds
 Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
   # if cpu usage is approaching 4 on the 5 min avg...
-  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3
+  if File.read("/proc/loadavg").split[1].to_f > 3
     if !req.remote_ip.blank?
-      if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3.5
+      if File.read("/proc/loadavg").split[1].to_f > 3.5
         # everyone out of the boat, no exceptions
         # log to file
         # File.write("#{Rails.root}/log/heavy_load_shedding.log", "#{req.remote_ip} - #{req.fingerprint} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
@@ -602,7 +602,7 @@ THROTTLED_RESPONSE = [503, {'Set-Cookie' => 'cerberus_throttled=true', 'Content-
 BLOCKED_RESPONSE = [403, {'Content-Type' => 'text/plain', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, ["Forbidden\n"]].freeze
 
 Rack::Attack.throttled_response = lambda do |env|
-  if (`cut -d ' ' -f2 /proc/loadavg`.strip.to_f < 5) && (env['rack.attack.matched'] == "challenged")
+  if (File.read("/proc/loadavg").split[1].to_f < 5) && (env['rack.attack.matched'] == "challenged")
     # Tally challenges served to this IP. A browser clears the tally by solving
     # the widget; a client that never runs the JS climbs to the threshold and
     # gets picked up by the "block IP" blocklist above.
