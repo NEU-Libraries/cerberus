@@ -13,6 +13,10 @@ module Rack
 end
 
 class Rack::Attack::Request < ::Rack::Request
+  def fullpath
+    @fullpath ||= super
+  end
+
   def host_lookup
     @host_lookup ||= `timeout -s 9 -k 1 2 host -p 5053 #{remote_ip} 127.0.0.1 | tail -n1`.strip
   end
@@ -146,12 +150,25 @@ Rack::Attack.safelist("safelist IP") do |req|
   Rails.cache.read("safelist #{req.remote_ip}")
 end
 
-Rack::Attack.blocklist('blacklight') do |req|
-  facet = req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creator") || req.fullpath.include?("rss")
+BLACKLIGHT_BAN_MEMO = {}
+BLACKLIGHT_BAN_MEMO_TTL = 60
 
-  if facet
-    Rack::Attack::Allow2Ban.filter(req.fingerprint, maxretry: 10, findtime: 10, bantime: 7200) do
-      true # the path check already gated entry; every request here counts
+Rack::Attack.blocklist('blacklight') do |req|
+  path = req.fullpath
+
+  if path.include?("&f") || path.include?("?f") || path.include?("creator") || path.include?("rss")
+    fp  = req.fingerprint
+    now = Time.now.to_f
+
+    if BLACKLIGHT_BAN_MEMO[fp].to_f > now
+      true
+    else
+      banned = Rack::Attack::Allow2Ban.filter(fp, maxretry: 10, findtime: 10, bantime: 7200) { true }
+      if banned
+        BLACKLIGHT_BAN_MEMO.clear if BLACKLIGHT_BAN_MEMO.size > 5_000
+        BLACKLIGHT_BAN_MEMO[fp] = now + BLACKLIGHT_BAN_MEMO_TTL
+      end
+      banned
     end
   end
 end
