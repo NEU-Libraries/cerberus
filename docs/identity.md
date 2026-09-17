@@ -184,6 +184,27 @@ emit fired mid-teardown.
 `Current.on_behalf_of` drives write attribution. `Current.view_as_nuid` is
 read-only bookkeeping; `effective_user` is its real consumer.
 
+### Which NUID a gated read uses
+
+`viewer_nuid` is `effective_user&.nuid`, and it is what a read that gates on
+the *view-as target* passes to atlas_rb. Three Work reads take it — `assets`,
+`file_sets` and `Blob.work` — plus the two zip packers.
+
+The kwarg's presence is a per-call decision, not boilerplate to be removed.
+`mods` and `find` carry no `nuid:` and must not: atlas_rb signs
+`Current.nuid`, the real user, into those reads. `Current` already holds
+`view_as_nuid`, so making the read NUID ambient looks free, and it would be a
+correctness regression — `mods` would silently acquire view-as gating.
+
+| Read | Gated by |
+|---|---|
+| `mods`, `find` | `Current.nuid`, the real user, via atlas_rb's ambient `User:` header |
+| `assets`, `file_sets`, `Blob.work` | `viewer_nuid`, the view-as target |
+
+`WorksController#parallel_show_reads` resolves it into a local before building
+the tasks. The parallel reads run on worker threads, and a worker must not
+touch ActiveRecord, which `effective_user` does.
+
 ### Rejecting a write under view-as
 
 `reject_writes_in_view_as` ends the session loudly on any non-GET, non-HEAD

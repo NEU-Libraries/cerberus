@@ -15,7 +15,7 @@ module ZoomViewer
     # show path, which reads them alongside mods and assets) hand them in, avoiding
     # a second AtlasRb::Work.file_sets round-trip.
     def prepare_zoom_view(work_id, pages: nil)
-      pages ||= AtlasRb::Work.file_sets(work_id, nuid: effective_user&.nuid)
+      pages ||= AtlasRb::Work.file_sets(work_id, nuid: viewer_nuid)
       @multipage = pages.count { |page| page['position'].present? } >= 2
       @can_zoom = @multipage && zoom_service_readable?(pages)
     end

@@ -44,6 +44,15 @@ module ImpersonationSession
     @effective_user ||= view_as? ? view_as_target : current_user
   end
 
+  # The NUID a gated READ is evaluated as. Every read that wants it passes it
+  # explicitly, and that is deliberate: `mods` and `find` gate on the real user
+  # through atlas_rb's ambient User: header, so reading this from Current
+  # instead would apply view-as to them silently. Current.view_as_nuid is
+  # read-side bookkeeping and never a write header.
+  def viewer_nuid
+    effective_user&.nuid
+  end
+
   def impersonation_target
     return @impersonation_target if defined?(@impersonation_target)
 

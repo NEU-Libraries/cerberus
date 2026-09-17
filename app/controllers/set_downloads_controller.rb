@@ -28,7 +28,7 @@ class SetDownloadsController < CatalogController
   private
 
     def packer_for(resolver)
-      SetZipPacker.new(resolver: resolver, nuid: effective_user&.nuid,
+      SetZipPacker.new(resolver: resolver, nuid: viewer_nuid,
                        ability: current_ability, bypass_embargo: bypass_embargo?)
     end
 

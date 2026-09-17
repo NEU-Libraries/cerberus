@@ -60,10 +60,10 @@ class DownloadsController < ApplicationController
     # permissions do not carry it. An unresolvable asset fails OPEN by design —
     # see docs/downloads.md before tightening that.
     def authorize_derivative_read!
-      work_id = AtlasRb::Blob.work(params[:id], nuid: effective_user&.nuid)
+      work_id = AtlasRb::Blob.work(params[:id], nuid: viewer_nuid)
       return if work_id.blank?
 
-      @derivative_asset = AtlasRb::Work.assets(work_id, nuid: effective_user&.nuid)
+      @derivative_asset = AtlasRb::Work.assets(work_id, nuid: viewer_nuid)
                                        .find { |a| a['noid'] == params[:id] }
       return if @derivative_asset.nil?
 

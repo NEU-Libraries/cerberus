@@ -72,7 +72,7 @@ class WorksController < ApplicationController
   end
 
   def downloads
-    @files = AtlasRb::Work.assets(params[:id], nuid: effective_user&.nuid)
+    @files = AtlasRb::Work.assets(params[:id], nuid: viewer_nuid)
     render layout: false
   end
 
@@ -96,7 +96,7 @@ class WorksController < ApplicationController
     load_advanced!
     # The Work's own assets, not the staged upload #metadata probes: by edit
     # time the content Blob has landed and the staged file is long gone.
-    assets = AtlasRb::Work.assets(params[:id], nuid: effective_user&.nuid)
+    assets = AtlasRb::Work.assets(params[:id], nuid: viewer_nuid)
     load_streaming_only!(offered: StreamingOnly.applicable?(assets))
     load_caption!(offered: CaptionTrack.applicable?(assets), files: assets)
     breadcrumbs(params[:id], editing: true)
@@ -219,11 +219,11 @@ class WorksController < ApplicationController
     # The view-as NUID is resolved here rather than inside a task because the
     # workers must not touch ActiveRecord. See docs/deposit.md.
     def parallel_show_reads
-      viewer_nuid = effective_user&.nuid
+      nuid = viewer_nuid
       parallel_atlas_reads(
         mods:         -> { AtlasRb::Work.mods(params[:id], 'html') },
-        files:        -> { AtlasRb::Work.assets(params[:id], nuid: viewer_nuid) },
-        file_sets:    -> { AtlasRb::Work.file_sets(params[:id], nuid: viewer_nuid) },
+        files:        -> { AtlasRb::Work.assets(params[:id], nuid: nuid) },
+        file_sets:    -> { AtlasRb::Work.file_sets(params[:id], nuid: nuid) },
         associations: -> { associations_or_none(params[:id]) }
       )
     end
