@@ -10,7 +10,7 @@
 -# @param active [String, nil] key of the standalone tab being viewed
 -# @param open [String, nil] key of the pane to open, when not the first one
 - keys = edit_tab_keys(klass)
-- edit_path = public_send("edit_#{klass.downcase}_path", id)
+- edit_path = edit_resource_path(klass, id)
 -# Which pane opens. The panes ask edit_tab_open_key too, so the row and the
 -# content it drives cannot disagree about which one is showing.
 - default_key = edit_tab_open_key(klass, open: local_assigns[:open])

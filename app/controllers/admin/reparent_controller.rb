@@ -142,7 +142,7 @@ module Admin
       end
 
       def node_path(node)
-        public_send("#{node.klass.downcase}_path", node.resource.id)
+        resource_path(node.klass, node.resource.id)
       end
       helper_method :node_path
   end

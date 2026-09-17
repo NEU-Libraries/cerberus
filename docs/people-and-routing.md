@@ -9,6 +9,7 @@ Source files:
 - `app/controllers/people_controller.rb`
 - `app/controllers/legacy_controller.rb`
 - `app/controllers/application_controller.rb`
+- `app/lib/atlas_routes.rb`
 - `app/controllers/concerns/collection_breadcrumbs.rb`
 - `app/controllers/xml_controller.rb`
 - `app/jobs/set_sentinel_apply_job.rb`
@@ -87,6 +88,28 @@ of that single find with no per-ancestor round trip.
 
 `result:` lets a caller that already fetched the resource — to branch on its
 ancestry, say — hand it in and avoid a second `AtlasRb::Resource.find`.
+
+### Turning an Atlas type into a path
+
+`AtlasRoutes::ROUTES` maps an Atlas type name to the Rails route that serves
+it. `ApplicationController#resource_path` and `#edit_resource_path` read it and
+are both helper methods, so the breadcrumb builders, the XML editor and the
+history pages all reach a path the same way.
+
+The map exists because the two vocabularies disagree. Downcasing the class name
+works for `Work`, `Collection` and `Community`, and Atlas's `Compilation` is
+the UI's Set — `SetsController`, `set_path`, no `compilation_path` anywhere. A
+history page opened on a Set derived a route helper that does not exist.
+
+Use these two only where the type arrives as *data* — from
+`AtlasRb::Resource.find(...).klass`, or from a Solr document's
+`internal_resource_tesim`. A controller that knows its own type declares it with
+`atlas_resource` and reads `show_path` / `edit_path` back, which needs no map at
+all. See `docs/edit-surfaces.md`.
+
+`route_for` raises on a type it has not been taught, rather than returning a
+default. The map has no `edit_person_path` to offer either: People have no edit
+page, so `edit_resource_path('Person', id)` raises as it always has.
 
 ### `match:` and the prefix problem
 
