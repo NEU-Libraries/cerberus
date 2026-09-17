@@ -95,7 +95,7 @@ module WorkDeposit
     # title goes through the structure-safe MODS merge (raw mods_xml=, never the
     # flat plain_title= setter — see save_descriptive!). See docs/deposit.md.
     def finalize_new_work(file, collection_id)
-      save_descriptive!('Work', @work.id, title: file.original_filename, description: nil)
+      save_descriptive!(@work.id, title: file.original_filename, description: nil)
       # Held for record_promotion, which runs after this and has no file to read.
       @deposit_title = file.original_filename
       apply_derivative_default(collection_id)

@@ -133,17 +133,13 @@ module Authorizable
       @permissions = AtlasRb::Resource.permissions(params[:id])
       raise ResourceNotFound if @permissions.nil?
 
-      authorize! :tombstone, solr_doc_from_permissions(@permissions, klass: tombstone_klass)
-    end
-
-    def tombstone_klass
-      controller_name.classify
+      authorize! :tombstone, solr_doc_from_permissions(@permissions, klass: solr_type)
     end
 
     # Renders the Edit / Delete links iff the action behind them would be
     # authorized — never show a control the user can't use.
-    def assign_show_abilities!(klass:)
-      doc = solr_doc_from_permissions(@permissions, klass: klass)
+    def assign_show_abilities!
+      doc = solr_doc_from_permissions(@permissions, klass: solr_type)
       @can_edit = current_ability.can?(:edit, doc)
       @can_tombstone = current_ability.can?(:tombstone, doc)
     end

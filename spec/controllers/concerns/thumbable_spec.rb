@@ -7,10 +7,14 @@ describe Thumbable do
     Class.new do
       include Thumbable
 
-      attr_accessor :params
+      # atlas_class is the class-level `atlas_resource` declaration in
+      # production. It is per-instance here so one host can stand in for each
+      # of the three resource types that share the concern.
+      attr_accessor :params, :atlas_class
 
-      def initialize(params)
+      def initialize(params, atlas_class = AtlasRb::Work)
         @params = params
+        @atlas_class = atlas_class
       end
     end
   end
@@ -28,7 +32,7 @@ describe Thumbable do
       expect(MasterJp2).not_to receive(:call)
       expect(AtlasRb::Work).not_to receive(:set_thumbnails)
 
-      expect(obj.apply_thumbnail('Work', 'w-1')).to be_nil
+      expect(obj.apply_thumbnail('w-1')).to be_nil
     end
 
     it 'mints the open JP2 from the upload and persists it via set_thumbnails' do
@@ -38,18 +42,19 @@ describe Thumbable do
       allow(ThumbnailCreator).to receive(:call).with(base: 'BASE').and_return(urls)
 
       expect(AtlasRb::Work).to receive(:set_thumbnails).with('w-1', **urls)
-      obj.apply_thumbnail('Work', 'w-1')
+      obj.apply_thumbnail('w-1')
     end
 
     # The concern is shared by the Work/Collection/Community edit forms; it must
-    # dispatch to the class named by `klass`, since all three expose set_thumbnails.
-    it 'routes to the Atlas class named by klass' do
-      obj = thumbable_class.new({ thumbnail: file })
+    # dispatch to the host's declared class, since all three expose
+    # set_thumbnails.
+    it 'routes to the declared Atlas class' do
+      obj = thumbable_class.new({ thumbnail: file }, AtlasRb::Collection)
       allow(MasterJp2).to receive(:call).and_return(MasterJp2::Result.new(open_base: 'BASE', gated_base: 'G'))
       allow(ThumbnailCreator).to receive(:call).with(base: 'BASE').and_return(urls)
 
       expect(AtlasRb::Collection).to receive(:set_thumbnails).with('c-1', **urls)
-      obj.apply_thumbnail('Collection', 'c-1')
+      obj.apply_thumbnail('c-1')
     end
   end
 end

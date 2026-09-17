@@ -26,6 +26,8 @@ class WorksController < ApplicationController
 
   copy_blacklight_config_from(CatalogController)
 
+  atlas_resource AtlasRb::Work, key: :work, route: :work
+
   IN_PROGRESS_NOTICE = 'This work is still being processed and cannot be edited yet.'
   PUBLISH_LINK_FAILED = "File uploaded — please review the metadata. It couldn't be added to the " \
                         'community showcase; contact DRS staff if this persists.'
@@ -90,8 +92,8 @@ class WorksController < ApplicationController
   def edit
     @work = requested_work
     form_preparation(@permissions, resource: @work)
-    load_descriptive!('Work')
-    load_advanced!('Work')
+    load_descriptive!
+    load_advanced!
     # The Work's own assets, not the staged upload #metadata probes: by edit
     # time the content Blob has landed and the staged file is long gone.
     assets = AtlasRb::Work.assets(params[:id], nuid: effective_user&.nuid)
@@ -114,7 +116,7 @@ class WorksController < ApplicationController
   # The Metadata and Permissions tabs are separate forms that both PATCH here
   # with disjoint fields. See docs/deposit.md.
   def update
-    handle_metadata_update(klass: 'Work', resource_key: :work, keywords: true)
+    handle_metadata_update(keywords: true)
     apply_streaming_only!
     apply_caption!
   end
@@ -123,14 +125,14 @@ class WorksController < ApplicationController
     @work = AtlasRb::Work.find(params[:id])
     @image_probe = StagedImageProbe.call(work_id: params[:id])
     form_preparation(@permissions, resource: @work)
-    load_descriptive!('Work')
+    load_descriptive!
     # Pre-fill for the Additional metadata disclosure, and it is load-bearing
     # rather than cosmetic: a blank title-part input means "remove this part" to
     # MODSMerge and an empty creator array means "replace the editable set with
     # nothing". An XML-loaded deposit can arrive already carrying both, so
     # without this the depositor's first confirm strips them. Costs no Atlas
     # read — resource_mods memoizes what load_descriptive! just fetched.
-    load_advanced!('Work')
+    load_advanced!
     # Probe the STAGED file, never the Work's assets: ContentCreationJob may
     # still be in flight here, and Atlas would hide the toggle and the caption
     # field from exactly the deposits that want them.
@@ -140,8 +142,7 @@ class WorksController < ApplicationController
   end
 
   def update_metadata
-    handle_metadata_update(klass: 'Work', resource_key: :work, keywords: true,
-                           include_advanced: true)
+    handle_metadata_update(keywords: true, include_advanced: true)
     # AFTER the descriptive save, deliberately: with a live worker
     # DepositDerivativesJob runs inside this request and its Delegate PATCH
     # bumps the lock, racing save_descriptive! into StaleResourceError. Specs
@@ -203,7 +204,7 @@ class WorksController < ApplicationController
       @associations = WorkAssociations.call(associations:   reads[:associations],
                                             search_service: search_service)
       prepare_zoom_view(params[:id], pages: reads[:file_sets])
-      assign_show_abilities!(klass: 'Work')
+      assign_show_abilities!
       work_breadcrumbs(params[:id])
     end
 

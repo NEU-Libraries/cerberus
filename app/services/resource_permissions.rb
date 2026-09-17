@@ -24,7 +24,7 @@ class ResourcePermissions
     def self.refused(message) = new(level: :alert, message: message)
   end
 
-  # @param klass [String] 'Work', 'Collection' or 'Community'.
+  # @param klass [Class] AtlasRb::Work, AtlasRb::Collection or AtlasRb::Community.
   # @param id [String] the resource's noid.
   # @param envelope [Hash] the submitted ACL, already parsed by PermissionsForm.
   # @param current_read [Array<String>] the resource's read ACL before this submit.
@@ -61,7 +61,7 @@ class ResourcePermissions
   private
 
     def write(payload)
-      with_stale_retry { AtlasRb.const_get(@klass).metadata(@id, payload) }
+      with_stale_retry { @klass.metadata(@id, payload) }
       Result.silent
     rescue AtlasRb::PermissionsError => e
       Result.refused(PERMISSIONS_REFUSED.fetch(e.code, e.message))
@@ -70,8 +70,8 @@ class ResourcePermissions
     # nil when the ordinary write should go ahead. Works never defer; Communities
     # never cascade.
     def narrowing_deferral
-      return nil if @klass == 'Work'
-      return community_narrowing_refusal if @klass == 'Community'
+      return nil if @klass == AtlasRb::Work
+      return community_narrowing_refusal if @klass == AtlasRb::Community
 
       outcome = NarrowingRequest.call(noid: @id, current_read: @current_read,
                                       permissions: @envelope[:permissions] || {}, actor: @actor)

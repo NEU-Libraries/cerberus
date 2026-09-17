@@ -7,7 +7,10 @@ describe Transformable do
     Class.new do
       include Transformable
 
-      attr_accessor :params, :current_user
+      # atlas_class and resource_key are the class-level `atlas_resource`
+      # declaration in production. They are per-instance here because these
+      # examples drive all three resource types through one host.
+      attr_accessor :params, :current_user, :atlas_class, :resource_key
 
       # The concern leans on these helpers, which live on
       # ApplicationController / Thumbable in production. Stub minimally so
@@ -19,6 +22,12 @@ describe Transformable do
   end
 
   let(:host) { host_class.new }
+
+  # Stands in for the controller's `atlas_resource` declaration.
+  def declare(klass, key)
+    host.atlas_class = klass
+    host.resource_key = key
+  end
 
   # The concern reads member_of? / admin? / admin_delegate? off current_user, so
   # each example states only the group list and the tier it cares about.
@@ -175,15 +184,17 @@ describe Transformable do
 
   describe '#transform_permissions' do
     it 'is a no-op when no permissions param is present' do
+      declare(AtlasRb::Collection, :collection)
       host.params = { collection: {} }
       permitted = {}
 
-      host.transform_permissions(permitted, :collection)
+      host.transform_permissions(permitted)
 
       expect(permitted).to eq({})
     end
 
     it 'populates :permissions from grouped form input and preserves embargo' do
+      declare(AtlasRb::Collection, :collection)
       host.params = ActionController::Parameters.new(
         collection: {
           permissions: {
@@ -194,7 +205,7 @@ describe Transformable do
       )
       permitted = {}
 
-      host.transform_permissions(permitted, :collection)
+      host.transform_permissions(permitted)
 
       expect(permitted[:permissions][:read]).to eq(['librarians'])
       expect(permitted[:permissions][:embargo]).to eq('2030-01-15')
@@ -230,17 +241,19 @@ describe Transformable do
   end
 
   describe '#curated_subjects_posted?' do
+    before { declare(AtlasRb::Work, :work) }
+
     it 'casts the form flag, so only a real true counts' do
       host.params = { work: { curated_subjects: 'true' } }
-      expect(host.curated_subjects_posted?(:work)).to be true
+      expect(host.curated_subjects_posted?).to be true
     end
 
     it 'is false when the flag says false, and when it is absent' do
       host.params = { work: { curated_subjects: 'false' } }
-      expect(host.curated_subjects_posted?(:work)).to be false
+      expect(host.curated_subjects_posted?).to be false
 
       host.params = { work: {} }
-      expect(host.curated_subjects_posted?(:work)).to be false
+      expect(host.curated_subjects_posted?).to be false
     end
   end
 
@@ -331,6 +344,7 @@ describe Transformable do
   # Communities never take this branch.
   describe '#apply_permissions when the submit narrows a Collection' do
     before do
+      declare(AtlasRb::Collection, :collection)
       host.params = ActionController::Parameters.new(
         id: 'c-1', collection: { permissions: { '1' => { 'group_id' => 'curators', 'ability' => 'read' } } }
       )
@@ -344,7 +358,7 @@ describe Transformable do
         NarrowingRequest::Outcome.new(status: :dispatched, message: 'Restricting this collection.')
       )
 
-      host.apply_permissions('Collection', 'c-1', :collection)
+      host.apply_permissions('c-1')
 
       expect(AtlasRb::Collection).not_to have_received(:metadata)
       expect(host.flash[:notice]).to eq('Restricting this collection.')
@@ -357,7 +371,7 @@ describe Transformable do
         NarrowingRequest::Outcome.new(status: :refused, message: 'Ask DRS staff.')
       )
 
-      host.apply_permissions('Collection', 'c-1', :collection)
+      host.apply_permissions('c-1')
 
       expect(AtlasRb::Collection).not_to have_received(:metadata)
       expect(host.flash[:alert]).to eq('Ask DRS staff.')
@@ -366,7 +380,7 @@ describe Transformable do
     it 'writes normally when the change is not a narrowing' do
       allow(NarrowingRequest).to receive(:call).and_return(NarrowingRequest::Outcome.new(status: :not_narrowing))
 
-      host.apply_permissions('Collection', 'c-1', :collection)
+      host.apply_permissions('c-1')
 
       expect(AtlasRb::Collection).to have_received(:metadata)
     end
@@ -374,11 +388,12 @@ describe Transformable do
     it 'never consults the cascade for a Work' do
       allow(NarrowingRequest).to receive(:call)
       allow(AtlasRb::Work).to receive(:metadata)
+      declare(AtlasRb::Work, :work)
       host.params = ActionController::Parameters.new(
         id: 'w-1', work: { permissions: { '1' => { 'group_id' => 'curators', 'ability' => 'read' } } }
       )
 
-      host.apply_permissions('Work', 'w-1', :work)
+      host.apply_permissions('w-1')
 
       expect(NarrowingRequest).not_to have_received(:call)
       expect(AtlasRb::Work).to have_received(:metadata)
@@ -390,7 +405,10 @@ describe Transformable do
   # offered it; for everyone else this is the backstop behind a form that does
   # not show the option, catching JS-off and hand-made requests.
   describe '#apply_permissions when the submit narrows a Community' do
-    before { allow(AtlasRb::Community).to receive(:metadata) }
+    before do
+      allow(AtlasRb::Community).to receive(:metadata)
+      declare(AtlasRb::Community, :community)
+    end
 
     it 'refuses the write and points at the administrators' do
       host.params = ActionController::Parameters.new(
@@ -398,7 +416,7 @@ describe Transformable do
       )
       host.instance_variable_set(:@permissions, AtlasRb::Mash.new('read' => ['public']))
 
-      host.apply_permissions('Community', 'm-1', :community)
+      host.apply_permissions('m-1')
 
       expect(AtlasRb::Community).not_to have_received(:metadata)
       expect(host.flash[:alert]).to eq(ResourcePermissions::COMMUNITY_NARROWING_REFUSED)
@@ -411,7 +429,7 @@ describe Transformable do
       )
       host.instance_variable_set(:@permissions, AtlasRb::Mash.new('read' => ['public']))
 
-      host.apply_permissions('Community', 'm-1', :community)
+      host.apply_permissions('m-1')
 
       expect(AtlasRb::Community).not_to have_received(:metadata)
     end
@@ -427,7 +445,7 @@ describe Transformable do
       )
       host.instance_variable_set(:@permissions, AtlasRb::Mash.new('read' => ['public']))
 
-      host.apply_permissions('Community', 'm-1', :community)
+      host.apply_permissions('m-1')
 
       expect(AtlasRb::Community).to have_received(:metadata)
       expect(NarrowingRequest).not_to have_received(:call)
@@ -440,7 +458,7 @@ describe Transformable do
       host.params = ActionController::Parameters.new(id: 'm-1', mass: 'public', community: { permissions: {} })
       host.instance_variable_set(:@permissions, AtlasRb::Mash.new('read' => []))
 
-      host.apply_permissions('Community', 'm-1', :community)
+      host.apply_permissions('m-1')
 
       expect(AtlasRb::Community).to have_received(:metadata)
     end
@@ -451,6 +469,7 @@ describe Transformable do
   # title/abstract edits in the same submit would be discarded with it.
   describe '#apply_permissions when Atlas refuses the ACL' do
     before do
+      declare(AtlasRb::Work, :work)
       host.params = ActionController::Parameters.new(
         work: { permissions: { '1' => { 'group_id' => 'curators', 'ability' => 'read' } } }
       )
@@ -460,7 +479,7 @@ describe Transformable do
       allow(AtlasRb::Work).to receive(:metadata)
         .and_raise(AtlasRb::PermissionsError.new('nope', code: 'visibility_exceeds_parent'))
 
-      expect { host.apply_permissions('Work', 'w-1', :work) }.not_to raise_error
+      expect { host.apply_permissions('w-1') }.not_to raise_error
       expect(host.flash[:alert]).to eq(ResourcePermissions::PERMISSIONS_REFUSED['visibility_exceeds_parent'])
     end
 
@@ -468,7 +487,7 @@ describe Transformable do
       allow(AtlasRb::Work).to receive(:metadata)
         .and_raise(AtlasRb::PermissionsError.new('some new invariant', code: 'not_yet_mapped'))
 
-      host.apply_permissions('Work', 'w-1', :work)
+      host.apply_permissions('w-1')
 
       expect(host.flash[:alert]).to eq('some new invariant')
     end
@@ -476,6 +495,7 @@ describe Transformable do
 
   describe '#save_descriptive! (optimistic-lock retry)' do
     before do
+      declare(AtlasRb::Work, :work)
       allow(host).to receive(:sleep) # don't actually back off in specs
       allow(host).to receive(:write_tmp_xml).and_return('/tmp/merged.xml')
       allow(AtlasRb::Work).to receive(:mods).and_return('<mods/>')
@@ -484,7 +504,7 @@ describe Transformable do
     end
 
     def save
-      host.save_descriptive!('Work', 'w-1', title: 'T', description: 'D', keywords: ['k'])
+      host.save_descriptive!('w-1', title: 'T', description: 'D', keywords: ['k'])
     end
 
     it 'retries on StaleResourceError and succeeds once the conflict clears' do
