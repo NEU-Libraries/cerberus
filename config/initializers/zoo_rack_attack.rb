@@ -225,6 +225,10 @@ Rack::Attack.blocklist('sec fetch extended') do |req|
   end
 end
 
+Rack::Attack.blocklist('ShapBot') do |req|
+  !req.user_agent.blank? && req.user_agent.downcase.include?("ShapBot".downcase)
+end
+
 Rack::Attack.blocklist('Yandex UA') do |req|
   !req.user_agent.blank? && req.user_agent.downcase.include?("Yandex".downcase)
 end
