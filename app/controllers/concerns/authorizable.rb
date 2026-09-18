@@ -88,18 +88,20 @@ module Authorizable
       render template: 'errors/gone', status: :gone, locals: { record: record }
     end
 
-    # atlas_rb does NOT raise on the tombstone refusal — RaiseOnResourceError
-    # passes the 422 (`code: "has_live_children"`) straight through as a raw
-    # Faraday::Response. A caller that ignores it reports a false "deleted"
-    # while the resource stays live. See docs/authorization.md.
-    def perform_tombstone!(response, type:)
+    # Withdraw the resource and report the outcome. atlas_rb does NOT raise on
+    # the tombstone refusal — RaiseOnResourceError passes the 422 (`code:
+    # "has_live_children"`) straight through as a raw Faraday::Response, so the
+    # status has to be read. Ignoring it reports a false "deleted" while the
+    # resource stays live. See docs/authorization.md.
+    def perform_tombstone!
+      response = AtlasRb::Resource.tombstone(params[:id])
       if response.success?
-        redirect_to root_path, notice: "#{type} deleted."
+        redirect_to root_path, notice: "#{solr_type} deleted."
       elsif response.status == 422
-        redirect_back_or_to(root_path, alert: "#{type} can't be deleted while it still contains live members. " \
-                                              'Withdraw or move them first.')
+        redirect_back_or_to(root_path, alert: "#{solr_type} can't be deleted while it still contains live " \
+                                              'members. Withdraw or move them first.')
       else
-        redirect_back_or_to(root_path, alert: "#{type} could not be deleted.")
+        redirect_back_or_to(root_path, alert: "#{solr_type} could not be deleted.")
       end
     end
 
