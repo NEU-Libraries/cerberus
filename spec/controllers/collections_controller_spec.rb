@@ -395,7 +395,7 @@ describe CollectionsController do
       allow(AtlasRb::Resource).to receive(:tombstone)
         .and_return(instance_double(Faraday::Response, success?: true))
       post :tombstone, params: { id: collection.id }
-      expect(AtlasRb::Collection).to have_received(:tombstone).with(collection.id)
+      expect(AtlasRb::Resource).to have_received(:tombstone).with(collection.id)
       expect(subject).to redirect_to(root_path)
       expect(flash[:notice]).to eq('Collection deleted.')
     end
@@ -424,7 +424,7 @@ describe CollectionsController do
       expect(created.title).to eq('BrandNewCollection')
       expect(created.description).to include('CollectionAbstract')
     ensure
-      AtlasRb::Collection.tombstone(created_id) if created_id
+      AtlasRb::Resource.tombstone(created_id) if created_id
     end
 
     it 'rejects a blank title without minting a collection' do
@@ -452,7 +452,7 @@ describe CollectionsController do
       created_id = response.location.split('/').last
       expect(Array(AtlasRb::Resource.permissions(created_id)&.read)).to match_array(inherited)
     ensure
-      [reference&.id, created_id].compact.each { |id| AtlasRb::Collection.tombstone(id) }
+      [reference&.id, created_id].compact.each { |id| AtlasRb::Resource.tombstone(id) }
     end
 
     it 'applies the submitted visibility and group grants to the new collection' do
@@ -465,7 +465,7 @@ describe CollectionsController do
       created_id = response.location.split('/').last
       expect(Array(AtlasRb::Resource.permissions(created_id)&.read)).to contain_exactly('public', 'editors')
     ensure
-      AtlasRb::Collection.tombstone(created_id) if created_id
+      AtlasRb::Resource.tombstone(created_id) if created_id
     end
 
     # Atlas assigns edit_groups, edit_users and embargo unconditionally from the
@@ -484,7 +484,7 @@ describe CollectionsController do
         created_id, hash_including(edit: [Permissions::STAFF_EDIT_GROUP], read: ['editors'])
       )
     ensure
-      AtlasRb::Collection.tombstone(created_id) if created_id
+      AtlasRb::Resource.tombstone(created_id) if created_id
     end
 
     # #apply_permissions would address params[:id] — nil on this path — and
@@ -499,7 +499,7 @@ describe CollectionsController do
       created_id = response.location.split('/').last
       expect(NarrowingRequest).not_to have_received(:call)
     ensure
-      AtlasRb::Collection.tombstone(created_id) if created_id
+      AtlasRb::Resource.tombstone(created_id) if created_id
     end
 
     # The destination is a route segment, so there is no request shape that

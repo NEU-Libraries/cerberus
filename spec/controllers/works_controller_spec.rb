@@ -66,10 +66,10 @@ describe WorksController do
         # Absolute URLs, as Atlas writes them. A relative value here persists to
         # the shared test corpus and raises Propshaft::MissingAssetError in any
         # later catalog render that happens to include this Work.
-        AtlasRb::Work.set_thumbnails(work.id,
-                                     thumbnail:    'http://example.com/t.jpg',
-                                     thumbnail_2x: 'http://example.com/t2.jpg',
-                                     preview:      'http://example.com/preview.jpg')
+        AtlasRb::Resource.set_thumbnails(work.id,
+                                         thumbnail:    'http://example.com/t.jpg',
+                                         thumbnail_2x: 'http://example.com/t2.jpg',
+                                         preview:      'http://example.com/preview.jpg')
 
         get :show, params: { id: work.id }
 
@@ -272,7 +272,7 @@ describe WorksController do
       work_id = assigns(:work).id
       expect(AtlasRb::Work.find(work_id).title).to eq('image.png')
     ensure
-      AtlasRb::Work.tombstone(work_id) if work_id
+      AtlasRb::Resource.tombstone(work_id) if work_id
     end
 
     context 'depositor attribution' do
@@ -348,7 +348,7 @@ describe WorksController do
           .with(assigns(:work).id, 'showcasenoid', on_behalf_of: user.nuid)
         expect(response).to redirect_to(metadata_work_path(assigns(:work).id))
       ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
       it 'still saves the work when Atlas forbids the showcase link (scoping safety net)' do
@@ -365,7 +365,7 @@ describe WorksController do
         expect(response).to redirect_to(metadata_work_path(assigns(:work).id))
         expect(flash[:notice]).to eq(described_class::PUBLISH_LINK_FAILED)
       ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
       # Atlas refuses a derivative tier more visible than its Work. The collection
@@ -382,7 +382,7 @@ describe WorksController do
         expect(response).to redirect_to(metadata_work_path(assigns(:work).id))
         expect(flash[:notice]).to eq(described_class::DERIVATIVE_DEFAULT_FAILED)
       ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
       # Promotion is only on offer from the depositor's own root, so a forged
@@ -402,7 +402,7 @@ describe WorksController do
         expect(AtlasRb::System::Work).not_to have_received(:add_linked_member)
         expect(flash[:notice]).to eq(described_class::PUBLISH_LINK_FAILED)
       ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
       it 'deposits without promoting when the box is unticked' do
@@ -417,7 +417,7 @@ describe WorksController do
         expect(AtlasRb::System::Work).not_to have_received(:add_linked_member)
         expect(flash[:notice]).to eq('File uploaded — please review the metadata.')
       ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
     end
 
@@ -467,7 +467,7 @@ describe WorksController do
         # reads wrong at a glance.
         expect(notice.detail(:work_title)).to eq('image.png')
       ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
       it 'records a refusal when Atlas forbids the link' do
@@ -480,7 +480,7 @@ describe WorksController do
         expect(AdminNotice.last.detail(:outcome)).to eq('refused')
         expect(AdminNotice.last.detail(:reason)).to eq('atlas_forbidden')
       ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
       it 'records a refusal when the destination is not the depositor’s root' do
@@ -491,7 +491,7 @@ describe WorksController do
 
         expect(AdminNotice.last.detail(:reason)).to eq('not_personal_root')
       ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
       it 'records a refusal when the genre has no showcase the depositor can see' do
@@ -504,7 +504,7 @@ describe WorksController do
         expect(AdminNotice.last.detail(:reason)).to eq('no_showcase')
         expect(AdminNotice.last.detail(:genre)).to eq('Datasets')
       ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
       it 'records nothing when the deposit asked for no promotion' do
@@ -512,7 +512,7 @@ describe WorksController do
 
         expect { deposit(publish: '0') }.not_to change(AdminNotice, :count)
       ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
     end
   end
@@ -1002,7 +1002,7 @@ describe WorksController do
                                work:      { title: work.title },
                                thumbnail: fixture_file_upload('image.png', 'image/png') }
 
-      expect(AtlasRb::Work).to have_received(:set_thumbnails).with(work.id, **urls)
+      expect(AtlasRb::Resource).to have_received(:set_thumbnails).with(work.id, **urls)
     end
 
     it 'does not touch set_thumbnails when no poster file is attached' do
@@ -1010,7 +1010,7 @@ describe WorksController do
 
       patch :update, params: { id: work.id, work: { title: work.title } }
 
-      expect(AtlasRb::Work).not_to have_received(:set_thumbnails)
+      expect(AtlasRb::Resource).not_to have_received(:set_thumbnails)
     end
   end
 
@@ -1030,7 +1030,7 @@ describe WorksController do
       allow(AtlasRb::Resource).to receive(:tombstone)
         .and_return(instance_double(Faraday::Response, success?: true))
       post :tombstone, params: { id: work.id }
-      expect(AtlasRb::Work).to have_received(:tombstone).with(work.id)
+      expect(AtlasRb::Resource).to have_received(:tombstone).with(work.id)
       expect(subject).to redirect_to(root_path)
       expect(flash[:notice]).to eq('Work deleted.')
     end

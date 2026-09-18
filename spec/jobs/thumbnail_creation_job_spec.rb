@@ -15,12 +15,12 @@ RSpec.describe ThumbnailCreationJob, type: :job do
 
   it 'PATCHes the sized IIIF URIs via set_thumbnails' do
     allow(ThumbnailCreator).to receive(:call).with(base: base).and_return(urls)
-    allow(AtlasRb::Work).to receive(:set_thumbnails)
+    allow(AtlasRb::Resource).to receive(:set_thumbnails)
 
     described_class.new.perform(work_id, base)
 
     expect(ThumbnailCreator).to have_received(:call).with(base: base)
-    expect(AtlasRb::Work).to have_received(:set_thumbnails).with(
+    expect(AtlasRb::Resource).to have_received(:set_thumbnails).with(
       work_id,
       thumbnail:    urls[:thumbnail],
       thumbnail_2x: urls[:thumbnail_2x],

@@ -45,8 +45,8 @@ describe CatalogController do
       expect(ids).to include(ordinary.valkyrie_id)     # ordinary public collection is in general search
       expect(ids).not_to include(featured.valkyrie_id) # the showcase is not
     ensure
-      AtlasRb::Collection.tombstone(featured.id) if featured
-      AtlasRb::Collection.tombstone(ordinary.id) if ordinary
+      AtlasRb::Resource.tombstone(featured.id) if featured
+      AtlasRb::Resource.tombstone(ordinary.id) if ordinary
     end
 
     # The "Featured" pill still renders for showcases where they *do* appear
@@ -117,8 +117,8 @@ describe CatalogController do
 
       expect(unindexed_configured_fields).to be_empty
     ensure
-      AtlasRb::Work.tombstone(work.id) if work
-      AtlasRb::Collection.tombstone(collection.id)
+      AtlasRb::Resource.tombstone(work.id) if work
+      AtlasRb::Resource.tombstone(collection.id)
     end
 
     # A displayed field that does not join emits one <dd> per value into a
@@ -175,8 +175,8 @@ describe CatalogController do
       expect(body).to include('id="facet-creator_ssim"').and include('Cohen, Daniel J.')
       expect(body).to include('id="facet-subject_ssim"').and include('Civil society')
     ensure
-      AtlasRb::Work.tombstone(work.id) if work
-      AtlasRb::Collection.tombstone(collection.id) if collection
+      AtlasRb::Resource.tombstone(work.id) if work
+      AtlasRb::Resource.tombstone(collection.id) if collection
     end
   end
 
@@ -213,8 +213,8 @@ describe CatalogController do
       expect(order_under('creator-desc', pair)).to eq([lake.valkyrie_id, whats_new.valkyrie_id])
       expect(order_under('date-created', pair)).to eq([lake.valkyrie_id, whats_new.valkyrie_id])
     ensure
-      [lake, whats_new].compact.each { |work| AtlasRb::Work.tombstone(work.id) }
-      AtlasRb::Collection.tombstone(collection.id)
+      [lake, whats_new].compact.each { |work| AtlasRb::Resource.tombstone(work.id) }
+      AtlasRb::Resource.tombstone(collection.id)
     end
 
     it 'names only fields the index carries' do
@@ -222,8 +222,8 @@ describe CatalogController do
 
       expect(unindexed_sort_fields).to be_empty
     ensure
-      AtlasRb::Work.tombstone(lake.id) if lake
-      AtlasRb::Collection.tombstone(collection.id)
+      AtlasRb::Resource.tombstone(lake.id) if lake
+      AtlasRb::Resource.tombstone(collection.id)
     end
 
     # The other way to get a sort wrong, and it fails louder: Solr rejects a sort

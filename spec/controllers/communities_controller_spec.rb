@@ -24,7 +24,7 @@ describe CommunitiesController do
       expect(docs.flat_map { |d| Array(d['internal_resource_tesim']) }.uniq).to eq(['Community'])
       expect(docs.map(&:id)).not_to include(collection.valkyrie_id)
     ensure
-      AtlasRb::Collection.tombstone(collection.id) if collection
+      AtlasRb::Resource.tombstone(collection.id) if collection
     end
   end
 
@@ -383,7 +383,7 @@ describe CommunitiesController do
       allow(AtlasRb::Resource).to receive(:tombstone)
         .and_return(instance_double(Faraday::Response, success?: true))
       post :tombstone, params: { id: community.id }
-      expect(AtlasRb::Community).to have_received(:tombstone).with(community.id)
+      expect(AtlasRb::Resource).to have_received(:tombstone).with(community.id)
       expect(subject).to redirect_to(root_path)
       expect(flash[:notice]).to eq('Community deleted.')
     end
@@ -416,7 +416,7 @@ describe CommunitiesController do
       expect(created.title).to eq('BrandNewCommunity')
       expect(created.description).to include('CommunityAbstract')
     ensure
-      AtlasRb::Community.tombstone(created_id) if created_id
+      AtlasRb::Resource.tombstone(created_id) if created_id
     end
 
     it 'provisions the new community with genre showcases' do
@@ -500,7 +500,7 @@ describe CommunitiesController do
       # documents (and therefore from Solr's facet counts).
       expect(assigns(:response).documents.map(&:id)).not_to include(showcase.valkyrie_id)
     ensure
-      AtlasRb::Collection.tombstone(showcase.id) if showcase
+      AtlasRb::Resource.tombstone(showcase.id) if showcase
     end
   end
 
