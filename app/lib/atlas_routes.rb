@@ -6,10 +6,16 @@
 # A controller that knows its own type states its route in `atlas_resource`
 # instead, and reads it back as show_path / edit_path.
 module AtlasRoutes
-  # Atlas's type vocabulary is not the UI's, so a route name cannot be had by
-  # downcasing a class name: a Compilation is a Set everywhere a reader can see
-  # one, and there is no compilation_path. This map is where that translation
-  # lives.
+  # Stated rather than derived. Downcasing a class name happens to work for
+  # every type below, so the map earns its place on `route_for`'s raise instead:
+  # an unmapped type says so here rather than assembling a helper name that
+  # nothing serves.
+  #
+  # `Compilation` has no producer today — Atlas's resolver answers 404 for one
+  # (Valkyrie-backed types only) and Solr does not index them — so nothing can
+  # hand this map that string. Kept because the route is correct if either ever
+  # changes, and because it records the vocabulary split: a Compilation is a Set
+  # everywhere a reader can see one.
   ROUTES = {
     'Community'   => :community,
     'Collection'  => :collection,

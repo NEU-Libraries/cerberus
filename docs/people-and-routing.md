@@ -97,10 +97,17 @@ it. `ApplicationController#resource_path` and `#edit_resource_path` read it and
 are both helper methods, so the breadcrumb builders, the XML editor and the
 history pages all reach a path the same way.
 
-The map exists because the two vocabularies disagree. Downcasing the class name
-works for `Work`, `Collection` and `Community`, and Atlas's `Compilation` is
-the UI's Set — `SetsController`, `set_path`, no `compilation_path` anywhere. A
-history page opened on a Set derived a route helper that does not exist.
+The map is stated rather than derived, and what it buys is `route_for`'s raise:
+an Atlas type nobody has mapped says so at the map, instead of reaching
+`public_send` with a route helper that does not exist. Downcasing the class name
+would in fact work for every type currently in it.
+
+It also records the vocabulary split, which is real even though nothing
+exercises it: Atlas's `Compilation` is the UI's Set — `SetsController`,
+`set_path`, no `compilation_path` anywhere. Nothing can hand the map that string
+today, because the generic resolver answers 404 for a Compilation NOID
+(Valkyrie-backed types only) and Solr does not index them, so no Set NOID
+reaches a surface that builds a path this way.
 
 Use these two only where the type arrives as *data* — from
 `AtlasRb::Resource.find(...).klass`, or from a Solr document's
