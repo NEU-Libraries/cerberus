@@ -58,7 +58,7 @@ class WorksController < ApplicationController
   end
 
   def tombstone
-    perform_tombstone!(AtlasRb::Work.tombstone(params[:id]), type: 'Work')
+    perform_tombstone!(AtlasRb::Resource.tombstone(params[:id]), type: 'Work')
   end
 
   # IIIF Presentation 3.0 manifest, one Canvas per page FileSet in page order.

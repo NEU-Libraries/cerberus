@@ -31,12 +31,12 @@ RSpec.describe VisibilityCascadeJob do
     it 'narrows a public descendant to the container’s audience' do
       stub_targets(target('w1'))
       allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: ['public']))
-      allow(AtlasRb::Work).to receive(:metadata)
+      allow(AtlasRb::Resource).to receive(:set_permissions)
 
       run
 
-      expect(AtlasRb::Work).to have_received(:metadata).with(
-        'w1', hash_including('permissions' => hash_including('read' => ['northeastern:drs:library:archives']))
+      expect(AtlasRb::Resource).to have_received(:set_permissions).with(
+        'w1', hash_including('read' => ['northeastern:drs:library:archives'])
       )
     end
 
@@ -44,25 +44,25 @@ RSpec.describe VisibilityCascadeJob do
       stub_targets(target('w1'))
       allow(AtlasRb::Resource).to receive(:permissions).with('w1')
                                                        .and_return(envelope(read: ['northeastern:drs:nupd:media']))
-      allow(AtlasRb::Work).to receive(:metadata)
+      allow(AtlasRb::Resource).to receive(:set_permissions)
 
       run(read_groups: %w[northeastern:drs:nupd:media northeastern:drs:library:archives])
 
       # Its audience is already a subset, so the intersection changes nothing
       # and cascading the container's wider list wholesale would WIDEN it.
-      expect(AtlasRb::Work).not_to have_received(:metadata)
+      expect(AtlasRb::Resource).not_to have_received(:set_permissions)
     end
 
     it 'makes a child private when the two audiences share nobody' do
       stub_targets(target('w1'))
       allow(AtlasRb::Resource).to receive(:permissions).with('w1')
                                                        .and_return(envelope(read: ['northeastern:drs:nupd:media']))
-      allow(AtlasRb::Work).to receive(:metadata)
+      allow(AtlasRb::Resource).to receive(:set_permissions)
 
       run(read_groups: ['northeastern:drs:library:archives'])
 
-      expect(AtlasRb::Work).to have_received(:metadata).with(
-        'w1', hash_including('permissions' => hash_including('read' => []))
+      expect(AtlasRb::Resource).to have_received(:set_permissions).with(
+        'w1', hash_including('read' => [])
       )
     end
   end
@@ -76,28 +76,28 @@ RSpec.describe VisibilityCascadeJob do
         envelope(read: ['public'], edit: %w[groupA groupB], edit_users: ['000000077'],
                  embargo: '2030-01-15T00:00:00+00:00')
       )
-      allow(AtlasRb::Work).to receive(:metadata)
+      allow(AtlasRb::Resource).to receive(:set_permissions)
 
       run
 
-      expect(AtlasRb::Work).to have_received(:metadata).with(
-        'w1', { 'permissions' => { 'embargo'    => '2030-01-15T00:00:00+00:00',
-                                   'read'       => ['northeastern:drs:library:archives'],
-                                   'edit'       => %w[groupA groupB],
-                                   'edit_users' => ['000000077'] } }
+      expect(AtlasRb::Resource).to have_received(:set_permissions).with(
+        'w1', { 'embargo'    => '2030-01-15T00:00:00+00:00',
+                'read'       => ['northeastern:drs:library:archives'],
+                'edit'       => %w[groupA groupB],
+                'edit_users' => ['000000077'] }
       )
     end
 
     it 'omits the write-once provenance slots so the setter leaves them alone' do
       stub_targets(target('w1'))
       allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: ['public']))
-      allow(AtlasRb::Work).to receive(:metadata)
+      allow(AtlasRb::Resource).to receive(:set_permissions)
 
       run
 
       sent = nil
-      expect(AtlasRb::Work).to have_received(:metadata) { |_noid, payload| sent = payload }
-      expect(sent['permissions'].keys).to contain_exactly('embargo', 'read', 'edit', 'edit_users')
+      expect(AtlasRb::Resource).to have_received(:set_permissions) { |_noid, payload| sent = payload }
+      expect(sent.keys).to contain_exactly('embargo', 'read', 'edit', 'edit_users')
     end
   end
 
@@ -108,14 +108,14 @@ RSpec.describe VisibilityCascadeJob do
     it 'takes the submitted envelope verbatim, without re-reading the stored one' do
       stub_targets(target('top', 'Collection'))
       allow(AtlasRb::Resource).to receive(:permissions)
-      allow(AtlasRb::Collection).to receive(:metadata)
+      allow(AtlasRb::Resource).to receive(:set_permissions)
 
       submitted = { 'read' => ['northeastern:drs:library:archives'], 'edit' => ['newgroup'], 'embargo' => '' }
       Current.set(nuid: actor) do
         described_class.perform_now(noid: 'top', uuid: 'uuid-top', permissions: submitted)
       end
 
-      expect(AtlasRb::Collection).to have_received(:metadata).with('top', { 'permissions' => submitted })
+      expect(AtlasRb::Resource).to have_received(:set_permissions).with('top', submitted)
       expect(AtlasRb::Resource).not_to have_received(:permissions)
     end
 
@@ -125,8 +125,8 @@ RSpec.describe VisibilityCascadeJob do
     it 'is not counted among the items it reports narrowing' do
       stub_targets(target('w1'), target('top', 'Collection'))
       allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: ['public']))
-      allow(AtlasRb::Work).to receive(:metadata)
-      allow(AtlasRb::Collection).to receive(:metadata)
+      allow(AtlasRb::Resource).to receive(:set_permissions)
+      allow(AtlasRb::Resource).to receive(:set_permissions)
 
       run
 
@@ -134,19 +134,21 @@ RSpec.describe VisibilityCascadeJob do
     end
   end
 
-  describe 'ordering and dispatch' do
-    it 'writes each target through its own atlas_rb class, in the order given' do
+  # One endpoint serves every type, so there is no per-class dispatch left to
+  # assert. The ORDER is the correctness requirement and always was: top-down
+  # opens a window where a descendant is more visible than its container, and a
+  # crash leaves it that way.
+  describe 'ordering' do
+    it 'writes the deepest targets first and the container last' do
       stub_targets(target('w1'), target('child', 'Collection'), target('top', 'Collection'))
       allow(AtlasRb::Resource).to receive(:permissions).and_return(envelope(read: ['public']))
 
-      calls = []
-      allow(AtlasRb::Work).to receive(:metadata) { |noid, _| calls << ['Work', noid] }
-      allow(AtlasRb::Collection).to receive(:metadata) { |noid, _| calls << ['Collection', noid] }
+      written = []
+      allow(AtlasRb::Resource).to receive(:set_permissions) { |noid, _| written << noid }
 
       run
 
-      # The container is written last, after everything beneath it.
-      expect(calls).to eq([%w[Work w1], %w[Collection child], %w[Collection top]])
+      expect(written).to eq(%w[w1 child top])
     end
   end
 
@@ -156,7 +158,7 @@ RSpec.describe VisibilityCascadeJob do
       allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: ['public']))
       allow(AtlasRb::Resource).to receive(:permissions).with('w2')
                                                        .and_return(envelope(read: ['northeastern:drs:library:archives']))
-      allow(AtlasRb::Work).to receive(:metadata)
+      allow(AtlasRb::Resource).to receive(:set_permissions)
 
       expect { run }.to change(Message, :count).by(1)
 
@@ -169,7 +171,7 @@ RSpec.describe VisibilityCascadeJob do
     it 'records the cascade on the admin ledger, with its tally and its failures' do
       stub_targets(target('w1'))
       allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: ['public']))
-      allow(AtlasRb::Work).to receive(:metadata).and_raise(AtlasRb::ForbiddenError.new('no rights'))
+      allow(AtlasRb::Resource).to receive(:set_permissions).and_raise(AtlasRb::ForbiddenError.new('no rights'))
 
       expect { run }.to change(AdminNotice, :count).by(1)
 
@@ -183,7 +185,7 @@ RSpec.describe VisibilityCascadeJob do
     it 'sends no message when there is no actor, and records the notice anyway' do
       stub_targets(target('w1'))
       allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: ['public']))
-      allow(AtlasRb::Work).to receive(:metadata)
+      allow(AtlasRb::Resource).to receive(:set_permissions)
 
       cascade = lambda do
         Current.set(nuid: nil) do
@@ -200,7 +202,7 @@ RSpec.describe VisibilityCascadeJob do
     it 'names what it could not change' do
       stub_targets(target('w1'))
       allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: ['public']))
-      allow(AtlasRb::Work).to receive(:metadata).and_raise(AtlasRb::ForbiddenError.new('no rights'))
+      allow(AtlasRb::Resource).to receive(:set_permissions).and_raise(AtlasRb::ForbiddenError.new('no rights'))
 
       run
 
@@ -212,11 +214,11 @@ RSpec.describe VisibilityCascadeJob do
     it 'skips a resource the permissions lookup cannot resolve' do
       stub_targets(target('gone'))
       allow(AtlasRb::Resource).to receive(:permissions).with('gone').and_return(nil)
-      allow(AtlasRb::Work).to receive(:metadata)
+      allow(AtlasRb::Resource).to receive(:set_permissions)
 
       run
 
-      expect(AtlasRb::Work).not_to have_received(:metadata)
+      expect(AtlasRb::Resource).not_to have_received(:set_permissions)
       expect(Message.last.subject).to eq('Visibility change finished')
     end
   end
@@ -228,7 +230,7 @@ RSpec.describe VisibilityCascadeJob do
   it 'does not record a stale-resource conflict as a permanent failure' do
     stub_targets(target('w1'))
     allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: ['public']))
-    allow(AtlasRb::Work).to receive(:metadata).and_raise(AtlasRb::StaleResourceError.new('conflict'))
+    allow(AtlasRb::Resource).to receive(:set_permissions).and_raise(AtlasRb::StaleResourceError.new('conflict'))
 
     expect { run }.not_to change(Message, :count)
   end
@@ -242,7 +244,7 @@ RSpec.describe VisibilityCascadeJob do
     let(:law) { 'northeastern:drs:school_of_law:law_library:staff' }
 
     before do
-      allow(AtlasRb::Collection).to receive(:metadata)
+      allow(AtlasRb::Resource).to receive(:set_permissions)
       allow(AtlasRb::Resource).to receive(:permissions).with('top').and_return(envelope(read: ['public']))
     end
 

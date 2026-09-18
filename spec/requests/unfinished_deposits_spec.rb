@@ -26,7 +26,7 @@ RSpec.describe 'Unfinished deposits', type: :request do
   let!(:unfinished) do
     work = AtlasRb::Work.create(collection.id, "#{fixtures}/work-mods.xml",
                                 nuid: '000000004', depositor: depositor_nuid)
-    AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+    AtlasRb::Resource.set_permissions(work.id, { 'read' => ['public'] }, nuid: '000000004')
     work
   end
 
@@ -42,7 +42,7 @@ RSpec.describe 'Unfinished deposits', type: :request do
   def public_container(klass, parent_id)
     kind = klass.name.demodulize.downcase
     container = klass.create(parent_id, "#{fixtures}/#{kind}-mods.xml", nuid: '000000004')
-    klass.metadata(container.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+    AtlasRb::Resource.set_permissions(container.id, { 'read' => ['public'] }, nuid: '000000004')
     container
   end
 

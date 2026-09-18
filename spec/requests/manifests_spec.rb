@@ -10,22 +10,22 @@ RSpec.describe 'Work IIIF manifests', type: :request do
   include Devise::Test::IntegrationHelpers
 
   def mods(kind) = "/home/cerberus/web/spec/fixtures/files/#{kind}-mods.xml"
-  def read_public = { 'permissions' => { 'read' => ['public'] } }
+  def read_public = { 'read' => ['public'] }
 
   let!(:community) do
     c = AtlasRb::Community.create(nil, mods('community'), nuid: '000000004')
-    AtlasRb::Community.metadata(c.id, read_public, nuid: '000000004')
+    AtlasRb::Resource.set_permissions(c.id, read_public, nuid: '000000004')
     c
   end
   let!(:collection) do
     c = AtlasRb::Collection.create(community.id, mods('collection'), nuid: '000000004')
-    AtlasRb::Collection.metadata(c.id, read_public, nuid: '000000004')
+    AtlasRb::Resource.set_permissions(c.id, read_public, nuid: '000000004')
     c
   end
   let!(:work) do
     w = AtlasRb::Work.create(collection.id, mods('work'), nuid: '000000004')
     AtlasRb::Work.complete(w.id, nuid: '000000004')
-    AtlasRb::Work.metadata(w.id, read_public, nuid: '000000004')
+    AtlasRb::Resource.set_permissions(w.id, read_public, nuid: '000000004')
     w
   end
 
@@ -68,8 +68,8 @@ RSpec.describe 'Work IIIF manifests', type: :request do
   end
 
   it 'denies the manifest of a private work to anonymous callers' do
-    AtlasRb::Work.metadata(work.id,
-                           { 'permissions' => { 'read' => [], 'edit' => [] } }, nuid: '000000004')
+    AtlasRb::Resource.set_permissions(work.id,
+                                      { 'read' => [], 'edit' => [] }, nuid: '000000004')
     get "/works/#{work.id}/manifest"
     expect(response).not_to have_http_status(:ok)
   end

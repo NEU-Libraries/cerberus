@@ -7,7 +7,7 @@ RSpec.describe ShowcaseProvisioner do
     allow(AtlasRb::Collection).to receive(:mods).and_return('<mods/>')
     allow(Metadata::MODSMerge).to receive(:call).and_return('<mods titled/>')
     allow(Metadata::MODSMerge).to receive(:unchanged?).and_return(false)
-    allow(AtlasRb::Collection).to receive(:update)
+    allow(AtlasRb::Resource).to receive(:put_mods)
     allow(File).to receive(:write)
   end
 

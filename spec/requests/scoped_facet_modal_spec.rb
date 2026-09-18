@@ -23,20 +23,20 @@ RSpec.describe 'Scoped facet modal', type: :request do
   # Rails.root, not the container's main-checkout path: these fixtures are new,
   # so in a worktree run they exist only under the worktree.
   def mods(kind) = Rails.root.join("spec/fixtures/files/#{kind}-mods.xml").to_s
-  def read_public = { 'permissions' => { 'read' => ['public'] } }
-  def read_staff  = { 'permissions' => { 'read' => ['northeastern:drs:repository:staff'] } }
+  def read_public = { 'read' => ['public'] }
+  def read_staff  = { 'read' => ['northeastern:drs:repository:staff'] }
 
   def public_container(klass, parent_id, fixture = nil)
     kind = fixture || klass.name.demodulize.downcase
     container = klass.create(parent_id, mods(kind), nuid: nuid)
-    klass.metadata(container.id, read_public, nuid: nuid)
+    AtlasRb::Resource.set_permissions(container.id, read_public, nuid: nuid)
     container
   end
 
   def public_work(parent_id, fixture)
     work = AtlasRb::Work.create(parent_id, mods(fixture), nuid: nuid)
     AtlasRb::Work.complete(work.id, nuid: nuid)
-    AtlasRb::Work.metadata(work.id, read_public, nuid: nuid)
+    AtlasRb::Resource.set_permissions(work.id, read_public, nuid: nuid)
     work
   end
 
@@ -208,7 +208,7 @@ RSpec.describe 'Scoped facet modal', type: :request do
     # readable and would prove nothing.
     let(:private_collection) do
       c = AtlasRb::Collection.create(community.id, mods('collection'), nuid: nuid)
-      AtlasRb::Collection.metadata(c.id, read_staff, nuid: nuid)
+      AtlasRb::Resource.set_permissions(c.id, read_staff, nuid: nuid)
       c
     end
     let!(:private_work) do

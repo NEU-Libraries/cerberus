@@ -15,7 +15,7 @@ class XmlController < ApplicationController
     item = resolved_resource
     @resource = item.resource
     @klass = item.klass
-    resource_mods(item.klass)
+    resource_mods
     @double_escapes = Metadata::DoubleEscapes.report(@raw_xml)
     editor_breadcrumbs(item.klass, params[:id])
   end
@@ -50,7 +50,7 @@ class XmlController < ApplicationController
     @errors = XmlValidator.call(xml: params[:raw_xml])
     return render_invalid(item) if @errors.any?
 
-    AtlasRb::Resource.class_for(klass).update(params[:resource_id], create_temp_xml, origin: 'xml_editor')
+    AtlasRb::Resource.put_mods(params[:resource_id], create_temp_xml, origin: 'xml_editor')
     redirect_to resource_path(klass, params[:resource_id])
   end
 
@@ -75,7 +75,7 @@ class XmlController < ApplicationController
       @raw_xml = params[:raw_xml]
       @repairable = Metadata::ControlCharacters.any?(params[:raw_xml])
       @double_escapes = Metadata::DoubleEscapes.report(params[:raw_xml])
-      @mods = AtlasRb::Resource.class_for(item.klass).mods(params[:resource_id], 'html')
+      @mods = AtlasRb::Resource.mods(params[:resource_id], 'html')
       editor_breadcrumbs(item.klass, params[:resource_id])
       render :editor, status: :unprocessable_content
     end
@@ -116,10 +116,9 @@ class XmlController < ApplicationController
       end
     end
 
-    def resource_mods(klass)
-      atlas_class = AtlasRb::Resource.class_for(klass)
-      @mods = atlas_class.mods(params[:id], 'html')
-      @raw_xml = atlas_class.mods(params[:id], 'xml')
+    def resource_mods
+      @mods = AtlasRb::Resource.mods(params[:id], 'html')
+      @raw_xml = AtlasRb::Resource.mods(params[:id], 'xml')
     end
 
     def create_temp_xml

@@ -350,7 +350,7 @@ describe Transformable do
       )
       host.instance_variable_set(:@permissions, AtlasRb::Mash.new('read' => ['public']))
       host.current_user = user_double(groups: ['curators'])
-      allow(AtlasRb::Collection).to receive(:metadata)
+      allow(AtlasRb::Resource).to receive(:set_permissions)
     end
 
     it 'skips its own write and reports what the cascade will do' do
@@ -360,7 +360,7 @@ describe Transformable do
 
       host.apply_permissions('c-1')
 
-      expect(AtlasRb::Collection).not_to have_received(:metadata)
+      expect(AtlasRb::Resource).not_to have_received(:set_permissions)
       expect(host.flash[:notice]).to eq('Restricting this collection.')
     end
 
@@ -373,7 +373,7 @@ describe Transformable do
 
       host.apply_permissions('c-1')
 
-      expect(AtlasRb::Collection).not_to have_received(:metadata)
+      expect(AtlasRb::Resource).not_to have_received(:set_permissions)
       expect(host.flash[:alert]).to eq('Ask DRS staff.')
     end
 
@@ -382,12 +382,12 @@ describe Transformable do
 
       host.apply_permissions('c-1')
 
-      expect(AtlasRb::Collection).to have_received(:metadata)
+      expect(AtlasRb::Resource).to have_received(:set_permissions)
     end
 
     it 'never consults the cascade for a Work' do
       allow(NarrowingRequest).to receive(:call)
-      allow(AtlasRb::Work).to receive(:metadata)
+      allow(AtlasRb::Resource).to receive(:set_permissions)
       declare(AtlasRb::Work, :work)
       host.params = ActionController::Parameters.new(
         id: 'w-1', work: { permissions: { '1' => { 'group_id' => 'curators', 'ability' => 'read' } } }
@@ -396,7 +396,7 @@ describe Transformable do
       host.apply_permissions('w-1')
 
       expect(NarrowingRequest).not_to have_received(:call)
-      expect(AtlasRb::Work).to have_received(:metadata)
+      expect(AtlasRb::Resource).to have_received(:set_permissions)
     end
   end
 
@@ -406,7 +406,7 @@ describe Transformable do
   # not show the option, catching JS-off and hand-made requests.
   describe '#apply_permissions when the submit narrows a Community' do
     before do
-      allow(AtlasRb::Community).to receive(:metadata)
+      allow(AtlasRb::Resource).to receive(:set_permissions)
       declare(AtlasRb::Community, :community)
     end
 
@@ -418,7 +418,7 @@ describe Transformable do
 
       host.apply_permissions('m-1')
 
-      expect(AtlasRb::Community).not_to have_received(:metadata)
+      expect(AtlasRb::Resource).not_to have_received(:set_permissions)
       expect(host.flash[:alert]).to eq(ResourcePermissions::COMMUNITY_NARROWING_REFUSED)
     end
 
@@ -431,7 +431,7 @@ describe Transformable do
 
       host.apply_permissions('m-1')
 
-      expect(AtlasRb::Community).not_to have_received(:metadata)
+      expect(AtlasRb::Resource).not_to have_received(:set_permissions)
     end
 
     # The admin path writes the ordinary way. Nothing is handed to
@@ -447,7 +447,7 @@ describe Transformable do
 
       host.apply_permissions('m-1')
 
-      expect(AtlasRb::Community).to have_received(:metadata)
+      expect(AtlasRb::Resource).to have_received(:set_permissions)
       expect(NarrowingRequest).not_to have_received(:call)
       expect(host.flash[:alert]).to be_nil
     end
@@ -460,7 +460,7 @@ describe Transformable do
 
       host.apply_permissions('m-1')
 
-      expect(AtlasRb::Community).to have_received(:metadata)
+      expect(AtlasRb::Resource).to have_received(:set_permissions)
     end
   end
 
@@ -476,7 +476,7 @@ describe Transformable do
     end
 
     it 'flashes the invariant in the depositor’s language rather than raising' do
-      allow(AtlasRb::Work).to receive(:metadata)
+      allow(AtlasRb::Resource).to receive(:set_permissions)
         .and_raise(AtlasRb::PermissionsError.new('nope', code: 'visibility_exceeds_parent'))
 
       expect { host.apply_permissions('w-1') }.not_to raise_error
@@ -484,7 +484,7 @@ describe Transformable do
     end
 
     it 'falls back to Atlas’s own message for a code Cerberus doesn’t map yet' do
-      allow(AtlasRb::Work).to receive(:metadata)
+      allow(AtlasRb::Resource).to receive(:set_permissions)
         .and_raise(AtlasRb::PermissionsError.new('some new invariant', code: 'not_yet_mapped'))
 
       host.apply_permissions('w-1')
@@ -498,7 +498,7 @@ describe Transformable do
       declare(AtlasRb::Work, :work)
       allow(host).to receive(:sleep) # don't actually back off in specs
       allow(host).to receive(:write_tmp_xml).and_return('/tmp/merged.xml')
-      allow(AtlasRb::Work).to receive(:mods).and_return('<mods/>')
+      allow(AtlasRb::Resource).to receive(:mods).and_return('<mods/>')
       allow(Metadata::MODSMerge).to receive(:call).and_return('<mods>merged</mods>')
       allow(Metadata::MODSMerge).to receive(:unchanged?).and_return(false)
     end
@@ -509,7 +509,7 @@ describe Transformable do
 
     it 'retries on StaleResourceError and succeeds once the conflict clears' do
       attempts = 0
-      allow(AtlasRb::Work).to receive(:update) do
+      allow(AtlasRb::Resource).to receive(:put_mods) do
         attempts += 1
         raise AtlasRb::StaleResourceError, 'stale' if attempts < 3
 
@@ -522,19 +522,19 @@ describe Transformable do
     end
 
     it 're-raises once the bounded retry budget is exhausted' do
-      allow(AtlasRb::Work).to receive(:update).and_raise(AtlasRb::StaleResourceError, 'stale')
+      allow(AtlasRb::Resource).to receive(:put_mods).and_raise(AtlasRb::StaleResourceError, 'stale')
 
       expect { save }.to raise_error(AtlasRb::StaleResourceError)
-      expect(AtlasRb::Work).to have_received(:update).exactly(5).times
+      expect(AtlasRb::Resource).to have_received(:put_mods).exactly(5).times
     end
 
     it 'skips the update entirely on a no-op merge (no write, no retry)' do
       allow(Metadata::MODSMerge).to receive(:unchanged?).and_return(true)
-      allow(AtlasRb::Work).to receive(:update)
+      allow(AtlasRb::Resource).to receive(:put_mods)
 
       save
 
-      expect(AtlasRb::Work).not_to have_received(:update)
+      expect(AtlasRb::Resource).not_to have_received(:put_mods)
     end
   end
 end

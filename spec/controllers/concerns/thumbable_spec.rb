@@ -7,14 +7,10 @@ describe Thumbable do
     Class.new do
       include Thumbable
 
-      # atlas_class is the class-level `atlas_resource` declaration in
-      # production. It is per-instance here so one host can stand in for each
-      # of the three resource types that share the concern.
-      attr_accessor :params, :atlas_class
+      attr_accessor :params
 
-      def initialize(params, atlas_class = AtlasRb::Work)
+      def initialize(params)
         @params = params
-        @atlas_class = atlas_class
       end
     end
   end
@@ -26,11 +22,15 @@ describe Thumbable do
       preview:      'https://iiif/x.jp2/full/500,/0/default.jpg' }
   end
 
+  # The Work / Collection / Community edit forms share this concern, and there
+  # is nothing type-specific left to assert: Atlas writes thumbnails on
+  # /resources/:id/thumbnails whatever the resource is, so the concern takes an
+  # id and no type at all.
   describe '#apply_thumbnail' do
     it 'no-ops when no file was uploaded (no mint, no Atlas write)' do
       obj = thumbable_class.new({ thumbnail: nil })
       expect(MasterJp2).not_to receive(:call)
-      expect(AtlasRb::Work).not_to receive(:set_thumbnails)
+      expect(AtlasRb::Resource).not_to receive(:set_thumbnails)
 
       expect(obj.apply_thumbnail('w-1')).to be_nil
     end
@@ -41,20 +41,8 @@ describe Thumbable do
                                         .and_return(MasterJp2::Result.new(open_base: 'BASE', gated_base: 'G'))
       allow(ThumbnailCreator).to receive(:call).with(base: 'BASE').and_return(urls)
 
-      expect(AtlasRb::Work).to receive(:set_thumbnails).with('w-1', **urls)
+      expect(AtlasRb::Resource).to receive(:set_thumbnails).with('w-1', **urls)
       obj.apply_thumbnail('w-1')
-    end
-
-    # The concern is shared by the Work/Collection/Community edit forms; it must
-    # dispatch to the host's declared class, since all three expose
-    # set_thumbnails.
-    it 'routes to the declared Atlas class' do
-      obj = thumbable_class.new({ thumbnail: file }, AtlasRb::Collection)
-      allow(MasterJp2).to receive(:call).and_return(MasterJp2::Result.new(open_base: 'BASE', gated_base: 'G'))
-      allow(ThumbnailCreator).to receive(:call).with(base: 'BASE').and_return(urls)
-
-      expect(AtlasRb::Collection).to receive(:set_thumbnails).with('c-1', **urls)
-      obj.apply_thumbnail('c-1')
     end
   end
 end

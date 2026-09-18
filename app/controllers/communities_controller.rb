@@ -40,7 +40,7 @@ class CommunitiesController < CatalogController
   end
 
   def tombstone
-    perform_tombstone!(AtlasRb::Community.tombstone(params[:id]), type: 'Community')
+    perform_tombstone!(AtlasRb::Resource.tombstone(params[:id]), type: 'Community')
   end
 
   def new

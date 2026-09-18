@@ -129,7 +129,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
     describe 'POST restore' do
       it 'restores through the generic admin endpoint and redirects with a notice' do
         expect(AtlasRb::Admin::Resource).to receive(:restore).with('abc')
-          .and_return(instance_double(Faraday::Response, success?: true))
+                                                             .and_return(instance_double(Faraday::Response, success?: true))
 
         post '/admin/tombstones/abc/restore', params: { type: 'Work' }
 
@@ -142,7 +142,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
       %w[Work Collection Community].each do |type|
         it "restores a #{type} through the same call" do
           expect(AtlasRb::Admin::Resource).to receive(:restore).with('xyz')
-            .and_return(instance_double(Faraday::Response, success?: true))
+                                                               .and_return(instance_double(Faraday::Response, success?: true))
 
           post '/admin/tombstones/xyz/restore', params: { type: type }
 

@@ -26,7 +26,7 @@ describe DownloadsController do
         # Widening runs top-down; Atlas refuses a resource more visible than its
         # container.
         publicize_ancestry!(community: community, collection: collection)
-        AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+        AtlasRb::Resource.set_permissions(work.id, { 'read' => ['public'] }, nuid: '000000004')
 
         allow(AtlasRb::Resource).to receive(:permissions).with(noid).and_return(
           AtlasRb::Mash.new('embargo' => '', 'depositor' => [], 'read' => ['public'], 'edit' => [])

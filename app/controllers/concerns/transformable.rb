@@ -17,7 +17,7 @@ module Transformable
   # #save_descriptive! deliberately re-reads inside with_stale_retry, because a
   # retry needs the current MODS and its lock token, not a memo from earlier.
   def resource_mods
-    @resource_mods ||= atlas_class.mods(params[:id], 'xml')
+    @resource_mods ||= AtlasRb::Resource.mods(params[:id], 'xml')
   end
 
   # `include_advanced` says this form carries the Advanced field set INLINE,
@@ -45,14 +45,14 @@ module Transformable
   # @permissions is the resource's CURRENT envelope, loaded by the authorization
   # gate; it is what tells ResourcePermissions whether this submit narrows.
   def apply_permissions(id)
-    report(ResourcePermissions.new(klass: atlas_class, id: id, envelope: permission_params,
+    report(ResourcePermissions.new(solr_type: solr_type, id: id, envelope: permission_params,
                                    current_read: Array(@permissions&.read), actor: current_user).apply!)
   end
 
   # No current_read: one line after a create, @permissions still holds the
   # DESTINATION's envelope, so it would answer the wrong question.
   def apply_new_permissions(id)
-    report(ResourcePermissions.new(klass: atlas_class, id: id,
+    report(ResourcePermissions.new(solr_type: solr_type, id: id,
                                    envelope: permission_params, actor: current_user).apply_minted!)
   end
 

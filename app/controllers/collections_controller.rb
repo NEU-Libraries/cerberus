@@ -35,7 +35,7 @@ class CollectionsController < CatalogController
   end
 
   def tombstone
-    perform_tombstone!(AtlasRb::Collection.tombstone(params[:id]), type: 'Collection')
+    perform_tombstone!(AtlasRb::Resource.tombstone(params[:id]), type: 'Collection')
   end
 
   def new

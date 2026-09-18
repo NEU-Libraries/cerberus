@@ -24,9 +24,9 @@ RSpec.describe XmlIngestJob, type: :job do
     allow(File).to receive(:exist?).with(content_path).and_return(true)
     allow(File).to receive(:read).with(mods_path).and_return('<mods:mods/>')
     allow(XmlValidator).to receive(:call).and_return([])
-    allow(AtlasRb::Work).to receive(:update)
+    allow(AtlasRb::Resource).to receive(:put_mods)
     allow(AtlasRb::Work).to receive(:create).and_return(double(id: 'w-new'))
-    allow(AtlasRb::Work).to receive(:metadata)
+    allow(AtlasRb::Resource).to receive(:set_permissions)
     allow(FileUtils).to receive(:mkdir_p)
     allow(FileUtils).to receive(:mv)
     allow(Marcel::MimeType).to receive(:for).and_return('image/tiff')
@@ -38,7 +38,7 @@ RSpec.describe XmlIngestJob, type: :job do
   describe 'update mode (row carries an identifier)' do
     it 'replaces the existing Work MODS via Work.update by NOID' do
       described_class.new.perform(ingest.id, update_row)
-      expect(AtlasRb::Work).to have_received(:update).with('noid-9', kind_of(String))
+      expect(AtlasRb::Resource).to have_received(:put_mods).with('noid-9', kind_of(String))
     end
 
     it 'records the NOID as work_pid and completes' do
@@ -51,7 +51,7 @@ RSpec.describe XmlIngestJob, type: :job do
     # hand-built-manifest mistake, and must read as that rather than as three
     # exhausted attempts and an exception class.
     it 'fails the row once, naming the identifier, when the object does not exist' do
-      allow(AtlasRb::Work).to receive(:update).and_raise(AtlasRb::NotFoundError, 'PATCH /works/noid-9 → 404')
+      allow(AtlasRb::Resource).to receive(:put_mods).and_raise(AtlasRb::NotFoundError, 'PUT /resources/noid-9/mods → 404')
 
       described_class.new.perform(ingest.id, update_row)
 
@@ -131,14 +131,14 @@ RSpec.describe XmlIngestJob, type: :job do
     it 'sets the embargo release date via Work.metadata when the row opts in' do
       row = update_row.merge('embargoed' => 'true', 'embargo_date' => '2030-01-01')
       described_class.new.perform(ingest.id, row)
-      expect(AtlasRb::Work).to have_received(:metadata).with('noid-9', { permissions: { embargo: '2030-01-01' } })
+      expect(AtlasRb::Resource).to have_received(:set_permissions).with('noid-9', { embargo: '2030-01-01' })
       expect(ingest.reload).to be_completed
     end
 
     it 'fails the row when embargoed without a valid YYYY-MM-DD date' do
       row = update_row.merge('embargoed' => 'true', 'embargo_date' => 'soon')
       described_class.new.perform(ingest.id, row)
-      expect(AtlasRb::Work).not_to have_received(:metadata)
+      expect(AtlasRb::Resource).not_to have_received(:set_permissions)
       expect(ingest.reload).to be_failed
       expect(ingest.error_message).to match(/Embargo Date/)
     end
@@ -160,7 +160,7 @@ RSpec.describe XmlIngestJob, type: :job do
       allow(File).to receive(:exist?).with(mods_path).and_return(false)
       described_class.new.perform(ingest.id, update_row)
       expect(ingest.reload.error_message).to match(/was not found in the archive/)
-      expect(AtlasRb::Work).not_to have_received(:update)
+      expect(AtlasRb::Resource).not_to have_received(:put_mods)
     end
 
     it 'fails when the MODS is invalid' do
@@ -168,7 +168,7 @@ RSpec.describe XmlIngestJob, type: :job do
       described_class.new.perform(ingest.id, update_row)
       expect(ingest.reload).to be_failed
       expect(ingest.error_message).to match(/Invalid MODS.*xmlns:mods/)
-      expect(AtlasRb::Work).not_to have_received(:update)
+      expect(AtlasRb::Resource).not_to have_received(:put_mods)
     end
   end
 
@@ -176,7 +176,7 @@ RSpec.describe XmlIngestJob, type: :job do
     %i[completed completed_with_warnings failed].each do |state|
       it "no-ops when already #{state}" do
         ingest.update!(status: state)
-        expect(AtlasRb::Work).not_to receive(:update)
+        expect(AtlasRb::Resource).not_to receive(:put_mods)
         expect(AtlasRb::Work).not_to receive(:create)
         described_class.new.perform(ingest.id, update_row)
       end

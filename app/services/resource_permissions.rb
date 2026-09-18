@@ -24,13 +24,15 @@ class ResourcePermissions
     def self.refused(message) = new(level: :alert, message: message)
   end
 
-  # @param klass [Class] AtlasRb::Work, AtlasRb::Collection or AtlasRb::Community.
+  # @param solr_type [String] 'Work', 'Collection' or 'Community'. A policy
+  #   input, not a dispatch one — the write itself is type-agnostic, and only
+  #   the cascade rules below differ by type.
   # @param id [String] the resource's noid.
   # @param envelope [Hash] the submitted ACL, already parsed by PermissionsForm.
   # @param current_read [Array<String>] the resource's read ACL before this submit.
   # @param actor [User, nil] the acting user.
-  def initialize(klass:, id:, envelope:, current_read: [], actor: nil)
-    @klass        = klass
+  def initialize(solr_type:, id:, envelope:, current_read: [], actor: nil)
+    @solr_type    = solr_type
     @id           = id
     @envelope     = envelope
     @current_read = Array(current_read)
@@ -45,7 +47,10 @@ class ResourcePermissions
     deferral = narrowing_deferral
     return deferral if deferral
 
-    write(@envelope)
+    # The ACL slots only. The form's `permit(:embargo)` leaves a top-level
+    # embargo key that nothing reads — PermissionsForm copies the submitted
+    # value into permissions[:embargo], which is where it belongs.
+    write(@envelope[:permissions])
   end
 
   # The create path. Deliberately not #apply!: there is no cascade one line
@@ -55,13 +60,13 @@ class ResourcePermissions
     submitted = @envelope[:permissions]
     return Result.silent if submitted.blank?
 
-    write(permissions: minted_permissions.merge(submitted.symbolize_keys))
+    write(minted_permissions.merge(submitted.symbolize_keys))
   end
 
   private
 
     def write(payload)
-      with_stale_retry { @klass.metadata(@id, payload) }
+      with_stale_retry { AtlasRb::Resource.set_permissions(@id, payload) }
       Result.silent
     rescue AtlasRb::PermissionsError => e
       Result.refused(PERMISSIONS_REFUSED.fetch(e.code, e.message))
@@ -70,8 +75,8 @@ class ResourcePermissions
     # nil when the ordinary write should go ahead. Works never defer; Communities
     # never cascade.
     def narrowing_deferral
-      return nil if @klass == AtlasRb::Work
-      return community_narrowing_refusal if @klass == AtlasRb::Community
+      return nil if @solr_type == 'Work'
+      return community_narrowing_refusal if @solr_type == 'Community'
 
       outcome = NarrowingRequest.call(noid: @id, current_read: @current_read,
                                       permissions: @envelope[:permissions] || {}, actor: @actor)

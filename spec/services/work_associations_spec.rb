@@ -158,25 +158,25 @@ RSpec.describe WorkAssociations do
 
   def nuid = '000000004'
   def mods(kind) = Rails.root.join('spec/fixtures/files', "#{kind}-mods.xml").to_s
-  def read_public = { 'permissions' => { 'read' => ['public'] } }
-  def read_staff  = { 'permissions' => { 'read' => ['northeastern:drs:repository:staff'] } }
+  def read_public = { 'read' => ['public'] }
+  def read_staff  = { 'read' => ['northeastern:drs:repository:staff'] }
 
   def public_community
     community = AtlasRb::Community.create(nil, mods('community'), nuid: nuid)
-    AtlasRb::Community.metadata(community.id, read_public, nuid: nuid)
+    AtlasRb::Resource.set_permissions(community.id, read_public, nuid: nuid)
     community
   end
 
   def public_collection(parent_id)
     collection = AtlasRb::Collection.create(parent_id, mods('collection'), nuid: nuid)
-    AtlasRb::Collection.metadata(collection.id, read_public, nuid: nuid)
+    AtlasRb::Resource.set_permissions(collection.id, read_public, nuid: nuid)
     collection
   end
 
   def public_work(parent_id)
     work = AtlasRb::Work.create(parent_id, mods('work'), nuid: nuid)
     AtlasRb::Work.complete(work.id, nuid: nuid)
-    AtlasRb::Work.metadata(work.id, read_public, nuid: nuid)
+    AtlasRb::Resource.set_permissions(work.id, read_public, nuid: nuid)
     work
   end
 
@@ -185,7 +185,7 @@ RSpec.describe WorkAssociations do
   def restricted_work(parent_id)
     work = AtlasRb::Work.create(parent_id, mods('work'), nuid: nuid)
     AtlasRb::Work.complete(work.id, nuid: nuid)
-    AtlasRb::Work.metadata(work.id, read_staff, nuid: nuid)
+    AtlasRb::Resource.set_permissions(work.id, read_staff, nuid: nuid)
     work
   end
 end

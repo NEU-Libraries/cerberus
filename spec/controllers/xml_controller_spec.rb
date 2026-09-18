@@ -226,11 +226,11 @@ describe XmlController do
         # Reference the fixture before the stub: AtlasRb::Work.create issues its
         # own update to attach the MODS, which the stub would otherwise absorb.
         resource_id = work.id
-        allow(AtlasRb::Work).to receive(:update)
+        allow(AtlasRb::Resource).to receive(:put_mods)
 
         put :update, params: { resource_id: resource_id, raw_xml: malformed_xml }
 
-        expect(AtlasRb::Work).not_to have_received(:update)
+        expect(AtlasRb::Resource).not_to have_received(:put_mods)
       end
 
       it 're-renders the editor with the errors, and refuses the request' do
@@ -269,11 +269,11 @@ describe XmlController do
 
     it 'writes nothing to Atlas -- the curator still has to press Save' do
       resource_id = work.id
-      allow(AtlasRb::Work).to receive(:update)
+      allow(AtlasRb::Resource).to receive(:put_mods)
 
       put :repair, params: { resource_id: resource_id, raw_xml: dirty_xml }, xhr: true
 
-      expect(AtlasRb::Work).not_to have_received(:update)
+      expect(AtlasRb::Resource).not_to have_received(:put_mods)
     end
 
     context 'what the curator sees' do
@@ -371,8 +371,8 @@ describe XmlController do
     let(:decoded_xml) { escaped_xml.sub('XM&amp;lt;LGBT/&amp;gt;', 'XM&lt;LGBT/&gt;') }
 
     def stub_stored_xml(xml)
-      allow(AtlasRb::Work).to receive(:mods).with(work.id, 'html').and_return('<div>preview</div>')
-      allow(AtlasRb::Work).to receive(:mods).with(work.id, 'xml').and_return(xml)
+      allow(AtlasRb::Resource).to receive(:mods).with(work.id, 'html').and_return('<div>preview</div>')
+      allow(AtlasRb::Resource).to receive(:mods).with(work.id, 'xml').and_return(xml)
     end
 
     # The record displays wrong on its show page, so the curator arrives here
@@ -435,11 +435,11 @@ describe XmlController do
 
     it 'writes nothing to Atlas -- the curator still has to press Save' do
       resource_id = work.id
-      allow(AtlasRb::Work).to receive(:update)
+      allow(AtlasRb::Resource).to receive(:put_mods)
 
       put :repair, params: { resource_id: resource_id, raw_xml: escaped_xml, kind: 'double_escapes' }, xhr: true
 
-      expect(AtlasRb::Work).not_to have_received(:update)
+      expect(AtlasRb::Resource).not_to have_received(:put_mods)
     end
 
     # Two repairs share the action, so the wrong confirmation would describe a

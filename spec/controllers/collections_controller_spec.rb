@@ -12,7 +12,7 @@ describe CollectionsController do
     let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
 
     before do
-      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(collection.id, { 'edit' => ['editors'] }, nuid: '000000004')
       # Readable as well as editable. Atlas gates reads on the resource's own ACL,
       # and this fixture user carries no NUID, so the ACL read is made as the
       # guest — a private resource comes back as nothing and the page 404s before
@@ -20,7 +20,7 @@ describe CollectionsController do
       # publicize_resource! reads the current envelope and carries the grant
       # through; the reverse order would drop it.
       publicize_ancestry!(community: community)
-      publicize_resource!(AtlasRb::Collection, collection, '000000004')
+      publicize_resource!(collection, '000000004')
       sign_in user
     end
 
@@ -83,7 +83,7 @@ describe CollectionsController do
       let!(:sub_collection) do
         publicize_ancestry!(community: community, collection: collection)
         c = AtlasRb::Collection.create(collection.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004')
-        AtlasRb::Collection.metadata(c.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+        AtlasRb::Resource.set_permissions(c.id, { 'read' => ['public'] }, nuid: '000000004')
         c
       end
       let!(:other_community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', nuid: '000000004') }
@@ -93,7 +93,7 @@ describe CollectionsController do
       let!(:foreign_collection) do
         publicize_ancestry!(community: other_community)
         c = AtlasRb::Collection.create(other_community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004')
-        AtlasRb::Collection.metadata(c.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+        AtlasRb::Resource.set_permissions(c.id, { 'read' => ['public'] }, nuid: '000000004')
         c
       end
 
@@ -160,7 +160,7 @@ describe CollectionsController do
 
     before do
       publicize_ancestry!(community: community)
-      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(collection.id, { 'read' => ['public'] }, nuid: '000000004')
     end
 
     it 'renders the show partial' do
@@ -177,9 +177,9 @@ describe CollectionsController do
       end
 
       it 'is shown to a user who can edit' do
-        AtlasRb::Collection.metadata(collection.id,
-                                     { 'permissions' => { 'read' => ['public'], 'edit' => ['editors'] } },
-                                     nuid: '000000004')
+        AtlasRb::Resource.set_permissions(collection.id,
+                                          { 'read' => ['public'], 'edit' => ['editors'] },
+                                          nuid: '000000004')
         sign_in User.new(email: 'ed@example.com', nuid: '000000002', groups: ['editors'])
         get :show, params: { id: collection.id }
         expect(response.body).to include(%(href="#{edit_collection_path(collection.id)}"))
@@ -219,7 +219,7 @@ describe CollectionsController do
       let!(:sub_collection) do
         c = AtlasRb::Collection.create(collection.id,
                                        '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004')
-        AtlasRb::Collection.metadata(c.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+        AtlasRb::Resource.set_permissions(c.id, { 'read' => ['public'] }, nuid: '000000004')
         c
       end
       # The Work is two tiers down, so every container above it has to be public
@@ -229,7 +229,7 @@ describe CollectionsController do
         w = AtlasRb::Work.create(sub_collection.id,
                                  '/home/cerberus/web/spec/fixtures/files/work-mods.xml', nuid: '000000004')
         AtlasRb::Work.complete(w.id, nuid: '000000004')
-        AtlasRb::Work.metadata(w.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+        AtlasRb::Resource.set_permissions(w.id, { 'read' => ['public'] }, nuid: '000000004')
         w
       end
 
@@ -332,8 +332,8 @@ describe CollectionsController do
       # to open holding it. Showing a blank slate would invite a curator to
       # submit one and silently drop grants they never saw.
       it 'prefills the grants the new collection would inherit' do
-        AtlasRb::Community.metadata(community.id,
-                                    { 'permissions' => { 'read' => ['editors'] } }, nuid: '000000004')
+        AtlasRb::Resource.set_permissions(community.id,
+                                          { 'read' => ['editors'] }, nuid: '000000004')
 
         get :new, params: { community_id: community.id }
 
@@ -386,13 +386,13 @@ describe CollectionsController do
     end
 
     before do
-      AtlasRb::Collection.metadata(collection.id,
-                                   { 'permissions' => { 'edit' => [Permissions::STAFF_EDIT_GROUP] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(collection.id,
+                                        { 'edit' => [Permissions::STAFF_EDIT_GROUP] }, nuid: '000000004')
       sign_in user
     end
 
-    it 'calls AtlasRb::Collection.tombstone and reports success on a 2xx' do
-      allow(AtlasRb::Collection).to receive(:tombstone)
+    it 'tombstones through the generic endpoint and reports success on a 2xx' do
+      allow(AtlasRb::Resource).to receive(:tombstone)
         .and_return(instance_double(Faraday::Response, success?: true))
       post :tombstone, params: { id: collection.id }
       expect(AtlasRb::Collection).to have_received(:tombstone).with(collection.id)
@@ -401,7 +401,7 @@ describe CollectionsController do
     end
 
     it 'reports a 422 live-members refusal without claiming success' do
-      allow(AtlasRb::Collection).to receive(:tombstone)
+      allow(AtlasRb::Resource).to receive(:tombstone)
         .and_return(instance_double(Faraday::Response, success?: false, status: 422))
       request.env['HTTP_REFERER'] = collection_path(collection.id)
       post :tombstone, params: { id: collection.id }
@@ -473,16 +473,15 @@ describe CollectionsController do
     # new Collection was minted with. Replacing it would strip the edit grants
     # Atlas just gave it — a form naming only read groups names no edit ones.
     it 'merges the submitted grants into the minted envelope rather than replacing it' do
-      allow(AtlasRb::Collection).to receive(:metadata).and_call_original
+      allow(AtlasRb::Resource).to receive(:set_permissions).and_call_original
 
       post :create, params: { community_id: community.id, mass: 'private',
                               collection: { title: 'EnvelopeCollection', description: 'D',
                                             permissions: { '1' => { group_id: 'editors', ability: 'read' } } } }
 
       created_id = response.location.split('/').last
-      expect(AtlasRb::Collection).to have_received(:metadata).with(
-        created_id, hash_including(permissions: hash_including(edit: [Permissions::STAFF_EDIT_GROUP],
-                                                               read: ['editors']))
+      expect(AtlasRb::Resource).to have_received(:set_permissions).with(
+        created_id, hash_including(edit: [Permissions::STAFF_EDIT_GROUP], read: ['editors'])
       )
     ensure
       AtlasRb::Collection.tombstone(created_id) if created_id
@@ -594,7 +593,7 @@ describe CollectionsController do
     let(:user) { User.new(email: 'ed@example.com', nuid: '000000002', groups: ['editors']) }
 
     before do
-      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(collection.id, { 'edit' => ['editors'] }, nuid: '000000004')
       sign_in user
     end
 
@@ -609,11 +608,11 @@ describe CollectionsController do
     end
 
     it 'refuses a blank title and returns to the edit page without writing MODS' do
-      allow(AtlasRb::Collection).to receive(:update)
+      allow(AtlasRb::Resource).to receive(:put_mods)
 
       patch :update, params: { id: collection.id, collection: { title: '', description: 'Whatever' } }
 
-      expect(AtlasRb::Collection).not_to have_received(:update)
+      expect(AtlasRb::Resource).not_to have_received(:put_mods)
       expect(flash[:alert]).to eq('Please provide a title.')
       expect(response).to redirect_to(edit_collection_path(collection.id))
     end
@@ -653,12 +652,12 @@ describe CollectionsController do
     it 'hands a narrowing to NarrowingRequest instead of writing it here' do
       allow(NarrowingRequest).to receive(:call)
         .and_return(NarrowingRequest::Outcome.new(status: :dispatched, message: 'Queued.'))
-      allow(AtlasRb::Collection).to receive(:metadata)
+      allow(AtlasRb::Resource).to receive(:set_permissions)
 
       patch :update, params: { id:         collection.id,
                                collection: { permissions: { '1' => { group_id: 'editors', ability: 'read' } } } }
 
-      expect(AtlasRb::Collection).not_to have_received(:metadata)
+      expect(AtlasRb::Resource).not_to have_received(:set_permissions)
       expect(flash[:notice]).to eq('Queued.')
     end
   end

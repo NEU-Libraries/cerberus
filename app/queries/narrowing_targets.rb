@@ -19,9 +19,10 @@ class NarrowingTargets
   # invite an off-by-one against the deepest collection.
   LEAF_DEPTH = Float::INFINITY
 
-  Target = Struct.new(:noid, :klass, :depth, keyword_init: true) do
-    def atlas_class = AtlasRb::Resource.class_for(klass)
-  end
+  # `klass` is a label now — it names the type in a failure message and sorts
+  # Works ahead of containers. Nothing resolves it to a class: every write on
+  # the cascade goes through the generic endpoint.
+  Target = Struct.new(:noid, :klass, :depth, keyword_init: true)
 
   def initialize(noid:, uuid:)
     @noid = noid.to_s.delete_prefix('id-')

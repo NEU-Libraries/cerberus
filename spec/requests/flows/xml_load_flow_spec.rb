@@ -32,7 +32,7 @@ RSpec.describe 'XML loader end-to-end flow', type: :request do
     Rails.application.config.x.cerberus.uploads_root = tmp_uploads
     sign_in admin_user
     allow(XmlValidator).to receive(:call).and_return([])
-    allow(AtlasRb::Work).to receive(:update)
+    allow(AtlasRb::Resource).to receive(:put_mods)
     # XML loaders validate the chosen destination resolves to a Collection.
     allow(AtlasRb::Resource).to receive(:find).with('neu:root').and_return(double(klass: 'Collection'))
   end
@@ -56,7 +56,7 @@ RSpec.describe 'XML loader end-to-end flow', type: :request do
     expect(lr.xml_ingests.count).to eq(5)
     expect(lr.xml_ingests.completed.count).to eq(5)
     expect(lr).to be_completed
-    expect(AtlasRb::Work).to have_received(:update).exactly(5).times
+    expect(AtlasRb::Resource).to have_received(:put_mods).exactly(5).times
   end
 
   it 'finalizes :failed when a row references a MODS file missing from the archive' do
