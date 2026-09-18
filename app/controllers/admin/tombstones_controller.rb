@@ -18,13 +18,11 @@ module Admin
 
     copy_blacklight_config_from(CatalogController)
 
-    # Resource class => the atlas_rb Admin class that restores and purges it.
-    # Also the allow-list: a `type` param outside these keys is rejected.
-    RESOURCE_ADMINS = {
-      'Work'       => AtlasRb::Admin::Work,
-      'Collection' => AtlasRb::Admin::Collection,
-      'Community'  => AtlasRb::Admin::Community
-    }.freeze
+    # The types this registry manages, and the allow-list a `type` param has to
+    # be in. Atlas restores and purges any resource through one generic endpoint,
+    # so this is no longer a class lookup — but it still has to refuse a FileSet
+    # or a Blob, which have no business being restored from here.
+    RESTORABLE_TYPES = %w[Work Collection Community].freeze
 
     RESTORE_FAILED = 'Restore could not be completed — a tombstoned parent must be ' \
                      'restored first. Restore that, then try again.'
@@ -42,10 +40,11 @@ module Admin
     end
 
     def restore
-      restorer = RESOURCE_ADMINS[params[:type]]
-      return redirect_to(admin_tombstones_path, alert: 'Unknown resource type — nothing was restored.') if restorer.nil?
+      unless restorable_type?
+        return redirect_to(admin_tombstones_path, alert: 'Unknown resource type — nothing was restored.')
+      end
 
-      if restored?(restorer)
+      if restored?
         redirect_to admin_tombstones_path, notice: 'Tombstone reversed — the item is live again.'
       else
         redirect_to admin_tombstones_path, alert: RESTORE_FAILED
@@ -56,10 +55,11 @@ module Admin
     end
 
     def destroy
-      purger = RESOURCE_ADMINS[params[:type]]
-      return redirect_to(admin_tombstones_path, alert: 'Unknown resource type — nothing was deleted.') if purger.nil?
+      unless restorable_type?
+        return redirect_to(admin_tombstones_path, alert: 'Unknown resource type — nothing was deleted.')
+      end
 
-      redirect_to admin_tombstones_path, **purge_outcome(purger)
+      redirect_to admin_tombstones_path, **purge_outcome
     rescue Faraday::Error => e
       Rails.logger.error("Admin::TombstonesController#destroy: #{e.class} #{e.message}")
       redirect_to admin_tombstones_path, alert: PURGE_FAILED
@@ -67,19 +67,23 @@ module Admin
 
     private
 
+      def restorable_type?
+        RESTORABLE_TYPES.include?(params[:type])
+      end
+
       # Restore is not one of atlas_rb's typed-error paths, so a non-2xx comes
       # back as a plain Faraday::Response instead of raising. Drop the success?
       # check and a refused restore reports as done.
-      def restored?(restorer)
-        response = restorer.restore(params[:id])
+      def restored?
+        response = AtlasRb::Admin::Resource.restore(params[:id])
         !response.respond_to?(:success?) || response.success?
       end
 
       # Destroy sits outside atlas_rb's typed-error middleware too, so the
       # container refusal arrives as a plain 422 and has to be read off the
       # body. It is the one failure the admin can act on.
-      def purge_outcome(purger)
-        response = purger.destroy(params[:id], confirm: :i_understand)
+      def purge_outcome
+        response = AtlasRb::Admin::Resource.destroy(params[:id], confirm: :i_understand)
         return { notice: PURGED } if !response.respond_to?(:success?) || response.success?
         return { alert: PURGE_HAS_CHILDREN } if purge_error_code(response) == 'has_children'
 
