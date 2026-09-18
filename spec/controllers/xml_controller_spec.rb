@@ -48,6 +48,18 @@ describe XmlController do
       expect(response).to have_http_status(:not_found)
     end
 
+    # The page names what it could not find, and the controller is called `xml`.
+    context 'the refusal page' do
+      render_views
+
+      it 'calls the missing thing a resource, not an "xml"' do
+        get :editor, params: { id: file_set.id }
+
+        expect(response.body).to include('the resource you requested')
+        expect(response.body).not_to include('the xml you requested')
+      end
+    end
+
     it 'is a 404 on the save, so nothing reaches the FileSet binary endpoint' do
       allow(AtlasRb::FileSet).to receive(:update)
 

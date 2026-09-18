@@ -30,6 +30,10 @@ class HistoriesController < ApplicationController
 
   private
 
+    # "the xml you requested" / "the history you requested" would both name the
+    # surface rather than the thing looked up, which is a resource either way.
+    def not_found_label = 'resource'
+
     # Admin-only, the same gate as the Audit History tab. A refusal lands on
     # the shared 403 page via Authorizable's rescue_from CanCan::AccessDenied.
     def authorize_history!

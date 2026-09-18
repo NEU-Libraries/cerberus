@@ -61,11 +61,18 @@ module Authorizable
     rescue_from AtlasRb::NotFoundError, ResourceNotFound do
       render template: 'errors/not_found',
              status:   :not_found,
-             locals:   { obj_type: controller_name.singularize }
+             locals:   { obj_type: not_found_label }
     end
   end
 
   private
+
+    # What the 404 page calls the thing it could not find. The controller name
+    # is right for a resourceful controller and wrong for one named after a
+    # surface rather than a noun: the XML editor is not looking for an "xml".
+    def not_found_label
+      controller_name.singularize
+    end
 
     # The one place where "an atlas_rb read returned nil" becomes a Rails 404.
     # It converts nil and nothing else: a tombstoned resource is often a 410
