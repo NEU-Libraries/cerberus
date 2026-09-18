@@ -56,11 +56,14 @@ class ResourcePermissions
   # The create path. Deliberately not #apply!: there is no cascade one line
   # after a create, and current_read still describes the DESTINATION.
   # See docs/permissions.md.
+  # The submitted grants alone. A minted child already carries the ACL Atlas
+  # gave it from its parent, and an omitted key keeps its stored value, so
+  # reading the envelope back to merge onto would only re-send what is there.
   def apply_minted!
     submitted = @envelope[:permissions]
     return Result.silent if submitted.blank?
 
-    write(minted_permissions.merge(submitted.symbolize_keys))
+    write(submitted.symbolize_keys)
   end
 
   private
@@ -92,12 +95,5 @@ class ResourcePermissions
       return nil if @actor&.admin?
 
       Result.refused(COMMUNITY_NARROWING_REFUSED)
-    end
-
-    # Grant lists only -- echoing depositor/proxy_uploader would re-assert
-    # attribution this form has no business touching.
-    def minted_permissions
-      envelope = AtlasRb::Resource.permissions(@id)
-      %i[read edit edit_users embargo].index_with { |key| envelope&.dig(key.to_s) }.compact
     end
 end

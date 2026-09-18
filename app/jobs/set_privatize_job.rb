@@ -39,7 +39,7 @@ class SetPrivatizeJob < ApplicationJob
       read = Array(current.read)
       return :already_private unless read.include?('public')
 
-      AtlasRb::Resource.set_permissions(noid, Permissions.envelope_with_read(current, read - ['public']))
+      AtlasRb::Resource.set_permissions(noid, { 'read' => read - ['public'] })
       :privatized
     end
 

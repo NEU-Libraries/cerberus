@@ -52,7 +52,7 @@ class VisibilityCascadeJob < ApplicationJob
       clamped = Permissions.audience_intersect(Array(current.read), container_read)
       return :unchanged if clamped.sort == Array(current.read).sort
 
-      AtlasRb::Resource.set_permissions(target.noid, Permissions.envelope_with_read(current, clamped))
+      AtlasRb::Resource.set_permissions(target.noid, { 'read' => clamped })
       clamp_sentinel(target.noid, clamped)
       :narrowed
     end

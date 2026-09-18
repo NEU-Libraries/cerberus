@@ -51,10 +51,10 @@ RSpec.describe SetPrivatizeJob do
     )
   end
 
-  # The job still reads the stored envelope and sends it back whole. Atlas now
-  # merges per key, so this is belt and braces rather than the requirement it
-  # was written for — but sending it costs one read the job already makes.
-  it 'sends the whole envelope, not just read' do
+  # The job takes `public` away and changes nothing else, so `read` is the only
+  # slot it sends. It still reads the stored envelope first, but for the value —
+  # it needs to know what the audience was in order to subtract from it.
+  it 'sends the stripped read and nothing else' do
     stub_contents('w1')
     allow(AtlasRb::Resource).to receive(:permissions)
       .with('w1').and_return(envelope(read: ['public'], edit: [staff, 'northeastern:drs:nupd:media'],
@@ -62,11 +62,7 @@ RSpec.describe SetPrivatizeJob do
 
     run
 
-    expect(AtlasRb::Resource).to have_received(:set_permissions).with(
-      'w1', { 'embargo' => '2027-01-01', 'read' => [],
-                                 'edit' => [staff, 'northeastern:drs:nupd:media'],
-                                 'edit_users' => ['000000011'] }
-    )
+    expect(AtlasRb::Resource).to have_received(:set_permissions).with('w1', { 'read' => [] })
   end
 
   it 'leaves a work that is already private alone' do

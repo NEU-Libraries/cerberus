@@ -468,21 +468,27 @@ describe CollectionsController do
       AtlasRb::Resource.tombstone(created_id) if created_id
     end
 
-    # Atlas assigns edit_groups, edit_users and embargo unconditionally from the
-    # payload, so the submitted grants have to be merged into the envelope the
-    # new Collection was minted with. Replacing it would strip the edit grants
-    # Atlas just gave it — a form naming only read groups names no edit ones.
-    it 'merges the submitted grants into the minted envelope rather than replacing it' do
-      allow(AtlasRb::Resource).to receive(:set_permissions).and_call_original
+    # Atlas mints a Collection carrying its parent's ACL, and keeps any key the
+    # payload omits — so sending the submitted grants alone has to leave the
+    # minted edit grant standing. A form naming only read groups names no edit
+    # ones, so replacing the envelope would strip them.
+    #
+    # Asserted on what Atlas STORED, not on what was sent: the payload is this
+    # service's business and the surviving grant is the contract.
+    it 'keeps the grants the Collection was minted with alongside the submitted ones' do
+      # The parent has to be public or Atlas refuses a read grant on the child
+      # for exceeding it, and the write this example is about never happens.
+      publicize_ancestry!(community: community)
 
       post :create, params: { community_id: community.id, mass: 'private',
                               collection: { title: 'EnvelopeCollection', description: 'D',
                                             permissions: { '1' => { group_id: 'editors', ability: 'read' } } } }
 
       created_id = response.location.split('/').last
-      expect(AtlasRb::Resource).to have_received(:set_permissions).with(
-        created_id, hash_including(edit: [Permissions::STAFF_EDIT_GROUP], read: ['editors'])
-      )
+      stored = AtlasRb::Resource.permissions(created_id)
+
+      expect(Array(stored.read)).to eq(['editors'])
+      expect(Array(stored.edit)).to include(Permissions::STAFF_EDIT_GROUP)
     ensure
       AtlasRb::Resource.tombstone(created_id) if created_id
     end

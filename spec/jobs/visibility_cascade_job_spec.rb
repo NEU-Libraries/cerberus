@@ -67,10 +67,13 @@ RSpec.describe VisibilityCascadeJob do
     end
   end
 
-  # Atlas's setter assigns these unconditionally, so a payload carrying only
-  # `read` would collapse edit_groups to the staff prepend and blank the embargo.
+  # A cascade narrows the read audience and nothing else, so `read` is the only
+  # slot it may send. Atlas keeps every key a payload omits, which is what lets
+  # the job leave edit, edit_users, embargo and the provenance slots alone
+  # instead of round-tripping them — and round-tripping is what used to blank an
+  # embargo when a key went missing.
   describe 'the envelope it sends' do
-    it 'round-trips edit, edit_users and embargo untouched' do
+    it 'sends the clamped read and nothing else' do
       stub_targets(target('w1'))
       allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(
         envelope(read: ['public'], edit: %w[groupA groupB], edit_users: ['000000077'],
@@ -81,23 +84,8 @@ RSpec.describe VisibilityCascadeJob do
       run
 
       expect(AtlasRb::Resource).to have_received(:set_permissions).with(
-        'w1', { 'embargo'    => '2030-01-15T00:00:00+00:00',
-                'read'       => ['northeastern:drs:library:archives'],
-                'edit'       => %w[groupA groupB],
-                'edit_users' => ['000000077'] }
+        'w1', { 'read' => ['northeastern:drs:library:archives'] }
       )
-    end
-
-    it 'omits the write-once provenance slots so the setter leaves them alone' do
-      stub_targets(target('w1'))
-      allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: ['public']))
-      allow(AtlasRb::Resource).to receive(:set_permissions)
-
-      run
-
-      sent = nil
-      expect(AtlasRb::Resource).to have_received(:set_permissions) { |_noid, payload| sent = payload }
-      expect(sent.keys).to contain_exactly('embargo', 'read', 'edit', 'edit_users')
     end
   end
 
