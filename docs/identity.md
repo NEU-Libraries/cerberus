@@ -124,6 +124,22 @@ would allow.
 `:restore` is deliberately not one of these verbs. Reversing a tombstone is an
 operator action, not an owner one.
 
+### Discovery follows the same read rule
+
+`SearchBuilder#apply_gated_discovery` puts `:read` into Solr as one filter. A
+document matches when it is public, a read group matches, an edit group
+matches, or `depositor_ssi` is the user's NUID. Admins skip the filter, and a
+view-as session is gated as the target.
+
+The two must stay in step. If the filter is narrower, staff and depositors
+cannot find items they can open: staff hold edit, not read, on every resource,
+and a private Work names its depositor in no group. If the filter is wider, a
+search shows hits that 403 when opened. That is why the filter does not match
+`edit_access_person_ssim`: `Ability` does not check edit users.
+
+Atlas's `WorkDigestQuery` copies this gate for Set contents and descendant-work
+lists, so a change here needs the same change there.
+
 ### Ownership and proxy deposits
 
 `depositor?` is not Work-scoped, because a depositor owns their Collections too.
