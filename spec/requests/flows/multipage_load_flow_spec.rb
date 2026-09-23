@@ -74,7 +74,8 @@ RSpec.describe 'Multipage loader end-to-end flow', type: :request do
 
       get loader_load_path(multipage_loader, lr)
       expect(response.body).to include('bdr_43889.tif').and include('bdr_43890.tif')
-      expect(response.body).to include('Confirm').and include('1 item')
+      expect(response.body).to include('Confirm')
+        .and match(%r{overview__label">Items</span>\s*<span class="load-report-overview__value">1<})
 
       perform_enqueued_jobs { patch confirm_loader_load_path(multipage_loader, lr) }
 
@@ -111,7 +112,7 @@ RSpec.describe 'Multipage loader end-to-end flow', type: :request do
 
       lr = upload(archive_path)
       get loader_load_path(multipage_loader, lr)
-      expect(response.body).to include('2 items')
+      expect(response.body).to match(%r{overview__label">Items</span>\s*<span class="load-report-overview__value">2<})
 
       perform_enqueued_jobs { patch confirm_loader_load_path(multipage_loader, lr) }
 

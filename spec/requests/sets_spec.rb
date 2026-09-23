@@ -233,7 +233,7 @@ RSpec.describe 'Sets', type: :request do
       it 'mounts the collection-kind modal with the live-subtree hint on community rows' do
         get "/communities/#{community.id}"
         expect(response.body).to include("add-to-set-#{collection.id}")
-          .and include('stays current as the collection changes')
+          .and include('including any new works added to the collection in the future')
       end
 
       it 'mounts the row affordance on gallery-view cards too' do
