@@ -41,7 +41,7 @@
       .col-sm
         %h5.pb-2 Embargo Release Date
         %input.form-select.form-select-sm#embargo{name: "work[permissions][embargo]", type: "date", value: @embargo}/
-        %label.small.py-3{for: "embargo"} If this item is embargoed, please enter the release date.
+        %label.small.py-3{for: "embargo"} If an embargo is required, select the release date for the file.
 
     = render 'shared/group_permissions', resource: 'work'
 
