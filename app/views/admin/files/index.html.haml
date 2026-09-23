@@ -16,7 +16,7 @@
 
   .p-3
     %p.text-muted.small.mb-3
-      Find the Work whose file you want to replace. Replacing a file adds a new version and keeps the same identifier — nothing is overwritten, and prior versions stay downloadable.
+      Search for the work with the file you want to replace. Replacing a file adds a new version but keeps the same identifier. Previous versions can be managed from the Administration page.
     = render 'admin/finder/search_form', url: admin_files_path, q: params[:q], hidden: {}, placeholder: 'Search works by title…'
 
   - if @results

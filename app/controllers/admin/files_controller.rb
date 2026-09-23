@@ -39,13 +39,14 @@ module Admin
       staged = stage_upload(file, params[:work_id])
       FileReplacementJob.perform_later(params[:blob_noid], params[:work_id], staged,
                                        file.original_filename, SecureRandom.uuid)
-      back_to_manage(notice: 'Replacement queued — the new version will appear here once processing finishes.')
+      back_to_manage(notice: 'The new version is processing. Refresh the page to view the updated versions list. ' \
+                             "The work's thumbnail may need to be updated.")
     end
 
     def rollback
       AtlasRb::Blob.rollback(params[:blob_noid], params[:version_id])
       FileDerivativeRefreshJob.perform_later(params[:work_id], params[:blob_noid])
-      back_to_manage(notice: "Reverted to #{params[:version_id]} — derivatives are refreshing.")
+      back_to_manage(notice: "File has been reverted to #{params[:version_id]}.")
     end
 
     private
