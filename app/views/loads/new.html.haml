@@ -48,10 +48,11 @@
               Archive packages larger than 2GB must use the
               %code.admin-registry-table__id .tar
               format. All other packages may use
-              %code.admin-registry-table__id .zip
-              \. New file ingests must contain files and MODS XML files. Metadata overwrite submissions should only contain MODS XML files. Every archive package must contain a manifest named
-              %code.admin-registry-table__id manifest.xlsx
-              \.
+              = succeed '.' do
+                %code.admin-registry-table__id .zip
+              New file ingests must contain files and MODS XML files. Metadata overwrite submissions should only contain MODS XML files. Every archive package must contain a manifest named
+              = succeed '.' do
+                %code.admin-registry-table__id manifest.xlsx
           - else
             .admin-registry-form__hint
               Accepted formats:
