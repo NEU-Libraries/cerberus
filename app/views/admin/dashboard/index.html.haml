@@ -2,7 +2,7 @@
   %header.admin-actions__head
     %span.admin-actions__title
       %i.fa-solid.fa-screwdriver-wrench{'aria-hidden' => 'true'}
-      Administration
+      DRS Administration
     %span.admin-actions__subtitle
       - if current_user&.admin?
         %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
@@ -12,7 +12,7 @@
         Delegated admin access
 
   %p.admin-actions__lede
-    Repository-structure operations. These actions change how objects are arranged and surfaced across the repository, so they apply repository-wide and live behind the admin gate.
+    Repository-management operations. These actions change how objects are arranged and displayed across the repository.
 
   .admin-actions__grid{role: 'list'}
     -# First in the grid: it is the surface somebody opens daily, and the only
@@ -63,7 +63,7 @@
           %i.fa-solid.fa-users{'aria-hidden' => 'true'}
         %span.admin-action-card__title Manage people
         %span.admin-action-card__desc
-          Create Person records by NUID, curate the authoritative display name / title / bio / ORCID, and manage the community affiliations that drive the Faculty & Staff browse.
+          Create new person records and manage details in existing records, including names, ORCIDs, and community affiliations.
         %span.admin-action-card__cta
           Open
           %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
@@ -73,7 +73,7 @@
         %i.fa-solid.fa-chart-line{'aria-hidden' => 'true'}
       %span.admin-action-card__title Usage analytics
       %span.admin-action-card__desc
-        Repository-wide views and downloads over time — top files and collections, unique visitors, and a human/bot segment toggle, with CSV / Excel export of the tables.
+        Views, downloads, and streams for all works, collections, and communities in the DRS, including top files and collections, and unique visitors.
       %span.admin-action-card__cta
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
@@ -83,7 +83,7 @@
         %i.fa-solid.fa-clipboard-list{'aria-hidden' => 'true'}
       %span.admin-action-card__title Deposits needing attention
       %span.admin-action-card__desc
-        Deposits nobody confirmed, which stay hidden from search until somebody does, and works a background job left short a rendition, thumbnail or extracted text. Two lists, oldest first.
+        Confirm deposits that are unfinished and manage incomplete files.
       %span.admin-action-card__cta
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
