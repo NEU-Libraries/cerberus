@@ -7,7 +7,7 @@
 -# indicator + ordering subtitle — only appears when there is more than one
 -# change to walk. Archival register throughout — reuses the audit-history card
 -# chrome + monospace identifier pills.
-- back_path = send("edit_#{@resource_klass.downcase}_path", @resource_id, anchor: 'history')
+- back_path = edit_resource_path(@resource_klass, @resource_id, anchor: 'history')
 .container.my-4
   .d-flex.justify-content-between.align-items-baseline.flex-wrap.gap-2.mb-3
     %div

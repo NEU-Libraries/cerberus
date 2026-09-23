@@ -46,9 +46,22 @@ class ApplicationController < ActionController::Base
   # `match: :exact` on the resource crumb: inclusive matching treats
   # /works/:id/edit as "under" /works/:id and would mark it current.
   def edit_breadcrumb_tail(item, klass)
-    breadcrumb(item.title, public_send("#{klass.downcase}_path", item.id), match: :exact)
-    breadcrumb("Edit #{klass}", public_send("edit_#{klass.downcase}_path", item.id))
+    breadcrumb(item.title, resource_path(klass, item.id), match: :exact)
+    breadcrumb("Edit #{klass}", edit_resource_path(klass, item.id))
   end
+
+  # The path for a resource whose type arrived as DATA — from Atlas's `klass`,
+  # or from a Solr document. A controller that knows its own type declares it
+  # with atlas_resource and reads show_path / edit_path back instead. See
+  # docs/people-and-routing.md.
+  def resource_path(klass, id, **)
+    public_send(:"#{AtlasRoutes.route_for(klass)}_path", id, **)
+  end
+
+  def edit_resource_path(klass, id, **)
+    public_send(:"edit_#{AtlasRoutes.route_for(klass)}_path", id, **)
+  end
+  helper_method :resource_path, :edit_resource_path
 
   def pretty_group(raw_group)
     Group.find_by(raw: raw_group)&.cosmetic || raw_group
@@ -74,7 +87,6 @@ class ApplicationController < ActionController::Base
     end
 
     def add_breadcrumb_for(resource_id, klass, title, match: :inclusive)
-      path = public_send("#{klass.downcase}_path", resource_id)
-      breadcrumb(title, path, match: match)
+      breadcrumb(title, resource_path(klass, resource_id), match: match)
     end
 end

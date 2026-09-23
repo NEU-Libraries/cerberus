@@ -298,5 +298,31 @@ RSpec.describe 'Histories', type: :request do
         expect(response).to have_http_status(:ok)
       end
     end
+
+    # Both pages render a back link to the resource's edit page, and only a
+    # Modsable type has one. Atlas answers a MODS-version list for every type,
+    # so without the gate these ids read from Atlas and then raise in the view.
+    %w[FileSet Blob Delegate Person].each do |klass|
+      it "refuses #{klass} with a 404 rather than raising in the view" do
+        allow(AtlasRb::Resource).to receive(:find).with(resource_id).and_return(found(klass: klass))
+        allow(AtlasRb::Resource).to receive(:history).and_return(history_mash([]))
+        allow(AtlasRb::Resource).to receive(:mods_versions)
+
+        get rights_history_path(resource_id)
+        expect(response).to have_http_status(:not_found)
+
+        get mods_history_path(resource_id)
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    it 'refuses before it reads, so a refused type costs no Atlas round trip' do
+      allow(AtlasRb::Resource).to receive(:find).with(resource_id).and_return(found(klass: 'FileSet'))
+      allow(AtlasRb::Resource).to receive(:mods_versions)
+
+      get mods_history_path(resource_id)
+
+      expect(AtlasRb::Resource).not_to have_received(:mods_versions)
+    end
   end
 end

@@ -34,6 +34,48 @@ describe XmlController do
 
   before { sign_in admin }
 
+  # Atlas answers /resources/:id/permissions for every resource type, so the
+  # :edit gate alone lets a hand-typed FileSet, Blob, Delegate or Person NOID
+  # into the editor. The MODS read then succeeds too, because atlas_rb defines
+  # Resource.mods on the base class. Each of those types used to reach the
+  # breadcrumb builder, which has no route for them, and 500.
+  describe 'a type with no MODS editing surface' do
+    let(:file_set) { AtlasRb::FileSet.create(work.id, 'image', position: 1, nuid: '000000004') }
+
+    it 'is a 404 on the editor, not a 500' do
+      get :editor, params: { id: file_set.id }
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    # The page names what it could not find, and the controller is called `xml`.
+    context 'the refusal page' do
+      render_views
+
+      it 'calls the missing thing a resource, not an "xml"' do
+        get :editor, params: { id: file_set.id }
+
+        expect(response.body).to include('the resource you requested')
+        expect(response.body).not_to include('the xml you requested')
+      end
+    end
+
+    it 'is a 404 on the save, so nothing reaches the FileSet binary endpoint' do
+      allow(AtlasRb::FileSet).to receive(:update)
+
+      patch :update, params: { resource_id: file_set.id, raw_xml: raw_xml }
+
+      expect(response).to have_http_status(:not_found)
+      expect(AtlasRb::FileSet).not_to have_received(:update)
+    end
+
+    it 'still admits a Work, so the gate reads the type and not the action' do
+      get :editor, params: { id: work.id }
+
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
   describe 'editor' do
     render_views
     it 'renders the editor partial' do
@@ -196,11 +238,11 @@ describe XmlController do
         # Reference the fixture before the stub: AtlasRb::Work.create issues its
         # own update to attach the MODS, which the stub would otherwise absorb.
         resource_id = work.id
-        allow(AtlasRb::Work).to receive(:update)
+        allow(AtlasRb::Resource).to receive(:put_mods)
 
         put :update, params: { resource_id: resource_id, raw_xml: malformed_xml }
 
-        expect(AtlasRb::Work).not_to have_received(:update)
+        expect(AtlasRb::Resource).not_to have_received(:put_mods)
       end
 
       it 're-renders the editor with the errors, and refuses the request' do
@@ -239,11 +281,11 @@ describe XmlController do
 
     it 'writes nothing to Atlas -- the curator still has to press Save' do
       resource_id = work.id
-      allow(AtlasRb::Work).to receive(:update)
+      allow(AtlasRb::Resource).to receive(:put_mods)
 
       put :repair, params: { resource_id: resource_id, raw_xml: dirty_xml }, xhr: true
 
-      expect(AtlasRb::Work).not_to have_received(:update)
+      expect(AtlasRb::Resource).not_to have_received(:put_mods)
     end
 
     context 'what the curator sees' do
@@ -341,8 +383,8 @@ describe XmlController do
     let(:decoded_xml) { escaped_xml.sub('XM&amp;lt;LGBT/&amp;gt;', 'XM&lt;LGBT/&gt;') }
 
     def stub_stored_xml(xml)
-      allow(AtlasRb::Work).to receive(:mods).with(work.id, 'html').and_return('<div>preview</div>')
-      allow(AtlasRb::Work).to receive(:mods).with(work.id, 'xml').and_return(xml)
+      allow(AtlasRb::Resource).to receive(:mods).with(work.id, 'html').and_return('<div>preview</div>')
+      allow(AtlasRb::Resource).to receive(:mods).with(work.id, 'xml').and_return(xml)
     end
 
     # The record displays wrong on its show page, so the curator arrives here
@@ -405,11 +447,11 @@ describe XmlController do
 
     it 'writes nothing to Atlas -- the curator still has to press Save' do
       resource_id = work.id
-      allow(AtlasRb::Work).to receive(:update)
+      allow(AtlasRb::Resource).to receive(:put_mods)
 
       put :repair, params: { resource_id: resource_id, raw_xml: escaped_xml, kind: 'double_escapes' }, xhr: true
 
-      expect(AtlasRb::Work).not_to have_received(:update)
+      expect(AtlasRb::Resource).not_to have_received(:put_mods)
     end
 
     # Two repairs share the action, so the wrong confirmation would describe a

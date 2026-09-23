@@ -39,13 +39,6 @@ module Permissions
   # edit_users and embargo unconditionally from the payload, so a partial
   # hash silently blanks them. depositor/proxy_uploader are write-once and
   # are omitted on purpose. See docs/permissions.md.
-  def self.envelope_with_read(current, read)
-    { 'embargo'    => current.embargo,
-      'read'       => Array(read),
-      'edit'       => Array(current.edit),
-      'edit_users' => Array(current.edit_users) }
-  end
-
   # Two group names are different audiences even if their memberships overlap.
   def self.audience_subset?(inner, outer)
     return true  if Array(outer).include?('public')

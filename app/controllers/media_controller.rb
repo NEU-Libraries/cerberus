@@ -44,7 +44,7 @@ class MediaController < ApplicationController
     # the containing Work's embargo, so the Work has to be resolved first —
     # the same second round-trip DownloadsController makes.
     def deny_if_work_embargoed!
-      work_id = AtlasRb::Blob.work(params[:id], nuid: effective_user&.nuid)
+      work_id = AtlasRb::Blob.work(params[:id], nuid: viewer_nuid)
       return if work_id.blank?
 
       deny_if_unfinished_work!(work_id)

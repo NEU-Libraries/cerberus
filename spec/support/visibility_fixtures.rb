@@ -13,20 +13,19 @@ module VisibilityFixtures
   # Widen the containers above a resource, outermost first. Both are optional so
   # a spec can pass whichever it has in scope.
   def publicize_ancestry!(community: nil, collection: nil, nuid: '000000004')
-    publicize_resource!(AtlasRb::Community, community, nuid) if community
-    publicize_resource!(AtlasRb::Collection, collection, nuid) if collection
+    publicize_resource!(community, nuid) if community
+    publicize_resource!(collection, nuid) if collection
   end
 
-  # Adds `public` to the read ACL, carrying the existing grants through. The
-  # metadata endpoint REPLACES the ACL rather than merging it, so writing a bare
-  # `read` would silently drop the edit groups a spec had just granted — the
-  # editor then loses access to the very page under test.
-  def publicize_resource!(klass, resource, nuid)
+  # Adds `public` to the read ACL, keeping the grants already there. The read is
+  # for `read` itself, which has to be sent whole — Atlas merges per key, but a
+  # key it is given replaces that key's list.
+  def publicize_resource!(resource, nuid)
     current = AtlasRb::Resource.permissions(resource.id, nuid: nuid)
-    klass.metadata(
+    AtlasRb::Resource.set_permissions(
       resource.id,
-      { 'permissions' => { 'read' => (Array(current&.read) + ['public']).uniq,
-                           'edit' => Array(current&.edit) } },
+      { 'read' => (Array(current&.read) + ['public']).uniq,
+        'edit' => Array(current&.edit) },
       nuid: nuid
     )
   end

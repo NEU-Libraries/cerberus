@@ -47,7 +47,7 @@ describe WorksController do
 
     before do
       publicize_chain!
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(work.id, { 'read' => ['public'] }, nuid: '000000004')
     end
 
     it 'renders the show partial' do
@@ -66,10 +66,10 @@ describe WorksController do
         # Absolute URLs, as Atlas writes them. A relative value here persists to
         # the shared test corpus and raises Propshaft::MissingAssetError in any
         # later catalog render that happens to include this Work.
-        AtlasRb::Work.set_thumbnails(work.id,
-                                     thumbnail:    'http://example.com/t.jpg',
-                                     thumbnail_2x: 'http://example.com/t2.jpg',
-                                     preview:      'http://example.com/preview.jpg')
+        AtlasRb::Resource.set_thumbnails(work.id,
+                                         thumbnail:    'http://example.com/t.jpg',
+                                         thumbnail_2x: 'http://example.com/t2.jpg',
+                                         preview:      'http://example.com/preview.jpg')
 
         get :show, params: { id: work.id }
 
@@ -95,8 +95,8 @@ describe WorksController do
       end
 
       it 'is shown to a user who can edit' do
-        AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'], 'edit' => ['editors'] } },
-                               nuid: '000000004')
+        AtlasRb::Resource.set_permissions(work.id, { 'read' => ['public'], 'edit' => ['editors'] },
+                                          nuid: '000000004')
         sign_in User.new(email: 'ed@example.com', nuid: '000000002', groups: ['editors'])
         get :show, params: { id: work.id }
         expect(response.body).to include(%(href="#{edit_work_path(work.id)}"))
@@ -133,9 +133,9 @@ describe WorksController do
 
     context 'when the work is under an active embargo' do
       before do
-        AtlasRb::Work.metadata(work.id,
-                               { 'permissions' => { 'read' => ['public'], 'embargo' => (Date.current + 30).to_s } },
-                               nuid: '000000004')
+        AtlasRb::Resource.set_permissions(work.id,
+                                          { 'read' => ['public'], 'embargo' => (Date.current + 30).to_s },
+                                          nuid: '000000004')
       end
 
       it 'shows the embargo banner with the release date, for any viewer' do
@@ -151,7 +151,7 @@ describe WorksController do
 
     before do
       publicize_chain!
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(work.id, { 'read' => ['public'] }, nuid: '000000004')
     end
 
     it 'renders the downloads turbo-frame without the layout' do
@@ -163,9 +163,9 @@ describe WorksController do
 
     context 'when the work is under an active embargo' do
       before do
-        AtlasRb::Work.metadata(work.id,
-                               { 'permissions' => { 'read' => ['public'], 'embargo' => (Date.current + 30).to_s } },
-                               nuid: '000000004')
+        AtlasRb::Resource.set_permissions(work.id,
+                                          { 'read' => ['public'], 'embargo' => (Date.current + 30).to_s },
+                                          nuid: '000000004')
         AtlasRb::Blob.create(work.id, '/home/cerberus/web/spec/fixtures/files/image.png', 'image.png', nuid: '000000004')
       end
 
@@ -272,7 +272,7 @@ describe WorksController do
       work_id = assigns(:work).id
       expect(AtlasRb::Work.find(work_id).title).to eq('image.png')
     ensure
-      AtlasRb::Work.tombstone(work_id) if work_id
+      AtlasRb::Resource.tombstone(work_id) if work_id
     end
 
     context 'depositor attribution' do
@@ -348,7 +348,7 @@ describe WorksController do
           .with(assigns(:work).id, 'showcasenoid', on_behalf_of: user.nuid)
         expect(response).to redirect_to(metadata_work_path(assigns(:work).id))
       ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
       it 'still saves the work when Atlas forbids the showcase link (scoping safety net)' do
@@ -365,7 +365,7 @@ describe WorksController do
         expect(response).to redirect_to(metadata_work_path(assigns(:work).id))
         expect(flash[:notice]).to eq(described_class::PUBLISH_LINK_FAILED)
       ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
       # Atlas refuses a derivative tier more visible than its Work. The collection
@@ -382,7 +382,7 @@ describe WorksController do
         expect(response).to redirect_to(metadata_work_path(assigns(:work).id))
         expect(flash[:notice]).to eq(described_class::DERIVATIVE_DEFAULT_FAILED)
       ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
       # Promotion is only on offer from the depositor's own root, so a forged
@@ -402,7 +402,7 @@ describe WorksController do
         expect(AtlasRb::System::Work).not_to have_received(:add_linked_member)
         expect(flash[:notice]).to eq(described_class::PUBLISH_LINK_FAILED)
       ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
       it 'deposits without promoting when the box is unticked' do
@@ -417,7 +417,7 @@ describe WorksController do
         expect(AtlasRb::System::Work).not_to have_received(:add_linked_member)
         expect(flash[:notice]).to eq('File uploaded — please review the metadata.')
       ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
     end
 
@@ -467,7 +467,7 @@ describe WorksController do
         # reads wrong at a glance.
         expect(notice.detail(:work_title)).to eq('image.png')
       ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
       it 'records a refusal when Atlas forbids the link' do
@@ -480,7 +480,7 @@ describe WorksController do
         expect(AdminNotice.last.detail(:outcome)).to eq('refused')
         expect(AdminNotice.last.detail(:reason)).to eq('atlas_forbidden')
       ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
       it 'records a refusal when the destination is not the depositor’s root' do
@@ -491,7 +491,7 @@ describe WorksController do
 
         expect(AdminNotice.last.detail(:reason)).to eq('not_personal_root')
       ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
       it 'records a refusal when the genre has no showcase the depositor can see' do
@@ -504,7 +504,7 @@ describe WorksController do
         expect(AdminNotice.last.detail(:reason)).to eq('no_showcase')
         expect(AdminNotice.last.detail(:genre)).to eq('Datasets')
       ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
       it 'records nothing when the deposit asked for no promotion' do
@@ -512,7 +512,7 @@ describe WorksController do
 
         expect { deposit(publish: '0') }.not_to change(AdminNotice, :count)
       ensure
-        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
     end
   end
@@ -580,7 +580,7 @@ describe WorksController do
     let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
 
     before do
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(work.id, { 'edit' => ['editors'] }, nuid: '000000004')
       # Readable as well as editable. Atlas gates reads on the resource's own ACL,
       # and this fixture user carries no NUID, so the ACL read is made as the
       # guest — a private resource comes back as nothing and the page 404s before
@@ -588,7 +588,7 @@ describe WorksController do
       # publicize_resource! reads the current envelope and carries the grant
       # through; the reverse order would drop it.
       publicize_chain!
-      publicize_resource!(AtlasRb::Work, work, '000000004')
+      publicize_resource!(work, '000000004')
       sign_in user
     end
 
@@ -646,7 +646,7 @@ describe WorksController do
     # title, the other for its structured parts — and #edit loads both.
     it 'reads the MODS from Atlas once' do
       xml = AtlasRb::Work.mods(work.id, 'xml', nuid: '000000004')
-      expect(AtlasRb::Work).to receive(:mods).once.with(work.id, 'xml').and_return(xml)
+      expect(AtlasRb::Resource).to receive(:mods).once.with(work.id, 'xml').and_return(xml)
 
       get :edit, params: { id: work.id }
 
@@ -686,11 +686,11 @@ describe WorksController do
     let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
 
     before do
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(work.id, { 'edit' => ['editors'] }, nuid: '000000004')
       # Readable as well as editable — see the note in #edit above. This fixture
       # user carries no NUID, so the ACL read is made as the guest.
       publicize_chain!
-      publicize_resource!(AtlasRb::Work, work, '000000004')
+      publicize_resource!(work, '000000004')
       sign_in user
     end
 
@@ -771,8 +771,8 @@ describe WorksController do
 
       it 'starts closed for a deposit with nothing in the Advanced fields' do
         bare = AtlasRb::Work.create(collection.id, nuid: '000000004')
-        AtlasRb::Work.metadata(bare.id, { 'permissions' => { 'edit' => ['editors'], 'read' => ['public'] } },
-                               nuid: '000000004')
+        AtlasRb::Resource.set_permissions(bare.id, { 'edit' => ['editors'], 'read' => ['public'] },
+                                          nuid: '000000004')
 
         get :metadata, params: { id: bare.id }
 
@@ -786,7 +786,7 @@ describe WorksController do
     let(:user) { User.new(email: 'test@example.com', password: 'password', nuid: '000000004', groups: ['editors']) }
 
     before do
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(work.id, { 'edit' => ['editors'] }, nuid: '000000004')
       sign_in user
     end
 
@@ -941,7 +941,7 @@ describe WorksController do
     let(:user) { User.new(email: 'test@example.com', nuid: '000000004', groups: ['editors']) }
 
     before do
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(work.id, { 'edit' => ['editors'] }, nuid: '000000004')
       sign_in user
     end
 
@@ -983,7 +983,7 @@ describe WorksController do
     let(:user) { User.new(email: 'test@example.com', nuid: '000000004', groups: ['editors']) }
 
     before do
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(work.id, { 'edit' => ['editors'] }, nuid: '000000004')
       sign_in user
     end
 
@@ -996,21 +996,21 @@ describe WorksController do
                thumbnail_2x: 'http://example.com/t2.jpg',
                preview:      'http://example.com/p.jpg' }
       allow(ThumbnailCreator).to receive(:call).with(base: 'BASE').and_return(urls)
-      allow(AtlasRb::Work).to receive(:set_thumbnails)
+      allow(AtlasRb::Resource).to receive(:set_thumbnails)
 
       patch :update, params: { id:        work.id,
                                work:      { title: work.title },
                                thumbnail: fixture_file_upload('image.png', 'image/png') }
 
-      expect(AtlasRb::Work).to have_received(:set_thumbnails).with(work.id, **urls)
+      expect(AtlasRb::Resource).to have_received(:set_thumbnails).with(work.id, **urls)
     end
 
     it 'does not touch set_thumbnails when no poster file is attached' do
-      allow(AtlasRb::Work).to receive(:set_thumbnails)
+      allow(AtlasRb::Resource).to receive(:set_thumbnails)
 
       patch :update, params: { id: work.id, work: { title: work.title } }
 
-      expect(AtlasRb::Work).not_to have_received(:set_thumbnails)
+      expect(AtlasRb::Resource).not_to have_received(:set_thumbnails)
     end
   end
 
@@ -1021,22 +1021,22 @@ describe WorksController do
     end
 
     before do
-      AtlasRb::Work.metadata(work.id,
-                             { 'permissions' => { 'edit' => [Permissions::STAFF_EDIT_GROUP] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(work.id,
+                                        { 'edit' => [Permissions::STAFF_EDIT_GROUP] }, nuid: '000000004')
       sign_in user
     end
 
-    it 'calls AtlasRb::Work.tombstone and reports success on a 2xx' do
-      allow(AtlasRb::Work).to receive(:tombstone)
+    it 'tombstones through the generic endpoint and reports success on a 2xx' do
+      allow(AtlasRb::Resource).to receive(:tombstone)
         .and_return(instance_double(Faraday::Response, success?: true))
       post :tombstone, params: { id: work.id }
-      expect(AtlasRb::Work).to have_received(:tombstone).with(work.id)
+      expect(AtlasRb::Resource).to have_received(:tombstone).with(work.id)
       expect(subject).to redirect_to(root_path)
       expect(flash[:notice]).to eq('Work deleted.')
     end
 
     it 'reports a 422 live-members refusal without claiming success' do
-      allow(AtlasRb::Work).to receive(:tombstone)
+      allow(AtlasRb::Resource).to receive(:tombstone)
         .and_return(instance_double(Faraday::Response, success?: false, status: 422))
       request.env['HTTP_REFERER'] = work_path(work.id)
       post :tombstone, params: { id: work.id }
@@ -1050,7 +1050,7 @@ describe WorksController do
 
     before do
       publicize_chain!
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(work.id, { 'read' => ['public'] }, nuid: '000000004')
       tombstoned = AtlasRb::Work.find(work.id, nuid: '000000004')
       tombstoned['tombstoned'] = true
       allow(AtlasRb::Work).to receive(:find).with(work.id).and_return(tombstoned)

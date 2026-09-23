@@ -23,8 +23,7 @@ class SetExportsController < CatalogController
   end
 
   def show
-    set = AtlasRb::Compilation.find(params[:id])
-    raise ResourceNotFound if set.nil?
+    set = require_resource!(AtlasRb::Compilation.find(params[:id]))
 
     resolver = SetResolver.new(compilation: set, search_service: search_service)
 

@@ -147,6 +147,28 @@ All three render the same friendly 404 page, with the singularized controller
 name giving the template a sensible `obj_type` default — "work", "collection",
 "download".
 
+#### Converting a nil read
+
+`require_resource!` is the one place that turns a nil read into
+`ResourceNotFound`. Every controller that reads a resource by id wraps the read
+in it:
+
+```ruby
+@work = require_resource!(AtlasRb::Work.find(params[:id]))
+```
+
+The conversion stays in the caller rather than in atlas_rb because the split
+above is deliberate — a write raises and a read returns nil. Centralising only
+the conversion keeps the gem's contract in one Cerberus method, so a change to
+what nil means is one edit.
+
+It converts nil and nothing else. Do not let it absorb the tombstone checks:
+`CollectionsController#show` renders 410 Gone for a tombstoned Collection while
+`#facet_scope_filters` folds tombstoned into the same 404, because a tombstoned
+container has no browsable contents to count. That difference is intentional.
+`Admin::FileVersionsController` likewise keeps its own second raise for an
+unknown version id.
+
 ### Tombstones
 
 `perform_tombstone!(response, type:)` translates an Atlas tombstone response

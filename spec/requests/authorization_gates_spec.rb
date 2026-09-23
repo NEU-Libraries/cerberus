@@ -57,9 +57,9 @@ RSpec.describe 'Authorization gates', type: :request do
       community:  (community unless klass == 'Community'),
       collection: (collection if klass == 'Work')
     )
-    AtlasRb.const_get(klass).metadata(
+    AtlasRb::Resource.set_permissions(
       id,
-      { 'permissions' => { 'read' => ['public'], 'edit' => [Permissions::STAFF_EDIT_GROUP] } },
+      { 'read' => ['public'], 'edit' => [Permissions::STAFF_EDIT_GROUP] },
       nuid: '000000004'
     )
   end
@@ -108,7 +108,7 @@ RSpec.describe 'Authorization gates', type: :request do
     # these examples need: the caller can see the container and is still refused.
     # Left private, Atlas's read gate hides it and the request 404s before the
     # :edit gate runs, so the example would pass for the wrong reason.
-    before { publicize_resource!(AtlasRb::Community, community, '000000004') }
+    before { publicize_resource!(community, '000000004') }
 
     it 'redirects the unauthenticated to sign in (works)' do
       post collection_works_path(collection.id)

@@ -12,8 +12,8 @@ module AdvancedMetadata
   # personal/corporate creators (plain, Creator-role) for pre-fill, plus the
   # preserved (authority-bearing / non-Creator) names shown read-only. Driven off
   # the shared NEU::MODS gem — exactly what save_advanced! merges back.
-  def load_advanced!(klass)
-    doc = NEU::MODS::Document.parse(resource_mods(klass))
+  def load_advanced!
+    doc = NEU::MODS::Document.parse(resource_mods)
     parts = doc.title_parts
     @advanced = {
       subtitle: parts[:subtitle], part_name: parts[:part_name],
@@ -26,14 +26,14 @@ module AdvancedMetadata
 
   # True when the Advanced-tab form (not Metadata/Permissions) was submitted —
   # routed on its hidden form marker, since all three PATCH #update.
-  def advanced_submitted?(resource_key)
+  def advanced_submitted?
     params.dig(resource_key, :form) == 'advanced'
   end
 
   # Advanced-tab fields, mapped to MODSMerge's vocabulary (form first/last ->
   # given/family). Blank title parts ("") clear the part; blank creator rows are
   # dropped by MODSMerge.
-  def advanced_params(resource_key)
+  def advanced_params
     raw = params.require(resource_key).permit(
       :subtitle, :part_name, :part_number, :non_sort,
       personal_creators: %i[first last], corporate_creators: []
@@ -50,7 +50,7 @@ module AdvancedMetadata
   # raw update path. The Advanced TAB submits these alone; the deposit page
   # submits them alongside the descriptive fields and goes through
   # save_descriptive!(advanced:) instead, so one submit is one write.
-  def save_advanced!(klass, id, **fields)
-    merge_mods!(klass, id, origin: 'advanced_form', **fields)
+  def save_advanced!(id, **fields)
+    merge_mods!(id, origin: 'advanced_form', **fields)
   end
 end

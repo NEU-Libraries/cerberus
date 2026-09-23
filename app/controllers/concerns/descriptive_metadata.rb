@@ -8,7 +8,7 @@ module DescriptiveMetadata
   extend ActiveSupport::Concern
   include AtlasWrite
 
-  def descriptive_params(resource_key, keywords: false)
+  def descriptive_params(keywords: false)
     raw = params.require(resource_key).permit(:title, :description, keywords: [])
     {
       title:       raw[:title],
@@ -17,7 +17,7 @@ module DescriptiveMetadata
     }
   end
 
-  def descriptive_submitted?(resource_key)
+  def descriptive_submitted?
     params[resource_key].respond_to?(:key?) && params[resource_key].key?(:title)
   end
 
@@ -33,7 +33,7 @@ module DescriptiveMetadata
 
   # Kept OUT of descriptive_params: that hash is splatted straight into
   # save_descriptive! as the MODS payload, and this is not a MODS field.
-  def curated_subjects_posted?(resource_key)
+  def curated_subjects_posted?
     ActiveModel::Type::Boolean.new.cast(params.dig(resource_key, :curated_subjects)).present?
   end
 
@@ -50,8 +50,8 @@ module DescriptiveMetadata
     Array(raw).map { |k| k.to_s.strip }.reject(&:empty?).uniq
   end
 
-  def load_descriptive!(klass)
-    @descriptive = Metadata::MODSFields.call(xml: resource_mods(klass))
+  def load_descriptive!
+    @descriptive = Metadata::MODSFields.call(xml: resource_mods)
   end
 
   # The raw, structure-safe update path, and it must stay that way: it preserves
@@ -60,10 +60,10 @@ module DescriptiveMetadata
   # `advanced` folds the Advanced field set into the SAME merge, for a form that
   # carries both — the deposit page. Two sequential saves would mint two OCFL
   # MODS versions and two audit rows for one submit.
-  def save_descriptive!(klass, id, title:, description:, keywords: nil, advanced: nil)
-    merge_mods!(klass, id, origin: 'metadata_form',
-                           title: title, abstract: description, keywords: keywords,
-                           **(advanced || {}))
+  def save_descriptive!(id, title:, description:, keywords: nil, advanced: nil)
+    merge_mods!(id, origin: 'metadata_form',
+                    title: title, abstract: description, keywords: keywords,
+                    **(advanced || {}))
   end
 
   # Guard, mint, title — in that order, and the title before anything else the
@@ -73,24 +73,25 @@ module DescriptiveMetadata
   #
   # @return [AtlasRb::Mash, nil] nil when the title was missing; the flash is
   #   already set, so the caller only sends the reader back to the form.
-  def mint_titled!(klass, resource_key)
+  def mint_titled!
     permitted = params.expect(resource_key => [:title, :description]).to_h
     return nil if title_missing?(permitted)
 
-    resource = AtlasRb.const_get(klass).create(@destination_id)
-    save_descriptive!(klass, resource.id, title: permitted['title'], description: permitted['description'])
+    resource = atlas_class.create(@destination_id)
+    save_descriptive!(resource.id, title: permitted['title'], description: permitted['description'])
     resource
   end
 
-  def apply_descriptive(klass, id, resource_key, keywords, show_path, advanced: nil)
-    descriptive = descriptive_params(resource_key, keywords: keywords)
+  def apply_descriptive(id, advanced: nil)
+    keywords = DescriptivePolicy.keywords_required?(atlas_class)
+    descriptive = descriptive_params(keywords: keywords)
     unless descriptive_valid?(descriptive, keywords:         keywords,
-                                           curated_subjects: curated_subjects_posted?(resource_key))
+                                           curated_subjects: curated_subjects_posted?)
       flash[:alert] = keywords ? 'Please provide a title and at least one keyword.' : 'Please provide a title.'
-      return redirect_back_or_to(public_send("edit_#{klass.downcase}_path", id))
+      return redirect_back_or_to(edit_path(id))
     end
 
-    save_descriptive!(klass, id, **descriptive, advanced: advanced)
-    redirect_to show_path
+    save_descriptive!(id, **descriptive, advanced: advanced)
+    redirect_to show_path(id)
   end
 end

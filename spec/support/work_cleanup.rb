@@ -61,7 +61,7 @@ module WorkCleanup
     # Anything other than "gone" is left to raise: a cleanup that swallows its own
     # failures is how the leak reached a page in the first place.
     def purge_work(id, nuid:)
-      status = AtlasRb::Admin::Work.destroy(id, confirm: :i_understand, nuid: nuid).status
+      status = AtlasRb::Admin::Resource.destroy(id, confirm: :i_understand, nuid: nuid).status
       return if PURGED_STATUSES.include?(status)
 
       raise "WorkCleanup could not purge Work #{id}: Atlas answered #{status}"

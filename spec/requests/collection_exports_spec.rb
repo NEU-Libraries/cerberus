@@ -64,19 +64,19 @@ RSpec.describe 'Collection metadata exports', type: :request do
   # --- helpers -------------------------------------------------------------
 
   def mods(kind) = "/home/cerberus/web/spec/fixtures/files/#{kind}-mods.xml"
-  def read_public = { 'permissions' => { 'read' => ['public'] } }
+  def read_public = { 'read' => ['public'] }
 
   def public_container(klass, parent_id)
     kind = klass.name.demodulize.downcase
     container = klass.create(parent_id, mods(kind), nuid: '000000004')
-    klass.metadata(container.id, read_public, nuid: '000000004')
+    AtlasRb::Resource.set_permissions(container.id, read_public, nuid: '000000004')
     container
   end
 
   def public_work(parent_id)
     work = AtlasRb::Work.create(parent_id, mods('work'), nuid: '000000004')
     AtlasRb::Work.complete(work.id, nuid: '000000004')
-    AtlasRb::Work.metadata(work.id, read_public, nuid: '000000004')
+    AtlasRb::Resource.set_permissions(work.id, read_public, nuid: '000000004')
     work
   end
 end

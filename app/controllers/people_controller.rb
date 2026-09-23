@@ -20,8 +20,7 @@ class PeopleController < CatalogController
   end
 
   def show
-    @person = AtlasRb::Person.find(params[:id], nuid: Current.nuid)
-    raise ResourceNotFound if @person.nil?
+    @person = require_resource!(AtlasRb::Person.find(params[:id], nuid: Current.nuid))
 
     @display_name = @person['display_name']
     @response = deposited_works(@person['nuid'])

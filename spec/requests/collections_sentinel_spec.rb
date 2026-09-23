@@ -32,10 +32,10 @@ RSpec.describe 'Collections sentinel', type: :request do
     # Community starts with an empty read audience — so the Community must carry
     # at least what we're about to give the Collection, whether that's `public`
     # or a restricted group. Widening runs top-down.
-    AtlasRb::Community.metadata(community.id, { 'permissions' => { 'read' => read } }, nuid: '000000004')
-    AtlasRb::Collection.metadata(
+    AtlasRb::Resource.set_permissions(community.id, { 'read' => read }, nuid: '000000004')
+    AtlasRb::Resource.set_permissions(
       collection.id,
-      { 'permissions' => { 'read' => read, 'edit' => [Permissions::STAFF_EDIT_GROUP] } }, nuid: '000000004'
+      { 'read' => read, 'edit' => [Permissions::STAFF_EDIT_GROUP] }, nuid: '000000004'
     )
   end
 

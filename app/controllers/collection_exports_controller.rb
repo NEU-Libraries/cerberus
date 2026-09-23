@@ -17,8 +17,7 @@ class CollectionExportsController < CatalogController
   end
 
   def show
-    collection = AtlasRb::Collection.find(params[:id])
-    raise ResourceNotFound if collection.nil?
+    collection = require_resource!(AtlasRb::Collection.find(params[:id]))
 
     resolver = CollectionContentsResolver.new(valkyrie_id:    collection.valkyrie_id,
                                               search_service: search_service)

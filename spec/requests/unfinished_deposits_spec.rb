@@ -26,7 +26,7 @@ RSpec.describe 'Unfinished deposits', type: :request do
   let!(:unfinished) do
     work = AtlasRb::Work.create(collection.id, "#{fixtures}/work-mods.xml",
                                 nuid: '000000004', depositor: depositor_nuid)
-    AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+    AtlasRb::Resource.set_permissions(work.id, { 'read' => ['public'] }, nuid: '000000004')
     work
   end
 
@@ -42,7 +42,7 @@ RSpec.describe 'Unfinished deposits', type: :request do
   def public_container(klass, parent_id)
     kind = klass.name.demodulize.downcase
     container = klass.create(parent_id, "#{fixtures}/#{kind}-mods.xml", nuid: '000000004')
-    klass.metadata(container.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+    AtlasRb::Resource.set_permissions(container.id, { 'read' => ['public'] }, nuid: '000000004')
     container
   end
 
@@ -76,9 +76,22 @@ RSpec.describe 'Unfinished deposits', type: :request do
   end
 
   describe 'discovery' do
+    # Every spec Work shares the fixture title, so browse newest first to keep
+    # this one on the first page. The staff example proves the browse reaches
+    # it, so the anonymous example cannot pass on an empty result.
+    def newest_works
+      search_catalog_path(q: '', sort: 'date-added', per_page: 100)
+    end
+
     it 'is absent from the anonymous catalog' do
-      get search_catalog_path(q: 'Test Work')
+      get newest_works
       expect(response.body).not_to include(work_path(unfinished.id))
+    end
+
+    it 'is in the catalog for repository staff' do
+      sign_in staff_user
+      get newest_works
+      expect(response.body).to include(work_path(unfinished.id))
     end
 
     it 'is absent from its collection listing for an anonymous visitor' do

@@ -35,7 +35,7 @@ class SearchBuilder < Blacklight::SearchBuilder
     return if gated_user&.admin?
 
     solr_parameters[:fq] ||= []
-    solr_parameters[:fq] << "{!terms f=read_access_group_ssim}#{discovery_permissions.join(',')}"
+    solr_parameters[:fq] << discovery_clause
   end
 
   # Register additional fq fragments to AND onto this query.
@@ -139,10 +139,28 @@ class SearchBuilder < Blacklight::SearchBuilder
       context[:effective_user] || context[:current_user]
     end
 
-    def discovery_permissions
-      permissions = ['public']
-      permissions.concat(Array(gated_user&.groups))
-      permissions.uniq
+    # The same ways in as Ability's `can :read`: public, a read group, an edit
+    # group, a named editor, or being the depositor. Checking read groups alone hides every
+    # item a user reaches only through edit rights — staff hold edit, not read,
+    # on each resource, and a private Work names its depositor in no group.
+    # Keep the two in step: a clause here that Ability lacks shows a hit that
+    # 403s when opened.
+    def discovery_clause
+      groups = Array(gated_user&.groups)
+      nuid = gated_user&.nuid
+
+      clauses = ["read_access_group_ssim:(#{solr_terms(['public'] + groups)})"]
+      clauses << "edit_access_group_ssim:(#{solr_terms(groups)})" if groups.any?
+      if nuid.present?
+        clauses << "edit_access_person_ssim:#{solr_terms([nuid])}"
+        clauses << "depositor_ssi:#{solr_terms([nuid])}"
+      end
+      clauses.map { |clause| "(#{clause})" }.join(' OR ')
+    end
+
+    # Quoted, so a group name's colons are literal rather than field separators.
+    def solr_terms(values)
+      values.uniq.map { |value| %("#{value.to_s.gsub(/["\\]/) { |char| "\\#{char}" }}") }.join(' OR ')
     end
 
     # A signed-in depositor keeps their own unfinished deposits.

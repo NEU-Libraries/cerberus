@@ -37,7 +37,7 @@ class Ability
     # Do not add :restore to these verbs — reversing a tombstone is an operator
     # action, not an owner one.
     def edit_equivalent?(doc, user)
-      groups_can_edit?(doc, user) || depositor?(doc, user)
+      groups_can_edit?(doc, user) || named_editor?(doc, user) || depositor?(doc, user)
     end
 
     def public_document?(doc)
@@ -50,6 +50,10 @@ class Ability
 
     def groups_can_edit?(doc, user)
       Array(doc['edit_access_group_ssim']).intersect?(Array(user.groups))
+    end
+
+    def named_editor?(doc, user)
+      user.nuid.present? && Array(doc['edit_access_person_ssim']).include?(user.nuid)
     end
 
     # Deliberately not Work-scoped, and deliberately has no emptiness check:

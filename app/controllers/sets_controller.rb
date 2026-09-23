@@ -132,8 +132,7 @@ class SetsController < CatalogController
   private
 
     def load_set
-      @set = AtlasRb::Compilation.find(params[:id])
-      raise ResourceNotFound if @set.nil?
+      @set = require_resource!(AtlasRb::Compilation.find(params[:id]))
 
       # @owned: owner/admin — gates ownership-only UI (Sharing tab, Delete).
       # @can_edit: owner OR a grantee — gates recipe-mutation affordances.

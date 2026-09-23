@@ -26,6 +26,8 @@ class WorksController < ApplicationController
 
   copy_blacklight_config_from(CatalogController)
 
+  atlas_resource AtlasRb::Work, key: :work, route: :work
+
   IN_PROGRESS_NOTICE = 'This work is still being processed and cannot be edited yet.'
   PUBLISH_LINK_FAILED = "File uploaded — please review the metadata. It couldn't be added to the " \
                         'community showcase; contact DRS staff if this persists.'
@@ -46,8 +48,7 @@ class WorksController < ApplicationController
   end
 
   def show
-    @work = AtlasRb::Work.find(params[:id])
-    raise ResourceNotFound if @work.nil?
+    @work = require_resource!(AtlasRb::Work.find(params[:id]))
     return render_gone(@work) if @work.tombstoned
 
     authorize_show!
@@ -57,7 +58,7 @@ class WorksController < ApplicationController
   end
 
   def tombstone
-    perform_tombstone!(AtlasRb::Work.tombstone(params[:id]), type: 'Work')
+    perform_tombstone!
   end
 
   # IIIF Presentation 3.0 manifest, one Canvas per page FileSet in page order.
@@ -70,7 +71,7 @@ class WorksController < ApplicationController
   end
 
   def downloads
-    @files = AtlasRb::Work.assets(params[:id], nuid: effective_user&.nuid)
+    @files = AtlasRb::Work.assets(params[:id], nuid: viewer_nuid)
     render layout: false
   end
 
@@ -78,8 +79,7 @@ class WorksController < ApplicationController
   # parent segment, already :edit-gated by authorize_destination!.
   def new
     @work = Work.new
-    @parent = AtlasRb::Collection.find(@destination_id)
-    raise ResourceNotFound if @parent.nil?
+    @parent = require_resource!(AtlasRb::Collection.find(@destination_id))
 
     # Required: without it form_tag posts back to /collections/:id/works/new,
     # which routes nowhere for POST, and the deposit 404s on submit.
@@ -90,11 +90,11 @@ class WorksController < ApplicationController
   def edit
     @work = requested_work
     form_preparation(@permissions, resource: @work)
-    load_descriptive!('Work')
-    load_advanced!('Work')
+    load_descriptive!
+    load_advanced!
     # The Work's own assets, not the staged upload #metadata probes: by edit
     # time the content Blob has landed and the staged file is long gone.
-    assets = AtlasRb::Work.assets(params[:id], nuid: effective_user&.nuid)
+    assets = AtlasRb::Work.assets(params[:id], nuid: viewer_nuid)
     load_streaming_only!(offered: StreamingOnly.applicable?(assets))
     load_caption!(offered: CaptionTrack.applicable?(assets), files: assets)
     breadcrumbs(params[:id], editing: true)
@@ -114,7 +114,7 @@ class WorksController < ApplicationController
   # The Metadata and Permissions tabs are separate forms that both PATCH here
   # with disjoint fields. See docs/deposit.md.
   def update
-    handle_metadata_update(klass: 'Work', resource_key: :work, keywords: true)
+    handle_metadata_update
     apply_streaming_only!
     apply_caption!
   end
@@ -123,14 +123,14 @@ class WorksController < ApplicationController
     @work = AtlasRb::Work.find(params[:id])
     @image_probe = StagedImageProbe.call(work_id: params[:id])
     form_preparation(@permissions, resource: @work)
-    load_descriptive!('Work')
+    load_descriptive!
     # Pre-fill for the Additional metadata disclosure, and it is load-bearing
     # rather than cosmetic: a blank title-part input means "remove this part" to
     # MODSMerge and an empty creator array means "replace the editable set with
     # nothing". An XML-loaded deposit can arrive already carrying both, so
     # without this the depositor's first confirm strips them. Costs no Atlas
     # read — resource_mods memoizes what load_descriptive! just fetched.
-    load_advanced!('Work')
+    load_advanced!
     # Probe the STAGED file, never the Work's assets: ContentCreationJob may
     # still be in flight here, and Atlas would hide the toggle and the caption
     # field from exactly the deposits that want them.
@@ -140,8 +140,7 @@ class WorksController < ApplicationController
   end
 
   def update_metadata
-    handle_metadata_update(klass: 'Work', resource_key: :work, keywords: true,
-                           include_advanced: true)
+    handle_metadata_update(include_advanced: true)
     # AFTER the descriptive save, deliberately: with a live worker
     # DepositDerivativesJob runs inside this request and its Delegate PATCH
     # bumps the lock, racing save_descriptive! into StaleResourceError. Specs
@@ -158,9 +157,7 @@ class WorksController < ApplicationController
 
   # The "Upload File" affordance on the show page; #add_file handles the POST.
   def upload
-    @work = AtlasRb::Work.find(params[:id])
-    raise ResourceNotFound if @work.nil?
-
+    @work = require_resource!(AtlasRb::Work.find(params[:id]))
     upload_breadcrumbs
   end
 
@@ -203,7 +200,7 @@ class WorksController < ApplicationController
       @associations = WorkAssociations.call(associations:   reads[:associations],
                                             search_service: search_service)
       prepare_zoom_view(params[:id], pages: reads[:file_sets])
-      assign_show_abilities!(klass: 'Work')
+      assign_show_abilities!
       work_breadcrumbs(params[:id])
     end
 
@@ -218,11 +215,11 @@ class WorksController < ApplicationController
     # The view-as NUID is resolved here rather than inside a task because the
     # workers must not touch ActiveRecord. See docs/deposit.md.
     def parallel_show_reads
-      viewer_nuid = effective_user&.nuid
+      nuid = viewer_nuid
       parallel_atlas_reads(
         mods:         -> { AtlasRb::Work.mods(params[:id], 'html') },
-        files:        -> { AtlasRb::Work.assets(params[:id], nuid: viewer_nuid) },
-        file_sets:    -> { AtlasRb::Work.file_sets(params[:id], nuid: viewer_nuid) },
+        files:        -> { AtlasRb::Work.assets(params[:id], nuid: nuid) },
+        file_sets:    -> { AtlasRb::Work.file_sets(params[:id], nuid: nuid) },
         associations: -> { associations_or_none(params[:id]) }
       )
     end

@@ -9,18 +9,19 @@ class XmlController < ApplicationController
   # authenticate first, then the :edit ability keyed on the resource.
   before_action :authenticate_user!
   before_action :authorize_xml_edit!
+  before_action :require_modsable_resource!
 
   def editor
-    item = AtlasRb::Resource.find(params[:id])
+    item = resolved_resource
     @resource = item.resource
     @klass = item.klass
-    resource_mods(item.klass)
+    resource_mods
     @double_escapes = Metadata::DoubleEscapes.report(@raw_xml)
     editor_breadcrumbs(item.klass, params[:id])
   end
 
   def validate
-    item = AtlasRb::Resource.find(params[:resource_id])
+    item = resolved_resource
     @resource = item.resource
 
     @errors = XmlValidator.call(xml: params[:raw_xml])
@@ -33,7 +34,7 @@ class XmlController < ApplicationController
   # presses Save, and nothing re-validates, so the preview pane keeps its last
   # render rather than one taken from the changed buffer.
   def repair
-    @resource = AtlasRb::Resource.find(params[:resource_id]).resource
+    @resource = resolved_resource.resource
     @repaired = repair_kind
     @raw_xml = apply_repair(@repaired, params[:raw_xml])
     @double_escapes = Metadata::DoubleEscapes.report(@raw_xml)
@@ -43,17 +44,21 @@ class XmlController < ApplicationController
   # stores malformed MODS truncated at the parse error, discarding every element
   # after it, with no error and an ordinary-looking audit entry.
   def update
-    item = AtlasRb::Resource.find(params[:resource_id])
+    item = resolved_resource
     klass = item.klass
 
     @errors = XmlValidator.call(xml: params[:raw_xml])
     return render_invalid(item) if @errors.any?
 
-    AtlasRb.const_get(klass).update(params[:resource_id], create_temp_xml, origin: 'xml_editor')
-    redirect_to public_send("#{klass.downcase}_path", params[:resource_id])
+    AtlasRb::Resource.put_mods(params[:resource_id], create_temp_xml, origin: 'xml_editor')
+    redirect_to resource_path(klass, params[:resource_id])
   end
 
   private
+
+    # "the xml you requested" / "the history you requested" would both name the
+    # surface rather than the thing looked up, which is a resource either way.
+    def not_found_label = 'resource'
 
     def repair_kind
       params[:kind] == 'double_escapes' ? :double_escapes : :control_characters
@@ -74,14 +79,35 @@ class XmlController < ApplicationController
       @raw_xml = params[:raw_xml]
       @repairable = Metadata::ControlCharacters.any?(params[:raw_xml])
       @double_escapes = Metadata::DoubleEscapes.report(params[:raw_xml])
-      @mods = AtlasRb.const_get(item.klass).mods(params[:resource_id], 'html')
+      @mods = AtlasRb::Resource.mods(params[:resource_id], 'html')
       editor_breadcrumbs(item.klass, params[:resource_id])
       render :editor, status: :unprocessable_content
     end
 
-    # editor carries :id; validate, repair and update carry :resource_id.
     def authorize_xml_edit!
-      authorize_edit_for!(params[:id] || params[:resource_id])
+      authorize_edit_for!(xml_resource_id)
+    end
+
+    # Refuse a type that has no MODS editing surface, before anything reads or
+    # renders it. Atlas answers /resources/:id/permissions for every type, so
+    # the :edit gate above passes on a FileSet, Blob, Delegate or Person, and
+    # the MODS read then succeeds too because atlas_rb defines it on the base
+    # class. Without this the editor opens on a resource it could never save and
+    # dies in the breadcrumb builder, which has no route for those types.
+    def require_modsable_resource!
+      resource = require_resource!(resolved_resource)
+      raise ResourceNotFound unless ModsableTypes.include?(resource.klass)
+    end
+
+    # One Resource.find per request. The type gate needs the payload before any
+    # action runs and every action needs it again, so this must not re-read.
+    def resolved_resource
+      @resolved_resource ||= AtlasRb::Resource.find(xml_resource_id)
+    end
+
+    # editor carries :id; validate, repair and update carry :resource_id.
+    def xml_resource_id
+      params[:id] || params[:resource_id]
     end
 
     # Takes the id rather than reading params, because the two actions that render
@@ -94,9 +120,9 @@ class XmlController < ApplicationController
       end
     end
 
-    def resource_mods(klass)
-      @mods = AtlasRb.const_get(klass).mods(params[:id], 'html')
-      @raw_xml = AtlasRb.const_get(klass).mods(params[:id], 'xml')
+    def resource_mods
+      @mods = AtlasRb::Resource.mods(params[:id], 'html')
+      @raw_xml = AtlasRb::Resource.mods(params[:id], 'xml')
     end
 
     def create_temp_xml

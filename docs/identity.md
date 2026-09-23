@@ -103,7 +103,9 @@ For a signed-in non-admin:
 
 ### Edit-equivalence, and why read follows it
 
-`edit_equivalent?` is an ACL edit-group match **or** ownership.
+`edit_equivalent?` is an ACL edit-group match, the user's NUID in the ACL's
+edit users, **or** ownership. This is the same test as Atlas's
+`group_acl_grants?` plus its ownership check.
 
 Granting read from it is the fix for two ordinary states that otherwise locked a
 person out of their own material. Those are a depositor who set their collection
@@ -123,6 +125,21 @@ would allow.
 
 `:restore` is deliberately not one of these verbs. Reversing a tombstone is an
 operator action, not an owner one.
+
+### Discovery follows the same read rule
+
+`SearchBuilder#apply_gated_discovery` puts `:read` into Solr as one filter. A
+document matches when it is public, a read group matches, an edit group
+matches, or the user's NUID is in `edit_access_person_ssim` or `depositor_ssi`.
+Admins skip the filter, and a view-as session is gated as the target.
+
+The two must stay in step. If the filter is narrower, staff and depositors
+cannot find items they can open: staff hold edit, not read, on every resource,
+and a private Work names its depositor in no group. If the filter is wider, a
+search shows hits that 403 when opened.
+
+Atlas's `SolrReadGate` applies the same five clauses to Set contents and
+descendant-work lists, so a change here needs the same change there.
 
 ### Ownership and proxy deposits
 
@@ -183,6 +200,27 @@ emit fired mid-teardown.
 `ApplicationController#set_current_nuid` has set the admin identity.
 `Current.on_behalf_of` drives write attribution. `Current.view_as_nuid` is
 read-only bookkeeping; `effective_user` is its real consumer.
+
+### Which NUID a gated read uses
+
+`viewer_nuid` is `effective_user&.nuid`, and it is what a read that gates on
+the *view-as target* passes to atlas_rb. Three Work reads take it — `assets`,
+`file_sets` and `Blob.work` — plus the two zip packers.
+
+The kwarg's presence is a per-call decision, not boilerplate to be removed.
+`mods` and `find` carry no `nuid:` and must not: atlas_rb signs
+`Current.nuid`, the real user, into those reads. `Current` already holds
+`view_as_nuid`, so making the read NUID ambient looks free, and it would be a
+correctness regression — `mods` would silently acquire view-as gating.
+
+| Read | Gated by |
+|---|---|
+| `mods`, `find` | `Current.nuid`, the real user, via atlas_rb's ambient `User:` header |
+| `assets`, `file_sets`, `Blob.work` | `viewer_nuid`, the view-as target |
+
+`WorksController#parallel_show_reads` resolves it into a local before building
+the tasks. The parallel reads run on worker threads, and a worker must not
+touch ActiveRecord, which `effective_user` does.
 
 ### Rejecting a write under view-as
 

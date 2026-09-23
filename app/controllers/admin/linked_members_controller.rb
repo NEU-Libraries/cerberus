@@ -41,8 +41,9 @@ module Admin
     private
 
       def load_work
-        @work = AtlasRb::Resource.find(params[:work_id]) # .resource.title + ancestors
-        raise ResourceNotFound if @work.nil?
+        # Resource.find rather than Work.find: this panel reads the wrapped
+        # shape, for the resource's own title and its ancestors.
+        @work = require_resource!(AtlasRb::Resource.find(params[:work_id]))
 
         @home_noid = Array(@work.resource.ancestors).last&.dig('noid')
         @linked_noids = Array(AtlasRb::Work.linked_members(params[:work_id]))

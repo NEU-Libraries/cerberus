@@ -61,35 +61,52 @@ module Authorizable
     rescue_from AtlasRb::NotFoundError, ResourceNotFound do
       render template: 'errors/not_found',
              status:   :not_found,
-             locals:   { obj_type: controller_name.singularize }
+             locals:   { obj_type: not_found_label }
     end
   end
 
   private
 
+    # What the 404 page calls the thing it could not find. The controller name
+    # is right for a resourceful controller and wrong for one named after a
+    # surface rather than a noun: the XML editor is not looking for an "xml".
+    def not_found_label
+      controller_name.singularize
+    end
+
+    # The one place where "an atlas_rb read returned nil" becomes a Rails 404.
+    # It converts nil and nothing else: a tombstoned resource is often a 410
+    # instead, and only the caller knows which it wants. See
+    # docs/authorization.md.
+    def require_resource!(resource)
+      raise ResourceNotFound if resource.nil?
+
+      resource
+    end
+
     def render_gone(record)
       render template: 'errors/gone', status: :gone, locals: { record: record }
     end
 
-    # atlas_rb does NOT raise on the tombstone refusal — RaiseOnResourceError
-    # passes the 422 (`code: "has_live_children"`) straight through as a raw
-    # Faraday::Response. A caller that ignores it reports a false "deleted"
-    # while the resource stays live. See docs/authorization.md.
-    def perform_tombstone!(response, type:)
+    # Withdraw the resource and report the outcome. atlas_rb does NOT raise on
+    # the tombstone refusal — RaiseOnResourceError passes the 422 (`code:
+    # "has_live_children"`) straight through as a raw Faraday::Response, so the
+    # status has to be read. Ignoring it reports a false "deleted" while the
+    # resource stays live. See docs/authorization.md.
+    def perform_tombstone!
+      response = AtlasRb::Resource.tombstone(params[:id])
       if response.success?
-        redirect_to root_path, notice: "#{type} deleted."
+        redirect_to root_path, notice: "#{solr_type} deleted."
       elsif response.status == 422
-        redirect_back_or_to(root_path, alert: "#{type} can't be deleted while it still contains live members. " \
-                                              'Withdraw or move them first.')
+        redirect_back_or_to(root_path, alert: "#{solr_type} can't be deleted while it still contains live " \
+                                              'members. Withdraw or move them first.')
       else
-        redirect_back_or_to(root_path, alert: "#{type} could not be deleted.")
+        redirect_back_or_to(root_path, alert: "#{solr_type} could not be deleted.")
       end
     end
 
     def authorize_show!
-      @permissions = AtlasRb::Resource.permissions(params[:id])
-      raise ResourceNotFound if @permissions.nil?
-
+      @permissions = require_resource!(AtlasRb::Resource.permissions(params[:id]))
       authorize! :read, solr_doc_from_permissions(@permissions)
     end
 
@@ -123,27 +140,19 @@ module Authorizable
     end
 
     def authorize_edit_for!(id)
-      @permissions = AtlasRb::Resource.permissions(id)
-      raise ResourceNotFound if @permissions.nil?
-
+      @permissions = require_resource!(AtlasRb::Resource.permissions(id))
       authorize! :edit, solr_doc_from_permissions(@permissions)
     end
 
     def authorize_tombstone!
-      @permissions = AtlasRb::Resource.permissions(params[:id])
-      raise ResourceNotFound if @permissions.nil?
-
-      authorize! :tombstone, solr_doc_from_permissions(@permissions, klass: tombstone_klass)
-    end
-
-    def tombstone_klass
-      controller_name.classify
+      @permissions = require_resource!(AtlasRb::Resource.permissions(params[:id]))
+      authorize! :tombstone, solr_doc_from_permissions(@permissions, klass: solr_type)
     end
 
     # Renders the Edit / Delete links iff the action behind them would be
     # authorized — never show a control the user can't use.
-    def assign_show_abilities!(klass:)
-      doc = solr_doc_from_permissions(@permissions, klass: klass)
+    def assign_show_abilities!
+      doc = solr_doc_from_permissions(@permissions, klass: solr_type)
       @can_edit = current_ability.can?(:edit, doc)
       @can_tombstone = current_ability.can?(:tombstone, doc)
     end
@@ -152,6 +161,7 @@ module Authorizable
       SolrDocument.new(
         'read_access_group_ssim'  => permissions.read,
         'edit_access_group_ssim'  => permissions.edit,
+        'edit_access_person_ssim' => permissions.try(:edit_users),
         'internal_resource_tesim' => klass.to_s,
         'depositor_ssi'           => permissions.try(:depositor),
         'proxy_uploader_ssi'      => permissions.try(:proxy_uploader)

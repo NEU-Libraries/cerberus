@@ -35,13 +35,17 @@ module AtlasWrite
   #
   # The unchanged? guard is what keeps a no-op submit from minting an OCFL MODS
   # version and an audit row. Do not hoist it: `update` writes unconditionally.
-  def merge_mods!(klass, id, origin:, **fields)
+  #
+  # Type-agnostic, so anything may call it — a controller, or a service with no
+  # resource declaration at all. Atlas reads and writes MODS on
+  # /resources/:id/mods whatever the resource turns out to be.
+  def merge_mods!(id, origin:, **fields)
     with_stale_retry do
-      xml = AtlasRb.const_get(klass).mods(id, 'xml')
+      xml = AtlasRb::Resource.mods(id, 'xml')
       merged = Metadata::MODSMerge.call(xml: xml, **fields)
       break if Metadata::MODSMerge.unchanged?(xml, merged)
 
-      AtlasRb.const_get(klass).update(id, write_tmp_xml(merged), origin: origin)
+      AtlasRb::Resource.put_mods(id, write_tmp_xml(merged), origin: origin)
     end
   end
 

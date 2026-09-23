@@ -13,6 +13,7 @@ class CommunitiesController < CatalogController
   include ContainerAnalytics
   include ContainerRestrictionRequest
 
+  atlas_resource AtlasRb::Community, key: :community, route: :community
   authorize_resource_writes!(extra_edit: %i[request_restriction])
   after_action :record_view_impression, only: :show
 
@@ -28,19 +29,18 @@ class CommunitiesController < CatalogController
   end
 
   def show
-    @community = AtlasRb::Community.find(params[:id])
-    raise ResourceNotFound if @community.nil?
+    @community = require_resource!(AtlasRb::Community.find(params[:id]))
     return render_gone(@community) if @community.tombstoned
 
     authorize_show!
     load_children_and_deletability
     prepend_faculty_staff_entry(params[:id])
-    assign_show_abilities!(klass: 'Community')
+    assign_show_abilities!
     breadcrumbs(params[:id])
   end
 
   def tombstone
-    perform_tombstone!(AtlasRb::Community.tombstone(params[:id]), type: 'Community')
+    perform_tombstone!
   end
 
   def new
@@ -54,7 +54,7 @@ class CommunitiesController < CatalogController
     # refuses anyone else server-side. See docs/permissions.md.
     @narrowing_allowed = current_user&.admin? || false
     form_preparation(@permissions, resource: @community)
-    load_descriptive!('Community')
+    load_descriptive!
     load_container_analytics(@community, 'Community')
     breadcrumbs(params[:id], editing: true)
   end
@@ -62,7 +62,7 @@ class CommunitiesController < CatalogController
   # Provision showcases only after the community exists and is titled, so a
   # missing title never leaves orphaned showcases behind.
   def create
-    c = mint_titled!('Community', :community)
+    c = mint_titled!
     return redirect_to(new_child_path('community')) if c.nil?
 
     ShowcaseProvisioner.call(community_id: c.id)
@@ -70,7 +70,7 @@ class CommunitiesController < CatalogController
   end
 
   def update
-    handle_metadata_update(klass: 'Community', resource_key: :community, keywords: false)
+    handle_metadata_update
   end
 
   private
@@ -100,8 +100,6 @@ class CommunitiesController < CatalogController
     # never as a Ruby post-filter on the returned documents: a post-filter leaves
     # Solr's Type facet counting the rows it hid.
     def empty_showcase_uuids(showcase_uuids)
-      return [] if showcase_uuids.empty?
-
       showcase_uuids - populated_showcase_ids(showcase_uuids).to_a
     end
 

@@ -37,12 +37,11 @@ class ShowcaseProvisioner < ApplicationService
       nil
     end
 
+    # The shared read-merge-write spine, which any caller may use now that it
+    # needs no resource type. This used to hand-roll it because merge_mods! read
+    # `atlas_class` off its includer and a service has none.
     def set_title(id, label)
-      xml = AtlasRb::Collection.mods(id, 'xml')
-      merged = Metadata::MODSMerge.call(xml: xml, title: label,
-                                        abstract: "Featured #{label.downcase} for this community.")
-      return if Metadata::MODSMerge.unchanged?(xml, merged)
-
-      AtlasRb::Collection.update(id, write_tmp_xml(merged))
+      merge_mods!(id, origin: nil, title: label,
+                  abstract: "Featured #{label.downcase} for this community.")
     end
 end

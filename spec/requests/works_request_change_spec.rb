@@ -34,10 +34,10 @@ RSpec.describe 'Works request_change', type: :request do
     # its container. Read and edit go in one call, since Atlas assigns the edit
     # grants unconditionally from the payload.
     publicize_ancestry!(community: community, collection: collection)
-    AtlasRb::Work.metadata(work.id,
-                           { 'permissions' => { 'read' => ['public'],
-                                                'edit' => [Permissions::STAFF_EDIT_GROUP] } },
-                           nuid: '000000004')
+    AtlasRb::Resource.set_permissions(work.id,
+                                      { 'read' => ['public'],
+                                        'edit' => [Permissions::STAFF_EDIT_GROUP] },
+                                      nuid: '000000004')
   end
 
   before { grant_edit! }

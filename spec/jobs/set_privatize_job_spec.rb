@@ -21,7 +21,7 @@ RSpec.describe SetPrivatizeJob do
   before do
     allow(AtlasRb::Compilation).to receive(:find).with('set-1')
                                                  .and_return(AtlasRb::Mash.new('id' => 'set-1', 'title' => 'Field Notes'))
-    allow(AtlasRb::Work).to receive(:metadata)
+    allow(AtlasRb::Resource).to receive(:set_permissions)
   end
 
   def run
@@ -34,8 +34,8 @@ RSpec.describe SetPrivatizeJob do
 
     run
 
-    expect(AtlasRb::Work).to have_received(:metadata).with(
-      'w1', hash_including('permissions' => hash_including('read' => []))
+    expect(AtlasRb::Resource).to have_received(:set_permissions).with(
+      'w1', hash_including('read' => [])
     )
   end
 
@@ -46,14 +46,15 @@ RSpec.describe SetPrivatizeJob do
 
     run
 
-    expect(AtlasRb::Work).to have_received(:metadata).with(
-      'w1', hash_including('permissions' => hash_including('read' => ['northeastern:drs:library:archives']))
+    expect(AtlasRb::Resource).to have_received(:set_permissions).with(
+      'w1', hash_including('read' => ['northeastern:drs:library:archives'])
     )
   end
 
-  # The whole-envelope rule: Atlas assigns edit/edit_users/embargo
-  # unconditionally, so a payload carrying read alone blanks them.
-  it 'sends the whole envelope, not just read' do
+  # The job takes `public` away and changes nothing else, so `read` is the only
+  # slot it sends. It still reads the stored envelope first, but for the value —
+  # it needs to know what the audience was in order to subtract from it.
+  it 'sends the stripped read and nothing else' do
     stub_contents('w1')
     allow(AtlasRb::Resource).to receive(:permissions)
       .with('w1').and_return(envelope(read: ['public'], edit: [staff, 'northeastern:drs:nupd:media'],
@@ -61,11 +62,7 @@ RSpec.describe SetPrivatizeJob do
 
     run
 
-    expect(AtlasRb::Work).to have_received(:metadata).with(
-      'w1', { 'permissions' => { 'embargo' => '2027-01-01', 'read' => [],
-                                 'edit' => [staff, 'northeastern:drs:nupd:media'],
-                                 'edit_users' => ['000000011'] } }
-    )
+    expect(AtlasRb::Resource).to have_received(:set_permissions).with('w1', { 'read' => [] })
   end
 
   it 'leaves a work that is already private alone' do
@@ -75,7 +72,7 @@ RSpec.describe SetPrivatizeJob do
 
     run
 
-    expect(AtlasRb::Work).not_to have_received(:metadata)
+    expect(AtlasRb::Resource).not_to have_received(:set_permissions)
   end
 
   it 'carries on after one work fails, and names it' do
@@ -85,7 +82,7 @@ RSpec.describe SetPrivatizeJob do
 
     run
 
-    expect(AtlasRb::Work).to have_received(:metadata).with('w2', anything)
+    expect(AtlasRb::Resource).to have_received(:set_permissions).with('w2', anything)
     notice = AdminNotice.find_by(kind: 'set_privatize')
     expect(notice.payload['failures'].first).to include('w1')
     expect(notice.subject).to include('problems')
@@ -107,7 +104,7 @@ RSpec.describe SetPrivatizeJob do
 
     run
 
-    expect(AtlasRb::Work).not_to have_received(:metadata)
+    expect(AtlasRb::Resource).not_to have_received(:set_permissions)
   end
 
   describe 'the report' do

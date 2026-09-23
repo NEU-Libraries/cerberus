@@ -177,10 +177,10 @@ RSpec.describe SetResolver do
       # assert exactly how many Works each shared collection holds. A public
       # Work left in one of them is counted by whichever chip example runs later.
       embargoed = public_work(public_collection(community.id).id)
-      AtlasRb::Work.metadata(embargoed.id,
-                             { 'permissions' => { 'read'    => ['public'],
-                                                  'embargo' => (Date.current + 365).to_s } },
-                             nuid: nuid)
+      AtlasRb::Resource.set_permissions(embargoed.id,
+                                        { 'read'    => ['public'],
+                                          'embargo' => (Date.current + 365).to_s },
+                                        nuid: nuid)
 
       zip = FakeZip.new
       SetZipPacker.new(resolver: resolver(recipe(works: [embargoed])), nuid: nil,
@@ -218,8 +218,8 @@ RSpec.describe SetResolver do
 
   def nuid = '000000004'
   def mods(kind) = "/home/cerberus/web/spec/fixtures/files/#{kind}-mods.xml"
-  def read_public = { 'permissions' => { 'read' => ['public'] } }
-  def read_staff  = { 'permissions' => { 'read' => ['northeastern:drs:repository:staff'] } }
+  def read_public = { 'read' => ['public'] }
+  def read_staff  = { 'read' => ['northeastern:drs:repository:staff'] }
 
   def recipe(collections: [], works: [], exclusions: [])
     { 'included_collections' => collections.map(&:id),
@@ -251,13 +251,13 @@ RSpec.describe SetResolver do
 
   def public_community
     community = AtlasRb::Community.create(nil, mods('community'), nuid: nuid)
-    AtlasRb::Community.metadata(community.id, read_public, nuid: nuid)
+    AtlasRb::Resource.set_permissions(community.id, read_public, nuid: nuid)
     community
   end
 
   def public_collection(parent_id)
     collection = AtlasRb::Collection.create(parent_id, mods('collection'), nuid: nuid)
-    AtlasRb::Collection.metadata(collection.id, read_public, nuid: nuid)
+    AtlasRb::Resource.set_permissions(collection.id, read_public, nuid: nuid)
     collection
   end
 
@@ -265,21 +265,21 @@ RSpec.describe SetResolver do
   # community is born public), so restriction must be written explicitly.
   def restricted_collection(parent_id)
     collection = AtlasRb::Collection.create(parent_id, mods('collection'), nuid: nuid)
-    AtlasRb::Collection.metadata(collection.id, read_staff, nuid: nuid)
+    AtlasRb::Resource.set_permissions(collection.id, read_staff, nuid: nuid)
     collection
   end
 
   def public_work(parent_id)
     work = AtlasRb::Work.create(parent_id, mods('work'), nuid: nuid)
     AtlasRb::Work.complete(work.id, nuid: nuid)
-    AtlasRb::Work.metadata(work.id, read_public, nuid: nuid)
+    AtlasRb::Resource.set_permissions(work.id, read_public, nuid: nuid)
     work
   end
 
   def restricted_work(parent_id)
     work = AtlasRb::Work.create(parent_id, mods('work'), nuid: nuid)
     AtlasRb::Work.complete(work.id, nuid: nuid)
-    AtlasRb::Work.metadata(work.id, read_staff, nuid: nuid)
+    AtlasRb::Resource.set_permissions(work.id, read_staff, nuid: nuid)
     work
   end
 end

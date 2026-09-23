@@ -35,8 +35,7 @@ module Admin
     # front of the person who clicked rather than inside a job.
     def set
       noid = params[:noid]
-      compilation = AtlasRb::Compilation.find(noid)
-      raise ResourceNotFound if compilation.nil?
+      compilation = require_resource!(AtlasRb::Compilation.find(noid))
 
       SetReindexJob.perform_later(noid)
       flash[:notice] = "Reindex of “#{compilation['title']}” has started. " \

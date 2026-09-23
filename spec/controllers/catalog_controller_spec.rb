@@ -8,7 +8,7 @@ describe CatalogController do
   def public_work(parent_id, fixture)
     AtlasRb::Work.create(parent_id, fixture_mods(fixture), nuid: '000000004').tap do |work|
       AtlasRb::Work.complete(work.id, nuid: '000000004')
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(work.id, { 'read' => ['public'] }, nuid: '000000004')
     end
   end
 
@@ -17,7 +17,7 @@ describe CatalogController do
   describe 'index' do
     render_views
     it 'renders the index partial' do
-      AtlasRb::Community.metadata(community.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(community.id, { 'read' => ['public'] }, nuid: '000000004')
       expect(community.title).to eq('Northeastern University')
       get :index
       expect(response).to render_template('catalog/index')
@@ -25,7 +25,7 @@ describe CatalogController do
     end
 
     it 'overlays a resource-type pill on each result thumbnail' do
-      AtlasRb::Community.metadata(community.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(community.id, { 'read' => ['public'] }, nuid: '000000004')
       get :index
       expect(response.body).to include('class="thumb-type-pill">Community')
     end
@@ -34,10 +34,10 @@ describe CatalogController do
       publicize_ancestry!(community: community)
       featured = AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml',
                                             featured: true, nuid: '000000004')
-      AtlasRb::Collection.metadata(featured.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(featured.id, { 'read' => ['public'] }, nuid: '000000004')
       ordinary = AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml',
                                             nuid: '000000004')
-      AtlasRb::Collection.metadata(ordinary.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(ordinary.id, { 'read' => ['public'] }, nuid: '000000004')
 
       get :index
 
@@ -45,8 +45,8 @@ describe CatalogController do
       expect(ids).to include(ordinary.valkyrie_id)     # ordinary public collection is in general search
       expect(ids).not_to include(featured.valkyrie_id) # the showcase is not
     ensure
-      AtlasRb::Collection.tombstone(featured.id) if featured
-      AtlasRb::Collection.tombstone(ordinary.id) if ordinary
+      AtlasRb::Resource.tombstone(featured.id) if featured
+      AtlasRb::Resource.tombstone(ordinary.id) if ordinary
     end
 
     # The "Featured" pill still renders for showcases where they *do* appear
@@ -105,7 +105,7 @@ describe CatalogController do
     let!(:collection) do
       publicize_ancestry!(community: community)
       AtlasRb::Collection.create(community.id, fixture_mods('collection'), nuid: '000000004').tap do |created|
-        AtlasRb::Collection.metadata(created.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+        AtlasRb::Resource.set_permissions(created.id, { 'read' => ['public'] }, nuid: '000000004')
       end
     end
 
@@ -117,8 +117,8 @@ describe CatalogController do
 
       expect(unindexed_configured_fields).to be_empty
     ensure
-      AtlasRb::Work.tombstone(work.id) if work
-      AtlasRb::Collection.tombstone(collection.id)
+      AtlasRb::Resource.tombstone(work.id) if work
+      AtlasRb::Resource.tombstone(collection.id)
     end
 
     # A displayed field that does not join emits one <dd> per value into a
@@ -166,7 +166,7 @@ describe CatalogController do
     it 'renders the Creator and Topic facets with the values Atlas indexed' do
       publicize_ancestry!(community: community)
       collection = AtlasRb::Collection.create(community.id, fixture_mods('collection'), nuid: '000000004')
-      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(collection.id, { 'read' => ['public'] }, nuid: '000000004')
       work = public_work(collection.id, 'work')
 
       get :index, params: { q: "What's New" }
@@ -175,8 +175,8 @@ describe CatalogController do
       expect(body).to include('id="facet-creator_ssim"').and include('Cohen, Daniel J.')
       expect(body).to include('id="facet-subject_ssim"').and include('Civil society')
     ensure
-      AtlasRb::Work.tombstone(work.id) if work
-      AtlasRb::Collection.tombstone(collection.id) if collection
+      AtlasRb::Resource.tombstone(work.id) if work
+      AtlasRb::Resource.tombstone(collection.id) if collection
     end
   end
 
@@ -195,7 +195,7 @@ describe CatalogController do
     let(:collection) do
       publicize_ancestry!(community: community)
       AtlasRb::Collection.create(community.id, fixture_mods('collection'), nuid: '000000004').tap do |created|
-        AtlasRb::Collection.metadata(created.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+        AtlasRb::Resource.set_permissions(created.id, { 'read' => ['public'] }, nuid: '000000004')
       end
     end
 
@@ -213,8 +213,8 @@ describe CatalogController do
       expect(order_under('creator-desc', pair)).to eq([lake.valkyrie_id, whats_new.valkyrie_id])
       expect(order_under('date-created', pair)).to eq([lake.valkyrie_id, whats_new.valkyrie_id])
     ensure
-      [lake, whats_new].compact.each { |work| AtlasRb::Work.tombstone(work.id) }
-      AtlasRb::Collection.tombstone(collection.id)
+      [lake, whats_new].compact.each { |work| AtlasRb::Resource.tombstone(work.id) }
+      AtlasRb::Resource.tombstone(collection.id)
     end
 
     it 'names only fields the index carries' do
@@ -222,8 +222,8 @@ describe CatalogController do
 
       expect(unindexed_sort_fields).to be_empty
     ensure
-      AtlasRb::Work.tombstone(lake.id) if lake
-      AtlasRb::Collection.tombstone(collection.id)
+      AtlasRb::Resource.tombstone(lake.id) if lake
+      AtlasRb::Resource.tombstone(collection.id)
     end
 
     # The other way to get a sort wrong, and it fails louder: Solr rejects a sort

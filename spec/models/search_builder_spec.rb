@@ -47,8 +47,54 @@ RSpec.describe SearchBuilder do
     let(:user) { nil }
 
     it 'gates discovery to public only' do
-      expect(gated_fq.first).to include('read_access_group_ssim', 'public')
-      expect(gated_fq.first).not_to include('northeastern')
+      expect(gated_fq).to eq(['(read_access_group_ssim:("public"))'])
+    end
+  end
+
+  # Read mirrors Ability's `can :read`: public, a read group, an edit group, a
+  # named editor, or the depositor. Staff hold edit, not read, on every resource, so a gate on
+  # read groups alone hides everything they curate.
+  describe 'edit-equivalent discovery' do
+    let(:user) do
+      User.new(nuid: '000000002', role: 'privileged',
+               groups: ['northeastern:drs:repository:staff'])
+    end
+
+    it 'admits documents the user\'s groups can edit' do
+      expect(gated_fq.first).to include('edit_access_group_ssim:("northeastern:drs:repository:staff")')
+    end
+
+    it 'admits documents that name the user as an editor' do
+      expect(gated_fq.first).to include('edit_access_person_ssim:"000000002"')
+    end
+
+    it 'admits documents the user deposited' do
+      expect(gated_fq.first).to include('depositor_ssi:"000000002"')
+    end
+
+    it 'ORs the clauses into one filter, so any one of them is enough' do
+      expect(gated_fq.first).to eq(
+        '(read_access_group_ssim:("public" OR "northeastern:drs:repository:staff")) OR ' \
+        '(edit_access_group_ssim:("northeastern:drs:repository:staff")) OR ' \
+        '(edit_access_person_ssim:"000000002") OR (depositor_ssi:"000000002")'
+      )
+    end
+
+    context 'when the user has no groups' do
+      let(:user) { User.new(nuid: '000000005', role: 'standard', groups: []) }
+
+      it 'omits the edit-group clause rather than emitting an empty one' do
+        expect(gated_fq.first).to eq('(read_access_group_ssim:("public")) OR ' \
+                                     '(edit_access_person_ssim:"000000005") OR (depositor_ssi:"000000005")')
+      end
+    end
+
+    context 'when a group name carries a quote or backslash' do
+      let(:user) { User.new(nuid: '', role: 'standard', groups: ['odd"group\\x']) }
+
+      it 'escapes it inside the quoted term' do
+        expect(gated_fq.first).to include('"odd\\"group\\\\x"')
+      end
     end
   end
 
@@ -74,6 +120,11 @@ RSpec.describe SearchBuilder do
         expect(gated_fq.size).to eq(1)
         expect(gated_fq.first).to include('read_access_group_ssim', 'public',
                                           'northeastern:drs:repository:staff')
+      end
+
+      it 'widens by the target\'s edit groups and deposits, never the admin\'s' do
+        expect(gated_fq.first).to include('edit_access_group_ssim', 'depositor_ssi:"000000002"')
+        expect(gated_fq.first).not_to include('000000004')
       end
     end
 

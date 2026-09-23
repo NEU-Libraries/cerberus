@@ -105,11 +105,7 @@ module Admin
       end
 
       def reparent(node, parent_id)
-        case node.klass
-        when 'Work'       then AtlasRb::Work.reparent(node.resource.id, parent_id)
-        when 'Collection' then AtlasRb::Collection.reparent(node.resource.id, parent_id)
-        when 'Community'  then AtlasRb::Community.reparent(node.resource.id, parent_id)
-        end
+        AtlasRb::Resource.reparent(node.resource.id, parent_id)
       end
 
       def set_confirm_ivars
@@ -142,7 +138,7 @@ module Admin
       end
 
       def node_path(node)
-        public_send("#{node.klass.downcase}_path", node.resource.id)
+        resource_path(node.klass, node.resource.id)
       end
       helper_method :node_path
   end

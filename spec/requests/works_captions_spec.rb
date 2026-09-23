@@ -47,10 +47,10 @@ RSpec.describe 'Works captions', type: :request do
   # the edit grants unconditionally from the payload.
   before do
     publicize_ancestry!(community: community, collection: collection)
-    AtlasRb::Work.metadata(work.id,
-                           { 'permissions' => { 'read' => ['public'],
-                                                'edit' => [Permissions::STAFF_EDIT_GROUP] } },
-                           nuid: '000000004')
+    AtlasRb::Resource.set_permissions(work.id,
+                                      { 'read' => ['public'],
+                                        'edit' => [Permissions::STAFF_EDIT_GROUP] },
+                                      nuid: '000000004')
   end
 
   describe 'authorization' do

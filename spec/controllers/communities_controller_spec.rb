@@ -7,10 +7,10 @@ describe CommunitiesController do
 
   describe 'index' do
     it 'scopes the listing to Communities only — child Collections do not leak in' do
-      AtlasRb::Community.metadata(community.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(community.id, { 'read' => ['public'] }, nuid: '000000004')
       collection = AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml',
                                               nuid: '000000004')
-      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(collection.id, { 'read' => ['public'] }, nuid: '000000004')
 
       get :index
 
@@ -24,7 +24,7 @@ describe CommunitiesController do
       expect(docs.flat_map { |d| Array(d['internal_resource_tesim']) }.uniq).to eq(['Community'])
       expect(docs.map(&:id)).not_to include(collection.valkyrie_id)
     ensure
-      AtlasRb::Collection.tombstone(collection.id) if collection
+      AtlasRb::Resource.tombstone(collection.id) if collection
     end
   end
 
@@ -34,14 +34,14 @@ describe CommunitiesController do
     let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
 
     before do
-      AtlasRb::Community.metadata(community.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(community.id, { 'edit' => ['editors'] }, nuid: '000000004')
       # Readable as well as editable. Atlas gates reads on the resource's own ACL,
       # and this fixture user carries no NUID, so the ACL read is made as the
       # guest — a private resource comes back as nothing and the page 404s before
       # the edit gate runs. Publicizing after the edit write, because
       # publicize_resource! reads the current envelope and carries the grant
       # through; the reverse order would drop it.
-      publicize_resource!(AtlasRb::Community, community, '000000004')
+      publicize_resource!(community, '000000004')
       sign_in user
     end
 
@@ -151,7 +151,7 @@ describe CommunitiesController do
       let!(:sub_collection) do
         publicize_ancestry!(community: community)
         c = AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004')
-        AtlasRb::Collection.metadata(c.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+        AtlasRb::Resource.set_permissions(c.id, { 'read' => ['public'] }, nuid: '000000004')
         c
       end
       let!(:other_community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', nuid: '000000004') }
@@ -161,7 +161,7 @@ describe CommunitiesController do
       let!(:foreign_collection) do
         publicize_ancestry!(community: other_community)
         c = AtlasRb::Collection.create(other_community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004')
-        AtlasRb::Collection.metadata(c.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+        AtlasRb::Resource.set_permissions(c.id, { 'read' => ['public'] }, nuid: '000000004')
         c
       end
 
@@ -206,7 +206,7 @@ describe CommunitiesController do
     render_views
 
     before do
-      AtlasRb::Community.metadata(community.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(community.id, { 'read' => ['public'] }, nuid: '000000004')
     end
 
     it 'renders the show partial' do
@@ -252,9 +252,9 @@ describe CommunitiesController do
       end
 
       it 'is rendered for a user who can edit the community' do
-        AtlasRb::Community.metadata(community.id,
-                                    { 'permissions' => { 'read' => ['public'], 'edit' => ['editors'] } },
-                                    nuid: '000000004')
+        AtlasRb::Resource.set_permissions(community.id,
+                                          { 'read' => ['public'], 'edit' => ['editors'] },
+                                          nuid: '000000004')
         sign_in User.new(email: 'ed@example.com', nuid: '000000002', groups: ['editors'])
         get :show, params: { id: community.id }
         expect(response.body).to include('breadcrumb-add')
@@ -269,9 +269,9 @@ describe CommunitiesController do
       end
 
       it 'is shown to a user who can edit' do
-        AtlasRb::Community.metadata(community.id,
-                                    { 'permissions' => { 'read' => ['public'], 'edit' => ['editors'] } },
-                                    nuid: '000000004')
+        AtlasRb::Resource.set_permissions(community.id,
+                                          { 'read' => ['public'], 'edit' => ['editors'] },
+                                          nuid: '000000004')
         sign_in User.new(email: 'ed@example.com', nuid: '000000002', groups: ['editors'])
         get :show, params: { id: community.id }
         expect(response.body).to include(%(href="#{edit_community_path(community.id)}"))
@@ -311,14 +311,14 @@ describe CommunitiesController do
       let!(:collection) do
         c = AtlasRb::Collection.create(community.id,
                                        '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004')
-        AtlasRb::Collection.metadata(c.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+        AtlasRb::Resource.set_permissions(c.id, { 'read' => ['public'] }, nuid: '000000004')
         c
       end
       let!(:work) do
         w = AtlasRb::Work.create(collection.id,
                                  '/home/cerberus/web/spec/fixtures/files/work-mods.xml', nuid: '000000004')
         AtlasRb::Work.complete(w.id, nuid: '000000004')
-        AtlasRb::Work.metadata(w.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+        AtlasRb::Resource.set_permissions(w.id, { 'read' => ['public'] }, nuid: '000000004')
         w
       end
 
@@ -374,22 +374,22 @@ describe CommunitiesController do
     end
 
     before do
-      AtlasRb::Community.metadata(community.id,
-                                  { 'permissions' => { 'edit' => [Permissions::STAFF_EDIT_GROUP] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(community.id,
+                                        { 'edit' => [Permissions::STAFF_EDIT_GROUP] }, nuid: '000000004')
       sign_in user
     end
 
-    it 'calls AtlasRb::Community.tombstone and reports success on a 2xx' do
-      allow(AtlasRb::Community).to receive(:tombstone)
+    it 'tombstones through the generic endpoint and reports success on a 2xx' do
+      allow(AtlasRb::Resource).to receive(:tombstone)
         .and_return(instance_double(Faraday::Response, success?: true))
       post :tombstone, params: { id: community.id }
-      expect(AtlasRb::Community).to have_received(:tombstone).with(community.id)
+      expect(AtlasRb::Resource).to have_received(:tombstone).with(community.id)
       expect(subject).to redirect_to(root_path)
       expect(flash[:notice]).to eq('Community deleted.')
     end
 
     it 'reports a 422 live-members refusal without claiming success' do
-      allow(AtlasRb::Community).to receive(:tombstone)
+      allow(AtlasRb::Resource).to receive(:tombstone)
         .and_return(instance_double(Faraday::Response, success?: false, status: 422))
       request.env['HTTP_REFERER'] = community_path(community.id)
       post :tombstone, params: { id: community.id }
@@ -416,7 +416,7 @@ describe CommunitiesController do
       expect(created.title).to eq('BrandNewCommunity')
       expect(created.description).to include('CommunityAbstract')
     ensure
-      AtlasRb::Community.tombstone(created_id) if created_id
+      AtlasRb::Resource.tombstone(created_id) if created_id
     end
 
     it 'provisions the new community with genre showcases' do
@@ -489,10 +489,10 @@ describe CommunitiesController do
     render_views
 
     it 'excludes an empty featured showcase from the browse and its facets' do
-      AtlasRb::Community.metadata(community.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(community.id, { 'read' => ['public'] }, nuid: '000000004')
       showcase = AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml',
                                             featured: true, nuid: '000000004')
-      AtlasRb::Collection.metadata(showcase.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(showcase.id, { 'read' => ['public'] }, nuid: '000000004')
 
       get :show, params: { id: community.id }
 
@@ -500,7 +500,7 @@ describe CommunitiesController do
       # documents (and therefore from Solr's facet counts).
       expect(assigns(:response).documents.map(&:id)).not_to include(showcase.valkyrie_id)
     ensure
-      AtlasRb::Collection.tombstone(showcase.id) if showcase
+      AtlasRb::Resource.tombstone(showcase.id) if showcase
     end
   end
 
@@ -535,7 +535,7 @@ describe CommunitiesController do
     let(:admin_user) { User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin') }
 
     before do
-      AtlasRb::Community.metadata(community.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      AtlasRb::Resource.set_permissions(community.id, { 'edit' => ['editors'] }, nuid: '000000004')
       sign_in user
     end
 
@@ -550,11 +550,11 @@ describe CommunitiesController do
     end
 
     it 'refuses a blank title and returns to the edit page without writing MODS' do
-      allow(AtlasRb::Community).to receive(:update)
+      allow(AtlasRb::Resource).to receive(:put_mods)
 
       patch :update, params: { id: community.id, community: { title: '', description: 'Whatever' } }
 
-      expect(AtlasRb::Community).not_to have_received(:update)
+      expect(AtlasRb::Resource).not_to have_received(:put_mods)
       expect(flash[:alert]).to eq('Please provide a title.')
       expect(response).to redirect_to(edit_community_path(community.id))
     end
@@ -563,11 +563,11 @@ describe CommunitiesController do
       before { publicize_ancestry!(community: community) }
 
       it 'refuses a non-admin narrowing and writes nothing' do
-        allow(AtlasRb::Community).to receive(:metadata)
+        allow(AtlasRb::Resource).to receive(:set_permissions)
 
         patch :update, params: { id: community.id, mass: 'private', community: { embargo: '' } }
 
-        expect(AtlasRb::Community).not_to have_received(:metadata)
+        expect(AtlasRb::Resource).not_to have_received(:set_permissions)
         expect(flash[:alert]).to eq(ResourcePermissions::COMMUNITY_NARROWING_REFUSED)
       end
 

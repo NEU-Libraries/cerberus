@@ -15,17 +15,17 @@ module AtlasFixtures
 
   def mods_path(kind) = Rails.root.join("spec/fixtures/files/#{kind}-mods.xml").to_s
 
-  def read_public = { 'permissions' => { 'read' => ['public'] } }
+  def read_public = { 'read' => ['public'] }
 
   def create_community(public: false)
     community = AtlasRb::Community.create(nil, mods_path('community'), nuid: admin_nuid)
-    AtlasRb::Community.metadata(community.id, read_public, nuid: admin_nuid) if public
+    AtlasRb::Resource.set_permissions(community.id, read_public, nuid: admin_nuid) if public
     community
   end
 
   def create_collection(parent_id, public: false)
     collection = AtlasRb::Collection.create(parent_id, mods_path('collection'), nuid: admin_nuid)
-    AtlasRb::Collection.metadata(collection.id, read_public, nuid: admin_nuid) if public
+    AtlasRb::Resource.set_permissions(collection.id, read_public, nuid: admin_nuid) if public
     collection
   end
 
@@ -34,7 +34,7 @@ module AtlasFixtures
   def create_work(parent_id, public: false)
     work = AtlasRb::Work.create(parent_id, mods_path('work'), nuid: admin_nuid)
     AtlasRb::Work.complete(work.id, nuid: admin_nuid)
-    AtlasRb::Work.metadata(work.id, read_public, nuid: admin_nuid) if public
+    AtlasRb::Resource.set_permissions(work.id, read_public, nuid: admin_nuid) if public
     work
   end
 end

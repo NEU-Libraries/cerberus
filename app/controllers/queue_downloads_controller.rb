@@ -15,7 +15,7 @@ class QueueDownloadsController < ApplicationController
     queue = DownloadQueue.new(session)
     return redirect_to(download_queue_path, alert: 'Your download queue is empty.') if queue.empty?
 
-    packer = QueueZipPacker.new(items: queue.items, nuid: effective_user&.nuid,
+    packer = QueueZipPacker.new(items: queue.items, nuid: viewer_nuid,
                                 ability: current_ability, bypass_embargo: bypass_embargo?)
     zip_kit_stream(filename: zip_filename) { |zip| packer.pack(zip) }
   end

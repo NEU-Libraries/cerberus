@@ -10,12 +10,12 @@ module Thumbable
   # thumbnail_2x / preview URL trio, and write them through the dedicated
   # /thumbnails endpoint. Thumbnails are machine-set Delegate URIs with their own
   # endpoint — distinct from the descriptive and permissions writes — so they go
-  # via AtlasRb::<klass>.set_thumbnails, not the metadata PATCH.
-  def apply_thumbnail(klass, id)
+  # via the dedicated set_thumbnails endpoint, not the metadata PATCH.
+  def apply_thumbnail(id)
     file = params[:thumbnail]
     return if file.blank?
 
     base = MasterJp2.call(path: file.tempfile.path.presence || file.path).open_base
-    AtlasRb.const_get(klass).set_thumbnails(id, **ThumbnailCreator.call(base: base))
+    AtlasRb::Resource.set_thumbnails(id, **ThumbnailCreator.call(base: base))
   end
 end

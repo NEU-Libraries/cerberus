@@ -10,6 +10,7 @@ class CollectionsController < CatalogController
   include ContainerAnalytics
   include ContainerRestrictionRequest
 
+  atlas_resource AtlasRb::Collection, key: :collection, route: :collection
   authorize_resource_writes!(extra_edit: %i[sentinel request_restriction])
   after_action :record_view_impression, only: :show
 
@@ -24,18 +25,17 @@ class CollectionsController < CatalogController
   end
 
   def show
-    @collection = AtlasRb::Collection.find(params[:id])
-    raise ResourceNotFound if @collection.nil?
+    @collection = require_resource!(AtlasRb::Collection.find(params[:id]))
     return render_gone(@collection) if @collection.tombstoned
 
     authorize_show!
     @response = find_children(@collection.valkyrie_id, params[:id])
-    assign_show_abilities!(klass: 'Collection')
+    assign_show_abilities!
     collection_breadcrumbs(params[:id])
   end
 
   def tombstone
-    perform_tombstone!(AtlasRb::Collection.tombstone(params[:id]), type: 'Collection')
+    perform_tombstone!
   end
 
   def new
@@ -49,15 +49,15 @@ class CollectionsController < CatalogController
   end
 
   def create
-    c = mint_titled!('Collection', :collection)
+    c = mint_titled!
     return redirect_to(new_child_path('collection')) if c.nil?
 
-    apply_new_permissions('Collection', c.id, :collection)
+    apply_new_permissions(c.id)
     redirect_to collection_path(c.id)
   end
 
   def update
-    handle_metadata_update(klass: 'Collection', resource_key: :collection, keywords: false)
+    handle_metadata_update
   end
 
   # Upsert this collection's derivative-access default (Sentinel). The container's
@@ -106,7 +106,7 @@ class CollectionsController < CatalogController
       # choose Private and bounce off a refusal.
       @narrowing_allowed = NarrowingPolicy.call(impact: impact, actor: current_user).allowed?
       form_preparation(@permissions, resource: @collection)
-      load_descriptive!('Collection')
+      load_descriptive!
       @sentinel = Sentinel.find_by(target_id: params[:id])
       load_container_analytics(@collection, 'Collection')
       collection_breadcrumbs(params[:id], editing: true)

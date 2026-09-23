@@ -74,7 +74,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
     # Gating destroy any wider here would only earn a 403 from the far end.
     it 'forbids a devolved-admin delegate the permanent delete' do
       sign_in delegate_user
-      expect(AtlasRb::Admin::Work).not_to receive(:destroy)
+      expect(AtlasRb::Admin::Resource).not_to receive(:destroy)
 
       delete '/admin/tombstones/abc', params: { type: 'Work' }
 
@@ -127,8 +127,9 @@ RSpec.describe 'Admin::Tombstones', type: :request do
     end
 
     describe 'POST restore' do
-      it 'dispatches to the Work restorer and redirects with a notice' do
-        expect(AtlasRb::Admin::Work).to receive(:restore).with('abc').and_return(instance_double(Faraday::Response, success?: true))
+      it 'restores through the generic admin endpoint and redirects with a notice' do
+        expect(AtlasRb::Admin::Resource).to receive(:restore).with('abc')
+                                                             .and_return(instance_double(Faraday::Response, success?: true))
 
         post '/admin/tombstones/abc/restore', params: { type: 'Work' }
 
@@ -136,20 +137,36 @@ RSpec.describe 'Admin::Tombstones', type: :request do
         expect(flash[:notice]).to include('live again')
       end
 
-      it 'dispatches to the Community restorer for a Community' do
-        expect(AtlasRb::Admin::Community).to receive(:restore).with('xyz').and_return(instance_double(Faraday::Response, success?: true))
-        post '/admin/tombstones/xyz/restore', params: { type: 'Community' }
-        expect(response).to redirect_to(admin_tombstones_path)
+      # One endpoint serves all three now, so `type` no longer picks a class.
+      # It is still the allow-list, which is why it is still sent.
+      %w[Work Collection Community].each do |type|
+        it "restores a #{type} through the same call" do
+          expect(AtlasRb::Admin::Resource).to receive(:restore).with('xyz')
+                                                               .and_return(instance_double(Faraday::Response, success?: true))
+
+          post '/admin/tombstones/xyz/restore', params: { type: type }
+
+          expect(response).to redirect_to(admin_tombstones_path)
+        end
       end
 
       it 'rejects an unknown resource type without calling atlas_rb' do
-        expect(AtlasRb::Admin::Work).not_to receive(:restore)
+        expect(AtlasRb::Admin::Resource).not_to receive(:restore)
         post '/admin/tombstones/abc/restore', params: { type: 'Pizza' }
         expect(flash[:alert]).to include('Unknown resource type')
       end
 
+      # The generic endpoint would happily restore a FileSet. The allow-list is
+      # the only thing keeping this registry to the three types it manages —
+      # the typed-class map used to give that for free.
+      it 'rejects a real Atlas type this registry does not manage' do
+        expect(AtlasRb::Admin::Resource).not_to receive(:restore)
+        post '/admin/tombstones/abc/restore', params: { type: 'FileSet' }
+        expect(flash[:alert]).to include('Unknown resource type')
+      end
+
       it 'reports a failure when Atlas refuses (e.g. a withdrawn parent)' do
-        allow(AtlasRb::Admin::Collection).to receive(:restore).and_return(instance_double(Faraday::Response, success?: false))
+        allow(AtlasRb::Admin::Resource).to receive(:restore).and_return(instance_double(Faraday::Response, success?: false))
         post '/admin/tombstones/abc/restore', params: { type: 'Collection' }
         expect(flash[:alert]).to include('tombstoned parent')
       end
@@ -159,8 +176,8 @@ RSpec.describe 'Admin::Tombstones', type: :request do
       # The confirm marker is atlas_rb's friction gate on the one irreversible
       # verb, so assert it on the wire rather than trusting the binding's default
       # — there isn't one, and omitting it raises ArgumentError.
-      it 'purges through the Work admin with the confirm marker and redirects with a notice' do
-        expect(AtlasRb::Admin::Work).to receive(:destroy)
+      it 'purges through the generic admin endpoint with the confirm marker' do
+        expect(AtlasRb::Admin::Resource).to receive(:destroy)
           .with('abc', confirm: :i_understand)
           .and_return(instance_double(Faraday::Response, success?: true))
 
@@ -170,8 +187,8 @@ RSpec.describe 'Admin::Tombstones', type: :request do
         expect(flash[:notice]).to include('Permanently deleted')
       end
 
-      it 'dispatches to the Community admin for a Community' do
-        expect(AtlasRb::Admin::Community).to receive(:destroy)
+      it 'purges a Community through the same call' do
+        expect(AtlasRb::Admin::Resource).to receive(:destroy)
           .with('xyz', confirm: :i_understand)
           .and_return(instance_double(Faraday::Response, success?: true))
 
@@ -181,7 +198,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
       end
 
       it 'rejects an unknown resource type without calling atlas_rb' do
-        expect(AtlasRb::Admin::Work).not_to receive(:destroy)
+        expect(AtlasRb::Admin::Resource).not_to receive(:destroy)
         delete '/admin/tombstones/abc', params: { type: 'Pizza' }
         expect(flash[:alert]).to include('Unknown resource type')
       end
@@ -193,7 +210,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
       # from the re-parent and linked-member envelopes.
       it 'names the members when Atlas refuses a non-empty container' do
         refusal = '{"error":"cannot destroy a collection that still has members","code":"has_children"}'
-        allow(AtlasRb::Admin::Collection).to receive(:destroy)
+        allow(AtlasRb::Admin::Resource).to receive(:destroy)
           .and_return(instance_double(Faraday::Response, success?: false, body: refusal))
 
         delete '/admin/tombstones/abc', params: { type: 'Collection' }
@@ -202,7 +219,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
       end
 
       it 'falls back to the generic alert on a refusal it cannot read' do
-        allow(AtlasRb::Admin::Work).to receive(:destroy)
+        allow(AtlasRb::Admin::Resource).to receive(:destroy)
           .and_return(instance_double(Faraday::Response, success?: false, body: 'Not Found'))
 
         delete '/admin/tombstones/abc', params: { type: 'Work' }
@@ -211,7 +228,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
       end
 
       it 'reports a transport failure instead of raising' do
-        allow(AtlasRb::Admin::Work).to receive(:destroy).and_raise(Faraday::ConnectionFailed, 'down')
+        allow(AtlasRb::Admin::Resource).to receive(:destroy).and_raise(Faraday::ConnectionFailed, 'down')
 
         delete '/admin/tombstones/abc', params: { type: 'Work' }
 

@@ -25,8 +25,7 @@ module Admin
     # rejected here rather than offered for replacement.
     def manage
       breadcrumb 'Manage files', admin_files_manage_path(work_id: params[:work_id])
-      @work = AtlasRb::Work.find(params[:work_id])
-      raise ResourceNotFound if @work.nil?
+      @work = require_resource!(AtlasRb::Work.find(params[:work_id]))
 
       assets  = AtlasRb::Work.assets(params[:work_id]).reject { |asset| asset[:uri].present? }
       history = version_history(assets.map(&:noid))

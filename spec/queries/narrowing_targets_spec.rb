@@ -48,7 +48,7 @@ RSpec.describe NarrowingTargets do
   it 'exposes the atlas_rb class that owns each noid' do
     stub_solr(doc(noid: 'w', klass: 'Work'), doc(noid: 'top', klass: 'Collection'))
 
-    expect(targets.map(&:atlas_class)).to eq([AtlasRb::Work, AtlasRb::Collection])
+    expect(targets.map(&:klass)).to eq(%w[Work Collection])
   end
 
   it 'skips a document carrying neither a noid nor a type' do

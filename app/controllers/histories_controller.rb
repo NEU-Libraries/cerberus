@@ -30,19 +30,29 @@ class HistoriesController < ApplicationController
 
   private
 
+    # "the xml you requested" / "the history you requested" would both name the
+    # surface rather than the thing looked up, which is a resource either way.
+    def not_found_label = 'resource'
+
     # Admin-only, the same gate as the Audit History tab. A refusal lands on
     # the shared 403 page via Authorizable's rescue_from CanCan::AccessDenied.
     def authorize_history!
       authorize! :read, :audit_event
     end
 
-    # Also the id gate for both actions: an unknown id reads back as nil, and
-    # raising here is what keeps the later history / mods_versions reads from
-    # having to nil-check an id this already rejected.
+    # Also the id and type gate for both actions: an unknown id reads back as
+    # nil, and raising here is what keeps the later history / mods_versions
+    # reads from having to nil-check an id this already rejected.
+    #
+    # The type check is not hygiene. Both pages render a back link to the
+    # resource's edit page, and only a Modsable type has one — so a FileSet,
+    # Blob, Delegate or Person id reaches the view and raises there, after the
+    # reads have already run. Atlas answers a MODS-version list for every type,
+    # so nothing upstream refuses these.
     def load_resource!
       @resource_id    = params[:id]
-      found           = AtlasRb::Resource.find(@resource_id)
-      raise ResourceNotFound if found.nil?
+      found           = require_resource!(AtlasRb::Resource.find(@resource_id))
+      raise ResourceNotFound unless ModsableTypes.include?(found.klass)
 
       @resource_klass = found.klass
       @resource_title = found.resource.title

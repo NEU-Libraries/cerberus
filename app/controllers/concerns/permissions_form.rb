@@ -114,20 +114,21 @@ module PermissionsForm
   # Permission / embargo fields, sent to Atlas's metadata PATCH. These are NOT
   # MODS and never touch the descriptive document; thumbnails ride the same edit
   # form but are persisted separately by apply_thumbnail.
-  def permission_params(resource_key)
+  def permission_params
     permitted = params.require(resource_key).permit(:embargo, permissions: [:group_id, :ability]).to_h
-    transform_permissions(permitted, resource_key)
+    transform_permissions(permitted)
     mass_permissions(permitted)
     permitted
   end
 
-  def transform_permissions(permitted, resource_key)
-    return unless params[resource_key][:permissions]
+  def transform_permissions(permitted)
+    submitted = params[resource_key][:permissions]
+    return unless submitted
 
-    permitted[:permissions] = form_group_permissions(params[resource_key][:permissions])
-    return if params[resource_key][:permissions][:embargo].nil?
+    permitted[:permissions] = form_group_permissions(submitted)
+    return if submitted[:embargo].nil?
 
-    permitted[:permissions][:embargo] = params[resource_key][:permissions][:embargo]
+    permitted[:permissions][:embargo] = submitted[:embargo]
   end
 
   # `read` is always set definitively when `mass` is present, including to `[]`:
