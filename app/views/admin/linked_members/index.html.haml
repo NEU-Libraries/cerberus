@@ -12,7 +12,7 @@
 
   .p-3
     %p.text-muted.small.mb-3
-      Find the Work whose collection placements you want to manage. Linking surfaces a Work in additional collections for discovery — it never moves the Work or changes its permissions.
+      Find the work whose collection placements you want to manage. Linking displays a work in additional collections for discovery. The work is not moved and permissions are unchanged.
     = render 'admin/finder/search_form', url: admin_linked_members_path, q: params[:q], hidden: {}, placeholder: 'Search works by title…'
 
   - if @results

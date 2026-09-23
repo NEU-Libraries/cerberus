@@ -28,14 +28,15 @@ module Admin
     def add
       AtlasRb::Work.add_linked_member(params[:work_id], params[:collection_id])
       redirect_to admin_linked_members_manage_path(work_id: params[:work_id]),
-                  notice: 'Collection added. If it does not appear below, the link was rejected ' \
-                          '(e.g. the Work is already a structural member, or the target is not a Collection).'
+                  notice: 'Work is now linked to the selected collection. If the collection does not appear below, ' \
+                          'the link could not be processed because the work is already a structural member ' \
+                          'of the collection or the target is not a collection.'
     end
 
     def remove
       AtlasRb::Work.remove_linked_member(params[:work_id], params[:collection_id])
       redirect_to admin_linked_members_manage_path(work_id: params[:work_id]),
-                  notice: 'Removed from that collection.'
+                  notice: 'Removed from collection.'
     end
 
     private

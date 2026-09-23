@@ -20,7 +20,7 @@
 
   .p-3
     %p.text-muted.small.mb-0
-      Every tombstoned Work, Collection and Community. Restoring reverses the tombstone — the item becomes discoverable again and its History records the restore. A Collection or Community can only be restored once any tombstoned parent above it is restored.
+      Every tombstoned work, collection and community. Restore an item to make it discoverable again. This action will be recorded in the activity history. An item can only be restored after any tombstoned parent above it has been restored.
     - if current_user&.admin?
       %p.text-muted.small.mb-0.mt-2
         Permanent deletion is the other way out of a withdrawal, and nothing reverses it: it removes the item and every preserved copy of its files, earlier versions included, leaving only the audit record. A Collection or Community must be emptied first, and its tombstoned members count.
