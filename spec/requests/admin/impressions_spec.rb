@@ -181,7 +181,7 @@ RSpec.describe 'Admin::Impressions', type: :request do
       get '/admin/impressions', params: { segment: 'all', item_noid: 'w1', item_uuid: 'uuid-w1', item_klass: 'Work', item_title: 'X' }
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('Composition', 'Faculty', 'Staff', 'Public works', 'Private works')
+      expect(response.body).to include('Content overview', 'Faculty', 'Staff', 'Public works', 'Private works')
     end
   end
 end

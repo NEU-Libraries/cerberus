@@ -21,17 +21,9 @@
   %label.form-label{ for: 'caption' } Captions file
   %input#caption.form-control{ name: 'caption', type: 'file', accept: CaptionTrack::EXTENSION }/
   %p.text-muted.small.mt-2.mb-1
-    = "The player shows these captions under the video, labelled #{CaptionTrack::LABEL}."
+    Caption files must be in WebVTT (.vtt) format. Contact repository staff for help converting caption files to WebVTT.
   - if caption
     %p.text-muted.small.mb-0
-      = link_to 'View the current captions file', media_path(caption.noid)
-      \— a new upload takes its place, and the file it replaces stays in this
-      Work's version history.
-  - else
-    -# Mind the line breaks: HAML reads a line that STARTS with ".srt" as a
-    -# div.srt, so the sentence keeps the extension away from the margin.
-    %p.text-muted.small.mb-0
-      WebVTT (.vtt) only — a browser reads no other caption format.
-      Convert an .srt file before you upload it.
+      #{link_to 'View the current caption file', media_path(caption.noid)}. Older caption files are retained in this work’s version history.
 
 %hr.section-divider.mt-3.mb-0

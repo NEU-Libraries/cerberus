@@ -40,7 +40,7 @@
           %span.admin-registry-table__id= @destination.resource.id
 
     %p.text-muted.small.mt-3.mb-3
-      Moving re-orders the structural tree and re-flows the breadcrumb and contents of every container beneath this one. Permissions are not changed.
+      This action updates the structural tree and refreshes the breadcrumb and contents of every container beneath this one. Permissions are not changed.
 
     = form_with url: admin_reparent_move_path, method: :post, class: 'reparent-confirm-form' do
       = hidden_field_tag :node_id, @node.resource.id

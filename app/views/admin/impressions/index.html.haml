@@ -23,14 +23,14 @@
 
     %ul.nav.nav-tabs{'data-controller' => 'tab-hash'}
       %li.nav-item
-        %button#overview-tab.nav-link.active{'aria-controls' => 'overview', 'aria-selected' => 'true', 'data-bs-target' => '#overview', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Overview
+        %button#overview-tab.nav-link.active{'aria-controls' => 'overview', 'aria-selected' => 'true', 'data-bs-target' => '#overview', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Usage history
       %li.nav-item
         %button#files-tab.nav-link{'aria-controls' => 'files', 'aria-selected' => 'false', 'data-bs-target' => '#files', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Top files
       - if @report.show_collections_tab?
         %li.nav-item
           %button#collections-tab.nav-link{'aria-controls' => 'collections', 'aria-selected' => 'false', 'data-bs-target' => '#collections', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Top collections
       %li.nav-item
-        %button#composition-tab.nav-link{'aria-controls' => 'composition', 'aria-selected' => 'false', 'data-bs-target' => '#composition', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Composition
+        %button#composition-tab.nav-link{'aria-controls' => 'composition', 'aria-selected' => 'false', 'data-bs-target' => '#composition', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Content overview
 
     .tab-content.pt-3
       #overview.tab-pane.active{'aria-labelledby' => 'overview-tab', role: 'tabpanel'}

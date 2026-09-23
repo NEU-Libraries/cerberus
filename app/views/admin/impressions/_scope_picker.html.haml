@@ -21,7 +21,7 @@
     = form_with url: admin_impressions_path, method: :get, class: 'usage-scope__facet-form' do
       - usage_preserved_params('facet', 'facet_type', 'facet_value').each do |key, value|
         = hidden_field_tag key, value
-      = select_tag :facet, grouped_options_for_select(usage_facet_groups, usage_selected_facet_value(@report)), include_blank: 'Facet by…', class: 'form-select usage-scope__facet-select'
+      = select_tag :facet, grouped_options_for_select(usage_facet_groups, usage_selected_facet_value(@report)), include_blank: 'Filter by…', class: 'form-select usage-scope__facet-select'
       %button.usage-scope__facet-apply{type: 'submit'} Filter
 
   - if @item_results

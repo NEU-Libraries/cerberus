@@ -20,9 +20,9 @@ RSpec.describe 'works/_captions', type: :view do
   context 'when the work has no captions' do
     before { render_section }
 
-    it 'says which format it takes and what to do about an .srt' do
-      expect(rendered).to have_text('WebVTT (.vtt) only')
-      expect(rendered).to have_text('Convert an .srt file before you upload it.')
+    it 'says which format it takes and who can help convert one' do
+      expect(rendered).to have_text('Caption files must be in WebVTT (.vtt) format.')
+      expect(rendered).to have_text('Contact repository staff for help converting caption files to WebVTT.')
     end
 
     # HAML reads a line STARTING with ".srt" as a div.srt, which silently ate half
@@ -44,15 +44,15 @@ RSpec.describe 'works/_captions', type: :view do
     # The media route, not the download one: a reader who can play the video can
     # read its captions, whatever the download gate says.
     it 'links the current file for review' do
-      expect(rendered).to have_link('View the current captions file', href: '/media/c-1')
+      expect(rendered).to have_link('View the current caption file', href: '/media/c-1')
     end
 
-    it 'says what a second upload does to it' do
-      expect(rendered).to have_text('a new upload takes its place')
+    it 'says the file it replaces is kept' do
+      expect(rendered).to have_text('Older caption files are retained in this work’s version history.')
     end
 
-    it 'drops the format note, which the link line replaces' do
-      expect(rendered).to have_no_text('WebVTT (.vtt) only')
+    it 'still states the format a replacement must be in' do
+      expect(rendered).to have_text('Caption files must be in WebVTT (.vtt) format.')
     end
   end
 end

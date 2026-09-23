@@ -36,8 +36,8 @@
         Restrict each one separately if you need that.
   - else
     %ul.small.pt-2
-      %li Setting to 'public' will allow anyone accessing the site to see your item.
-      %li Setting to 'private' will only allow groups that are explicitly chosen to see your item.
+      %li Selecting 'public' will allow anyone who accesses the DRS to see your item.
+      %li Selecting 'private' will restrict visibility to groups you explicitly choose.
 - elsif locked_public
   = hidden_field_tag 'mass', 'public'
   .form-text.pt-1

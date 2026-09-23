@@ -45,7 +45,7 @@ module Admin
       end
 
       if restored?
-        redirect_to admin_tombstones_path, notice: 'Tombstone reversed — the item is live again.'
+        redirect_to admin_tombstones_path, notice: 'The item has been restored and is now discoverable.'
       else
         redirect_to admin_tombstones_path, alert: RESTORE_FAILED
       end

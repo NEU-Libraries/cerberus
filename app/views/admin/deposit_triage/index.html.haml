@@ -34,9 +34,9 @@
   .p-3
     %p.text-muted.small.mb-0
       - if unconfirmed
-        Nobody has confirmed these on the deposit form's second page, so they are hidden from search and from their collections. Their depositors see them under “Deposits to finish”. Finish one on their behalf, or withdraw it from its own page.
+        The depositor submitted these files for deposit but has not yet confirmed the upload metadata. The depositor and DRS staff can see these files, but other users cannot access them and they are hidden from search. Depositors can manage these files from the “Deposits to finish” section of their My DRS page.
       - else
-        These are published and readable, but a background job gave up before it finished making something — a rendition, a thumbnail, or the extracted text. Replacing the file rebuilds what is missing.
+        These files are published and readable, but a background job ended before completing them. Each file must be replaced or resubmitted to complete it.
 
   - if documents.any?
     .table-responsive

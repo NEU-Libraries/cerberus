@@ -29,7 +29,7 @@
       = form_with url: container_analytics_path(base_klass, noid), method: :get, class: 'usage-scope__facet-form' do
         - container_analytics_preserved_params('analytics_facet', 'analytics_facet_type', 'analytics_facet_value').each do |key, value|
           = hidden_field_tag key, value
-        = select_tag :analytics_facet, grouped_options_for_select(@analytics_facet_groups, container_analytics_selected_facet_value(@analytics)), include_blank: 'Facet by…', class: 'form-select usage-scope__facet-select'
+        = select_tag :analytics_facet, grouped_options_for_select(@analytics_facet_groups, container_analytics_selected_facet_value(@analytics)), include_blank: 'Filter by…', class: 'form-select usage-scope__facet-select'
         %button.usage-scope__facet-apply{type: 'submit'} Filter
 
     - if @analytics_item_results
@@ -37,14 +37,14 @@
 
   %ul.nav.nav-tabs.mb-0{role: 'tablist'}
     %li.nav-item
-      %button#analytics-overview-tab.nav-link.active{'aria-controls' => 'analytics-overview', 'aria-selected' => 'true', 'data-bs-target' => '#analytics-overview', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Overview
+      %button#analytics-overview-tab.nav-link.active{'aria-controls' => 'analytics-overview', 'aria-selected' => 'true', 'data-bs-target' => '#analytics-overview', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Usage history
     %li.nav-item
       %button#analytics-files-tab.nav-link{'aria-controls' => 'analytics-files', 'aria-selected' => 'false', 'data-bs-target' => '#analytics-files', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Top files
     - if @analytics.scope.show_collections_tab?
       %li.nav-item
         %button#analytics-collections-tab.nav-link{'aria-controls' => 'analytics-collections', 'aria-selected' => 'false', 'data-bs-target' => '#analytics-collections', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Top collections
     %li.nav-item
-      %button#analytics-composition-tab.nav-link{'aria-controls' => 'analytics-composition', 'aria-selected' => 'false', 'data-bs-target' => '#analytics-composition', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Composition
+      %button#analytics-composition-tab.nav-link{'aria-controls' => 'analytics-composition', 'aria-selected' => 'false', 'data-bs-target' => '#analytics-composition', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Content overview
 
   .tab-content.pt-3
     #analytics-overview.tab-pane.active{'aria-labelledby' => 'analytics-overview-tab', role: 'tabpanel'}
@@ -63,11 +63,11 @@
       -# Stacking views onto downloads also makes the bar height read as total
       -# activity for the day.
       %section.usage-chart-block
-        %h2.usage-chart-block__title Views & downloads over time
+        %h2.usage-chart-block__title Views & downloads in the last 90 days
         .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-stacked-value' => 'true', 'usage-chart-dataset-value' => usage_timeseries(@analytics).to_json, 'usage-chart-colors-value' => %w[#2666a6 #18bc9c].to_json}}
 
       %section.usage-chart-block
-        %h2.usage-chart-block__title Unique visitors over time
+        %h2.usage-chart-block__title Unique visitors in the last 90 days
         .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-dataset-value' => usage_visitors_series(@analytics).to_json, 'usage-chart-colors-value' => %w[#5d569b].to_json}}
 
     #analytics-files.tab-pane{'aria-labelledby' => 'analytics-files-tab', role: 'tabpanel'}
@@ -77,7 +77,7 @@
         = render 'shared/container_analytics_top_table', entries: @analytics.top_containers, empty: 'No container activity in this range.'
     #analytics-composition.tab-pane{'aria-labelledby' => 'analytics-composition-tab', role: 'tabpanel'}
       = render 'admin/impressions/composition', composition: @analytics_composition,
-                                                scope_description: "This #{base_klass.downcase}'s own subtree"
+                                                scope_phrase: "in #{plain_text(@analytics_base_item[:title])}"
 
   - if current_user&.admin? || current_user&.admin_delegate?
     .mt-3

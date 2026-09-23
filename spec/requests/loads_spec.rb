@@ -487,14 +487,14 @@ RSpec.describe 'Loads', type: :request do
         get "/loaders/xml/loads/#{load_report.id}"
         expect(response).to have_http_status(:ok)
         expect(response.body).to include('Confirm')
-        expect(response.body).to include('Update existing')
+        expect(response.body).to include('Metadata overwrite')
         expect(response.body).not_to include('data-controller="load-poll"')
       end
 
       it 'shows raw MODS beside the Atlas-rendered HTML (two-column)' do
         get "/loaders/xml/loads/#{load_report.id}"
-        expect(response.body).to include('Raw MODS')
-        expect(response.body).to include('Rendered')
+        expect(response.body).to include('MODS XML')
+        expect(response.body).to include('Display metadata')
         expect(response.body).to include('mods-display') # the decorated HTML, rendered html_safe
       end
     end

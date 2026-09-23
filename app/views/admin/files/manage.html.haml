@@ -16,7 +16,7 @@
   %p.admin-actions__lede
     Replacing a file in
     %strong= enhanced_text(@work.title)
-    adds a new version and keeps the same identifier — nothing is overwritten. The original filename is preserved; prior versions stay below, downloadable and revertible.
+    creates a new version while keeping the same identifier. Information about the original file is kept, including the filename. Previous versions can be managed below.
 
 - if @blobs.empty?
   .admin-registry.my-3
@@ -54,7 +54,7 @@
               %i.fa-solid.fa-arrows-rotate.me-1{'aria-hidden' => 'true'}
               Replace file
         %p.admin-registry-form__hint.mt-1
-          The current file becomes the newest version below; older versions remain retrievable.
+          Select the file you would like to use as the most recent version. Older versions will be retained.
 
     - if versions.any?
       .table-responsive
@@ -62,8 +62,8 @@
           %thead
             %tr
               %th{scope: 'col'} Version
-              %th{scope: 'col'} When
-              %th{scope: 'col'} Who
+              %th{scope: 'col'} Date Deposited
+              %th{scope: 'col'} Depositor
               %th{scope: 'col'} Fixity
               %th.text-end{scope: 'col'} Actions
           %tbody

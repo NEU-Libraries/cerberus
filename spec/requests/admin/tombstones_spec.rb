@@ -134,7 +134,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
         post '/admin/tombstones/abc/restore', params: { type: 'Work' }
 
         expect(response).to redirect_to(admin_tombstones_path)
-        expect(flash[:notice]).to include('live again')
+        expect(flash[:notice]).to include('restored and is now discoverable')
       end
 
       # One endpoint serves all three now, so `type` no longer picks a class.

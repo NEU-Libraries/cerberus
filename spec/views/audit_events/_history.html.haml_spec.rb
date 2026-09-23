@@ -62,12 +62,11 @@ describe 'audit_events/_history.html.haml' do
       expect(rendered).to have_css('.audit-history__subtitle', text: 'Reverse chronological')
     end
 
-    it 'renders four column headers — When / Action / Detail / Who (actor+on-behalf merged; resource Type absent)' do
-      %w[When Action Detail Who].each do |label|
+    it 'renders four column headers — Date / Action / Type / Agent (actor+on-behalf merged)' do
+      %w[Date Action Type Agent].each do |label|
         expect(rendered).to have_css('table.audit-event-table thead th', text: label)
       end
       expect(rendered).not_to have_css('table.audit-event-table thead th', text: 'On behalf of')
-      expect(rendered).not_to have_css('table.audit-event-table thead th', text: 'Type')
     end
 
     it 'renders the create/update/tombstone/restore action labels' do
