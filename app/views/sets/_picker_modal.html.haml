@@ -25,7 +25,7 @@
       .modal-body
         - if kind == 'collection'
           %p.small.text-muted.mb-2
-            Adds everything in this collection — the set stays current as the collection changes.
+            Every work in this collection will be added to the Set, including any new works added to the collection in the future.
         %form.mb-2{action: picker_sets_path, method: 'get',
                    data: { controller: 'picker-search', turbo_frame: frame_id }}
           %input{type: 'hidden', name: "#{kind}_id", value: noid}

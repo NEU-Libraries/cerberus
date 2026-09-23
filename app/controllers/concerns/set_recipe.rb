@@ -12,7 +12,8 @@ module SetRecipe
     AtlasRb::Compilation.add_included_collection(@set['id'], params[:collection_id])
     redirect_back_or_to(
       set_path(@set['id']),
-      notice: "Collection added to “#{@set['title']}”. The set stays current as the collection changes."
+      notice: "Collection added to “#{@set['title']}”. " \
+              "Any new works added to the collection will also be added to “#{@set['title']}”."
     )
   rescue AtlasRb::CompilationError => e
     redirect_back_or_to(set_path(@set['id']), alert: e.message)

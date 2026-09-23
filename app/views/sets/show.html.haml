@@ -53,7 +53,7 @@
                           form_class: 'd-inline',
                           title:      'Rebuild the search records this set names'
             - if @can_edit
-              = link_to 'Edit', edit_set_path(@set['id']), class: 'px-3'
+              = link_to 'Manage', edit_set_path(@set['id']), class: 'px-3'
             - if @owned
               = link_to 'Delete', set_path(@set['id']), class: 'px-3',
                 data: { turbo_method: :delete,
@@ -80,7 +80,7 @@
               = button_to remove_collection_set_path(@set['id'], collection_id: chip.noid), method: :delete,
                 class: 'btn btn-danger rm-cap', 'aria-label' => 'Remove this collection from the set',
                 title: 'Remove this collection from the set',
-                form: { class: 'rm-cap-form', data: { turbo_confirm: "Remove “#{set_noun_label(chip.noid, @recipe_titles)}” from this set?\n\nThe collection and its works are not deleted — they just stop appearing here." } } do
+                form: { class: 'rm-cap-form', data: { turbo_confirm: "Remove “#{set_noun_label(chip.noid, @recipe_titles)}” from this set?\n\nThe collection and its works will not be affected." } } do
                 %i.fa-solid.fa-minus{'aria-hidden' => 'true'}
       - else
         .text-muted.small.fst-italic No collections included.
@@ -95,7 +95,7 @@
           new deposits won't appear here unasked.
       .defn-label.mt-4.mb-2
         %i.fa-solid.fa-thumbtack.me-1{'aria-hidden' => 'true'}
-        Items added individually
+        Individual works in this set
       - if added_noids.any?
         - added_noids.each do |noid|
           .incl-row.is-item
