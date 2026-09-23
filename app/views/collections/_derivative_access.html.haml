@@ -14,7 +14,7 @@
   = bootstrap_form_tag(url: sentinel_collection_path(collection_id), method: :patch) do |f|
     .well.p-3.my-3.rounded-3
       .d-flex.align-items-center.flex-wrap.gap-2.mb-1
-        %h5.mb-0 Derivative access default
+        %h5.mb-0 Update derivative access
         - if public_collection
           %span.badge.bg-success-subtle.text-success-emphasis.border.border-success-subtle
             %i.fa-solid.fa-globe.me-1{ 'aria-hidden' => 'true' }
@@ -24,10 +24,10 @@
             %i.fa-solid.fa-lock.me-1{ 'aria-hidden' => 'true' }
             Restricted
       %p.small.text-muted.mb-0
-        Each rendition of Works added to this collection inherits the collection's access unless
-        you restrict it to groups — a rendition is never more visible than the collection. Image
-        visibility must also narrow as resolution grows, so a rendition can't be more open than a
-        smaller one above it. Audio, video, and PDF renditions gate on their own.
+        Every file uploaded to this collection will inherit the collection’s permissions. Use the
+        toggles below to change the default permissions for files uploaded to this collection.
+        Changes made here will not affect existing files. For images, larger resolution images must
+        have the same or greater level of restriction than their smaller resolution versions.
     %section.my-3{ data: { controller: "derivative-policy", "derivative-policy-groups-value": derivative_group_registry(groups) } }
       %h6.derivative-group-heading Image renditions
       %ol.derivative-ladder.list-unstyled.mb-4
