@@ -25,6 +25,17 @@ describe Ability do
       expect(ability).to be_able_to(:edit, doc)
     end
 
+    it 'allows a user named in the edit users, as Atlas does' do
+      doc = SolrDocument.new('edit_access_group_ssim'  => ['others'],
+                             'edit_access_person_ssim' => ['000000002'])
+      expect(ability).to be_able_to(:edit, doc)
+    end
+
+    it 'denies a user whose NUID is blank even when the edit users hold a blank' do
+      blank = described_class.new(User.new(email: 'b@example.com', nuid: '', groups: []))
+      expect(blank).not_to be_able_to(:edit, SolrDocument.new('edit_access_person_ssim' => ['']))
+    end
+
     it 'allows the depositor of a Collection' do
       doc = SolrDocument.new('internal_resource_tesim' => 'Collection',
                              'depositor_ssi'           => '000000002')
@@ -127,6 +138,12 @@ describe Ability do
     it 'allows a group granted edit but not read' do
       doc = SolrDocument.new('read_access_group_ssim' => ['curators'],
                              'edit_access_group_ssim' => ['editors'])
+      expect(ability).to be_able_to(:read, doc)
+    end
+
+    it 'allows a user named in the edit users but in no read group' do
+      doc = SolrDocument.new('read_access_group_ssim'  => ['curators'],
+                             'edit_access_person_ssim' => ['000000002'])
       expect(ability).to be_able_to(:read, doc)
     end
 

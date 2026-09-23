@@ -103,7 +103,9 @@ For a signed-in non-admin:
 
 ### Edit-equivalence, and why read follows it
 
-`edit_equivalent?` is an ACL edit-group match **or** ownership.
+`edit_equivalent?` is an ACL edit-group match, the user's NUID in the ACL's
+edit users, **or** ownership. This is the same test as Atlas's
+`group_acl_grants?` plus its ownership check.
 
 Granting read from it is the fix for two ordinary states that otherwise locked a
 person out of their own material. Those are a depositor who set their collection
@@ -128,17 +130,16 @@ operator action, not an owner one.
 
 `SearchBuilder#apply_gated_discovery` puts `:read` into Solr as one filter. A
 document matches when it is public, a read group matches, an edit group
-matches, or `depositor_ssi` is the user's NUID. Admins skip the filter, and a
-view-as session is gated as the target.
+matches, or the user's NUID is in `edit_access_person_ssim` or `depositor_ssi`.
+Admins skip the filter, and a view-as session is gated as the target.
 
 The two must stay in step. If the filter is narrower, staff and depositors
 cannot find items they can open: staff hold edit, not read, on every resource,
 and a private Work names its depositor in no group. If the filter is wider, a
-search shows hits that 403 when opened. That is why the filter does not match
-`edit_access_person_ssim`: `Ability` does not check edit users.
+search shows hits that 403 when opened.
 
-Atlas's `WorkDigestQuery` copies this gate for Set contents and descendant-work
-lists, so a change here needs the same change there.
+Atlas's `SolrReadGate` applies the same five clauses to Set contents and
+descendant-work lists, so a change here needs the same change there.
 
 ### Ownership and proxy deposits
 

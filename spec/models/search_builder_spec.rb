@@ -51,8 +51,8 @@ RSpec.describe SearchBuilder do
     end
   end
 
-  # Read mirrors Ability's `can :read`: public, a read group, an edit group, or
-  # the depositor. Staff hold edit, not read, on every resource, so a gate on
+  # Read mirrors Ability's `can :read`: public, a read group, an edit group, a
+  # named editor, or the depositor. Staff hold edit, not read, on every resource, so a gate on
   # read groups alone hides everything they curate.
   describe 'edit-equivalent discovery' do
     let(:user) do
@@ -64,6 +64,10 @@ RSpec.describe SearchBuilder do
       expect(gated_fq.first).to include('edit_access_group_ssim:("northeastern:drs:repository:staff")')
     end
 
+    it 'admits documents that name the user as an editor' do
+      expect(gated_fq.first).to include('edit_access_person_ssim:"000000002"')
+    end
+
     it 'admits documents the user deposited' do
       expect(gated_fq.first).to include('depositor_ssi:"000000002"')
     end
@@ -72,7 +76,7 @@ RSpec.describe SearchBuilder do
       expect(gated_fq.first).to eq(
         '(read_access_group_ssim:("public" OR "northeastern:drs:repository:staff")) OR ' \
         '(edit_access_group_ssim:("northeastern:drs:repository:staff")) OR ' \
-        '(depositor_ssi:"000000002")'
+        '(edit_access_person_ssim:"000000002") OR (depositor_ssi:"000000002")'
       )
     end
 
@@ -80,7 +84,8 @@ RSpec.describe SearchBuilder do
       let(:user) { User.new(nuid: '000000005', role: 'standard', groups: []) }
 
       it 'omits the edit-group clause rather than emitting an empty one' do
-        expect(gated_fq.first).to eq('(read_access_group_ssim:("public")) OR (depositor_ssi:"000000005")')
+        expect(gated_fq.first).to eq('(read_access_group_ssim:("public")) OR ' \
+                                     '(edit_access_person_ssim:"000000005") OR (depositor_ssi:"000000005")')
       end
     end
 

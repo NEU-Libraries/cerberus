@@ -100,6 +100,31 @@ RSpec.describe 'Edit-equivalent discovery', type: :request do
     end
   end
 
+  # A person named in the ACL's edit users, with no group and no deposit.
+  context 'as a named editor' do
+    let(:editor_nuid) { '000000003' }
+
+    before do
+      AtlasRb::Resource.set_permissions(private_work.id, { 'edit_users' => [editor_nuid] }, nuid: '000000004')
+      sign_in reader(editor_nuid)
+    end
+
+    it 'can open it' do
+      get work_path(private_work.id)
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'finds it in the catalog' do
+      get newest_test_works
+      expect(response.body).to include(work_path(private_work.id))
+    end
+
+    it 'can reach its edit page' do
+      get edit_work_path(private_work.id)
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
   context 'as a reader in an unrelated group' do
     before { sign_in reader('000000001', groups: ['northeastern:drs:unrelated']) }
 

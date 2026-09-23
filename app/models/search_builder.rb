@@ -139,8 +139,8 @@ class SearchBuilder < Blacklight::SearchBuilder
       context[:effective_user] || context[:current_user]
     end
 
-    # The same four ways in as Ability's `can :read`: public, a read group, an
-    # edit group, or being the depositor. Checking read groups alone hides every
+    # The same ways in as Ability's `can :read`: public, a read group, an edit
+    # group, a named editor, or being the depositor. Checking read groups alone hides every
     # item a user reaches only through edit rights — staff hold edit, not read,
     # on each resource, and a private Work names its depositor in no group.
     # Keep the two in step: a clause here that Ability lacks shows a hit that
@@ -151,7 +151,10 @@ class SearchBuilder < Blacklight::SearchBuilder
 
       clauses = ["read_access_group_ssim:(#{solr_terms(['public'] + groups)})"]
       clauses << "edit_access_group_ssim:(#{solr_terms(groups)})" if groups.any?
-      clauses << "depositor_ssi:#{solr_terms([nuid])}" if nuid.present?
+      if nuid.present?
+        clauses << "edit_access_person_ssim:#{solr_terms([nuid])}"
+        clauses << "depositor_ssi:#{solr_terms([nuid])}"
+      end
       clauses.map { |clause| "(#{clause})" }.join(' OR ')
     end
 
