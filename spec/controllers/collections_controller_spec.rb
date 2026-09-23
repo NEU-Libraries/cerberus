@@ -150,7 +150,7 @@ describe CollectionsController do
       it 'renders the Composition tab scoped to this collection\'s own subtree' do
         get :edit, params: { id: collection.id }
 
-        expect(response.body).to include('Composition', 'Faculty', 'Staff', 'Public works', 'Private works')
+        expect(response.body).to include('Content overview', 'Faculty', 'Staff', 'Public works', 'Private works')
       end
     end
   end

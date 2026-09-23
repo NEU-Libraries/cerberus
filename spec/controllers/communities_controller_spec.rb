@@ -197,7 +197,7 @@ describe CommunitiesController do
       it 'renders the Composition tab scoped to this community\'s own subtree' do
         get :edit, params: { id: community.id }
 
-        expect(response.body).to include('Composition', 'Faculty', 'Staff', 'Public works', 'Private works')
+        expect(response.body).to include('Content overview', 'Faculty', 'Staff', 'Public works', 'Private works')
       end
     end
   end
