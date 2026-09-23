@@ -45,13 +45,13 @@
               listing one or more items. Each item is a MODS XML (Sequence 0) followed by its page images in order (Sequence 1 and up), with Last Item on that item's final page. Every item becomes its own Work with ordered pages; you'll preview the first item before the batch runs.
           - elsif @loader.xml?
             .admin-registry-form__hint
-              Accepted formats:
+              Archive packages larger than 2GB must use the
               %code.admin-registry-table__id .tar
-              or
+              format. All other packages may use
               %code.admin-registry-table__id .zip
-              \. Must contain a
+              \. New file ingests must contain files and MODS XML files. Metadata overwrite submissions should only contain MODS XML files. Every archive package must contain a manifest named
               %code.admin-registry-table__id manifest.xlsx
-              plus the MODS XML files it references. Each row updates an existing object by PID, or creates a new one from a named content file. You'll preview the first row before the batch runs.
+              \.
           - else
             .admin-registry-form__hint
               Accepted formats:
@@ -94,7 +94,7 @@
                 Where the new multipage Works land — any collection.
             - else
               .admin-registry-form__hint
-                Where newly-created Works land — any collection. Rows that update an existing object by PID ignore this.
+                A destination collection is not required for metadata overwrite packages.
 
       -# Hidden until a submit starts. role=progressbar without aria-valuenow reads
       -# as indeterminate, which is exactly the state after the last byte is sent
