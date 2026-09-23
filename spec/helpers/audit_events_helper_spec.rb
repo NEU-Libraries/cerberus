@@ -129,18 +129,25 @@ RSpec.describe AuditEventsHelper, type: :helper do
         )
       end
 
-      it 'reports a set embargo in compact ISO form' do
-        expect(summary(unembargoed, embargoed)).to include('embargo none → 2027-12-31')
+      it 'reports a newly set embargo' do
+        expect(summary(unembargoed, embargoed)).to include('Embargo set')
       end
 
       it 'reports a lifted embargo' do
-        expect(summary(embargoed, unembargoed)).to include('embargo 2027-12-31 → none')
+        expect(summary(embargoed, unembargoed)).to include('Embargo removed')
+      end
+
+      it 'reports a moved release date without either date' do
+        moved = { 'embargo' => '2028-06-30T00:00:00+00:00' }
+        text = summary(embargoed, moved)
+        expect(text).to include('Embargo updated')
+        expect(text).not_to include('2027-12-31', '2028-06-30')
       end
 
       it 'appends the embargo clause after the grant clauses' do
         text = summary({ 'read' => [], 'embargo' => nil },
                        { 'read' => %w[public], 'embargo' => '2027-12-31T00:00:00+00:00' })
-        expect(text).to include('read +public · embargo none → 2027-12-31')
+        expect(text).to include('read +public · Embargo set')
       end
 
       it 'says nothing when the embargo did not move' do

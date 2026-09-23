@@ -343,11 +343,10 @@ module AuditEventsHelper
     end
 
     def embargo_summary_clause(before, after)
-      "embargo #{embargo_summary_value(before[EMBARGO_KEY])} → #{embargo_summary_value(after[EMBARGO_KEY])}"
-    end
+      return 'Embargo set' if embargo_date(before[EMBARGO_KEY]).nil?
+      return 'Embargo removed' if embargo_date(after[EMBARGO_KEY]).nil?
 
-    def embargo_summary_value(value)
-      embargo_date(value)&.iso8601 || 'none'
+      'Embargo updated'
     end
 
     def embargo_date(value)
