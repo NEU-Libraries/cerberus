@@ -234,18 +234,20 @@ class CatalogController < ApplicationController
     # onto a fresh flex line and the *next* field's <dt> fills the gap beside it —
     # a label rendered next to another field's value. Joining also spares each
     # value its own truncation toggle under one shared label.
-    config.add_index_field 'creator_ssim', label: 'Creator', join: true
-    config.add_index_field 'description_tsim', label: 'Description', join: true
-    config.add_index_field 'language_ssim', label: 'Language', join: true
+    # PresentValuesFieldPresenter hides a field whose only value is blank.
+    text_field = { join: true, presenter: PresentValuesFieldPresenter }
+    config.add_index_field 'creator_ssim', label: 'Creator', **text_field
+    config.add_index_field 'description_tsim', label: 'Description', **text_field
+    config.add_index_field 'language_ssim', label: 'Language', **text_field
 
     # A container browse (a community, collection or set listing its members)
     # renders its member rows from the show config, not the index config, so
     # these two lists have to be kept in step. Blacklight's own single-document
     # show page is dead surface here — SolrDocument#to_param routes every
     # document link to Cerberus's own /works/:noid and friends.
-    config.add_show_field 'creator_ssim', label: 'Creator', join: true
-    config.add_show_field 'description_tsim', label: 'Description', join: true
-    config.add_show_field 'language_ssim', label: 'Language', join: true
+    config.add_show_field 'creator_ssim', label: 'Creator', **text_field
+    config.add_show_field 'description_tsim', label: 'Description', **text_field
+    config.add_show_field 'language_ssim', label: 'Language', **text_field
 
     # "fielded" search configuration. Used by pulldown among other places.
     # For supported keys in hash, see rdoc for Blacklight::SearchFields
