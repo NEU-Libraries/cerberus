@@ -54,25 +54,12 @@ class PeopleController < CatalogController
       @community_filter = %(affiliated_community_ids_ssim:"#{solr_phrase(params[:community_id])}")
     end
 
-    # `match: :exact`: /communities/:id is a prefix of /communities/:id/people, so
-    # inclusive matching would mark the community crumb as the current page.
-    # The find inside #breadcrumbs runs first, so a failure leaves the trail
-    # empty and the rescue rebuilds it from nothing.
     def build_profile_breadcrumbs
-      community_noid = Array(@person['affiliated_community_ids']).first.presence
-      if community_noid
-        breadcrumbs(community_noid, match: :exact)
-        breadcrumb('Faculty & Staff', community_people_path(community_noid))
-      else
-        breadcrumb('People', people_path)
-      end
-      breadcrumb(@display_name, person_path(params[:id]))
-    rescue Faraday::Error, JSON::ParserError
-      breadcrumb('People', people_path)
-      breadcrumb(@display_name, person_path(params[:id]))
+      person_trail(Array(@person['affiliated_community_ids']).first, @display_name, params[:id])
     end
 
-    # `match: :exact` for the same reason as the profile trail.
+    # `match: :exact`: /communities/:id is a prefix of /communities/:id/people, so
+    # inclusive matching would mark the community crumb as the current page.
     def build_faculty_staff_breadcrumbs(community_noid)
       breadcrumbs(community_noid, match: :exact)
       breadcrumb('Faculty & Staff', community_people_path(community_noid))

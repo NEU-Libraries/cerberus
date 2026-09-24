@@ -116,13 +116,13 @@ describe XmlController do
       expect(response.body).not_to include('#advanced')
     end
 
-    it 'builds the personal-root-aware trail for a Collection via collection_breadcrumbs' do
-      expect(controller).to receive(:collection_breadcrumbs).with(collection.id, editing: true)
+    it 'builds the edit trail from the resource it already resolved, for a Collection' do
+      expect(controller).to receive(:breadcrumbs).with(collection.id, editing: true, result: anything)
       get :editor, params: { id: collection.id }
     end
 
-    it 'uses the structural edit trail for a Work via #breadcrumbs' do
-      expect(controller).to receive(:breadcrumbs).with(work.id, editing: true)
+    it 'builds the edit trail from the resource it already resolved, for a Work' do
+      expect(controller).to receive(:breadcrumbs).with(work.id, editing: true, result: anything)
       get :editor, params: { id: work.id }
     end
   end
