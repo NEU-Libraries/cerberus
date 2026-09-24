@@ -517,6 +517,21 @@ describe CollectionsController do
     end
   end
 
+  # A personal root is structure, not content, so nobody browses it: its show
+  # page hands over to the owning Person.
+  describe 'show on a personal root' do
+    it "redirects to the owner's profile before reading anything else" do
+      root = AtlasRb::Mash.new('id' => 'janeroot', 'title' => 'Personal Root', 'personal_root' => true)
+      allow(AtlasRb::Collection).to receive(:find).with('janeroot').and_return(root)
+      allow(controller).to receive(:personal_root_home).with('janeroot').and_return(person_path('janenoid'))
+      expect(AtlasRb::Resource).not_to receive(:permissions)
+
+      get :show, params: { id: 'janeroot' }
+
+      expect(response).to redirect_to(person_path('janenoid'))
+    end
+  end
+
   # #update is the shared entry point for the Metadata and Permissions tabs,
   # which are separate forms posting disjoint fields to the same action. The
   # branches worth pinning are the ones that decide whether Atlas is written at

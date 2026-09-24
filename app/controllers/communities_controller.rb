@@ -28,7 +28,11 @@ class CommunitiesController < CatalogController
     super.merge(resource_type_scope: 'Community')
   end
 
+  # Before the find: Atlas refuses the People Community to everyone but full
+  # admins, so the flag has to come from Solr (see StructuralContainers).
   def show
+    return redirect_to(people_path) if system_container?(params[:id])
+
     @community = require_resource!(AtlasRb::Community.find(params[:id]))
     return render_gone(@community) if @community.tombstoned
 

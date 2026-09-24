@@ -25,6 +25,7 @@ class CollectionsController < CatalogController
   def show
     @collection = require_resource!(AtlasRb::Collection.find(params[:id]))
     return render_gone(@collection) if @collection.tombstoned
+    return redirect_to(personal_root_home(params[:id])) if @collection.personal_root
 
     authorize_show!
     @response = find_children(@collection.valkyrie_id, params[:id])

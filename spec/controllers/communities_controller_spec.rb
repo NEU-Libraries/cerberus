@@ -202,6 +202,19 @@ describe CommunitiesController do
     end
   end
 
+  # Atlas refuses the People Community to everyone but full admins, so the
+  # redirect has to happen before the find, or a guest gets a 403 instead.
+  describe 'show on the People system Community' do
+    it 'redirects to the People directory without reading the Community' do
+      allow(controller).to receive(:system_container?).with('people').and_return(true)
+      expect(AtlasRb::Community).not_to receive(:find)
+
+      get :show, params: { id: 'people' }
+
+      expect(response).to redirect_to(people_path)
+    end
+  end
+
   describe 'show' do
     render_views
 
