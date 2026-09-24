@@ -11,7 +11,7 @@ Source files:
 - `app/controllers/application_controller.rb`
 - `app/lib/atlas_routes.rb`
 - `app/lib/modsable_types.rb`
-- `app/controllers/concerns/collection_breadcrumbs.rb`
+- `app/controllers/concerns/structural_containers.rb`
 - `app/controllers/xml_controller.rb`
 - `app/jobs/set_sentinel_apply_job.rb`
 - `app/jobs/set_privatize_job.rb`
@@ -153,35 +153,52 @@ the flat People trail rather than an error page. The `AtlasRb::Resource.find`
 inside `breadcrumbs` runs before any crumb is added, so a failure leaves the
 trail empty and the rescue can rebuild it from nothing.
 
-### A Collection in a personal workspace
+The profile trail is `StructuralContainers#person_trail`, which the trail under
+a personal root reuses. So a Work's trail extends its owner's profile trail
+exactly, and the two cannot drift.
 
-`CollectionBreadcrumbs` builds the Collection trail. A collection under a
-Person's personal root is trailed away from the structural "People / Personal
-Root" prefix:
+### Content under a personal root
 
-| Viewer | Trail |
+Atlas keeps the People Community and each personal root in every ancestor chain
+below them, and flags each entry with `system_container` or `personal_root`.
+Neither container is content, so `StructuralContainers#ancestor_trail` replaces
+both with the owner's profile trail and keeps every Collection below the root:
+
+```
+Northeastern University / Faculty & Staff / Mickey Gasper / Baseball stuff / monograph-3.pdf
+```
+
+It runs inside `ApplicationController#breadcrumbs`, so every trail gets it: show
+and edit pages for Works and Collections, the upload page, and the XML editor.
+Every viewer sees the same trail, the owner included.
+
+The whole chain is searched for the root, not just the item's parent, because a
+workspace nests Collections to any depth. The root's own edit page is the one
+case with no flagged ancestor: there the root is the item, so the item's own
+`personal_root` flag starts the owner trail.
+
+**The owner comes from the root, not from the item's depositor.** A proxy or a
+seed can deposit into someone else's workspace. `personal_root_owner` reads the
+Person whose Solr document has `personal_root_id_ssi` equal to the root, which
+also carries the display name, NOID and affiliations the trail needs.
+
+If no Person answers, the structural entries are still dropped. The raw chain
+is exactly the trail this exists to avoid.
+
+### The two structural show pages redirect
+
+| Page | Redirects to |
 |---|---|
-| The owner | My DRS / *collection* — their personal home |
-| Everyone else, including logged out | People / *Person* / *collection* |
-| Any other collection | The plain structural trail |
+| The People Community | `/people` |
+| A personal root | The owner's profile, or `/people` if no Person answers |
 
-The concern lives outside `CollectionsController` so the XML editor can build the
-same trail. Clicking the XML tab from an edit page has to keep the personal-root
-prefix rather than falling back to the structural one.
+**The People check reads Solr before the Atlas find.** Atlas refuses that
+Community to everyone but full admins, so a check on the Atlas response would
+redirect only the admin and leave everyone else on a 403. `system_container?` is
+an ungated read for that reason, and it answers one boolean about a known id.
 
-`editing:` swaps the show tail — the collection as the you-are-here crumb — for
-the edit tail. That tail is the collection as a link plus an "Edit Collection"
-current crumb.
-That keeps an edit or XML page on the same prefix as the show page.
-
-`personal_root_owner` resolves the owning Person from the personal root's
-`depositor_ssi`. A lookup failure returns nil, and the trail falls back to the
-structural one. `collection_doc` reads the root's Solr document, which carries
-`personal_root_bsi` and `depositor_ssi`.
-
-The concern leans on `ApplicationController`'s `#breadcrumbs`, `#breadcrumb`,
-`#add_breadcrumb_for` and `#edit_breadcrumb_tail`, and on `DepositorContext`'s
-`#deposit_person`.
+The edit pages do not redirect, so an administrator can still reach both
+containers' settings.
 
 ## Request-wide setup
 
@@ -319,10 +336,9 @@ valid to draw from the rejected text.
 
 ### The editor's trail
 
-`editor_breadcrumbs` mirrors the resource's edit page. A Collection reuses the
-personal-root-aware trail from `CollectionBreadcrumbs`; a Work uses the
-structural edit trail. That matches `CollectionsController#edit` and
-`WorksController#edit` respectively.
+The editor's trail is the resource's edit-page trail: `breadcrumbs(id, editing:
+true)`, handed the resource the editor already resolved. Content under a
+personal root gets the same owner trail as its edit page.
 
 ## Sweeping and reindexing a Set
 
