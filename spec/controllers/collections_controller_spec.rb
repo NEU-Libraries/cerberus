@@ -517,76 +517,18 @@ describe CollectionsController do
     end
   end
 
-  # The personal-workspace trail is isolated on the private seam (the show stack
-  # makes many Atlas calls; here we stub the resolve + find and assert the crumbs).
-  describe '#collection_breadcrumbs (private)' do
-    def stub_collection(parent_noid:)
-      item = OpenStruct.new(id: 'cnoid', title: 'Working Files',
-                            ancestors: [{ 'noid' => 'people', 'klass' => 'Community', 'title' => 'People' },
-                                        { 'noid' => parent_noid, 'klass' => 'Collection', 'title' => 'Personal Root' }])
-      allow(AtlasRb::Resource).to receive(:find).with('cnoid').and_return(OpenStruct.new(resource: item, klass: 'Collection'))
-    end
+  # A personal root is structure, not content, so nobody browses it: its show
+  # page hands over to the owning Person.
+  describe 'show on a personal root' do
+    it "redirects to the owner's profile before reading anything else" do
+      root = AtlasRb::Mash.new('id' => 'janeroot', 'title' => 'Personal Root', 'personal_root' => true)
+      allow(AtlasRb::Collection).to receive(:find).with('janeroot').and_return(root)
+      allow(controller).to receive(:personal_root_home).with('janeroot').and_return(person_path('janenoid'))
+      expect(AtlasRb::Resource).not_to receive(:permissions)
 
-    it 'trails "My DRS" for the owner viewing a collection under their own personal root' do
-      stub_collection(parent_noid: 'janeroot')
-      allow(controller).to receive(:deposit_person).and_return(AtlasRb::Mash.new('personal_root_id' => 'janeroot'))
+      get :show, params: { id: 'janeroot' }
 
-      expect(controller).to receive(:breadcrumb).with('My DRS', my_drs_path)
-      expect(controller).to receive(:add_breadcrumb_for).with('cnoid', 'Collection', 'Working Files')
-      expect(controller).not_to receive(:breadcrumbs)
-
-      controller.send(:collection_breadcrumbs, 'cnoid')
-    end
-
-    it 'trails "People / <Person>" for the public view of a workspace collection' do
-      stub_collection(parent_noid: 'janeroot')
-      allow(controller).to receive(:deposit_person).and_return(nil) # logged out / non-owner
-      root_doc = SolrDocument.new('id' => 'uuid-jr', 'personal_root_bsi' => true, 'depositor_ssi' => '000000002')
-      allow(controller).to receive(:collection_doc).with('janeroot').and_return(root_doc)
-      allow(AtlasRb::Person).to receive(:resolve).with(['000000002'])
-                                                 .and_return([AtlasRb::Mash.new('id' => 'jnoid', 'display_name' => 'Jane Doe')])
-
-      expect(controller).to receive(:breadcrumb).with('People', people_path)
-      expect(controller).to receive(:breadcrumb).with('Jane Doe', person_path('jnoid'))
-      expect(controller).to receive(:add_breadcrumb_for).with('cnoid', 'Collection', 'Working Files')
-      expect(controller).not_to receive(:breadcrumbs)
-
-      controller.send(:collection_breadcrumbs, 'cnoid')
-    end
-
-    it 'falls back to the structural trail for an ordinary (non-workspace) collection' do
-      stub_collection(parent_noid: 'a-community')
-      allow(controller).to receive(:deposit_person).and_return(nil)
-      ordinary = SolrDocument.new('id' => 'uuid-x', 'personal_root_bsi' => false)
-      allow(controller).to receive(:collection_doc).with('a-community').and_return(ordinary)
-
-      expect(controller).to receive(:breadcrumbs).with('cnoid', editing: false, result: anything)
-      expect(controller).not_to receive(:breadcrumb).with('My DRS', anything)
-
-      controller.send(:collection_breadcrumbs, 'cnoid')
-    end
-
-    it 'keeps the "My DRS" prefix and uses the edit tail when editing an owner-workspace collection' do
-      stub_collection(parent_noid: 'janeroot')
-      allow(controller).to receive(:deposit_person).and_return(AtlasRb::Mash.new('personal_root_id' => 'janeroot'))
-
-      expect(controller).to receive(:breadcrumb).with('My DRS', my_drs_path)
-      expect(controller).to receive(:edit_breadcrumb_tail).with(anything, 'Collection')
-      expect(controller).not_to receive(:add_breadcrumb_for)
-      expect(controller).not_to receive(:breadcrumbs)
-
-      controller.send(:collection_breadcrumbs, 'cnoid', editing: true)
-    end
-
-    it 'passes editing through to the structural trail for an ordinary collection edit' do
-      stub_collection(parent_noid: 'a-community')
-      allow(controller).to receive(:deposit_person).and_return(nil)
-      ordinary = SolrDocument.new('id' => 'uuid-x', 'personal_root_bsi' => false)
-      allow(controller).to receive(:collection_doc).with('a-community').and_return(ordinary)
-
-      expect(controller).to receive(:breadcrumbs).with('cnoid', editing: true, result: anything)
-
-      controller.send(:collection_breadcrumbs, 'cnoid', editing: true)
+      expect(response).to redirect_to(person_path('janenoid'))
     end
   end
 

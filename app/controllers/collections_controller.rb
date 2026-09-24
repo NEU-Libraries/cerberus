@@ -4,8 +4,6 @@ class CollectionsController < CatalogController
   include Thumbable
   include Transformable
   include ShowScopedSearch
-  include DepositorContext
-  include CollectionBreadcrumbs
   include RecordsImpressions
   include ContainerAnalytics
   include ContainerRestrictionRequest
@@ -27,11 +25,12 @@ class CollectionsController < CatalogController
   def show
     @collection = require_resource!(AtlasRb::Collection.find(params[:id]))
     return render_gone(@collection) if @collection.tombstoned
+    return redirect_to(personal_root_home(params[:id])) if @collection.personal_root
 
     authorize_show!
     @response = find_children(@collection.valkyrie_id, params[:id])
     assign_show_abilities!
-    collection_breadcrumbs(params[:id])
+    breadcrumbs(params[:id])
   end
 
   def tombstone
@@ -75,9 +74,6 @@ class CollectionsController < CatalogController
                 notice: 'Derivative access default saved.'
   end
 
-  # The personal-root-aware breadcrumb trail (collection_breadcrumbs + helpers)
-  # lives in CollectionBreadcrumbs, shared with XmlController's raw-XML editor.
-
   private
 
     # The same children #show lists, gated the same way: the modal's counts
@@ -109,7 +105,7 @@ class CollectionsController < CatalogController
       load_descriptive!
       @sentinel = Sentinel.find_by(target_id: params[:id])
       load_container_analytics(@collection, 'Collection')
-      collection_breadcrumbs(params[:id], editing: true)
+      breadcrumbs(params[:id], editing: true)
     end
 
     # Re-render the tab holding the policy that was SUBMITTED, not the stored

@@ -8,7 +8,6 @@ class WorksController < ApplicationController
   include Transformable
   include DepositorContext
   include WorkDeposit
-  include WorkBreadcrumbs
   include WorkChangeRequest
   include WorkCaptions
   include WorkStreamingOnly
@@ -201,7 +200,8 @@ class WorksController < ApplicationController
                                             search_service: search_service)
       prepare_zoom_view(params[:id], pages: reads[:file_sets])
       assign_show_abilities!
-      work_breadcrumbs(params[:id])
+      ancestor_trail(@work.ancestors, item: @work)
+      add_breadcrumb_for(@work.id, 'Work', @work.title)
     end
 
     # The facet list comes from the live Blacklight config rather than a second
@@ -270,9 +270,7 @@ class WorksController < ApplicationController
     # tail label. `match: :exact` keeps loaf from marking the Work crumb current
     # on the /upload sub-path, which is what makes it a link back.
     def upload_breadcrumbs
-      Array(@work.ancestors).each do |node|
-        add_breadcrumb_for(node['noid'], node['klass'], node['title'])
-      end
+      ancestor_trail(@work.ancestors, item: @work)
       breadcrumb(@work.title, work_path(@work.id), match: :exact)
       breadcrumb('Upload File', upload_work_path(@work.id))
     end

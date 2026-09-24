@@ -2,9 +2,6 @@
 
 # The raw-XML metadata editor. See docs/people-and-routing.md.
 class XmlController < ApplicationController
-  include DepositorContext
-  include CollectionBreadcrumbs
-
   # A sibling of the Metadata and Permissions edit tabs, and gated the same way:
   # authenticate first, then the :edit ability keyed on the resource.
   before_action :authenticate_user!
@@ -17,7 +14,7 @@ class XmlController < ApplicationController
     @klass = item.klass
     resource_mods
     @double_escapes = Metadata::DoubleEscapes.report(@raw_xml)
-    editor_breadcrumbs(item.klass, params[:id])
+    breadcrumbs(params[:id], editing: true, result: item)
   end
 
   def validate
@@ -80,7 +77,7 @@ class XmlController < ApplicationController
       @repairable = Metadata::ControlCharacters.any?(params[:raw_xml])
       @double_escapes = Metadata::DoubleEscapes.report(params[:raw_xml])
       @mods = AtlasRb::Resource.mods(params[:resource_id], 'html')
-      editor_breadcrumbs(item.klass, params[:resource_id])
+      breadcrumbs(params[:resource_id], editing: true, result: item)
       render :editor, status: :unprocessable_content
     end
 
@@ -108,16 +105,6 @@ class XmlController < ApplicationController
     # editor carries :id; validate, repair and update carry :resource_id.
     def xml_resource_id
       params[:id] || params[:resource_id]
-    end
-
-    # Takes the id rather than reading params, because the two actions that render
-    # this view carry it under different names.
-    def editor_breadcrumbs(klass, id)
-      if klass == 'Collection'
-        collection_breadcrumbs(id, editing: true)
-      else
-        breadcrumbs(id, editing: true)
-      end
     end
 
     def resource_mods

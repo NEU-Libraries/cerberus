@@ -7,6 +7,7 @@ class ApplicationController < ActionController::Base
   include Authorizable
   include UnfinishedDepositGate
   include ImpersonationSession
+  include StructuralContainers
 
   before_action do
     I18n.locale = :en
@@ -32,9 +33,7 @@ class ApplicationController < ActionController::Base
   def breadcrumbs(id, editing: false, match: :inclusive, result: nil)
     result ||= AtlasRb::Resource.find(id)
     item = result.resource
-    Array(item.ancestors).each do |node|
-      add_breadcrumb_for(node['noid'], node['klass'], node['title'], match: match)
-    end
+    ancestor_trail(item.ancestors, item: item, match: match)
 
     if editing
       edit_breadcrumb_tail(item, result.klass)
