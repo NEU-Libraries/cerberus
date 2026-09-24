@@ -133,6 +133,18 @@
     margin-bottom: 0;
   }
 
+  // The main section stretches to the thumbnail's height, so on a record
+  // with little metadata the actions row would sit just under the title.
+  // A column flex with an auto top margin pins it to the card's foot.
+  .document-main-section {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .document-actions {
+    margin-top: auto;
+  }
+
   // Align the first card's top edge with the facet card across the
   // gutter. The "Displaying N of M" bar above this column is shorter
   // than the sidebar's "Limit your search" heading, leaving the first
