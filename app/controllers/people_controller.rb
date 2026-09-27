@@ -24,6 +24,7 @@ class PeopleController < CatalogController
 
     @display_name = @person['display_name']
     @response = deposited_works(@person['nuid'])
+    assign_workspace_add(@person['personal_root_id'])
     build_profile_breadcrumbs
   end
 
@@ -52,6 +53,21 @@ class PeopleController < CatalogController
       @community = find_community(params[:community_id])
       build_faculty_staff_breadcrumbs(params[:community_id])
       @community_filter = %(affiliated_community_ids_ssim:"#{solr_phrase(params[:community_id])}")
+    end
+
+    # The workspace redirects here, so its Add menu lives here too: this is the
+    # only in-app route for a proxy depositor into someone else's workspace.
+    # Gated like every Add, on edit rights over the container it adds to.
+    def assign_workspace_add(root_noid)
+      return if root_noid.blank? || !user_signed_in?
+
+      permissions = AtlasRb::Resource.permissions(root_noid)
+      return if permissions.nil?
+
+      @can_edit = current_ability.can?(:edit, solr_doc_from_permissions(permissions, klass: 'Collection'))
+      @workspace_id = root_noid if @can_edit
+    rescue AtlasRb::ResourceError, Faraday::Error, JSON::ParserError
+      @can_edit = false
     end
 
     def build_profile_breadcrumbs
