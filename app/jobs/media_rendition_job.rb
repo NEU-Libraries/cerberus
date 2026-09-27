@@ -34,7 +34,8 @@ class MediaRenditionJob < ApplicationJob
     IncompleteFlag.set(job.arguments.first, nuid: job.current_nuid, reason: IncompleteReasons::MEDIA_RENDITION)
   end
 
-  def perform(work_id, staged_path, rendition_key)
+  # refresh: a replace or revert, whose Work already has a now-stale poster.
+  def perform(work_id, staged_path, rendition_key, refresh: false)
     return unless File.exist?(staged_path)
     unless MediaRemux.available?
       return Rails.logger.warn("MediaRenditionJob: ffmpeg not installed — A/V rendition skipped for work #{work_id}")
@@ -44,19 +45,19 @@ class MediaRenditionJob < ApplicationJob
     poster_path = build_poster(work_id, staged_path) if mime.start_with?('video/')
     mp4_path = MediaRemux.to_mp4(staged_path, rendition_path(staged_path)) if MediaRemux.remux_needed?(mime)
 
-    attach(work_id, mp4_path, poster_path, rendition_key)
+    attach(work_id, mp4_path, poster_path, rendition_key, refresh: refresh)
   end
 
   private
 
     # Attach the rendition + poster once the primary Blob is there — deferring to
     # ContentCreationJob, exactly like PdfRenditionJob.
-    def attach(work_id, mp4_path, poster_path, rendition_key)
+    def attach(work_id, mp4_path, poster_path, rendition_key, refresh:)
       raise PrimaryFileMissing, "work #{work_id} has no primary file yet" unless primary_file?(work_id)
 
       AtlasRb::Blob.create(work_id, mp4_path, File.basename(mp4_path), idempotency_key: rendition_key) if mp4_path
       # perform_now so the ambient acting NUID carries through (see ApplicationJob).
-      IiifAssetsJob.perform_now(work_id, poster_path) if poster_path
+      IiifAssetsJob.perform_now(work_id, poster_path, refresh: refresh) if poster_path
       IncompleteFlag.clear(work_id)
     end
 

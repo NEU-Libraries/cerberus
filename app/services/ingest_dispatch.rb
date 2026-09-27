@@ -32,9 +32,9 @@ class IngestDispatch < ApplicationService
     if mime_type.start_with?('image/') || mime_type == 'application/pdf'
       IiifAssetsJob.perform_later(@work_id, @staged_path, refresh: refreshing?)
     elsif CONVERTIBLE_MIME_TYPES.include?(mime_type)
-      PdfRenditionJob.perform_later(@work_id, @staged_path, rendition_key)
+      PdfRenditionJob.perform_later(@work_id, @staged_path, rendition_key, refresh: refreshing?)
     elsif mime_type.start_with?('video/', 'audio/')
-      MediaRenditionJob.perform_later(@work_id, @staged_path, rendition_key)
+      MediaRenditionJob.perform_later(@work_id, @staged_path, rendition_key, refresh: refreshing?)
     end
     FullTextExtractionJob.perform_later(@work_id, @staged_path) if extractable_text?
     return unless @include_primary

@@ -266,7 +266,7 @@ describe WorksController do
         post :create, params: { binary:        fixture_file_upload('example.docx', docx_mime),
                                 collection_id: collection.id }
       end.to have_enqueued_job(PdfRenditionJob)
-        .with(anything, anything, a_string_matching(uuid_re))
+        .with(anything, anything, a_string_matching(uuid_re), refresh: false)
         .and have_enqueued_job(ContentCreationJob)
         .and not_have_enqueued_job(IiifAssetsJob)
     end

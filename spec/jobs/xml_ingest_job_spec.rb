@@ -106,7 +106,7 @@ RSpec.describe XmlIngestJob, type: :job do
       rendition_key = Digest::UUID.uuid_v5(Digest::UUID::URL_NAMESPACE, 'cerberus:rendition:idem-1')
       described_class.new.perform(ingest.id, create_row)
       expect(PdfRenditionJob).to have_received(:perform_later)
-        .with('w-new', File.join(uploads_root, 'w-new', 'pic.tif'), rendition_key)
+        .with('w-new', File.join(uploads_root, 'w-new', 'pic.tif'), rendition_key, refresh: false)
       expect(IiifAssetsJob).not_to have_received(:perform_later)
     end
 

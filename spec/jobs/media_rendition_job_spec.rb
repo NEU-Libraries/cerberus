@@ -21,7 +21,16 @@ RSpec.describe MediaRenditionJob do
     described_class.perform_now('w1', '/u/x.mov', 'key1')
 
     expect(AtlasRb::Blob).to have_received(:create).with('w1', '/u/x.mp4', 'x.mp4', idempotency_key: 'key1')
-    expect(IiifAssetsJob).to have_received(:perform_now).with('w1', '/u/x-poster.jpg')
+    expect(IiifAssetsJob).to have_received(:perform_now).with('w1', '/u/x-poster.jpg', refresh: false)
+  end
+
+  it 'passes a refresh through, so a replaced video gets a fresh poster' do
+    allow(Marcel::MimeType).to receive(:for).and_return('video/mp4')
+    allow(MediaRemux).to receive(:poster).and_return('/u/x-poster.jpg')
+
+    described_class.perform_now('w1', '/u/x.mp4', 'key1', refresh: true)
+
+    expect(IiifAssetsJob).to have_received(:perform_now).with('w1', '/u/x-poster.jpg', refresh: true)
   end
 
   it 'skips remux for an MP4 master but still seeds the poster' do

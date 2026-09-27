@@ -27,7 +27,8 @@ class PdfRenditionJob < ApplicationJob
     IncompleteFlag.set(job.arguments.first, nuid: job.current_nuid, reason: IncompleteReasons::PDF_RENDITION)
   end
 
-  def perform(work_id, staged_path, rendition_key)
+  # refresh: a replace or revert, whose Work already has a now-stale thumbnail.
+  def perform(work_id, staged_path, rendition_key, refresh: false)
     return unless File.exist?(staged_path)
     unless WordToPdf.available?
       return Rails.logger.warn("PdfRenditionJob: soffice not installed — rendition skipped for work #{work_id}")
@@ -41,7 +42,7 @@ class PdfRenditionJob < ApplicationJob
 
     AtlasRb::Blob.create(work_id, pdf_path, File.basename(pdf_path), idempotency_key: rendition_key)
     # perform_now so the ambient acting NUID carries through (see ApplicationJob).
-    IiifAssetsJob.perform_now(work_id, pdf_path)
+    IiifAssetsJob.perform_now(work_id, pdf_path, refresh: refresh)
     FullTextExtractionJob.perform_later(work_id, pdf_path)
     IncompleteFlag.clear(work_id)
   end
