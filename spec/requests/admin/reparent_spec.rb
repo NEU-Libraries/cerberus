@@ -122,6 +122,17 @@ RSpec.describe 'Admin::Reparent', type: :request do
         expect(response.body).to include('Node Collection', 'Parent Community', 'par')
       end
 
+      it 'leaves the current parent out of the destination candidates' do
+        node = atlas_node(noid: 'node', title: 'Node Collection',
+                          ancestors: [{ 'noid' => 'cur1234', 'klass' => 'Community', 'title' => 'Current Home' }])
+        allow(AtlasRb::Resource).to receive(:find).with('node').and_return(node)
+        expect(ResourceSearch).to receive(:call)
+          .with(hash_including(exclude_noid: 'cur1234', exclude_subtree_noid: 'node'))
+          .and_return(fake_results)
+
+        get '/admin/reparent/choose_parent', params: { node_id: 'node', q: 'home' }
+      end
+
       it 'never offers a top-level / no-parent option, for any node class' do
         %w[Community Collection Work].each do |klass|
           allow(AtlasRb::Resource).to receive(:find)

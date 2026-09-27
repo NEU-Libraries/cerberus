@@ -109,6 +109,65 @@ RSpec.describe 'People', type: :request do
       expect(response.body).to include(people_path)
     end
 
+    it 'keeps a profile readable when its affiliated community refuses the read' do
+      affiliated = person.merge('affiliated_community_ids' => ['gated11'])
+      allow(AtlasRb::Person).to receive(:find).and_return(affiliated)
+      allow(AtlasRb::Resource).to receive(:find).with('gated11')
+                                                .and_raise(AtlasRb::ResourceError.new('GET /resources/gated11 → 403', response: nil))
+
+      get '/people/pp11aa22'
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Stephen Flynn')
+      expect(response.body).not_to include(community_path('gated11'))
+    end
+
+    context 'with a personal workspace' do
+      include Devise::Test::IntegrationHelpers
+
+      let(:owner) { person.merge('personal_root_id' => 'root1234') }
+      let(:staff_user) do
+        User.new(email: 'staff@example.com', password: 'password', nuid: '000000002', role: 'privileged',
+                 groups: ['northeastern:drs:repository:staff'])
+      end
+      let(:guest_user) do
+        User.new(email: 'guest@example.com', password: 'password', nuid: '000000001', role: 'guest', groups: [])
+      end
+
+      before do
+        allow(AtlasRb::User).to receive(:resolve).and_return([])
+        allow(AtlasRb::Person).to receive(:find).and_return(owner)
+        allow(AtlasRb::Resource).to receive(:permissions).with('root1234').and_return(
+          AtlasRb::Mash.new('read' => ['public'], 'edit' => ['northeastern:drs:repository:staff'])
+        )
+      end
+
+      it "offers an editor the Add menu into the person's workspace" do
+        sign_in staff_user
+
+        get '/people/pp11aa22'
+
+        expect(response.body).to include(new_collection_work_path('root1234'))
+        expect(response.body).to include(new_collection_collection_path('root1234'))
+      end
+
+      it 'offers no Add menu to a user who cannot edit the workspace' do
+        sign_in guest_user
+
+        get '/people/pp11aa22'
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).not_to include('breadcrumb-add')
+      end
+
+      it 'offers no Add menu when signed out, and does not read the workspace' do
+        get '/people/pp11aa22'
+
+        expect(response.body).not_to include('breadcrumb-add')
+        expect(AtlasRb::Resource).not_to have_received(:permissions)
+      end
+    end
+
     it '404s a NOID with no curated Person record' do
       allow(AtlasRb::Person).to receive(:find).and_return(nil) # atlas_rb returns nil for a 404
 

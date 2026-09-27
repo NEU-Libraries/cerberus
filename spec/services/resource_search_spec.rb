@@ -30,6 +30,11 @@ RSpec.describe ResourceSearch do
       expect(filters).to include('-id:"uuid-1"', '-ancestor_ids_ssim:"abc"')
     end
 
+    it 'excludes one named resource by its NOID' do
+      filters = described_class.new(scope: scope, query: 'x', exclude_noid: 'par1234').filters
+      expect(filters).to include('-alternate_ids_tesim:"par1234"')
+    end
+
     it 'omits the exclusion clauses when not moving' do
       filters = described_class.new(scope: scope, query: 'x').filters
       expect(filters).not_to include(a_string_matching(/\A-id:/))

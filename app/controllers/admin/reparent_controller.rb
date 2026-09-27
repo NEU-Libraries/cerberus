@@ -57,13 +57,7 @@ module Admin
       @allowed_parent_label = allowed_parent_label(@node.klass)
       return if params[:q].blank?
 
-      @results = ResourceSearch.call(
-        scope:                self,
-        query:                params[:q],
-        types:                ALLOWED_PARENTS.fetch(@node.klass, []),
-        exclude_node_uuid:    params[:node_uuid].presence,
-        exclude_subtree_noid: @node.resource.id
-      )
+      @results = destination_candidates(@node)
     end
 
     # Step 3 — preview the move and confirm. A destination is mandatory —
@@ -98,6 +92,19 @@ module Admin
       # JSON::ParserError → Authorizable's rescue renders the 404 page.
       def load_node(id)
         AtlasRb::Resource.find(id)
+      end
+
+      # The item, its subtree and its current parent are all left out: the
+      # first two would make a cycle, and the parent would move it nowhere.
+      def destination_candidates(node)
+        ResourceSearch.call(
+          scope:                self,
+          query:                params[:q],
+          types:                ALLOWED_PARENTS.fetch(node.klass, []),
+          exclude_node_uuid:    params[:node_uuid].presence,
+          exclude_subtree_noid: node.resource.id,
+          exclude_noid:         immediate_parent(node)&.noid
+        )
       end
 
       def search_containers

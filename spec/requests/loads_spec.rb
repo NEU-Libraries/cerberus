@@ -427,10 +427,10 @@ RSpec.describe 'Loads', type: :request do
         expect(LoadReport.count).to eq(0)
       end
 
-      it 're-renders :new with 422 when no destination is given' do
+      it 'stages an upload with no destination, leaving the preview to judge it' do
         post '/loaders/xml/loads', params: { load_report: { archive: archive } }
-        expect(response).to have_http_status(:unprocessable_content)
-        expect(LoadReport.count).to eq(0)
+        expect(LoadReport.last).to be_previewing
+        expect(LoadReport.last.parent_collection_id).to be_blank
       end
     end
 
@@ -505,6 +505,10 @@ RSpec.describe 'Loads', type: :request do
                            parent_collection_id: 'neu:c1', status: :previewing)
       end
 
+      let(:open_preview) { instance_double(XmlPreview::Result, blocked?: false) }
+
+      before { allow(XmlPreview).to receive(:call).and_return(open_preview) }
+
       it 'flips the report to pending and enqueues XmlUnzipJob' do
         patch confirm_loader_load_path(xml_loader, load_report)
         expect(load_report.reload).to be_pending
@@ -515,6 +519,13 @@ RSpec.describe 'Loads', type: :request do
       it 'is a no-op when the report is not previewing' do
         load_report.update!(status: :completed)
         patch confirm_loader_load_path(xml_loader, load_report)
+        expect(XmlUnzipJob).not_to have_received(:perform_later)
+      end
+
+      it 'refuses to run a preview that is blocked' do
+        allow(XmlPreview).to receive(:call).and_return(instance_double(XmlPreview::Result, blocked?: true))
+        patch confirm_loader_load_path(xml_loader, load_report)
+        expect(load_report.reload).to be_previewing
         expect(XmlUnzipJob).not_to have_received(:perform_later)
       end
     end

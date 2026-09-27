@@ -22,11 +22,12 @@
                 %a.dropdown-item{:href => new_community_community_path(params[:id])} New Community
               %li
                 %a.dropdown-item{:href => new_community_collection_path(params[:id])} New Collection
-            - elsif controller_name == "collections"
+            - elsif controller_name == "collections" || local_assigns[:add_to_collection]
+              - collection_id = local_assigns[:add_to_collection] || params[:id]
               %li
-                %a.dropdown-item{:href => new_collection_collection_path(params[:id])} New Collection
+                %a.dropdown-item{:href => new_collection_collection_path(collection_id)} New Collection
               %li
-                %a.dropdown-item{:href => new_collection_work_path(params[:id])} New Work
+                %a.dropdown-item{:href => new_collection_work_path(collection_id)} New Work
             - else
               %li
                 %a.dropdown-item{:href => upload_work_path(params[:id])} Upload File

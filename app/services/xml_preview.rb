@@ -29,6 +29,9 @@ class XmlPreview < ApplicationService
     end
   end
 
+  NO_DESTINATION = 'This manifest creates new records, so it needs a destination collection. ' \
+                   'Discard this upload and upload it again with a destination chosen.'
+
   def initialize(load_report:)
     @load_report = load_report
   end
@@ -42,6 +45,7 @@ class XmlPreview < ApplicationService
     rows = parse_rows(manifest_bytes)
     return structural([@structural_error]) if @structural_error
     return structural(['The manifest has a header row but no data rows.']) if rows.empty?
+    return structural([NO_DESTINATION]) if @load_report.parent_collection_id.blank? && rows.any?(&:create?)
 
     first = rows.first
     # Archive#read returns ASCII-8BIT (raw zip/tar bytes); the MODS is UTF-8

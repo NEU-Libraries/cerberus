@@ -508,5 +508,18 @@ namespace :reset do
     Blacklight.default_index.connection.delete_by_query '*:*'
     Blacklight.default_index.connection.commit
     AtlasRb::Reset.clean
+    clear_contents(Rails.application.config.x.cerberus.uploads_root)
+    clear_contents(Rails.application.config.x.cerberus.derivatives_root)
+  end
+
+  # Atlas mints NOIDs afresh after a clean, so an upload staged under an old
+  # NOID is read as the upload of whichever new Work reuses that NOID. The
+  # JP2s are UUID-named and cannot collide, but nothing references them once
+  # Atlas is wiped. The contents go, not the directory, which can be a mount.
+  def clear_contents(root)
+    root = root.to_s
+    return unless root.present? && File.directory?(root)
+
+    FileUtils.rm_rf(Dir.children(root).map { |name| File.join(root, name) })
   end
 end
