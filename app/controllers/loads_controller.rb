@@ -78,6 +78,9 @@ class LoadsController < ApplicationController
   # Librarian-approved go: flip the staged preview into a real run.
   def confirm
     return redirect_to(loader_load_path(@loader, @load_report)) unless @load_report.previewing?
+    # The preview hides Confirm when it is blocked; this refuses a hand-sent one,
+    # such as a create manifest staged without a destination.
+    return redirect_to(loader_load_path(@loader, @load_report)) if xml_preview_blocked?
 
     @load_report.update!(status: :pending)
     unzip_job.perform_later(@load_report.id)
@@ -99,6 +102,10 @@ class LoadsController < ApplicationController
         parent_collection_id: parent,
         status:               @loader.iptc? ? :pending : :previewing
       )
+    end
+
+    def xml_preview_blocked?
+      @loader.xml? && XmlPreview.call(load_report: @load_report).blocked?
     end
 
     def preview_service
@@ -123,9 +130,11 @@ class LoadsController < ApplicationController
     # under the configured root), so it's trusted as-is. XML/multipage accept a
     # free-typed or typeahead-picked NOID, so resolve it against Atlas and
     # confirm it's actually a Collection before staging anything.
+    # A blank destination is left to the preview on the XML loader: an overwrite
+    # package names every Work it touches, and only a create row needs one.
     def valid_destination?(parent_id)
       return true if @loader.iptc?
-      return false if parent_id.blank?
+      return @loader.xml? if parent_id.blank?
 
       # find returns nil for a 404 (unknown NOID) and raises ResourceError for
       # any other non-2xx; either way the destination isn't a usable Collection.

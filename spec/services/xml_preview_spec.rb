@@ -57,6 +57,26 @@ RSpec.describe XmlPreview do
     end
   end
 
+  context 'with a create manifest and no destination' do
+    let(:fixture) { 'xml_loader_create_sample.zip' }
+
+    it 'is blocked until a destination is chosen' do
+      load_report.update!(parent_collection_id: nil)
+      result = described_class.call(load_report: load_report)
+      expect(result).to be_blocked
+      expect(result.structural_errors).to eq([XmlPreview::NO_DESTINATION])
+    end
+  end
+
+  context 'with an update manifest and no destination' do
+    let(:fixture) { 'metadata_existing_file.zip' }
+
+    it 'is not blocked' do
+      load_report.update!(parent_collection_id: nil)
+      expect(described_class.call(load_report: load_report)).not_to be_blocked
+    end
+  end
+
   context 'when the archive has no manifest' do
     let(:fixture) { 'zip_without_manifest.zip' }
 
