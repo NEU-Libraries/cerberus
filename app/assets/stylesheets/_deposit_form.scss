@@ -194,6 +194,38 @@
     }
   }
 
+  // The promote option and its category fields share one box, so the checked
+  // state visibly owns the dropdowns beneath it. The inner label drops its own
+  // chrome: the fields cannot live inside it, since a select nested in a label
+  // would toggle the checkbox on every click.
+  &__promote {
+    background-color: $white;
+    border: 1px solid $gray-300;
+    border-radius: 0.4rem;
+    transition: border-color 0.12s ease, background-color 0.12s ease,
+                box-shadow 0.12s ease;
+
+    &:has(.deposit-form__radio-input:checked) {
+      border-color: $blue;
+      background-color: color-mix(in srgb, #{$blue} 5%, white);
+      box-shadow: inset 4px 0 0 $blue;
+    }
+
+    .deposit-form__radio,
+    .deposit-form__radio:hover,
+    .deposit-form__radio:has(.deposit-form__radio-input:checked) {
+      border: 0;
+      background-color: transparent;
+      box-shadow: none;
+    }
+  }
+
+  // Indented to the radio body's left edge: the label's padding plus the
+  // checkbox and its gap.
+  &__promote-fields {
+    padding: 0 1rem 0.85rem 2.7rem;
+  }
+
   &__radio-input {
     margin-top: 0.25rem;
     accent-color: $blue;

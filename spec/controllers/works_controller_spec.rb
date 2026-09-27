@@ -369,6 +369,32 @@ describe WorksController do
         AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
+      # Staff load theses and dissertations; a depositor never self-publishes there.
+      it 'does not offer Theses & Dissertations as a showcase category' do
+        stub_person_rooted_at(collection.id)
+        allow(ShowcaseFinder).to receive(:call).and_return('Datasets' => 'ds1', 'Theses & Dissertations' => 'td1')
+        allow(AtlasRb::Community).to receive(:find).with('comm1').and_return(AtlasRb::Mash.new('title' => 'A Community'))
+
+        get :new, params: { collection_id: collection.id }
+
+        expect(assigns(:publish_targets).dig('comm1', :genres).keys).to eq(['Datasets'])
+      end
+
+      it 'refuses a forged Theses & Dissertations promotion but keeps the deposit' do
+        stub_person_rooted_at(collection.id)
+        allow(ShowcaseFinder).to receive(:call).and_return('tdnoid')
+        allow(AtlasRb::System::Work).to receive(:add_linked_member)
+
+        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+                                collection_id: collection.id, publish: '1',
+                                publish_community_id: 'comm1', publish_genre: 'Theses & Dissertations' }
+
+        expect(AtlasRb::System::Work).not_to have_received(:add_linked_member)
+        expect(flash[:notice]).to eq(described_class::PUBLISH_LINK_FAILED)
+      ensure
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
       it 'still saves the work when Atlas forbids the showcase link (scoping safety net)' do
         stub_person_rooted_at(collection.id)
         allow(ShowcaseFinder).to receive(:call).and_return('showcasenoid')

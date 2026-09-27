@@ -43,7 +43,7 @@ module DepositorContext
       return {} unless person && person['personal_root_id'].present?
 
       Array(person['affiliated_community_ids']).each_with_object({}) do |noid, targets|
-        genres = ShowcaseFinder.call(scope: self, community_noid: noid)
+        genres = ShowcaseFinder.call(scope: self, community_noid: noid).except(*FeaturedContent::STAFF_ONLY)
         next if genres.blank?
 
         targets[noid.to_s] = { name: community_name(noid), genres: genres }
@@ -59,6 +59,7 @@ module DepositorContext
 
       community_noid = params[:publish_community_id].to_s
       return nil unless Array(person['affiliated_community_ids']).map(&:to_s).include?(community_noid)
+      return nil if FeaturedContent::STAFF_ONLY.include?(params[:publish_genre])
 
       ShowcaseFinder.call(scope: self, community_noid: community_noid,
                           genre_label: params[:publish_genre])

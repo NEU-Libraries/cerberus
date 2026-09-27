@@ -22,7 +22,7 @@
       -# the depositor's own personal root (WorksController#publish_offered?),
       -# which is what keeps a promoted Work in their own space.
       - if @publish_targets.present?
-        %fieldset.deposit-form__field
+        %fieldset.deposit-form__field.deposit-form__promote
           %label.deposit-form__radio{for: 'publish'}
             = check_box_tag 'publish', '1', false, class: 'deposit-form__radio-input', id: 'publish', data: { action: 'deposit-promotion#toggle' }
             .deposit-form__radio-body
@@ -31,7 +31,7 @@
                 Also promote to a community showcase
               .deposit-form__radio-desc
                 Surfaces this work in your community's featured showcase for a category — a deliberate, public act. It still lives here.
-          .mt-3.d-none{data: { 'deposit-promotion-target' => 'fields' }}
+          .deposit-form__promote-fields.d-none{data: { 'deposit-promotion-target' => 'fields' }}
             - if @publish_targets.size > 1
               %label.deposit-form__field-label{for: 'publish_community_id'} Community
               %select.form-select#publish_community_id{name: 'publish_community_id', data: { 'deposit-promotion-target' => 'community', action: 'deposit-promotion#communityChanged' }}

@@ -18,6 +18,10 @@ class FeaturedContent
     ['Other Publications',     'fa-newspaper']
   ].freeze
 
+  # Provisioned like the rest, but never a depositor's own choice: theses and
+  # dissertations are loaded by staff, so the deposit fork does not offer it.
+  STAFF_ONLY = ['Theses & Dissertations'].freeze
+
   # Just the showcase titles / publish categories (no icons) — what
   # provisioning and showcase discovery match on.
   def self.genre_labels
