@@ -113,7 +113,10 @@
       - else
         .p-3
           %p.text-muted.mb-0
-            No collections yet. Deposit a file to start your workspace.
+            - if @personal_root_id.present?
+              No collections yet. Deposit a file to start your workspace.
+            - else
+              No collections yet. Your account has no workspace to deposit into.
       -# Action footer, pinned to the card bottom (mt-auto), button right-aligned so
       -# the "add" affordance sits below the rows rather than lost in the header strip.
       - if @personal_root_id.present?

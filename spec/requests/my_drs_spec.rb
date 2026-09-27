@@ -44,6 +44,9 @@ RSpec.describe 'My DRS', type: :request do
       expect(response.body).to include('Published to my community')
       # Column-level empty states.
       expect(response.body).to include('Nothing published yet')
+      # No workspace means no Deposit control, so the empty state must not ask for one.
+      expect(response.body).to include('Your account has no workspace to deposit into.')
+      expect(response.body).not_to include('Deposit a file to start your workspace.')
     end
 
     it 'lists owned collections and groups published works by showcase category' do
