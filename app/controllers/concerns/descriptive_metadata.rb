@@ -42,8 +42,12 @@ module DescriptiveMetadata
   def title_missing?(permitted)
     return false if permitted['title'].present?
 
-    flash[:alert] = 'Please provide a title.'
+    flash[:alert] = missing_title_alert
     true
+  end
+
+  def missing_title_alert
+    "Please give your #{resource_key.to_s.humanize(capitalize: false)} a title."
   end
 
   def clean_keywords(raw)
@@ -87,7 +91,7 @@ module DescriptiveMetadata
     descriptive = descriptive_params(keywords: keywords)
     unless descriptive_valid?(descriptive, keywords:         keywords,
                                            curated_subjects: curated_subjects_posted?)
-      flash[:alert] = keywords ? 'Please provide a title and at least one keyword.' : 'Please provide a title.'
+      flash[:alert] = keywords ? 'Please provide a title and at least one keyword.' : missing_title_alert
       return redirect_back_or_to(edit_path(id))
     end
 

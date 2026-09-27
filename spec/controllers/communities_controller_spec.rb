@@ -455,7 +455,7 @@ describe CommunitiesController do
 
       expect(AtlasRb::Community).not_to have_received(:create)
       expect(ShowcaseProvisioner).not_to have_received(:call)
-      expect(flash[:alert]).to eq('Please provide a title.')
+      expect(flash[:alert]).to eq('Please give your community a title.')
       expect(response).to redirect_to(new_community_community_path(parent.id))
     end
   end
@@ -568,7 +568,7 @@ describe CommunitiesController do
       patch :update, params: { id: community.id, community: { title: '', description: 'Whatever' } }
 
       expect(AtlasRb::Resource).not_to have_received(:put_mods)
-      expect(flash[:alert]).to eq('Please provide a title.')
+      expect(flash[:alert]).to eq('Please give your community a title.')
       expect(response).to redirect_to(edit_community_path(community.id))
     end
 

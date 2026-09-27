@@ -120,6 +120,15 @@ describe WorksController do
         expect(response.body).not_to match(%r{>\s*Edit\s*</a>})
       end
 
+      it 'points the depositor at My DRS instead' do
+        AtlasRb::Work.find(work.id)['depositor'] = '000000005'
+        sign_in User.new(email: 'depositor@example.com', nuid: '000000005', groups: [])
+
+        get :show, params: { id: work.id }
+
+        expect(flash.now[:alert]).to eq(WorksController::DEPOSITOR_IN_PROGRESS_NOTICE)
+      end
+
       it '404s a visitor who may not see an unfinished deposit' do
         get :show, params: { id: work.id }
         expect(response).to have_http_status(:not_found)
@@ -424,7 +433,7 @@ describe WorksController do
 
         expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
         expect(AtlasRb::System::Work).not_to have_received(:add_linked_member)
-        expect(flash[:notice]).to eq('File uploaded — please review the metadata.')
+        expect(flash[:notice]).to be_nil
       ensure
         AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end

@@ -19,9 +19,9 @@
           %ul.dropdown-menu{"aria-labelledby" => "dropdownMenuButton1"}
             - if controller_name == "communities"
               %li
-                %a.dropdown-item{:href => new_community_community_path(params[:id])} New Community
-              %li
                 %a.dropdown-item{:href => new_community_collection_path(params[:id])} New Collection
+              %li
+                %a.dropdown-item{:href => new_community_community_path(params[:id])} New Community
             - elsif controller_name == "collections" || local_assigns[:add_to_collection]
               - collection_id = local_assigns[:add_to_collection] || params[:id]
               %li
