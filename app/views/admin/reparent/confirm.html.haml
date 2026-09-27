@@ -48,4 +48,4 @@
       = button_tag class: 'btn btn-primary' do
         %i.fa-solid.fa-check.me-1{'aria-hidden' => 'true'}
         Confirm move
-      = link_to 'Cancel', admin_reparent_choose_parent_path(node_id: @node.resource.id), class: 'btn btn-link'
+      = link_to 'Cancel', admin_reparent_path, class: 'btn btn-link'
