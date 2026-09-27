@@ -30,10 +30,14 @@ module LoadsHelper
     loader.xml? ? load_report.xml_ingests : load_report.iptc_ingests
   end
 
-  # Multipage rows are pages of one Work — show them in page order, not
-  # filename order (nulls-first keeps a structural-failure row on top).
+  # Multipage rows are pages of several Works — group them by item, then page
+  # order. NULLS FIRST is explicit because Postgres sorts nulls last by
+  # default, and a structural-failure row (no item, no page) belongs on top.
   def report_ingest_order(loader)
-    loader.multipage? ? :sequence : :source_filename
+    return [:source_filename] unless loader.multipage?
+
+    table = MultipageIngest.arel_table
+    [table[:item_index].asc.nulls_first, table[:sequence].asc.nulls_first]
   end
 
   # What this loader takes, for the never-run empty state. Kind-specific because

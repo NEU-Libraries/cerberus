@@ -119,6 +119,27 @@ RSpec.describe UnzipJob, type: :job do
     end
   end
 
+  describe 'an archive with no JPEGs' do
+    let(:entries) do
+      [instance_double(Zip::Entry, name: 'readme.txt'), instance_double(Zip::Entry, name: 'scan.pdf')]
+    end
+    let(:zip_file) { instance_double(Zip::File) }
+
+    before do
+      allow(FileUtils).to receive(:mkdir_p)
+      allow(Zip::File).to receive(:open).with(archive_path).and_yield(zip_file)
+      allow(zip_file).to receive(:each) { |&b| entries.each(&b) }
+    end
+
+    # Nothing else would finalize it: no row means no IptcIngestJob.
+    it 'fails the report with one row saying why, instead of hanging at processing' do
+      expect { described_class.new.perform(load_report.id) }.not_to have_enqueued_job(IptcIngestJob)
+
+      expect(load_report.reload).to be_failed
+      expect(load_report.iptc_ingests.sole).to have_attributes(status: 'failed', error_message: described_class::NO_IMAGES)
+    end
+  end
+
   describe 'idempotency — non-pending LoadReport' do
     %i[processing completed failed completed_with_warnings].each do |state|
       context "when LoadReport status is #{state}" do

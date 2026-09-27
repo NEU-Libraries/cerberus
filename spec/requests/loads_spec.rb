@@ -124,6 +124,12 @@ RSpec.describe 'Loads', type: :request do
 
       expect(response.body).to include('2 pending')
     end
+
+    it 'confirms a canceled upload' do
+      get loader_loads_path(marcom_loader, canceled: 1)
+
+      expect(response.body).to include('Upload canceled.')
+    end
   end
 
   # The never-run empty state tells an operator what to bring, so it has to
@@ -154,10 +160,12 @@ RSpec.describe 'Loads', type: :request do
     before do
       sign_in marcom_user
       allow(AtlasRb::Collection).to receive(:children)
-        .with('neu:fix-comm-photos-archive').and_return(['neu:c1', 'neu:c2'])
-      allow(AtlasRb::Resource).to receive(:find_many).with(['neu:c1', 'neu:c2']).and_return(
-        [OpenStruct.new(noid: 'neu:c1', id: 'neu:c1', title: 'Campus Life (Photographs)'),
-         OpenStruct.new(noid: 'neu:c2', id: 'neu:c2', title: 'Athletics (Photographs)')]
+        .with('neu:fix-comm-photos-archive').and_return(['neu:c1', 'neu:c2', 'neu:w1', 'neu:c3'])
+      allow(AtlasRb::Resource).to receive(:find_many).with(['neu:c1', 'neu:c2', 'neu:w1', 'neu:c3']).and_return(
+        [OpenStruct.new(noid: 'neu:c1', id: 'neu:c1', klass: 'Collection', title: 'Campus Life (Photographs)'),
+         OpenStruct.new(noid: 'neu:c2', id: 'neu:c2', klass: 'Collection', title: 'Athletics (Photographs)'),
+         OpenStruct.new(noid: 'neu:w1', id: 'neu:w1', klass: 'Work', title: 'A Stray Work'),
+         OpenStruct.new(noid: 'neu:c3', id: 'neu:c3', klass: 'Collection', title: 'Withdrawn', tombstoned: true)]
       )
     end
 
@@ -166,6 +174,12 @@ RSpec.describe 'Loads', type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('Campus Life (Photographs)')
       expect(response.body).to include('Athletics (Photographs)')
+    end
+
+    # A Work destination would parent every ingested Work under it.
+    it 'offers only live Collections' do
+      get '/loaders/marcom/loads/new'
+      expect(response.body).not_to include('A Stray Work', 'Withdrawn')
     end
   end
 
