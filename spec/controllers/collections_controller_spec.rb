@@ -396,7 +396,7 @@ describe CollectionsController do
         .and_return(instance_double(Faraday::Response, success?: true))
       post :tombstone, params: { id: collection.id }
       expect(AtlasRb::Resource).to have_received(:tombstone).with(collection.id)
-      expect(subject).to redirect_to(root_path)
+      expect(subject).to redirect_to(community_path(community.id))
       expect(flash[:notice]).to eq('Collection deleted.')
     end
 

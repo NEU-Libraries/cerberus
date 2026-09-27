@@ -1049,7 +1049,7 @@ describe WorksController do
         .and_return(instance_double(Faraday::Response, success?: true))
       post :tombstone, params: { id: work.id }
       expect(AtlasRb::Resource).to have_received(:tombstone).with(work.id)
-      expect(subject).to redirect_to(root_path)
+      expect(subject).to redirect_to(collection_path(collection.id))
       expect(flash[:notice]).to eq('Work deleted.')
     end
 

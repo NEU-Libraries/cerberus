@@ -392,6 +392,7 @@ describe CommunitiesController do
       sign_in user
     end
 
+    # A top-level community has no parent, so this also covers the fallback.
     it 'tombstones through the generic endpoint and reports success on a 2xx' do
       allow(AtlasRb::Resource).to receive(:tombstone)
         .and_return(instance_double(Faraday::Response, success?: true))
