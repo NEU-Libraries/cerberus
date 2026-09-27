@@ -53,6 +53,7 @@ module PermissionsForm
     @groups = groups_for_permissions_picker
     @public = raw_permissions&.read&.include?('public')
     @embargo = Embargo.release_date(raw_permissions&.embargo).to_s
+    @embargo_min = [Date.current.tomorrow, Embargo.release_date(@embargo)].compact.min.to_s
     # Snapshot the read audience first: the next line REPLACES @permissions with
     # the form's rows, and pretty_resource_permissions mutates the envelope's
     # read list in place to strip the public sentinel, so there is no way back

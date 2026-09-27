@@ -46,7 +46,8 @@ module Transformable
   # gate; it is what tells ResourcePermissions whether this submit narrows.
   def apply_permissions(id)
     report(ResourcePermissions.new(solr_type: solr_type, id: id, envelope: permission_params,
-                                   current_read: Array(@permissions&.read), actor: current_user).apply!)
+                                   current_read: Array(@permissions&.read), actor: current_user,
+                                   current_embargo: @permissions&.embargo).apply!)
   end
 
   # No current_read: one line after a create, @permissions still holds the
