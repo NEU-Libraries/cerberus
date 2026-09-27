@@ -60,8 +60,8 @@ module DescriptiveMetadata
   # `advanced` folds the Advanced field set into the SAME merge, for a form that
   # carries both — the deposit page. Two sequential saves would mint two OCFL
   # MODS versions and two audit rows for one submit.
-  def save_descriptive!(id, title:, description:, keywords: nil, advanced: nil)
-    merge_mods!(id, origin: 'metadata_form',
+  def save_descriptive!(id, title:, description:, keywords: nil, advanced: nil, origin: 'metadata_form')
+    merge_mods!(id, origin: origin,
                     title: title, abstract: description, keywords: keywords,
                     **(advanced || {}))
   end

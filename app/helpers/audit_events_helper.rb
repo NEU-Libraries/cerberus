@@ -57,7 +57,8 @@ module AuditEventsHelper
   ORIGIN_LABELS = {
     'metadata_form' => 'Metadata form',
     'advanced_form' => 'Advanced form',
-    'xml_editor'    => 'XML editor'
+    'xml_editor'    => 'XML editor',
+    'deposit'       => 'Deposit'
   }.freeze
 
   # Prose for the download tiers. The vocabulary and its narrowing order come

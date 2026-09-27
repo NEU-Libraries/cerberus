@@ -183,6 +183,11 @@ string verbatim beside `source` in the payload:
 | Metadata form | `DescriptiveMetadata#save_descriptive!` | `metadata_form` |
 | Advanced tab | `AdvancedMetadata#save_advanced!` | `advanced_form` |
 | Raw XML editor | `XmlController#update` | `xml_editor` |
+| Deposit, titling a new Work from its filename | `WorkDeposit#finalize_new_work` | `deposit` |
+
+The deposit row is not a form: it is the write that titles a new Work before its
+depositor has seen the metadata page. It takes its own tag so the audit log does
+not show a Metadata form edit that nobody made.
 
 `AuditEventsHelper::ORIGIN_LABELS` maps each tag to the prose the row shows, and
 `origin_label` humanizes a tag the map has not been taught rather than dropping

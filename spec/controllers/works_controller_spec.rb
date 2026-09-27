@@ -223,6 +223,15 @@ describe WorksController do
                                                             complete_work: false)
     end
 
+    # The filename title is written before the depositor sees the metadata
+    # page, so it must not read as a Metadata form edit in the audit log.
+    it 'tags the filename titling as the deposit, not the Metadata form' do
+      post :create, params: { binary:        fixture_file_upload('plain.txt', 'text/plain'),
+                              collection_id: collection.id }
+
+      expect(mods_edit_origins(assigns(:work).id)).to eq(['deposit'])
+    end
+
     it 'does not enqueue any enrichment job for unenriched uploads' do
       expect do
         post :create, params: { binary:        fixture_file_upload('plain.txt', 'text/plain'),
