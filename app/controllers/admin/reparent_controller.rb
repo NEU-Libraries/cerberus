@@ -62,7 +62,8 @@ module Admin
         query:                params[:q],
         types:                ALLOWED_PARENTS.fetch(@node.klass, []),
         exclude_node_uuid:    params[:node_uuid].presence,
-        exclude_subtree_noid: @node.resource.id
+        exclude_subtree_noid: @node.resource.id,
+        exclude_noid:         immediate_parent(@node)&.noid
       )
     end
 

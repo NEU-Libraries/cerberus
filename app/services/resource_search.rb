@@ -9,12 +9,13 @@ class ResourceSearch < ApplicationService
   DEFAULT_PER_PAGE = 25
 
   def initialize(scope:, query: nil, types: %w[Collection Community],
-                 exclude_node_uuid: nil, exclude_subtree_noid: nil, within_fq: nil)
+                 exclude_node_uuid: nil, exclude_subtree_noid: nil, exclude_noid: nil, within_fq: nil)
     @scope = scope
     @query = query
     @types = Array(types)
     @exclude_node_uuid = exclude_node_uuid
     @exclude_subtree_noid = exclude_subtree_noid
+    @exclude_noid = exclude_noid
     @within_fq = within_fq
     super()
   end
@@ -32,6 +33,7 @@ class ResourceSearch < ApplicationService
     fq = ["internal_resource_tesim:(#{@types.join(' OR ')})", '-tombstoned_bsi:true']
     fq << "-id:\"#{@exclude_node_uuid}\"" if @exclude_node_uuid.present?
     fq << "-ancestor_ids_ssim:\"#{@exclude_subtree_noid}\"" if @exclude_subtree_noid.present?
+    fq << "-alternate_ids_tesim:\"#{@exclude_noid}\"" if @exclude_noid.present?
     fq << @within_fq if @within_fq.present?
     fq
   end
