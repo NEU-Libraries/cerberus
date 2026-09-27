@@ -10,7 +10,8 @@ class CaptionTrack
   LANGUAGE = 'en'
   LABEL = 'English'
 
-  REFUSED = 'Captions must be a WebVTT (.vtt) file. Convert an .srt file before you upload it.'
+  REFUSED = 'Caption files must be in WebVTT (.vtt) format. Contact repository staff for help converting ' \
+            'caption files to WebVTT.'
 
   # The Work's caption Blob among its assets, or nil. The `uri` test excludes
   # Delegates — the image tiers — which are not content.

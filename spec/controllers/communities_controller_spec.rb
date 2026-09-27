@@ -188,10 +188,10 @@ describe CommunitiesController do
         expect(response.body).not_to include('Scoped to:')
       end
 
-      it 'facets by content type and shows the "Faceted by" chip' do
+      it 'facets by content type and shows the "Filtered by" chip' do
         get :edit, params: { id: community.id, analytics_facet_type: 'content', analytics_facet_value: 'Image' }
 
-        expect(response.body).to include('Faceted by: Content: Image')
+        expect(response.body).to include('Filtered by: Content: Image')
       end
 
       it 'renders the Composition tab scoped to this community\'s own subtree' do

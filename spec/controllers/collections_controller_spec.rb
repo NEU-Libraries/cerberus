@@ -130,10 +130,10 @@ describe CollectionsController do
         expect(response.body).not_to include('Scoped to:')
       end
 
-      it 'facets by content type and shows the "Faceted by" chip' do
+      it 'facets by content type and shows the "Filtered by" chip' do
         get :edit, params: { id: collection.id, analytics_facet_type: 'content', analytics_facet_value: 'Image' }
 
-        expect(response.body).to include('Faceted by: Content: Image')
+        expect(response.body).to include('Filtered by: Content: Image')
       end
 
       it 'clears a drill-down back to the base collection scope, not fully unscoped' do

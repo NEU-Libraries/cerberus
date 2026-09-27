@@ -139,7 +139,7 @@ RSpec.describe 'Admin::Impressions', type: :request do
       get '/admin/impressions', params: { facet_type: 'content', facet_value: 'Image' }
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('Faceted by: Content: Image')
+      expect(response.body).to include('Filtered by: Content: Image')
       expect(response.body).not_to include('Top collections')
     end
 
@@ -149,7 +149,7 @@ RSpec.describe 'Admin::Impressions', type: :request do
       get '/admin/impressions', params: { facet: 'featured::Datasets' }
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('Faceted by: Featured Content: Datasets')
+      expect(response.body).to include('Filtered by: Featured Content: Datasets')
     end
 
     it 'combines an item scope with a facet, hiding Top collections even for a Collection' do
@@ -161,7 +161,7 @@ RSpec.describe 'Admin::Impressions', type: :request do
                                           item_title: 'Sample Collection', facet_type: 'content', facet_value: 'Image' }
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('Scoped to: Collection: Sample Collection', 'Faceted by: Content: Image')
+      expect(response.body).to include('Scoped to: Collection: Sample Collection', 'Filtered by: Content: Image')
       expect(response.body).not_to include('Top collections')
     end
   end

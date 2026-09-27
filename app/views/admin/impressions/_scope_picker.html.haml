@@ -10,8 +10,8 @@
       - if @report.scope.facet_label
         %span.usage-scope__chip
           %i.fa-solid.fa-filter.me-1{'aria-hidden' => 'true'}
-          Faceted by: #{@report.scope.facet_label}
-          = link_to usage_clear_facet_path, class: 'usage-scope__chip-clear', 'aria-label' => 'Clear facet' do
+          Filtered by: #{@report.scope.facet_label}
+          = link_to usage_clear_facet_path, class: 'usage-scope__chip-clear', 'aria-label' => 'Clear filter' do
             %i.fa-solid.fa-xmark{'aria-hidden' => 'true'}
 
   .usage-scope__controls
