@@ -44,7 +44,8 @@ module StructuralContainers
     # The profile trail, shared with PeopleController so a Work's trail extends
     # its owner's profile trail exactly. `match: :exact`: /communities/:id is a
     # prefix of /communities/:id/people. The find inside #breadcrumbs runs
-    # before any crumb is added, so the rescue rebuilds from nothing.
+    # before any crumb is added, so the rescue rebuilds from nothing. A gated
+    # community refuses the read, and must cost the reader only that crumb.
     def person_trail(community_noid, name, person_noid)
       if community_noid.present?
         breadcrumbs(community_noid, match: :exact)
@@ -53,7 +54,7 @@ module StructuralContainers
         breadcrumb('People', people_path)
       end
       breadcrumb(name, person_path(person_noid))
-    rescue Faraday::Error, JSON::ParserError
+    rescue AtlasRb::ResourceError, Faraday::Error, JSON::ParserError
       breadcrumb('People', people_path)
       breadcrumb(name, person_path(person_noid))
     end

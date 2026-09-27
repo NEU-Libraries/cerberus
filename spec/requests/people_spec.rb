@@ -109,6 +109,19 @@ RSpec.describe 'People', type: :request do
       expect(response.body).to include(people_path)
     end
 
+    it 'keeps a profile readable when its affiliated community refuses the read' do
+      affiliated = person.merge('affiliated_community_ids' => ['gated11'])
+      allow(AtlasRb::Person).to receive(:find).and_return(affiliated)
+      allow(AtlasRb::Resource).to receive(:find).with('gated11')
+                                                .and_raise(AtlasRb::ResourceError.new('GET /resources/gated11 → 403', response: nil))
+
+      get '/people/pp11aa22'
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Stephen Flynn')
+      expect(response.body).not_to include(community_path('gated11'))
+    end
+
     it '404s a NOID with no curated Person record' do
       allow(AtlasRb::Person).to receive(:find).and_return(nil) # atlas_rb returns nil for a 404
 
