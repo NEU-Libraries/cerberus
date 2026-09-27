@@ -3,6 +3,22 @@
 require 'rails_helper'
 
 RSpec.describe SetsHelper do
+  describe '#set_recipe_sentence' do
+    # Plain prose: the recipe summary carries no bold or colour emphasis.
+    it 'reads each part of the recipe as one plain sentence' do
+      sentence = helper.set_recipe_sentence(chips_count: 2, added_count: 1, aside_count: 3)
+
+      expect(sentence).to eq('This set contains everything in 2 collections, plus 1 item you added ' \
+                             'individually, minus 3 items you set aside. It updates automatically as ' \
+                             'those collections change.')
+    end
+
+    it 'describes a set of individual works alone' do
+      expect(helper.set_recipe_sentence(chips_count: 0, added_count: 2, aside_count: 0))
+        .to eq('This set contains 2 items you added individually.')
+    end
+  end
+
   def chip(live, total)
     SetResolver::Chip.new(noid: 'abc1234', uuid: 'u-1', live: live, total: total)
   end

@@ -107,7 +107,7 @@
             - if @can_edit
               = button_to remove_work_set_path(@set['id'], work_id: noid), method: :delete,
                 class: 'btn btn-danger rm-cap', 'aria-label' => 'Remove from the set', title: 'Remove from the set',
-                form: { class: 'rm-cap-form' } do
+                form: { class: 'rm-cap-form', data: { turbo_confirm: "Remove “#{set_noun_label(noid, @recipe_titles)}” from this set?\n\nThe work will not be affected." } } do
                 %i.fa-solid.fa-minus{'aria-hidden' => 'true'}
       - else
         .text-muted.small.fst-italic Nothing added individually.

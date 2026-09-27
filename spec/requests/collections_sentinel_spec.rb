@@ -75,7 +75,7 @@ RSpec.describe 'Collections sentinel', type: :request do
         'small' => ['public'], 'medium' => ['public'],
         'large' => [Permissions::STAFF_EDIT_GROUP], 'service' => [Permissions::STAFF_EDIT_GROUP]
       )
-      expect(response).to redirect_to(edit_collection_path(collection.id, anchor: 'derivative-access'))
+      expect(response).to redirect_to(collection_path(collection.id))
       expect(flash[:notice]).to eq('Derivative access default saved.')
     end
 

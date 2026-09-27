@@ -31,8 +31,7 @@ module SetsHelper
     end
 
     clauses = set_recipe_clauses(chips_count, added_count, aside_count)
-    sentence = safe_join(['This set contains ', tag.strong(set_recipe_head(chips_count, added_count)),
-                          *clauses.flat_map { |clause| [', ', clause] }, '.'])
+    sentence = "This set contains #{[set_recipe_head(chips_count, added_count), *clauses].join(', ')}."
     sentence += ' It updates automatically as those collections change.' if chips_count.positive?
     sentence
   end
@@ -109,11 +108,9 @@ module SetsHelper
     def set_recipe_clauses(chips_count, added_count, aside_count)
       clauses = []
       if chips_count.positive? && added_count.positive?
-        clauses << tag.span("plus #{pluralize(added_count, 'item')} you added individually", class: 'pos')
+        clauses << "plus #{pluralize(added_count, 'item')} you added individually"
       end
-      if aside_count.positive?
-        clauses << tag.span("minus #{pluralize(aside_count, 'item')} you set aside", class: 'neg')
-      end
+      clauses << "minus #{pluralize(aside_count, 'item')} you set aside" if aside_count.positive?
       clauses
     end
 end

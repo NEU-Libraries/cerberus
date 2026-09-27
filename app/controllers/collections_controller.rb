@@ -70,8 +70,7 @@ class CollectionsController < CatalogController
 
     return render_rejected_sentinel(record) unless record.save
 
-    redirect_to edit_collection_path(params[:id], anchor: 'derivative-access'),
-                notice: 'Derivative access default saved.'
+    redirect_to collection_path(params[:id]), notice: 'Derivative access default saved.'
   end
 
   private
