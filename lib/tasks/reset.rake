@@ -508,5 +508,16 @@ namespace :reset do
     Blacklight.default_index.connection.delete_by_query '*:*'
     Blacklight.default_index.connection.commit
     AtlasRb::Reset.clean
+    clear_upload_staging
+  end
+
+  # Atlas mints NOIDs afresh after a clean, so an upload staged under an old
+  # NOID is read as the upload of whichever new Work reuses that NOID. The
+  # contents go, not the directory, which can be a mount point.
+  def clear_upload_staging
+    uploads = Rails.application.config.x.cerberus.uploads_root.to_s
+    return unless uploads.present? && File.directory?(uploads)
+
+    FileUtils.rm_rf(Dir.children(uploads).map { |name| File.join(uploads, name) })
   end
 end
