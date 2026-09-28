@@ -157,6 +157,7 @@ action. The shapes mirror what Atlas emits:
 | `link_member` | `{ collection: noid }` | "to &lt;noid&gt;" |
 | `unlink_member` | `{ collection: noid }` | "from &lt;noid&gt;" |
 | `create`, `tombstone`, `restore` | none | the category pill alone |
+| `release_embargo` | `{ release_date: }` | none; the row's own timestamp is the release day |
 
 `acl_diff_summary` prints a per-grant added and removed summary across the
 audited ACL keys — `read +public · edit −staff +editors` — and appends the

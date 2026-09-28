@@ -22,6 +22,13 @@ RSpec.describe AuditEventsHelper, type: :helper do
       'on_behalf_of_nuid' => nil }
   end
 
+  describe '#audit_event_action' do
+    # "Embargo removed" is a person clearing one early; a lapse must not read alike.
+    it 'labels a lapsed embargo "Embargo released"' do
+      expect(helper.audit_event_action('release_embargo')).to include(label: 'Embargo released')
+    end
+  end
+
   describe '#audit_event_view_cell' do
     it 'links a permissions update to the rights-history page' do
       html = helper.audit_event_view_cell(event(action: 'update', change_type: 'permissions'), 'w-1')

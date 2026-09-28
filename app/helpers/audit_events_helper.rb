@@ -8,13 +8,16 @@ module AuditEventsHelper
   # hasn't been taught about MUST still render: unknown verbs fall through
   # to GENERIC_ACTION rather than raising or rendering an empty chip.
   ACTION_DESCRIPTORS = {
-    'create'        => { tone: 'create',    icon: 'fa-circle-plus',  label: 'Created' },
-    'update'        => { tone: 'update',    icon: 'fa-pen',          label: 'Updated' },
-    'tombstone'     => { tone: 'tombstone', icon: 'fa-trash-can',    label: 'Tombstoned' },
-    'restore'       => { tone: 'restore',   icon: 'fa-rotate-left',  label: 'Restored' },
-    'reparent'      => { tone: 'reparent',  icon: 'fa-folder-tree',  label: 'Reparented' },
-    'link_member'   => { tone: 'link',      icon: 'fa-link',         label: 'Linked' },
-    'unlink_member' => { tone: 'unlink',    icon: 'fa-link-slash',   label: 'Unlinked' }
+    'create'          => { tone: 'create',    icon: 'fa-circle-plus',  label: 'Created' },
+    'update'          => { tone: 'update',    icon: 'fa-pen',          label: 'Updated' },
+    'tombstone'       => { tone: 'tombstone', icon: 'fa-trash-can',    label: 'Tombstoned' },
+    'restore'         => { tone: 'restore',   icon: 'fa-rotate-left',  label: 'Restored' },
+    'reparent'        => { tone: 'reparent',  icon: 'fa-folder-tree',  label: 'Reparented' },
+    'link_member'     => { tone: 'link',      icon: 'fa-link',         label: 'Linked' },
+    'unlink_member'   => { tone: 'unlink',    icon: 'fa-link-slash',   label: 'Unlinked' },
+    # A lapse, recorded by the nightly job. "Embargo removed" is a person
+    # clearing one early, on an `update` row; the two must not read alike.
+    'release_embargo' => { tone: 'update',    icon: 'fa-lock-open',    label: 'Embargo released' }
   }.freeze
 
   GENERIC_ACTION = { tone: 'generic', icon: 'fa-circle-info', label: nil }.freeze
