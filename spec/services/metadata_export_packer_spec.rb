@@ -23,6 +23,42 @@ RSpec.describe MetadataExportPacker do
 
   before do
     allow(AtlasRb::Work).to receive(:mods) { |noid, _fmt| "<mods><id>#{noid}</id></mods>" }
+    allow(AtlasRb::Work).to receive(:assets).and_return([])
+  end
+
+  # The librarians found the File Name column always blank. It carries the name
+  # the content file was deposited under; the loader ignores it on an update row.
+  context 'the File Name column' do
+    def asset(role:, original: nil, stored: nil, uri: nil)
+      AtlasRb::Mash.new('role' => role, 'original_filename' => original, 'filename' => stored, 'uri' => uri)
+    end
+
+    def file_names
+      manifest_rows(pack_to_entries(include_mods: false).fetch('manifest.xlsx')).to_h { |r| [r.identifier, r.file_name] }
+    end
+
+    it 'names the original file as deposited, not a derivative or the stored name' do
+      derivative = asset(role: 'small_image', uri: 'https://iiif/x')
+      original = asset(role: 'original_file', original: 'IMG_0042.jpg', stored: 'master_aaa.jpg')
+      allow(AtlasRb::Work).to receive(:assets).with('aaa111').and_return([derivative, original])
+
+      expect(file_names['aaa111']).to eq('IMG_0042.jpg')
+    end
+
+    it 'falls back to the stored name when none was recorded' do
+      allow(AtlasRb::Work).to receive(:assets).with('aaa111')
+                                              .and_return([asset(role: 'original_file', stored: 'master_aaa.jpg')])
+
+      expect(file_names['aaa111']).to eq('master_aaa.jpg')
+    end
+
+    it 'leaves the cell blank and notes it when the file list cannot be read' do
+      allow(AtlasRb::Work).to receive(:assets).with('aaa111').and_raise(Faraday::ConnectionFailed, 'down')
+
+      entries = pack_to_entries(include_mods: false)
+      expect(manifest_rows(entries.fetch('manifest.xlsx')).find { |r| r.identifier == 'aaa111' }.file_name).to be_nil
+      expect(entries['ERRORS.txt']).to include('aaa111: file list fetch failed')
+    end
   end
 
   # Pack into a buffer and return the entry-name => bytes map.

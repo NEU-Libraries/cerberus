@@ -256,8 +256,11 @@ v1's column name for what is now a NOID, and the loader accepts either. A sixth
 column, Date Ingested, is for the reader: the Work's creation date in Eastern
 time. The loader ignores columns it does not know, so it still re-ingests.
 
-File Name is left blank. For an update-oriented export, where every row has a
-NOID, the loader does not require it. The embargo columns are best-effort from
+File Name carries the name the Work's original file was deposited under, falling
+back to its stored name. Solr holds no filename, so it costs one Atlas read per
+Work; a failed read leaves the cell blank and adds a line to `ERRORS.txt`. Every
+exported row has a NOID, so the loader treats it as an update and ignores the
+cell. The embargo columns are best-effort from
 Solr and otherwise blank, kept so the spreadsheet stays a faithful re-ingest
 template.
 

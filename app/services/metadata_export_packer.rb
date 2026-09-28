@@ -37,7 +37,7 @@ class MetadataExportPacker
         next if noid.blank?
 
         xml_path = write_mods(zip, noid, errors) if @include_mods
-        rows << manifest_row(doc, noid, xml_path)
+        rows << manifest_row(doc, noid, xml_path, file_name(noid, errors))
       end
     end
 
@@ -64,8 +64,22 @@ class MetadataExportPacker
     end
 
     # A row in HEADERS order.
-    def manifest_row(doc, noid, xml_path)
-      [noid, xml_path, nil, embargoed(doc), embargo_date(doc), ingest_date(doc)]
+    def manifest_row(doc, noid, xml_path, file_name)
+      [noid, xml_path, file_name, embargoed(doc), embargo_date(doc), ingest_date(doc)]
+    end
+
+    # The name the Work's content file was deposited under, as a create row
+    # would name it. Solr carries no filename, so this is an Atlas read per Work.
+    # A row with a PID updates on re-load and the loader ignores this cell, so a
+    # failed lookup costs only the reader's information: blank, and noted.
+    def file_name(noid, errors)
+      original = Array(AtlasRb::Work.assets(noid)).find do |asset|
+        asset['uri'].blank? && asset['role'].to_s == 'original_file'
+      end
+      original && (original['original_filename'].presence || original['filename'])
+    rescue Faraday::Error, JSON::ParserError, AtlasRb::ResourceError => e
+      errors << "#{noid}: file list fetch failed — #{e.class}: #{e.message}"
+      nil
     end
 
     # The day the Work was created, in Eastern time like every date in the UI.
