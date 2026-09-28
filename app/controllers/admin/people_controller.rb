@@ -19,10 +19,30 @@ module Admin
 
     breadcrumb_for 'Manage people', :admin_people_path
 
-    before_action :set_person, only: %i[edit update add_affiliation remove_affiliation]
+    before_action :set_person, only: %i[edit update add_affiliation remove_affiliation groups]
 
+    # Asked for explicitly: Atlas's default page is 10, and this index used to
+    # take it unasked, so everyone past the tenth person was missing.
+    PER_PAGE = 50
+
+    # atlas_rb returns the rows without Atlas's page count, so Next is offered
+    # when a page comes back full; at worst it leads to one empty page.
     def index
-      @people = AtlasRb::Person.list(nuid: Current.nuid)
+      @page = [params[:page].to_i, 1].max
+      @people = Array(AtlasRb::Person.list(page: @page, per_page: PER_PAGE, nuid: Current.nuid))
+      @more = @people.size == PER_PAGE
+    end
+
+    # A Person's Grouper groups live on its sign-in accounts, one set each, so
+    # this reads the accounts. One Atlas read, made only when a row is opened.
+    def groups
+      nuid = @person['nuid']
+      @accounts = nuid.present? ? Array(AtlasRb::User.accounts(nuid, nuid: Current.nuid)&.dig('accounts')) : []
+    rescue AtlasRb::ResourceError, Faraday::Error, JSON::ParserError => e
+      Rails.logger.warn("Admin people groups read failed for #{@noid}: #{e.class}: #{e.message}")
+      @failed = true
+    ensure
+      render layout: false unless performed?
     end
 
     def new

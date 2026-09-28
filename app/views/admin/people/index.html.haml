@@ -5,7 +5,8 @@
     %span.admin-registry__title
       %i.fa-solid.fa-users{'aria-hidden' => 'true'}
       People registry
-      - if @people.any?
+      -# A count only when it is the whole registry: a full page may not be.
+      - if @people.any? && @page == 1 && !@more
         %span.admin-registry__count= pluralize(@people.size, 'person')
     .admin-registry__head-actions
       %span.admin-registry__subtitle
@@ -23,18 +24,47 @@
             %th{scope: 'col'} Display name
             %th{scope: 'col'} NUID
             %th{scope: 'col'}
+              %span.visually-hidden Actions
         %tbody
           - @people.each do |person|
+            - groups_id = "person-groups-row-#{person['id']}"
             %tr
               %td.admin-registry-table__name
                 %i.fa-solid.fa-user.text-primary.me-2{'aria-hidden' => 'true'}
                 = person['display_name'].presence || '(no name)'
               %td
                 %span.admin-registry-table__id= person['nuid']
-              %td.text-end
+              %td.text-end.text-nowrap
+                - if person['nuid'].present?
+                  %button.btn.btn-sm.btn-tonal-secondary.me-2{type: 'button',
+                    data: { 'bs-toggle': 'collapse', 'bs-target': "##{groups_id}" },
+                    'aria-expanded' => 'false', 'aria-controls' => groups_id}
+                    %i.fa-solid.fa-users.me-1{'aria-hidden' => 'true'}
+                    Groups
                 = link_to edit_admin_person_path(person['id']), class: 'admin-registry-table__edit' do
                   Manage
                   %i.fa-solid.fa-arrow-right{'aria-hidden' => 'true'}
+            - if person['nuid'].present?
+              -# Lazy: the frame loads when the row opens and first shows, so the
+              -# index costs no per-person Atlas read.
+              %tr.collapse{id: groups_id}
+                %td{colspan: 3}
+                  = turbo_frame_tag "person-groups-#{person['id']}", src: groups_admin_person_path(person['id']), loading: :lazy do
+                    .py-2.px-2.small.text-muted Loading groups…
+    - if @page > 1 || @more
+      %nav.px-3.pb-3{'aria-label' => 'People pages'}
+        %ul.pagination.pagination-sm.mb-0
+          %li.page-item{class: ('disabled' if @page <= 1)}
+            = link_to 'Previous', admin_people_path(page: @page - 1), class: 'page-link'
+          %li.page-item.disabled
+            %span.page-link Page #{@page}
+          %li.page-item{class: ('disabled' unless @more)}
+            = link_to 'Next', admin_people_path(page: @page + 1), class: 'page-link'
+  - elsif @page > 1
+    -# Reached through a full previous page that turned out to be the last.
+    .admin-registry__empty
+      %p.mb-2.text-muted No more people.
+      = link_to 'Previous page', admin_people_path(page: @page - 1), class: 'btn btn-tonal-secondary btn-sm'
   - else
     .admin-registry__empty
       %i.fa-solid.fa-users.admin-registry__empty-icon{'aria-hidden' => 'true'}

@@ -75,6 +75,68 @@ RSpec.describe 'Admin::People', type: :request do
       end
     end
 
+    # Atlas pages this list at 10 by default, and the index took that unasked,
+    # so everyone past the tenth person was missing.
+    describe 'GET /admin/people paging' do
+      it 'asks Atlas for a full page, and for the page requested' do
+        allow(AtlasRb::Person).to receive(:list).and_return([person])
+
+        get admin_people_path(page: 3)
+
+        expect(AtlasRb::Person).to have_received(:list)
+          .with(page: 3, per_page: Admin::PeopleController::PER_PAGE, nuid: anything)
+      end
+
+      it 'offers Next only when the page came back full' do
+        allow(AtlasRb::Person).to receive(:list).and_return(Array.new(Admin::PeopleController::PER_PAGE) { person })
+        get admin_people_path
+        expect(response.body).to include(admin_people_path(page: 2))
+
+        allow(AtlasRb::Person).to receive(:list).and_return([person])
+        get admin_people_path
+        expect(response.body).not_to include(admin_people_path(page: 2))
+      end
+
+      it 'says there are no more people on an empty later page' do
+        allow(AtlasRb::Person).to receive(:list).and_return([])
+        get admin_people_path(page: 2)
+        expect(response.body).to include('No more people.').and include(admin_people_path(page: 1))
+      end
+    end
+
+    # v1 showed each user's Grouper groups in an expanding row. Here the row
+    # holds a lazy frame, so the index costs no per-person Atlas read.
+    describe 'Grouper groups' do
+      it 'gives each person with a NUID a lazy groups frame' do
+        allow(AtlasRb::Person).to receive(:list).and_return([person])
+        get admin_people_path
+        expect(response.body).to include(%(src="#{groups_admin_person_path('cz8wbpk')}"))
+        expect(response.body).to include('loading="lazy"')
+      end
+
+      it 'lists each account with its groups, raw ids beside display names' do
+        allow(AtlasRb::Person).to receive(:find).and_return(AtlasRb::Mash.new(person))
+        allow(AtlasRb::User).to receive(:accounts).with('000000004', nuid: '000000004').and_return(
+          AtlasRb::Mash.new('accounts' => [{ 'email' => 'dcliff@example.edu', 'affiliation' => 'staff',
+                                             'groups' => ['northeastern:drs:repository:staff'] }])
+        )
+
+        get groups_admin_person_path('cz8wbpk')
+
+        expect(response.body).to include('person-groups-cz8wbpk', 'dcliff@example.edu',
+                                         'northeastern:drs:repository:staff')
+      end
+
+      it 'says so when the groups cannot be read' do
+        allow(AtlasRb::Person).to receive(:find).and_return(AtlasRb::Mash.new(person))
+        allow(AtlasRb::User).to receive(:accounts).and_raise(Faraday::ConnectionFailed, 'down')
+
+        get groups_admin_person_path('cz8wbpk')
+
+        expect(response.body).to include('could not be loaded')
+      end
+    end
+
     describe 'GET /admin/people/new' do
       it 'renders the create form' do
         get new_admin_person_path

@@ -266,6 +266,8 @@ Rails.application.routes.draw do
     resources :people, only: %i[index new create edit update], param: :noid do
       member do
         post   'affiliations', to: 'people#add_affiliation', as: :add_affiliation
+        # The index row's expandable Grouper groups, loaded only when opened.
+        get    'groups', to: 'people#groups', as: :groups
         delete 'affiliations/:community_id', to: 'people#remove_affiliation', as: :remove_affiliation
       end
     end
