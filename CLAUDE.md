@@ -52,6 +52,13 @@ When creating a Rails interface whole-cloth or editing one in place, invoke the 
 - **Typography & numerics.** Bootstrap defaults for body. For tabular data (audit rows, NUIDs, file sizes, timestamps), turn on `font-variant-numeric: tabular-nums` and consider a monospace chip — identifiers should *look like* identifiers, not body words.
 - **Iconography.** Font Awesome solid set is already wired in. Match existing usage: `fa-folder-open` (Collection), `fa-users` (Community), `fa-file*` (Work / files). New iconography should be semantic + restrained.
 - **Tabs / nav.** The Edit pages use Bootstrap `nav-tabs` with `data-controller="tab-hash"`. Add new tabs by extending that pattern; don't introduce a different navigation idiom.
+- **Buttons.** Never use `btn-outline-*` or `btn-light`. An outline button is transparent, and `btn-light` is the body's own `$gray-100`, so both take the colour of whatever they sit on and read as text in a box. Give each surface one solid button for its main action (`btn-primary`, or `btn-success` for Save). Every other button takes a variant from `_tonal_buttons.scss`:
+  - `btn-tonal-primary` for row and file actions: Download, export, Regenerate, New upload.
+  - `btn-tonal-secondary` for quiet actions: Copy, Clear, Add to queue, Back links, inactive filter chips.
+  - `btn-tonal-danger` for destructive actions: Discard, Revoke, Remove.
+  - `btn-tonal-success` for status chips such as "In queue".
+
+  A Cancel that abandons a form is always `btn-warning`, with no icon. A Back link only navigates, so it is tonal-secondary rather than orange. Keep the tonal border at full strength: it is what clears WCAG's 3:1 edge contrast against both the grey page and white cards, and a softer border falls to about 2:1.
 - **Don't.** Don't introduce Tailwind, a different CSS framework, or a different design system. Don't add new web fonts. Don't add maximalist effects (gradient meshes, grain overlays, animated heroes) — they fight the institutional register the rest of the site sets.
 
 **Reference example — the Audit History tab.** When in doubt about how to combine "use the skill" with "match this aesthetic", read these:
