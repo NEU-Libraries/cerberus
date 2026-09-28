@@ -151,6 +151,11 @@ RSpec.describe SetResolver do
     it 'is empty when nothing is set aside' do
       expect(resolver(recipe(collections: [collection_a])).aside_documents).to be_empty
     end
+
+    # The Set's collection was removed, but Atlas kept the exclusion row.
+    it 'drops a set-aside work the recipe no longer reaches' do
+      expect(resolver(recipe(works: [work_b], exclusions: [work_sub])).aside_documents).to be_empty
+    end
   end
 
   describe '#each_content_batch' do

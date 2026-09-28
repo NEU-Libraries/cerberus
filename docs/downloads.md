@@ -251,8 +251,10 @@ the MODS payloads stream. The `.xlsx` is itself a zip, so it too is STOREd.
 
 ### The manifest columns
 
-`HEADERS` matches `XmlLoader::Manifest::COLUMN_LABELS`. `PIDs` is v1's column
-name for what is now a NOID, and the loader accepts either.
+The first five `HEADERS` match `XmlLoader::Manifest::COLUMN_LABELS`. `PIDs` is
+v1's column name for what is now a NOID, and the loader accepts either. A sixth
+column, Date Ingested, is for the reader: the Work's creation date in Eastern
+time. The loader ignores columns it does not know, so it still re-ingests.
 
 File Name is left blank. For an update-oriented export, where every row has a
 NOID, the loader does not require it. The embargo columns are best-effort from

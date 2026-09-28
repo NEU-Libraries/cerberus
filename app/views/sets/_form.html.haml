@@ -4,7 +4,11 @@
 = form_with scope: :set, url: url, method: method do |f|
   .p-2
     .mb-3
-      = f.label :title, 'Title', class: 'form-label'
+      -# The asterisk is visual only: the input's required attribute is what
+      -# assistive technology announces.
+      = f.label :title, class: 'form-label' do
+        Title
+        %span.text-danger{'aria-hidden' => 'true'} *
       = f.text_field :title, value: @set['title'], class: 'form-control', required: true, maxlength: 250
     .mb-3
       = f.label :description, 'Description', class: 'form-label'

@@ -7,9 +7,10 @@ require 'caxlsx'
 # rather than Blob bytes, so it does not include {ZipEntryWriter}. Gating lives
 # in the `docs:` enumerator, not here. See docs/downloads.md.
 class MetadataExportPacker
-  # Must match XmlLoader::Manifest::COLUMN_LABELS, or the exported bundle no
-  # longer loads back into the XML loader.
-  HEADERS = ['PIDs', 'MODS XML File Path', 'File Name', 'Embargoed?', 'Embargo Date'].freeze
+  # The first five must match XmlLoader::Manifest::COLUMN_LABELS, or the
+  # exported bundle no longer loads back into the XML loader. Columns after
+  # them are for the reader only; the loader ignores columns it does not know.
+  HEADERS = ['PIDs', 'MODS XML File Path', 'File Name', 'Embargoed?', 'Embargo Date', 'Date Ingested'].freeze
 
   # Every Solr field this packer reads off a doc, so a resolver's `fl` can be
   # taken from here instead of guessed. A field read but not fetched raises
@@ -19,6 +20,7 @@ class MetadataExportPacker
     alternate_ids_ssim
     embargo_release_date_dtsi
     embargoed_bsi
+    created_at_dtsi
   ].freeze
 
   def initialize(docs:, include_mods: true)
@@ -64,7 +66,13 @@ class MetadataExportPacker
 
     # A row in HEADERS order.
     def manifest_row(doc, noid, xml_path)
-      [noid, xml_path, nil, embargoed(doc), embargo_date(doc)]
+      [noid, xml_path, nil, embargoed(doc), embargo_date(doc), ingest_date(doc)]
+    end
+
+    # The day the Work was created, in Eastern time like every date in the UI.
+    def ingest_date(doc)
+      stamp = Array(doc['created_at_dtsi']).first
+      stamp.present? ? Time.zone.parse(stamp.to_s)&.to_date&.iso8601 : nil
     end
 
     # embargoed_bsi is boolean-as-string (Atlas's _bsi convention) — compare

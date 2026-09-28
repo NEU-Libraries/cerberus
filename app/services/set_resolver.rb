@@ -73,10 +73,14 @@ class SetResolver
     chips.find { |chip| edges.intersect?(container_sets[chip.noid]) }&.noid
   end
 
+  # Only exclusions the recipe still reaches. Atlas keeps an exclusion row
+  # when its collection is removed from the Set, so without the positive
+  # clause a work set aside from a departed collection would linger here.
   def aside_documents
-    return [] if excluded_uuids.empty?
+    return [] if excluded_uuids.empty? || positive_clauses.empty?
 
     @aside_documents ||= search(MembershipQuery.identity_fq(excluded_uuids),
+                                MembershipQuery.any_of(positive_clauses),
                                 *DEFAULT_TYPE_FILTERS).documents
   end
 

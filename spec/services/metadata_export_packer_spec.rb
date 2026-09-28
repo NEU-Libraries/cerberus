@@ -93,6 +93,43 @@ RSpec.describe MetadataExportPacker do
     end
   end
 
+  context 'the Date Ingested column' do
+    let(:docs) do
+      Class.new do
+        def initialize(rows) = @rows = rows
+        def each_content_batch(**) = yield @rows
+      end.new([
+                # 02:30 UTC on the 16th is still the 15th in Boston.
+                { 'alternate_ids_ssim' => ['id-aaa111'], 'created_at_dtsi' => '2026-07-16T02:30:00Z' },
+                { 'alternate_ids_ssim' => ['id-bbb222'] }
+              ])
+    end
+    let(:entries) { pack_to_entries(include_mods: false) }
+
+    def sheet_rows(xlsx_bytes)
+      file = Tempfile.new(['manifest', '.xlsx'])
+      file.binmode
+      file.write(xlsx_bytes)
+      file.close
+      sheet = Roo::Excelx.new(file.path).sheet(0)
+      (1..sheet.last_row).map { |i| sheet.row(i) }
+    ensure
+      file&.unlink
+    end
+
+    it 'follows the loader columns and gives each Work its Eastern ingest date' do
+      header, first, second = sheet_rows(entries.fetch('manifest.xlsx'))
+
+      expect(header.last).to eq('Date Ingested')
+      expect(first.last).to eq('2026-07-15')
+      expect(second.last).to be_nil
+    end
+
+    it 'still re-parses through the loader, which ignores the extra column' do
+      expect(manifest_rows(entries.fetch('manifest.xlsx')).map(&:identifier)).to eq(%w[aaa111 bbb222])
+    end
+  end
+
   # Atlas's `_bsi` convention is boolean-as-string (matching TombstoneIndexer/
   # FeaturedIndexer), so `embargoed_bsi` arrives as the STRING 'true'/'false',
   # never a real boolean — the "Embargoed?" column must key off that shape.
