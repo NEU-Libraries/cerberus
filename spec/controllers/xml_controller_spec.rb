@@ -23,7 +23,7 @@ describe XmlController do
   let(:community) { @community }
   let(:collection) { @collection }
   let(:work) { AtlasRb::Work.create(collection.id, '/home/cerberus/web/spec/fixtures/files/work-mods.xml', nuid: '000000004') }
-  let(:raw_xml) { '<mods><titleInfo><title>Test Title</title></titleInfo></mods>' }
+  let(:raw_xml) { '<mods xmlns="http://www.loc.gov/mods/v3"><titleInfo><title>Test Title</title></titleInfo><subject><topic>Test</topic></subject></mods>' }
 
   # The raw-XML editor is now authenticate + edit-gated (audit G1); sign in as
   # the admin who owns the fixtures so every example passes the gate and
@@ -496,7 +496,10 @@ describe XmlController do
   # The document is well-formed, so refusing it would be the editor inventing a
   # rule XML does not have. The advisory is advice; Save stays the curator's call.
   describe 'saving a document that escapes twice' do
-    let(:escaped_xml) { '<mods><abstract>XM&amp;lt;LGBT/&amp;gt;</abstract></mods>' }
+    let(:escaped_xml) do
+      '<mods xmlns="http://www.loc.gov/mods/v3"><titleInfo><title>T</title></titleInfo><abstract>XM&amp;lt;LGBT/&amp;gt;</abstract>' \
+        '<subject><topic>Test</topic></subject></mods>'
+    end
 
     before { allow(XmlValidator).to receive(:call).and_return([]) }
 

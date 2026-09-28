@@ -418,8 +418,9 @@ already created the item's pending page rows, grouped by `item_index`, and
 validated its structure locally. This job owns everything that touches the
 network:
 
-1. Validate the item's MODS with `XmlValidator` — the XSD work, isolated per
-   item. Kataba caches the schema across items.
+1. Validate the item's MODS with `MODSRecordValidator` — the XSD work plus
+   the required title and keyword, isolated per item. Kataba caches the schema
+   across items.
 2. Mint the one Work the item becomes.
 3. Stamp `work_pid` onto the item's page rows.
 4. Enqueue a `MultipageIngestJob` per page.

@@ -23,7 +23,7 @@ RSpec.describe XmlIngestJob, type: :job do
     allow(File).to receive(:exist?).with(mods_path).and_return(true)
     allow(File).to receive(:exist?).with(content_path).and_return(true)
     allow(File).to receive(:read).with(mods_path).and_return('<mods:mods/>')
-    allow(XmlValidator).to receive(:call).and_return([])
+    allow(MODSRecordValidator).to receive(:call).and_return([])
     allow(AtlasRb::Resource).to receive(:put_mods)
     allow(AtlasRb::Work).to receive(:create).and_return(double(id: 'w-new'))
     allow(AtlasRb::Resource).to receive(:set_permissions)
@@ -164,7 +164,7 @@ RSpec.describe XmlIngestJob, type: :job do
     end
 
     it 'fails when the MODS is invalid' do
-      allow(XmlValidator).to receive(:call).and_return(['Document must declare xmlns:mods'])
+      allow(MODSRecordValidator).to receive(:call).and_return(['Document must declare xmlns:mods'])
       described_class.new.perform(ingest.id, update_row)
       expect(ingest.reload).to be_failed
       expect(ingest.error_message).to match(/Invalid MODS.*xmlns:mods/)

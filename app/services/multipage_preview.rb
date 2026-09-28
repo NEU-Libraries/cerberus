@@ -61,7 +61,7 @@ class MultipagePreview < ApplicationService
     def build_result(archive, items)
       first = items.first
       mods = read_mods(archive, first)
-      mods_errors = mods ? XmlValidator.call(xml: mods) : []
+      mods_errors = mods ? MODSRecordValidator.call(xml: mods, keywords: true) : []
 
       Result.new(
         structural_errors: [],

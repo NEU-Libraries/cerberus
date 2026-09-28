@@ -47,6 +47,7 @@ module MultipageArchiveBuilder
       <?xml version="1.0" encoding="UTF-8"?>
       <mods:mods xmlns:mods="http://www.loc.gov/mods/v3">
         <mods:titleInfo><mods:title>#{title}</mods:title></mods:titleInfo>
+        <mods:subject><mods:topic>Test</mods:topic></mods:subject>
       </mods:mods>
     XML
   end
