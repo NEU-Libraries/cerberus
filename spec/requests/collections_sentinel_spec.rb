@@ -181,25 +181,27 @@ RSpec.describe 'Collections sentinel', type: :request do
     end
   end
 
-  describe 'the open option + visibility chip (rendered edit page)' do
+  # The visibility is a sentence in the summary, not a chip: a chip read as a
+  # label for who may open the page.
+  describe 'the open option + visibility sentence (rendered edit page)' do
     before { sign_in editor }
 
-    it 'labels the open option "Inherit from collection" and chips a restricted collection' do
+    it 'labels the open option "Inherit from collection" and says a restricted collection is restricted' do
       set_access!(read: [Permissions::STAFF_EDIT_GROUP])
 
       get edit_collection_path(collection.id)
 
       expect(response.body).to include('Inherit from collection')
-      expect(response.body).to include('fa-lock') # restricted chip
+      expect(response.body).to match(/This\s+collection is restricted\./)
     end
 
-    it 'keeps the same open-option label but chips a public collection' do
+    it 'keeps the same open-option label and says a public collection is public' do
       set_access!(read: ['public'])
 
       get edit_collection_path(collection.id)
 
       expect(response.body).to include('Inherit from collection')
-      expect(response.body).to include('fa-globe') # public chip
+      expect(response.body).to match(/This\s+collection is public\./)
     end
   end
 end

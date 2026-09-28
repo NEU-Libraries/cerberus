@@ -13,9 +13,9 @@ module SentinelsHelper
     'large'   => { label: 'Large',            note: 'Highest-resolution download' },
     'service' => { label: 'Service',          note: 'Full-resolution deep-zoom' },
     'master'  => { label: 'Master / original', note: 'Full-resolution source file' },
-    'audio'   => { label: 'Audio',            note: 'Downloadable audio rendition' },
-    'video'   => { label: 'Video',            note: 'Downloadable video rendition' },
-    'pdf'     => { label: 'PDF',              note: 'Downloadable PDF rendition' }
+    'audio'   => { label: 'Audio',            note: 'Downloadable audio file' },
+    'video'   => { label: 'Video',            note: 'Downloadable video file' },
+    'pdf'     => { label: 'PDF',              note: 'Downloadable PDF file' }
   }.freeze
 
   def derivative_tier_meta(tier)

@@ -10,7 +10,7 @@ RSpec.describe SentinelsHelper do
 
     it 'covers the master and independent-media tiers' do
       expect(helper.derivative_tier_meta('master')).to eq(label: 'Master / original', note: 'Full-resolution source file')
-      expect(helper.derivative_tier_meta('pdf')).to eq(label: 'PDF', note: 'Downloadable PDF rendition')
+      expect(helper.derivative_tier_meta('pdf')).to eq(label: 'PDF', note: 'Downloadable PDF file')
     end
   end
 

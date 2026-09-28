@@ -16,18 +16,18 @@
 .py-2.px-1
   = bootstrap_form_tag(url: sentinel_set_path(set_id), method: :patch) do |f|
     .well.p-3.my-3.rounded-3
-      %h5.mb-1 Derivative access
+      %h5.mb-1 Update derivative access
       %p.small.text-muted.mb-0
-        Restrict which groups may download each rendition of this set's works. A rendition you
-        don't restrict inherits the visibility of the work it belongs to. Image visibility must
-        narrow as resolution grows, so a rendition can't be more open than a smaller one above it.
-        Audio, video, and PDF renditions gate on their own.
+        Use the toggles below to restrict which groups can download each type of file in this
+        set's works. A file you don't restrict keeps the permissions of the work it belongs to. For
+        images, larger resolution images must have the same or greater level of restriction than
+        their smaller resolution versions.
     %section.my-3{ data: { controller: "derivative-policy", "derivative-policy-groups-value": derivative_group_registry(groups) } }
-      %h6.derivative-group-heading Image renditions
+      %h6.derivative-group-heading Images
       %ol.derivative-ladder.list-unstyled.mb-4
         - Sentinel::IMAGE_LADDER.each do |tier|
           = render "shared/derivative_tier", tier: tier, sentinel: sentinel, groups: groups, open_label: "Inherit from the work"
-      %h6.derivative-group-heading Other renditions
+      %h6.derivative-group-heading Audio, video and PDF
       %ul.derivative-independent.list-unstyled.mb-0
         - Sentinel::INDEPENDENT.each do |tier|
           = render "shared/derivative_tier", tier: tier, sentinel: sentinel, groups: groups, open_label: "Inherit from the work"
@@ -39,9 +39,8 @@
     %h5.mb-1 Apply it to this set's works
     %p.small.text-muted.mb-3
       Saving the policy above does not change anything already in this set. Apply it to write the
-      policy onto every work the set holds now. Each rendition is narrowed to what its own work
-      allows, so a private work's renditions are withheld rather than refused. You'll get a message
-      when it finishes.
+      policy onto every work the set holds now. Each file is narrowed to what its own work allows,
+      so a private work's files stay withheld. You'll get a message when it finishes.
     - if sentinel.nil?
       %p.small.text-muted.mb-0
         %i.fa-solid.fa-circle-info.me-1{ 'aria-hidden' => 'true' }
@@ -49,7 +48,7 @@
     - else
       = button_to "Apply to this set's works", apply_sentinel_set_path(set_id),
                   class: "btn btn-primary", form: { class: "d-inline" },
-                  data: { turbo_confirm: "Apply this policy to every work in this set? Renditions that are currently downloadable may stop being downloadable. You can change the policy and apply it again.",
+                  data: { turbo_confirm: "Apply this policy to every work in this set? Files that are currently downloadable may stop being downloadable. You can change the policy and apply it again.",
                           turbo_confirm_title: "Confirm apply",
                           turbo_confirm_button: "Apply",
                           turbo_confirm_variant: "primary" }

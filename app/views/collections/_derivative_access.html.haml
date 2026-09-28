@@ -7,33 +7,26 @@
 -# (widest audience at top, narrowest at the bottom) so the monotonicity rule
 -# reads as structure — audience narrows as you descend; the other renditions
 -# (audio/video/pdf) gate independently, so they get a plain list with no rail.
--# The header carries a visibility chip for the collection itself, so the open
--# option can read uniformly as "Inherit from collection" — the chip is where
--# the author sees whether inheriting means public or restricted.
+-# The summary states the collection's own visibility, so the open option can
+-# read uniformly as "Inherit from collection" — that sentence is where the
+-# author sees whether inheriting means public or restricted. It is prose, not a
+-# chip, because a chip here read as a label for who may open the page.
 .py-2.px-1
   = bootstrap_form_tag(url: sentinel_collection_path(collection_id), method: :patch) do |f|
     .well.p-3.my-3.rounded-3
-      .d-flex.align-items-center.flex-wrap.gap-2.mb-1
-        %h5.mb-0 Update derivative access
-        - if public_collection
-          %span.badge.bg-success-subtle.text-success-emphasis.border.border-success-subtle
-            %i.fa-solid.fa-globe.me-1{ 'aria-hidden' => 'true' }
-            Public
-        - else
-          %span.badge.bg-secondary-subtle.text-secondary-emphasis.border.border-secondary-subtle
-            %i.fa-solid.fa-lock.me-1{ 'aria-hidden' => 'true' }
-            Restricted
+      %h5.mb-1 Update derivative access
       %p.small.text-muted.mb-0
-        Every file uploaded to this collection will inherit the collection’s permissions. Use the
+        Every file uploaded to this collection will inherit the collection’s permissions. This
+        collection is #{public_collection ? 'public' : 'restricted'}. Use the
         toggles below to change the default permissions for files uploaded to this collection.
         Changes made here will not affect existing files. For images, larger resolution images must
         have the same or greater level of restriction than their smaller resolution versions.
     %section.my-3{ data: { controller: "derivative-policy", "derivative-policy-groups-value": derivative_group_registry(groups) } }
-      %h6.derivative-group-heading Image renditions
+      %h6.derivative-group-heading Images
       %ol.derivative-ladder.list-unstyled.mb-4
         - Sentinel::IMAGE_LADDER.each do |tier|
           = render "shared/derivative_tier", tier: tier, sentinel: sentinel, groups: groups, open_label: "Inherit from collection"
-      %h6.derivative-group-heading Other renditions
+      %h6.derivative-group-heading Audio, video and PDF
       %ul.derivative-independent.list-unstyled.mb-0
         - Sentinel::INDEPENDENT.each do |tier|
           = render "shared/derivative_tier", tier: tier, sentinel: sentinel, groups: groups, open_label: "Inherit from collection"
