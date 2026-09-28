@@ -9,6 +9,9 @@ class CaptionTrack
 
   LANGUAGE = 'en'
   LABEL = 'English'
+  # Atlas labels every text Blob "Text Document"; a caption file is named for
+  # what it is instead.
+  DOWNLOAD_LABEL = 'Captions'
 
   REFUSED = 'Caption files must be in WebVTT (.vtt) format. Contact repository staff for help converting ' \
             'caption files to WebVTT.'
@@ -16,7 +19,11 @@ class CaptionTrack
   # The Work's caption Blob among its assets, or nil. The `uri` test excludes
   # Delegates — the image tiers — which are not content.
   def self.for(files)
-    Array(files).find { |file| file[:uri].blank? && file.mime_type.to_s == MIME }
+    Array(files).find { |file| caption?(file) }
+  end
+
+  def self.caption?(file)
+    file[:uri].blank? && file.mime_type.to_s == MIME
   end
 
   # Video only. Its own predicate rather than StreamingOnly.applicable?, which
