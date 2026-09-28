@@ -14,15 +14,54 @@ RSpec.describe ShowcaseFinder do
                      'alternate_ids_tesim' => ["id-#{noid}"], 'featured_bsi' => true)
   end
 
-  before do
+  let(:index) { instance_double(Blacklight::Solr::Repository) }
+  let(:showcases) do
     # Two real genres + one off-vocabulary title that must be ignored.
-    response = instance_double(Blacklight::Solr::Response,
-                               documents: [showcase_doc('Datasets', 'aaa'),
-                                           showcase_doc('Presentations', 'bbb'),
-                                           showcase_doc('Staff Picks', 'ccc')])
-    index = instance_double(Blacklight::Solr::Repository)
-    allow(index).to receive(:search).and_return(response)
+    [showcase_doc('Datasets', 'aaa'), showcase_doc('Presentations', 'bbb'), showcase_doc('Staff Picks', 'ccc')]
+  end
+
+  def response(docs)
+    instance_double(Blacklight::Solr::Response, documents: docs)
+  end
+
+  # One entry per search: the first resolves the community's uuid, the second
+  # finds its showcases.
+  let(:searched_fqs) { [] }
+
+  before do
+    allow(index).to receive(:search) do |params:|
+      searched_fqs << Array(params[:fq])
+      if Array(params[:fq]).any? { |fq| fq.include?('alternate_ids_ssim') }
+        response([SolrDocument.new('id' => 'comm1-uuid')])
+      else
+        response(showcases)
+      end
+    end
     allow(Blacklight).to receive(:default_index).and_return(index)
+  end
+
+  # A descendant community's showcases carry the same genre titles, so matching
+  # the whole subtree let the root resolve a genre to a sub-community's showcase.
+  describe 'the membership filter' do
+    it 'matches only the direct children of the community' do
+      described_class.call(scope: scope, community_noid: 'comm1')
+
+      showcase_fqs = searched_fqs.last
+      expect(showcase_fqs).to include(MembershipQuery.members_fq(['comm1-uuid']))
+      expect(showcase_fqs.join).not_to include(MembershipQuery::ANCESTOR_FIELD)
+    end
+
+    it 'resolves the community by its noid' do
+      described_class.call(scope: scope, community_noid: 'comm1')
+
+      expect(searched_fqs.first).to include('{!terms f=alternate_ids_ssim}id-comm1')
+    end
+
+    it 'returns {} when the community does not resolve' do
+      allow(index).to receive(:search).and_return(response([]))
+
+      expect(described_class.call(scope: scope, community_noid: 'gone')).to eq({})
+    end
   end
 
   describe '.call without a genre_label' do
