@@ -42,8 +42,8 @@ RSpec.describe UnzipJob, type: :job do
 
     it 'streams each entry to disk via Zip::Entry#extract (not read)' do
       described_class.new.perform(load_report.id)
-      expect(entries[0]).to have_received(:extract).with(File.join(extracted_dir, 'one.jpg'))
-      expect(entries[1]).to have_received(:extract).with(File.join(extracted_dir, 'two.jpg'))
+      expect(entries[0]).to have_received(:extract).with('one.jpg', destination_directory: extracted_dir)
+      expect(entries[1]).to have_received(:extract).with('two.jpg', destination_directory: extracted_dir)
     end
 
     it 'never invokes get_input_stream (streaming-API discipline)' do

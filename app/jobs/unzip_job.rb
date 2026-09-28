@@ -83,8 +83,10 @@ class UnzipJob < ApplicationJob
           next unless relevant_jpeg?(entry.name) && seen.add?(basename)
 
           dest = File.join(dest_dir, basename)
-          # Streaming extract. Never entry.get_input_stream.read.
-          entry.extract(dest) unless File.exist?(dest)
+          # Streaming extract. Never entry.get_input_stream.read. rubyzip 3
+          # reads the first argument as relative to destination_directory, so
+          # an absolute path here would land under the working directory.
+          entry.extract(basename, destination_directory: dest_dir) unless File.exist?(dest)
           yield(basename)
         end
       end

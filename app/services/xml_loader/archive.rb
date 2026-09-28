@@ -86,7 +86,8 @@ module XmlLoader
             next unless relevant?(entry.name) && seen.add?(base)
 
             dest = File.join(dest_dir, base)
-            entry.extract(dest) unless File.exist?(dest)
+            # Relative to destination_directory, not absolute: see UnzipJob.
+            entry.extract(base, destination_directory: dest_dir) unless File.exist?(dest)
             yield(base) if block_given?
           end
         end

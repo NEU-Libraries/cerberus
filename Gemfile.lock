@@ -135,6 +135,7 @@ GEM
     concurrent-ruby (1.3.8)
     connection_pool (3.0.2)
     crass (1.0.7)
+    csv (3.3.6)
     dartsass-rails (0.5.1)
       railties (>= 6.0.0)
       sass-embedded (~> 1.63)
@@ -380,9 +381,12 @@ GEM
       actionpack (>= 7.0)
       railties (>= 7.0)
     rexml (3.4.4)
-    roo (2.10.1)
+    roo (3.0.0)
+      base64 (~> 0.2)
+      csv (~> 3)
+      logger (~> 1)
       nokogiri (~> 1)
-      rubyzip (>= 1.3.0, < 3.0.0)
+      rubyzip (>= 3.0.0, < 4.0.0)
     rsolr (2.6.0)
       builder (>= 2.1.2)
       faraday (>= 0.9, < 3, != 2.0.0)
@@ -431,13 +435,15 @@ GEM
     ruby-vips (2.3.0)
       ffi (~> 1.12)
       logger
-    rubyzip (2.4.1)
+    rubyzip (3.7.0)
     sass-embedded (1.105.0-x86_64-linux-gnu)
       google-protobuf (~> 4.31)
     securerandom (0.4.1)
-    selenium-webdriver (4.10.0)
+    selenium-webdriver (4.44.0)
+      base64 (~> 0.2)
+      logger (~> 1.4)
       rexml (~> 3.2, >= 3.2.5)
-      rubyzip (>= 1.2.2, < 3.0)
+      rubyzip (>= 1.2.2, < 4.0)
       websocket (~> 1.0)
     simplecov (1.2.0)
     simplecov_json_formatter (0.1.3)
@@ -477,10 +483,6 @@ GEM
       concurrent-ruby (~> 1)
     warden (1.2.9)
       rack (>= 2.0.9)
-    webdrivers (5.3.1)
-      nokogiri (~> 1.6)
-      rubyzip (>= 1.3.0)
-      selenium-webdriver (~> 4.0, < 4.11)
     websocket (1.2.11)
     websocket-driver (0.8.2)
       base64
@@ -540,6 +542,7 @@ DEPENDENCIES
   rubocop
   rubocop-rails
   ruby-vips
+  rubyzip (>= 3.4)
   sass-embedded
   selenium-webdriver
   simplecov
@@ -550,7 +553,6 @@ DEPENDENCIES
   timescaledb
   turbo-rails
   tzinfo-data
-  webdrivers
   zip_kit
 
 BUNDLED WITH

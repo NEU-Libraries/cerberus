@@ -32,6 +32,26 @@ RSpec.describe XmlLoader::Archive do
       expect(File).to exist(File.join(dest, 'manifest.xlsx'))
       expect(File).to exist(File.join(dest, 'sample_mods_with_handle_4.xml'))
     end
+
+    # An entry named to climb out of the destination is written by its
+    # basename, inside it — nothing reaches the parent or a sibling directory.
+    it 'keeps a path-traversal entry inside the destination' do
+      zip_path = File.join(Dir.mktmpdir('archive-spec-zip'), 'hostile.zip')
+      Zip::OutputStream.open(zip_path) do |out|
+        out.put_next_entry('../escape.txt')
+        out.write('climbed')
+        out.put_next_entry('pages/page1.jpg')
+        out.write('jpeg')
+      end
+
+      described_class.new(zip_path).extract_all(dest)
+
+      expect(File.read(File.join(dest, 'escape.txt'))).to eq('climbed')
+      expect(File).to exist(File.join(dest, 'page1.jpg'))
+      expect(File).not_to exist(File.join(File.dirname(dest), 'escape.txt'))
+    ensure
+      FileUtils.rm_rf(File.dirname(zip_path)) if zip_path
+    end
   end
 
   describe '#basenames' do
