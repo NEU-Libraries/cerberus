@@ -240,20 +240,32 @@ describe Transformable do
     end
   end
 
-  describe '#curated_subjects_posted?' do
+  describe '#curated_subjects_stored?' do
     before { declare(AtlasRb::Work, :work) }
 
-    it 'casts the form flag, so only a real true counts' do
-      host.params = { work: { curated_subjects: 'true' } }
-      expect(host.curated_subjects_posted?).to be true
+    def stored_mods(subjects)
+      allow(host).to receive(:resource_mods).and_return(<<~XML)
+        <mods xmlns="http://www.loc.gov/mods/v3"><titleInfo><title>T</title></titleInfo>#{subjects}</mods>
+      XML
     end
 
-    it 'is false when the flag says false, and when it is absent' do
-      host.params = { work: { curated_subjects: 'false' } }
-      expect(host.curated_subjects_posted?).to be false
+    it 'is true when the stored record carries an authority subject' do
+      stored_mods('<subject authority="lcsh"><topic>Boston</topic></subject>')
+      expect(host.curated_subjects_stored?).to be true
+    end
 
-      host.params = { work: {} }
-      expect(host.curated_subjects_posted?).to be false
+    it 'is false when the stored record has only free-text keywords, or none' do
+      stored_mods('<subject><topic>Boston</topic></subject>')
+      expect(host.curated_subjects_stored?).to be false
+
+      stored_mods('')
+      expect(host.curated_subjects_stored?).to be false
+    end
+
+    it 'ignores a curated_subjects flag posted by the form' do
+      host.params = { work: { curated_subjects: 'true' } }
+      stored_mods('')
+      expect(host.curated_subjects_stored?).to be false
     end
   end
 

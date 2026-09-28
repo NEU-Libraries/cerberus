@@ -177,7 +177,9 @@ RSpec.describe 'Authorization gates', type: :request do
     end
 
     describe 'PUT /xml/update (persists raw MODS to any id — was unauthenticated)' do
-      let(:raw_xml) { '<mods><titleInfo><title>Edited via XML</title></titleInfo></mods>' }
+      let(:raw_xml) do
+        '<mods xmlns="http://www.loc.gov/mods/v3"><titleInfo><title>Edited via XML</title></titleInfo><subject><topic>Test</topic></subject></mods>'
+      end
 
       # These examples draw one distinction: admitted or denied. Save refuses
       # XML that does not validate, and this minimal fixture does not, so the

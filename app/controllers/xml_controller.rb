@@ -21,7 +21,7 @@ class XmlController < ApplicationController
     item = resolved_resource
     @resource = item.resource
 
-    @errors = XmlValidator.call(xml: params[:raw_xml])
+    @errors = record_errors(item)
     @repairable = Metadata::ControlCharacters.any?(params[:raw_xml])
     @double_escapes = Metadata::DoubleEscapes.report(params[:raw_xml])
     @mods = AtlasRb::Resource.preview(create_temp_xml) if @errors.empty?
@@ -44,7 +44,7 @@ class XmlController < ApplicationController
     item = resolved_resource
     klass = item.klass
 
-    @errors = XmlValidator.call(xml: params[:raw_xml])
+    @errors = record_errors(item)
     return render_invalid(item) if @errors.any?
 
     AtlasRb::Resource.put_mods(params[:resource_id], create_temp_xml, origin: 'xml_editor')
@@ -105,6 +105,11 @@ class XmlController < ApplicationController
     # editor carries :id; validate, repair and update carry :resource_id.
     def xml_resource_id
       params[:id] || params[:resource_id]
+    end
+
+    def record_errors(item)
+      keywords = DescriptivePolicy.keywords_required?(AtlasRb::Resource.class_for(item.klass))
+      MODSRecordValidator.call(xml: params[:raw_xml], keywords:)
     end
 
     def resource_mods

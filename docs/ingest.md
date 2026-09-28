@@ -162,10 +162,29 @@ you cannot schema-validate XML that does not parse.
 
 ### The phases this class deliberately omits
 
-**Phase 3, business rules** — required fields, date formats — is not here on
-purpose. Different consumers want different rule sets: the XML editor, IPTC
-ingest, and future bulk loaders. Layering them onto this generic XSD-floor
-validator would widen every consumer's contract at once.
+**Phase 3, business rules**, is not here on purpose. Layering them onto this
+generic XSD-floor validator would widen every consumer's contract at once.
+
+### Required fields
+
+Every record needs a primary title, and every Work needs at least one keyword.
+`MODSRecordValidator` runs `XmlValidator` first, then checks both. The XML
+editor, and the XML and multipage loaders' previews and ingest jobs, all call
+it rather than `XmlValidator`.
+
+- **Title** means a non-blank `<mods:title>` in the primary `<mods:titleInfo>`.
+- **Keyword** means any non-blank `<mods:subject><mods:topic>`. An
+  authority-bearing subject counts, exactly as it does on the metadata form.
+- **Keywords are required where `DescriptivePolicy` says so**, which is Works
+  only. The loaders create Works, so they always require one. The XML editor
+  asks the policy with the resource's own type.
+
+The field checks run only after the floor passes. They need a parsed document,
+and a schema error is the one to fix first.
+
+The IPTC loader builds its MODS itself, so it enforces the same two fields
+before building: `Iptc::MODSBuilder` refuses a blank Headline, and a Keywords
+list (or Subject fallback) with nothing but blank values.
 
 **Phase 4, does the MODS-display partial render?** belongs to the caller, via
 `AtlasRb::Resource.preview`, because rendering lives in Atlas.

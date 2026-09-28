@@ -88,7 +88,7 @@ class XmlPreview < ApplicationService
       return ['The first row has no MODS XML File Path.'] if row.xml_path.blank?
       return ["MODS XML file '#{row.xml_path}' was not found in the archive."] if mods.nil?
 
-      XmlValidator.call(xml: mods)
+      MODSRecordValidator.call(xml: mods, keywords: true)
     end
 
     def structural(errors)

@@ -52,7 +52,7 @@ class XmlIngestJob < ApplicationJob
     mods = read_mods(ingest, xml_path)
     return finalize_failure(ingest, "MODS XML file '#{xml_path}' was not found in the archive.") if mods.nil?
 
-    errors = XmlValidator.call(xml: mods)
+    errors = MODSRecordValidator.call(xml: mods, keywords: true)
     return finalize_failure(ingest, "Invalid MODS: #{errors.join('; ')}") if errors.any?
 
     work_pid = identifier ? update_work(ingest, identifier, mods) : create_work(ingest, mods, file_name)

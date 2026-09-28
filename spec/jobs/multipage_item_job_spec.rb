@@ -26,7 +26,7 @@ RSpec.describe MultipageItemJob, type: :job do
   before do
     allow(File).to receive(:read).and_call_original
     allow(File).to receive(:read).with(mods_path).and_return('<mods:mods/>')
-    allow(XmlValidator).to receive(:call).and_return([])
+    allow(MODSRecordValidator).to receive(:call).and_return([])
     allow(AtlasRb::Work).to receive(:create).and_return(double(id: 'w-1'))
     allow(MultipageIngestJob).to receive(:perform_later)
   end
@@ -38,7 +38,7 @@ RSpec.describe MultipageItemJob, type: :job do
   describe 'happy path' do
     it 'validates the item MODS and mints one Work with the passed idempotency key' do
       run
-      expect(XmlValidator).to have_received(:call).with(xml: '<mods:mods/>')
+      expect(MODSRecordValidator).to have_received(:call).with(xml: '<mods:mods/>', keywords: true)
       expect(AtlasRb::Work).to have_received(:create).with('col-abc', mods_path, idempotency_key: 'idem-w')
     end
 
@@ -56,7 +56,7 @@ RSpec.describe MultipageItemJob, type: :job do
   end
 
   describe 'MODS invalid' do
-    before { allow(XmlValidator).to receive(:call).and_return(['not schema-valid']) }
+    before { allow(MODSRecordValidator).to receive(:call).and_return(['not schema-valid']) }
 
     it 'fails the item rows and mints nothing' do
       run
@@ -88,7 +88,7 @@ RSpec.describe MultipageItemJob, type: :job do
     it 'is a no-op when a prior attempt already failed the item' do
       load_report.multipage_ingests.update_all(status: MultipageIngest.statuses[:failed]) # rubocop:disable Rails/SkipsModelValidations
       run
-      expect(XmlValidator).not_to have_received(:call)
+      expect(MODSRecordValidator).not_to have_received(:call)
       expect(AtlasRb::Work).not_to have_received(:create)
     end
   end

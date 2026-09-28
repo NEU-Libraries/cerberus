@@ -275,12 +275,10 @@ arrived, by looking for `:title`.
 `MODSMerge` expects. `keywords: false` — the container case — passes nil, and
 leaves keyword subjects untouched.
 
-`curated_subjects_posted?` casts a flag the same form posts, and is
-deliberately kept out of `descriptive_params`. That hash is splatted straight
-into `save_descriptive!` as the MODS payload, and this is not a MODS field.
-Trusting a form value is fine here. The guard is a curation prompt, not a
-security boundary — Atlas is that. So the worst a tampered value buys is a
-Work saved with no subjects, which the API permits anyway.
+`curated_subjects_stored?` reads the stored record, never the form. A
+posted flag would let any editor save a Work with no subjects at all, and every
+entry point must refuse that. The read costs one Atlas MODS fetch, and only
+when a Work is saved with no keywords.
 
 ### Validation
 
@@ -290,9 +288,10 @@ a depositor supplies one.
 
 A record whose subjects are all authority-controlled already satisfies that
 requirement, and those subjects are curated. `MODSFields` keeps them out of
-the box on purpose, and `MODSMerge` never writes over them. So the form posts
-`curated_subjects` and it counts. Without that, a curator fixing a title on
-such a record would have to invent a redundant keyword to save.
+the box on purpose, and `MODSMerge` never writes over them. So the server
+counts them. Without that, a curator fixing a title on such a record would have
+to invent a redundant keyword to save. The form mirrors the same exemption
+client-side, from the `keyword-list` controller's `optional` value.
 
 ### Writing
 

@@ -31,7 +31,7 @@ class MultipageItemJob < ApplicationJob
     return if rows.where.not(work_pid: nil).exists? || rows.exists?(status: :failed)
 
     mods_path = File.join(XmlLoader::Paths.extracted_dir(report), mods_basename)
-    mods_errors = XmlValidator.call(xml: File.read(mods_path))
+    mods_errors = MODSRecordValidator.call(xml: File.read(mods_path), keywords: true)
     return self.class.fail_item_rows(report, item_index, "Invalid MODS: #{mods_errors.join('; ')}") if mods_errors.any?
 
     mint_and_fan_out(report, item_index, mods_path, work_idempotency_key)
