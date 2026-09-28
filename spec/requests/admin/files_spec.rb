@@ -227,6 +227,25 @@ RSpec.describe 'Admin::Files', type: :request do
         expect(response).to redirect_to(admin_files_manage_path(work_id: 'w1'))
       end
 
+      # Atlas keeps the old filename and MIME type across versions, so a new
+      # version of another type would download under the wrong name and not open.
+      it 'refuses a replacement of a different file type, and queues nothing' do
+        allow(AtlasRb::Blob).to receive(:find).with('b1').and_return(AtlasRb::Mash.new('mime_type' => 'application/pdf'))
+
+        expect do
+          post '/admin/files/replace', params: { work_id: 'w1', blob_noid: 'b1', binary: upload }
+        end.not_to have_enqueued_job(FileReplacementJob)
+        expect(flash[:alert]).to include('same type of file', 'application/pdf', 'image/png')
+      end
+
+      it 'accepts a replacement of the same type' do
+        allow(AtlasRb::Blob).to receive(:find).with('b1').and_return(AtlasRb::Mash.new('mime_type' => 'image/png'))
+
+        expect do
+          post '/admin/files/replace', params: { work_id: 'w1', blob_noid: 'b1', binary: upload }
+        end.to have_enqueued_job(FileReplacementJob)
+      end
+
       it 'rejects a submission with no file' do
         expect do
           post '/admin/files/replace', params: { work_id: 'w1', blob_noid: 'b1' }

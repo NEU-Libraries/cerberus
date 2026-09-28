@@ -35,6 +35,7 @@ module Admin
     def replace
       file = params[:binary]
       return back_to_manage(alert: 'Choose a file to upload.') if file.blank?
+      return back_to_manage(alert: type_mismatch_message(file)) if type_mismatch_message(file)
 
       staged = stage_upload(file, params[:work_id])
       FileReplacementJob.perform_later(params[:blob_noid], params[:work_id], staged,
@@ -50,6 +51,22 @@ module Admin
     end
 
     private
+
+      # Atlas keeps a Blob's filename and MIME type across versions, so a new
+      # version of another type downloads under the old name and type and will
+      # not open. Until Atlas can change them, refuse the swap. Sniffed as ingest
+      # does, so .jpg against .jpeg is not a mismatch; unknown either side allows.
+      def type_mismatch_message(file)
+        return @type_mismatch_message if defined?(@type_mismatch_message)
+
+        current = AtlasRb::Blob.find(params[:blob_noid])&.dig('mime_type').to_s
+        incoming = Marcel::MimeType.for(Pathname.new(file.tempfile.path), name: file.original_filename).to_s
+        @type_mismatch_message =
+          if current.present? && incoming.present? && current != incoming
+            "The replacement must be the same type of file as the current one (#{current}); " \
+              "this one is #{incoming}. To change a file's type, add it to the work as a new file instead."
+          end
+      end
 
       # One batched call, not a versions-per-noid fan-out. find_many_versions
       # is unordered and drops an id it cannot resolve, so index by blob_id.
