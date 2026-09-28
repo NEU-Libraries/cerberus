@@ -146,15 +146,15 @@ RSpec.describe 'Admin::Files', type: :request do
         expect(response.body).to include('A Photograph', 'report.pdf', 'b1', 'Replace file', 'v4', 'v1')
       end
 
-      it 'headlines the revision ordinal and demotes the raw OCFL version_id to a secondary label' do
+      # Two numberings side by side read as a mistake, so the gappy OCFL label
+      # is kept only as a tooltip on the revision ordinal.
+      it 'shows only the revision ordinal, with the raw OCFL version_id as a tooltip' do
         get '/admin/files/manage', params: { work_id: 'w1' }
         html = response.parsed_body
-        headlines  = html.css('.admin-registry-table__id').map { |n| n.text.strip }
-        secondary  = html.css('.admin-registry-table__vid').map { |n| n.text.strip }
-        # Revision ordinals lead as the primary chip...
-        expect(headlines).to include('2', '1')
-        # ...while the skipping OCFL labels ride below as secondary/debug.
-        expect(secondary).to eq(%w[v4 v1])
+        chips = html.css('.admin-registry-table__id[title^="OCFL"]')
+
+        expect(chips.map { |n| n.text.strip }).to eq(%w[2 1])
+        expect(chips.pluck('title')).to eq(['OCFL v4', 'OCFL v1'])
       end
 
       it 'reads every Blob\'s history in one call, whatever the file count' do
@@ -243,6 +243,14 @@ RSpec.describe 'Admin::Files', type: :request do
           post '/admin/files/rollback', params: { work_id: 'w1', blob_noid: 'b1', version_id: 'v1' }
         end.to have_enqueued_job(FileDerivativeRefreshJob).with('w1', 'b1')
         expect(response).to redirect_to(admin_files_manage_path(work_id: 'w1'))
+      end
+
+      it 'names the revision in the notice, not the raw OCFL label' do
+        allow(AtlasRb::Blob).to receive(:rollback)
+
+        post '/admin/files/rollback', params: { work_id: 'w1', blob_noid: 'b1', version_id: 'v4', revision: '2' }
+
+        expect(flash[:notice]).to eq('File has been reverted to version 2.')
       end
     end
   end

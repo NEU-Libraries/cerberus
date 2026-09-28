@@ -70,14 +70,13 @@
             - versions.each_with_index do |version, i|
               %tr
                 %td
-                  -# The contiguous revision ordinal is the headline; the raw OCFL
-                  -# version_id can skip (v1 → v4) when preservation-envelope bumps
-                  -# consume OCFL versions, so it rides below as a secondary/debug label.
-                  %span.admin-registry-table__id= version['revision'] || version['version_id']
+                  -# The contiguous revision ordinal is the only number shown. The raw
+                  -# OCFL version_id can skip (v1 → v4) when preservation-envelope
+                  -# bumps consume OCFL versions, which reads as a second, gappy
+                  -# numbering, so it survives only as a tooltip for debugging.
+                  %span.admin-registry-table__id{title: ("OCFL #{version['version_id']}" if version['revision'].present?)}= version['revision'] || version['version_id']
                   - if i.zero?
                     %span.badge.rounded-pill.text-bg-light.ms-1 current
-                  - if version['revision'].present? && version['version_id'].present?
-                    .admin-registry-table__vid{title: 'Raw OCFL version label — secondary/debug'}= version['version_id']
                 %td.text-muted.small{style: 'font-variant-numeric: tabular-nums'}= file_version_when(version['created'])
                 %td= file_version_who(version['actor_nuid'])
                 %td= file_version_digest(version['digest'])
@@ -91,6 +90,6 @@
                     -# rather than removing one — but it swaps the file every viewer
                     -# downloads and re-derives the renditions, so it should not
                     -# happen on a mis-click in a table of near-identical rows.
-                    = button_to admin_files_rollback_path, method: :post, params: { work_id: params[:work_id], blob_noid: asset.noid, version_id: version['version_id'] }, class: 'admin-registry-table__edit admin-registry-table__edit--restore ms-1', form_class: 'd-inline', form: { data: { turbo_confirm: "Revert to version #{version['revision']}? It becomes the current file and the download renditions are rebuilt from it. Nothing is deleted — the version you are leaving stays in the history." } } do
+                    = button_to admin_files_rollback_path, method: :post, params: { work_id: params[:work_id], blob_noid: asset.noid, version_id: version['version_id'], revision: version['revision'] }, class: 'admin-registry-table__edit admin-registry-table__edit--restore ms-1', form_class: 'd-inline', form: { data: { turbo_confirm: "Revert to version #{version['revision']}? It becomes the current file and the download renditions are rebuilt from it. Nothing is deleted — the version you are leaving stays in the history." } } do
                       %i.fa-solid.fa-rotate-left{'aria-hidden' => 'true'}
                       Revert
