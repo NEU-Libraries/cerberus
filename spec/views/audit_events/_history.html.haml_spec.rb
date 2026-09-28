@@ -56,6 +56,13 @@ describe 'audit_events/_history.html.haml' do
 
     before { render_with(events: events) }
 
+    # Hidden until audit_filter_controller builds its options from the rows,
+    # so the page reads the same without JavaScript.
+    it 'renders the action filter hidden, for the Stimulus controller to reveal' do
+      expect(rendered).to have_css('.audit-history[data-controller="audit-filter"]')
+      expect(rendered).to have_css('.audit-history__filter[hidden] select[data-action="audit-filter#filter"]', visible: :all)
+    end
+
     it 'renders the section header with title and event count' do
       expect(rendered).to have_css('.audit-history__title', text: 'Audit log')
       expect(rendered).to have_css('.audit-history__count', text: '5 events')

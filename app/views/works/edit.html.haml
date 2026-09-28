@@ -43,6 +43,14 @@
             %h5.pb-2 Embargo Release Date
             %input.form-select.form-select-sm#embargo{name: "work[permissions][embargo]", type: "date", value: @embargo, min: @embargo_min}/
             %label.small.py-3{for: "embargo"} If an embargo is required, select the release date for the file. Release dates are in Eastern time.
+            -# Belongs to the empty remove-embargo form below, not this one: as
+            -# this form's first submit button it would be what Enter presses.
+            -# It sends only a blank date, which clears the embargo and nothing else.
+            - if @embargo.present?
+              %button.btn.btn-outline-secondary.btn-sm.d-block{type: 'submit', form: 'remove-embargo', name: 'work[permissions][embargo]', value: '',
+                data: { turbo_confirm: 'Remove the embargo? The file becomes available to everyone who can see this work.' }}
+                %i.fa-solid.fa-lock-open.me-1{'aria-hidden' => 'true'}
+                Remove embargo
         = render 'shared/group_permissions', resource: 'work'
         - if @streaming_only_offered
           = render 'works/streaming_only', enabled: @streaming_only
@@ -50,6 +58,8 @@
           .well.p-3.my-3.rounded-3
             = f.button :submit, class: "btn btn-success"
             = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"
+      - if @embargo.present?
+        = form_tag(work_path(params[:id]), method: :patch, id: 'remove-embargo') {}
   #move.tab-pane{"aria-labelledby" => "move-tab", role: "tabpanel"}
     .py-2.px-1
       %p.text-muted.small.mb-3

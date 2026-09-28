@@ -981,6 +981,34 @@ describe WorksController do
     end
   end
 
+  describe 'update (Remove embargo)' do
+    render_views
+
+    let(:user) { User.new(email: 'test@example.com', nuid: '000000004', groups: ['editors']) }
+    let(:release) { Date.current.next_year.to_s }
+
+    before do
+      AtlasRb::Resource.set_permissions(work.id, { 'edit' => ['editors'], 'embargo' => release }, nuid: '000000004')
+      sign_in user
+    end
+
+    # Its own form, so Enter in the Permissions form can never press it.
+    it 'offers the control on an embargoed work, outside the Permissions form' do
+      get :edit, params: { id: work.id }
+
+      expect(response.body).to include('form="remove-embargo"', 'id="remove-embargo"')
+    end
+
+    it 'clears the embargo and leaves the grants alone' do
+      patch :update, params: { id: work.id, work: { permissions: { embargo: '' } } }
+
+      permissions = AtlasRb::Resource.permissions(work.id, nuid: '000000004')
+      expect(permissions.embargo).to be_blank
+      expect(Array(permissions.edit)).to include('editors')
+      expect(subject).to redirect_to action: :show, id: work.id
+    end
+  end
+
   describe 'update (Advanced tab)' do
     let(:user) { User.new(email: 'test@example.com', nuid: '000000004', groups: ['editors']) }
 
