@@ -32,8 +32,10 @@
           = f.label :archive, class: 'admin-registry-form__label' do
             %i.fa-solid.fa-file-zipper{'aria-hidden' => 'true'}
             Archive file
-          = f.file_field :archive, class: 'form-control', accept: '.tar,.zip', required: true,
-                          data: { 'archive-upload-target' => 'file' }
+          = f.file_field :archive, class: 'form-control archive-upload__drop', accept: '.tar,.zip', required: true,
+                          data: { 'archive-upload-target' => 'file',
+                                  action: 'dragenter->archive-upload#dragOver dragleave->archive-upload#dragEnd ' \
+                                          'drop->archive-upload#dragEnd' }
           - if @loader.multipage?
             .admin-registry-form__hint
               Accepted formats:

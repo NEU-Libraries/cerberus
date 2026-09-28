@@ -44,6 +44,17 @@
             %span.load-report-overview__value
               %code.admin-registry-table__id= load_report.parent_collection_id
 
+      - if preview.unlisted_files.any?
+        .alert.alert-warning.d-flex.gap-2.mt-3.mb-0.small
+          %i.fa-solid.fa-triangle-exclamation.mt-1{'aria-hidden' => 'true'}
+          %div
+            %p.fw-semibold.mb-1
+              #{pluralize(preview.unlisted_files.size, 'file')} in the archive #{preview.unlisted_files.size == 1 ? 'is' : 'are'} not in the manifest and will not be ingested.
+            %ul.mb-0
+              - preview.unlisted_files.each do |name|
+                %li
+                  %code= name
+
     - if preview.ok? && preview.first_item
       - first = preview.first_item
       %p.text-muted.small.mt-4.mb-2

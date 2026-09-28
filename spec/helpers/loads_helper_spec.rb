@@ -4,6 +4,18 @@ require 'rails_helper'
 
 RSpec.describe LoadsHelper do
   describe '#report_ingest_order' do
+    it 'puts IPTC failures, then warnings, ahead of the rest' do
+      report = LoadReport.create!(source_filename: 'jpgs.zip')
+      %w[c.jpg:completed a.jpg:completed_with_warnings b.jpg:failed d.jpg:completed_with_warnings].each do |pair|
+        name, status = pair.split(':')
+        report.iptc_ingests.create!(source_filename: name, status: status, idempotency_key: SecureRandom.uuid)
+      end
+
+      ordered = report.iptc_ingests.order(*helper.report_ingest_order(Loader.new(kind: :iptc)))
+
+      expect(ordered.map(&:source_filename)).to eq(%w[b.jpg a.jpg d.jpg c.jpg])
+    end
+
     let(:load_report) { LoadReport.create!(source_filename: 'pages.zip') }
 
     def page(item, sequence)

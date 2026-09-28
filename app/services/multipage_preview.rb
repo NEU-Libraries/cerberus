@@ -19,7 +19,7 @@ require 'tempfile'
 # time, surfaced in the load report.
 class MultipagePreview < ApplicationService
   Result = Struct.new(:structural_errors, :item_count, :page_count,
-                      :first_item, :mods_xml, :mods_errors, :decorated_html,
+                      :first_item, :mods_xml, :mods_errors, :decorated_html, :unlisted_files,
                       keyword_init: true) do
     # Confirm is blocked only when the archive itself is unusable.
     def blocked?
@@ -72,8 +72,19 @@ class MultipagePreview < ApplicationService
         mods_errors:       mods_errors,
         # Only render the decorated view when the sample MODS validated —
         # Atlas's renderer expects well-formed, schema-valid input.
-        decorated_html:    mods_errors.empty? && mods ? decorated(mods) : nil
+        decorated_html:    mods_errors.empty? && mods ? decorated(mods) : nil,
+        unlisted_files:    unlisted_files(archive, items)
       )
+    end
+
+    # Files in the archive that no manifest row names. Ingest ignores them
+    # silently, so the preview is the one place a librarian can learn one was
+    # left out of the sheet by mistake. Advisory: it never blocks confirm.
+    def unlisted_files(archive, items)
+      listed = items.flat_map(&:rows).flat_map do |row|
+        [row.file_name, row.xml_path.presence && File.basename(row.xml_path)]
+      end
+      (archive.basenames.to_a - ['manifest.xlsx'] - listed.compact).sort
     end
 
     def parse_rows(manifest_bytes)
@@ -100,7 +111,7 @@ class MultipagePreview < ApplicationService
 
     def structural(errors)
       Result.new(structural_errors: errors, item_count: 0, page_count: 0,
-                 first_item: nil, mods_xml: nil, mods_errors: [], decorated_html: nil)
+                 first_item: nil, mods_xml: nil, mods_errors: [], decorated_html: nil, unlisted_files: [])
     end
 
     # Same best-effort decorated render as XmlPreview: if Atlas is unreachable
