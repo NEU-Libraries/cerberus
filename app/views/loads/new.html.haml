@@ -34,8 +34,7 @@
             Archive file
           = f.file_field :archive, class: 'form-control archive-upload__drop', accept: '.tar,.zip', required: true,
                           data: { 'archive-upload-target' => 'file',
-                                  action: 'dragenter->archive-upload#dragOver dragleave->archive-upload#dragEnd ' \
-                                          'drop->archive-upload#dragEnd' }
+                                  action: 'dragenter->archive-upload#dragOver dragleave->archive-upload#dragEnd drop->archive-upload#dragEnd' }
           - if @loader.multipage?
             .admin-registry-form__hint
               Accepted formats:
