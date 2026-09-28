@@ -148,6 +148,7 @@ RSpec.describe 'Sets', type: :request do
       follow_redirect!
       expect(response.body).to include('drs-toast')
         .and match(%r{Hid\s+<b>Work One</b>\s+from this set})
+        .and match(%r{</b>, which is still in your set})
         .and include('still in your set')
         .and include('1</span><span class="of"> of 2')
 
