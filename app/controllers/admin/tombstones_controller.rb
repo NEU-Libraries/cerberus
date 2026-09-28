@@ -36,7 +36,7 @@ module Admin
                          'and tombstoned members count. Permanently delete each one first.'
 
     def index
-      @response = TombstonedItems.call(scope: self, page: params[:page])
+      @response = TombstonedItems.call(scope: self, page: params[:page], query: params[:q])
     end
 
     def restore

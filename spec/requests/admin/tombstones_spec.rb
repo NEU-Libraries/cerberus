@@ -106,6 +106,24 @@ RSpec.describe 'Admin::Tombstones', type: :request do
         expect(response.body).to include('8000 items')
       end
 
+      it 'passes the search to the registry and offers the search form' do
+        allow(TombstonedItems).to receive(:call).and_return(fake_results(tombstoned_doc(noid: 'abc', title: 'Withdrawn Thesis')))
+
+        get '/admin/tombstones', params: { q: 'thesis' }
+
+        expect(TombstonedItems).to have_received(:call).with(hash_including(query: 'thesis'))
+        expect(response.body).to include('Search tombstoned items by title or PID')
+      end
+
+      it 'says nothing matched a search, rather than that nothing is tombstoned' do
+        allow(TombstonedItems).to receive(:call).and_return(fake_results)
+
+        get '/admin/tombstones', params: { q: 'nomatch' }
+
+        expect(response.body).to include('No tombstoned items match').and include('Show all tombstoned items')
+        expect(response.body).not_to include('Nothing is tombstoned')
+      end
+
       it 'shows the empty state when nothing is tombstoned' do
         allow(TombstonedItems).to receive(:call).and_return(fake_results)
         get '/admin/tombstones'
