@@ -22,8 +22,6 @@ a.featured-gateway {
   border-radius: var(--bs-border-radius);
   color: var(--bs-body-color);
   text-decoration: none;
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  @include hover-cool-off;
 
   i {
     font-size: 1.6rem;

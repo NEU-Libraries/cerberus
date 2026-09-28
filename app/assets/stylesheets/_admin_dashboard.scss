@@ -80,8 +80,6 @@
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
   text-decoration: none;
   color: inherit;
-  transition: border-color 0.12s ease, box-shadow 0.12s ease;
-  @include hover-cool-off;
 
   // No lift on hover: moving the card moves its edge out from under a pointer
   // resting there, the hover drops, the card falls back, and it flickers.

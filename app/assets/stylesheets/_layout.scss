@@ -2,34 +2,12 @@
 // global structural styles that aren't tied to a specific Blacklight or
 // audit surface.
 
-// Hover switches instantly and lets go after a cool-off.
-//
-// Instant, not faded: a hover that swaps dark text on a pale fill for white on
-// a dark one passes, mid-fade, through text and fill of nearly the same colour
-// (about 1.3:1), so the label blinks out on every hover. The 1ms transition is
-// what makes the change instant while still honouring the delay below; a delay
-// acts only on a transition, and Bootstrap turns button transitions off for
-// reduced motion.
-//
-// The cool-off: a pointer resting on a control's edge drifts in and out of it.
-// Leaving hover waits $hover-cool-off, so a drift back in cancels the change;
-// entering hover and gaining keyboard focus stay instant. Include this AFTER
-// any `transition:` shorthand in the same rule, which would reset both.
-$hover-cool-off: 150ms;
-
-@mixin hover-cool-off {
-  transition-property: color, background-color, border-color, box-shadow;
-  transition-duration: 1ms;
-  transition-delay: $hover-cool-off;
-
-  &:hover,
-  &:focus-visible {
-    transition-delay: 0s;
-  }
-}
-
+// Hover switches instantly, never fades. A hover that swaps dark text on a pale
+// fill for white on a dark one passes, mid-fade, through text and fill of
+// nearly the same colour (about 1.3:1), so the label blinks out on every
+// hover. Bootstrap fades every button's colour change; this turns that off.
 .btn {
-  @include hover-cool-off;
+  transition: none;
 }
 
 body {
