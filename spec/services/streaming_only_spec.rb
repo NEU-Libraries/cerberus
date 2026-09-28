@@ -6,6 +6,19 @@ require 'rails_helper'
 # The browser-facing consequences (no download row, no link under the player,
 # nothing in a zip) are specced where they are enforced.
 RSpec.describe StreamingOnly do
+  describe '.policy_from' do
+    it 'reads the tier map off a Work payload, each audience as an array' do
+      work = AtlasRb::Mash.new('derivative_permissions' => { 'video' => 'northeastern:drs:repository:admin' })
+
+      expect(described_class.policy_from(work)).to eq('video' => ['northeastern:drs:repository:admin'])
+    end
+
+    it 'reads a Work with no map, or no Work, as no policy' do
+      expect(described_class.policy_from(AtlasRb::Mash.new)).to eq({})
+      expect(described_class.policy_from(nil)).to eq({})
+    end
+  end
+
   let(:admin_group) { Permissions::ADMIN_GROUP }
 
   describe '.audience_for' do

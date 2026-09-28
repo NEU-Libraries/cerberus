@@ -30,7 +30,12 @@
   -# link unconditionally and did exactly that.) Decided by the caller rather
   -# than here, so this partial stays presentational.
   - if downloadable
-    %p.av-player__fallback.text-muted.small.mb-0
+    %p.av-player__fallback.small.mb-0
+      %i.fa-solid.fa-circle-info.me-1{'aria-hidden' => 'true'}
       Trouble playing this file?
-      = link_to 'Download it', download_path(file.noid)
+      = link_to 'Download it', download_path(file.noid), class: 'fw-semibold'
       instead.
+  - elsif local_assigns[:streaming_only]
+    %p.av-player__fallback.small.mb-0
+      %i.fa-solid.fa-circle-info.me-1{'aria-hidden' => 'true'}
+      This content can only be viewed in the browser and may not be downloaded for offline viewing or sharing.
