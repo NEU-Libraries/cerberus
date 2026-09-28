@@ -16,7 +16,7 @@ RSpec.describe ImpressionsReport do
   end
 
   it 'totals each action across all noids in the range' do
-    expect(report.totals).to eq('view' => 109, 'download' => 4)
+    expect(report.totals).to eq('view' => 109, 'download' => 4, 'stream' => 0)
   end
 
   it 'returns a day => count series for an action' do
@@ -34,7 +34,7 @@ RSpec.describe ImpressionsReport do
 
     works = report.top_works
     expect(works.pluck(:noid)).to eq(['w1'])
-    expect(works.first[:counts]).to eq('view' => 10, 'download' => 4)
+    expect(works.first[:counts]).to eq('view' => 10, 'download' => 4, 'stream' => 0)
     expect(works.first[:total]).to eq(14)
   end
 
@@ -81,7 +81,7 @@ RSpec.describe ImpressionsReport do
     subject(:scoped_report) { described_class.new(range:, segment: :human, scope:) }
 
     it 'restricts totals/series to the scope noid set (c1 excluded)' do
-      expect(scoped_report.totals).to eq('view' => 10, 'download' => 4)
+      expect(scoped_report.totals).to eq('view' => 10, 'download' => 4, 'stream' => 0)
     end
 
     it 'restricts top_works ranking to the scope' do

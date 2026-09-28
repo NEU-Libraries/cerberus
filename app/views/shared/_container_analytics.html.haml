@@ -66,8 +66,8 @@
       -# Stacking views onto downloads also makes the bar height read as total
       -# activity for the day.
       %section.usage-chart-block
-        %h2.usage-chart-block__title Views & downloads in the last 90 days
-        .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-stacked-value' => 'true', 'usage-chart-dataset-value' => usage_timeseries(@analytics).to_json, 'usage-chart-colors-value' => %w[#2666a6 #18bc9c].to_json}}
+        %h2.usage-chart-block__title Views, downloads & streams in the last 90 days
+        .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-stacked-value' => 'true', 'usage-chart-dataset-value' => usage_timeseries(@analytics).to_json, 'usage-chart-colors-value' => usage_series_colors.to_json}}
 
       %section.usage-chart-block
         %h2.usage-chart-block__title Unique visitors in the last 90 days

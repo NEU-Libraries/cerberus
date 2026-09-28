@@ -7,13 +7,14 @@
 // ---------------------------------------------------------------------
 
 // Per-metric accent tones (desaturated, matching the existing palette):
-// views = Cerberus navy, downloads = teal-green success, visitors = indigo
-// (the audit-history "reparent" tone). Composition tab reuses the same
+// views = Cerberus navy, downloads = teal-green success, streams = amber (the
+// audit-history "restore" tone), visitors = indigo (the "reparent" tone). Composition tab reuses the same
 // ledger with its own set — communities/collections/works/people trace the
 // structural-home hierarchy top to bottom; public/private mirrors the
 // open/restricted register used elsewhere (success = open, orange = gated).
 $usage-view:     $blue;
 $usage-download: $success;
+$usage-stream:   #c46410;
 $usage-visitor:  #5d569b;
 $usage-communities: $teal;
 $usage-collections: $cyan;
@@ -43,6 +44,7 @@ $usage-private:     $orange;
     --usage-accent: #{$gray-500};
     &--view        { --usage-accent: #{$usage-view}; }
     &--download    { --usage-accent: #{$usage-download}; }
+    &--stream      { --usage-accent: #{$usage-stream}; }
     &--visitors    { --usage-accent: #{$usage-visitor}; }
     &--communities { --usage-accent: #{$usage-communities}; }
     &--collections { --usage-accent: #{$usage-collections}; }

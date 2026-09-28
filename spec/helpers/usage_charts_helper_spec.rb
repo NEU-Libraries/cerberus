@@ -16,18 +16,18 @@ RSpec.describe UsageChartsHelper do
 
   let(:range) { Date.new(2026, 7, 9)..Date.new(2026, 7, 13) }
 
-  # Views on the 9th and 13th, a download on the 11th only — the shape that
-  # broke the chart: each series has days the other doesn't.
+  # Views on the 9th and 13th, a download on the 11th and a stream on the 12th —
+  # the shape that broke the chart: each series has days the others don't.
+  let(:series_by_action) do
+    { 'view'     => { Date.new(2026, 7, 9) => 1, Date.new(2026, 7, 13) => 3 },
+      'download' => { Date.new(2026, 7, 11) => 5 },
+      'stream'   => { Date.new(2026, 7, 12) => 2 } }
+  end
+
   def report
-    instance_double(
-      ImpressionsReport,
-      range:,
-      series:                 nil,
-      unique_visitors_series: { Date.new(2026, 7, 11) => 2 }
-    ).tap do |r|
-      allow(r).to receive(:series).with('view')
-                                  .and_return(Date.new(2026, 7, 9) => 1, Date.new(2026, 7, 13) => 3)
-      allow(r).to receive(:series).with('download').and_return(Date.new(2026, 7, 11) => 5)
+    instance_double(ImpressionsReport, range:, series: nil,
+                                       unique_visitors_series: { Date.new(2026, 7, 11) => 2 }).tap do |r|
+      allow(r).to receive(:series) { |action| series_by_action.fetch(action) }
     end
   end
 
@@ -50,7 +50,11 @@ RSpec.describe UsageChartsHelper do
     end
 
     it 'names each series after its action' do
-      expect(helper.usage_timeseries(report).pluck(:name)).to eq(%w[View Download])
+      expect(helper.usage_timeseries(report).pluck(:name)).to eq(%w[View Download Stream])
+    end
+
+    it 'gives each series its own colour, in the same order' do
+      expect(helper.usage_series_colors).to eq(%w[#2666a6 #18bc9c #c46410])
     end
   end
 

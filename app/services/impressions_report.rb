@@ -17,7 +17,7 @@
 # `impressions` via HumanImpressionsQuery instead of waiting on a rollup that
 # was never going to exist for this shape.
 class ImpressionsReport
-  ACTIONS      = %w[view download].freeze # stream deferred (no Range endpoint)
+  ACTIONS      = %w[view download stream].freeze
   DEFAULT_DAYS = 90
   TOP_LIMIT    = 10
   TITLE_FIELD  = 'title_tsim'
