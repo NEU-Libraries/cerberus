@@ -72,7 +72,10 @@ class WorksController < ApplicationController
   end
 
   def downloads
-    @files = AtlasRb::Work.assets(params[:id], nuid: viewer_nuid)
+    nuid = viewer_nuid
+    reads = parallel_atlas_reads(files:     -> { AtlasRb::Work.assets(params[:id], nuid: nuid) },
+                                 file_sets: -> { AtlasRb::Work.file_sets(params[:id], nuid: nuid) })
+    @files = page_ordered_files(reads)
     render layout: false
   end
 
@@ -192,7 +195,7 @@ class WorksController < ApplicationController
     def prepare_show_view
       reads = parallel_show_reads
       @mods = browsable_mods(reads[:mods])
-      @files = reads[:files]
+      @files = page_ordered_files(reads)
       @scholar = GoogleScholarMetadata.for(work: @work, permissions: @permissions, files: @files)
       @av_file = MediaRemux.playable_file(@files)
       @caption = CaptionTrack.for(@files)
@@ -216,6 +219,10 @@ class WorksController < ApplicationController
     # mods deliberately carries no nuid — Current.nuid, the real user, gates it.
     # The view-as NUID is resolved here rather than inside a task because the
     # workers must not touch ActiveRecord. See docs/deposit.md.
+    def page_ordered_files(reads)
+      PageOrder.sort(reads[:files], reads[:file_sets])
+    end
+
     def parallel_show_reads
       nuid = viewer_nuid
       parallel_atlas_reads(
