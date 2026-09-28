@@ -103,6 +103,17 @@ RSpec.describe 'Admin::Loaders', type: :request do
   describe 'CRUD (as admin)' do
     before { sign_in admin_user }
 
+    describe 'GET /admin/loaders/new' do
+      # The kind column defaults to iptc; preselecting it made a new multipage
+      # loader an IPTC one unless the admin noticed the select.
+      it 'preselects no loader type' do
+        get '/admin/loaders/new'
+        select = Capybara.string(response.body).find('select[name="loader[kind]"]')
+        expect(select).to have_no_css('option[selected]', visible: :all)
+        expect(select.first('option', visible: :all).text).to eq('Select a loader type…')
+      end
+    end
+
     describe 'POST /admin/loaders' do
       it 'creates a Loader and redirects to index' do
         expect { post '/admin/loaders', params: valid_params }
@@ -114,6 +125,12 @@ RSpec.describe 'Admin::Loaders', type: :request do
         post '/admin/loaders', params: valid_params
         follow_redirect!
         expect(response.body).to include('marcom')
+      end
+
+      it 'refuses a loader with no type chosen' do
+        expect { post '/admin/loaders', params: { loader: valid_params[:loader].merge(kind: '') } }
+          .not_to change(Loader, :count)
+        expect(response).to have_http_status(:unprocessable_content)
       end
 
       it 're-renders :new with 422 on validation error' do

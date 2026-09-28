@@ -17,6 +17,12 @@ describe Loader do
       expect(described_class.new(valid_attrs)).to be_valid
     end
 
+    it 'requires a kind, even though the column defaults to iptc' do
+      loader = described_class.new(valid_attrs.merge(kind: ''))
+      expect(loader).not_to be_valid
+      expect(loader.errors[:kind]).to be_present
+    end
+
     %i[slug display_name group].each do |attr|
       it "requires #{attr}" do
         loader = described_class.new(valid_attrs.except(attr))
