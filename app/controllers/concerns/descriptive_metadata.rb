@@ -31,10 +31,10 @@ module DescriptiveMetadata
     true
   end
 
-  # Kept OUT of descriptive_params: that hash is splatted straight into
-  # save_descriptive! as the MODS payload, and this is not a MODS field.
-  def curated_subjects_posted?
-    ActiveModel::Type::Boolean.new.cast(params.dig(resource_key, :curated_subjects)).present?
+  # Read from the stored record, never from the form: a posted flag would let
+  # any editor save a Work with no subjects at all by claiming curated ones.
+  def curated_subjects_stored?
+    Metadata::MODSFields.call(xml: resource_mods)[:curated_subjects]
   end
 
   # Must run BEFORE the mint: MODSMerge leaves a blank title untouched, so a
@@ -89,8 +89,8 @@ module DescriptiveMetadata
   def apply_descriptive(id, advanced: nil)
     keywords = DescriptivePolicy.keywords_required?(atlas_class)
     descriptive = descriptive_params(keywords: keywords)
-    unless descriptive_valid?(descriptive, keywords:         keywords,
-                                           curated_subjects: curated_subjects_posted?)
+    curated = keywords && Array(descriptive[:keywords]).empty? && curated_subjects_stored?
+    unless descriptive_valid?(descriptive, keywords:, curated_subjects: curated)
       flash[:alert] = keywords ? 'Please provide a title and at least one keyword.' : missing_title_alert
       return redirect_back_or_to(edit_path(id))
     end

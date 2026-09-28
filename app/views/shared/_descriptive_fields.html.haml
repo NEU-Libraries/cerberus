@@ -40,12 +40,11 @@
   -# ...unless the record already carries curated subjects, which this box never
   -# shows: MODSFields skips authority-bearing ones and MODSMerge never overwrites
   -# them. The requirement really means "has a subject", so a curated record already
-  -# satisfies it. The flag rides along for descriptive_valid? and relaxes the
-  -# client-side mirror, or a curator editing only a title is forced to invent a
-  -# keyword the record does not need.
+  -# satisfies it. The flag relaxes the client-side check here; the server reads
+  -# the stored record itself, or a curator editing only a title is forced to
+  -# invent a keyword the record does not need.
   - curated = descriptive[:curated_subjects].present?
   .mb-3{ data: { controller: 'keyword-list', 'keyword-list-optional-value': curated.to_s } }
-    = hidden_field_tag "#{f.object_name}[curated_subjects]", curated.to_s
     %label.form-label.mb-1 Keywords
     - if curated
       .form-text.text-muted.mt-0.mb-2

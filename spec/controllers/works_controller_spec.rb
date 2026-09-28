@@ -867,11 +867,28 @@ describe WorksController do
       expect(doc.abstract_nodes.first.text).to eq("Para one\nPara two")
     end
 
-    it 'rejects a save with no keywords (keywords are mandatory)' do
-      patch :update_metadata, params: { id: work.id, work: { title: 'NewTitle', description: 'NewAbstract' } }
+    it 'rejects a save with no keywords when the stored record has no subjects' do
+      bare = AtlasRb::Work.create(collection.id, Rails.root.join('spec/fixtures/files/work-lake-mods.xml').to_s,
+                                  nuid: '000000004')
+      patch :update_metadata, params: { id: bare.id, work: { title: 'NewTitle', description: 'NewAbstract' } }
 
       expect(flash[:alert]).to be_present
-      expect(AtlasRb::Work.find(work.id, nuid: '000000004').title).not_to start_with('NewTitle')
+      expect(AtlasRb::Work.find(bare.id, nuid: '000000004').title).not_to start_with('NewTitle')
+    end
+
+    it 'rejects a forged curated_subjects flag on a record with no subjects' do
+      bare = AtlasRb::Work.create(collection.id, Rails.root.join('spec/fixtures/files/work-lake-mods.xml').to_s,
+                                  nuid: '000000004')
+      patch :update_metadata, params: { id: bare.id, work: { title: 'NewTitle', curated_subjects: 'true' } }
+
+      expect(flash[:alert]).to be_present
+    end
+
+    it 'saves with no keywords when the stored record carries curated subjects' do
+      patch :update_metadata, params: { id: work.id, work: { title: 'NewTitle', description: 'NewAbstract' } }
+
+      expect(flash[:alert]).to be_blank
+      expect(AtlasRb::Work.find(work.id, nuid: '000000004').title).to start_with('NewTitle')
     end
 
     # The depositor's own Advanced values, typed at deposit rather than on a
