@@ -1,4 +1,5 @@
 %nav.reparent-progress{'aria-label' => 'Progress'}
+  %span.reparent-progress__count Step #{step} of 3:
   - [[1, 'Find'], [2, 'Select'], [3, 'Confirm']].each_with_index do |(num, label), i|
     - if i.positive?
       %span.reparent-progress__sep{'aria-hidden' => 'true'}

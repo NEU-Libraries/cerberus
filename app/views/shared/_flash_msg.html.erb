@@ -1,0 +1,15 @@
+<%# Overrides Blacklight's flash partial for one addition: a notice can carry a
+    follow-up link. A flash crosses the redirect as a plain String, so markup
+    inside it would be escaped; the controller sets flash[:notice_link] with a
+    label and an app-internal path instead, and the link is built here. %>
+<% link = flash[:notice_link] %>
+<div class="flash_messages">
+  <% [:success, :notice, :error, :alert].each do |type| %>
+    <% next unless flash[type] %>
+    <% messages = Array.wrap(flash[type]) %>
+    <% if type == :notice && link.is_a?(Hash) && link['path'].to_s.start_with?('/') %>
+      <% messages = messages.map { |message| safe_join([message, ' ', link_to(link['label'], link['path'], class: 'alert-link')]) } %>
+    <% end %>
+    <%= render(Blacklight::System::FlashMessageComponent.with_collection(messages, type: type)) %>
+  <% end %>
+</div>

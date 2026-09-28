@@ -45,6 +45,7 @@ module Admin
       end
 
       if restored?
+        flash[:notice_link] = { 'label' => 'View it', 'path' => resource_path(params[:type], params[:id]) }
         redirect_to admin_tombstones_path, notice: 'The item has been restored and is now discoverable.'
       else
         redirect_to admin_tombstones_path, alert: RESTORE_FAILED

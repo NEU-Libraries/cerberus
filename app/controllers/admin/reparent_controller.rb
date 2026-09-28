@@ -43,6 +43,8 @@ module Admin
       'Community'  => %w[Community]
     }.freeze
 
+    ROOT_REFUSED = 'The top-level community holds the whole repository, so it cannot be moved.'
+
     # Step 1 — find the node to move.
     breadcrumb_for 'Re-parent / Move', :admin_reparent_path
 
@@ -54,6 +56,8 @@ module Admin
     def choose_parent
       breadcrumb 'Choose parent', admin_reparent_choose_parent_path
       @node = load_node(params[:node_id])
+      return refuse_root_move if root?(@node)
+
       @allowed_parent_label = allowed_parent_label(@node.klass)
       return if params[:q].blank?
 
@@ -67,17 +71,19 @@ module Admin
 
       breadcrumb 'Confirm', admin_reparent_confirm_path
       set_confirm_ivars
+      refuse_root_move if root?(@node)
     end
 
     # Perform the move. Same mandatory-destination guard as confirm.
     def move
       node = load_node(params[:node_id])
+      return refuse_root_move if root?(node)
+
       parent_id = params[:parent_id].presence
       return redirect_to_choose_parent(node) if parent_id.nil?
 
       if reparent(node, parent_id)
-        redirect_to node_path(node),
-                    notice: "Moved “#{node.resource.title}” to its new home."
+        moved(node)
       else
         set_confirm_ivars
         flash.now[:alert] = 'Move could not be completed — the destination may be ' \
@@ -105,6 +111,21 @@ module Admin
           exclude_subtree_noid: node.resource.id,
           exclude_noid:         immediate_parent(node)&.noid
         )
+      end
+
+      # Back to the finder, ready for the next move, with a link to this one.
+      def moved(node)
+        flash[:notice_link] = { 'label' => 'View it', 'path' => node_path(node) }
+        redirect_to admin_reparent_path, notice: "Moved “#{node.resource.title}” to its new home."
+      end
+
+      # The one Community with no parent is the root the whole tree hangs from.
+      def root?(node)
+        node.klass == 'Community' && Array(node.resource.ancestors).empty?
+      end
+
+      def refuse_root_move
+        redirect_to admin_reparent_path, alert: ROOT_REFUSED
       end
 
       def search_containers

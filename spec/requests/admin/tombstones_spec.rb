@@ -144,6 +144,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
 
         expect(response).to redirect_to(admin_tombstones_path)
         expect(flash[:notice]).to include('restored and is now discoverable')
+        expect(flash[:notice_link]).to eq('label' => 'View it', 'path' => work_path('abc'))
       end
 
       # One endpoint serves all three now, so `type` no longer picks a class.
