@@ -278,18 +278,16 @@ $audit-tone-unlink:    #8f5e78;
     padding-left: 0;
   }
 
-  // WHO cell — actor name over its NUID chip; the proxy / acting-as target
-  // (rare) stacks beneath as a muted "for <name>" line. The same
-  // meaning-over-identifier idiom as the When cell's date over time.
-  // Most rows are just the actor, no extra line.
+  // WHO cell — actor name then its NUID chip on one line, with the proxy /
+  // acting-as target (rare) beneath as a muted "for <name>" line. The cell
+  // never wraps, so the column takes its width from the wrapping Detail
+  // column instead of splitting a name from its chip.
   &__who {
     line-height: 1.35;
+    white-space: nowrap;
   }
-  // Block, not inline: this column is narrow and names are not short, so an
-  // inline chip wraps mid-cell. Stacked, the name reads first and the
-  // identifier stays available beneath it.
   &__actor {
-    display: block;
+    margin-right: 0.4rem;
     color: $gray-800;
   }
   &__on-behalf {

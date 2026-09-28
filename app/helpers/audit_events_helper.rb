@@ -135,12 +135,12 @@ module AuditEventsHelper
 
   def audit_event_who(event)
     actor = audit_event_actor(event['actor_nuid'])
-    return actor if event['on_behalf_of_nuid'].blank?
-
-    on_behalf = content_tag(:span, class: 'audit-event__on-behalf') do
-      safe_join(['for ', audit_event_actor(event['on_behalf_of_nuid'])])
+    if event['on_behalf_of_nuid'].present?
+      on_behalf = content_tag(:span, class: 'audit-event__on-behalf') do
+        safe_join(['for ', audit_event_actor(event['on_behalf_of_nuid'])])
+      end
     end
-    content_tag(:div, safe_join([actor, on_behalf]), class: 'audit-event__who')
+    content_tag(:div, safe_join([actor, on_behalf].compact), class: 'audit-event__who')
   end
 
   def audit_event_actor(nuid)
