@@ -292,11 +292,19 @@ $audit-tone-unlink:    #8f5e78;
     margin-right: 0.4rem;
     color: $gray-800;
   }
+  // Beneath the actor on narrow screens; beside it from lg up, where the
+  // wrapping Detail column has the width to give.
   &__on-behalf {
     display: block;
     margin-top: 0.15rem;
     font-size: 0.72rem;
     color: $gray-500;
+
+    @include media-breakpoint-up(lg) {
+      display: inline;
+      margin-top: 0;
+      margin-left: 0.4rem;
+    }
   }
 }
 
