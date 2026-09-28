@@ -57,9 +57,7 @@
       -# second, conflicting attribution mechanism. See WorksController#deposit_attribution.
       - if (current_user&.admin? || current_user&.privileged?) && !acting_as?
         %fieldset.deposit-form__field
-          %legend.deposit-form__field-label
-            Attribution
-            %span.deposit-form__field-pill Privileged
+          %legend.deposit-form__field-label Ownership
           .deposit-form__radio-grid
             %label.deposit-form__radio{for: 'upload_as_myself'}
               = radio_button_tag 'upload_as', 'myself', true, class: 'deposit-form__radio-input', id: 'upload_as_myself'
