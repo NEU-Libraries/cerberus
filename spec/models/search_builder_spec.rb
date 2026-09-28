@@ -252,7 +252,7 @@ RSpec.describe SearchBuilder do
 
     it 'excludes them for a signed-in reader, but keeps that reader their own' do
       user = User.new(nuid: '000000015', role: 'standard', groups: [])
-      expect(unfinished_fq(user)).to eq(['((*:* -in_progress_bsi:true) OR depositor_ssi:000000015)'])
+      expect(unfinished_fq(user)).to eq(['((*:* -in_progress_bsi:true) OR depositor_ssi:000000015 OR proxy_uploader_ssi:000000015)'])
     end
 
     it 'appends nothing for repository staff, who curate them' do

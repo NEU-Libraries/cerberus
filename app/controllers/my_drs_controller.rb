@@ -55,8 +55,12 @@ class MyDrsController < CatalogController
 
     # The gated search's own unfinished-deposit filter already holds a depositor
     # to their own rows, so this composes with it rather than working around it.
+    # A proxy uploader finds the deposits they started for someone else here too:
+    # the depositor never uploaded them and may not know they exist.
     def unfinished_deposits
-      own_works('in_progress_bsi:true')
+      phrase = depositor_phrase
+      own_works('in_progress_bsi:true',
+                owner: %((depositor_ssi:"#{phrase}" OR proxy_uploader_ssi:"#{phrase}")))
     end
 
     # `-in_progress_bsi:true` is not redundant here: it keeps the two panels
@@ -65,10 +69,10 @@ class MyDrsController < CatalogController
       own_works('incomplete_bsi:true', '-in_progress_bsi:true')
     end
 
-    def own_works(*filters)
+    def own_works(*filters, owner: %(depositor_ssi:"#{depositor_phrase}"))
       builder = search_service.search_builder.with({}).with_filters(
         'internal_resource_tesim:Work',
-        %(depositor_ssi:"#{depositor_phrase}"),
+        owner,
         '-tombstoned_bsi:true',
         *filters
       ).merge(rows: 50)

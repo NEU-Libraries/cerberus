@@ -75,6 +75,52 @@ RSpec.describe 'Unfinished deposits', type: :request do
     end
   end
 
+  # A proxy deposit's depositor never uploaded it, so the uploader is the one
+  # left on its metadata step. The visibility gates keyed on the depositor alone,
+  # so the uploader could not find it. They could always finish it: creating the
+  # Work took edit on the collection, and the Work inherits that ACL.
+  describe 'uploaded by a proxy on the depositor\'s behalf' do
+    let(:uploader_nuid) { '000000003' }
+
+    let!(:proxied) do
+      AtlasRb::Resource.set_permissions(collection.id, { 'edit_users' => [uploader_nuid] }, nuid: '000000004')
+      work = AtlasRb::Work.create(collection.id, "#{fixtures}/work-mods.xml",
+                                  nuid: uploader_nuid, depositor: depositor_nuid)
+      AtlasRb::Resource.set_permissions(work.id, { 'read' => ['public'] }, nuid: '000000004')
+      work
+    end
+
+    it 'records the uploader as proxy_uploader — the fact the gates now read' do
+      expect(AtlasRb::Work.find(proxied.id).proxy_uploader).to eq(uploader_nuid)
+    end
+
+    it 'renders its page for the uploader' do
+      sign_in reader(uploader_nuid)
+      get work_path(proxied.id)
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'lists it under the uploader\'s Deposits to finish on My DRS' do
+      allow(AtlasRb::Person).to receive(:resolve).and_return([])
+      sign_in reader(uploader_nuid)
+      get my_drs_path
+      expect(response.body).to include(metadata_work_path(proxied.id))
+    end
+
+    it 'still lists it for the depositor it was made for' do
+      allow(AtlasRb::Person).to receive(:resolve).and_return([])
+      sign_in reader(depositor_nuid)
+      get my_drs_path
+      expect(response.body).to include(metadata_work_path(proxied.id))
+    end
+
+    it 'lets the uploader open the metadata step, through the inherited edit' do
+      sign_in reader(uploader_nuid)
+      get metadata_work_path(proxied.id)
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
   describe 'discovery' do
     # Every spec Work shares the fixture title, so browse newest first to keep
     # this one on the first page. The staff example proves the browse reaches

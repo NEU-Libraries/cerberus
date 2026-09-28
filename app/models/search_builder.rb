@@ -163,7 +163,9 @@ class SearchBuilder < Blacklight::SearchBuilder
       values.uniq.map { |value| %("#{value.to_s.gsub(/["\\]/) { |char| "\\#{char}" }}") }.join(' OR ')
     end
 
-    # A signed-in depositor keeps their own unfinished deposits.
+    # A signed-in depositor keeps their own unfinished deposits, and so does the
+    # person who uploaded one on the depositor's behalf: they are the one left to
+    # finish it.
     #
     # The `*:*` is load-bearing: Solr cannot evaluate a purely negative clause as
     # one side of an OR, so the negation needs a positive set to subtract from.
@@ -172,6 +174,7 @@ class SearchBuilder < Blacklight::SearchBuilder
       nuid = gated_user&.nuid
       return '-in_progress_bsi:true' if nuid.blank?
 
-      "((*:* -in_progress_bsi:true) OR depositor_ssi:#{RSolr.solr_escape(nuid)})"
+      term = RSolr.solr_escape(nuid)
+      "((*:* -in_progress_bsi:true) OR depositor_ssi:#{term} OR proxy_uploader_ssi:#{term})"
     end
 end

@@ -31,13 +31,14 @@ module UnfinishedDepositGate
       deny_if_unfinished!(work) if work
     end
 
-    # Staff and admins because they curate. The depositor because the flag clears
-    # on *their* next action, and hiding a deposit from the one person who can
-    # finish it would strand it.
+    # Staff and admins because they curate. The depositor and a proxy uploader
+    # because the flag clears on the next confirm, and hiding a deposit from the
+    # person who can finish it would strand it.
     def may_see_unfinished?(work)
       return false if effective_user.blank?
       return true if effective_user.admin? || effective_user.member_of?(Permissions::STAFF_EDIT_GROUP)
 
-      effective_user.nuid.present? && effective_user.nuid == work.depositor
+      nuid = effective_user.nuid
+      nuid.present? && [work.depositor, work.try(:proxy_uploader)].include?(nuid)
     end
 end
