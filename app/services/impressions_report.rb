@@ -21,6 +21,7 @@ class ImpressionsReport
   DEFAULT_DAYS = 90
   TOP_LIMIT    = 10
   TITLE_FIELD  = 'title_tsim'
+  DAY          = Arel.sql('day::date')
 
   attr_reader :range, :segment, :scope
 
@@ -46,12 +47,16 @@ class ImpressionsReport
     ACTIONS.index_with { |action| series(action).values.sum }
   end
 
-  # chartkick-ready { day => count } for one action, honouring the segment
+  # chartkick-ready { Date => count } for one action, honouring the segment
   # and any active scope.
+  #
+  # Grouped on day::date because the :all leaf's day is a timestamp bucket.
+  # Grouped raw, its keys come back as Eastern TimeWithZone values, which miss
+  # every Date lookup in the chart's zero-fill and land a day early besides.
   def series(action)
     scoped_leaf = leaf.for_action(action).in_range(range)
     scoped_leaf = scoped_leaf.where(noid: scope.overview_noids) if scoped?
-    scoped_leaf.group(:day).order(:day).sum(sum_column)
+    scoped_leaf.group(DAY).order(DAY).sum(sum_column)
   end
 
   # { day => unique non-bot visitors } (human only; §10) — repo-wide rollup

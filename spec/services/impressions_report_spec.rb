@@ -53,6 +53,20 @@ RSpec.describe ImpressionsReport do
     all_report.series('view')
   end
 
+  # The aggregate buckets day as a timestamp at UTC midnight. Grouped raw, the
+  # keys came back as Eastern times, so the chart's Date zero-fill found none
+  # of them and the All traffic chart drew empty.
+  it 'keys the :all series by the UTC calendar day, as a Date' do
+    bucket = ImpressionCountByDay.from(<<~SQL.squish)
+      (SELECT 'w1'::text AS noid, 'view'::text AS action,
+              '#{Date.current.iso8601} 00:00:00'::timestamp AS day, 5::bigint AS impressions) impression_counts_by_day
+    SQL
+    all_report = described_class.new(range:, segment: :all)
+    allow(all_report).to receive(:leaf).and_return(bucket)
+
+    expect(all_report.series('view')).to eq(Date.current => 5)
+  end
+
   it 'is unscoped without a scope, and show_collections_tab? defaults true' do
     expect(report.scoped?).to be false
     expect(report.show_collections_tab?).to be true
