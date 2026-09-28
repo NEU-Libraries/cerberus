@@ -60,6 +60,11 @@ describe Iptc::MODSBuilder do
         .to raise_error(Iptc::MODSBuilder::MissingRequiredField, /Keywords/)
     end
 
+    it 'raises if every Keyword and Subject is blank' do
+      expect { described_class.call(iptc: { Headline: 'A', Keywords: ['', '  '], Subject: [''] }) }
+        .to raise_error(Iptc::MODSBuilder::MissingRequiredField, /Keywords/)
+    end
+
     it 'falls back to Subject if Keywords is absent (v1 parity)' do
       expect { described_class.call(iptc: { Headline: 'A', Subject: ['fallback'] }) }
         .not_to raise_error

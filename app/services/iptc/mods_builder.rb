@@ -99,7 +99,7 @@ module Iptc
       end
 
       def keywords
-        Array(iptc[:Keywords]).presence || Array(iptc[:Subject])
+        Array(iptc[:Keywords]).compact_blank.presence || Array(iptc[:Subject]).compact_blank
       end
 
       def build_xml
