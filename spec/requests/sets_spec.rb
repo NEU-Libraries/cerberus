@@ -139,7 +139,7 @@ RSpec.describe 'Sets', type: :request do
       get "/sets/#{set['id']}"
       expect(response.body).to include('Flow Set')
         .and include('added directly')
-        .and include('Set aside')
+        .and include('Hidden works')
 
       # set one collection-sourced work aside: it leaves the rows, the chip
       # count diverges, and the teaching toast carries fresh counts + Undo
@@ -147,6 +147,7 @@ RSpec.describe 'Sets', type: :request do
            params: { work_id: work_one.id, title: 'Work One', chip: collection.id }
       follow_redirect!
       expect(response.body).to include('drs-toast')
+        .and match(%r{Hid\s+<b>Work One</b>\s+from this set})
         .and include('still in your set')
         .and include('1</span><span class="of"> of 2')
 
@@ -179,7 +180,7 @@ RSpec.describe 'Sets', type: :request do
         expect(response.body).to include('Already in this set')
 
         get '/sets/picker', params: { work_id: work_one.id }
-        expect(response.body).to include('Set aside in this set')
+        expect(response.body).to include('Hidden in this set')
 
         get '/sets/picker', params: { work_id: lone_work.id }
         expect(response.body).to include("/sets/#{set['id']}/works")
@@ -278,7 +279,7 @@ RSpec.describe 'Sets', type: :request do
       sign_in other_user
       get "/sets/#{set['id']}"
       expect(response).to have_http_status(:ok)
-      expect(response.body).not_to include('Set aside')
+      expect(response.body).not_to include(set_aside_set_path(set['id']))
       expect(response.body).not_to include(edit_set_path(set['id']))
     end
   end

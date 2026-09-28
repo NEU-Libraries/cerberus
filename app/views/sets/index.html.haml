@@ -46,7 +46,7 @@
                 - parts = []
                 - parts << pluralize(Array(set['included_collections']).size, 'collection') if Array(set['included_collections']).any?
                 - parts << pluralize(Array(set['included_works']).size, 'item') if Array(set['included_works']).any?
-                - parts << "#{Array(set['excluded_works']).size} set aside" if Array(set['excluded_works']).any?
+                - parts << "#{Array(set['excluded_works']).size} hidden" if Array(set['excluded_works']).any?
                 = parts.any? ? parts.join(' · ') : 'empty'
               %td.small.text-muted
                 -# Resolved tally arrives lazily — recipe resolution is several
