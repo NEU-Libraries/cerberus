@@ -81,11 +81,11 @@ module AuditEventsHelper
   end
 
   def audit_event_timestamp(event)
-    parsed = Time.iso8601(event['occurred_at'])
-    content_tag(:div, class: 'audit-event__when', title: parsed.iso8601) do
+    parsed = Time.iso8601(event['occurred_at']).in_time_zone
+    content_tag(:div, class: 'audit-event__when', title: event['occurred_at']) do
       safe_join([
                   content_tag(:div, parsed.strftime('%Y-%m-%d'), class: 'audit-event__when-date'),
-                  content_tag(:div, parsed.strftime('%H:%M UTC'), class: 'audit-event__when-time')
+                  content_tag(:div, parsed.strftime('%H:%M %Z'), class: 'audit-event__when-time')
                 ])
     end
   end

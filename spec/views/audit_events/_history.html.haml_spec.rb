@@ -97,7 +97,7 @@ describe 'audit_events/_history.html.haml' do
     it 'renders the timestamp split into date and time, with the full ISO in title' do
       expect(rendered).to have_css('.audit-event__when[title="2026-05-26T12:34:56Z"]')
       expect(rendered).to have_css('.audit-event__when-date', text: '2026-05-26')
-      expect(rendered).to have_css('.audit-event__when-time', text: '12:34 UTC')
+      expect(rendered).to have_css('.audit-event__when-time', text: '08:34 EDT')
     end
 
     it 'renders the actor NUID as a monospace chip' do

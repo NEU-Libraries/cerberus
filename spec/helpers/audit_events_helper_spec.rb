@@ -3,6 +3,16 @@
 require 'rails_helper'
 
 RSpec.describe AuditEventsHelper, type: :helper do
+  describe '#audit_event_timestamp' do
+    # 02:00 UTC is still the previous evening in Boston, so the date moves too.
+    it 'shows the time in Eastern, labelled, on the Eastern date' do
+      html = helper.audit_event_timestamp('occurred_at' => '2026-05-27T02:00:00Z')
+
+      expect(html).to include('2026-05-26', '22:00 EDT')
+      expect(html).to include('title="2026-05-27T02:00:00Z"')
+    end
+  end
+
   def event(action:, change_type:, payload: nil, at: '2026-05-26T12:34:56Z')
     { 'action'            => action,
       'change_type'       => change_type,
