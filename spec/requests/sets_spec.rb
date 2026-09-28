@@ -130,6 +130,43 @@ RSpec.describe 'Sets', type: :request do
 
     before { sign_in curator }
 
+    # "+ New set" in the Add-to-set picker used to open a blank form: the new set
+    # came out empty and the user landed on it, not back on their results.
+    describe 'New set from the picker' do
+      let(:results_page) { '/catalog?q=anything' }
+
+      it 'says on the form that the chosen work will be added, and carries it' do
+        get new_set_path(work_id: lone_work.id, return_to: results_page)
+
+        expect(response.body).to include('will be added to this set when you create it')
+        expect(response.body).to include(%(name="work_id" value="#{lone_work.id}"))
+        expect(response.body).to include(%(name="return_to" value="#{results_page}"))
+      end
+
+      it 'creates the set holding the work and returns to the results' do
+        post '/sets', params: { set: { title: 'Picked Set' }, work_id: lone_work.id, return_to: results_page }
+
+        expect(response).to redirect_to(results_page)
+        expect(flash[:notice]).to include('Picked Set', 'work added')
+        created = AtlasRb::Compilation.list(nuid: nuid)['compilations'].find { |c| c['title'] == 'Picked Set' }
+        expect(AtlasRb::Compilation.find(created['id'])['included_works']).to include(lone_work.id)
+      end
+
+      it 'includes a chosen collection' do
+        post '/sets', params: { set: { title: 'Collection Set' }, collection_id: collection.id }
+
+        created = AtlasRb::Compilation.list(nuid: nuid)['compilations'].find { |c| c['title'] == 'Collection Set' }
+        expect(AtlasRb::Compilation.find(created['id'])['included_collections']).to include(collection.id)
+      end
+
+      it 'ignores an off-host return_to and lands on the new set' do
+        post '/sets', params: { set: { title: 'Offsite Set' }, work_id: lone_work.id,
+                                return_to: 'https://evil.example/phish' }
+
+        expect(response.location).to start_with("#{request.base_url}/sets/")
+      end
+    end
+
     it 'walks the whole flow: include, add, set aside, put back, remove' do
       set = make_set('Flow Set')
 

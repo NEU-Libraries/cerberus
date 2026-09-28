@@ -14,6 +14,7 @@ class SetsController < CatalogController
 
   include ShowScopedSearch
   include SetRecipe
+  include SetPendingItem
   include SetSharing
   include SetBulkActions
 
@@ -82,6 +83,7 @@ class SetsController < CatalogController
 
   def new
     @set = AtlasRb::Mash.new
+    @pending = pending_item
   end
 
   # Details tab is open to any editor; the Sharing tab is owner/admin-only
@@ -95,8 +97,11 @@ class SetsController < CatalogController
   end
 
   def create
+    @pending = pending_item
     set = AtlasRb::Compilation.create(set_params[:title], description: set_params[:description].presence)
-    redirect_to set_path(set['id']), notice: 'Set created.'
+    return redirect_to(set_path(set['id']), notice: 'Set created.') if @pending.nil?
+
+    add_pending_item(set)
   rescue AtlasRb::CompilationError => e
     @set = AtlasRb::Mash.new(set_params)
     flash.now[:alert] = e.message
