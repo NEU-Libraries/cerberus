@@ -93,8 +93,11 @@ module Authorizable
     # "has_live_children"`) straight through as a raw Faraday::Response, so the
     # status has to be read. Ignoring it reports a false "deleted" while the
     # resource stays live. See docs/authorization.md.
+    # return_to lets a list that offers the delete (deposit triage, My DRS) take
+    # the user back to itself. url_from drops any off-host value, so it cannot
+    # become an open redirect.
     def perform_tombstone!
-      landing = parent_path(params[:id])
+      landing = url_from(params[:return_to]) || parent_path(params[:id])
       response = AtlasRb::Resource.tombstone(params[:id])
       if response.success?
         redirect_to landing, notice: "#{solr_type} deleted."

@@ -1,0 +1,14 @@
+-# locals: work_id (String), return_to (String)
+-#
+-# Deletes an unfinished deposit from a list that offers Finish beside it. The
+-# same tombstone the metadata step's Cancel uses, so the Work leaves every list.
+-# The confirm button says Delete, not Cancel: the shared dialog's dismiss button
+-# is already labelled Cancel.
+= button_to tombstone_work_path(work_id, return_to: return_to), method: :post,
+            class: 'btn btn-sm btn-tonal-danger', form: { class: 'd-inline' },
+            data: { turbo_confirm: 'The uploaded file and anything entered for it will be deleted.',
+                    turbo_confirm_title: 'Cancel this deposit?',
+                    turbo_confirm_button: 'Delete deposit',
+                    turbo_confirm_variant: 'danger' } do
+  %i.fa-solid.fa-trash-can.me-1{ 'aria-hidden' => 'true' }
+  Cancel deposit

@@ -8,6 +8,7 @@
 -#
 -# Finish deposit goes to the metadata step, not Edit: an unfinished deposit
 -# refuses Edit by design, and the metadata step is the route that completes it.
+-# Cancel deposit is the metadata step's own Cancel, returning here.
 .my-drs-card.bg-white.border.rounded-3.overflow-hidden.shadow-sm.mb-4
   .my-drs-card__head.p-3
     %h5.mb-1
@@ -20,7 +21,8 @@
       %thead
         %tr
           %th{ scope: 'col' } File
-          %th.text-end{ scope: 'col' } Finish
+          %th.text-end{ scope: 'col' }
+            %span.visually-hidden Actions
       %tbody
         - unfinished.each do |work|
           %tr
@@ -28,6 +30,8 @@
               %i.fa-regular.fa-file.text-muted.me-2{ 'aria-hidden' => 'true' }
               = finder_doc_heading(work)
             %td.text-end
-              = link_to metadata_work_path(work), class: 'btn btn-sm btn-warning' do
-                %i.fa-solid.fa-pen-to-square.me-1{ 'aria-hidden' => 'true' }
-                Finish deposit
+              .d-inline-flex.flex-wrap.justify-content-end.gap-2
+                = link_to metadata_work_path(work), class: 'btn btn-sm btn-warning' do
+                  %i.fa-solid.fa-pen-to-square.me-1{ 'aria-hidden' => 'true' }
+                  Finish deposit
+                = render 'shared/cancel_deposit_button', work_id: work.to_param, return_to: my_drs_path

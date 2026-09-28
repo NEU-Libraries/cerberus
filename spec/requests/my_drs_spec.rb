@@ -87,6 +87,7 @@ RSpec.describe 'My DRS', type: :request do
       expect(response.body).to include('Deposits to finish')
       expect(response.body).to include('thesis.docx')
       expect(response.body).to include(metadata_work_path('unoid'))
+      expect(response.body).to include(tombstone_work_path('unoid', return_to: my_drs_path))
     end
 
     it 'omits the panel entirely when nothing is unfinished' do

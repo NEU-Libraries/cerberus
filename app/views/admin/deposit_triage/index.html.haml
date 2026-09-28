@@ -62,14 +62,18 @@
                 - else
                   = IncompleteReasons.describe(doc.incomplete_reason)
               %td.text-end
-                = link_to(unconfirmed ? metadata_work_path(doc) : work_path(doc),
-                  class: 'admin-registry-table__edit') do
+                .d-inline-flex.align-items-center.justify-content-end.gap-3
+                  = link_to(unconfirmed ? metadata_work_path(doc) : work_path(doc),
+                    class: 'admin-registry-table__edit') do
+                    - if unconfirmed
+                      %i.fa-solid.fa-pen-to-square{'aria-hidden' => 'true'}
+                      Finish deposit
+                    - else
+                      %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+                      Open
                   - if unconfirmed
-                    %i.fa-solid.fa-pen-to-square{'aria-hidden' => 'true'}
-                    Finish deposit
-                  - else
-                    %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
-                    Open
+                    = render 'shared/cancel_deposit_button', work_id: doc.to_param,
+                             return_to: admin_deposit_triage_path(state: @state, page: params[:page])
 
     - if @response.respond_to?(:total_pages) && @response.total_pages > 1
       .px-3.pt-2
