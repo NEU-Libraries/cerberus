@@ -3,6 +3,17 @@
 require 'rails_helper'
 
 RSpec.describe UsageChartsHelper do
+  describe '#usage_daily_visitor_average' do
+    # Four days, visitors on two: the zero days count, or the average inflates.
+    it 'divides by every day in the range, to one decimal' do
+      range = Date.new(2026, 9, 1)..Date.new(2026, 9, 4)
+      report = instance_double(ImpressionsReport, range:                  range,
+                                                  unique_visitors_series: { range.first => 3, range.last => 2 })
+
+      expect(helper.usage_daily_visitor_average(report)).to eq(1.3)
+    end
+  end
+
   let(:range) { Date.new(2026, 7, 9)..Date.new(2026, 7, 13) }
 
   # Views on the 9th and 13th, a download on the 11th only — the shape that

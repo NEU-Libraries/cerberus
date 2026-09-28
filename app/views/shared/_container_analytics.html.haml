@@ -37,22 +37,25 @@
 
   %ul.nav.nav-tabs.mb-0{role: 'tablist'}
     %li.nav-item
-      %button#analytics-overview-tab.nav-link.active{'aria-controls' => 'analytics-overview', 'aria-selected' => 'true', 'data-bs-target' => '#analytics-overview', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Usage history
+      %button#analytics-composition-tab.nav-link.active{'aria-controls' => 'analytics-composition', 'aria-selected' => 'true', 'data-bs-target' => '#analytics-composition', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Content overview
+    %li.nav-item
+      %button#analytics-overview-tab.nav-link{'aria-controls' => 'analytics-overview', 'aria-selected' => 'false', 'data-bs-target' => '#analytics-overview', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Usage history
     %li.nav-item
       %button#analytics-files-tab.nav-link{'aria-controls' => 'analytics-files', 'aria-selected' => 'false', 'data-bs-target' => '#analytics-files', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Top files
     - if @analytics.scope.show_collections_tab?
       %li.nav-item
         %button#analytics-collections-tab.nav-link{'aria-controls' => 'analytics-collections', 'aria-selected' => 'false', 'data-bs-target' => '#analytics-collections', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Top collections
-    %li.nav-item
-      %button#analytics-composition-tab.nav-link{'aria-controls' => 'analytics-composition', 'aria-selected' => 'false', 'data-bs-target' => '#analytics-composition', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Content overview
 
   .tab-content.pt-3
-    #analytics-overview.tab-pane.active{'aria-labelledby' => 'analytics-overview-tab', role: 'tabpanel'}
+    #analytics-overview.tab-pane{'aria-labelledby' => 'analytics-overview-tab', role: 'tabpanel'}
       %dl.usage-ledger
         - @analytics.totals.each do |action, total|
           .usage-ledger__item{class: "usage-ledger__item--#{action}"}
             %dt.usage-ledger__label= action.capitalize.pluralize
             %dd.usage-ledger__figure= number_with_delimiter(total)
+        .usage-ledger__item.usage-ledger__item--visitors
+          %dt.usage-ledger__label Unique visitors · daily average
+          %dd.usage-ledger__figure= number_with_precision(usage_daily_visitor_average(@analytics), precision: 1, strip_insignificant_zeros: true, delimiter: ',')
         .usage-ledger__item.usage-ledger__item--visitors
           %dt.usage-ledger__label Unique visitors · peak day
           %dd.usage-ledger__figure= number_with_delimiter(@analytics.unique_visitors_series.values.max || 0)
@@ -75,7 +78,7 @@
     - if @analytics.scope.show_collections_tab?
       #analytics-collections.tab-pane{'aria-labelledby' => 'analytics-collections-tab', role: 'tabpanel'}
         = render 'shared/container_analytics_top_table', entries: @analytics.top_containers, empty: 'No container activity in this range.'
-    #analytics-composition.tab-pane{'aria-labelledby' => 'analytics-composition-tab', role: 'tabpanel'}
+    #analytics-composition.tab-pane.active{'aria-labelledby' => 'analytics-composition-tab', role: 'tabpanel'}
       = render 'admin/impressions/composition', composition: @analytics_composition,
                                                 scope_phrase: "in #{plain_text(@analytics_base_item[:title])}"
 
