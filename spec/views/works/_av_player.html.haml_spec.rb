@@ -3,11 +3,11 @@
 require 'rails_helper'
 
 RSpec.describe 'works/_av_player', type: :view do
-  def render_player(mime:, preview:, downloadable: true, caption: nil)
+  def render_player(mime:, preview:, downloadable: true, caption: nil, streaming_only: false)
     assign(:work, AtlasRb::Mash.new(preview: preview))
     render partial: 'works/av_player',
            locals:  { file:    AtlasRb::Mash.new(noid: 'b-1', mime_type: mime),
-                      caption: caption, downloadable: downloadable }
+                      caption: caption, downloadable: downloadable, streaming_only: streaming_only }
   end
 
   let(:captions) { AtlasRb::Mash.new(noid: 'c-1', mime_type: 'text/vtt') }
@@ -56,6 +56,21 @@ RSpec.describe 'works/_av_player', type: :view do
       expect(rendered).not_to have_css('.av-player__fallback')
       expect(rendered).not_to have_link('Download it')
     end
+  end
+
+  it 'says so under the player when the work is streaming only' do
+    render_player(mime: 'video/mp4', preview: nil, downloadable: false, streaming_only: true)
+
+    expect(rendered).to have_css('.av-player__fallback', text: 'can only be viewed in the browser')
+    expect(rendered).not_to have_link('Download it')
+  end
+
+  # An admin may still download a streaming-only file, so they get the link.
+  it 'offers the download line, not the note, to a viewer who may still download' do
+    render_player(mime: 'video/mp4', preview: nil, downloadable: true, streaming_only: true)
+
+    expect(rendered).to have_link('Download it')
+    expect(rendered).not_to have_text('can only be viewed in the browser')
   end
 
   it 'offers the download-instead line when the viewer may download the file' do

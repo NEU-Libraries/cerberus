@@ -46,7 +46,7 @@ module Admin
     def rollback
       AtlasRb::Blob.rollback(params[:blob_noid], params[:version_id])
       FileDerivativeRefreshJob.perform_later(params[:work_id], params[:blob_noid])
-      back_to_manage(notice: "File has been reverted to #{params[:version_id]}.")
+      back_to_manage(notice: "File has been reverted to version #{params[:revision].presence || params[:version_id]}.")
     end
 
     private

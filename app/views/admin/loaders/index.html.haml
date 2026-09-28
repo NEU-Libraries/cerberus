@@ -38,7 +38,10 @@
               %td
                 %span.admin-registry-table__id= loader.group
               %td
-                %span.admin-registry-table__id= loader.root_collection
+                - if loader.root_collection.present?
+                  %span.admin-registry-table__id= loader.root_collection
+                - else
+                  %span.text-muted —
               %td.text-end
                 .d-inline-flex.gap-3.align-items-center
                   = link_to edit_admin_loader_path(loader), class: 'admin-registry-table__edit' do

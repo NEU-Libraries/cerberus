@@ -28,6 +28,8 @@ class WorksController < ApplicationController
   atlas_resource AtlasRb::Work, key: :work, route: :work
 
   IN_PROGRESS_NOTICE = 'This work is still being processed and cannot be edited yet.'
+  DEPOSITOR_IN_PROGRESS_NOTICE = 'This work is still being processed. Options for managing this work are ' \
+                                 'available on your My DRS page.'
   PUBLISH_LINK_FAILED = "File uploaded — please review the metadata. It couldn't be added to the " \
                         'community showcase; contact DRS staff if this persists.'
   DERIVATIVE_DEFAULT_FAILED = 'File uploaded — please review the metadata. The collection\'s download ' \
@@ -52,7 +54,7 @@ class WorksController < ApplicationController
 
     authorize_show!
     deny_if_unfinished!(@work)
-    flash.now[:alert] = IN_PROGRESS_NOTICE if @work.in_progress
+    flash.now[:alert] = in_progress_notice(@work) if @work.in_progress
     prepare_show_view
   end
 
@@ -234,11 +236,20 @@ class WorksController < ApplicationController
       nil
     end
 
+    # nil on success: the metadata page already opens with "Your file was
+    # uploaded successfully", so a flash saying the same would only repeat it.
     def create_notice
       return PUBLISH_LINK_FAILED if @publish_link_failed
-      return DERIVATIVE_DEFAULT_FAILED if @derivative_default_failed
 
-      'File uploaded — please review the metadata.'
+      DERIVATIVE_DEFAULT_FAILED if @derivative_default_failed
+    end
+
+    # Only the depositor finishes an unfinished deposit from My DRS; staff and
+    # admins reach it from the triage page, so the pointer would mislead them.
+    def in_progress_notice(work)
+      return IN_PROGRESS_NOTICE unless effective_user&.nuid.present? && effective_user.nuid == work.depositor
+
+      DEPOSITOR_IN_PROGRESS_NOTICE
     end
 
     # complete_work: false — the depositor still owes the metadata page, so

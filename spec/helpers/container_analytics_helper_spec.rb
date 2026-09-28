@@ -28,9 +28,9 @@ RSpec.describe ContainerAnalyticsHelper do
     it 'describes the whole subtree when neither a drill-down nor a facet is active' do
       blurb = helper.container_analytics_scope_blurb(report(scope), base_item, base_item)
 
-      expect(blurb).to eq('Views, downloads, and visitors for everything under this collection — ' \
-                          'the collection itself and every descendant Work. ' \
-                          'Last 90 days, human traffic only.')
+      expect(blurb).to eq('An overview of the contents and usage of Test Collection, including counts of its ' \
+                          'communities, collections, and works, along with usage statistics recorded by human ' \
+                          'visitors.')
     end
 
     # The figures below this sentence are for the one item, so claiming the
@@ -39,15 +39,15 @@ RSpec.describe ContainerAnalyticsHelper do
       blurb = helper.container_analytics_scope_blurb(report(scope), base_item, work_item)
 
       expect(blurb).to include('for Sample Office Document — one work within this collection')
-      expect(blurb).not_to include('everything under this collection')
+      expect(blurb).not_to include('An overview of the contents')
     end
 
     it 'says the figures are facet-narrowed rather than claiming everything' do
       faceted = scope(facet: { type: 'content', value: 'Text' })
       blurb = helper.container_analytics_scope_blurb(report(faceted), base_item, base_item)
 
-      expect(blurb).to include('the Works under this collection matching the facet below')
-      expect(blurb).not_to include('everything under this collection')
+      expect(blurb).to include('the works under this collection that match the filter below')
+      expect(blurb).not_to include('An overview of the contents')
     end
 
     it 'prefers the drill-down wording when a facet is also active' do
@@ -61,7 +61,7 @@ RSpec.describe ContainerAnalyticsHelper do
       community = { noid: 'm1', uuid: 'uuid-m1', klass: 'Community', title: 'A Community' }
       blurb = helper.container_analytics_scope_blurb(report(scope), community, community)
 
-      expect(blurb).to include('everything under this community — the community itself')
+      expect(blurb).to include('An overview of the contents and usage of A Community')
     end
   end
 end

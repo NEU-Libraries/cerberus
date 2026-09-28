@@ -33,7 +33,14 @@ RSpec.describe WorkAssociationsHelper do
     # Built from Atlas's vocabulary, not from the label table, so the select can
     # only ever offer a predicate the server accepts.
     it 'offers exactly the predicates Atlas accepts' do
-      expect(helper.association_type_options.map(&:last)).to eq(AtlasRb::Work::ASSOCIATION_TYPES)
+      expect(helper.association_type_options.map(&:last)).to match_array(AtlasRb::Work::ASSOCIATION_TYPES)
+    end
+
+    it 'lists the most-used predicate first and an unranked one last' do
+      stub_const('AtlasRb::Work::ASSOCIATION_TYPES', %w[is_appendix_to is_codebook_for is_supplemental_material_for])
+
+      expect(helper.association_type_options.map(&:last))
+        .to eq(%w[is_supplemental_material_for is_codebook_for is_appendix_to])
     end
 
     it 'phrases each one as the tail of “This work is the …”' do

@@ -354,13 +354,18 @@ the slice of `SetResolver` that bulk export needs. That is the same
 `SetResolver::MAX_EXPORT_ROWS` runaway cap. See `docs/sets.md` for the Set side.
 
 It takes the collection's uuid — the Solr uniqueKey form stored in the
-membership fields, typically `collection.valkyrie_id`. It also takes the
-controller's `search_service`, which supplies the gated builder and the index.
+membership fields, typically `collection.valkyrie_id` — and its noid. It also
+takes the controller's `search_service`, which supplies the gated builder and
+the index.
 
-The resolver returns direct members only, structural plus the linked overlay.
-That matches the Collection show page's browse semantics,
-`CatalogController#find_children` with no query. Works in sub-collections are not
-pulled, and containers are excluded: only leaf Works count as contents.
+The resolver returns the Works of the collection and of every sub-collection
+beneath it, structural plus the linked overlay. Librarians export a collection
+to get everything in it, so this deliberately goes deeper than the Collection
+show page's browse, which lists direct members only. Works hang off their
+immediate parent, so the resolver first finds the descendant containers through
+`ancestor_ids_ssim` (keyed by noid) and then takes members of all of them — the
+two-step walk `SetResolver` does for a Set. Without the noid it falls back to
+direct members. Containers are excluded: only leaf Works count as contents.
 
 ### The field list comes from the packer
 

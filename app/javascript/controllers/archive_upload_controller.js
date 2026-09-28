@@ -27,6 +27,16 @@ export default class extends Controller {
     this.send(form)
   }
 
+  // The file input takes a dropped file natively but gives no sign that it
+  // will; this only marks it as a drop target while a file is over it.
+  dragOver() {
+    this.fileTarget.classList.add("is-dragover")
+  }
+
+  dragEnd() {
+    this.fileTarget.classList.remove("is-dragover")
+  }
+
   begin() {
     this.panelTarget.hidden = false
     this.submitTarget.disabled = true

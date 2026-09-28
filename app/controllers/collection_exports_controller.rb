@@ -20,6 +20,7 @@ class CollectionExportsController < CatalogController
     collection = require_resource!(AtlasRb::Collection.find(params[:id]))
 
     resolver = CollectionContentsResolver.new(valkyrie_id:    collection.valkyrie_id,
+                                              noid:           params[:id],
                                               search_service: search_service)
 
     if resolver.contents_count.zero?

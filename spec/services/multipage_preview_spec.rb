@@ -39,6 +39,10 @@ RSpec.describe MultipagePreview do
       expect(result.page_count).to eq(2)
     end
 
+    it 'finds nothing unlisted when the manifest names every file' do
+      expect(result.unlisted_files).to eq([])
+    end
+
     it 'exposes the first item: ordered pages and the MODS row' do
       expect(result.first_item.pages.map(&:file_name)).to eq(%w[bdr_43889.tif bdr_43890.tif])
       expect(result.first_item.pages.map(&:sequence)).to eq([1, 2])
@@ -50,6 +54,21 @@ RSpec.describe MultipagePreview do
       expect(result.mods_xml.encoding).to eq(Encoding::UTF_8)
       expect(result.mods_errors).to be_empty
       expect(result.decorated_html).to include('rendered')
+    end
+  end
+
+  context 'with a file the manifest does not name' do
+    let(:archive_path) do
+      build_multipage_archive_from_rows(
+        [['a.mods.xml', 'Item A', 'a.mods.xml', 0, nil], ['a1.tif', 'Item A', 'a.mods.xml', 1, true]],
+        'a.mods.xml' => mods_xml('Item A'), 'a1.tif' => 'bytes', 'notes.txt' => 'stray'
+      )
+    end
+
+    # Ingest skips it silently, so the preview is where it has to be said.
+    it 'lists it as unlisted without blocking confirm' do
+      expect(result).to be_ok
+      expect(result.unlisted_files).to eq(['notes.txt'])
     end
   end
 

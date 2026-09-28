@@ -376,6 +376,14 @@ turbo-frame#load_report[busy] .admin-registry {
   to   { background-position: 140% 0; }
 }
 
+// The archive field while a file is dragged over it: a dashed rail in the
+// Cerberus blue, so the drop target is obvious before the file is let go.
+.archive-upload__drop.is-dragover {
+  border: 1px dashed $blue;
+  background-color: color-mix(in srgb, #{$blue} 6%, white);
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, #{$blue} 20%, transparent);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .archive-upload--indeterminate .archive-upload__fill {
     animation: none;

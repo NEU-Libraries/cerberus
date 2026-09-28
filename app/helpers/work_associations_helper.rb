@@ -46,10 +46,16 @@ module WorkAssociationsHelper
     end
   end
 
+  # Most-used first: staff pick "supplemental material" for most associations.
+  PICKER_ORDER = %w[is_supplemental_material_for is_transcription_of is_instructional_material_for
+                    is_figure_for is_codebook_for].freeze
+
   # Built from AtlasRb::Work::ASSOCIATION_TYPES, not the table above, so the
-  # select can only offer a predicate the server accepts.
+  # select can only offer a predicate the server accepts. An unranked type
+  # sorts last rather than disappearing.
   def association_type_options
-    AtlasRb::Work::ASSOCIATION_TYPES.map do |type|
+    ranked = AtlasRb::Work::ASSOCIATION_TYPES.sort_by { |type| PICKER_ORDER.index(type) || PICKER_ORDER.size }
+    ranked.map do |type|
       [ASSOCIATION_LABELS.dig(type, :assertion) || type.humanize.downcase, type]
     end
   end

@@ -120,6 +120,15 @@ describe WorksController do
         expect(response.body).not_to match(%r{>\s*Edit\s*</a>})
       end
 
+      it 'points the depositor at My DRS instead' do
+        AtlasRb::Work.find(work.id)['depositor'] = '000000005'
+        sign_in User.new(email: 'depositor@example.com', nuid: '000000005', groups: [])
+
+        get :show, params: { id: work.id }
+
+        expect(flash.now[:alert]).to eq(WorksController::DEPOSITOR_IN_PROGRESS_NOTICE)
+      end
+
       it '404s a visitor who may not see an unfinished deposit' do
         get :show, params: { id: work.id }
         expect(response).to have_http_status(:not_found)
@@ -257,7 +266,7 @@ describe WorksController do
         post :create, params: { binary:        fixture_file_upload('example.docx', docx_mime),
                                 collection_id: collection.id }
       end.to have_enqueued_job(PdfRenditionJob)
-        .with(anything, anything, a_string_matching(uuid_re))
+        .with(anything, anything, a_string_matching(uuid_re), refresh: false)
         .and have_enqueued_job(ContentCreationJob)
         .and not_have_enqueued_job(IiifAssetsJob)
     end
@@ -360,6 +369,32 @@ describe WorksController do
         AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
+      # Staff load theses and dissertations; a depositor never self-publishes there.
+      it 'does not offer Theses & Dissertations as a showcase category' do
+        stub_person_rooted_at(collection.id)
+        allow(ShowcaseFinder).to receive(:call).and_return('Datasets' => 'ds1', 'Theses & Dissertations' => 'td1')
+        allow(AtlasRb::Community).to receive(:find).with('comm1').and_return(AtlasRb::Mash.new('title' => 'A Community'))
+
+        get :new, params: { collection_id: collection.id }
+
+        expect(assigns(:publish_targets).dig('comm1', :genres).keys).to eq(['Datasets'])
+      end
+
+      it 'refuses a forged Theses & Dissertations promotion but keeps the deposit' do
+        stub_person_rooted_at(collection.id)
+        allow(ShowcaseFinder).to receive(:call).and_return('tdnoid')
+        allow(AtlasRb::System::Work).to receive(:add_linked_member)
+
+        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+                                collection_id: collection.id, publish: '1',
+                                publish_community_id: 'comm1', publish_genre: 'Theses & Dissertations' }
+
+        expect(AtlasRb::System::Work).not_to have_received(:add_linked_member)
+        expect(flash[:notice]).to eq(described_class::PUBLISH_LINK_FAILED)
+      ensure
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
       it 'still saves the work when Atlas forbids the showcase link (scoping safety net)' do
         stub_person_rooted_at(collection.id)
         allow(ShowcaseFinder).to receive(:call).and_return('showcasenoid')
@@ -424,7 +459,7 @@ describe WorksController do
 
         expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
         expect(AtlasRb::System::Work).not_to have_received(:add_linked_member)
-        expect(flash[:notice]).to eq('File uploaded — please review the metadata.')
+        expect(flash[:notice]).to be_nil
       ensure
         AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
@@ -946,6 +981,34 @@ describe WorksController do
     end
   end
 
+  describe 'update (Remove embargo)' do
+    render_views
+
+    let(:user) { User.new(email: 'test@example.com', nuid: '000000004', groups: ['editors']) }
+    let(:release) { Date.current.next_year.to_s }
+
+    before do
+      AtlasRb::Resource.set_permissions(work.id, { 'edit' => ['editors'], 'embargo' => release }, nuid: '000000004')
+      sign_in user
+    end
+
+    # Its own form, so Enter in the Permissions form can never press it.
+    it 'offers the control on an embargoed work, outside the Permissions form' do
+      get :edit, params: { id: work.id }
+
+      expect(response.body).to include('form="remove-embargo"', 'id="remove-embargo"')
+    end
+
+    it 'clears the embargo and leaves the grants alone' do
+      patch :update, params: { id: work.id, work: { permissions: { embargo: '' } } }
+
+      permissions = AtlasRb::Resource.permissions(work.id, nuid: '000000004')
+      expect(permissions.embargo).to be_blank
+      expect(Array(permissions.edit)).to include('editors')
+      expect(subject).to redirect_to action: :show, id: work.id
+    end
+  end
+
   describe 'update (Advanced tab)' do
     let(:user) { User.new(email: 'test@example.com', nuid: '000000004', groups: ['editors']) }
 
@@ -1040,7 +1103,7 @@ describe WorksController do
         .and_return(instance_double(Faraday::Response, success?: true))
       post :tombstone, params: { id: work.id }
       expect(AtlasRb::Resource).to have_received(:tombstone).with(work.id)
-      expect(subject).to redirect_to(root_path)
+      expect(subject).to redirect_to(collection_path(collection.id))
       expect(flash[:notice]).to eq('Work deleted.')
     end
 

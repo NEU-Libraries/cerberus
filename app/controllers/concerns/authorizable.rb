@@ -94,9 +94,10 @@ module Authorizable
     # status has to be read. Ignoring it reports a false "deleted" while the
     # resource stays live. See docs/authorization.md.
     def perform_tombstone!
+      landing = parent_path(params[:id])
       response = AtlasRb::Resource.tombstone(params[:id])
       if response.success?
-        redirect_to root_path, notice: "#{solr_type} deleted."
+        redirect_to landing, notice: "#{solr_type} deleted."
       elsif response.status == 422
         redirect_back_or_to(root_path, alert: "#{solr_type} can't be deleted while it still contains live " \
                                               'members. Withdraw or move them first.')

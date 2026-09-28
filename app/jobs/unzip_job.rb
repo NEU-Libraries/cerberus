@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'rubygems/package'
 require 'zip'
 
 # Opens the staged archive (zip or tar) for a LoadReport, walks the
@@ -16,6 +17,7 @@ class UnzipJob < ApplicationJob
   queue_as :default
 
   JPEG_EXT = %w[.jpg .jpeg .JPG .JPEG].freeze
+  NO_IMAGES = 'No JPEG images were found in this archive. The IPTC loader only accepts .jpg and .jpeg files.'
 
   def perform(load_report_id)
     load_report = LoadReport.find(load_report_id)
@@ -31,14 +33,9 @@ class UnzipJob < ApplicationJob
     # can't finalize the report before later rows exist. Only integer row IDs
     # accumulate here — entry bytes still stream chunk-by-chunk (the batch-job
     # memory rule); the two passes are NOT a slurp.
-    archive_path = archive_path_for(load_report)
-    ingest_ids = []
-    extract_each(archive_path, extracted_dir) do |basename|
-      ingest_ids << load_report.iptc_ingests.create!(
-        source_filename: basename,
-        idempotency_key: SecureRandom.uuid
-      ).id
-    end
+    ingest_ids = create_rows(load_report, extracted_dir)
+    return no_images_failure(load_report) if ingest_ids.empty?
+
     ingest_ids.each { |id| IptcIngestJob.perform_later(id) }
   rescue StandardError => e
     Rails.logger.error("UnzipJob failed for LoadReport #{load_report_id}: #{e.class} #{e.message}")
@@ -46,6 +43,30 @@ class UnzipJob < ApplicationJob
   end
 
   private
+
+    def create_rows(load_report, extracted_dir)
+      ingest_ids = []
+      extract_each(archive_path_for(load_report), extracted_dir) do |basename|
+        ingest_ids << load_report.iptc_ingests.create!(
+          source_filename: basename,
+          idempotency_key: SecureRandom.uuid
+        ).id
+      end
+      ingest_ids
+    end
+
+    # With no rows, no IptcIngestJob ever runs maybe_finalize!, so without this
+    # the report sits at "processing" forever. One failed row carries the reason
+    # onto the report table, as XmlUnzipJob does for a missing manifest.
+    def no_images_failure(load_report)
+      load_report.iptc_ingests.create!(
+        source_filename: load_report.source_filename,
+        status:          :failed,
+        error_message:   NO_IMAGES,
+        idempotency_key: SecureRandom.uuid
+      )
+      load_report.maybe_finalize!
+    end
 
     def extract_each(archive_path, dest_dir, &)
       if archive_path.end_with?('.zip')
@@ -63,8 +84,10 @@ class UnzipJob < ApplicationJob
           next unless relevant_jpeg?(entry.name) && seen.add?(basename)
 
           dest = File.join(dest_dir, basename)
-          # Streaming extract. Never entry.get_input_stream.read.
-          entry.extract(dest) unless File.exist?(dest)
+          # Streaming extract. Never entry.get_input_stream.read. rubyzip 3
+          # reads the first argument as relative to destination_directory, so
+          # an absolute path here would land under the working directory.
+          entry.extract(basename, destination_directory: dest_dir) unless File.exist?(dest)
           yield(basename)
         end
       end

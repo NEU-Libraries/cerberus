@@ -56,6 +56,13 @@ describe 'audit_events/_history.html.haml' do
 
     before { render_with(events: events) }
 
+    # Hidden until audit_filter_controller builds its options from the rows,
+    # so the page reads the same without JavaScript.
+    it 'renders the action filter hidden, for the Stimulus controller to reveal' do
+      expect(rendered).to have_css('.audit-history[data-controller="audit-filter"]')
+      expect(rendered).to have_css('.audit-history__filter[hidden] select[data-action="audit-filter#filter"]', visible: :all)
+    end
+
     it 'renders the section header with title and event count' do
       expect(rendered).to have_css('.audit-history__title', text: 'Audit log')
       expect(rendered).to have_css('.audit-history__count', text: '5 events')
@@ -97,7 +104,7 @@ describe 'audit_events/_history.html.haml' do
     it 'renders the timestamp split into date and time, with the full ISO in title' do
       expect(rendered).to have_css('.audit-event__when[title="2026-05-26T12:34:56Z"]')
       expect(rendered).to have_css('.audit-event__when-date', text: '2026-05-26')
-      expect(rendered).to have_css('.audit-event__when-time', text: '12:34 UTC')
+      expect(rendered).to have_css('.audit-event__when-time', text: '08:34 EDT')
     end
 
     it 'renders the actor NUID as a monospace chip' do

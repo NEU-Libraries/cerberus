@@ -8,12 +8,12 @@
 
 %nav.px-3.pb-2{'aria-label' => 'Activity kind'}
   = link_to 'All', admin_ledger_path(tab: 'activity', on: @on),
-    class: "btn btn-sm me-1 #{@kind.blank? ? 'btn-secondary' : 'btn-outline-secondary'}",
+    class: "btn btn-sm me-1 #{@kind.blank? ? 'btn-secondary' : 'btn-tonal-secondary'}",
     'aria-current': ('page' if @kind.blank?)
   - AdminNotice::ACTIVITY_KINDS.each do |kind|
     - current = kind == @kind
     = link_to Admin::LedgerHelper::KINDS.dig(kind, :label), admin_ledger_path(tab: 'activity', kind: kind, on: @on),
-      class: "btn btn-sm me-1 #{current ? 'btn-secondary' : 'btn-outline-secondary'}",
+      class: "btn btn-sm me-1 #{current ? 'btn-secondary' : 'btn-tonal-secondary'}",
       'aria-current': ('page' if current)
 
 = render 'admin/ledger/day_filter'

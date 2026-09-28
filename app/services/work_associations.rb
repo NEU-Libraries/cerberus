@@ -38,7 +38,7 @@ class WorkAssociations < ApplicationService
 
       AtlasRb::Work::ASSOCIATION_TYPES.filter_map do |type|
         docs = Array(edges[type]).filter_map { |noid| documents_by_noid[noid.to_s] }
-        [type, docs] if docs.any?
+        [type, docs.sort_by { |doc| Array(doc['title_tsim']).first.to_s.downcase }] if docs.any?
       end.to_h
     end
 

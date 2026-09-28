@@ -15,7 +15,7 @@
 - if can?(:read, :audit_event)
   - history = AtlasRb::Resource.history(resource_id, nuid: Current.nuid)
   - events = Array(history && history['events'])
-  .audit-history.my-3
+  .audit-history.my-3{data: { controller: 'audit-filter' }}
     %header.audit-history__head
       %div
         %span.audit-history__title Audit log
@@ -24,7 +24,12 @@
             %i.fa-solid.fa-clock-rotate-left{'aria-hidden' => 'true'}
             = pluralize(events.size, 'event')
       - if events.any?
-        %span.audit-history__subtitle Reverse chronological
+        .d-flex.align-items-center.gap-3
+          .audit-history__filter{hidden: true, data: { 'audit-filter-target': 'wrapper' }}
+            %label.visually-hidden{for: "audit-filter-#{resource_id}"} Filter by action
+            %select.form-select.form-select-sm{id: "audit-filter-#{resource_id}", data: { 'audit-filter-target': 'select', action: 'audit-filter#filter' }}
+              %option{value: ''} All actions
+          %span.audit-history__subtitle Reverse chronological
     - if events.empty?
       .audit-history__empty
         %i.fa-solid.fa-clock-rotate-left.audit-history__empty-icon{'aria-hidden' => 'true'}

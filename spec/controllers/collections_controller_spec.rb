@@ -130,10 +130,10 @@ describe CollectionsController do
         expect(response.body).not_to include('Scoped to:')
       end
 
-      it 'facets by content type and shows the "Faceted by" chip' do
+      it 'facets by content type and shows the "Filtered by" chip' do
         get :edit, params: { id: collection.id, analytics_facet_type: 'content', analytics_facet_value: 'Image' }
 
-        expect(response.body).to include('Faceted by: Content: Image')
+        expect(response.body).to include('Filtered by: Content: Image')
       end
 
       it 'clears a drill-down back to the base collection scope, not fully unscoped' do
@@ -396,7 +396,7 @@ describe CollectionsController do
         .and_return(instance_double(Faraday::Response, success?: true))
       post :tombstone, params: { id: collection.id }
       expect(AtlasRb::Resource).to have_received(:tombstone).with(collection.id)
-      expect(subject).to redirect_to(root_path)
+      expect(subject).to redirect_to(community_path(community.id))
       expect(flash[:notice]).to eq('Collection deleted.')
     end
 
@@ -433,7 +433,7 @@ describe CollectionsController do
       post :create, params: { community_id: community.id, collection: { title: '', description: 'Y' } }
 
       expect(AtlasRb::Collection).not_to have_received(:create)
-      expect(flash[:alert]).to eq('Please provide a title.')
+      expect(flash[:alert]).to eq('Please give your collection a title.')
       expect(response).to redirect_to(new_community_collection_path(community.id))
     end
 
@@ -561,7 +561,7 @@ describe CollectionsController do
       patch :update, params: { id: collection.id, collection: { title: '', description: 'Whatever' } }
 
       expect(AtlasRb::Resource).not_to have_received(:put_mods)
-      expect(flash[:alert]).to eq('Please provide a title.')
+      expect(flash[:alert]).to eq('Please give your collection a title.')
       expect(response).to redirect_to(edit_collection_path(collection.id))
     end
 

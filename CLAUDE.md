@@ -52,6 +52,16 @@ When creating a Rails interface whole-cloth or editing one in place, invoke the 
 - **Typography & numerics.** Bootstrap defaults for body. For tabular data (audit rows, NUIDs, file sizes, timestamps), turn on `font-variant-numeric: tabular-nums` and consider a monospace chip — identifiers should *look like* identifiers, not body words.
 - **Iconography.** Font Awesome solid set is already wired in. Match existing usage: `fa-folder-open` (Collection), `fa-users` (Community), `fa-file*` (Work / files). New iconography should be semantic + restrained.
 - **Tabs / nav.** The Edit pages use Bootstrap `nav-tabs` with `data-controller="tab-hash"`. Add new tabs by extending that pattern; don't introduce a different navigation idiom.
+- **Buttons.** Never use `btn-outline-*` or `btn-light`. An outline button is transparent, and `btn-light` is the body's own `$gray-100`, so both take the colour of whatever they sit on and read as text in a box. Give each surface one solid button for its main action (`btn-primary`, or `btn-success` for Save). Every other button takes a variant from `_tonal_buttons.scss`:
+  - `btn-tonal-primary` for row and file actions: Download, export, Regenerate, New upload.
+  - `btn-tonal-secondary` for quiet actions: Copy, Clear, Add to queue, Back links, inactive filter chips.
+  - `btn-tonal-danger` for destructive actions: Discard, Revoke, Remove.
+  - `btn-tonal-success` for status chips such as "In queue".
+
+  Buttons come in two sizes, default and `btn-sm`, and no custom ones. A form's actions (Save, Cancel, and the tab's main action) take the default size on every tab, so switching tabs never resizes them. `btn-sm` is for actions inside a table row, a chip group, or a compact toolbar strip such as the Analytics header.
+
+  A Cancel that abandons a form is always `btn-warning`, with no icon. A Back link only navigates, so it is tonal-secondary rather than orange. Keep the tonal border at full strength: it is what clears WCAG's 3:1 edge contrast against both the grey page and white cards, and a softer border falls to about 2:1.
+- **Hover.** Hover must never move or resize the element under the pointer: no `translateY` lift, and no border-width, padding or font-weight change. The element's edge slides out from under a resting pointer, the hover drops, the element slides back, and it flickers. Signal hover with colour, border and shadow instead, and switch it instantly rather than fading: a fade that swaps dark text on a pale fill for white on a dark one passes through a point where the label vanishes. `_layout.scss` switches off Bootstrap's fade on every `.btn`, so don't add a `transition` to a hover that changes colour, on a button or anywhere else.
 - **Don't.** Don't introduce Tailwind, a different CSS framework, or a different design system. Don't add new web fonts. Don't add maximalist effects (gradient meshes, grain overlays, animated heroes) — they fight the institutional register the rest of the site sets.
 
 **Reference example — the Audit History tab.** When in doubt about how to combine "use the skill" with "match this aesthetic", read these:

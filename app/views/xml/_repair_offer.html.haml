@@ -5,7 +5,7 @@
 -# locals:
 -#   kind    — which repair to run, read by XmlController#repair
 -#   label   — what the button says it does, so each offer names its own fix
--#   variant — the Bootstrap outline colour, matched to the alert it sits in
+-#   variant — the btn-tonal-* colour (primary or danger), matched to the alert it sits in
 -#
 -# `form:` rather than nesting, because the three places an offer belongs are all
 -# outside #raw_xml_form — the refusal banner above it, the advisory below that,
@@ -18,6 +18,6 @@
 -# the form's own action, so a `formaction` override can only authenticate on the
 -# global token Turbo sends in the X-CSRF-Token header — opting out of Turbo here
 -# earns a 422 from InvalidAuthenticityToken. Save relies on the same thing.
-%button.btn.btn-sm.mt-2{class: "btn-outline-#{variant}", type: "submit", form: "raw_xml_form", formaction: xml_repair_path(kind: kind)}
+%button.btn.btn-sm.mt-2{class: "btn-tonal-#{variant}", type: "submit", form: "raw_xml_form", formaction: xml_repair_path(kind: kind)}
   %i.fas.fa-screwdriver-wrench.me-1
   = label

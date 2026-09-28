@@ -87,7 +87,7 @@ RSpec.describe 'Admin::Reparent', type: :request do
 
       post '/admin/reparent/move', params: { node_id: 'node', parent_id: 'par' }
 
-      expect(response).to redirect_to(collection_path('node'))
+      expect(response).to redirect_to(admin_reparent_path)
     end
   end
 
@@ -208,14 +208,30 @@ RSpec.describe 'Admin::Reparent', type: :request do
                                                   .and_return(atlas_node(noid: 'par', klass: 'Community', title: 'Parent Community'))
       end
 
-      it 'reparents via atlas_rb and redirects to the node page on success' do
+      it 'reparents via atlas_rb and returns to the finder with a link to the node' do
         expect(AtlasRb::Resource).to receive(:reparent).with('node', 'par')
                                                        .and_return(OpenStruct.new(id: 'node'))
 
         post '/admin/reparent/move', params: { node_id: 'node', parent_id: 'par' }
 
-        expect(response).to redirect_to(collection_path('node'))
+        expect(response).to redirect_to(admin_reparent_path)
         expect(flash[:notice]).to include('Node Collection')
+        expect(flash[:notice_link]).to eq('label' => 'View it', 'path' => collection_path('node'))
+
+        follow_redirect!
+        expect(response.body).to include(%(href="#{collection_path('node')}"))
+      end
+
+      it 'refuses to move the top-level community' do
+        allow(AtlasRb::Resource).to receive(:find).with('root')
+                                                  .and_return(atlas_node(noid: 'root', klass: 'Community', title: 'NU'))
+        allow(AtlasRb::Resource).to receive(:reparent)
+
+        post '/admin/reparent/move', params: { node_id: 'root', parent_id: 'par' }
+
+        expect(AtlasRb::Resource).not_to have_received(:reparent)
+        expect(response).to redirect_to(admin_reparent_path)
+        expect(flash[:alert]).to eq(Admin::ReparentController::ROOT_REFUSED)
       end
 
       it 're-renders confirm with a generic alert when atlas returns nil' do
@@ -234,9 +250,9 @@ RSpec.describe 'Admin::Reparent', type: :request do
         expect(flash[:alert]).to include('must have a parent')
       end
 
-      # One endpoint serves every type, so this asserts the trail a Work takes
-      # back to its own show page rather than which class was called.
-      it 'reparents a Work and returns to the Work page' do
+      # One endpoint serves every type, so this asserts the link a Work gets
+      # to its own show page rather than which class was called.
+      it 'reparents a Work and links to the Work page' do
         allow(AtlasRb::Resource).to receive(:find).with('wk')
                                                   .and_return(atlas_node(noid: 'wk', klass: 'Work', title: 'A Work'))
         expect(AtlasRb::Resource).to receive(:reparent).with('wk', 'par')
@@ -244,7 +260,8 @@ RSpec.describe 'Admin::Reparent', type: :request do
 
         post '/admin/reparent/move', params: { node_id: 'wk', parent_id: 'par' }
 
-        expect(response).to redirect_to(work_path('wk'))
+        expect(response).to redirect_to(admin_reparent_path)
+        expect(flash[:notice_link]['path']).to eq(work_path('wk'))
         expect(flash[:notice]).to include('A Work')
       end
     end

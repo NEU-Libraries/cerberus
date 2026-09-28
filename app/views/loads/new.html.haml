@@ -32,8 +32,9 @@
           = f.label :archive, class: 'admin-registry-form__label' do
             %i.fa-solid.fa-file-zipper{'aria-hidden' => 'true'}
             Archive file
-          = f.file_field :archive, class: 'form-control', accept: '.tar,.zip', required: true,
-                          data: { 'archive-upload-target' => 'file' }
+          = f.file_field :archive, class: 'form-control archive-upload__drop', accept: '.tar,.zip', required: true,
+                          data: { 'archive-upload-target' => 'file',
+                                  action: 'dragenter->archive-upload#dragOver dragleave->archive-upload#dragEnd drop->archive-upload#dragEnd' }
           - if @loader.multipage?
             .admin-registry-form__hint
               Accepted formats:
@@ -118,5 +119,6 @@
         = f.submit 'Upload', class: 'btn btn-primary',
                    disabled: (@loader.iptc? && @destinations.empty?),
                    data: { 'archive-upload-target' => 'submit' }
-        = link_to loader_loads_path(@loader), class: 'btn btn-warning' do
+        = link_to loader_loads_path(@loader, canceled: 1), class: 'btn btn-warning',
+                  data: { turbo_method: :get, turbo_confirm: 'Cancel this upload? Nothing will be uploaded.' } do
           Cancel

@@ -117,7 +117,7 @@ $audit-tone-unlink:    #8f5e78;
   }
 
   tbody td {
-    padding: 0.45rem 0.85rem;
+    padding: 0.75rem 0.85rem;
     // Top-align so the date, action chip, and NUID pill all pin to one shared
     // top edge — the eye gets a horizontal guide per row instead of a zigzag.
     vertical-align: top;
@@ -169,9 +169,11 @@ $audit-tone-unlink:    #8f5e78;
   &--unlink    { --audit-action-color: #{$audit-tone-unlink}; }
   &--generic   { --audit-action-color: #{$audit-tone-generic}; }
 
-  // Timestamp — date prominent on top, time muted underneath.
+  // Timestamp — date prominent on top, time muted underneath. The date must
+  // not wrap at its hyphens, or a wide Agent column splits it across lines.
   &__when {
     line-height: 1.15;
+    white-space: nowrap;
   }
   &__when-date {
     font-weight: 600;
@@ -278,25 +280,31 @@ $audit-tone-unlink:    #8f5e78;
     padding-left: 0;
   }
 
-  // WHO cell — actor name over its NUID chip; the proxy / acting-as target
-  // (rare) stacks beneath as a muted "for <name>" line. The same
-  // meaning-over-identifier idiom as the When cell's date over time.
-  // Most rows are just the actor, no extra line.
+  // WHO cell — actor name then its NUID chip on one line, with the proxy /
+  // acting-as target (rare) beneath as a muted "for <name>" line. The cell
+  // never wraps, so the column takes its width from the wrapping Detail
+  // column instead of splitting a name from its chip.
   &__who {
     line-height: 1.35;
+    white-space: nowrap;
   }
-  // Block, not inline: this column is narrow and names are not short, so an
-  // inline chip wraps mid-cell. Stacked, the name reads first and the
-  // identifier stays available beneath it.
   &__actor {
-    display: block;
+    margin-right: 0.4rem;
     color: $gray-800;
   }
+  // Beneath the actor on narrow screens; beside it from lg up, where the
+  // wrapping Detail column has the width to give.
   &__on-behalf {
     display: block;
     margin-top: 0.15rem;
     font-size: 0.72rem;
     color: $gray-500;
+
+    @include media-breakpoint-up(lg) {
+      display: inline;
+      margin-top: 0;
+      margin-left: 0.4rem;
+    }
   }
 }
 

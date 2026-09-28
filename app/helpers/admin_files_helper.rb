@@ -6,12 +6,12 @@
 # rather than audit events, so it can't reuse AuditEventsHelper's event-shaped
 # cells directly.
 module AdminFilesHelper
-  # Compact UTC timestamp for a version row; muted em-dash when absent or
+  # Compact Eastern timestamp for a version row; muted em-dash when absent or
   # unparseable so the column still reads cleanly.
   def file_version_when(created)
     return version_empty_cell if created.blank?
 
-    Time.iso8601(created).strftime('%Y-%m-%d %H:%M UTC')
+    Time.iso8601(created).in_time_zone.strftime('%Y-%m-%d %H:%M %Z')
   rescue ArgumentError
     version_empty_cell
   end

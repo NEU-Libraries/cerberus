@@ -14,6 +14,8 @@ class ResourcePermissions
                                    'container public first.'
   }.freeze
 
+  PAST_EMBARGO_REFUSED = "The embargo date wasn't saved — the release date has to be in the future."
+
   COMMUNITY_NARROWING_REFUSED = 'Restricting a community needs DRS administrators — it does not reach the ' \
                                 'collections inside it. Nothing has been changed.'
 
@@ -31,12 +33,15 @@ class ResourcePermissions
   # @param envelope [Hash] the submitted ACL, already parsed by PermissionsForm.
   # @param current_read [Array<String>] the resource's read ACL before this submit.
   # @param actor [User, nil] the acting user.
-  def initialize(solr_type:, id:, envelope:, current_read: [], actor: nil)
-    @solr_type    = solr_type
-    @id           = id
-    @envelope     = envelope
-    @current_read = Array(current_read)
-    @actor        = actor
+  # @param current_embargo [String, nil] the stored release date, so an
+  #   untouched lapsed embargo re-submitted by the form is not refused.
+  def initialize(solr_type:, id:, envelope:, current_read: [], actor: nil, current_embargo: nil)
+    @solr_type       = solr_type
+    @id              = id
+    @envelope        = envelope
+    @current_read    = Array(current_read)
+    @actor           = actor
+    @current_embargo = Embargo.release_date(current_embargo)
   end
 
   # A refusal is reported, not raised: this runs BEFORE the descriptive save in
@@ -50,7 +55,7 @@ class ResourcePermissions
     # The ACL slots only. The form's `permit(:embargo)` leaves a top-level
     # embargo key that nothing reads — PermissionsForm copies the submitted
     # value into permissions[:embargo], which is where it belongs.
-    write(@envelope[:permissions])
+    guarded_write(@envelope[:permissions])
   end
 
   # The create path. Deliberately not #apply!: there is no cascade one line
@@ -63,10 +68,25 @@ class ResourcePermissions
     submitted = @envelope[:permissions]
     return Result.silent if submitted.blank?
 
-    write(submitted.symbolize_keys)
+    guarded_write(submitted.symbolize_keys)
   end
 
   private
+
+    # A past date is dropped rather than failing the whole write, so the
+    # submit's group and visibility changes still land.
+    def guarded_write(payload)
+      return write(payload) unless past_embargo?(payload)
+
+      rest = payload.except(:embargo)
+      result = rest.empty? ? Result.silent : write(rest)
+      result.level ? result : Result.refused(PAST_EMBARGO_REFUSED)
+    end
+
+    def past_embargo?(payload)
+      date = Embargo.release_date(Hash(payload)[:embargo])
+      date.present? && !date.future? && date != @current_embargo
+    end
 
     def write(payload)
       with_stale_retry { AtlasRb::Resource.set_permissions(@id, payload) }

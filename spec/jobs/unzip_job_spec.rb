@@ -42,8 +42,8 @@ RSpec.describe UnzipJob, type: :job do
 
     it 'streams each entry to disk via Zip::Entry#extract (not read)' do
       described_class.new.perform(load_report.id)
-      expect(entries[0]).to have_received(:extract).with(File.join(extracted_dir, 'one.jpg'))
-      expect(entries[1]).to have_received(:extract).with(File.join(extracted_dir, 'two.jpg'))
+      expect(entries[0]).to have_received(:extract).with('one.jpg', destination_directory: extracted_dir)
+      expect(entries[1]).to have_received(:extract).with('two.jpg', destination_directory: extracted_dir)
     end
 
     it 'never invokes get_input_stream (streaming-API discipline)' do
@@ -116,6 +116,27 @@ RSpec.describe UnzipJob, type: :job do
     it 'creates one IptcIngest per file entry that is a JPEG' do
       expect { described_class.new.perform(tar_report.id) }
         .to change { tar_report.iptc_ingests.count }.by(2)
+    end
+  end
+
+  describe 'an archive with no JPEGs' do
+    let(:entries) do
+      [instance_double(Zip::Entry, name: 'readme.txt'), instance_double(Zip::Entry, name: 'scan.pdf')]
+    end
+    let(:zip_file) { instance_double(Zip::File) }
+
+    before do
+      allow(FileUtils).to receive(:mkdir_p)
+      allow(Zip::File).to receive(:open).with(archive_path).and_yield(zip_file)
+      allow(zip_file).to receive(:each) { |&b| entries.each(&b) }
+    end
+
+    # Nothing else would finalize it: no row means no IptcIngestJob.
+    it 'fails the report with one row saying why, instead of hanging at processing' do
+      expect { described_class.new.perform(load_report.id) }.not_to have_enqueued_job(IptcIngestJob)
+
+      expect(load_report.reload).to be_failed
+      expect(load_report.iptc_ingests.sole).to have_attributes(status: 'failed', error_message: described_class::NO_IMAGES)
     end
   end
 

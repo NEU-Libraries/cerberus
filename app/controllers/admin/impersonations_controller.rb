@@ -53,8 +53,7 @@ module Admin
 
         cfg = MODES.fetch(mode)
         send(cfg[:starter], user.nuid)
-        redirect_to root_path,
-                    notice: "Now #{cfg[:verb]} #{user.pretty_name} (#{user.nuid}). Use the banner to exit."
+        redirect_to root_path
       rescue Faraday::Error => e
         # Safe to swallow: start_* emits the audit event before establishing the
         # session, so a failed emit means no session was set.

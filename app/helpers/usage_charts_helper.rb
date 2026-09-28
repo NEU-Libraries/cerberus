@@ -20,6 +20,16 @@ module UsageChartsHelper
     [{ name: 'Unique visitors', data: dense_series(report.range, report.unique_visitors_series) }]
   end
 
+  # Divided by every day in the range, not by the days that have a row: the
+  # series is sparse, and skipping its zero days would inflate the average.
+  # One decimal, so a quiet collection does not read as zero.
+  def usage_daily_visitor_average(report)
+    days = report.range.count
+    return 0 if days.zero?
+
+    (report.unique_visitors_series.values.sum.to_f / days).round(1)
+  end
+
   private
 
     # Every day in the range, zero-filled. The underlying rollups carry no row

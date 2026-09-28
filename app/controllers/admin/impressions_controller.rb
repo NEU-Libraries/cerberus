@@ -33,7 +33,8 @@ module Admin
     def index
       @report = build_report
       @item_results = search_items if params[:q].present?
-      @composition = RepositoryCompositionReport.new
+      @composition = RepositoryCompositionReport.new(scope_fq: composition_scope_fq)
+      @composition_scope_phrase = "in #{item_params[:title]}" if @composition.scoped?
     end
 
     # CSV / Excel of the top-N tables (the quarterly-report artifact). Format
@@ -67,6 +68,19 @@ module Admin
 
         { noid: params[:item_noid], uuid: params[:item_uuid],
           klass: params[:item_klass], title: params[:item_title] }
+      end
+
+      # Composition follows the item scope but never the facet: it is an
+      # inventory of the scoped item, and a facet only narrows the traffic.
+      def composition_scope_fq
+        item = item_params
+        return nil if item.blank? || item[:uuid].blank?
+
+        if item[:klass].in?(%w[Collection Community])
+          ContainerDescendantsQuery.new(noid: item[:noid], uuid: item[:uuid]).subtree_fq
+        else
+          MembershipQuery.identity_fq([item[:uuid]])
+        end
       end
 
       def facet_params

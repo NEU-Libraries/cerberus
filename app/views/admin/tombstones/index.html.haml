@@ -8,7 +8,7 @@
       %i.fa-solid.fa-trash-can-arrow-up{'aria-hidden' => 'true'}
       Tombstoned items
       - if documents.any?
-        %span.admin-registry__count= pluralize(documents.size, 'item')
+        %span.admin-registry__count= pluralize(@response.total, 'item')
     .admin-registry__head-actions
       %span.admin-registry__subtitle
         - if current_user&.admin?

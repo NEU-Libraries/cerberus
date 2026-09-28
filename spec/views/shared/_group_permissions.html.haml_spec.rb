@@ -24,7 +24,14 @@ describe 'shared/_group_permissions.html.haml' do
     end
 
     it 'preselects the row’s current ability' do
-      expect(rendered).to have_css('select.ability option[value="read"][selected]', text: 'View')
+      expect(rendered).to have_css('select.ability option[value="read"][selected]', text: 'view')
+    end
+
+    # Each row reads as a sentence: "Members of [group] can [view] this work".
+    it 'phrases the row as a sentence about the resource, under an explainer' do
+      expect(rendered).to have_css('#group-list_1 .form-text', text: 'Members of')
+      expect(rendered).to have_css('#group-list_1 .form-text', text: 'this work')
+      expect(rendered).to include('Select the groups that should be able to view or manage this work.')
     end
 
     it 'omits the locked-grant footnote' do
@@ -67,7 +74,7 @@ describe 'shared/_group_permissions.html.haml' do
 
     it 'states the group, its ability, and the locked marker as text' do
       expect(rendered).to include('Curators')
-      expect(rendered).to include('Manage')
+      expect(rendered).to include('manage')
       expect(rendered).to include('Locked')
       expect(rendered).to have_css('i.fa-lock')
     end

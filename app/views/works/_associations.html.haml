@@ -25,4 +25,9 @@
                 -# finder_doc_heading is the app's one title-off-a-Solr-doc reader,
                 -# with the untitled fallback; it needs no blacklight_config.
                 = link_to finder_doc_heading(doc), work_path(doc.to_param), class: 'work-association__title'
-                %span.work-association__id= doc.to_param
+                -# A glimpse of the abstract tells related works apart better than
+                -# an identifier; the PID remains the fallback when there is none.
+                - if (abstract = Array(doc['description_tsim']).first.presence)
+                  %span.work-association__abstract= truncate(abstract, length: 160, separator: ' ')
+                - else
+                  %span.work-association__id= doc.to_param

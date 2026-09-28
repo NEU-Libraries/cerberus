@@ -46,7 +46,12 @@ module StreamingOnly
   # No dedicated reader; the map rides the Work payload. The write's own response
   # nests it under `work`, not where the gem's docstring promises.
   def self.stored_policy(work_id, nuid: nil)
-    work = AtlasRb::Work.find(work_id, nuid: nuid)
+    policy_from(AtlasRb::Work.find(work_id, nuid: nuid))
+  end
+
+  # The same map off a Work payload already in hand, so a show page can ask
+  # without a second read.
+  def self.policy_from(work)
     (work&.dig('derivative_permissions') || {}).to_h.transform_values { |groups| Array(groups) }
   end
 

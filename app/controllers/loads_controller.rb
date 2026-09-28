@@ -23,6 +23,7 @@ class LoadsController < ApplicationController
 
   def index
     @load_reports = LoadReport.where(loader: @loader).order(created_at: :desc)
+    flash.now[:notice] = 'Upload canceled.' if params[:canceled]
   end
 
   def show
@@ -37,7 +38,7 @@ class LoadsController < ApplicationController
     # IPTC is boxed to its root collection's children (the dropdown). XML and
     # multipage pick any collection via the client-driven typeahead, so they
     # need no precomputed destination list.
-    @destinations = @loader.iptc? ? load_destinations : []
+    @destinations = @loader.iptc? ? IptcDestinations.call(root: @loader.root_collection) : []
   end
 
   # JSON typeahead for the XML/multipage destination picker: any collection by
@@ -71,7 +72,7 @@ class LoadsController < ApplicationController
     # redundant banner would only contradict the body once the poll runs.
     redirect_to loader_load_path(@loader, @load_report)
   rescue ActiveRecord::RecordInvalid
-    @destinations = @loader.iptc? ? load_destinations : []
+    @destinations = @loader.iptc? ? IptcDestinations.call(root: @loader.root_collection) : []
     render :new, status: :unprocessable_content
   end
 
@@ -122,7 +123,7 @@ class LoadsController < ApplicationController
     def rerender_new(alert, parent_id)
       flash.now[:alert] = alert
       @load_report      = LoadReport.new(parent_collection_id: parent_id)
-      @destinations     = @loader.iptc? ? load_destinations : []
+      @destinations     = @loader.iptc? ? IptcDestinations.call(root: @loader.root_collection) : []
       render :new, status: :unprocessable_content
     end
 
@@ -164,21 +165,6 @@ class LoadsController < ApplicationController
       return if @loader && current_user&.groups&.include?(@loader.group)
 
       render template: 'errors/forbidden', status: :forbidden, layout: 'application'
-    end
-
-    # Atlas's children endpoint returns child IDs only; resolve them to
-    # id+title for the picker in a single batched find_many rather than a
-    # find-per-id fan-out. find_many is unordered and may drop unresolvable
-    # ids, so index by noid and re-impose the children order.
-    def load_destinations
-      ids = AtlasRb::Collection.children(@loader.root_collection)
-      return [] if ids.blank?
-
-      by_noid = AtlasRb::Resource.find_many(ids).index_by { |n| n['noid'] }
-      ids.filter_map { |id| by_noid[id] }
-    rescue Faraday::Error, JSON::ParserError => e
-      Rails.logger.error("LoadsController#load_destinations: #{e.class} #{e.message}")
-      []
     end
 
     # FileUtils.cp against the Rails tempfile path — streaming copy,

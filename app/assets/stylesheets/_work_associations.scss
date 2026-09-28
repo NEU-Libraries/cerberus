@@ -69,6 +69,12 @@
     font-weight: 500;
   }
 
+  &__abstract {
+    font-size: 0.82rem;
+    color: $gray-600;
+    line-height: 1.4;
+  }
+
   // Identifiers should look like identifiers, not body words.
   &__id {
     font-family: var(--bs-font-monospace);

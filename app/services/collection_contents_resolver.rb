@@ -1,14 +1,18 @@
 # frozen_string_literal: true
 
-# A Collection's member Works as gated Solr documents, in the page-batched shape
-# {MetadataExportPacker} consumes. See docs/discovery.md.
+# A Collection's member Works — its own and every sub-collection's — as gated
+# Solr documents, in the page-batched shape {MetadataExportPacker} consumes.
+# See docs/discovery.md.
 #
 # Gated: every query runs through the controller's `search_service.search_builder`,
 # so a viewer only ever sees Works they can discover.
 class CollectionContentsResolver
-  def initialize(valkyrie_id:, search_service:)
+  # @param noid [String, nil] the collection's noid, which the descendant walk
+  #   keys on; without it only the collection's direct members are exported.
+  def initialize(valkyrie_id:, search_service:, noid: nil)
     @valkyrie_id = valkyrie_id
     @search_service = search_service
+    @noid = noid
   end
 
   def contents_count
@@ -37,8 +41,21 @@ class CollectionContentsResolver
   private
 
     def contents_fqs
-      [MembershipQuery.members_fq([@valkyrie_id], include_linked: true),
-       *SetResolver::DEFAULT_TYPE_FILTERS]
+      @contents_fqs ||= [MembershipQuery.members_fq(container_uuids, include_linked: true),
+                         *SetResolver::DEFAULT_TYPE_FILTERS]
+    end
+
+    # Works hang off their immediate parent only, so the sub-collections have
+    # to be found first — the same two-step walk SetResolver does for a Set.
+    def container_uuids
+      [@valkyrie_id, *descendant_container_uuids]
+    end
+
+    def descendant_container_uuids
+      return [] if @noid.blank?
+
+      search(MembershipQuery.descendants_fq([@noid]), 'internal_resource_tesim:(Collection OR Community)',
+             rows: 100_000, fl: 'id').documents.map(&:id)
     end
 
     def search(*filter_queries, **extra)

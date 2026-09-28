@@ -1,6 +1,6 @@
 - content_for(:head) { tag.meta(name: "turbo-cache-control", content: "no-cache") }
-- staff_link  = link_to "contacting the DRS staff", "mailto:Library-Repository-Team@neu.edu"
-- report_link = link_to "reporting the problem", "https://northeastern.libanswers.com/form?queue_id=5581&resource=#{CGI::escape(request.original_url)}", target: "_blank"
+- staff_link  = link_to "contact DRS staff", "mailto:Library-Repository-Team@neu.edu"
+- report_link = link_to "report the problem", "https://northeastern.libanswers.com/form?queue_id=5581&resource=#{CGI::escape(request.original_url)}", target: "_blank"
 .error-page.error-page--error
   %header.error-page__head
     %i.fa-solid.fa-triangle-exclamation.error-page__icon{'aria-hidden' => 'true'}
@@ -12,6 +12,4 @@
     %p.error-page__lede
       The DRS tried to process your request but encountered an error. We apologize for the inconvenience and will resolve the error soon.
   .error-page__actions
-    You might be interested in #{staff_link}
-    %span.sep ·
-    or #{report_link}.
+    Please #{staff_link} for help or #{report_link}.

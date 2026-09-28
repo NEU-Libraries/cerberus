@@ -188,10 +188,10 @@ describe CommunitiesController do
         expect(response.body).not_to include('Scoped to:')
       end
 
-      it 'facets by content type and shows the "Faceted by" chip' do
+      it 'facets by content type and shows the "Filtered by" chip' do
         get :edit, params: { id: community.id, analytics_facet_type: 'content', analytics_facet_value: 'Image' }
 
-        expect(response.body).to include('Faceted by: Content: Image')
+        expect(response.body).to include('Filtered by: Content: Image')
       end
 
       it 'renders the Composition tab scoped to this community\'s own subtree' do
@@ -392,6 +392,7 @@ describe CommunitiesController do
       sign_in user
     end
 
+    # A top-level community has no parent, so this also covers the fallback.
     it 'tombstones through the generic endpoint and reports success on a 2xx' do
       allow(AtlasRb::Resource).to receive(:tombstone)
         .and_return(instance_double(Faraday::Response, success?: true))
@@ -455,7 +456,7 @@ describe CommunitiesController do
 
       expect(AtlasRb::Community).not_to have_received(:create)
       expect(ShowcaseProvisioner).not_to have_received(:call)
-      expect(flash[:alert]).to eq('Please provide a title.')
+      expect(flash[:alert]).to eq('Please give your community a title.')
       expect(response).to redirect_to(new_community_community_path(parent.id))
     end
   end
@@ -568,7 +569,7 @@ describe CommunitiesController do
       patch :update, params: { id: community.id, community: { title: '', description: 'Whatever' } }
 
       expect(AtlasRb::Resource).not_to have_received(:put_mods)
-      expect(flash[:alert]).to eq('Please provide a title.')
+      expect(flash[:alert]).to eq('Please give your community a title.')
       expect(response).to redirect_to(edit_community_path(community.id))
     end
 

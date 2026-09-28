@@ -12,18 +12,18 @@ module ContainerAnalyticsHelper
     effective_item[:noid].to_s != base_item[:noid].to_s
   end
 
+  # The whole-container wording claims the entire subtree, so a drill-down or a
+  # filter gets its own sentence rather than one the figures below contradict.
   def container_analytics_scope_blurb(report, base_item, effective_item)
     container = base_item[:klass].downcase
-    subject =
-      if container_analytics_drilled?(base_item, effective_item)
-        "#{effective_item[:title]} — one #{effective_item[:klass].downcase} within this #{container}"
-      elsif report.scope.facet_active?
-        "the Works under this #{container} matching the facet below"
-      else
-        "everything under this #{container} — the #{container} itself and every descendant Work"
-      end
-    "Views, downloads, and visitors for #{subject}. " \
-      "Last #{ImpressionsReport::DEFAULT_DAYS} days, human traffic only."
+    if container_analytics_drilled?(base_item, effective_item)
+      narrowed_blurb("#{effective_item[:title]} — one #{effective_item[:klass].downcase} within this #{container}")
+    elsif report.scope.facet_active?
+      narrowed_blurb("the works under this #{container} that match the filter below")
+    else
+      "An overview of the contents and usage of #{base_item[:title]}, including counts of its communities, " \
+        'collections, and works, along with usage statistics recorded by human visitors.'
+    end
   end
 
   # Append the fragment as a string, never url_for's :anchor option: +params+
@@ -33,6 +33,11 @@ module ContainerAnalyticsHelper
   def container_analytics_path(klass, noid, params = {})
     path_helper = klass == 'Community' ? :edit_community_path : :edit_collection_path
     "#{public_send(path_helper, noid, params)}#analytics"
+  end
+
+  def narrowed_blurb(subject)
+    "Usage statistics recorded by human visitors for #{subject}, " \
+      "over the last #{ImpressionsReport::DEFAULT_DAYS} days."
   end
 
   def container_analytics_preserved_params(*except)

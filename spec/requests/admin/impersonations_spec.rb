@@ -181,14 +181,15 @@ RSpec.describe 'Admin::Impersonations', type: :request do
     end
 
     describe 'POST /admin/act_as' do
-      it 'starts an acting-as session and redirects with a notice' do
+      # No flash: the persistent banner already says who is being impersonated.
+      it 'starts an acting-as session and redirects without a notice' do
         stub_target('000000002')
         post admin_act_as_path, params: { nuid: '000000002' }
 
         expect(session[:acting_as_nuid]).to eq('000000002')
         expect(session[:view_as_nuid]).to be_blank
         expect(response).to redirect_to(root_path)
-        expect(flash[:notice]).to match(/acting as Jane Doe \(000000002\)/)
+        expect(flash[:notice]).to be_nil
       end
 
       it 'records the session start (admin actor, target, mode)' do
@@ -214,13 +215,13 @@ RSpec.describe 'Admin::Impersonations', type: :request do
     end
 
     describe 'POST /admin/view_as' do
-      it 'starts a view-as session and redirects with a notice' do
+      it 'starts a view-as session and redirects without a notice' do
         stub_target('000000002')
         post admin_view_as_path, params: { nuid: '000000002' }
 
         expect(session[:view_as_nuid]).to eq('000000002')
         expect(session[:acting_as_nuid]).to be_blank
-        expect(flash[:notice]).to match(/viewing as Jane Doe/)
+        expect(flash[:notice]).to be_nil
       end
     end
 

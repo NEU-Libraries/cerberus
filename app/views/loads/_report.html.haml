@@ -1,4 +1,4 @@
-- ingests = report_ingests(load_report, loader).order(report_ingest_order(loader)).to_a
+- ingests = report_ingests(load_report, loader).order(*report_ingest_order(loader)).to_a
 .admin-registry.my-3{data: { controller: 'load-poll', 'load-poll-terminal-value' => load_report.terminal?.to_s, 'load-poll-url-value' => loader_load_path(loader, load_report) }}
   %header.admin-registry__head
     %span.admin-registry__title

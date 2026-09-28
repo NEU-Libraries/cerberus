@@ -40,8 +40,8 @@
         = render 'shared/visibility_control', resource: 'work'
       .col-sm
         %h5.pb-2 Embargo Release Date
-        %input.form-select.form-select-sm#embargo{name: "work[permissions][embargo]", type: "date", value: @embargo}/
-        %label.small.py-3{for: "embargo"} If an embargo is required, select the release date for the file.
+        %input.form-select.form-select-sm#embargo{name: "work[permissions][embargo]", type: "date", value: @embargo, min: @embargo_min}/
+        %label.small.py-3{for: "embargo"} If an embargo is required, select the release date for the file. Release dates are in Eastern time.
 
     = render 'shared/group_permissions', resource: 'work'
 
@@ -57,4 +57,4 @@
                 tombstone_work_path(params[:id]),
                 class: 'btn btn-warning',
                 data: { turbo_method: :post,
-                        turbo_confirm: 'Cancel this upload? The Work will be deleted.' }
+                        turbo_confirm: 'The work will be deleted and you will be returned to the collection page.' }

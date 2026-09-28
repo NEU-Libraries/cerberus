@@ -42,8 +42,8 @@ RSpec.describe 'Admin::Tombstones', type: :request do
                      'tombstoned_bsi'          => true)
   end
 
-  def fake_results(*docs)
-    instance_double(Blacklight::Solr::Response, documents: docs, total_pages: 1)
+  def fake_results(*docs, total: docs.size)
+    instance_double(Blacklight::Solr::Response, documents: docs, total_pages: 1, total: total)
   end
 
   describe 'admin gate' do
@@ -97,6 +97,15 @@ RSpec.describe 'Admin::Tombstones', type: :request do
         expect(response.body).to include('Withdrawn Thesis', 'abc', 'Old Community', 'Restore')
       end
 
+      it 'counts every withdrawn item, not just the page on screen' do
+        allow(TombstonedItems).to receive(:call)
+          .and_return(fake_results(tombstoned_doc(noid: 'abc', title: 'Withdrawn Thesis'), total: 8000))
+
+        get '/admin/tombstones'
+
+        expect(response.body).to include('8000 items')
+      end
+
       it 'shows the empty state when nothing is tombstoned' do
         allow(TombstonedItems).to receive(:call).and_return(fake_results)
         get '/admin/tombstones'
@@ -135,6 +144,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
 
         expect(response).to redirect_to(admin_tombstones_path)
         expect(flash[:notice]).to include('restored and is now discoverable')
+        expect(flash[:notice_link]).to eq('label' => 'View it', 'path' => work_path('abc'))
       end
 
       # One endpoint serves all three now, so `type` no longer picks a class.

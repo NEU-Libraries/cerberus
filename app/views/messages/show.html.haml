@@ -10,7 +10,7 @@
       %i.fa-solid.fa-envelope-open{'aria-hidden' => 'true'}
       = @message.subject
     .admin-registry__head-actions
-      = button_to message_path(@message), method: :delete, class: 'btn btn-outline-danger btn-sm',
+      = button_to message_path(@message), method: :delete, class: 'btn btn-tonal-danger btn-sm',
         form: { data: { turbo_confirm: 'Dismiss this message from your inbox?' } } do
         %i.fa-solid.fa-trash-can.me-1{'aria-hidden' => 'true'}
         Dismiss

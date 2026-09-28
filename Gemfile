@@ -116,6 +116,9 @@ gem 'rack-timeout', require: 'rack/timeout/base'
 gem 'roo'
 gem 'rsolr', '>= 1.0', '< 3'
 gem 'ruby-vips'
+# A floor, not a pin: before 3.4.0 Zip::Entry#extract can write outside its
+# destination (GHSA-47m2-wp7j-p9vc). roo and caxlsx pull it in regardless.
+gem 'rubyzip', '>= 3.4'
 gem 'sass-embedded'
 gem 'solid_queue'
 gem 'timescaledb' # hypertable migration helper + schema dumper for the impressions analytics store
@@ -151,5 +154,4 @@ group :test do
   gem 'factory_bot_rails'
   gem 'rails-controller-testing'
   gem 'selenium-webdriver'
-  gem 'webdrivers'
 end

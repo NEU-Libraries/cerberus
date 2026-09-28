@@ -38,7 +38,9 @@ module Cerberus
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
-    # config.time_zone = "Central Time (US & Canada)"
+    # The university is in Boston, so "today" (embargo dates, daily digests) and
+    # every displayed time follow Eastern time, and the UI says so.
+    config.time_zone = "Eastern Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
     config.iiif_host = ''
     config.active_job.queue_adapter = :solid_queue

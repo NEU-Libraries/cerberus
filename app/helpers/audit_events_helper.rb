@@ -81,11 +81,11 @@ module AuditEventsHelper
   end
 
   def audit_event_timestamp(event)
-    parsed = Time.iso8601(event['occurred_at'])
-    content_tag(:div, class: 'audit-event__when', title: parsed.iso8601) do
+    parsed = Time.iso8601(event['occurred_at']).in_time_zone
+    content_tag(:div, class: 'audit-event__when', title: event['occurred_at']) do
       safe_join([
                   content_tag(:div, parsed.strftime('%Y-%m-%d'), class: 'audit-event__when-date'),
-                  content_tag(:div, parsed.strftime('%H:%M UTC'), class: 'audit-event__when-time')
+                  content_tag(:div, parsed.strftime('%H:%M %Z'), class: 'audit-event__when-time')
                 ])
     end
   end
@@ -135,12 +135,12 @@ module AuditEventsHelper
 
   def audit_event_who(event)
     actor = audit_event_actor(event['actor_nuid'])
-    return actor if event['on_behalf_of_nuid'].blank?
-
-    on_behalf = content_tag(:span, class: 'audit-event__on-behalf') do
-      safe_join(['for ', audit_event_actor(event['on_behalf_of_nuid'])])
+    if event['on_behalf_of_nuid'].present?
+      on_behalf = content_tag(:span, class: 'audit-event__on-behalf') do
+        safe_join(['for ', audit_event_actor(event['on_behalf_of_nuid'])])
+      end
     end
-    content_tag(:div, safe_join([actor, on_behalf]), class: 'audit-event__who')
+    content_tag(:div, safe_join([actor, on_behalf].compact), class: 'audit-event__who')
   end
 
   def audit_event_actor(nuid)
@@ -160,7 +160,7 @@ module AuditEventsHelper
     path = audit_event_view_path(event, resource_id)
     return if path.nil?
 
-    link_to(path, class: 'btn btn-sm btn-outline-secondary audit-event__view-btn') do
+    link_to(path, class: 'btn btn-sm btn-tonal-secondary audit-event__view-btn') do
       safe_join([
                   content_tag(:i, '', class: 'fa-solid fa-magnifying-glass', 'aria-hidden': 'true'),
                   'View'

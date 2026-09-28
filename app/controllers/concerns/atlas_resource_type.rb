@@ -35,4 +35,16 @@ module AtlasResourceType
   def atlas_class
     raise NotImplementedError, "#{self.class.name} must declare atlas_resource"
   end
+
+  private
+
+    # Where to land once the resource is gone. Read it BEFORE a tombstone: the
+    # withdrawn resource's own read is gated. A failed read or a top-level
+    # resource falls back to the homepage rather than blocking the caller.
+    def parent_path(id)
+      parent = Array(atlas_class.find(id)&.ancestors).last
+      parent ? resource_path(parent['klass'], parent['noid']) : root_path
+    rescue AtlasRb::Error, Faraday::Error
+      root_path
+    end
 end

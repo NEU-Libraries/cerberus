@@ -141,9 +141,8 @@ prefix.
 ### Composition ignores the drill-down
 
 Overview, Top files and Top collections all follow the drill-down. Composition
-does not. This mirrors the admin dashboard's own Composition tab, which is
-always unscoped by item and facet. On the edit page it always means "composition
-of this container's own subtree", whatever is drilled into above it.
+does not. On the edit page it always means "composition of this container's own
+subtree", whatever is drilled into above it.
 
 ### The facet picker
 
@@ -280,8 +279,13 @@ every resource regardless of the viewer's own visibility.
 
 `scope_fq` is an additional raw `fq` fragment — for example
 `ContainerDescendantsQuery#subtree_fq` — restricting every count to one
-container's subtree. `nil`, the default, is unscoped: the repo-wide behaviour the
-admin dashboard's Composition tab has always had.
+container's subtree. `nil`, the default, is unscoped and counts the whole repository.
+
+The admin dashboard scopes Composition to its picked item, and never to its
+facet. A Collection or Community counts its own subtree, through `subtree_fq`.
+A Work counts only itself, through `MembershipQuery.identity_fq`. A facet
+narrows the traffic figures only, because the Content overview is an inventory
+of the scoped item, not of its traffic.
 
 Person docs sit outside the structural containment tree that `subtree_fq`
 matches, so a scoped `entity_counts` always reads 0 Person whatever the

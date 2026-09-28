@@ -3,8 +3,6 @@
     %span.admin-registry__title
       %i.fa-solid.fa-file-import{'aria-hidden' => 'true'}
       = @loader.display_name
-      - if @load_reports.any?
-        %span.admin-registry__count= pluralize(@load_reports.count, 'batch')
     .admin-registry__head-actions
       %span.admin-registry__subtitle
         %i.fa-solid.fa-folder-tree{'aria-hidden' => 'true'}
@@ -20,6 +18,8 @@
           %tr
             %th{scope: 'col'} Status
             %th{scope: 'col'} Archive
+            %th{scope: 'col'} Submitted by
+            %th{scope: 'col'} Destination
             %th{scope: 'col'} Progress
             %th{scope: 'col'} Started
             %th{scope: 'col'} Finished
@@ -33,9 +33,19 @@
                   = lr.status.humanize
               %td
                 %span.admin-registry-table__id= lr.source_filename
+              %td
+                - if lr.creator_nuid.present?
+                  %span.admin-registry-table__id= lr.creator_nuid
+                - else
+                  %span.text-muted —
+              %td
+                - if lr.parent_collection_id.present?
+                  %span.admin-registry-table__id= link_to lr.parent_collection_id, collection_path(lr.parent_collection_id), class: 'text-decoration-none'
+                - else
+                  %span.text-muted —
               %td.text-muted= load_report_progress_summary(lr)
-              %td= lr.started_at&.strftime('%Y-%m-%d %H:%M') || '—'
-              %td= lr.finished_at&.strftime('%Y-%m-%d %H:%M') || '—'
+              %td= lr.started_at&.strftime('%Y-%m-%d %H:%M %Z') || '—'
+              %td= lr.finished_at&.strftime('%Y-%m-%d %H:%M %Z') || '—'
               %td.text-end
                 = link_to loader_load_path(@loader, lr), class: 'admin-registry-table__edit' do
                   %i.fa-solid.fa-arrow-right{'aria-hidden' => 'true'}

@@ -31,7 +31,13 @@ RSpec.describe PdfRenditionJob, type: :job do
     expect(WordToPdf).to have_received(:call).with(source_path: staged_path, target_path: pdf_path)
     expect(AtlasRb::Blob).to have_received(:create)
       .with(work_id, pdf_path, 'thesis.pdf', idempotency_key: rendition_key)
-    expect(IiifAssetsJob).to have_received(:perform_now).with(work_id, pdf_path)
+    expect(IiifAssetsJob).to have_received(:perform_now).with(work_id, pdf_path, refresh: false)
+  end
+
+  it 'passes a refresh through, so a replaced document gets a fresh thumbnail' do
+    described_class.new.perform(work_id, staged_path, rendition_key, refresh: true)
+
+    expect(IiifAssetsJob).to have_received(:perform_now).with(work_id, pdf_path, refresh: true)
   end
 
   it 'enqueues full-text extraction from the rendition PDF (Office text path)' do

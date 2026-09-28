@@ -35,6 +35,19 @@ RSpec.describe 'Collection metadata exports', type: :request do
       .and include("-#{collection.id}-metadata.zip")
   end
 
+  # Works hang off their immediate parent, so without the descendant walk a
+  # collection whose works all sit one level down exported nothing.
+  it 'includes works that sit in a sub-collection' do
+    sub_collection = public_container(AtlasRb::Collection, collection.id)
+    public_work(sub_collection.id)
+    sign_in curator
+
+    get export_collection_path(collection.id)
+
+    expect(response).to have_http_status(:ok)
+    expect(response.headers['Content-Type']).to include('application/zip')
+  end
+
   it 'redirects with an alert when the collection has no member metadata' do
     sign_in curator
 

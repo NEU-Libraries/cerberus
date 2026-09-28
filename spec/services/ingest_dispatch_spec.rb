@@ -40,7 +40,7 @@ RSpec.describe IngestDispatch do
     allow(Marcel::MimeType).to receive(:for).and_return('video/mp4') # content irrelevant; mime stubbed
     path = fixtures.join('image.png')
     expect { dispatch(path) }
-      .to have_enqueued_job(MediaRenditionJob).with(work_id, path.to_s, rendition_key)
+      .to have_enqueued_job(MediaRenditionJob).with(work_id, path.to_s, rendition_key, refresh: false)
       .and have_enqueued_job(ContentCreationJob)
       .and not_have_enqueued_job(IiifAssetsJob)
   end
@@ -48,7 +48,7 @@ RSpec.describe IngestDispatch do
   it 'routes Word documents to PdfRenditionJob with the derived rendition key' do
     path = fixtures.join('example.docx')
     expect { dispatch(path) }
-      .to have_enqueued_job(PdfRenditionJob).with(work_id, path.to_s, rendition_key)
+      .to have_enqueued_job(PdfRenditionJob).with(work_id, path.to_s, rendition_key, refresh: false)
       .and have_enqueued_job(ContentCreationJob)
       .and not_have_enqueued_job(IiifAssetsJob)
   end
@@ -56,7 +56,7 @@ RSpec.describe IngestDispatch do
   it 'routes PowerPoint documents to PdfRenditionJob' do
     path = fixtures.join('example.pptx')
     expect { dispatch(path) }
-      .to have_enqueued_job(PdfRenditionJob).with(work_id, path.to_s, rendition_key)
+      .to have_enqueued_job(PdfRenditionJob).with(work_id, path.to_s, rendition_key, refresh: false)
       .and not_have_enqueued_job(IiifAssetsJob)
   end
 
@@ -69,7 +69,7 @@ RSpec.describe IngestDispatch do
       File.binwrite(path, "\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1#{"\x00" * 512}".b)
 
       expect { dispatch(path, 'legacy.doc') }
-        .to have_enqueued_job(PdfRenditionJob).with(work_id, path, rendition_key)
+        .to have_enqueued_job(PdfRenditionJob).with(work_id, path, rendition_key, refresh: false)
         .and not_have_enqueued_job(IiifAssetsJob)
     end
   end
@@ -138,6 +138,21 @@ RSpec.describe IngestDispatch do
       expect { dispatch_derivatives_only(path) }
         .to have_enqueued_job(IiifAssetsJob).with(work_id, path.to_s, refresh: true)
         .and not_have_enqueued_job(ContentCreationJob)
+    end
+
+    # The rendition jobs seed the thumbnail too, so a replaced Word file or
+    # video would otherwise keep the old one.
+    it 'refreshes a Word document through its rendition job' do
+      path = fixtures.join('example.docx')
+      expect { dispatch_derivatives_only(path) }
+        .to have_enqueued_job(PdfRenditionJob).with(work_id, path.to_s, rendition_key, refresh: true)
+    end
+
+    it 'refreshes audio/video through its rendition job' do
+      allow(Marcel::MimeType).to receive(:for).and_return('video/mp4')
+      path = fixtures.join('image.png')
+      expect { dispatch_derivatives_only(path) }
+        .to have_enqueued_job(MediaRenditionJob).with(work_id, path.to_s, rendition_key, refresh: true)
     end
 
     it 'enqueues nothing for an unenriched type (no derivatives, no primary)' do
