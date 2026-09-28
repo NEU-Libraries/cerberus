@@ -19,7 +19,10 @@ RSpec.describe 'Load report polling', :browser, type: :system do
                        status: :processing, started_at: Time.current)
   end
 
+  let(:before_visit) { nil }
+
   before do
+    before_visit
     sign_in_as(AtlasFixtures::ADMIN_NUID)
     visit loader_load_path(loader.slug, report)
   end
@@ -43,6 +46,29 @@ RSpec.describe 'Load report polling', :browser, type: :system do
     expect(page).to have_content('Completed', wait: 15)
     expect(page_marked?).to be(true)
     expect(poll_flag).to eq('true')
+  end
+
+  # Only a fresh frame's connect() schedules the next poll, and a failed reload
+  # leaves the old frame in place, so without a retry one bad response ended
+  # polling for good. The second call to show is the first poll; it fails.
+  describe 'after a failed poll' do
+    let(:before_visit) do
+      calls = 0
+      allow_any_instance_of(LoadsController).to receive(:show).and_wrap_original do |original, *args|
+        calls += 1
+        next original.call(*args) unless calls == 2
+
+        original.receiver.render plain: 'upstream timeout', status: :internal_server_error
+      end
+    end
+
+    it 'keeps polling and still reaches Completed, without blanking the report' do
+      expect(page).to have_content('Processing')
+      report.update!(status: :completed, finished_at: Time.current)
+
+      expect(page).to have_content('Completed', wait: 20)
+      expect(page).to have_no_content('Content missing')
+    end
   end
 
   # --- helpers ---------------------------------------------------------------
