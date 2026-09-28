@@ -120,7 +120,8 @@ RSpec.describe 'Admin::Impressions', type: :request do
 
     it 'scopes to a picked Collection and keeps the Top collections tab' do
       allow(ContainerDescendantsQuery).to receive(:new).with(noid: 'c1', uuid: 'uuid-c1')
-                                                       .and_return(instance_double(ContainerDescendantsQuery, noids: ['c1'], work_noids: [], container_noids: ['c1']))
+                                                       .and_return(instance_double(ContainerDescendantsQuery, noids: ['c1'], work_noids: [], container_noids: ['c1'],
+                                                                                        subtree_fq: 'id:uuid-c1'))
 
       get '/admin/impressions', params: { item_noid: 'c1', item_uuid: 'uuid-c1', item_klass: 'Collection', item_title: 'Sample Collection' }
 
@@ -154,7 +155,8 @@ RSpec.describe 'Admin::Impressions', type: :request do
 
     it 'combines an item scope with a facet, hiding Top collections even for a Collection' do
       allow(ContainerDescendantsQuery).to receive(:new).with(noid: 'c1', uuid: 'uuid-c1')
-                                                       .and_return(instance_double(ContainerDescendantsQuery, noids: ['c1'], work_noids: [], container_noids: ['c1']))
+                                                       .and_return(instance_double(ContainerDescendantsQuery, noids: ['c1'], work_noids: [], container_noids: ['c1'],
+                                                                                        subtree_fq: 'id:uuid-c1'))
       allow(FacetedWorkNoids).to receive(:call).with(type: 'content', value: 'Image').and_return([])
 
       get '/admin/impressions', params: { item_noid: 'c1', item_uuid: 'uuid-c1', item_klass: 'Collection',
@@ -169,19 +171,61 @@ RSpec.describe 'Admin::Impressions', type: :request do
   describe 'Composition tab' do
     before { sign_in admin_user }
 
-    it 'always renders, ignoring the date range/segment/scope, with entity counts and a classification chart' do
-      allow(SolrFacetValues).to receive(:call).with(field: 'internal_resource_tesim', extra_fq: [])
+    def stub_classifications(extra_fq)
+      allow(SolrFacetValues).to receive(:call).with(field: 'classification_ssim', extra_fq:)
+                                              .and_return([['Image', 90], ['Text', 60]])
+    end
+
+    # The facet picker always lists the repository-wide content types, so its
+    # unscoped classification lookup is stubbed alongside the scoped one.
+    def stub_composition(scope_fq)
+      stub_classifications(['internal_resource_tesim:Work'])
+      stub_classifications(['internal_resource_tesim:Work', *scope_fq])
+      allow(SolrFacetValues).to receive(:call).with(field: 'internal_resource_tesim', extra_fq: scope_fq)
                                               .and_return([['community', 5], ['collection', 10], ['work', 200], ['person', 8]])
       allow(Blacklight.default_index).to receive(:search)
-        .with(hash_including(fq: ['internal_resource_tesim:Work', 'read_access_group_ssim:public']))
+        .with(hash_including(fq: ['internal_resource_tesim:Work', 'read_access_group_ssim:public', *scope_fq]))
         .and_return(instance_double(Blacklight::Solr::Response, total: 150))
-      allow(SolrFacetValues).to receive(:call).with(field: 'classification_ssim', extra_fq: ['internal_resource_tesim:Work'])
-                                              .and_return([['Image', 90], ['Text', 60]])
+    end
 
-      get '/admin/impressions', params: { segment: 'all', item_noid: 'w1', item_uuid: 'uuid-w1', item_klass: 'Work', item_title: 'X' }
+    it 'counts the whole repository when unscoped, ignoring the date range and segment' do
+      stub_composition([])
+
+      get '/admin/impressions', params: { segment: 'all' }
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('Content overview', 'Faculty', 'Staff', 'Public works', 'Private works')
+      expect(response.body).to include('Content overview', 'Faculty', 'Staff', 'Public works', 'Private works',
+                                       'works across the DRS')
+    end
+
+    it "counts a scoped Collection's own subtree" do
+      allow(ContainerDescendantsQuery).to receive(:new).with(noid: 'c1', uuid: 'uuid-c1')
+                                                       .and_return(instance_double(ContainerDescendantsQuery, noids: ['c1'], work_noids: [], container_noids: ['c1'],
+                                                                                                              subtree_fq: 'id:uuid-c1'))
+      stub_composition(['id:uuid-c1'])
+
+      get '/admin/impressions', params: { item_noid: 'c1', item_uuid: 'uuid-c1', item_klass: 'Collection', item_title: 'Sample Collection' }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('works in Sample Collection')
+    end
+
+    it 'counts only the scoped Work itself' do
+      stub_composition(['{!terms f=id}uuid-w1'])
+
+      get '/admin/impressions', params: { item_noid: 'w1', item_uuid: 'uuid-w1', item_klass: 'Work', item_title: 'Sample Work' }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('works in Sample Work')
+    end
+
+    it 'ignores a facet, which narrows traffic rather than the inventory' do
+      allow(FacetedWorkNoids).to receive(:call).with(type: 'content', value: 'Image').and_return([])
+      stub_composition([])
+
+      get '/admin/impressions', params: { facet_type: 'content', facet_value: 'Image' }
+
+      expect(response.body).to include('works across the DRS')
     end
   end
 end

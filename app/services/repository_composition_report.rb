@@ -37,6 +37,10 @@ class RepositoryCompositionReport
     )
   end
 
+  def scoped?
+    @scope_fq.present?
+  end
+
   private
 
     def scope_filters
