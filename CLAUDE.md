@@ -59,6 +59,7 @@ When creating a Rails interface whole-cloth or editing one in place, invoke the 
   - `btn-tonal-success` for status chips such as "In queue".
 
   A Cancel that abandons a form is always `btn-warning`, with no icon. A Back link only navigates, so it is tonal-secondary rather than orange. Keep the tonal border at full strength: it is what clears WCAG's 3:1 edge contrast against both the grey page and white cards, and a softer border falls to about 2:1.
+- **Hover.** Hover must never move or resize the element under the pointer: no `translateY` lift, and no border-width, padding or font-weight change. The element's edge slides out from under a resting pointer, the hover drops, the element slides back, and it flickers. Signal hover with colour, border and shadow instead. Buttons get a hover cool-off automatically; clickable cards and custom buttons include the `hover-cool-off` mixin from `_layout.scss`, placed after any `transition:` shorthand, which would reset its delay.
 - **Don't.** Don't introduce Tailwind, a different CSS framework, or a different design system. Don't add new web fonts. Don't add maximalist effects (gradient meshes, grain overlays, animated heroes) — they fight the institutional register the rest of the site sets.
 
 **Reference example — the Audit History tab.** When in doubt about how to combine "use the skill" with "match this aesthetic", read these:
