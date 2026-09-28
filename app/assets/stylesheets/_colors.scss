@@ -44,6 +44,10 @@ $danger:        $red !default;
 $light:         $gray-100 !default;
 $dark:          $gray-800 !default;
 
+// The footer's navy, and the root of the quiet tonal button (a lightened
+// tint of it). Not part of the link/well contrast system below.
+$slate:         #385775 !default;
+
 // cerberus
 // The link colour and the .well fill are a matched pair, both pinned by WCAG
 // contrast rather than chosen freely. A link must clear 4.5:1 against every

@@ -10,6 +10,7 @@
 // tones read only 3.4-3.6:1 on their own tint.
 //
 // Hover and active fill solid, as the outline buttons they replace did.
+// Secondary is slate rather than $secondary grey; see its rule below.
 
 @mixin tonal-button($tone, $text: $tone, $tint: 10%) {
   $fill: mix($tone, $white, $tint);
@@ -31,9 +32,10 @@
 }
 
 .btn-tonal-primary   { @include tonal-button($primary); }
-// A stronger tint than the others: grey at 10% is 1.10:1 against the page
-// and barely registers as a fill.
-.btn-tonal-secondary { @include tonal-button($secondary, $tint: 16%); }
+// Muted slate, not grey: a dark grey border outweighed the blue primary
+// beside it. Lightened from the footer navy so it sits behind blue (4.5:1
+// edge against white, to blue's 5.9:1) while keeping 3:1 on both surfaces.
+.btn-tonal-secondary { @include tonal-button(tint-color($slate, 20%), $text: tint-color($slate, 5%)); }
 .btn-tonal-danger    { @include tonal-button($danger, $text: shade-color($danger, 25%)); }
 
 .btn-tonal-success {
