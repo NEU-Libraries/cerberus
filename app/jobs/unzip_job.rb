@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'rubygems/package'
 require 'zip'
 
 # Opens the staged archive (zip or tar) for a LoadReport, walks the
