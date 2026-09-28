@@ -1,0 +1,45 @@
+// Tonal buttons: a pale tint of the tone as the button's own fill, with the
+// full-strength tone as the border. Bootstrap's outline buttons are
+// transparent, so on the gray-100 page (and on white cards) they take the
+// surface's colour and read as text in a box; a filled secondary action
+// would be too loud beside the page's one solid primary.
+//
+// The border must stay full-strength: it is what keeps WCAG's 3:1 edge
+// contrast against both surfaces. A softer border (a common "tonal" look)
+// falls to about 2:1. Danger and success text are shaded, because the base
+// tones read only 3.4-3.6:1 on their own tint.
+//
+// Hover and active fill solid, as the outline buttons they replace did.
+
+@mixin tonal-button($tone, $text: $tone, $tint: 10%) {
+  $fill: mix($tone, $white, $tint);
+
+  @include button-variant(
+    $background:          $fill,
+    $border:              $tone,
+    $color:               $text,
+    $hover-background:    $tone,
+    $hover-border:        $tone,
+    $hover-color:         $white,
+    $active-background:   shade-color($tone, 20%),
+    $active-border:       shade-color($tone, 20%),
+    $active-color:        $white,
+    $disabled-background: $fill,
+    $disabled-border:     $tone,
+    $disabled-color:      $text
+  );
+}
+
+.btn-tonal-primary   { @include tonal-button($primary); }
+// A stronger tint than the others: grey at 10% is 1.10:1 against the page
+// and barely registers as a fill.
+.btn-tonal-secondary { @include tonal-button($secondary, $tint: 16%); }
+.btn-tonal-danger    { @include tonal-button($danger, $text: shade-color($danger, 25%)); }
+
+.btn-tonal-success {
+  @include tonal-button($success, $text: shade-color($success, 25%));
+
+  // Used disabled as a status chip ("In queue"), not an unavailable action,
+  // so it keeps full strength rather than Bootstrap's faded 65%.
+  --#{$prefix}btn-disabled-opacity: 1;
+}

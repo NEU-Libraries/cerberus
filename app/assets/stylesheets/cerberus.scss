@@ -4,6 +4,7 @@
 //
 // Partials are organized by surface, not by selector type:
 //   _layout              — page chrome (body, footer, breadcrumbs, nav)
+//   _tonal_buttons       — btn-tonal-* variants for secondary, row and destructive actions
 //   _blacklight_discovery — search-result document styling
 //                           (thumbnails, gallery, metadata)
 //   _audit_history       — Edit → History tab (archival ledger)
@@ -25,6 +26,7 @@
 //   _scoped_search       — "Search this collection/community" header box
 //   _work_associations   — Associated works box (Work show) + admin manage rows
 @import 'layout';
+@import 'tonal_buttons';
 @import 'featured_content';
 @import 'blacklight_discovery';
 @import 'audit_history';
