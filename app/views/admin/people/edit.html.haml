@@ -10,7 +10,7 @@
       %span.admin-registry__subtitle
         %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
         Admin-only
-      = link_to admin_people_path, class: 'btn btn-outline-secondary btn-sm' do
+      = link_to admin_people_path, class: 'btn btn-tonal-secondary btn-sm' do
         %i.fa-solid.fa-arrow-left.me-1{'aria-hidden' => 'true'}
         All people
 
@@ -49,7 +49,7 @@
                 = enhanced_text(aff[:title])
                 %span.admin-registry-table__id.ms-2= aff[:noid]
               = button_to remove_affiliation_admin_person_path(@noid, community_id: aff[:noid]),
-                          method: :delete, class: 'btn btn-sm btn-outline-danger',
+                          method: :delete, class: 'btn btn-sm btn-tonal-danger',
                           form: { data: { turbo_confirm: "Remove the affiliation with #{plain_text(aff[:title])}?" } } do
                 %i.fa-solid.fa-xmark.me-1{'aria-hidden' => 'true'}
                 Remove

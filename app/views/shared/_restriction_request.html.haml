@@ -23,4 +23,4 @@
         %button.btn.btn-primary{ type: 'submit' }
           %i.fa-solid.fa-lock.me-1{ 'aria-hidden' => 'true' }
           = "Ask to restrict this #{resource}"
-        = link_to 'Cancel', public_send("#{resource}_path", params[:id]), class: 'btn btn-light'
+        = link_to 'Cancel', public_send("#{resource}_path", params[:id]), class: 'btn btn-warning'

@@ -34,6 +34,5 @@
 
       .d-flex.gap-2.align-items-center.mt-4
         = f.submit 'Create person', class: 'btn btn-primary'
-        = link_to admin_people_path, class: 'btn btn-outline-secondary' do
-          %i.fa-solid.fa-arrow-left.me-1{'aria-hidden' => 'true'}
+        = link_to admin_people_path, class: 'btn btn-warning' do
           Cancel

@@ -36,7 +36,7 @@
                 %i.fa-solid.fa-right-left.me-1{ 'aria-hidden' => 'true' }
                 Switch to this account
             - unless account['preferred']
-              = button_to prefer_account_path, method: :post, params: { email: account['email'] }, class: 'btn btn-sm btn-outline-secondary' do
+              = button_to prefer_account_path, method: :post, params: { email: account['email'] }, class: 'btn btn-sm btn-tonal-secondary' do
                 %i.fa-regular.fa-star.me-1{ 'aria-hidden' => 'true' }
                 Set as default
         - unless current

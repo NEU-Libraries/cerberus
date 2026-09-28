@@ -12,7 +12,7 @@
         = link_to download_queue_archive_path, class: 'btn btn-primary btn-sm', data: { turbo: false } do
           %i.fa-solid.fa-file-zipper.me-1{'aria-hidden' => 'true'}
           Download all
-        = button_to download_queue_path, method: :delete, class: 'btn btn-outline-secondary btn-sm',
+        = button_to download_queue_path, method: :delete, class: 'btn btn-tonal-secondary btn-sm',
             form: { class: 'd-inline' }, data: { turbo_confirm: 'Clear all files from your download queue?' } do
           %i.fa-solid.fa-trash-can.me-1{'aria-hidden' => 'true'}
           Clear queue
@@ -52,7 +52,7 @@
                     %span.admin-registry-table__id= entry['b']
                 %td.text-end
                   = button_to download_queue_item_path(remove_params), method: :delete,
-                      class: 'btn btn-outline-danger btn-sm', form: { class: 'd-inline' },
+                      class: 'btn btn-tonal-danger btn-sm', form: { class: 'd-inline' },
                       'aria-label' => "Remove #{file_label} from the queue" do
                     %i.fa-solid.fa-xmark{'aria-hidden' => 'true'}
   - else

@@ -84,6 +84,6 @@
 
   - if current_user&.admin? || current_user&.admin_delegate?
     .mt-3
-      = link_to admin_impressions_path(open_in_usage_analytics_params(@analytics_effective_item, @analytics)), class: 'btn btn-sm btn-outline-primary' do
+      = link_to admin_impressions_path(open_in_usage_analytics_params(@analytics_effective_item, @analytics)), class: 'btn btn-sm btn-tonal-primary' do
         %i.fa-solid.fa-chart-line.me-1{'aria-hidden' => 'true'}
         Open in Usage Analytics

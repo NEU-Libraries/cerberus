@@ -83,6 +83,6 @@
         = button_to confirm_loader_load_path(loader, load_report), method: :patch, class: 'btn btn-primary' do
           %i.fa-solid.fa-play.me-1{'aria-hidden' => 'true'}
           Confirm &amp; run
-      = button_to loader_load_path(loader, load_report), method: :delete, class: 'btn btn-outline-danger', data: { turbo_confirm: 'Discard this upload? The archive will be removed.' } do
+      = button_to loader_load_path(loader, load_report), method: :delete, class: 'btn btn-tonal-danger', data: { turbo_confirm: 'Discard this upload? The archive will be removed.' } do
         %i.fa-solid.fa-trash-can.me-1{'aria-hidden' => 'true'}
         Discard

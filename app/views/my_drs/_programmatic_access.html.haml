@@ -29,17 +29,17 @@
       .small.fw-semibold.text-muted.mb-1 Your access token
       .input-group.mb-3{ data: { controller: 'clipboard', 'clipboard-text-value': token } }
         %code.form-control.bg-body-tertiary.font-monospace.text-break.user-select-all{ style: 'height: auto; white-space: normal;' }= token
-        %button.btn.btn-outline-secondary{ type: 'button', 'aria-label' => 'Copy access token', data: { action: 'clipboard#copy' } }
+        %button.btn.btn-tonal-secondary{ type: 'button', 'aria-label' => 'Copy access token', data: { action: 'clipboard#copy' } }
           %i.fa-regular.fa-copy.me-1{ 'aria-hidden' => 'true' }
           %span{ data: { 'clipboard-target': 'label' } } Copy
       %p.small.text-muted.mb-1 Then use it as a bearer token — for example, export it for atlas_rb:
       %pre.bg-body-tertiary.border.rounded-2.p-2.small.mb-3
         %code= 'export ATLAS_JWT=<your token>'
       .d-flex.gap-2
-        = button_to atlas_token_path, method: :post, params: { regenerate: true }, class: 'btn btn-sm btn-outline-primary', data: { turbo_confirm: 'Regenerate your token? The current one stops working immediately.' } do
+        = button_to atlas_token_path, method: :post, params: { regenerate: true }, class: 'btn btn-sm btn-tonal-primary', data: { turbo_confirm: 'Regenerate your token? The current one stops working immediately.' } do
           %i.fa-solid.fa-rotate.me-1{ 'aria-hidden' => 'true' }
           Regenerate
-        = button_to atlas_token_path, method: :delete, class: 'btn btn-sm btn-outline-danger', data: { turbo_confirm: 'Revoke all your access tokens? Any scripts using them stop working immediately.' } do
+        = button_to atlas_token_path, method: :delete, class: 'btn btn-sm btn-tonal-danger', data: { turbo_confirm: 'Revoke all your access tokens? Any scripts using them stop working immediately.' } do
           %i.fa-solid.fa-ban.me-1{ 'aria-hidden' => 'true' }
           Revoke all
     - else
@@ -49,6 +49,6 @@
         = button_to atlas_token_path, method: :post, class: 'btn btn-sm btn-primary' do
           %i.fa-solid.fa-key.me-1{ 'aria-hidden' => 'true' }
           Generate token
-        = button_to atlas_token_path, method: :delete, class: 'btn btn-sm btn-outline-secondary', data: { turbo_confirm: 'Revoke all your access tokens? Any scripts using them stop working immediately.' } do
+        = button_to atlas_token_path, method: :delete, class: 'btn btn-sm btn-tonal-secondary', data: { turbo_confirm: 'Revoke all your access tokens? Any scripts using them stop working immediately.' } do
           %i.fa-solid.fa-ban.me-1{ 'aria-hidden' => 'true' }
           Revoke all

@@ -23,12 +23,12 @@
     - if file[:size]
       %small.text-muted.text-nowrap= number_to_human_size(file[:size])
   - if file[:uri].present?
-    = link_to derivative_download_path(work_noid, file[:use]), class: 'btn btn-outline-primary btn-sm ms-3', 'aria-label' => "Download #{display_label}", target: '_blank', rel: 'noopener' do
+    = link_to derivative_download_path(work_noid, file[:use]), class: 'btn btn-tonal-primary btn-sm ms-3', 'aria-label' => "Download #{display_label}", target: '_blank', rel: 'noopener' do
       %span.fa-solid.fa-download{'aria-hidden' => true}
       %span.ms-1 Download
     = render 'works/queue_button', work_noid: work_noid, use: file[:use], label: display_label
   - else
-    = link_to download_path(file.noid), class: 'btn btn-outline-primary btn-sm ms-3', 'aria-label' => "Download #{display_label}", data: { turbo: false } do
+    = link_to download_path(file.noid), class: 'btn btn-tonal-primary btn-sm ms-3', 'aria-label' => "Download #{display_label}", data: { turbo: false } do
       %span.fa-solid.fa-download{'aria-hidden' => true}
       %span.ms-1 Download
     = render 'works/queue_button', work_noid: work_noid, blob_noid: file.noid, label: display_label

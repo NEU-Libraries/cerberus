@@ -160,7 +160,7 @@ module AuditEventsHelper
     path = audit_event_view_path(event, resource_id)
     return if path.nil?
 
-    link_to(path, class: 'btn btn-sm btn-outline-secondary audit-event__view-btn') do
+    link_to(path, class: 'btn btn-sm btn-tonal-secondary audit-event__view-btn') do
       safe_join([
                   content_tag(:i, '', class: 'fa-solid fa-magnifying-glass', 'aria-hidden': 'true'),
                   'View'

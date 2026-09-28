@@ -8,9 +8,9 @@
     offline and re-load to update the records. You only get the items you can
     see.
   .d-flex.flex-wrap.gap-2
-    = link_to export_set_path(set_id), class: 'btn btn-outline-secondary' do
+    = link_to export_set_path(set_id), class: 'btn btn-tonal-primary' do
       %i.fa-solid.fa-file-zipper.me-1{'aria-hidden' => 'true'}
       Manifest + MODS XML
-    = link_to export_set_path(set_id, mods: 0), class: 'btn btn-outline-secondary' do
+    = link_to export_set_path(set_id, mods: 0), class: 'btn btn-tonal-primary' do
       %i.fa-solid.fa-table.me-1{'aria-hidden' => 'true'}
       Manifest only
