@@ -55,6 +55,7 @@
     transition: background-color 120ms ease-out,
                 border-color 120ms ease-out,
                 color 120ms ease-out;
+    @include hover-cool-off;
 
     &:hover,
     &:focus,

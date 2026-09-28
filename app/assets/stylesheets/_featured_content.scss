@@ -3,7 +3,7 @@
 // Each tile reads as a discrete, clickable white card against the page — the
 // same #fff / gray-300 / rounded chrome as the result-row cards — so the section
 // is scannable wayfinding, not decorative hero chrome. Boldness is spent on the
-// hover promotion (navy border + lift); the resting state stays quiet.
+// hover promotion (navy border and shadow); the resting state stays quiet.
 //
 // Selector carries the `a` so it ties the global `a:not(.btn, …)` link-color
 // rule on specificity and, imported after `_layout`, wins on source order —
@@ -22,7 +22,8 @@ a.featured-gateway {
   border-radius: var(--bs-border-radius);
   color: var(--bs-body-color);
   text-decoration: none;
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, transform 0.15s ease-in-out;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  @include hover-cool-off;
 
   i {
     font-size: 1.6rem;
@@ -49,27 +50,17 @@ a.featured-gateway {
     }
   }
 
+  // No lift on hover: a moving card slides its edge out from under a resting
+  // pointer, which drops the hover and makes the card flicker.
   &:hover,
   &:focus-visible {
     color: var(--bs-body-color);
     border-color: $primary;
     box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.08);
-    transform: translateY(-2px);
   }
 
   &:focus-visible {
     outline: 2px solid $primary;
     outline-offset: 2px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  a.featured-gateway {
-    transition: none;
-
-    &:hover,
-    &:focus-visible {
-      transform: none;
-    }
   }
 }

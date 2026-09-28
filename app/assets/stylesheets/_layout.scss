@@ -2,6 +2,35 @@
 // global structural styles that aren't tied to a specific Blacklight or
 // audit surface.
 
+// Hover cool-off. A pointer resting on a control's edge drifts in and out of
+// it, and a hover that changes colour then flashes on every crossing. Leaving
+// hover waits $hover-cool-off, so a drift back in cancels the change; entering
+// hover and gaining keyboard focus stay instant. Include it AFTER any
+// `transition:` shorthand in the same rule, which would reset the delay.
+//
+// Bootstrap turns button transitions off for reduced motion, and a delay only
+// acts on a transition, so that case gets a 1ms one: the same cool-off, with
+// no visible animation.
+$hover-cool-off: 150ms;
+
+@mixin hover-cool-off {
+  transition-delay: $hover-cool-off;
+
+  &:hover,
+  &:focus-visible {
+    transition-delay: 0s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition-property: color, background-color, border-color, box-shadow;
+    transition-duration: 1ms;
+  }
+}
+
+.btn {
+  @include hover-cool-off;
+}
+
 body {
   background-color: $gray-100;
   height:100vh;
