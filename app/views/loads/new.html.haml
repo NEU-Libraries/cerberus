@@ -119,5 +119,5 @@
                    disabled: (@loader.iptc? && @destinations.empty?),
                    data: { 'archive-upload-target' => 'submit' }
         = link_to loader_loads_path(@loader, canceled: 1), class: 'btn btn-warning',
-                  data: { turbo_confirm: 'Cancel this upload? Nothing will be uploaded.' } do
+                  data: { turbo_method: :get, turbo_confirm: 'Cancel this upload? Nothing will be uploaded.' } do
           Cancel
