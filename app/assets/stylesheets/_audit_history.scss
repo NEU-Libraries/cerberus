@@ -169,9 +169,11 @@ $audit-tone-unlink:    #8f5e78;
   &--unlink    { --audit-action-color: #{$audit-tone-unlink}; }
   &--generic   { --audit-action-color: #{$audit-tone-generic}; }
 
-  // Timestamp — date prominent on top, time muted underneath.
+  // Timestamp — date prominent on top, time muted underneath. The date must
+  // not wrap at its hyphens, or a wide Agent column splits it across lines.
   &__when {
     line-height: 1.15;
+    white-space: nowrap;
   }
   &__when-date {
     font-weight: 600;
