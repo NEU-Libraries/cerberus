@@ -112,8 +112,8 @@ That failure is silent, and it fails towards serving content.
 It is the union of both packers' fields because this resolver feeds both —
 `SetZipPacker` for the content download and `MetadataExportPacker` for the
 manifest. Asking for only one packer's fields reintroduces the same silent-nil
-bug on whichever path was left out. `embargoed_bsi` was missing that way, so a
-Work embargoed by flag rather than by release date exported as not embargoed.
+bug on whichever path was left out, and the packer's embargo column then reads
+blank.
 
 ### Discovery gating is not the whole rule
 

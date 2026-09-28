@@ -19,7 +19,6 @@ class MetadataExportPacker
     id
     alternate_ids_ssim
     embargo_release_date_dtsi
-    embargoed_bsi
     created_at_dtsi
   ].freeze
 
@@ -75,11 +74,11 @@ class MetadataExportPacker
       stamp.present? ? Time.zone.parse(stamp.to_s)&.to_date&.iso8601 : nil
     end
 
-    # embargoed_bsi is boolean-as-string (Atlas's _bsi convention) — compare
-    # against the string, not `true`.
+    # A lapsed date is not an embargo. Atlas indexes only the date, never a
+    # flag, because nothing re-indexes a Work on its release day; an
+    # `embargoed_bsi` still in the index is a stale leftover and stays true.
     def embargoed(doc)
-      'true' if Array(doc['embargo_release_date_dtsi']).first.present? ||
-                Array(doc['embargoed_bsi']).first.to_s == 'true'
+      'true' if Embargo.active?(Array(doc['embargo_release_date_dtsi']).first)
     end
 
     def embargo_date(doc)

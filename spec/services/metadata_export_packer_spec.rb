@@ -130,17 +130,15 @@ RSpec.describe MetadataExportPacker do
     end
   end
 
-  # Atlas's `_bsi` convention is boolean-as-string (matching TombstoneIndexer/
-  # FeaturedIndexer), so `embargoed_bsi` arrives as the STRING 'true'/'false',
-  # never a real boolean — the "Embargoed?" column must key off that shape.
   context 'embargo columns' do
     let(:docs) do
       Class.new do
         def initialize(rows) = @rows = rows
         def each_content_batch(**) = yield @rows
       end.new([
-                { 'alternate_ids_ssim' => ['id-aaa111'], 'embargo_release_date_dtsi' => '2028-07-16' },
-                { 'alternate_ids_ssim' => ['id-bbb222'], 'embargoed_bsi' => 'true' },
+                { 'alternate_ids_ssim' => ['id-aaa111'], 'embargo_release_date_dtsi' => 1.year.from_now.to_date.iso8601 },
+                { 'alternate_ids_ssim' => ['id-bbb222'], 'embargo_release_date_dtsi' => '2020-07-16',
+                  'embargoed_bsi' => 'true' },
                 { 'alternate_ids_ssim' => ['id-ccc333'] }
               ])
     end
@@ -150,14 +148,18 @@ RSpec.describe MetadataExportPacker do
       manifest_rows(entries.fetch('manifest.xlsx')).find { |r| r.identifier == identifier }
     end
 
-    it 'marks a row embargoed via the release date field' do
+    it 'marks a row embargoed while its release date is in the future' do
       row = row_for(entries, 'aaa111')
       expect(row.embargoed?).to be(true)
-      expect(row.embargo_date).to eq('2028-07-16')
+      expect(row.embargo_date).to eq(1.year.from_now.to_date.iso8601)
     end
 
-    it 'marks a row embargoed via the boolean-as-string embargoed_bsi' do
-      expect(row_for(entries, 'bbb222').embargoed?).to be(true)
+    # The date stays, because it is still a fact about the Work. A stale
+    # `embargoed_bsi` left in the index must not override it.
+    it 'leaves Embargoed? blank once the release date has passed' do
+      row = row_for(entries, 'bbb222')
+      expect(row.embargoed?).to be(false)
+      expect(row.embargo_date).to eq('2020-07-16')
     end
 
     it 'leaves a non-embargoed row blank' do
