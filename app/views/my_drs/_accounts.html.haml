@@ -1,7 +1,8 @@
--# "Your accounts" — the multi-account switcher, rendered only when the person's
--# NUID holds more than one account (staff/student logins). Same card shell as the
--# other My DRS cards; the considered element is the per-account group DIFF vs the
--# account you're on — the reason to switch, made legible.
+-# "Your accounts". With several accounts (staff/student logins) it is the
+-# switcher, and the considered element is the per-account group DIFF vs the
+-# account you're on — the reason to switch, made legible. With one account there
+-# is nothing to switch or prefer, so it lists that account's groups instead.
+- single = accounts.one?
 - current_acct = current_account(accounts)
 - current_groups = Array(current_acct && current_acct['groups'])
 
@@ -11,7 +12,10 @@
       %i.fa-solid.fa-id-badge.text-primary.me-2{ 'aria-hidden' => 'true' }
       Your accounts
     %p.small.mb-0.text-muted
-      You're signed in with more than one account. Switch to another, or set the one you land on by default.
+      - if single
+        The account you're signed in with, and the groups it belongs to.
+      - else
+        You're signed in with more than one account. Switch to another, or set the one you land on by default.
   %ul.account-list.list-unstyled.mb-0
     - accounts.each do |account|
       - current = account['email'] == current_user.email
@@ -22,7 +26,7 @@
               %span.account-row__affiliation= (account['affiliation'].presence || 'Account').titleize
               - if current
                 %span.badge.rounded-pill.text-bg-primary Current
-              - if account['preferred']
+              - if account['preferred'] && !single
                 %span.badge.rounded-pill.bg-body-secondary.text-secondary-emphasis.border
                   %i.fa-solid.fa-star.me-1{ 'aria-hidden' => 'true' }
                   Preferred
@@ -30,16 +34,24 @@
             %p.account-row__meta.small.text-muted.mb-0.mt-1
               %i.fa-solid.fa-users.me-1{ 'aria-hidden' => 'true' }
               = pluralize(Array(account['groups']).size, 'group')
-          .account-row__actions.d-flex.flex-column.gap-2.flex-shrink-0
-            - unless current
-              = button_to switch_account_path, method: :post, params: { email: account['email'] }, class: 'btn btn-sm btn-primary' do
-                %i.fa-solid.fa-right-left.me-1{ 'aria-hidden' => 'true' }
-                Switch to this account
-            - unless account['preferred']
-              = button_to prefer_account_path, method: :post, params: { email: account['email'] }, class: 'btn btn-sm btn-tonal-secondary' do
-                %i.fa-regular.fa-star.me-1{ 'aria-hidden' => 'true' }
-                Set as default
-        - unless current
+            - if single && Array(account['groups']).any?
+              - shown, extra = account_diff_chips(Array(account['groups']).map { |raw| pretty_group_name(raw) }.sort)
+              %ul.account-diff__chips.list-unstyled.mb-0.mt-2
+                - shown.each do |name|
+                  %li.account-diff__chip= name
+                - if extra.positive?
+                  %li.account-diff__chip.account-diff__chip--more= "+#{extra} more"
+          - unless single
+            .account-row__actions.d-flex.flex-column.gap-2.flex-shrink-0
+              - unless current
+                = button_to switch_account_path, method: :post, params: { email: account['email'] }, class: 'btn btn-sm btn-primary' do
+                  %i.fa-solid.fa-right-left.me-1{ 'aria-hidden' => 'true' }
+                  Switch to this account
+              - unless account['preferred']
+                = button_to prefer_account_path, method: :post, params: { email: account['email'] }, class: 'btn btn-sm btn-tonal-secondary' do
+                  %i.fa-regular.fa-star.me-1{ 'aria-hidden' => 'true' }
+                  Set as default
+        - unless current || single
           - diff = account_group_diff(account, current_groups)
           - if diff[:gained].any? || diff[:lost].any?
             %details.account-diff.mt-3

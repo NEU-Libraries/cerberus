@@ -142,5 +142,23 @@ RSpec.describe 'My DRS', type: :request do
       expect(response.body).to include('depositor@husky.neu.edu')
       expect(response.body).to include('Switch to this account')
     end
+
+    # Librarians troubleshoot from this card, so a one-account person gets it
+    # too: the email and the group names, with nothing to switch or prefer.
+    it 'shows a single-account person their email and groups, without switch controls' do
+      allow(AtlasRb::Person).to receive(:resolve).and_return([])
+      allow(AtlasRb::User).to receive(:accounts).and_return(
+        AtlasRb::Mash.new('nuid' => '000000004', 'accounts' => [
+                            { 'email' => user.email, 'affiliation' => 'staff', 'role' => 'standard',
+                              'groups' => %w[g:alpha g:beta], 'preferred' => true }
+                          ])
+      )
+
+      get '/my_drs'
+
+      expect(response.body).to include('Your accounts', user.email, 'the groups it belongs to')
+      expect(Capybara.string(response.body)).to have_css('.account-diff__chip', count: 2)
+      expect(response.body).not_to include('Switch to this account', 'Set as default', 'Preferred')
+    end
   end
 end
