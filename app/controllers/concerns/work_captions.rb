@@ -7,7 +7,35 @@
 module WorkCaptions
   extend ActiveSupport::Concern
 
+  included do
+    before_action :require_caption_admin!, only: :destroy_caption
+  end
+
+  # Atlas deletes the Blob's whole OCFL object, so every earlier caption
+  # revision goes with it and nothing can be rolled back afterwards.
+  def destroy_caption
+    back = edit_work_path(params[:id])
+    caption = current_caption
+    return redirect_to(back, alert: 'This work has no caption file.') if caption.nil?
+
+    if AtlasRb::Blob.destroy(caption.noid, nuid: current_user.nuid).success?
+      redirect_to back, notice: 'Caption file removed.'
+    else
+      redirect_to back, alert: 'The caption file could not be removed.'
+    end
+  end
+
   private
+
+    def current_caption
+      CaptionTrack.for(AtlasRb::Work.assets(params[:id], nuid: viewer_nuid))
+    end
+
+    # Admin-only because the Atlas delete is: the edit gate alone would let an
+    # editor reach a call Atlas then refuses.
+    def require_caption_admin!
+      raise CanCan::AccessDenied unless current_user&.admin?
+    end
 
     # State for the Captions section. `files` is absent at deposit, where the Work
     # has no assets yet and so can have no caption to link to.

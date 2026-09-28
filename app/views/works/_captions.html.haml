@@ -1,5 +1,6 @@
 -# locals: caption (AtlasRb::Mash, nil) — the Work's current caption Blob, if it
--# has one, for the link to it.
+-# has one, for the link to it. removable (Boolean, optional) — offer Remove,
+-# which submits the empty remove-caption form outside the metadata form.
 -#
 -# Offered only for a Work with video content: CaptionTrack.applicable? on the
 -# edit page, StagedVideoProbe at deposit, where the Blob may still be in flight.
@@ -25,5 +26,12 @@
   - if caption
     %p.text-muted.small.mb-0
       #{link_to 'View the current caption file', media_path(caption.noid)}. Older caption files are retained in this work’s version history.
+    - if local_assigns[:removable]
+      %button.btn.btn-tonal-danger.btn-sm.mt-2{ type: 'submit', form: 'remove-caption',
+        data: { turbo_confirm: 'Remove the caption file? It and every earlier caption file for this work are deleted permanently.',
+                turbo_confirm_title: 'Remove caption file', turbo_confirm_button: 'Remove',
+                turbo_confirm_variant: 'danger' } }
+        %i.fa-solid.fa-trash-can.me-1{ 'aria-hidden' => 'true' }
+        Remove caption file
 
 %hr.section-divider.mt-3.mb-0

@@ -107,6 +107,9 @@ Rails.application.routes.draw do
       get :manifest
       get :metadata
       patch :metadata, action: :update_metadata
+      # Remove the Work's caption file. Admin-only, like the Atlas Blob delete
+      # beneath it (WorkCaptions#destroy_caption).
+      delete :caption, action: :destroy_caption
       # Add an arbitrary binary to an existing Work: GET renders the upload
       # form, POST stages the file and queues the attach (AddFileJob). Both are
       # edit-gated via authorize_resource_writes!'s extra_edit list.

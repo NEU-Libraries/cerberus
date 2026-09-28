@@ -53,6 +53,48 @@ RSpec.describe 'Works captions', type: :request do
                                       nuid: '000000004')
   end
 
+  # Atlas's Blob delete is admin-only and takes every earlier revision with it,
+  # so Cerberus offers it only to admins.
+  describe 'removing the caption file' do
+    let(:admin) do
+      User.new(email: 'admin@example.com', password: 'password', nuid: '000000004',
+               name: 'Ad, Min', role: 'admin', groups: [Permissions::STAFF_EDIT_GROUP])
+    end
+    let(:caption) { AtlasRb::Mash.new(noid: 'cap-1', mime_type: 'text/vtt') }
+
+    before do
+      allow(AtlasRb::Work).to receive(:assets).and_call_original
+      allow(AtlasRb::Work).to receive(:assets).with(work.id, anything).and_return([caption])
+      allow(AtlasRb::Blob).to receive(:destroy).and_return(instance_double(Faraday::Response, success?: true))
+    end
+
+    it 'deletes the caption Blob for an admin and returns to the edit page' do
+      sign_in admin
+      delete caption_work_path(work.id)
+
+      expect(AtlasRb::Blob).to have_received(:destroy).with('cap-1', nuid: '000000004')
+      expect(response).to redirect_to(edit_work_path(work.id))
+      expect(flash[:notice]).to eq('Caption file removed.')
+    end
+
+    it 'refuses an editor who is not an admin, and deletes nothing' do
+      sign_in editor
+      delete caption_work_path(work.id)
+
+      expect(response).to have_http_status(:forbidden)
+      expect(AtlasRb::Blob).not_to have_received(:destroy)
+    end
+
+    it 'says so when the work has no caption file' do
+      allow(AtlasRb::Work).to receive(:assets).with(work.id, anything).and_return([])
+      sign_in admin
+      delete caption_work_path(work.id)
+
+      expect(flash[:alert]).to eq('This work has no caption file.')
+      expect(AtlasRb::Blob).not_to have_received(:destroy)
+    end
+  end
+
   describe 'authorization' do
     it 'forbids the unauthenticated and enqueues nothing' do
       expect { submit(upload('captions.vtt')) }.not_to have_enqueued_job(CaptionJob)
