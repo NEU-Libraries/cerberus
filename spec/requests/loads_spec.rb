@@ -115,6 +115,17 @@ RSpec.describe 'Loads', type: :request do
       expect(response.body).to include('4 of 6 completed', '1 with warnings', '1 failed')
     end
 
+    it 'names who submitted each run and where it went' do
+      LoadReport.create!(loader: marcom_loader, source_filename: 'jpgs.zip', creator_nuid: '000000003',
+                         parent_collection_id: 'neu:c1', status: :completed)
+
+      get loader_loads_path(marcom_loader)
+
+      expect(response.body).to include('Submitted by', 'Destination', '000000003')
+      expect(response.body).to include(%(href="#{collection_path('neu:c1')}"))
+      expect(response.body).not_to match(/\d+ batch/)
+    end
+
     it 'reads "N pending" when nothing has finished yet' do
       report = LoadReport.create!(loader: marcom_loader, source_filename: 'jpgs.zip',
                                   parent_collection_id: 'neu:c1', status: :pending)
