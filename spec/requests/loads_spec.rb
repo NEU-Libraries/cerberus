@@ -423,6 +423,26 @@ RSpec.describe 'Loads', type: :request do
     end
 
     describe 'POST .../loads' do
+      # The archive save is stubbed above, so the real preview would find no
+      # archive and block; each example says what the preview concludes.
+      let(:open_result) { instance_double(XmlPreview::Result, blocked?: false) }
+
+      before { allow(XmlPreview).to receive(:call).and_return(open_result) }
+
+      # A blocked preview can never be confirmed; left previewing, it read as a
+      # load still waiting rather than one that had failed.
+      it 'fails a load whose preview is blocked, and runs nothing' do
+        allow(XmlPreview).to receive(:call).and_return(instance_double(XmlPreview::Result, blocked?: true))
+
+        post '/loaders/xml/loads', params: { load_report: { archive: archive } }
+
+        lr = LoadReport.last
+        expect(lr).to be_failed
+        expect(lr).to be_failed_at_preview
+        expect(XmlUnzipJob).not_to have_received(:perform_later)
+        expect(response).to redirect_to(loader_load_path(xml_loader, lr))
+      end
+
       it 'stages a previewing LoadReport and enqueues no job yet' do
         post '/loaders/xml/loads',
              params: { load_report: { archive: archive, parent_collection_id: 'neu:c1' } }
@@ -521,6 +541,30 @@ RSpec.describe 'Loads', type: :request do
         expect(response.body).to include('MODS XML')
         expect(response.body).to include('Display metadata')
         expect(response.body).to include('mods-display') # the decorated HTML, rendered html_safe
+      end
+    end
+
+    describe 'GET .../loads/:id after the preview refused it' do
+      let!(:load_report) do
+        LoadReport.create!(loader: xml_loader, source_filename: 'no_manifest.zip',
+                           status: :failed, finished_at: Time.current)
+      end
+
+      before do
+        allow(XmlPreview).to receive(:call).and_return(
+          XmlPreview::Result.new(structural_errors: ['No manifest.xlsx was found in the uploaded archive.'],
+                                 validation_errors: [])
+        )
+      end
+
+      # The reason lives only in the preview, so the page keeps showing it,
+      # marked Failed, with Discard but no Confirm.
+      it 'shows the preview and its reason, marked Failed, with no Confirm' do
+        get "/loaders/xml/loads/#{load_report.id}"
+
+        expect(response.body).to include('No manifest.xlsx was found', 'Failed', 'Discard')
+        expect(response.body).not_to include('Confirm &amp; run')
+        expect(response.body).not_to include('data-controller="load-poll"')
       end
     end
 

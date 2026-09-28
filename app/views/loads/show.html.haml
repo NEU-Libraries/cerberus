@@ -11,9 +11,10 @@
 / frame in the linked page, doesn't find one, and renders "content
 / missing". The poller is unaffected: it calls reload()/src= on the frame
 / element directly, which target does not govern.
-- if @load_report.previewing?
+- if shows_preview?
   / XML and multipage loads pause here: render the preview (no poll frame —
-  / there is no background job running until the librarian confirms).
+  / there is no background job running until the librarian confirms). A load
+  / refused at preview keeps this view too, because its reason is the preview.
   = render (@loader.multipage? ? 'multipage_preview' : 'preview'), load_report: @load_report, loader: @loader, preview: @preview
 - else
   = turbo_frame_tag 'load_report', target: '_top' do

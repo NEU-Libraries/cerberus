@@ -30,7 +30,7 @@ class LoadsController < ApplicationController
     # XML and multipage loads pause on a preview the librarian must confirm;
     # build it lazily from the staged archive (no persistence) for the show
     # view to render.
-    @preview = preview_service.call(load_report: @load_report) if @load_report.previewing?
+    @preview = preview_service.call(load_report: @load_report) if shows_preview?
   end
 
   def new
@@ -62,10 +62,7 @@ class LoadsController < ApplicationController
 
     @load_report = create_load_report!(archive, parent)
     save_archive(@load_report, archive)
-    # IPTC commits straight to the run. XML and multipage stop at a preview
-    # the librarian confirms (see #confirm), so they enqueue no job yet —
-    # the show view renders the preview from the staged archive.
-    UnzipJob.perform_later(@load_report.id) if @loader.iptc?
+    start_or_hold(@load_report)
 
     # No flash notice — the show page's own state (in-progress spinner for
     # IPTC, the preview card for XML) communicates what happens next, so a
@@ -104,6 +101,22 @@ class LoadsController < ApplicationController
         status:               @loader.iptc? ? :pending : :previewing
       )
     end
+
+    # IPTC commits straight to the run. XML and multipage stop at a preview
+    # the librarian confirms (see #confirm), so they enqueue no job yet — the
+    # show view renders the preview from the staged archive. A blocked preview
+    # can never be confirmed, so it is failed now rather than left reading
+    # Previewing on the loader's list indefinitely.
+    def start_or_hold(load_report)
+      return UnzipJob.perform_later(load_report.id) if @loader.iptc?
+
+      load_report.fail_load if preview_service.call(load_report: load_report).blocked?
+    end
+
+    def shows_preview?
+      @load_report.previewing? || @load_report.failed_at_preview?
+    end
+    helper_method :shows_preview?
 
     def xml_preview_blocked?
       @loader.xml? && XmlPreview.call(load_report: @load_report).blocked?

@@ -9,6 +9,10 @@
       %i.fa-solid.fa-eye{'aria-hidden' => 'true'}
       Preview
       %span.text-muted.fw-normal= load_report.source_filename
+      - if load_report.failed?
+        %span.ingest-status.ingest-status--failed.ms-2
+          %i.fa-solid{class: load_report_status_icon('failed'), 'aria-hidden' => 'true'}
+          Failed
     %span.admin-registry__subtitle
       %i.fa-solid.fa-folder-tree{'aria-hidden' => 'true'}
       = link_to loader.display_name, loader_loads_path(loader), class: 'text-decoration-none'

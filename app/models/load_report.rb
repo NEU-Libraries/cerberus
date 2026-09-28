@@ -26,6 +26,13 @@ class LoadReport < ApplicationRecord
     !in_progress?
   end
 
+  # Refused at preview, before any job ran: every job path calls start_load
+  # before it can fail a report, so a failure with no start is this one. The
+  # show view keeps rendering the preview for it, since the reason lives there.
+  def failed_at_preview?
+    failed? && started_at.nil?
+  end
+
   def start_load
     update!(status: :processing, started_at: Time.current)
   end
