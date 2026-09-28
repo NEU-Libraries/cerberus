@@ -54,4 +54,27 @@ RSpec.describe LoadsHelper do
         .to eq('a manifest spreadsheet with a MODS file and ordered page images per item')
     end
   end
+  # The librarians asked for the collection's name, with its PID in brackets,
+  # where the report showed only the PID.
+  describe '#load_destination' do
+    before { Rails.cache.clear }
+
+    it 'reads "Title (PID)", linked to the collection' do
+      allow(AtlasRb::Collection).to receive(:find).with('931zdng').and_return(AtlasRb::Mash.new('title' => 'Sarah’s Test Collection'))
+
+      html = helper.load_destination('931zdng')
+
+      expect(html).to include('Sarah’s Test Collection (931zdng)', collection_path('931zdng'))
+    end
+
+    it 'falls back to the PID when the title cannot be read' do
+      allow(AtlasRb::Collection).to receive(:find).and_raise(Faraday::ConnectionFailed, 'down')
+
+      expect(helper.load_destination('931zdng')).to include('>931zdng<')
+    end
+
+    it 'renders a dash for a load with no destination' do
+      expect(helper.load_destination(nil)).to eq('—')
+    end
+  end
 end

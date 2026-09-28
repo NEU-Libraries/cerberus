@@ -40,7 +40,7 @@
                   %span.text-muted —
               %td
                 - if lr.parent_collection_id.present?
-                  %span.admin-registry-table__id= link_to lr.parent_collection_id, collection_path(lr.parent_collection_id), class: 'text-decoration-none'
+                  = load_destination(lr.parent_collection_id)
                 - else
                   %span.text-muted —
               %td.text-muted= load_report_progress_summary(lr)

@@ -16,11 +16,7 @@
       .load-report-overview__top
         .load-report-overview__meta
           %span.load-report-overview__label Destination
-          %span.load-report-overview__value
-            - if load_report.parent_collection_id.present?
-              %code.admin-registry-table__id= load_report.parent_collection_id
-            - else
-              —
+          %span.load-report-overview__value= load_destination(load_report.parent_collection_id)
           %span.load-report-overview__label Started
           %span.load-report-overview__value= load_report.started_at&.strftime('%Y-%m-%d %H:%M:%S') || '—'
           %span.load-report-overview__label Finished

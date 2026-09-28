@@ -45,8 +45,7 @@
           %span.load-report-overview__value= preview.page_count
           - if load_report.parent_collection_id.present?
             %span.load-report-overview__label Destination
-            %span.load-report-overview__value
-              %code.admin-registry-table__id= load_report.parent_collection_id
+            %span.load-report-overview__value= load_destination(load_report.parent_collection_id)
 
       - if preview.unlisted_files.any?
         .alert.alert-warning.d-flex.gap-2.mt-3.mb-0.small
