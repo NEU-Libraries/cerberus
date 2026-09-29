@@ -17,6 +17,7 @@ Source files:
 - `app/services/derivative_creator.rb`
 - `app/jobs/deposit_derivatives_job.rb`
 - `app/jobs/pdf_rendition_job.rb`
+- `app/services/pdf_rendition_asset.rb`
 
 `IiifAssetsJob`, `CaptionJob` and `StreamingOnly` are covered in
 `docs/derivatives.md`. `SetDownloadsController` and the resolvers that feed the
@@ -434,3 +435,29 @@ primary Blob that never lands all exhaust their retries, log, and leave the
 deposit intact. `bin/soffice-timeout` kills a hung `soffice` at 120 seconds.
 The deposit is left with its primary file present, no rendition, no thumbnail.
 A missing `soffice` binary skips the rendition outright.
+
+### One PDF across replaces and reverts
+
+A replace or revert re-runs this job with `refresh: true`. The job then updates
+the Work's existing PDF with `Blob.update` rather than creating another one, so
+the Work keeps a single PDF that matches its current file. Each earlier PDF
+stays as a revision of that Blob.
+
+Deleting the stale PDF and creating a new one was the obvious alternative. It
+does not work, because Atlas lets only an admin delete a Blob. This job runs as
+whoever replaced the file, and atlas_rb has no system-principal delete.
+
+`PdfRenditionAsset` finds the existing PDF. Atlas stores a rendition as an
+ordinary `original_file` in a FileSet of its own, so nothing on the wire marks
+it as derived. The name does: the job writes `thesis.docx` as `thesis.pdf`, and
+a primary's `original_filename` survives every `Blob.update`. So the rendition
+is the `original_file` PDF whose name stem matches another `original_file` on
+the Work. It reads `original_filename` for that match only, and never renders
+it.
+
+Two consequences follow:
+
+- A PDF that the depositor attached under the same stem counts as the
+  rendition. Updating it appends a revision, so its bytes stay recoverable.
+- A Work that already holds several PDFs keeps them. Every replace updates the
+  same one, the lowest NOID, and an admin can remove the others.
