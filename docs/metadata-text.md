@@ -20,11 +20,13 @@ escapes again on output, so a reader sees the tags instead of the formula.
 
 ### Which helper to call
 
-There are two, because the same string lands in two kinds of place.
+There are three. The same string lands in two kinds of place, and an abstract
+also carries paragraphs.
 
 | Helper | Use it for | Why |
 |---|---|---|
 | `enhanced_text` | Element content | A subscript can actually render there |
+| `enhanced_paragraphs` | A multi-paragraph description, such as a Collection's or Community's | It wraps each paragraph in `<p>` and runs each through `enhanced_text` |
 | `plain_text` | An attribute, a page `<title>`, a citation meta tag, or anything about to be truncated | Markup can only ever show up as literal characters there, or a cut could sever a tag |
 
 `plain_text` returns an ordinary String, not `html_safe` output, so it composes.
@@ -34,29 +36,41 @@ that escape it once.
 Truncation goes through `plain_text` too. `truncate` counts characters and knows
 nothing about tags, so cutting the markup-bearing string can sever one.
 
+### Paragraphs follow Atlas's rules
+
+`enhanced_paragraphs` splits on one or more blank lines (`PARAGRAPH_BREAK`,
+which tolerates the trailing spaces a textarea collects). A lone newline is a
+wrap, not a break, and becomes a space. Those rules are Atlas's: its decorator
+projects the same abstract into `<p>` elements that way. A Work's show page and
+a container's must agree about one stored value. The `<p>` wrappers are built in
+the helper, never taken from the value, so the no-parsing rule below still
+holds.
+
 ### Never parse the value as HTML
 
 Both helpers work by pattern. A title is free text, and `<` is a character a
 physics title uses for its own sake.
 
 Handing `Ti <Tc in Bi<sub>2</sub>O` to an HTML parser opens a bogus element at
-`<Tc` that swallows everything up to the next `>`. The value rendered as
-`Ti 2O` — the span gone and the subscript with it, by an amount that depended on
-where that bracket fell. A record that correctly escapes its less-than as
-`&lt;Tc` produces exactly that text, so well-formed MODS was the trigger.
+`<Tc` that swallows everything up to the next `>`. The value renders as
+`Ti 2O`: the span is gone, and the subscript with it. How much is lost depends
+on where that bracket falls. A record that correctly escapes its less-than as
+`&lt;Tc` produces exactly that text, so well-formed MODS triggers the fault.
 
-### The three patterns
+### The constants
 
 `ENHANCED_TAGS` is the entire allowlist: the two inline tags carrying meaning a
 reader cannot recover from the plain characters.
 
-`ESCAPES` holds the three characters an HTML text node must escape. The quote
-characters are deliberately absent. They matter only inside an attribute value,
-and this output is always element text. So escaping an apostrophe would show up
-as `&#39;` in an ordinary possessive title.
+`ESCAPES` (matched by `ESCAPE_PATTERN`) holds the three characters an HTML text
+node must escape. The quote characters are deliberately absent. They matter only
+inside an attribute value, and this output is always element text. Escaping an
+apostrophe would show up as `&#39;` in an ordinary possessive title.
 
 `ESCAPED_TAG` matches an allowlisted tag in its escaped form, and bare — no
-attributes. That is what makes the revival safe. The escaped form of a tag
+attributes. It ignores case, and `enhanced_text` revives the tag in lower case.
+The bare-only match is what makes the revival safe, and what makes the helper's
+`html_safe` safe. The escaped form of a tag
 carrying anything (`<sub onmouseover=…>`) cannot match, so it can never come back
 as markup.
 
@@ -130,6 +144,12 @@ curator meant as a no-op.
 folds it back to a space for display and search, so nothing downstream has to
 know it is there.
 
+Both cleaners pass `nil` through unchanged. `MODSMerge` reads a nil field as
+"leave this alone", where `""` would mean "empty it".
+
+`ControlCharacters.any?` answers whether a string holds an unstorable character
+at all. `XmlController` uses it to decide whether to offer the repair.
+
 ### Reporting it to a curator
 
 `ControlCharacters.report` is written for the curator reading a validation panel.
@@ -137,12 +157,12 @@ For the same input, libxml answers `PCDATA invalid Char value 11`, which names
 neither the character, nor where it came from, nor what to do about it.
 
 `DESCRIPTIONS` carries plain-language names for the characters a curator
-plausibly pastes. Anything else is reported by codepoint alone rather than
-guessed at.
+plausibly pastes: a null, and Word's two breaks. Anything else is reported by
+codepoint alone rather than guessed at.
 
-`first_lines` returns one entry per codepoint rather than per occurrence. A paste
-carries dozens, and listing every one buries the fix the message is there to
-give.
+`first_lines` returns one entry per codepoint rather than per occurrence, each
+with the line it first appears on. A paste carries dozens, and listing every one
+buries the fix the message is there to give.
 
 ## References escaped twice
 
@@ -165,8 +185,9 @@ should hold.
 
 ### Only the five predefined entities
 
-`CHARACTERS` holds the named entities XML 1.0 predefines, mapped to the character
-each one stands for: the character the reader should have been shown.
+`CHARACTERS` holds the five named entities XML 1.0 predefines (`lt`, `gt`,
+`amp`, `quot`, `apos`), each mapped to the character the reader should have
+been shown. `NESTED_RE` matches `&amp;` followed by one of them.
 
 Nothing else is recognised. Decoding `&amp;nbsp;` would produce `&nbsp;`, which
 XML cannot parse, turning a valid document into one that no longer loads. A
@@ -197,13 +218,16 @@ where the record means `<`" — is the whole problem in six words.
 
 `first_lines` returns one entry per reference rather than per occurrence. A
 migrated abstract carries the same one in every paragraph, and listing every hit
-buries the fix the message exists to give.
+buries the fix the message exists to give. It keeps reading order through the
+Hash's insertion order. Sorting the pairs would order the message by entity name
+instead, and send the curator up and down the buffer.
 
 ## The caption track
 
-`CaptionTrack` answers three questions about an audio or video Work's captions. They are:
+`CaptionTrack` answers three questions about an audio or video Work's captions:
 which Blob is the caption, whether to offer the field at all, and whether an
 upload is acceptable. `CaptionJob` does the writing — see `docs/derivatives.md`.
+`WorkCaptions` (`app/controllers/concerns/work_captions.rb`) takes the upload.
 
 ### One track, labelled English
 
@@ -214,14 +238,20 @@ never told apart from the first. The offer therefore matches what can be
 described, and a multi-language Work waits on Atlas growing somewhere to put the
 language.
 
-`LANGUAGE` and `LABEL` are the srclang/label pair every track carries, since
-nothing records the real ones. English matches v1, which hardcoded exactly this.
+`LANGUAGE` (`en`) and `LABEL` (`English`) are the srclang/label pair every
+track carries, since nothing records the real ones. `works/_caption_source`
+writes them onto the `<track>`. English matches v1, which hardcoded exactly
+this.
+
+`DOWNLOAD_LABEL` names the caption's row on the downloads list `Captions`.
+Atlas labels every text Blob "Text Document", which says nothing about what the
+file is for.
 
 ### WebVTT only
 
-A browser `<track>` parses no other format, and an SRT conversion is work this
-application does not do. An `.srt` upload is refused at the form rather than
-stored as a file no player will read.
+A browser `<track>` parses no other format, and Cerberus does not convert SRT.
+`WorkCaptions` refuses an `.srt` upload with `CaptionTrack::REFUSED` rather than
+storing a file no player will read. The file input's `accept` is `.vtt` too.
 
 `CaptionTrack.accepted?` tests the extension rather than sniffed content. WebVTT
 is plain text, so a sniffer reports `text/plain` for a perfectly good caption
@@ -229,10 +259,14 @@ file. Atlas itself types the stored Blob `text/vtt` off the name.
 
 ### Finding the caption Blob
 
-`CaptionTrack.for` finds at most one, because the write path replaces the bytes
-of the Blob it finds rather than attaching a second. Delegates — the image tiers
-— carry a `uri` and are not content, the same test `MediaRemux.playable_file`
-makes.
+`CaptionTrack.caption?` tells a caption by **MIME type**, `text/vtt`, never by
+role. Atlas gives every content Blob the role `original_file`, the video master
+included, so the role cannot tell them apart.
+
+`CaptionTrack.for` finds at most one, because `CaptionJob` updates the bytes of
+the Blob it finds rather than creating a second. Delegates — the image tiers —
+carry a `uri` and are not content. `MediaRemux.playable_file` applies the same
+test.
 
 ### Audio and video
 
@@ -243,6 +277,10 @@ A plain `<audio>` element is one control bar tall and has nowhere to draw a
 caption. So `works/_av_player` mounts captioned audio on a `<video>` element in
 video.js's `audioPosterMode`, the same element a poster already puts it on.
 Posterless audio without captions keeps the plain `<audio>` player.
+
+The caption rides `/media`, not `/downloads`. A caption is part of playing the
+file, so anyone who can play it must reach it. The download gate that a
+Streaming Only recording closes would otherwise take its captions down too.
 
 It is deliberately its own predicate rather than `StreamingOnly.applicable?`,
 which tests the same thing today for an unrelated reason. They are two features

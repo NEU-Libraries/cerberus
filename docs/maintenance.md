@@ -7,12 +7,14 @@ Source files:
 
 - `app/services/maintenance_mode.rb`
 - `app/controllers/concerns/maintenance_gate.rb`
+- `app/controllers/admin/maintenance_controller.rb`
+- `lib/tasks/maintenance.rake`
 
 ## Atlas owns the window
 
-Atlas owns the flag and enforces it. While the window is open, every write Atlas
-receives is refused with a 503 carrying `error: "read_only_mode"`, which
-atlas_rb raises as `AtlasRb::ReadOnlyModeError`.
+Atlas owns the flag and enforces it. While the window is open, Atlas refuses
+every write it receives with a 503 carrying `error: "read_only_mode"`. atlas_rb
+raises that as `AtlasRb::ReadOnlyModeError`.
 
 `MaintenanceMode` is the read side: what Cerberus consults to render its banner
 and to refuse a write before it leaves the app. `MaintenanceGate` is the refusal
@@ -33,16 +35,19 @@ turned back.
 | `message` | the operator's note for the banner |
 | `retry_after` | seconds Atlas asks a refused caller to wait |
 
-Reads are cached for `config.x.cerberus.maintenance_ttl`. Where the cache store
-is a null store, that degrades to one call per request. It is correct but
-chatty. Test is such an environment, as is any environment with caching off. In
-test it also keeps one example's window from leaking into the next.
+`window` caches each read in `Rails.cache` for
+`config.x.cerberus.maintenance_ttl` (`CERBERUS_MAINTENANCE_TTL`, default 5
+seconds, set in `config/application.rb`). Under a null cache store every call
+reads Atlas. That is correct but chatty. Test uses a null store, as does
+development with caching off. In test it also keeps one example's window from
+leaking into the next.
 
-`reset_cache!` drops the cached state. It is called after a write so the
-flipping request sees its own effect rather than waiting out the TTL.
+`reset_cache!` drops the cached state. Every write calls it, so the request that
+flips the flag sees its own effect rather than waiting out the TTL.
 
-`acting_nuid` supplies the NUID the read is made as. `Current.nuid` is set per
-request; a rake task or job has none, so it falls back to the guest identity.
+`acting_nuid` supplies the NUID the read is made as. It uses `Current.nuid`,
+which is set per request. A rake task or job has none, so it falls back to
+`config.x.cerberus.guest_nuid`.
 The read sits on Atlas's authenticated read floor, which the guest fixture
 satisfies.
 
@@ -53,7 +58,11 @@ satisfies.
 | Failure | Answer | Why |
 |---|---|---|
 | **Transport** — `Faraday::ConnectionFailed`, `Faraday::TimeoutError`; nothing answered at all | hold the window (`read_only: true`, a 60-second `retry_after`, and a generic message) | this happens while Atlas is being replaced, which is exactly when a window is likely to be open and when Cerberus could not render a page anyway |
-| **An HTTP response we cannot read** — any other `StandardError` | assume no window | Atlas is up and talking but told us nothing about a window; most often it is a build older than the endpoint |
+| **An HTTP response we cannot read** — any other `StandardError`, or a `nil` read | assume no window | Atlas is up and talking but told us nothing about a window; most often it is a build older than the endpoint |
+
+An Atlas build without the endpoint answers 404, which atlas_rb reads back as
+`nil` rather than raising. `fetch_window` therefore ends in `|| no_window`, or
+every `read_only?` would raise `NoMethodError` on the nil.
 
 Failing closed on the second case would be far worse than the ugly error a
 refused write would produce. It would put the whole site into maintenance mode
@@ -67,23 +76,29 @@ rescue turns that into the same page.
 ## Opening and closing the window
 
 `open!(message:, retry_after:, source:)` and `close!(source:)` write the flag
-through `AtlasRb::Maintenance.write`, and both drop the cache in an `ensure`.
+through `AtlasRb::Maintenance.write`. Both drop the cache in an `ensure`. Every
+keyword is optional, and `source:` defaults to `'operator'`.
 
 `source:` is either `'operator'` or `'deploy'`, and says which door is acting.
+`Admin::MaintenanceController` always acts as `'operator'`. The
+`maintenance:open` and `maintenance:close` rake tasks take `SOURCE=`, and the
+deploy orchestrator runs them with `SOURCE=deploy`.
 Atlas records it and enforces one rule with it. A `deploy` close is refused when
 an operator opened the window. A deploy that finishes therefore cannot end a
 window a human opened by hand. An operator close clears either.
 
 Atlas answers that refusal with **200 and the unchanged state**, not an error. A
 caller that needs to know whether the close landed must read `read_only` off the
-return value.
+return value. `maintenance:close` does, and aborts when the window is still
+open.
 
 ## Refusing a write
 
-`MaintenanceGate` runs `block_writes_in_maintenance!` as a `before_action` on
-everything that is not exempt.
+`ApplicationController` includes `MaintenanceGate`, which runs
+`block_writes_in_maintenance!` as a `before_action` on every request that is not
+exempt. GET and HEAD are exempt, as is anything in `SESSION_ONLY_WRITES`.
 
-It keys on the HTTP method rather than an action list, which makes it
+The gate keys on the HTTP method rather than an action list, which makes it
 fail-closed by construction. A controller added later inherits the refusal
 without being enumerated anywhere. The usual objection to method filtering —
 that a GET can write — does not apply, because this is not the boundary.
@@ -95,9 +110,11 @@ that turns out to reach Atlas.
 
 ### The response renders, it does not redirect
 
-`render_maintenance_notice` renders `errors/service_unavailable` with status 503
-and sets `Retry-After` from `MaintenanceMode.retry_after` when Atlas supplied
-one.
+`render_maintenance_notice` renders `errors/service_unavailable` with status 503,
+passing the operator's note as the `message` local. It sets `Retry-After` from
+`MaintenanceMode.retry_after` when Atlas supplied one. `ErrorsController` also
+renders that template for a plain 503, with no locals, so the template must not
+require any.
 
 Turbo renders a non-2xx body in place, so the notice lands in the frame the
 librarian submitted from. A redirect would need a 303 and would lose that
@@ -133,10 +150,14 @@ Each of these is the sibling of an allowed action and must not be added.
 | `atlas#process_find_or_create` | it provisions a user in Atlas |
 | Starting an impersonation — neither `view_as` nor `act_as` | both record a session-start `AuditEvent` in Atlas first and fail closed if it does not land, so neither can work during a window whatever this gate does. Refusing them here makes the message clear and saves a round trip |
 
-`admin/impersonations#destroy` is exempt because it is exiting only. The session
-is torn down before the end event is emitted. An admin must always be able to
-leave a session they have already left. The end event itself is lost during a
-window: an impersonation exited inside one leaves no end row in the ledger.
+`admin/impersonations#destroy` is exempt because it is exiting only.
+`end_impersonation` tears the session down before it emits the end event, and
+rescues `AtlasRb::Error` from that emit. An admin must always be able to leave a
+session they have already left. The end event itself is lost during a window: an
+impersonation exited inside one leaves no end row in the ledger.
 
-The maintenance surface itself is not listed. It opts out in its own controller,
-next to the code the exemption protects.
+The maintenance surface is not listed either. `Admin::MaintenanceController`
+opts out with `skip_before_action`, next to the code the exemption protects.
+Closing a window from the browser is the escape hatch. If the gate covered this
+controller, a window held by an unreachable Atlas could only be closed from a
+shell.
