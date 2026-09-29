@@ -271,20 +271,37 @@ worker must not touch ActiveRecord, which `effective_user` can reach.
 
 ### Rejecting a write under view-as
 
-`reject_writes_in_view_as` ends the session loudly on any request that is not
-GET or HEAD. It neither performs the write nor drops it silently. A plain
-request gets a redirect to the root page with an alert.
+View-as refuses every write, in two places, and keeps the session open. The
+admin is there to look at the target's screens, so a stray Save must not throw
+them out. The one message comes from `view_as_write_refusal`: "You can't make
+changes while viewing as <target>. Nothing was saved."
 
-"Loudly" needs help when the write came from inside a turbo-frame — the My DRS
-token panel is one. Turbo looks for that frame in the redirect's target, does not
-find it on the root page, and discards the entire response. That means no token,
-no error, no flash, and the banner still showing until the next navigation. The
-button looks simply dead, so an admin may keep pressing it while no longer
-impersonating anyone.
+The first place is the browser. The banner mounts the `view-as-guard` Stimulus
+controller in view-as. It catches, in the capture phase, every form submission
+whose method is not GET, counting Rails' hidden `_method`, and shows the message
+in a modal. Nothing is sent, and the admin stays on the page. Turbo's own submit
+handler skips an event whose default is prevented, so this covers Turbo forms,
+`button_to` and `data-turbo-method` links alike.
 
-So the reply to a turbo-frame request is a turbo-stream refresh. Turbo honours a
-turbo-stream whatever frame the request came from, and a refresh re-renders the
-page, which shows the flash and drops the banner.
+The second place is the server, as the backstop for anything the browser guard
+misses. `reject_writes_in_view_as` refuses any request that is not GET or HEAD
+before the action runs. A plain request is redirected back to the page it came
+from, with `303 See Other` and the message as an alert. A 302 would make a Turbo
+DELETE or PATCH repeat its verb on the target.
+
+Some writes must still go through, and both places allow them:
+
+| Write | Server | Browser |
+|---|---|---|
+| Exit, and switching mode | `Admin::ImpersonationsController` skips the guard | its paths are in the guard's allowed list |
+| Log Out | `signing_out?` lets Devise's `sessions#destroy` through | `destroy_user_session_path` is in the allowed list |
+
+A redirect does not work when the write came from inside a turbo-frame, such as
+the My DRS token panel. Turbo looks for that frame in the redirect's target,
+does not find it, and discards the whole response, so the button looks dead. So
+the reply to a turbo-frame request is a turbo-stream refresh. Turbo honours a
+turbo-stream whatever frame the request came from, and the refresh re-renders
+the page with the flash.
 
 The refresh must pass `request_id: nil`. The default is the current request's
 id, and Turbo drops a refresh whose id it has already seen. That is true of
