@@ -179,7 +179,8 @@ RSpec.describe 'Sets', type: :request do
       expect(response.body).not_to include('Hidden works')
 
       get "/sets/#{set['id']}/edit"
-      expect(response.body).to include('Set definition').and include('Hidden works')
+      expect(response.parsed_body.at_css('#definition-tab').text.strip).to eq('Definition')
+      expect(response.body).to include('Hidden works')
 
       # set one collection-sourced work aside: it leaves the rows, the chip
       # count diverges, and the teaching toast carries fresh counts + Undo
@@ -200,7 +201,7 @@ RSpec.describe 'Sets', type: :request do
       get "/sets/#{set['id']}/edit"
       expect(response.body).not_to include('of 2</span>')
 
-      # put back from the Manage page returns to its Set definition tab
+      # put back from the Manage page returns to its Definition tab
       post "/sets/#{set['id']}/aside", params: { work_id: work_one.id, title: 'Work One', chip: collection.id }
       delete "/sets/#{set['id']}/aside/#{work_one.id}", params: { return_to: 'manage' }
       expect(response).to redirect_to(edit_set_path(set['id'], tab: 'definition'))

@@ -4,7 +4,7 @@
 # collections and works, and the set-aside / put-back exclusion pair. Each is a
 # thin POST/DELETE over the atlas_rb Compilation binding. Adds come from
 # show-page affordances elsewhere in the app, so they return the user to where
-# they were. Removals live on the Manage page's Set definition tab and return
+# they were. Removals live on the Manage page's Definition tab and return
 # there; set-aside lives on the Set page, and put-back serves both.
 module SetRecipe
   extend ActiveSupport::Concern
@@ -58,7 +58,7 @@ module SetRecipe
 
   private
 
-    # The Manage page's Set definition tab. Every action that renders :edit
+    # The Manage page's Definition tab. Every action that renders :edit
     # calls this, a refused save included, or the tab has nothing to draw.
     def prepare_set_definition
       @resolver = SetResolver.new(compilation: @set, search_service: search_service)

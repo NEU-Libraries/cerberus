@@ -16,14 +16,14 @@
     %i.fa-solid.fa-layer-group.text-primary.me-2{'aria-hidden' => 'true'}
     Edit set
 
-  -# Details and Set definition are open to any editor; Sharing (ACL) is owner/admin-only; the two
+  -# Details and Definition are open to any editor; Sharing (ACL) is owner/admin-only; the two
   -# bulk-action tabs are operator-only, on the same predicate their write paths
   -# gate on (SetBulkActions#bulk_operator?).
   %ul.nav.nav-tabs{'data-controller' => 'tab-hash'}
     %li.nav-item
       %button#details-tab.nav-link{class: ('active' if open == 'details'), 'aria-controls' => 'details', 'aria-selected' => (open == 'details').to_s, 'data-bs-target' => '#details', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Details
     %li.nav-item
-      %button#definition-tab.nav-link{class: ('active' if open == 'definition'), 'aria-controls' => 'definition', 'aria-selected' => (open == 'definition').to_s, 'data-bs-target' => '#definition', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Set definition
+      %button#definition-tab.nav-link{class: ('active' if open == 'definition'), 'aria-controls' => 'definition', 'aria-selected' => (open == 'definition').to_s, 'data-bs-target' => '#definition', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Definition
     - if @owned
       %li.nav-item
         %button#sharing-tab.nav-link{class: ('active' if open == 'sharing'), 'aria-controls' => 'sharing', 'aria-selected' => (open == 'sharing').to_s, 'data-bs-target' => '#sharing', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Sharing
