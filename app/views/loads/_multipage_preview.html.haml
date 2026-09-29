@@ -34,7 +34,7 @@
 
       .load-report-overview
         .load-report-overview__meta
-          %span.load-report-overview__label Mode
+          %span.load-report-overview__label Ingest mode
           %span.load-report-overview__value
             %span.ingest-status{style: '--ingest-tone: #18bc9c'}
               %i.fa-solid.fa-layer-group{'aria-hidden' => 'true'}
@@ -74,19 +74,12 @@
               %tr
                 %th{scope: 'col'} Sequence
                 %th{scope: 'col'} Page file
-                %th{scope: 'col'} Title
-                %th{scope: 'col'} Last item
             %tbody
               - first.pages.each do |page|
                 %tr
                   %td= page.sequence
                   %td
                     %code.admin-registry-table__id= page.file_name
-                  %td.small= page.title
-                  %td
-                    - if page.last_item?
-                      %i.fa-solid.fa-flag-checkered.text-muted{'aria-hidden' => 'true'}
-                      %span.visually-hidden Last item
 
       - if preview.mods_xml.present?
         / The first item's MODS, two-up: raw document beside Atlas's rendered
@@ -110,6 +103,6 @@
         = button_to confirm_loader_load_path(loader, load_report), method: :patch, class: 'btn btn-primary' do
           %i.fa-solid.fa-play.me-1{'aria-hidden' => 'true'}
           Confirm &amp; run
-      = button_to loader_load_path(loader, load_report), method: :delete, class: 'btn btn-tonal-danger', data: { turbo_confirm: 'Discard this upload? The archive will be removed.' } do
+      = button_to loader_load_path(loader, load_report), method: :delete, params: { discard: 1 }, class: 'btn btn-tonal-danger', data: { turbo_confirm: 'Discard this upload? The archive will be removed.' } do
         %i.fa-solid.fa-trash-can.me-1{'aria-hidden' => 'true'}
         Discard

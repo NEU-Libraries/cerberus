@@ -87,7 +87,9 @@ class LoadsController < ApplicationController
 
   def destroy
     @load_report.destroy
-    redirect_to loader_loads_path(@loader), notice: 'Load report deleted.'
+    # The preview's Discard abandons an upload; the list's Delete removes a run.
+    notice = params[:discard].present? ? 'Upload canceled.' : 'Load report deleted.'
+    redirect_to loader_loads_path(@loader), notice: notice
   end
 
   private

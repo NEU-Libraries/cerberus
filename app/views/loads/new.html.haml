@@ -66,7 +66,7 @@
         .mb-0
           = f.label :parent_collection_id, class: 'admin-registry-form__label' do
             %i.fa-solid.fa-folder-open{'aria-hidden' => 'true'}
-            Destination collection
+            = @loader.xml? ? 'Destination collection for new file ingests' : 'Destination collection'
           - if @loader.iptc?
             -# IPTC safety rail: boxed to the configured root collection's children.
             - if @destinations.any?
@@ -116,7 +116,7 @@
           %span{ data: { 'archive-upload-target' => 'note' } } Keep this tab open until the upload finishes.
 
       .d-flex.gap-2.align-items-center.mt-4
-        = f.submit 'Upload', class: 'btn btn-primary',
+        = f.submit (@loader.iptc? ? 'Upload' : 'Preview'), class: 'btn btn-primary',
                    disabled: (@loader.iptc? && @destinations.empty?),
                    data: { 'archive-upload-target' => 'submit' }
         = link_to loader_loads_path(@loader, canceled: 1), class: 'btn btn-warning',
