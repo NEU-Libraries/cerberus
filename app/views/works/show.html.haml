@@ -89,8 +89,11 @@
       -# Editors get v1's tabbed column; everyone else sees the metadata alone,
       -# since a lone Metadata tab would be noise.
       - if @work_analytics
+        -# Level with the media beside it, not the global .nav-tabs margin: the
+        -# thumbnail carries mt-1, the players and viewer sit flush.
+        - tabs_offset = @av_file || (@multipage && @can_zoom) ? 'mt-0' : 'mt-1'
         %div{data: { controller: 'tab-hash' }}
-          %ul.nav.nav-tabs{role: 'tablist'}
+          %ul.nav.nav-tabs{role: 'tablist', class: tabs_offset}
             %li.nav-item{role: 'presentation'}
               %button#metadata-tab.nav-link.active{type: 'button', role: 'tab', 'data-bs-toggle' => 'tab', 'data-bs-target' => '#metadata', 'aria-controls' => 'metadata', 'aria-selected' => 'true'} Metadata
             %li.nav-item{role: 'presentation'}
