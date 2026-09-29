@@ -11,6 +11,8 @@ Source files:
 - `app/jobs/record_impression_job.rb`
 - `app/queries/human_impressions_query.rb`
 - `app/queries/scoped_visitors_query.rb`
+- `app/lib/impression_day.rb`
+- `app/models/impression_count_by_day.rb`
 - `app/controllers/concerns/container_analytics.rb`
 - `app/helpers/container_analytics_helper.rb`
 - `app/views/works/_analytics.html.haml`
@@ -97,6 +99,38 @@ under-detect it.
 The volume threshold and the IP allowlist come from
 `config.x.cerberus.impression_volume_threshold` and
 `config.x.cerberus.impression_ip_allowlist`.
+
+## Counting by Eastern day
+
+Every figure counts an impression toward its calendar day in the app's time
+zone, Eastern, not in UTC. `created_at` is stored as UTC in a plain `timestamp`,
+so `::date` alone gives the UTC date, and an evening's traffic after 7 or 8 p.m.
+Eastern lands on tomorrow.
+
+`ImpressionDay.of(column)` is the one SQL expression for that day. It converts
+the UTC time to Eastern with Postgres's own rules for `America/New_York`, so
+daylight saving is handled there. `RollupImpressionsJob`, `HumanImpressionsQuery`'s
+per-(IP, day) volume check and `ScopedVisitorsQuery` all group by it. That keeps
+the volume threshold and the counts on the same day.
+
+The "All traffic" segment reads a TimescaleDB continuous aggregate, and that
+layer works differently. A continuous aggregate can bucket a plain `timestamp`
+only at a fixed offset, which is wrong for part of every year once daylight
+saving shifts. So `impression_counts_by_day` buckets by UTC **hour**, and the
+report folds hours into Eastern days when it reads them. Eastern offsets are
+whole hours, so every hour falls wholly inside one Eastern day.
+
+Two methods read the aggregate. Never read its `hour` column directly:
+
+- `ImpressionCountByDay.in_range` bounds a range of dates by Eastern midnight,
+  through `ImpressionDay.utc_bounds`. Each end is its own day's midnight, so a
+  daylight-saving day is 23 or 25 hours long.
+- `ImpressionCountByDay.day_sql` groups by the Eastern date. `ImpressionsReport`
+  asks each leaf for its `day_sql`, and the human leaf's is its stored `day`.
+
+`RollupImpressionsJob` re-derives only its last 90 days. Rows older than that
+keep the day they were rolled up on until the job runs once with a longer
+`window:`.
 
 ## Scoping a report to one container
 

@@ -26,7 +26,7 @@ class HumanImpressionsQuery
         AND COALESCE(ua.is_bot, FALSE) = FALSE
         AND NOT (
           i.ip_address NOT IN (#{allow_in})
-          AND (i.ip_address, i.created_at::date) IN (#{volume_offenders_sql})
+          AND (i.ip_address, #{ImpressionDay.of('i.created_at')}) IN (#{volume_offenders_sql})
         )
         #{noid_filter_sql}
     SQL
@@ -56,12 +56,12 @@ class HumanImpressionsQuery
     # does respect the outer query's date window.
     def volume_offenders_sql
       <<~SQL.squish
-        SELECT ip_address, created_at::date
+        SELECT ip_address, #{ImpressionDay.of('created_at')}
         FROM impressions
         WHERE created_at >= #{@window_start}
           #{range_end_sql('')}
           AND ip_address IS NOT NULL
-        GROUP BY ip_address, created_at::date
+        GROUP BY ip_address, #{ImpressionDay.of('created_at')}
         HAVING count(*) > #{@threshold}
       SQL
     end
