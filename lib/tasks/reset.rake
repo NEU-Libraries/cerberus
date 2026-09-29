@@ -454,6 +454,13 @@ namespace :reset do
       AtlasRb::Resource.set_thumbnails(l2_archive['id'], **ThumbnailCreator.call(base: licensed_base))
       AtlasRb::Resource.set_permissions(l2_archive['id'], { 'read' => [l2_group] })
 
+      # Every community gets its showcases, as one created through the UI does.
+      # Library was provisioned above, because Jane's published work needs its
+      # Datasets showcase. Each showcase inherits its community's read gate.
+      [community, communications, archives_community, public_safety, school_of_law, licensed_resources].each do |c|
+        ShowcaseProvisioner.call(community_id: c['id'])
+      end
+
       # The Person half of each group fixture. My DRS resolves the depositor's
       # workspace and publish target through Person#personal_root_id
       # (DepositorContext#deposit_person), so a loginable user with no Person

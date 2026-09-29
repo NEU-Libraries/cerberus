@@ -91,8 +91,9 @@ Two services own the pair of questions.
 
 ### Provisioning
 
-`CommunitiesController#create` provisions every new community, and the
-development and staging reset seed provisions the ones it creates. Each showcase
+`CommunitiesController#create` provisions every new community. The
+development and staging reset seed provisions every community it creates, the
+root included. Each showcase
 is a featured Collection titled after its genre, written through the same
 structure-safe MODS merge the descriptive forms use. That merge parses the
 freshly minted MODS, merges the title and abstract in, and writes the raw XML
