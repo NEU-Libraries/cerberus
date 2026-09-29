@@ -36,21 +36,27 @@ module ImpersonationSession
     session[:view_as_nuid]
   end
 
-  # The user whose READ view is rendered, and the single user both Ability and
-  # SearchBuilder must consult — never current_user directly. Fails closed: a
-  # view-as target that will not hydrate falls back to a guest-shaped user
-  # rather than leaking the admin's own view under a view-as banner.
+  # The user the page renders as: the impersonation target in either mode, so an
+  # admin sees exactly the target's screens, menus and permissions. Ability and
+  # SearchBuilder consult it, never current_user. current_user stays the real
+  # person, for the write identity, audit actors and admin surfaces; see
+  # docs/identity.md for which call sites use which. Fails closed: a target
+  # that will not hydrate renders as a guest, never as the admin.
   def effective_user
-    @effective_user ||= view_as? ? view_as_target : current_user
+    @effective_user ||= impersonating? ? impersonation_target || User.new(groups: [], role: 'guest') : current_user
   end
 
-  # The NUID a gated READ is evaluated as. Every read that wants it passes it
-  # explicitly, and that is deliberate: `mods` and `find` gate on the real user
-  # through atlas_rb's ambient User: header, so reading this from Current
+  # The NUID a gated Atlas READ is evaluated as. Every read that wants it passes
+  # it explicitly, and that is deliberate: `mods` and `find` gate on the real
+  # user through atlas_rb's ambient User: header, so reading this from Current
   # instead would apply view-as to them silently. Current.view_as_nuid is
   # read-side bookkeeping and never a write header.
+  #
+  # Acting-as keeps the admin here even though the page renders as the target:
+  # the request also carries On-Behalf-Of, and Atlas refuses that header from a
+  # non-admin User:, so the target's NUID would 403 every gated read.
   def viewer_nuid
-    effective_user&.nuid
+    view_as? ? effective_user&.nuid : current_user&.nuid
   end
 
   def impersonation_target
@@ -178,10 +184,5 @@ module ImpersonationSession
     rescue AtlasRb::Error, Faraday::Error, JSON::ParserError => e
       Rails.logger.error("Impersonation hydrate failed for #{nuid}: #{e.class} #{e.message}")
       nil
-    end
-
-    # Fail-closed: a hydration miss yields a public-only guest, not the admin.
-    def view_as_target
-      @view_as_target ||= hydrate_user(view_as_nuid) || User.new(groups: [], role: 'guest')
     end
 end

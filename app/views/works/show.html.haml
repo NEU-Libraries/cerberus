@@ -44,7 +44,7 @@
             -# A POST, so button_to rather than link_to. `link-action` strips the
             -# button chrome back to a plain link, because the rest of this row
             -# is plain links and a repair action should not outrank Edit.
-            - if current_user&.admin? || current_user&.admin_delegate?
+            - if effective_user&.admin? || effective_user&.admin_delegate?
               = button_to 'Reindex', admin_reindex_work_path(@work.id),
                           class:      'btn btn-link link-action px-2',
                           form_class: 'd-inline',

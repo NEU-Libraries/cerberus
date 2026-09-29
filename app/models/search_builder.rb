@@ -119,7 +119,7 @@ class SearchBuilder < Blacklight::SearchBuilder
   private
 
     # The user discovery is gated AS. Prefer the controller's effective_user
-    # (the view-as target during a view-as session; the real user otherwise),
+    # (the target during either impersonation mode; the real user otherwise),
     # falling back to current_user for scopes that predate impersonation
     # (e.g. bare doubles in specs).
     #

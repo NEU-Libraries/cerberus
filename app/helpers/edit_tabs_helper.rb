@@ -39,7 +39,7 @@ module EditTabsHelper
   def edit_tab_visible?(key)
     case key
     when 'history' then can?(:read, :audit_event)
-    when 'export'  then current_user&.loader_tier?.present?
+    when 'export'  then effective_user&.loader_tier?.present?
     else true
     end
   end

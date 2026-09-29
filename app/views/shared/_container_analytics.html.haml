@@ -82,7 +82,7 @@
       = render 'admin/impressions/composition', composition: @analytics_composition,
                                                 scope_phrase: "in #{plain_text(@analytics_base_item[:title])}"
 
-  - if current_user&.admin? || current_user&.admin_delegate?
+  - if effective_user&.admin? || effective_user&.admin_delegate?
     .mt-3.text-center
       = link_to admin_impressions_path(open_in_usage_analytics_params(@analytics_effective_item, @analytics)), class: 'btn btn-sm btn-tonal-primary' do
         %i.fa-solid.fa-chart-line.me-1{'aria-hidden' => 'true'}

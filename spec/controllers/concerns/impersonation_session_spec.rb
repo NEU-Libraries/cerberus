@@ -230,6 +230,43 @@ describe ImpersonationSession do
       expect(host.effective_user.groups).to eq([])
       expect(host.effective_user.admin?).to be(false)
     end
+
+    it 'is the hydrated target during acting-as, so the page renders as the target' do
+      host.session[:acting_as_nuid] = '000000002'
+      stub_login('000000002', role: 'staff', groups: ['public-readers'])
+
+      expect(host.effective_user.nuid).to eq('000000002')
+      expect(host.effective_user.admin?).to be(false)
+    end
+
+    it 'fails closed to a guest during acting-as too' do
+      host.session[:acting_as_nuid] = '000000002'
+      allow(AtlasRb::Authentication).to receive(:login).and_raise(JSON::ParserError)
+
+      expect(host.effective_user.role).to eq('guest')
+      expect(host.effective_user.admin?).to be(false)
+    end
+  end
+
+  describe '#viewer_nuid' do
+    before { stub_login('000000002', role: 'staff', groups: []) }
+
+    it 'is the target during view-as' do
+      host.session[:view_as_nuid] = '000000002'
+
+      expect(host.viewer_nuid).to eq('000000002')
+    end
+
+    # Acting-as sends On-Behalf-Of, which Atlas refuses from a non-admin User:.
+    it 'stays the admin during acting-as' do
+      host.session[:acting_as_nuid] = '000000002'
+
+      expect(host.viewer_nuid).to eq('000000004')
+    end
+
+    it 'is the real user when not impersonating' do
+      expect(host.viewer_nuid).to eq('000000004')
+    end
   end
 
   describe 'profile hydration' do

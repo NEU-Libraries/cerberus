@@ -19,7 +19,7 @@
         <span class="maintenance-banner__message"><%= maintenance_message %></span>
       <% end %>
 
-      <% if current_user&.admin? %>
+      <% if effective_user&.admin? %>
         <%= link_to 'Manage', admin_maintenance_path, class: 'maintenance-banner__manage' %>
       <% end %>
     </div>

@@ -31,7 +31,7 @@
     -# An admin or devolved admin gets the Reindex action on any set they can
     -# reach, including one they neither own nor may edit — so it opens this row
     -# on its own, not only alongside the owner's controls.
-    - admin_tier = current_user&.admin? || current_user&.admin_delegate?
+    - admin_tier = effective_user&.admin? || effective_user&.admin_delegate?
     - if public_set || @can_edit || @owned || admin_tier
       .d-flex.align-items-center.flex-wrap.gap-2.pt-3
         - if public_set

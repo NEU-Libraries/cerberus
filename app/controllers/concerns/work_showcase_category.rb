@@ -60,13 +60,13 @@ module WorkShowcaseCategory
       FeaturedContent.genre_labels.select do |genre|
         next false unless placement.options.key?(genre)
 
-        genre == placement.genre || current_user&.admin? || FeaturedContent::STAFF_ONLY.exclude?(genre)
+        genre == placement.genre || effective_user&.admin? || FeaturedContent::STAFF_ONLY.exclude?(genre)
       end
     end
 
     # Atlas requires the depositor to own the Work, so an admin moves it on the
     # depositor's behalf; nobody else can.
     def showcase_editor?(work)
-      current_user&.admin? || (current_user&.nuid.present? && current_user.nuid == work&.depositor)
+      effective_user&.admin? || (effective_user&.nuid.present? && effective_user.nuid == work&.depositor)
     end
 end

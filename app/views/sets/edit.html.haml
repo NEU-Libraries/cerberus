@@ -32,7 +32,7 @@
         %button#derivative-access-tab.nav-link{class: ('active' if open == 'derivative-access'), 'aria-controls' => 'derivative-access', 'aria-selected' => (open == 'derivative-access').to_s, 'data-bs-target' => '#derivative-access', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Derivative access
       %li.nav-item
         %button#visibility-tab.nav-link{class: ('active' if open == 'visibility'), 'aria-controls' => 'visibility', 'aria-selected' => (open == 'visibility').to_s, 'data-bs-target' => '#visibility', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Visibility
-    - if current_user&.loader_tier?
+    - if effective_user&.loader_tier?
       %li.nav-item
         %button#export-tab.nav-link{class: ('active' if open == 'export'), 'aria-controls' => 'export', 'aria-selected' => (open == 'export').to_s, 'data-bs-target' => '#export', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Export
 
@@ -50,6 +50,6 @@
         = render 'derivative_access', set_id: @set['id'], sentinel: @sentinel, groups: sentinel_groups
       #visibility.tab-pane{class: ('active' if open == 'visibility'), 'aria-labelledby' => 'visibility-tab', role: 'tabpanel'}
         = render 'bulk_visibility', set_id: @set['id']
-    - if current_user&.loader_tier?
+    - if effective_user&.loader_tier?
       #export.tab-pane{class: ('active' if open == 'export'), 'aria-labelledby' => 'export-tab', role: 'tabpanel'}
         = render 'export', set_id: @set['id']

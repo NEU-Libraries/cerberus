@@ -341,7 +341,7 @@ class CatalogController < ApplicationController
   # current_user/effective_user — so without this, SearchBuilder#gated_user is
   # nil and gated discovery silently collapses to public-only, ignoring group
   # membership and the admin short-circuit (across container/set contents and
-  # the catalog index alike). `effective_user` honors a view-as session.
+  # the catalog index alike). `effective_user` is the target in either impersonation mode.
   def search_service_context
     { current_user: current_user, effective_user: effective_user,
       catalog_index: catalog_index? }

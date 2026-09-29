@@ -22,7 +22,7 @@
 
   %p.text-muted.small.mb-0
     Human visitors only. Usage statistics are refreshed daily.
-    - if current_user&.admin? || current_user&.admin_delegate?
+    - if effective_user&.admin? || effective_user&.admin_delegate?
       = link_to 'See other date ranges in Usage analytics',
                 admin_impressions_path(item_noid: @work.id, item_uuid: @work.valkyrie_id, item_klass: 'Work',
                                        item_title: plain_text(@work.title))

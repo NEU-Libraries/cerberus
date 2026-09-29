@@ -55,7 +55,7 @@
       -# Hidden during an acting-as session: impersonation already fixes the
       -# attribution (to the target), so offering the proxy radio would be a
       -# second, conflicting attribution mechanism. See WorksController#deposit_attribution.
-      - if (current_user&.admin? || current_user&.privileged?) && !acting_as?
+      - if (effective_user&.admin? || effective_user&.privileged?) && !acting_as?
         %fieldset.deposit-form__field
           %legend.deposit-form__field-label Ownership
           .deposit-form__radio-grid

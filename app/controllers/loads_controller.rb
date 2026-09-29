@@ -156,14 +156,14 @@ class LoadsController < ApplicationController
     end
 
     def require_loader_role
-      return if current_user&.loader_tier?
+      return if effective_user&.loader_tier?
 
       render template: 'errors/forbidden', status: :forbidden, layout: 'application'
     end
 
     def require_loader_group
-      return if current_user&.admin?
-      return if @loader && current_user&.groups&.include?(@loader.group)
+      return if effective_user&.admin?
+      return if @loader && effective_user&.groups&.include?(@loader.group)
 
       render template: 'errors/forbidden', status: :forbidden, layout: 'application'
     end

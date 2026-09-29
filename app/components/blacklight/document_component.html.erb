@@ -60,7 +60,7 @@
         <% end %>
         <%# klass_type (string), not klass: in this template's scope a bare
             `Collection` is ViewComponent::Collection, not the app model. %>
-        <% if helpers.current_user&.curates_sets? && %w[Work Collection].include?(@document.klass_type) %>
+        <% if helpers.effective_user&.curates_sets? && %w[Work Collection].include?(@document.klass_type) %>
           <a href="#add-to-set-<%= @document.to_param %>"
              class="btn btn-sm btn-link p-0 me-2"
              role="button"
@@ -81,7 +81,7 @@
         <% end %>
         <%= helpers.document_status_icons(@document) %>
       </div>
-      <% if helpers.current_user&.curates_sets? && %w[Work Collection].include?(@document.klass_type) %>
+      <% if helpers.effective_user&.curates_sets? && %w[Work Collection].include?(@document.klass_type) %>
         <%= render 'sets/picker_modal',
                    kind: @document.klass_type.downcase,
                    noid: @document.to_param %>

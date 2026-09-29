@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Depositor context shared by the deposit fork and My DRS: the signed-in
+# Depositor context shared by the deposit fork and My DRS: the effective
 # depositor's curated Person and their workspace. See docs/identity.md.
 module DepositorContext
   extend ActiveSupport::Concern
@@ -10,7 +10,7 @@ module DepositorContext
     def deposit_person
       return @deposit_person if defined?(@deposit_person)
 
-      @deposit_person = (Array(AtlasRb::Person.resolve([current_user.nuid])).first if current_user&.nuid)
+      @deposit_person = (Array(AtlasRb::Person.resolve([effective_user.nuid])).first if effective_user&.nuid)
     rescue AtlasRb::Error, Faraday::Error, JSON::ParserError
       @deposit_person = nil
     end
@@ -33,7 +33,7 @@ module DepositorContext
 
     # Escaped for a quoted Solr phrase.
     def depositor_phrase
-      current_user.nuid.to_s.gsub(/["\\]/, '')
+      effective_user.nuid.to_s.gsub(/["\\]/, '')
     end
 
     # Empty hides the publish branch entirely, so the personal_root_id check is

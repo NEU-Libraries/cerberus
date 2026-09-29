@@ -12,7 +12,7 @@ class MyDrsController < CatalogController
   include DepositorContext
 
   def index
-    return redirect_to(root_path, alert: 'Sign in to see your DRS.') unless current_user&.nuid
+    return redirect_to(root_path, alert: 'Sign in to see your DRS.') unless effective_user&.nuid
 
     @accounts = account_list
     @workspace_collections = workspace_collections
@@ -24,12 +24,14 @@ class MyDrsController < CatalogController
 
   private
 
-    # An Atlas fault degrades to an empty list rather than a broken My DRS.
+    # An Atlas fault degrades to an empty list rather than a broken My DRS. The
+    # list is the effective user's, but the caller stays the real person, so an
+    # impersonating admin's own credentials authorize the lookup.
     def account_list
-      accounts = AtlasRb::User.accounts(current_user.nuid, nuid: current_user.nuid)
+      accounts = AtlasRb::User.accounts(effective_user.nuid, nuid: current_user.nuid)
       Array(accounts && accounts['accounts'])
     rescue Faraday::Error, JSON::ParserError => e
-      Rails.logger.error("My DRS account lookup failed for #{current_user.nuid}: #{e.class} #{e.message}")
+      Rails.logger.error("My DRS account lookup failed for #{effective_user.nuid}: #{e.class} #{e.message}")
       []
     end
 

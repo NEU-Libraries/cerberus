@@ -17,7 +17,7 @@ class AtlasController < ApplicationController
   end
 
   def user
-    @user = current_user
+    @user = effective_user
   end
 
   private

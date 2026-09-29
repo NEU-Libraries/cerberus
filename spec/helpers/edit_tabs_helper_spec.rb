@@ -3,10 +3,13 @@
 require 'rails_helper'
 
 RSpec.describe EditTabsHelper do
-  # Gates read off the view context's own can? / current_user.
+  # Gates read off the view context's own can? / effective_user. The bare test
+  # controller lacks ImpersonationSession's helper_method, so verifying partial
+  # doubles rejects a stub of effective_user; define a real singleton instead.
   def allow_gates(history:, loader:)
     allow(helper).to receive(:can?).with(:read, :audit_event).and_return(history)
-    allow(helper).to receive(:current_user).and_return(instance_double(User, loader_tier?: loader))
+    user = instance_double(User, loader_tier?: loader)
+    helper.define_singleton_method(:effective_user) { user }
   end
 
   before { allow_gates(history: true, loader: true) }

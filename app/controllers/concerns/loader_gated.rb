@@ -16,7 +16,7 @@ module LoaderGated
   private
 
     def require_loader_role
-      return if current_user&.loader_tier?
+      return if effective_user&.loader_tier?
 
       render template: 'errors/forbidden', status: :forbidden, layout: 'application'
     end

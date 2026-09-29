@@ -21,7 +21,7 @@ class ApplicationController < ActionController::Base
   # read, and Current.nuid is what the signed assertion carries.
   include MaintenanceGate
 
-  # Authorization is evaluated against the effective user, so a view-as session
+  # Authorization is evaluated against the effective user, so an impersonation
   # renders the target's access decisions rather than the real admin's.
   def current_ability
     @current_ability ||= Ability.new(effective_user)

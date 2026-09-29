@@ -10,7 +10,7 @@
 #
 # Minting a token for an NUID is a "become anyone" operation — which is why
 # Atlas :system-gates it — so Cerberus only ever mints for the *real* signed-in
-# user (current_user, never the view-as effective_user) and never persists the
+# user (current_user, never an impersonation's effective_user) and never persists the
 # token: it's rendered into the response once and dropped, so a leaked
 # session/DB never carries the credential.
 class AtlasTokensController < ApplicationController
