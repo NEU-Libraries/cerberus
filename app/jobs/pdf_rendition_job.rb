@@ -53,7 +53,7 @@ class PdfRenditionJob < ApplicationJob
     # Deleting the stale PDF is not an option: a Blob delete is admin-only in
     # Atlas, and this job runs as whoever replaced the file.
     def attach_rendition(work_id, pdf_path, rendition_key, refresh:)
-      existing = PdfRenditionAsset.for(AtlasRb::Work.file_sets(work_id)) if refresh
+      existing = RenditionAsset.for(AtlasRb::Work.file_sets(work_id), mime_types: RenditionAsset::PDF) if refresh
       if existing
         AtlasRb::Blob.update(existing['noid'], pdf_path, idempotency_key: rendition_key)
       else

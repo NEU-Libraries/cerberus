@@ -55,10 +55,22 @@ class MediaRenditionJob < ApplicationJob
     def attach(work_id, mp4_path, poster_path, rendition_key, refresh:)
       raise PrimaryFileMissing, "work #{work_id} has no primary file yet" unless primary_file?(work_id)
 
-      AtlasRb::Blob.create(work_id, mp4_path, File.basename(mp4_path), idempotency_key: rendition_key) if mp4_path
+      attach_mp4(work_id, mp4_path, rendition_key, refresh: refresh) if mp4_path
       # perform_now so the ambient acting NUID carries through (see ApplicationJob).
       IiifAssetsJob.perform_now(work_id, poster_path, refresh: refresh) if poster_path
       IncompleteFlag.clear(work_id)
+    end
+
+    # A replace or revert updates the Work's one MP4 rather than adding another,
+    # as PdfRenditionJob does for its PDF. A Blob delete is admin-only in Atlas,
+    # and this job runs as whoever replaced the file.
+    def attach_mp4(work_id, mp4_path, rendition_key, refresh:)
+      existing = RenditionAsset.for(AtlasRb::Work.file_sets(work_id), mime_types: RenditionAsset::MP4) if refresh
+      if existing
+        AtlasRb::Blob.update(existing['noid'], mp4_path, idempotency_key: rendition_key)
+      else
+        AtlasRb::Blob.create(work_id, mp4_path, File.basename(mp4_path), idempotency_key: rendition_key)
+      end
     end
 
     def rendition_path(staged_path)

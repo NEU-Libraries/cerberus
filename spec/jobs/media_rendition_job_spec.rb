@@ -24,6 +24,43 @@ RSpec.describe MediaRenditionJob do
     expect(IiifAssetsJob).to have_received(:perform_now).with('w1', '/u/x-poster.jpg', refresh: false)
   end
 
+  describe 'on a replace or revert' do
+    def asset(noid, name, mime)
+      AtlasRb::Mash.new(role: 'original_file', noid: noid, original_filename: name, mime_type: mime)
+    end
+
+    before do
+      allow(Marcel::MimeType).to receive(:for).and_return('video/quicktime')
+      allow(MediaRemux).to receive(:poster).and_return('/u/talk-poster.jpg')
+      allow(MediaRemux).to receive(:to_mp4).and_return('/u/talk.mp4')
+      allow(AtlasRb::Blob).to receive(:update)
+    end
+
+    # Each replace passes a fresh key, so creating here added an MP4 per replace.
+    it "updates the Work's existing MP4 instead of attaching another" do
+      allow(AtlasRb::Work).to receive(:file_sets).and_return(
+        [AtlasRb::Mash.new(assets: [asset('b-mov', 'talk.mov', 'video/quicktime')]),
+         AtlasRb::Mash.new(assets: [asset('b-mp4', 'talk.mp4', 'video/mp4')])]
+      )
+
+      described_class.perform_now('w1', '/u/talk.mov', 'key2', refresh: true)
+
+      expect(AtlasRb::Blob).to have_received(:update).with('b-mp4', '/u/talk.mp4', idempotency_key: 'key2')
+      expect(AtlasRb::Blob).not_to have_received(:create)
+    end
+
+    it 'attaches an MP4 when the Work has none yet' do
+      allow(AtlasRb::Work).to receive(:file_sets).and_return(
+        [AtlasRb::Mash.new(assets: [asset('b-mov', 'talk.mov', 'video/quicktime')])]
+      )
+
+      described_class.perform_now('w1', '/u/talk.mov', 'key2', refresh: true)
+
+      expect(AtlasRb::Blob).to have_received(:create)
+      expect(AtlasRb::Blob).not_to have_received(:update)
+    end
+  end
+
   it 'passes a refresh through, so a replaced video gets a fresh poster' do
     allow(Marcel::MimeType).to receive(:for).and_return('video/mp4')
     allow(MediaRemux).to receive(:poster).and_return('/u/x-poster.jpg')

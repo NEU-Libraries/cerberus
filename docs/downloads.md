@@ -18,7 +18,7 @@ Source files:
 - `app/services/derivative_creator.rb`
 - `app/jobs/deposit_derivatives_job.rb`
 - `app/jobs/pdf_rendition_job.rb`
-- `app/services/pdf_rendition_asset.rb`
+- `app/services/rendition_asset.rb`
 - `bin/soffice-timeout`
 
 `IiifAssetsJob`, `CaptionJob` and `StreamingOnly` are covered in
@@ -532,10 +532,11 @@ Deleting the stale PDF and creating a new one was the obvious alternative. It
 does not work, because Atlas lets only an admin delete a Blob. This job runs as
 whoever replaced the file, and atlas_rb has no system-principal delete.
 
-`PdfRenditionAsset.for` finds the existing PDF from `Work.file_sets`. Atlas
+`RenditionAsset.for` finds the existing PDF from `Work.file_sets`. Atlas
 stores a rendition as an ordinary `original_file` in a FileSet of its own, so
-nothing on the wire marks it as derived. The name does: the job writes `thesis.docx` as `thesis.pdf`, and
-a primary's `original_filename` survives every `Blob.update`. So the rendition
+nothing on the wire marks it as derived. The name does: the job writes
+`thesis.docx` as `thesis.pdf`, and a primary's `original_filename` survives
+every `Blob.update`. So the rendition
 is the `original_file` PDF whose name stem matches another `original_file` on
 the Work. It reads `original_filename` for that match only, and never renders
 it.
@@ -546,3 +547,9 @@ Two consequences follow:
   rendition. Updating it appends a revision, so its bytes stay recoverable.
 - A Work that already holds several PDFs keeps them. Every replace updates the
   same one, the lowest NOID, and an admin can remove the others.
+
+`MediaRenditionJob` does the same for the MP4 it remuxes from a video or audio
+master, such as `talk.mov` to `talk.mp4`, asking `RenditionAsset` with
+`mime_types: RenditionAsset::MP4`. A master that is already an MP4 is never
+remuxed, and has no other original under its stem, so it is never mistaken for
+its own rendition.
