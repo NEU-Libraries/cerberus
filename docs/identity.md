@@ -8,6 +8,7 @@ Source files:
 
 - `app/models/user.rb`
 - `app/models/ability.rb`
+- `app/controllers/atlas_controller.rb`
 - `app/lib/devise/strategies/custom_authenticatable.rb`
 - `app/controllers/concerns/impersonation_session.rb`
 - `app/controllers/admin/impersonations_controller.rb`
@@ -20,68 +21,73 @@ that use the abilities described here are in
 
 ## Building a user
 
-`User` has no database table. It is an `ActiveModel` built per session from
-Atlas's user lookup, carrying `email`, `nuid`, `name`, `groups`, `role` and
-`affiliation`. `AtlasController#sign_in_from_atlas` calls
-`AtlasRb::Authentication.login(nuid)`, builds the `User` from what comes back,
-and hands it to Devise's `sign_in`.
+`User` has no database table. It is an `ActiveModel` object built per session
+from Atlas's user lookup. It carries `email`, `nuid`, `name`, `groups`, `role`
+and `affiliation`. `AtlasController#sign_in_from_atlas` calls
+`AtlasRb::Authentication.login(nuid)`, builds the `User` from the result, and
+hands it to Devise's `sign_in`. It also clears `session[:account_email]`, so a
+fresh login lands on the person's preferred account.
 
-`groups` is the identity-provider-asserted array. It is `nil` on the guest
-fallback, which is why `User#member_of?` wraps it in `Array` before testing
-membership. Group gates read as `member_of?(...)` rather than re-typing
+`groups` is the array the identity provider asserts. It is `nil` on the guest
+fallback, so `User#member_of?` wraps it in `Array` before testing membership.
+Group gates call `member_of?(...)` rather than repeating
 `Array(...).include?(...)` at every call site.
 
 ### The Warden strategy
 
 `Devise::Strategies::CustomAuthenticatable` backs
 `devise :custom_authenticatable`. It inherits `Devise::Strategies::Authenticatable`,
-which implements the underlying strategy logic, and is based on
+which supplies the underlying strategy logic. It is based on
 [this gist](https://gist.github.com/madtrick/3917079).
 
 Warden calls `authenticate!`. On success the strategy calls `success!` with an
-instance of the model class Devise is configured with — `mapping.to`, the `User`
-class. The strategy builds it from `authentication_hash`, which the base class
-populates with the fields the login form submitted. On failure it calls `fail!`.
+instance of the model class Devise is configured with: `mapping.to`, the `User`
+class. It builds that instance from `authentication_hash`, which the base class
+fills with the fields the login form submitted. Only `nuid`, `email` and
+`password` are copied. On failure it calls `fail!`.
 
-`credentials_valid?` returns `true`. Nothing is checked. The shape the source
-records as intended is: take the NUID, send it to Atlas, and merge the returned
-values into the authentication hash. That is not wired, and the sign-in path the
-app actually uses builds the `User` in `AtlasController` instead.
+`credentials_valid?` returns `true`. It checks nothing, so whatever the
+authentication hash carries becomes the signed-in identity. The NUID lookup
+against Atlas that would validate it is not wired here. The app signs in through
+`AtlasController#sign_in_from_atlas` instead.
 
 ### Displaying a name
 
 `pretty_name` runs the stored name through Namae, which understands only
-person-shaped names. A descriptive or organisational one — "Law Library Staffer"
-— parses to nothing. The raw-name fallback is load-bearing. An empty display
-name blanks the whole user block in the navbar, and that block holds Log Out. So
-the only way out of the session was to clear it by hand.
+person-shaped names. A descriptive or organisational name, such as "Law Library
+Staffer", parses to nothing. Keep the fallback to the raw name. An empty display
+name blanks the whole user block in the navbar, and that block holds Log Out.
+The user would then have to clear the session by hand to get out.
 
 ## What each role predicate gates
 
 | Predicate | Test | What it gates |
 |---|---|---|
 | `admin?` | `role == 'admin'` | Mirrors the Atlas-side role. Because `Ability` short-circuits on it, an Atlas admin drives admin-only UI without every Grouper group stuffed onto their record |
-| `privileged?` | `role == 'privileged'` | Whether the deposit form renders the proxy ("upload as") radio. Group membership still selects *which* collections the user may deposit into |
+| `privileged?` | `role == 'privileged'` | Whether the deposit form (`works/new`) renders the proxy ("upload as") radio, for an admin or a privileged user who is not acting as someone. Group membership still selects *which* collections the user may deposit into |
 | `messageable?` | not `guest` or `anonymous` | Inbox eligibility. The guest NUID is a shared fallback identity with no inbox of its own |
 | `curates_sets?` | `messageable?` | Whether the user may own Sets. Sets share the inbox's human-role floor — one concept, two surfaces. Split the predicates if the floor ever diverges |
-| `loader_tier?` | `loader`, `privileged` or `admin` | The loader surface: `LoadsController` and the My Loaders page and menu. *Which* loaders appear inside is `Loader.available_to`'s concern, per Grouper group |
+| `loader_tier?` | `loader`, `privileged` or `admin` | The loader surface: `LoadersController` (the My Loaders page), `LoadsController`, and the menu link. *Which* loaders appear inside is `Loader.available_to`'s concern, per Grouper group |
 | `admin_delegate?` | `privileged?` **and** `Permissions::ADMIN_GROUP` | The devolved-admin tier — a named subset of `Admin::BaseController` surfaces below the full `:admin` role's blanket access. See [`docs/admin.md`](admin.md) |
-| `can_bypass_embargo?` | `admin?` or `Permissions::STAFF_EDIT_GROUP` | The only carve-out from an active embargo's download withholding |
+| `can_bypass_embargo?` | `admin?` or `Permissions::STAFF_EDIT_GROUP` | The only exception to an active embargo's download withholding. Widening it hands out embargoed bytes. Callers ask it of `effective_user` |
 
 Two of these are easy to get wrong.
 
-`admin_delegate?` mirrors the Atlas-side Ability's identical role-and-group
-pairing, and neither half alone is sufficient. It covers only the narrower
-non-admin case, so call sites ask `admin? || admin_delegate?` — `:admin` always
-short-circuits.
+`admin_delegate?` mirrors Atlas's `User#admin_delegate?`, which pairs the same
+role and group. Neither half alone is sufficient. It covers only the narrower
+non-admin tier, so call sites must ask `admin? || admin_delegate?`. Otherwise
+they lock full admins out of the surface.
 
-`can_bypass_embargo?` uses `STAFF_EDIT_GROUP` on the read side, which is not that
-group's usual role. Elsewhere it is an always-on edit group; here it stands in
-for "someone who can confirm this restriction is intentional".
+`can_bypass_embargo?` uses `STAFF_EDIT_GROUP` on the read side, which is not
+that group's usual job. Elsewhere it is the edit group Atlas adds to everything.
+Here it stands in for "someone who can confirm this restriction is
+intentional".
 
 ## Discovery abilities
 
 `Ability` decides `:read`, `:edit` and `:tombstone` on a `SolrDocument`.
+`ApplicationController#current_ability` builds it from `effective_user`, so a
+view-as session sees the target's decisions.
 
 | Principal | Rules |
 |---|---|
@@ -103,109 +109,116 @@ For a signed-in non-admin:
 
 ### Edit-equivalence, and why read follows it
 
-`edit_equivalent?` is an ACL edit-group match, the user's NUID in the ACL's
-edit users, **or** ownership. This is the same test as Atlas's
-`group_acl_grants?` plus its ownership check.
+`edit_equivalent?` is true for an ACL edit-group match, the user's NUID in the
+ACL's `edit_users`, **or** ownership (`depositor`). Atlas's `edit_grants?` makes
+the same test: `group_acl_grants?` plus its ownership check.
 
-Granting read from it is the fix for two ordinary states that otherwise locked a
-person out of their own material. Those are a depositor who set their collection
-Private with no group rows, and a group granted Manage but not View. Both kept
-the Edit page and got a 403 on the object itself.
+Read must follow it. Otherwise two ordinary states lock a person out of their
+own material: a depositor who set their collection Private with no group rows,
+and a group granted Manage but not View. Both keep the Edit page and get a 403
+on the object itself.
 
-It cannot widen disclosure, because it only admits people who could already
-alter the thing. Atlas says the same of Sets — edit implies read. Its read floor
-admits any authenticated principal, so nothing here outruns what the backend
-will serve.
+It cannot widen disclosure, because it admits only people who could already
+change the thing. Atlas's own read rule, `Ability#resource_readable?`, admits
+the same three ways in: public, a read group, or `edit_grants?`. So nothing here
+outruns what the backend will serve.
 
-Ownership has to be tested separately because the ACL does not represent it. A
-personal root and everything beneath it carries `edit: [repository:staff]` with
-the owner recorded only as `depositor`. This mirrors Atlas's edit-equivalent
-grant, and divergence shows up as Cerberus hiding an Edit link for a write Atlas
-would allow.
+Ownership needs its own test because the ACL does not record it. A personal
+root and everything beneath it carries `edit: [repository:staff]`, with the
+owner recorded only as `depositor`. An ACL-only test would lock a non-staff
+depositor out of their own workspace. If the two sides diverge, Cerberus hides
+an Edit link for a write Atlas would allow.
 
 `:restore` is deliberately not one of these verbs. Reversing a tombstone is an
 operator action, not an owner one.
 
 ### Discovery follows the same read rule
 
-`SearchBuilder#apply_gated_discovery` puts `:read` into Solr as one filter. A
-document matches when it is public, a read group matches, an edit group
-matches, or the user's NUID is in `edit_access_person_ssim` or `depositor_ssi`.
-Admins skip the filter, and a view-as session is gated as the target.
+`SearchBuilder#apply_gated_discovery` puts `:read` into Solr as one `fq`,
+built by `discovery_clause`. A document matches when it is public, a read group
+matches, an edit group matches, or the user's NUID is in
+`edit_access_person_ssim` or `depositor_ssi`. Admins skip the filter.
+`gated_user` is the effective user, so a view-as session is gated as the
+target.
 
 The two must stay in step. If the filter is narrower, staff and depositors
 cannot find items they can open: staff hold edit, not read, on every resource,
 and a private Work names its depositor in no group. If the filter is wider, a
 search shows hits that 403 when opened.
 
-Atlas's `SolrReadGate` applies the same five clauses to Set contents and
-descendant-work lists, so a change here needs the same change there.
+Atlas's `SolrReadGate` applies the same five clauses to `/resources/search`,
+Set contents and descendant-work lists. A change here needs the same change
+there.
 
 ### Ownership and proxy deposits
 
 `depositor?` is not Work-scoped, because a depositor owns their Collections too.
-The whole workspace subtree inherits their NUID, since creators copy
-`parent.permissions` and that carries `depositor`. A Collection they own is
-theirs to edit and, once empty, to withdraw. Emptiness needs no check here —
+The whole workspace subtree inherits their NUID: Atlas's creators copy
+`parent.permissions`, which carries `depositor`. A Collection they own is theirs
+to edit and, once empty, to withdraw. Emptiness needs no check here, because
 Atlas refuses the tombstone while live children remain.
 
-`proxy_uploader?` applies to Works only. A librarian who proxied a deposit keeps
-tombstone rights on it: the recorded `proxy_uploader` retains authority, not just
-the on-behalf-of depositor.
+`proxy_uploader?` applies to Works only (`internal_resource_tesim` is `Work`). A
+librarian who proxied a deposit keeps tombstone rights on it. The recorded
+`proxy_uploader` keeps authority, not only the depositor they acted for.
 
 ## Impersonation
 
 `ImpersonationSession` is included into `ApplicationController`, so it governs
-every request — an impersonating administrator browses the whole app, not just an
-admin surface. Its two modes are mutually exclusive and both admin-only.
+every request. An impersonating administrator browses the whole app, not just an
+admin surface. Its two modes are mutually exclusive: each `start_*` calls
+`end_impersonation` first.
 
-| Mode | Authenticated identity | Effect | Writes |
-|---|---|---|---|
-| acting-as | stays the admin (`Current.nuid`) | `Current.on_behalf_of` is set to the target, so atlas_rb writes carry `On-Behalf-Of: <target>` via the default on-behalf-of callable. Atlas authorizes the admin and stamps the target as provenance | allowed, and attributed to the target |
-| view-as | untouched | sets `view_as_nuid`, which drives `effective_user` — the single user both `Ability` and `SearchBuilder` consult | rejected |
+| Mode | Who may start it | Authenticated identity | Effect | Writes |
+|---|---|---|---|---|
+| acting-as | `:admin` only | stays the admin (`Current.nuid`) | sets `Current.on_behalf_of` to the target, so atlas_rb writes carry `On-Behalf-Of: <target>` through the default on-behalf-of callable. Atlas authorizes the admin and stamps the target as provenance | allowed, and attributed to the target |
+| view-as | `:admin` or a devolved admin | untouched | sets `view_as_nuid`, which drives `effective_user`, the single user both `Ability` and `SearchBuilder` consult | rejected |
 
-Session state lives in the Rails session cookie with a 30-minute sliding
-inactivity TTL (`IMPERSONATION_TTL`). `enforce_impersonation_ttl` runs on every
-request and either expires the session or refreshes the clock. Every termination
-path funnels through `end_impersonation`.
+Session state lives in the Rails session (`session[:acting_as_nuid]` or
+`session[:view_as_nuid]`) with a 30-minute sliding inactivity limit,
+`IMPERSONATION_TTL`. `enforce_impersonation_ttl` runs on every request and
+either ends the session or refreshes the clock. Every way a session ends goes
+through `end_impersonation`.
 
 `impersonation_target` hydrates whichever target is set, for the banner's name
-and NUID display, and is `nil` when there is no session or hydration fails.
+and NUID. It is `nil` when there is no session or hydration fails.
 
 ### Ordering, and the audit trail
 
 `start_acting_as` and `start_view_as` emit the `impersonation_started` audit
-event **before** establishing the session, so an admin can never impersonate
-without a trail. A failed emit raises a Faraday error and no session is set;
-`ImpersonationsController` rescues it into a flash and a redirect rather than a
-500.
+event **before** they set the session, so an admin can never impersonate without
+a trail. A failed emit raises and no session is set.
+`ImpersonationsController#begin_impersonation` rescues a `Faraday::Error` into a
+flash and a redirect rather than a 500.
 
-`end_impersonation` inverts that order: it tears the session down first and then
-emits `impersonation_ended` best-effort, logging a failure. The rescue covers
+`end_impersonation` reverses that order. It tears the session down first, then
+emits `impersonation_ended` best-effort and logs a failure. The rescue covers
 `AtlasRb::Error` as well as `Faraday::Error`, because a refusal Atlas states in
 an HTTP response is still a failed emit. A read-only maintenance window is the
-case that proves it. The session is already gone by that point. So letting
+proving case. The session is already gone by then, so letting
 `AtlasRb::ReadOnlyModeError` escape would land the admin on the maintenance page
 and tell them an exit failed that had in fact succeeded.
 
-`emit_impersonation_event` records a session-scoped `AuditEvent` — there is no
-resource to hang it on — through atlas_rb's emit binding. It passes the admin as
-`actor_nuid` explicitly. The gem uses that value as the `User:` header and as the
-recorded principal. So the admin gate still holds on an `impersonation_ended`
-emit fired mid-teardown.
+`emit_impersonation_event` records a session-scoped event through
+`AtlasRb::AuditEvent.emit`; there is no resource to hang it on. It passes the
+admin as `actor_nuid` explicitly, with the target as `on_behalf_of_nuid` and
+the mode. The gem sends `actor_nuid` as the `User:` header and records it as
+the principal. So the admin gate still holds on an `impersonation_ended` emit
+fired after the session is gone.
 
 ### Context plumbing
 
-`set_impersonation_context` pushes the impersonation state into `Current` after
-`ApplicationController#set_current_nuid` has set the admin identity.
-`Current.on_behalf_of` drives write attribution. `Current.view_as_nuid` is
-read-only bookkeeping; `effective_user` is its real consumer.
+`set_impersonation_context` copies the session's impersonation state into
+`Current`. `Current.on_behalf_of` drives write attribution.
+`Current.view_as_nuid` is read-side bookkeeping, and must never become a write
+header. `effective_user` reads the session, not `Current`.
 
 ### Which NUID a gated read uses
 
-`viewer_nuid` is `effective_user&.nuid`, and it is what a read that gates on
-the *view-as target* passes to atlas_rb. Three Work reads take it — `assets`,
-`file_sets` and `Blob.work` — plus the two zip packers.
+`viewer_nuid` is `effective_user&.nuid`. A read that gates on the *view-as
+target* passes it to atlas_rb. Three reads take it: `Work.assets`,
+`Work.file_sets` and `Blob.work`. So do the two zip packers, `QueueZipPacker`
+and `SetZipPacker`.
 
 The kwarg's presence is a per-call decision, not boilerplate to be removed.
 `mods` and `find` carry no `nuid:` and must not: atlas_rb signs
@@ -216,16 +229,17 @@ correctness regression — `mods` would silently acquire view-as gating.
 | Read | Gated by |
 |---|---|
 | `mods`, `find` | `Current.nuid`, the real user, via atlas_rb's ambient `User:` header |
-| `assets`, `file_sets`, `Blob.work` | `viewer_nuid`, the view-as target |
+| `Work.assets`, `Work.file_sets`, `Blob.work` | `viewer_nuid`, the view-as target |
 
-`WorksController#parallel_show_reads` resolves it into a local before building
-the tasks. The parallel reads run on worker threads, and a worker must not
-touch ActiveRecord, which `effective_user` does.
+`WorksController#parallel_show_reads` and `#downloads` resolve it into a local
+before building the tasks. The parallel reads run on worker threads, and a
+worker must not touch ActiveRecord, which `effective_user` can reach.
 
 ### Rejecting a write under view-as
 
-`reject_writes_in_view_as` ends the session loudly on any non-GET, non-HEAD
-request, rather than silently performing or silently dropping the write.
+`reject_writes_in_view_as` ends the session loudly on any request that is not
+GET or HEAD. It neither performs the write nor drops it silently. A plain
+request gets a redirect to the root page with an alert.
 
 "Loudly" needs help when the write came from inside a turbo-frame — the My DRS
 token panel is one. Turbo looks for that frame in the redirect's target, does not
@@ -234,23 +248,31 @@ no error, no flash, and the banner still showing until the next navigation. The
 button looks simply dead, so an admin may keep pressing it while no longer
 impersonating anyone.
 
-The reply to a turbo-frame request is therefore a turbo-stream refresh. A
-turbo-stream is honoured whatever frame the request came from, and a refresh
-re-renders the page, which surfaces the flash and drops the banner.
+So the reply to a turbo-frame request is a turbo-stream refresh. Turbo honours a
+turbo-stream whatever frame the request came from, and a refresh re-renders the
+page, which shows the flash and drops the banner.
+
+The refresh must pass `request_id: nil`. The default is the current request's
+id, and Turbo drops a refresh whose id it has already seen. That is true of
+every refresh sent in reply to the request that triggered it.
 
 ### Hydrating a target
 
-`hydrate_user` builds a `User` from the same Atlas user lookup SSO sign-in uses —
-there is no database to read. It suppresses `Current.on_behalf_of` for the
-duration, because this is a plain profile lookup and not an on-behalf-of
-operation. A hydration failure logs and returns `nil`.
+`hydrate_user` builds a `User` from the same Atlas user lookup that sign-in uses,
+`AtlasRb::Authentication.login`; there is no database to read. It clears
+`Current.on_behalf_of` for the call, because this is a plain profile lookup, not
+an on-behalf-of operation. The lookup sends the target as `User:`, and the
+target is not an admin. So a leaked `On-Behalf-Of` makes Atlas refuse the
+lookup, and the banner reads "Unknown user". A transport or parse failure logs
+and returns `nil`.
 
-`view_as_target` fails closed: a miss yields a public-only guest-shaped user, so
-a broken lookup can never render the admin's own view under a view-as banner.
+`view_as_target` fails closed. A miss yields a guest-shaped user with no groups,
+who sees public material only. So a broken lookup can never render the admin's
+own view under a view-as banner.
 
 ### The toggle surface
 
-`Admin::ImpersonationsController` is only the toggle; the state machine and
+`Admin::ImpersonationsController` is only the toggle. The state machine and
 hydration live in the concern.
 
 | Action | Gate |
@@ -258,54 +280,66 @@ hydration live in the concern.
 | `create_acting_as` | the inherited strict `require_admin` |
 | everything else — `new`, `recipients`, `create_view_as`, `destroy` | `require_admin_or_delegate` |
 
-Act-as stays `:admin`-only even for a delegate who cleared the broader gate to
-reach the controller, which matches the view. `_start.html.haml` renders the "Act
-as" control for a full admin only. Atlas gates acting-as server-side too,
-authorizing the `On-Behalf-Of` header against the admin role. So the Cerberus
-gate is defense in depth rather than the only backstop. Atlas's own
-devolved-admin grant opens `:create AuditEvent` for the session-start emit that
-view-as needs, and does not touch on-behalf-of or acting-as at all.
+Act-as stays `:admin`-only, even for a delegate who cleared the broader gate to
+reach the controller. That matches the view: `_start.html.haml` renders the "Act
+as" control for a full admin only. Atlas also gates acting-as, authorizing the
+`On-Behalf-Of` header against the admin role. So the Cerberus gate is defense in
+depth, not the only backstop. Atlas's devolved-admin grants include
+`:create, AuditEvent`, which view-as needs for its session-start emit. They do
+not touch on-behalf-of.
 
-The controller skips `reject_writes_in_view_as` because it manages the
-impersonation session itself. `enforce_impersonation_ttl` and
-`set_impersonation_context` still run.
+The controller skips `reject_writes_in_view_as`, because it manages the
+impersonation session itself. Without the skip, the banner's Exit (a DELETE) and
+a mode switch (a POST) would trip the guard and end the session with a
+misleading message. `enforce_impersonation_ttl` and `set_impersonation_context`
+still run.
 
 `new` renders the NUID-entry start form, reached from the admin dashboard's
-Impersonation card. That matches the other admin actions — Re-parent, Linked
-members — which open onto their own page. `recipients` is the typeahead JSON for
-the target-user picker, from `UserDirectorySearchable`. That directory's role
-exclusions are apt here too, since impersonation targets real human users and
-never the self, system or anonymous principals. `resolve_target` returns `nil`
-for a blank entry without calling Atlas.
+Impersonation card. That matches the other admin actions, such as Re-parent and
+Linked members, which open onto their own page. `recipients` is the typeahead
+JSON for the target picker, from `UserDirectorySearchable`. Atlas's directory
+leaves out guest, anonymous and system users, and the requesting user. That
+suits impersonation, which targets real people and never oneself.
+`resolve_target` returns `nil` for a blank entry without calling Atlas.
 
 ## Depositor context
 
-`DepositorContext` is the shared context for the curation surfaces: the weighted
-deposit fork in `WorksController`, and the two-space My DRS page in
-`MyDrsController`. Both need the signed-in depositor's curated Person and the
-Collections they own.
+`DepositorContext` is the shared context for the curation surfaces: the deposit
+fork in `WorksController`, and the two-space My DRS page in `MyDrsController`.
+Both need the signed-in depositor's curated Person and the Collections they own.
 
-`deposit_person` resolves the Person from the user's NUID and memoises it for the
-request. The Person is authoritative for display name, affiliations, and
-`personal_root_id` — the personal root that homes published works. It is `nil`
-for anyone without a Person, which is most depositors, and simply means no
-publish branch. A resolution failure degrades to `nil` rather than blocking a
-workspace deposit.
+`deposit_person` resolves the Person from the user's NUID
+(`AtlasRb::Person.resolve`) and memoises it for the request. The Person is
+authoritative for display name, affiliations, and `personal_root_id`, the
+personal root that homes published works. It is `nil` for anyone without a
+Person, which is most depositors, and then there is simply no publish branch. A
+transport or parse failure also yields `nil` rather than blocking a workspace
+deposit.
 
-`workspace_collections` returns the Collections under that personal root. They
-are sorted newest first over Valkyrie's own record timestamp, because a depositor
-reaches for the collection they just made. Featured showcases and tombstoned
-rows are excluded. No personal root means no personal workspace, and an empty
-list.
+`workspace_collections` returns the Collections under that personal root, up to
+`rows:` (200). It scopes by `ancestor_ids_ssim`, not by every collection the
+user deposited into. Otherwise an admin who seeded the institutional tree would
+"own" all of it. The Solr query is deliberately ungated, so a depositor's own
+private collections stay visible. Results sort newest first on
+`created_at_dtsi`, because a depositor reaches for the collection they just
+made. Featured showcases and tombstoned rows are excluded. No personal root
+means no workspace, and an empty list.
 
 `publish_targets` keys publish destinations by community NOID:
-`{ noid => { name:, genres: { label => showcase_noid } } }`. Only the depositor's
-affiliated communities that actually have showcases appear, and only when the
-Person carries a `personal_root_id`. `community_name` degrades to the NOID when
-the lookup fails, so a stale affiliation cannot break the deposit form.
+`{ noid => { name:, genres: { label => showcase_noid } } }`. An empty hash hides
+the publish branch entirely, so the `personal_root_id` check gates publishing.
+Only the depositor's affiliated communities that have showcases appear, and
+staff-only genres (`FeaturedContent::STAFF_ONLY`) are left out.
+`community_name` falls back to the NOID when the lookup fails, so a stale
+affiliation cannot break the deposit form.
 
 `publish_showcase_id` resolves the showcase to promote into from the submitted
-community and genre. It returns `nil` when the request cannot be honoured. That
-covers no curated Person, a community the depositor is not affiliated with, or
-no showcase for that genre there. The showcase lookup is gated, so one the
-depositor cannot see reads `nil` as well.
+`publish_community_id` and `publish_genre`. It returns `nil` when the request
+cannot be honoured: no curated Person, a community the depositor is not
+affiliated with, a staff-only genre, or no showcase for that genre there.
+`ShowcaseFinder` runs through the gated `SearchBuilder`, so a showcase the
+depositor cannot see also reads `nil`.
+
+`publish_showcase_id` does **not** check where the Work is going. The caller
+must confirm separately that the destination is the depositor's own root before
+offering promotion.
