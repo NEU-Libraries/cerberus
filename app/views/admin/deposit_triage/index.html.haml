@@ -10,14 +10,6 @@
     %span.admin-registry__title
       %i.fa-solid.fa-clipboard-list{'aria-hidden' => 'true'}
       Deposits needing attention
-    .admin-registry__head-actions
-      %span.admin-registry__subtitle
-        - if current_user&.admin?
-          %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
-          Admin-only
-        - else
-          %i.fa-solid.fa-user-shield{'aria-hidden' => 'true'}
-          Delegated admin access
 
   -# Plain links, not JS tabs: each list pages independently, so each is its own
   -# GET. Both counts show, so the inactive tab says whether it is worth opening.

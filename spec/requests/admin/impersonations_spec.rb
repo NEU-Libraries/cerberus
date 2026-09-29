@@ -100,7 +100,7 @@ RSpec.describe 'Admin::Impersonations', type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('Target user')
-      # Matches the rest of the admin-action UX (Re-parent / Linked members),
+      # Matches the rest of the admin-action UX (Move / Linked members),
       # not the old .well form-section chrome.
       expect(response.body).to include('admin-registry')
       expect(response.body).not_to include('impersonation-start')
@@ -108,7 +108,7 @@ RSpec.describe 'Admin::Impersonations', type: :request do
       expect(response.body).to include('data-controller="impersonation-search"')
       expect(response.body).to include(admin_impersonation_recipients_path)
       # Full admin: both modes offered.
-      expect(response.body).to include('value="Act as"', 'value="View as"', 'Admin-only')
+      expect(response.body).to include('value="Act as"', 'value="View as"')
     end
 
     it 'renders View-as only (no Act-as control) for a devolved-admin delegate' do
@@ -118,8 +118,6 @@ RSpec.describe 'Admin::Impersonations', type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('value="View as"')
       expect(response.body).not_to include('value="Act as"')
-      expect(response.body).to include('Delegated admin access')
-      expect(response.body).not_to include('Admin-only')
     end
   end
 

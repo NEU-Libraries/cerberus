@@ -9,9 +9,6 @@
       - if @people.any? && @page == 1 && !@more
         %span.admin-registry__count= pluralize(@people.size, 'person')
     .admin-registry__head-actions
-      %span.admin-registry__subtitle
-        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
-        Admin-only
       = link_to new_admin_person_path, class: 'btn btn-primary btn-sm' do
         %i.fa-solid.fa-user-plus.me-1{'aria-hidden' => 'true'}
         New person

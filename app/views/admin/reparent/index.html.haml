@@ -7,13 +7,6 @@
       Move
     .admin-registry__head-actions
       = render 'steps', step: 1
-      %span.admin-registry__subtitle
-        - if current_user&.admin?
-          %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
-          Admin-only
-        - else
-          %i.fa-solid.fa-user-shield{'aria-hidden' => 'true'}
-          Delegated admin access
 
   .p-3
     %p.text-muted.small.mb-3

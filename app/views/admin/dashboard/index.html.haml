@@ -3,13 +3,6 @@
     %span.admin-actions__title
       %i.fa-solid.fa-screwdriver-wrench{'aria-hidden' => 'true'}
       DRS Administration
-    %span.admin-actions__subtitle
-      - if current_user&.admin?
-        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
-        Admin-only
-      - else
-        %i.fa-solid.fa-user-shield{'aria-hidden' => 'true'}
-        Delegated admin access
 
   %p.admin-actions__lede
     Repository-management operations. These actions change how objects are arranged and displayed across the repository.

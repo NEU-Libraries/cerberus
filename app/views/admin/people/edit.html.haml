@@ -7,9 +7,6 @@
       Edit person
       %span.admin-registry__count= @person['nuid']
     .admin-registry__head-actions
-      %span.admin-registry__subtitle
-        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
-        Admin-only
       = link_to admin_people_path, class: 'btn btn-tonal-secondary btn-sm' do
         %i.fa-solid.fa-arrow-left.me-1{'aria-hidden' => 'true'}
         All people

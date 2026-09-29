@@ -5,9 +5,6 @@
     %span.admin-registry__title
       %i.fa-solid.fa-user-plus{'aria-hidden' => 'true'}
       Register a person
-    %span.admin-registry__subtitle
-      %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
-      Admin-only
   .admin-registry__body
     - pv = params[:person] || {}
     = form_with scope: :person, url: admin_people_path, method: :post, class: 'admin-registry-form' do |f|
