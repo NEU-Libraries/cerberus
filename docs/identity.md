@@ -86,8 +86,8 @@ intentional".
 ## Discovery abilities
 
 `Ability` decides `:read`, `:edit` and `:tombstone` on a `SolrDocument`.
-`ApplicationController#current_ability` builds it from `effective_user`, so a
-view-as session sees the target's decisions.
+`ApplicationController#current_ability` builds it from `effective_user`, so an
+impersonation in either mode sees the target's decisions.
 
 | Principal | Rules |
 |---|---|
@@ -138,8 +138,8 @@ operator action, not an owner one.
 built by `discovery_clause`. A document matches when it is public, a read group
 matches, an edit group matches, or the user's NUID is in
 `edit_access_person_ssim` or `depositor_ssi`. Admins skip the filter.
-`gated_user` is the effective user, so a view-as session is gated as the
-target.
+`gated_user` is the effective user, so an impersonation in either mode is gated
+as the target.
 
 The two must stay in step. If the filter is narrower, staff and depositors
 cannot find items they can open: staff hold edit, not read, on every resource,
@@ -166,13 +166,15 @@ librarian who proxied a deposit keeps tombstone rights on it. The recorded
 
 `ImpersonationSession` is included into `ApplicationController`, so it governs
 every request. An impersonating administrator browses the whole app, not just an
-admin surface. Its two modes are mutually exclusive: each `start_*` calls
-`end_impersonation` first.
+admin surface, and in either mode sees the target's own screens: menus, My DRS,
+Inbox, Sets and every Cerberus gate. That is what makes impersonation useful for
+reproducing a user's problem. Its two modes are mutually exclusive: each
+`start_*` calls `end_impersonation` first.
 
 | Mode | Who may start it | Authenticated identity | Effect | Writes |
 |---|---|---|---|---|
-| acting-as | `:admin` only | stays the admin (`Current.nuid`) | sets `Current.on_behalf_of` to the target, so atlas_rb writes carry `On-Behalf-Of: <target>` through the default on-behalf-of callable. Atlas authorizes the admin and stamps the target as provenance | allowed, and attributed to the target |
-| view-as | `:admin` or a devolved admin | untouched | sets `view_as_nuid`, which drives `effective_user`, the single user both `Ability` and `SearchBuilder` consult | rejected |
+| acting-as | `:admin` only | stays the admin (`Current.nuid`) | `effective_user` is the target. Sets `Current.on_behalf_of` to the target, so atlas_rb writes carry `On-Behalf-Of: <target>` through the default on-behalf-of callable. Atlas authorizes the admin and stamps the target as provenance | allowed, and attributed to the target |
+| view-as | `:admin` or a devolved admin | untouched | `effective_user` is the target. Sets `view_as_nuid`, which also moves `viewer_nuid` to the target | rejected |
 
 Session state lives in the Rails session (`session[:acting_as_nuid]` or
 `session[:view_as_nuid]`) with a 30-minute sliding inactivity limit,
@@ -180,8 +182,38 @@ Session state lives in the Rails session (`session[:acting_as_nuid]` or
 either ends the session or refreshes the clock. Every way a session ends goes
 through `end_impersonation`.
 
-`impersonation_target` hydrates whichever target is set, for the banner's name
-and NUID. It is `nil` when there is no session or hydration fails.
+`impersonation_target` hydrates whichever target is set. It is `nil` when there
+is no session or hydration fails.
+
+### Which user a call site uses
+
+`effective_user` is the target in either mode, and `current_user` is always the
+real person. Choose by what the call does:
+
+| The call site | Uses | Examples |
+|---|---|---|
+| renders the page, or is a Cerberus gate | `effective_user` | `Ability`, `SearchBuilder`, the user menu, My DRS, the Inbox, the Sets and Loaders gates, admin-only buttons on Work and Set pages |
+| names who performed a write, or carries credentials | `current_user` | `Current.nuid`, audit `actor_nuid`, token minting, account switching |
+| mirrors a rule Atlas applies to its actor | `current_user` | `PermissionsForm#revocable_grant?`, the caption-removal gate |
+| is an admin surface | `current_user` | `/admin/*`, the impersonation toggle and banner |
+
+An admin surface stays reachable by URL while impersonating, because the admin
+needs it to end the session. Its menu link hides, since the target has none.
+
+Three things that act on the real person hide while impersonating: the API
+token card and the account switch controls on My DRS, and the Inbox's Dismiss
+button. The Inbox also skips `mark_read!` while impersonating, so reading the
+target's messages does not change what the target sees next.
+
+My Sets and the Add-to-set picker list the target's Sets by passing `owner:`
+to `Compilation.list`. Atlas allows a cross-owner listing for a full admin
+only, so a delegate in view-as gets the forbidden page there. The "Shared with
+me" and "Editable by me" tabs hide while impersonating, because Atlas keys
+those scopes on the caller alone and would list the admin's grants.
+
+`effective_user` fails closed. A target that will not hydrate renders as a
+guest with no groups, who sees public material only. So a broken lookup can
+never render the admin's own view under an impersonation banner.
 
 ### Ordering, and the audit trail
 
@@ -215,8 +247,10 @@ header. `effective_user` reads the session, not `Current`.
 
 ### Which NUID a gated read uses
 
-`viewer_nuid` is `effective_user&.nuid`. A read that gates on the *view-as
-target* passes it to atlas_rb. Three reads take it: `Work.assets`,
+`viewer_nuid` is the view-as target in view-as, and the real user otherwise,
+acting-as included. Acting-as sends `On-Behalf-Of`, and Atlas refuses that
+header from a non-admin `User:`, so a target NUID there would 403 every gated
+read. A read that gates on the *view-as target* passes it to atlas_rb. Three reads take it: `Work.assets`,
 `Work.file_sets` and `Blob.work`. So do the two zip packers, `QueueZipPacker`
 and `SetZipPacker`.
 
@@ -265,10 +299,6 @@ an on-behalf-of operation. The lookup sends the target as `User:`, and the
 target is not an admin. So a leaked `On-Behalf-Of` makes Atlas refuse the
 lookup, and the banner reads "Unknown user". A transport or parse failure logs
 and returns `nil`.
-
-`view_as_target` fails closed. A miss yields a guest-shaped user with no groups,
-who sees public material only. So a broken lookup can never render the admin's
-own view under a view-as banner.
 
 ### The toggle surface
 
