@@ -5,11 +5,20 @@ module Admin
   # (`a_linked_member_of`). See docs/admin.md. Admin-only: this controller keeps
   # BaseController's :admin gate and does not opt into the delegate one.
   #
-  # Never touch the structural home (`a_member_of`) here. atlas_rb swallows a
-  # rejected 4xx on add and remove, so both redirect to manage, which re-reads
-  # the live list from Atlas rather than trusting the call.
+  # Never touch the structural home (`a_member_of`) here. Atlas refuses a link
+  # it will not make with a 422, which atlas_rb raises as LinkedMemberError;
+  # Authorizable does not catch that class, so both actions rescue it here.
   class LinkedMembersController < BaseController
     breadcrumb_for 'Linked members', :admin_linked_members_path
+
+    # Keyed on Atlas's `error` discriminator; an unknown code shows Atlas's own
+    # message instead.
+    REFUSALS = {
+      'already_structural_member' => 'The work already lives in that collection, so it cannot also be linked there.',
+      'invalid_target_type'       => 'Only a collection can be linked to.',
+      'tombstoned_target'         => 'That collection is tombstoned, so nothing can be linked into it.',
+      'tombstoned_work'           => 'This work is tombstoned, so it cannot be linked anywhere.'
+    }.freeze
 
     include Blacklight::Configurable
 
@@ -27,19 +36,27 @@ module Admin
 
     def add
       AtlasRb::Work.add_linked_member(params[:work_id], params[:collection_id])
-      redirect_to admin_linked_members_manage_path(work_id: params[:work_id]),
-                  notice: 'Work is now linked to the selected collection. If the collection does not appear below, ' \
-                          'the link could not be processed because the work is already a structural member ' \
-                          'of the collection or the target is not a collection.'
+      back_to_manage(notice: 'Work is now linked to the selected collection.')
+    rescue AtlasRb::LinkedMemberError => e
+      back_to_manage(alert: refusal(e))
     end
 
     def remove
       AtlasRb::Work.remove_linked_member(params[:work_id], params[:collection_id])
-      redirect_to admin_linked_members_manage_path(work_id: params[:work_id]),
-                  notice: 'Removed from collection.'
+      back_to_manage(notice: 'Removed from collection.')
+    rescue AtlasRb::LinkedMemberError => e
+      back_to_manage(alert: refusal(e))
     end
 
     private
+
+      def back_to_manage(**flash)
+        redirect_to admin_linked_members_manage_path(work_id: params[:work_id]), **flash
+      end
+
+      def refusal(error)
+        REFUSALS.fetch(error.code.to_s) { "The link was refused: #{error.message}" }
+      end
 
       def load_work
         # Resource.find rather than Work.find: this panel reads the wrapped
