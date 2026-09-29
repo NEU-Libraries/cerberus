@@ -10,6 +10,7 @@ Source files:
 - `app/queries/human_impressions_query.rb`
 - `app/controllers/concerns/container_analytics.rb`
 - `app/helpers/container_analytics_helper.rb`
+- `app/views/works/_analytics.html.haml`
 - `app/helpers/admin/impressions_helper.rb`
 - `app/services/repository_composition_report.rb`
 
@@ -166,6 +167,29 @@ Accepting both is what lets a bookmarked or shared URL round-trip cleanly.
 It takes the resource being edited and a `klass` string of `'Collection'` or
 `'Community'`. The resource must respond to `.id` (the noid), `.valkyrie_id`
 (the Solr uuid) and `.title`.
+
+## A Work's Analytics tab
+
+A Work's analytics sit on its **show** page, not its Edit page, as v1's
+Statistics tab did. v1's Work page was tabbed, with Metadata as one tab, and the
+librarians looked for analytics there.
+
+`WorksController#load_work_analytics` builds an `ImpressionsReport` scoped to
+the one Work, and only when the viewer holds `:edit`, the same audience as a
+container's tab. Everyone else sees the show page unchanged, because a single
+Metadata tab would be noise. For an editor the metadata column becomes the
+Metadata and Analytics tabs, and `tab-hash` makes `#analytics` a link that
+opens the tab.
+
+The tab is smaller than a container's on purpose:
+
+- A Work scope resolves to its own noid, so there is no drill-down, no facet
+  picker and no Solr query.
+- It shows views, downloads and streams over the last 90 days of human traffic.
+  Streams appear only for a Work that plays in the browser.
+- It leaves out unique visitors, which the librarians do not use.
+- An admin or admin delegate gets a link to the Usage analytics dashboard,
+  scoped to the Work, for other date ranges.
 
 ## Building the scoping UI
 

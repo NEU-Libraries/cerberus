@@ -14,14 +14,14 @@ module UsageChartsHelper
   SERIES_COLORS = { 'view' => '#2666a6', 'download' => '#18bc9c', 'stream' => '#c46410' }.freeze
 
   # Per-action series as a chartkick multi-series array.
-  def usage_timeseries(report)
-    ImpressionsReport::ACTIONS.map do |action|
+  def usage_timeseries(report, actions: ImpressionsReport::ACTIONS)
+    actions.map do |action|
       { name: action.capitalize, data: dense_series(report.range, report.series(action)) }
     end
   end
 
-  def usage_series_colors
-    ImpressionsReport::ACTIONS.map { |action| SERIES_COLORS.fetch(action) }
+  def usage_series_colors(actions: ImpressionsReport::ACTIONS)
+    actions.map { |action| SERIES_COLORS.fetch(action) }
   end
 
   def usage_visitors_series(report)

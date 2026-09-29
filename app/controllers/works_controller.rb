@@ -57,6 +57,8 @@ class WorksController < ApplicationController
     deny_if_unfinished!(@work)
     flash.now[:alert] = in_progress_notice(@work) if @work.in_progress
     prepare_show_view
+    # After prepare_show_view, which sets @can_edit.
+    load_work_analytics
   end
 
   def tombstone
@@ -210,6 +212,16 @@ class WorksController < ApplicationController
       assign_show_abilities!
       ancestor_trail(@work.ancestors, item: @work)
       add_breadcrumb_for(@work.id, 'Work', @work.title)
+    end
+
+    # The show page's Analytics tab, for the same :edit audience as a
+    # container's. A Work scope resolves to its own noid, so this costs the
+    # rollup reads and no Solr query. See docs/analytics.md.
+    def load_work_analytics
+      return unless @can_edit
+
+      item = { noid: @work.id, uuid: @work.valkyrie_id, klass: 'Work', title: @work.title }
+      @work_analytics = ImpressionsReport.new(scope: ImpressionScope.new(item:))
     end
 
     # The facet list comes from the live Blacklight config rather than a second

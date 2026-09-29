@@ -86,7 +86,24 @@
       - else
         = render partial: "thumbnail"
     .col-md-6.order-md-2.order-1
-      = @mods&.html_safe
+      -# Editors get v1's tabbed column; everyone else sees the metadata alone,
+      -# since a lone Metadata tab would be noise.
+      - if @work_analytics
+        %div{data: { controller: 'tab-hash' }}
+          %ul.nav.nav-tabs{role: 'tablist'}
+            %li.nav-item{role: 'presentation'}
+              %button#metadata-tab.nav-link.active{type: 'button', role: 'tab', 'data-bs-toggle' => 'tab', 'data-bs-target' => '#metadata', 'aria-controls' => 'metadata', 'aria-selected' => 'true'} Metadata
+            %li.nav-item{role: 'presentation'}
+              %button#analytics-tab.nav-link{type: 'button', role: 'tab', 'data-bs-toggle' => 'tab', 'data-bs-target' => '#analytics', 'aria-controls' => 'analytics', 'aria-selected' => 'false'}
+                %i.fa-solid.fa-chart-simple.me-1{'aria-hidden' => 'true'}
+                Analytics
+          .tab-content
+            #metadata.tab-pane.active.pt-3{role: 'tabpanel', 'aria-labelledby' => 'metadata-tab'}
+              = @mods&.html_safe
+            #analytics.tab-pane{role: 'tabpanel', 'aria-labelledby' => 'analytics-tab'}
+              = render 'works/analytics', report: @work_analytics, media: @av_file.present?
+      - else
+        = @mods&.html_safe
 
 .clearfix.mb-4
 
