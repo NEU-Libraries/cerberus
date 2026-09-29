@@ -12,15 +12,19 @@ Each page names the source files it covers. Those files carry a one-line pointer
 back, so you can find either from the other.
 
 One page is not per-component. [`development.md`](development.md) covers the
-environment and the workflow — setup, the spec wrappers, worktrees, verification,
+environment and the workflow: setup, the spec wrappers, worktrees, verification,
 the migration pause. It lives here because it versions with the scripts it
 describes, and because a developer needs it before any of the other pages make
 sense.
 
 ## What belongs elsewhere
 
+Cerberus keeps knowledge in three homes: the code, the specs, and these pages.
+Other audiences and needs have homes outside the repository.
+
 | Audience or need | Home |
 |---|---|
+| A convention every change has to satisfy | `CLAUDE.md`, at the repository root |
 | A repository user, or a UAT tester | the user guide (`cerberus-guide`) |
 | A Rails developer new to repository software | the developer primer (`cerberus-primer`) |
 | A rule that code can check | a spec, not prose |
@@ -48,13 +52,28 @@ A source file should keep its comments under about 35% of its non-blank lines.
 That is a target for prose that belongs on a page here, not a rule to satisfy by
 deleting knowledge. If a comment would cost someone a bug, keep it and go over.
 
+Density is comment lines divided by comment plus code lines, with blank lines
+left out. Directives (`# frozen_string_literal:`, `# rubocop:`, `# encoding:`)
+count as code, because they instruct a tool rather than explain.
+
 **Files with fewer than 25 lines of code are exempt.** Density measures comments
 against code, so a file that declares rather than computes has no denominator to
 earn a budget with. `app/models/current.rb` is the clearest case. Twenty comment
-lines sit over seven lines of code, and each one names a header's behaviour on
-the wire. One of them records that `view_as_nuid` is never sent as a write
-header. Forcing that file under the target would make it worse at the thing the
-target exists to improve.
+lines sit over seven lines of code. The class header explains how jobs inherit
+the attributes; each attribute's comment says whether and how atlas_rb sends it to
+Atlas. One records that `view_as_nuid` is never sent as a write header. Forcing that
+file under the target would make it worse at the thing the target exists to
+improve.
+
+Three Blacklight extension points are also exempt, at any size:
+`app/controllers/catalog_controller.rb`, `app/models/search_builder.rb` and
+`app/models/solr_document.rb`. Their comments document Blacklight's contract,
+which a page here could not carry any better than the file does.
+
+A Claude Code `PostToolUse` hook, `.claude/hooks/comment-density-lint.sh`,
+reports the number after every edit to Ruby under `app/`. It is advisory: it
+runs after the write, so it cannot block one. `.claude/` is gitignored, so the
+hook lives in the main checkout's local configuration, not in the repository.
 
 ## Adding a page
 
