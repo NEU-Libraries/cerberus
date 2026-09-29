@@ -7,8 +7,8 @@
 
 = render 'sets/toast', chips: chips
 
--# The hero and the recipe describe the whole set, so they ride
--# :container_header and span the full main width. Anything outside that block
+-# The hero describes the whole set, so it rides :container_header and spans
+-# the full main width. Anything outside that block
 -# lands beside the facet sidebar in the narrow results column once the set has
 -# contents.
 - content_for(:container_header) do
@@ -58,84 +58,6 @@
               = link_to 'Delete', set_path(@set['id']), class: 'px-3',
                 data: { turbo_method: :delete,
                         turbo_confirm: "Delete “#{@set['title']}”?\n\nThe works and collections it references are not deleted — only this set goes away." }
-
-  -# ===== Set definition (recipe) =====
-  .container.p-3.my-3.well.rounded-3.set-defn
-    %button.btn.btn-link.p-0.text-decoration-none.fw-semibold.text-dark.d-flex.align-items-center.gap-2{type: 'button', 'data-bs-toggle' => 'collapse', 'data-bs-target' => '#setDefn', 'aria-expanded' => 'true', 'aria-controls' => 'setDefn'}
-      %i.fa-solid.fa-sliders.text-secondary{'aria-hidden' => 'true'}
-      Set definition
-      %span.text-muted.small.fw-normal — what's included, and the rules behind it
-    #setDefn.collapse.show.mt-3
-      .defn-label.mb-2
-        %i.fa-solid.fa-folder-open.me-1{'aria-hidden' => 'true'}
-        Collections in this set
-      - if chips.any?
-        - chips.each do |chip|
-          .incl-row
-            %span.ic
-              %i.fa-solid.fa-folder-open{'aria-hidden' => 'true'}
-            %span.nm= link_to set_noun_label(chip.noid, @recipe_titles), collection_path(chip.noid), class: 'text-decoration-none'
-            = set_chip_count(chip)
-            - if @can_edit
-              = button_to remove_collection_set_path(@set['id'], collection_id: chip.noid), method: :delete,
-                class: 'btn btn-danger rm-cap', 'aria-label' => 'Remove this collection from the set',
-                title: 'Remove this collection from the set',
-                form: { class: 'rm-cap-form', data: { turbo_confirm: "Remove “#{set_noun_label(chip.noid, @recipe_titles)}” from this set?\n\nThe collection and its works will not be affected." } } do
-                %i.fa-solid.fa-minus{'aria-hidden' => 'true'}
-      - else
-        .text-muted.small.fst-italic No collections included.
-      - inverted = @can_edit ? set_inverted_chips(chips) : []
-      - if inverted.any?
-        .note-band.p-2.px-3.mt-2.small.text-secondary
-          %i.fa-solid.fa-circle-info.text-primary.me-1{'aria-hidden' => 'true'}
-          You've hidden most of
-          #{inverted.map { |chip| "“#{set_noun_label(chip.noid, @recipe_titles)}”" }.to_sentence}.
-          If you only want a handful of works, consider removing the
-          #{'collection'.pluralize(inverted.size)} and adding those works individually —
-          new deposits won't appear here unasked.
-      .defn-label.mt-4.mb-2
-        %i.fa-solid.fa-thumbtack.me-1{'aria-hidden' => 'true'}
-        Individual works in this set
-      - if added_noids.any?
-        - added_noids.each do |noid|
-          .incl-row.is-item
-            %span.ic
-              %i.fa-solid.fa-file-lines{'aria-hidden' => 'true'}
-            %span.nm
-              = link_to set_noun_label(noid, @recipe_titles), work_path(noid), class: 'text-decoration-none'
-              %span.nuid= noid
-            - if @can_edit
-              = button_to remove_work_set_path(@set['id'], work_id: noid), method: :delete,
-                class: 'btn btn-danger rm-cap', 'aria-label' => 'Remove from the set', title: 'Remove from the set',
-                form: { class: 'rm-cap-form', data: { turbo_confirm: "Remove “#{set_noun_label(noid, @recipe_titles)}” from this set?\n\nThe work will not be affected." } } do
-                %i.fa-solid.fa-minus{'aria-hidden' => 'true'}
-      - else
-        .text-muted.small.fst-italic Nothing added individually.
-
-      - if @can_edit || aside_docs.any?
-        .defn-label.mt-4.mb-1
-          %i.fa-solid.fa-eye-slash.me-1{'aria-hidden' => 'true'}
-          Hidden works
-        %p.small.text-muted.mb-2 Hidden works do not appear in the Set but remain in their original collection.
-        .aside-zone.p-3
-          - if aside_docs.any?
-            - aside_docs.each do |doc|
-              - source = @resolver.provenance_for(doc)
-              .aside-item
-                %i.fa-solid.fa-file-lines.text-muted{'aria-hidden' => 'true'}
-                %span.flex-grow-1= link_to set_document_title(doc), work_path(doc.to_param), class: 'text-decoration-none'
-                %span.src
-                  - if source.is_a?(String)
-                    from #{set_noun_label(source, @recipe_titles)}
-                  - elsif source == :direct
-                    added directly
-                - if @can_edit
-                  = button_to put_back_set_path(@set['id'], work_id: doc.to_param), method: :delete,
-                    class: 'btn btn-sm btn-link text-decoration-none p-0 ms-2', form: { class: 'd-inline' } do
-                    %i.fa-solid.fa-rotate-left.me-1{'aria-hidden' => 'true'}
-                    Put back
-          - else
-            .text-muted.small.fst-italic No hidden works.
 
 -# ===== Contents =====
 - if @response.documents.present?

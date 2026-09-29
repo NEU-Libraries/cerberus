@@ -92,6 +92,7 @@ class SetsController < CatalogController
   # view by #bulk_operator?).
   def edit
     edit_breadcrumbs
+    prepare_set_definition
     prepare_sharing_form if @owned
     @sentinel = Sentinel.find_by(target_id: params[:id]) if bulk_operator?
   end
@@ -117,6 +118,7 @@ class SetsController < CatalogController
     redirect_to set_path(@set['id']), notice: 'Set updated.'
   rescue AtlasRb::CompilationError => e
     flash.now[:alert] = e.message
+    prepare_set_definition
     render :edit, status: :unprocessable_content
   end
 
@@ -203,17 +205,5 @@ class SetsController < CatalogController
 
       builder = search_service.search_builder.with(search_state).with_filters(*fqs)
       Blacklight.default_index.search(params: builder)
-    end
-
-    # Display digests (title / klass) for every recipe noun, keyed by noid —
-    # one batch round-trip. Unresolvable nouns are absent; views fall back to
-    # the bare noid.
-    def recipe_titles
-      noids = Array(@set['included_collections']) +
-              Array(@set['included_works']) +
-              Array(@set['excluded_works'])
-      return {} if noids.empty?
-
-      AtlasRb::Resource.find_many(noids).index_by { |digest| digest['noid'] }
     end
 end

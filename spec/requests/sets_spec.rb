@@ -174,9 +174,12 @@ RSpec.describe 'Sets', type: :request do
       post "/sets/#{set['id']}/works",       params: { work_id: lone_work.id }
 
       get "/sets/#{set['id']}"
-      expect(response.body).to include('Flow Set')
-        .and include('added directly')
-        .and include('Hidden works')
+      expect(response.body).to include('Flow Set').and include('added directly')
+      # The definition lives on the Manage page, not the set's own page.
+      expect(response.body).not_to include('Hidden works')
+
+      get "/sets/#{set['id']}/edit"
+      expect(response.body).to include('Set definition').and include('Hidden works')
 
       # set one collection-sourced work aside: it leaves the rows, the chip
       # count diverges, and the teaching toast carries fresh counts + Undo
@@ -187,17 +190,28 @@ RSpec.describe 'Sets', type: :request do
         .and match(%r{Hid\s+<b>Work One</b>\s+from this set})
         .and match(%r{</b>, which is still in your set})
         .and include('still in your set')
-        .and include('1</span><span class="of"> of 2')
+      # The per-collection count is drawn in the definition, on the Manage page.
+      get "/sets/#{set['id']}/edit"
+      expect(response.body).to include('1</span><span class="of"> of 2')
 
-      # put it back: divergence gone
+      # put it back from the toast's Undo: back on the set, divergence gone
       delete "/sets/#{set['id']}/aside/#{work_one.id}"
-      follow_redirect!
+      expect(response).to redirect_to(set_path(set['id']))
+      get "/sets/#{set['id']}/edit"
       expect(response.body).not_to include('of 2</span>')
 
-      # remove the include; only the direct add remains
+      # put back from the Manage page returns to its Set definition tab
+      post "/sets/#{set['id']}/aside", params: { work_id: work_one.id, title: 'Work One', chip: collection.id }
+      delete "/sets/#{set['id']}/aside/#{work_one.id}", params: { return_to: 'manage' }
+      expect(response).to redirect_to(edit_set_path(set['id'], tab: 'definition'))
+
+      # remove the include from the Manage page; only the direct add remains
       delete "/sets/#{set['id']}/collections/#{collection.id}"
-      follow_redirect!
+      expect(response).to redirect_to(edit_set_path(set['id'], tab: 'definition'))
+      get "/sets/#{set['id']}"
       expect(response.body).to include('added directly')
+      get "/sets/#{set['id']}/edit"
+      expect(response.body).to include('No collections included.')
       expect(response.body).not_to include('of 2')
     end
 

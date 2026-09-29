@@ -67,6 +67,7 @@ module SetBulkActions
     def render_rejected_set_sentinel(record)
       prepare_sharing_form if @owned
       edit_breadcrumbs
+      prepare_set_definition
       @sentinel = record
       @open_tab = 'derivative-access'
       flash.now[:alert] = record.errors.full_messages.to_sentence
