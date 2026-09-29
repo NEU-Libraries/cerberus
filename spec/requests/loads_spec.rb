@@ -185,6 +185,9 @@ RSpec.describe 'Loads', type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('Campus Life (Photographs)')
       expect(response.body).to include('Athletics (Photographs)')
+      # IPTC uploads and runs in one step, so it keeps "Upload".
+      expect(response.body).to include('value="Upload"')
+      expect(response.body).not_to include('value="Preview"', 'for new file ingests')
     end
 
     # A Work destination would parent every ingested Work under it.
@@ -288,6 +291,27 @@ RSpec.describe 'Loads', type: :request do
                                         parent_collection_id: 'c')
       get "/loaders/marcom/loads/#{other_report.id}"
       expect(response).to have_http_status(:not_found)
+    end
+  end
+
+  describe 'DELETE /loaders/marcom/loads/:id' do
+    let!(:load_report) do
+      LoadReport.create!(loader: marcom_loader, source_filename: 'jpgs.zip',
+                         parent_collection_id: 'neu:c1')
+    end
+
+    before { sign_in marcom_user }
+
+    it "says the upload was canceled when the preview's Discard sends it" do
+      delete "/loaders/marcom/loads/#{load_report.id}", params: { discard: 1 }
+      expect(response).to redirect_to('/loaders/marcom/loads')
+      expect(flash[:notice]).to eq('Upload canceled.')
+      expect(LoadReport.exists?(load_report.id)).to be(false)
+    end
+
+    it "says the report was deleted when the history list's Delete sends it" do
+      delete "/loaders/marcom/loads/#{load_report.id}"
+      expect(flash[:notice]).to eq('Load report deleted.')
     end
   end
 
@@ -485,6 +509,7 @@ RSpec.describe 'Loads', type: :request do
         expect(response).to have_http_status(:ok)
         expect(response.body).to include('data-controller="collection-picker"')
         expect(response.body).to include('Search by collection title')
+        expect(response.body).to include('Destination collection for new file ingests', 'value="Preview"')
       end
     end
 
