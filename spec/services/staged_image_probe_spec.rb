@@ -32,6 +32,17 @@ RSpec.describe StagedImageProbe do
     expect(result.path).to eq(File.join(work_dir, 'image.png'))
   end
 
+  # libvips caches a load by path, and a replace restages to the same path.
+  it 'reads a file re-staged to the same path afresh' do
+    FileUtils.mkdir_p(work_dir)
+    path = File.join(work_dir, 'same-name.png')
+    Vips::Image.black(40, 30).write_to_file(path)
+    expect(described_class.call(work_id: work_id).width).to eq(40)
+
+    Vips::Image.black(64, 20).write_to_file(path)
+    expect(described_class.call(work_id: work_id).width).to eq(64)
+  end
+
   it 'returns nil when no staging directory exists' do
     expect(described_class.call(work_id: work_id)).to be_nil
   end

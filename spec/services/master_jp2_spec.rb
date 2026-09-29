@@ -75,6 +75,28 @@ describe MasterJp2 do
     end
   end
 
+  # Unstubbed, because the bug lives in libvips: it caches a load by path, and
+  # a replace or revert restages a new file to the same path as the last one.
+  describe 'call on a file re-staged to the same path' do
+    let(:dir) { Dir.mktmpdir('master-jp2') }
+    let(:source) { File.join(dir, 'same-name.png') }
+
+    before { allow(Rails.application.config.x.cerberus).to receive(:derivatives_root).and_return(dir) }
+    after { FileUtils.rm_rf(dir) }
+
+    def gated_width(result)
+      Vips::Image.new_from_file(File.join(dir, File.basename(result.gated_base))).width
+    end
+
+    it 'builds from the new file, not the one vips loaded before' do
+      Vips::Image.black(40, 30).write_to_file(source)
+      expect(gated_width(MasterJp2.call(path: source))).to eq(40)
+
+      Vips::Image.black(64, 20).write_to_file(source)
+      expect(gated_width(MasterJp2.call(path: source))).to eq(64)
+    end
+  end
+
   describe 'initialize' do
     it 'sets the path' do
       expect(MasterJp2.new(path: image_path).instance_variable_get(:@path)).to eq(image_path)
