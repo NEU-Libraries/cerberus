@@ -31,7 +31,8 @@ class ApplicationController < ActionController::Base
   # (/communities/:id vs /communities/:id/people) a link, instead of letting loaf
   # mark it as the current crumb. The default, :inclusive, is loaf's own.
   def breadcrumbs(id, editing: false, match: :inclusive, result: nil)
-    result ||= AtlasRb::Resource.find(id)
+    # A stale id reads as nil, which would otherwise raise NoMethodError below.
+    result ||= require_resource!(AtlasRb::Resource.find(id))
     item = result.resource
     ancestor_trail(item.ancestors, item: item, match: match)
 

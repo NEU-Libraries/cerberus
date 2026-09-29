@@ -10,8 +10,8 @@ module DepositorContext
     def deposit_person
       return @deposit_person if defined?(@deposit_person)
 
-      @deposit_person = (AtlasRb::Person.resolve([current_user.nuid]).first if current_user&.nuid)
-    rescue Faraday::Error, JSON::ParserError
+      @deposit_person = (Array(AtlasRb::Person.resolve([current_user.nuid])).first if current_user&.nuid)
+    rescue AtlasRb::Error, Faraday::Error, JSON::ParserError
       @deposit_person = nil
     end
 
@@ -66,8 +66,8 @@ module DepositorContext
     end
 
     def community_name(noid)
-      AtlasRb::Community.find(noid)['title'].presence || noid.to_s
-    rescue Faraday::Error, JSON::ParserError
+      AtlasRb::Community.find(noid)&.[]('title').presence || noid.to_s
+    rescue AtlasRb::Error, Faraday::Error, JSON::ParserError
       noid.to_s
     end
 end

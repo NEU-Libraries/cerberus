@@ -248,6 +248,16 @@ RSpec.describe 'Admin::Impersonations', type: :request do
         expect(flash[:alert]).to match(/valid NUID/)
       end
 
+      # A status-guarded read answers an unknown NUID with nil, not a raise.
+      it 'refuses to start when Atlas does not know the NUID' do
+        allow(AtlasRb::Authentication).to receive(:login).and_return(nil)
+        post admin_act_as_path, params: { nuid: '999999999' }
+
+        expect(session[:acting_as_nuid]).to be_blank
+        expect(response).to redirect_to(admin_root_path)
+        expect(flash[:alert]).to match(/valid NUID/)
+      end
+
       it 'refuses to start on a blank NUID without calling Atlas' do
         expect(AtlasRb::Authentication).not_to receive(:login)
         post admin_act_as_path, params: { nuid: '' }

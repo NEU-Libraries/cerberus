@@ -165,6 +165,9 @@ module ImpersonationSession
       return if nuid.blank?
 
       values = Current.set(on_behalf_of: nil) { AtlasRb::Authentication.login(nuid) }
+      # A NUID Atlas does not know reads as nil; the callers fail closed on nil.
+      return nil if values.nil?
+
       User.new(
         email:  values.email,
         nuid:   values.nuid,
@@ -172,7 +175,7 @@ module ImpersonationSession
         groups: values.groups,
         role:   values.role
       )
-    rescue Faraday::Error, JSON::ParserError => e
+    rescue AtlasRb::Error, Faraday::Error, JSON::ParserError => e
       Rails.logger.error("Impersonation hydrate failed for #{nuid}: #{e.class} #{e.message}")
       nil
     end

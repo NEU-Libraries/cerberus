@@ -79,7 +79,7 @@ class PeopleController < CatalogController
     def build_faculty_staff_breadcrumbs(community_noid)
       breadcrumbs(community_noid, match: :exact)
       breadcrumb('Faculty & Staff', community_people_path(community_noid))
-    rescue Faraday::Error, JSON::ParserError
+    rescue Authorizable::ResourceNotFound, AtlasRb::ResourceError, Faraday::Error, JSON::ParserError
       breadcrumb('Faculty & Staff', community_people_path(community_noid))
     end
 

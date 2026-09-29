@@ -60,6 +60,16 @@ RSpec.describe 'People', type: :request do
       expect(response.body).to include(%(href="#{community_path('9zw3s1h')}"))
       expect(response.body).to include(%(href="#{community_path('jm640df')}"))
     end
+
+    it 'falls back to the lone Faculty & Staff crumb when the community read fails' do
+      allow(AtlasRb::Community).to receive(:find).and_return(OpenStruct.new(title: 'Communications'))
+      allow(AtlasRb::Resource).to receive(:find).with('jm640df').and_return(nil)
+
+      get '/communities/jm640df/people'
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Faculty')
+    end
   end
 
   describe 'GET /people/:id (show)' do
@@ -120,6 +130,19 @@ RSpec.describe 'People', type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('Stephen Flynn')
       expect(response.body).not_to include(community_path('gated11'))
+    end
+
+    # A 404 reads as nil, and the breadcrumb walk called `.resource` on it.
+    it 'keeps a profile readable when its affiliated community no longer exists' do
+      affiliated = person.merge('affiliated_community_ids' => ['gone1234'])
+      allow(AtlasRb::Person).to receive(:find).and_return(affiliated)
+      allow(AtlasRb::Resource).to receive(:find).with('gone1234').and_return(nil)
+
+      get '/people/pp11aa22'
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Stephen Flynn', people_path)
+      expect(response.body).not_to include(community_path('gone1234'))
     end
 
     context 'with a personal workspace' do
