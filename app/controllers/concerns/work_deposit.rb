@@ -13,7 +13,8 @@ module WorkDeposit
     def create_at_destination(file)
       parent = require_resource!(AtlasRb::Collection.find(@destination_id))
 
-      @work = AtlasRb::Work.create(parent.id, depositor: deposit_attribution(parent))
+      @depositor_nuid = deposit_attribution(parent)
+      @work = AtlasRb::Work.create(parent.id, depositor: @depositor_nuid)
       finalize_new_work(file, parent.id)
     end
 
@@ -47,7 +48,9 @@ module WorkDeposit
     # the promotion failed and @publish_link_failed must say exactly that —
     # never a 403 page hiding a Work the depositor can already see.
     def promote_to_showcase(showcase_id)
-      AtlasRb::System::Work.add_linked_member(@work.id, showcase_id, on_behalf_of: current_user&.nuid)
+      # The Work's depositor, not the signed-in user: Atlas links only on the
+      # depositor's behalf, and an acting-as or proxy deposit names someone else.
+      AtlasRb::System::Work.add_linked_member(@work.id, showcase_id, on_behalf_of: @depositor_nuid)
       record_promotion(outcome: 'promoted', showcase_id: showcase_id)
     rescue AtlasRb::ForbiddenError => e
       Rails.logger.warn("[publish] add_linked_member forbidden for work #{@work.id} " \

@@ -138,7 +138,10 @@ sidestep it.
 The showcase link is a `:system`-attributed write (`AtlasRb::System::Work`),
 not a call the depositor's own credential could make. Atlas scopes `:system`'s
 grant to a featured Collection on one side and, on the other, to a Work whose
-depositor matches the asserted `on_behalf_of` NUID.
+depositor matches the asserted `on_behalf_of` NUID. So Cerberus asserts the
+depositor the Work was created with, from `deposit_attribution`, never the
+signed-in user. An acting-as or proxy deposit names someone else, and asserting
+the signed-in admin would be refused.
 
 `WorkDeposit#promote_to_showcase` rescues `AtlasRb::ForbiddenError` as a
 safety net for that scoping — a misconfigured showcase, or an

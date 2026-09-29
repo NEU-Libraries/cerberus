@@ -369,6 +369,26 @@ describe WorksController do
         AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
+      # Atlas links only on the Work's depositor's behalf. Acting as someone, the
+      # depositor is the target, so sending the signed-in admin was refused.
+      it 'links on behalf of the acting-as target, who is the depositor' do
+        stub_person_rooted_at(collection.id)
+        allow(ShowcaseFinder).to receive(:call).and_return('showcasenoid')
+        allow(AtlasRb::System::Work).to receive(:add_linked_member)
+        allow(AtlasRb::Work).to receive(:create).and_call_original
+
+        post :create, params:  { binary: fixture_file_upload('image.png', 'image/png'),
+                                 collection_id: collection.id, publish: '1',
+                                 publish_community_id: 'comm1', publish_genre: 'Datasets' },
+                      session: { acting_as_nuid: '000000002' }
+
+        expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: '000000002')
+        expect(AtlasRb::System::Work).to have_received(:add_linked_member)
+          .with(assigns(:work).id, 'showcasenoid', on_behalf_of: '000000002')
+      ensure
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
       # Staff load theses and dissertations; a depositor never self-publishes there.
       it 'does not offer Theses & Dissertations as a showcase category' do
         stub_person_rooted_at(collection.id)
