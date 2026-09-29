@@ -24,8 +24,8 @@ class Current < ActiveSupport::CurrentAttributes
   # attributed to the target while authorization stays with `nuid`.
   attribute :on_behalf_of
 
-  # View-as target. Read-side only — drives `effective_user` (and thus
-  # Ability + SearchBuilder gating). NEVER sent as a write header; view-as
-  # is read-only.
+  # View-as target, recorded for the request. Nothing gates on it:
+  # `effective_user` reads the session, and gated reads pass `viewer_nuid`
+  # explicitly. NEVER sent as a write header; view-as is read-only.
   attribute :view_as_nuid
 end

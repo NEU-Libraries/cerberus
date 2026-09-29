@@ -12,10 +12,10 @@ require 'open3'
 # whichever Atlas it points at — so the ceiling is checked here rather than
 # discovered as a cluster of unattributable failures.
 #
-# Prerequisites, both cheap and both idempotent:
-#
-#   docker compose --profile parallel up -d   # the extra Atlas instances
-#   bin/parallel-solr-cores                   # the core each of them indexes to
+# Prerequisites: the extra Atlas instances, and the Solr core each of them
+# indexes to. Run this task through bin/parallel-spec, which provisions both,
+# cores first, with the compose file chain from bin/lib/spec-lane.sh. A bare
+# `docker compose --profile parallel up` misses that chain.
 #
 # Split by recorded runtime rather than by file count. This suite's cost is
 # extremely concentrated — a handful of controller and request files carry most

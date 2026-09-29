@@ -21,9 +21,9 @@ module IiifSigner
     # The expiry is QUANTIZED, not wall-clock: every view in a window must mint
     # a byte-identical identifier, or each page load gets a unique one and
     # Cantaloupe's derivative cache is defeated. Rounding up to the window
-    # *after* next keeps a token valid for [ttl, 2*ttl), so tiles never 403
-    # mid-view near a boundary. `~` avoids Cantaloupe's `;` meta-delimiter and
-    # keeps the identifier slash-free.
+    # *after* next keeps a token valid for more than ttl and at most 2*ttl, so
+    # tiles never 403 mid-view near a boundary. `~` avoids Cantaloupe's `;`
+    # meta-delimiter and keeps the identifier slash-free.
     def sign_identifier(url, ttl: IDENTIFIER_TTL)
       uri = URI.parse(url)
       identifier = File.basename(uri.path)

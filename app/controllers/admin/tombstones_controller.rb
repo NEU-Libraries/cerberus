@@ -20,8 +20,8 @@ module Admin
 
     # The types this registry manages, and the allow-list a `type` param has to
     # be in. Atlas restores and purges any resource through one generic endpoint,
-    # so this is no longer a class lookup — but it still has to refuse a FileSet
-    # or a Blob, which have no business being restored from here.
+    # so no per-type class is needed, but this still has to refuse a FileSet or
+    # a Blob, which have no business being restored from here.
     RESTORABLE_TYPES = %w[Work Collection Community].freeze
 
     RESTORE_FAILED = 'Restore could not be completed — a tombstoned parent must be ' \

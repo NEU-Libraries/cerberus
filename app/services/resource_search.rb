@@ -3,8 +3,10 @@
 # Keyword search over Works, Collections and Communities for the admin finders.
 # See docs/discovery.md.
 #
-# Gated: the search runs through the normal {SearchBuilder} chain, so an admin
-# sees non-public resources. Only ever invoke it from an admin-gated controller.
+# Gated: #call runs through the viewer's {SearchBuilder} chain, so each caller
+# sees only what it may discover, and an admin sees non-public resources too.
+# #filters is the bare fq list; a caller that searches with it directly, as the
+# container Analytics tab does, is ungated and must bound the scope itself.
 class ResourceSearch < ApplicationService
   DEFAULT_PER_PAGE = 25
 

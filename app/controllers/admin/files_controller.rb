@@ -4,8 +4,9 @@ module Admin
   # Replace a file: find a Work, then replace or roll back one of its Blobs.
   # See docs/admin.md.
   #
-  # Reachable by :admin and by the devolved-admin tier — Atlas already grants
-  # Blob :update, :rollback and :read_versions to that pair.
+  # Reachable by :admin and by the devolved-admin tier. Atlas allows both
+  # here: every depositor role holds Blob :update, which rollback is also
+  # authorized as, and the devolved tier holds :read_versions.
   class FilesController < BaseController
     skip_before_action :require_admin
     before_action :require_admin_or_delegate

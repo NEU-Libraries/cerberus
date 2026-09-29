@@ -100,9 +100,11 @@ module ImpersonationSession
 
   private
 
-    # Runs after ApplicationController#set_current_nuid has set the admin
-    # identity. on_behalf_of drives write attribution; view_as_nuid is read-only
-    # bookkeeping and must never become a write header.
+    # Copies the session's targets into Current. It runs before
+    # ApplicationController#set_current_nuid, since this concern's callbacks
+    # register first, and needs no NUID of its own. on_behalf_of drives write
+    # attribution; view_as_nuid is read-only bookkeeping and must never become
+    # a write header.
     def set_impersonation_context
       Current.on_behalf_of = acting_as_nuid
       Current.view_as_nuid = view_as_nuid

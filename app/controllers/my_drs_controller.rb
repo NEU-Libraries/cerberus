@@ -3,9 +3,11 @@
 # My DRS — the depositor's workspace and published spaces. See
 # docs/discovery.md.
 #
-# Every panel is a gated Solr query through `search_service.search_builder`, and
-# the work panels narrow to this depositor with `depositor_ssi`. Both halves
-# matter: drop either one and a depositor is shown rows that are not theirs.
+# The work panels are gated Solr queries through `search_service.search_builder`,
+# narrowed to this depositor with `depositor_ssi`. Both halves matter: drop
+# either one and a depositor is shown rows that are not theirs. The workspace
+# panel is the exception, ungated on purpose and bounded to the depositor's own
+# personal root instead (DepositorContext#workspace_collections).
 class MyDrsController < CatalogController
   include DepositorContext
 
