@@ -182,4 +182,48 @@ RSpec.describe 'Messages', type: :request do
       expect(response.parsed_body).to eq([])
     end
   end
+
+  # An impersonating admin reads the target's inbox, and reads only: the target
+  # must find their messages unread and undismissed afterwards.
+  describe 'while acting as a user' do
+    let(:admin_user) do
+      User.new(email: 'admin@example.com', password: 'password',
+               nuid: '000000004', role: 'admin', groups: [])
+    end
+    let!(:targets) { Message.create!(subject: 'For the target', recipient_nuid: staff_user.nuid) }
+    let!(:admins)  { Message.create!(subject: 'For the admin', recipient_nuid: admin_user.nuid) }
+
+    before do
+      allow(AtlasRb::AuditEvent).to receive(:emit)
+      allow(AtlasRb::Authentication).to receive(:login).with(staff_user.nuid).and_return(
+        AtlasRb::Mash.new('nuid' => staff_user.nuid, 'name' => 'Staff, Sam', 'email' => staff_user.email,
+                          'role' => staff_user.role, 'groups' => staff_user.groups)
+      )
+      sign_in admin_user
+      post admin_act_as_path, params: { nuid: staff_user.nuid }
+    end
+
+    it "lists the target's messages, not the admin's" do
+      get '/inbox'
+
+      expect(response.body).to include('For the target')
+      expect(response.body).not_to include('For the admin')
+    end
+
+    it 'renders the menu as the target, without the Admin link' do
+      get '/inbox'
+
+      expect(response.body).not_to include('fa-screwdriver-wrench')
+    end
+
+    it 'does not mark a message read, and offers no Dismiss' do
+      expect { get "/inbox/#{targets.id}" }.not_to change(MessageReceipt, :count)
+      expect(response.body).not_to include('Dismiss')
+    end
+
+    it 'refuses a dismissal' do
+      expect { delete "/inbox/#{targets.id}" }.not_to change(MessageReceipt, :count)
+      expect(response).to redirect_to(messages_path)
+    end
+  end
 end

@@ -9,11 +9,13 @@
     %h1.admin-registry__title.h6.mb-0
       %i.fa-solid.fa-envelope-open{'aria-hidden' => 'true'}
       = @message.subject
-    .admin-registry__head-actions
-      = button_to message_path(@message), method: :delete, class: 'btn btn-tonal-danger btn-sm',
-        form: { data: { turbo_confirm: 'Dismiss this message from your inbox?' } } do
-        %i.fa-solid.fa-trash-can.me-1{'aria-hidden' => 'true'}
-        Dismiss
+    -# Dismissing is the target's own choice, so an impersonating admin reads only.
+    - unless impersonating?
+      .admin-registry__head-actions
+        = button_to message_path(@message), method: :delete, class: 'btn btn-tonal-danger btn-sm',
+          form: { data: { turbo_confirm: 'Dismiss this message from your inbox?' } } do
+          %i.fa-solid.fa-trash-can.me-1{'aria-hidden' => 'true'}
+          Dismiss
 
   .admin-registry__body
     .inbox-message__meta.text-muted

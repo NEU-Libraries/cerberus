@@ -4,7 +4,7 @@
 # chip so identifiers read the same across surfaces.
 module MessagesHelper
   def unread_messages_count
-    @unread_messages_count ||= current_user&.messageable? ? Message.unread_count_for(current_user) : 0
+    @unread_messages_count ||= effective_user&.messageable? ? Message.unread_count_for(effective_user) : 0
   end
 
   def inbox_aria_label
