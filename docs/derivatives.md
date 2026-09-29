@@ -103,9 +103,10 @@ missing video.
 Like `AddFileJob`, this job runs no derivative enrichment. A caption upload
 leaves the Work's thumbnail, poster and player untouched.
 
-## Streaming-only video
+## Streaming-only audio and video
 
-`StreamingOnly` decides whether a Work's video may be played but not taken away.
+`StreamingOnly` decides whether a Work's audio or video may be played but not
+taken away.
 
 It is a **licensing affordance, not a security boundary**. Anyone who can play a
 file can capture it, and nothing here pretends otherwise. What it owes the
@@ -120,20 +121,26 @@ The repository therefore offers none of these:
 
 ### It is expressed in vocabulary Atlas already has
 
-There is no flag of its own. A video Blob is reachable by two routes that are
-gated differently:
+There is no flag of its own. An audio or video Blob is reachable by two routes
+that are gated differently:
 
 | Route | Gated by |
 |---|---|
 | `MediaController` — playback | the Work's own read ACL |
 | `DownloadsController` — download | the Work's read ACL **and** the per-asset derivative gate |
 
-So "may I watch this" is a property of the Work, and "may I keep a copy" is a
-property of the `video` tier. Restricting that tier is the whole feature.
+So "may I play this" is a property of the Work, and "may I keep a copy" is a
+property of the Work's media tier. Atlas keys that tier by media type, `audio`
+or `video`. Restricting it is the whole feature.
 
-An absent `video` key means the tier rides the Work's own visibility, which is
-what "not streaming only" means. Turning the toggle off therefore **removes**
-the key rather than setting it public.
+An absent key means the tier rides the Work's own visibility, which is what
+"not streaming only" means. Turning the toggle off therefore **removes** the key
+rather than setting it public.
+
+Only the Work's own media type is written. `tiers_for` reads it off the Work's
+content Blobs. A Collection's Sentinel default writes these same keys, and the
+Permissions tab lists every key present, so writing both on every Work would
+show an "Audio" limit on a video Work.
 
 ### Computing the audience
 
@@ -159,7 +166,7 @@ consult.
 
 ### Reading the toggle back
 
-`on?` is an exact match on purpose. A `video` tier written by something else,
+`on?` is an exact match on purpose. A media tier written by something else,
 such as a Collection's Sentinel default, leaves the toggle reading "off".
 Turning it off can therefore never quietly widen a restriction this feature did
 not impose.
@@ -183,7 +190,10 @@ so it is not used.
 
 ### When the toggle is offered at all
 
-`applicable?` asks whether the Work has a video Blob. Both the deposited master
-and any remuxed MP4 are `video/*`. A Work therefore matches from the moment its
+`applicable?` asks whether the Work has an audio or video Blob. A remuxed MP4
+shares its master's media type. A Work therefore matches from the moment its
 content lands, not only once it is playable. Delegates — the image tiers — carry
 a `uri` and are not content.
+
+At deposit the Blob may still be in flight, so the metadata page asks
+`StagedMediaProbe` instead, which reads the staged upload's media type.

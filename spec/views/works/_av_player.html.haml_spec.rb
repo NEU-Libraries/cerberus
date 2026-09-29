@@ -34,6 +34,17 @@ RSpec.describe 'works/_av_player', type: :view do
     end
   end
 
+  # A bare <audio> element is one control bar tall, with nowhere to draw a caption.
+  context 'audio without a poster but with captions' do
+    before { render_player(mime: 'audio/mpeg', preview: nil, caption: captions) }
+
+    it 'mounts on a <video> in audio-poster mode, carrying the track' do
+      expect(rendered).to have_css('video.av-player__media track[kind="captions"][src="/media/c-1"]')
+      expect(rendered).to have_css('.av-player[data-av-player-audio-poster-value="true"]')
+      expect(rendered).to have_no_css('audio')
+    end
+  end
+
   context 'video' do
     before { render_player(mime: 'video/mp4', preview: 'https://iiif/v.jp2/full/500,/0/default.jpg') }
 
@@ -100,11 +111,6 @@ RSpec.describe 'works/_av_player', type: :view do
       render_player(mime: 'video/mp4', preview: nil, downloadable: false, caption: captions)
       expect(rendered).to have_css('track[src="/media/c-1"]', visible: :all)
       expect(rendered).to have_no_link('Download it')
-    end
-
-    it 'renders the track inside a bare audio element too, if a work ever has one' do
-      render_player(mime: 'audio/mpeg', preview: nil, caption: captions)
-      expect(rendered).to have_css('audio track[kind="captions"]', visible: :all)
     end
   end
 end

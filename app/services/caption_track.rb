@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# One WebVTT Blob, served as a video Work's single player <track>. A caption is
+# One WebVTT Blob, served as an audio or video Work's single player <track>. A caption is
 # discriminated by MIME TYPE, never by role: Atlas gives every content Blob the
 # role `original_file`, video master included. See docs/metadata-text.md.
 class CaptionTrack
@@ -26,10 +26,10 @@ class CaptionTrack
     file[:uri].blank? && file.mime_type.to_s == MIME
   end
 
-  # Video only. Its own predicate rather than StreamingOnly.applicable?, which
-  # tests the same thing today for an unrelated reason — not one rule.
+  # Audio or video. Its own predicate rather than StreamingOnly.applicable?,
+  # which tests the same thing today for an unrelated reason — not one rule.
   def self.applicable?(files)
-    Array(files).any? { |file| file[:uri].blank? && file.mime_type.to_s.start_with?('video/') }
+    Array(files).any? { |file| file[:uri].blank? && file.mime_type.to_s.start_with?('video/', 'audio/') }
   end
 
   # The extension, never sniffed content: WebVTT is plain text, so a sniffer

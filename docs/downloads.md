@@ -203,7 +203,7 @@ refuses them.
 
 **Atlas re-authorizes at the Work level, not the tier level.** The per-asset
 gate rides the returned entries as advisory `gated` and `permission` values.
-The display layer enforces them. A restricted tier — a Streaming Only video, a
+The display layer enforces them. A restricted tier — a Streaming Only recording, a
 gated master — therefore arrives looking ordinary. `DerivativeGate.readable?` is
 what stops the archive handing out those bytes.
 

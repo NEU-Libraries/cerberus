@@ -100,7 +100,7 @@ class WorksController < ApplicationController
     # The Work's own assets, not the staged upload #metadata probes: by edit
     # time the content Blob has landed and the staged file is long gone.
     assets = AtlasRb::Work.assets(params[:id], nuid: viewer_nuid)
-    load_streaming_only!(offered: StreamingOnly.applicable?(assets))
+    load_streaming_only!(tiers: StreamingOnly.tiers_for(assets))
     load_caption!(offered: CaptionTrack.applicable?(assets), files: assets)
     load_showcase_category!(@work)
     breadcrumbs(params[:id], editing: true)
@@ -121,7 +121,7 @@ class WorksController < ApplicationController
   # with disjoint fields. See docs/deposit.md.
   def update
     handle_metadata_update
-    apply_streaming_only!
+    apply_streaming_only! { StreamingOnly.tiers_for(AtlasRb::Work.assets(params[:id], nuid: viewer_nuid)) }
     apply_caption!
     apply_showcase_category!
   end
@@ -141,9 +141,9 @@ class WorksController < ApplicationController
     # Probe the STAGED file, never the Work's assets: ContentCreationJob may
     # still be in flight here, and Atlas would hide the toggle and the caption
     # field from exactly the deposits that want them.
-    video = StagedVideoProbe.call(work_id: params[:id])
-    load_streaming_only!(offered: video)
-    load_caption!(offered: video)
+    tiers = StagedMediaProbe.call(work_id: params[:id])
+    load_streaming_only!(tiers: tiers)
+    load_caption!(offered: tiers.any?)
   end
 
   def update_metadata
@@ -153,7 +153,7 @@ class WorksController < ApplicationController
     # bumps the lock, racing save_descriptive! into StaleResourceError. Specs
     # never see it — the test adapter does not run the job inline.
     process_derivative_widths
-    apply_streaming_only!
+    apply_streaming_only! { StagedMediaProbe.call(work_id: params[:id]) }
     # Before the confirm, so the caption Blob queues behind the deposit's own
     # finalization rather than ahead of it.
     apply_caption!

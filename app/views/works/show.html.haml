@@ -82,7 +82,7 @@
                  locals: { file:         @av_file,
                            caption:      @caption,
                            downloadable: derivative_readable?(@av_file, embargo_date: @permissions&.embargo),
-                           streaming_only: StreamingOnly.on?(StreamingOnly.policy_from(@work), read: @permissions&.read) }
+                           streaming_only: StreamingOnly.on?(StreamingOnly.policy_from(@work), tiers: StreamingOnly.tiers_for([@av_file]), read: @permissions&.read) }
       - else
         = render partial: "thumbnail"
     .col-md-6.order-md-2.order-1

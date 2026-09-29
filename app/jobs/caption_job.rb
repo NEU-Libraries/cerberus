@@ -6,7 +6,7 @@
 # The wait for the Work's primary file is load-bearing, not defensive: a caption
 # also carries the role `original_file`, so attaching one first lets a deposit
 # complete around captions alone and Atlas writes a METS structMap omitting the
-# video. See docs/derivatives.md.
+# recording. See docs/derivatives.md.
 class CaptionJob < ApplicationJob
   include PrimaryFilePresence
 

@@ -188,8 +188,8 @@ from the form, so it can name nothing at all.
 Both probe the **staged file**, not the Work's assets. `ContentCreationJob`
 may still be in flight when the page renders. And asking Atlas would hide the
 streaming-only toggle and the caption field from exactly the deposits that
-want them. `StagedVideoProbe` is called once and shared, since both sections
-ask the same question of the same upload. `StagedImageProbe` gates the opt-in
+want them. `StagedMediaProbe` is called once and shared, since both sections
+ask the same question of the same upload: is it audio or video? `StagedImageProbe` gates the opt-in
 Image Derivatives section and is nil for non-image deposits.
 
 By `#edit` time the situation has reversed. The content Blob has landed and

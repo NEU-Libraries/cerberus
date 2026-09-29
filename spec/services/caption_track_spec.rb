@@ -34,8 +34,8 @@ RSpec.describe CaptionTrack do
       expect(described_class.applicable?([asset('video/mp4')])).to be(true)
     end
 
-    it 'withholds it on audio, which the port did not cover' do
-      expect(described_class.applicable?([asset('audio/mpeg')])).to be(false)
+    it 'offers the field on a work with an audio blob' do
+      expect(described_class.applicable?([asset('audio/mpeg')])).to be(true)
     end
 
     it 'withholds it on an image work' do
