@@ -8,6 +8,7 @@
 # can't reuse it and has to read raw. Only ever asked for one scope at a time
 # (a single dashboard render), so the extra cost over the persisted rollup is
 # fine here in a way it wouldn't be for the repo-wide case.
+# See docs/analytics.md.
 class ScopedVisitorsQuery
   # @param range [Range<Date>] inclusive date range.
   # @param segment [:human, :all, String] :human applies the same bot/volume

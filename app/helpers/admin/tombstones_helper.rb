@@ -2,6 +2,7 @@
 
 module Admin
   # View helpers for the tombstone registry.
+  # See docs/admin.md.
   module TombstonesHelper
     # The types Atlas refuses to purge while they still hold a member.
     CONTAINER_TYPES = %w[Collection Community].freeze

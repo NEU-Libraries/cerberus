@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# See docs/identity.md.
 class AtlasController < ApplicationController
   def login; end
 

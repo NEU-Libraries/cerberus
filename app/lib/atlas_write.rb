@@ -4,6 +4,7 @@
 # about: surviving a lost optimistic-lock race, and handing raw MODS over as a
 # file path rather than a string. Shared by the controller concerns and by the
 # services that write MODS, so neither carries its own copy.
+# See docs/deposit.md.
 module AtlasWrite
   # Atlas enforces optimistic locking server-side and raises
   # AtlasRb::StaleResourceError (HTTP 409) only once its own retry budget is

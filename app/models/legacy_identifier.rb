@@ -12,6 +12,7 @@
 #
 # Written once by the migration and thereafter read-only, which is what makes it
 # safe to cache and leaves it with no consistency surface.
+# See docs/people-and-routing.md.
 class LegacyIdentifier < ApplicationRecord
   # The v2 object kinds a v1 pid can name. The value drives which route
   # LegacyController builds, so it is a closed set rather than free text — an

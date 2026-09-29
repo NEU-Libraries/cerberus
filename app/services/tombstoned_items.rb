@@ -10,6 +10,7 @@
 # which inverts the catalog's default `-tombstoned_bsi:true` exclusion. Paginated
 # (withdrawals are rare, but the result rides Blacklight's Kaminari integration
 # so the registry never dumps an unbounded list).
+# See docs/admin.md.
 class TombstonedItems < ApplicationService
   PER_PAGE = 50
 

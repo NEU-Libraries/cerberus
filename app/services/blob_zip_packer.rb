@@ -11,6 +11,7 @@
 # inventory.csv — the per-work folder and inventory only earn their place in the
 # multi-file packers. STORE compression and the labeled entry naming come from
 # {ZipEntryWriter}, shared so single- and bulk-file downloads can't drift.
+# See docs/downloads.md.
 class BlobZipPacker
   include ZipEntryWriter
 

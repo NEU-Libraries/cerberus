@@ -11,6 +11,7 @@
 # SOURCE names the door. `deploy` exists so the orchestrator's close cannot end
 # a window a person opened by hand: Atlas refuses that combination and answers
 # with the unchanged state, which `close` reports rather than swallowing.
+# See docs/maintenance.md.
 namespace :maintenance do
   desc 'Make the repository read-only. Usage: rake maintenance:open [MESSAGE=…] [RETRY_AFTER=…] [SOURCE=operator|deploy]'
   task open: :environment do
