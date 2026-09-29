@@ -67,7 +67,10 @@ RSpec.describe 'Works showcase category', type: :request do
     expect(flash[:notice]).to eq('Moved to the “Presentations” showcase.')
     expect(linked).to include(showcases['Presentations'].id)
     expect(linked).not_to include(showcases['Datasets'].id)
-    expect(AdminNotice.last).to have_attributes(kind: 'showcase_promotion', subject_noid: work.id)
+    notice = AdminNotice.last
+    expect(notice).to have_attributes(kind: 'showcase_promotion', subject_noid: work.id)
+    expect(notice.detail(:genre)).to eq('Presentations')
+    expect(notice.detail(:community_name)).to be_present
   end
 
   it "lets an admin move a depositor's Work" do

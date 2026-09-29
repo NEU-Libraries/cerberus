@@ -25,7 +25,7 @@ RSpec.describe WorkShowcase do
   before do
     allow(AtlasRb::Work).to receive(:linked_members).with('w1').and_return(%w[col-plain sc-data])
     allow(index).to receive(:search) do |params:|
-      Array(params[:fq]).any? { |fq| fq.include?('{!terms f=id}') } ? response([doc('comm1')]) : response(linked_docs)
+      Array(params[:fq]).any? { |fq| fq.include?('{!terms f=id}') } ? response([doc('comm1', title: 'Library')]) : response(linked_docs)
     end
     allow(Blacklight).to receive(:default_index).and_return(index)
     allow(ShowcaseFinder).to receive(:call).with(scope: scope, community_noid: 'comm1').and_return(options)
@@ -37,6 +37,7 @@ RSpec.describe WorkShowcase do
     expect(placement.showcase_noid).to eq('sc-data')
     expect(placement.genre).to eq('Datasets')
     expect(placement.community_noid).to eq('comm1')
+    expect(placement.community_title).to eq('Library')
     expect(placement.options).to eq(options)
   end
 

@@ -50,6 +50,7 @@ module WorkShowcaseCategory
         subject_noid: work.id,
         payload:      { outcome: outcome, reason: outcome == 'refused' ? 'atlas_forbidden' : nil,
                         showcase_noid: placement.options[genre], community_noid: placement.community_noid,
+                        community_name: placement.community_title, work_title: work.title,
                         genre: genre, previous_genre: placement.genre }
       )
     end

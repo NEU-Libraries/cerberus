@@ -7,7 +7,7 @@
 # Atlas's find_many digest carries neither `featured` nor a parent, so both come
 # from Solr, through the gated SearchBuilder chain like ShowcaseFinder.
 class WorkShowcase < ApplicationService
-  Placement = Struct.new(:showcase_noid, :genre, :community_noid, :options, keyword_init: true)
+  Placement = Struct.new(:showcase_noid, :genre, :community_noid, :community_title, :options, keyword_init: true)
 
   def initialize(scope:, work_noid:)
     @scope = scope
@@ -23,12 +23,12 @@ class WorkShowcase < ApplicationService
     showcase = current_showcase(linked)
     return nil if showcase.nil?
 
-    community_noid = parent_noid(showcase)
-    return nil if community_noid.nil?
+    community = parent(showcase)
+    return nil if community.nil?
 
     Placement.new(showcase_noid: showcase.to_param, genre: Array(showcase['title_tsim']).first,
-                  community_noid: community_noid,
-                  options: ShowcaseFinder.call(scope: @scope, community_noid: community_noid))
+                  community_noid: community.to_param, community_title: Array(community['title_tsim']).first,
+                  options: ShowcaseFinder.call(scope: @scope, community_noid: community.to_param))
   end
 
   private
@@ -42,11 +42,11 @@ class WorkShowcase < ApplicationService
         .documents.find { |doc| labels.include?(Array(doc['title_tsim']).first) }
     end
 
-    def parent_noid(showcase)
+    def parent(showcase)
       uuid = showcase[MembershipQuery::STRUCTURAL_FIELD].to_s.delete_prefix('id-')
       return nil if uuid.blank?
 
-      search(MembershipQuery.identity_fq([uuid])).documents.first&.to_param
+      search(MembershipQuery.identity_fq([uuid])).documents.first
     end
 
     def search(*filter_queries)
