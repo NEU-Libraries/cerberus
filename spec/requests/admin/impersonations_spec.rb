@@ -289,14 +289,40 @@ RSpec.describe 'Admin::Impersonations', type: :request do
         expect(session[:view_as_nuid]).to eq('000000002')
       end
 
-      it 'ends the session on a write to a guarded route, before the action runs' do
+      it 'refuses a write to a guarded route before the action runs, and keeps the session' do
         # PATCH /works/:id would hit Atlas in the action — the guard fires
         # first, so no stub is needed and Atlas is never touched.
         patch work_path('anything')
 
-        expect(session[:view_as_nuid]).to be_blank
+        expect(session[:view_as_nuid]).to eq('000000002')
         expect(response).to redirect_to(root_path)
-        expect(flash[:alert]).to match(/Write attempted during View-as/)
+        expect(response).to have_http_status(:see_other)
+        expect(flash[:alert]).to match(/can't make changes while viewing as .*Nothing was saved/)
+      end
+
+      it 'returns to the page the write came from' do
+        patch work_path('anything'), headers: { 'Referer' => 'http://www.example.com/works/anything/edit' }
+
+        expect(response).to redirect_to('http://www.example.com/works/anything/edit')
+      end
+
+      it 'lets the admin log out' do
+        delete destroy_user_session_path
+
+        expect(flash[:alert]).to be_blank
+        expect(session[:view_as_nuid]).to be_blank
+        get my_drs_path
+        expect(response).to redirect_to(root_path)
+      end
+
+      it 'mounts the client guard on the banner with the same message' do
+        get admin_root_path
+
+        banner = response.parsed_body.at_css('aside.impersonation-banner')
+        expect(banner['data-controller']).to eq('view-as-guard')
+        expect(banner['data-view-as-guard-message-value']).to match(/Nothing was saved/)
+        expect(JSON.parse(banner['data-view-as-guard-allowed-value']))
+          .to include(admin_impersonation_path, destroy_user_session_path)
       end
 
       it 'permits a GET and keeps the session' do
@@ -327,11 +353,11 @@ RSpec.describe 'Admin::Impersonations', type: :request do
           expect(response.body).not_to include('request-id')
         end
 
-        it 'still ends the session and still says so' do
+        it 'keeps the session and still says so' do
           patch work_path('anything'), headers: frame_headers
 
-          expect(session[:view_as_nuid]).to be_blank
-          expect(flash[:alert]).to match(/Write attempted during View-as/)
+          expect(session[:view_as_nuid]).to eq('000000002')
+          expect(flash[:alert]).to match(/Nothing was saved/)
         end
       end
 

@@ -13,7 +13,8 @@ module ImpersonationSession
     before_action :reject_writes_in_view_as
     helper_method :acting_as?, :view_as?, :impersonating?,
                   :acting_as_nuid, :view_as_nuid,
-                  :impersonation_target, :effective_user
+                  :impersonation_target, :effective_user,
+                  :view_as_write_refusal
   end
 
   def acting_as?
@@ -81,6 +82,13 @@ module ImpersonationSession
     stamp_impersonation_clock
   end
 
+  # The one message for a write refused under view-as, shared by the server
+  # guard's flash and the client guard's modal.
+  def view_as_write_refusal
+    name = impersonation_target&.pretty_name.presence || 'another user'
+    "You can't make changes while viewing as #{name}. Nothing was saved."
+  end
+
   def end_impersonation
     mode   = ('acting_as' if acting_as?) || ('view_as' if view_as?)
     target = acting_as_nuid || view_as_nuid
@@ -116,22 +124,33 @@ module ImpersonationSession
       Current.view_as_nuid = view_as_nuid
     end
 
-    # View-as is read-only: a state-changing request ends the session loudly.
+    # View-as is read-only: a state-changing request is refused before the
+    # action runs, and the session stays open. The view-as-guard Stimulus
+    # controller stops most writes before they are sent; this is the backstop.
     # A redirect is discarded when the write came from inside a turbo-frame, so
     # the reply has to be a turbo-stream refresh instead.
     def reject_writes_in_view_as
       return unless view_as?
       return if request.get? || request.head?
+      return if signing_out?
 
-      end_impersonation
-      alert = 'Write attempted during View-as — the session has ended.'
-      return redirect_to(root_path, alert: alert) unless turbo_frame_request?
+      # :see_other, because a Turbo DELETE or PATCH would repeat its own verb on
+      # a 302 and land on a route that does not take it.
+      unless turbo_frame_request?
+        return redirect_back_or_to(root_path, alert: view_as_write_refusal, status: :see_other)
+      end
 
-      flash[:alert] = alert
+      flash[:alert] = view_as_write_refusal
       # request_id: nil is load-bearing. It defaults to the current request's id,
       # and Turbo drops a refresh whose id it has already seen — which is true of
       # every refresh issued in reply to the request that triggered it.
       render turbo_stream: turbo_stream.refresh(request_id: nil)
+    end
+
+    # Devise's sessions controller inherits the guard, and refusing its DELETE
+    # would leave the admin unable to log out while viewing as someone.
+    def signing_out?
+      devise_controller? && controller_name == 'sessions' && action_name == 'destroy'
     end
 
     def enforce_impersonation_ttl

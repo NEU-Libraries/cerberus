@@ -29,9 +29,14 @@ describe ImpersonationSession do
       # target frame is absent from the response. A plain write takes the redirect,
       # which is the path these examples exercise.
       def turbo_frame_request? = false
+      def devise_controller? = false
 
       def redirect_to(target, **opts)
         @redirected = { target: target, opts: opts }
+      end
+
+      def redirect_back_or_to(fallback, **opts)
+        @redirected = { target: fallback, opts: opts }
       end
     end
   end
@@ -292,14 +297,24 @@ describe ImpersonationSession do
   end
 
   describe '#reject_writes_in_view_as' do
-    it 'ends the session and redirects on a non-GET request during view-as' do
+    it 'refuses a non-GET request during view-as and keeps the session' do
       host.session[:view_as_nuid] = '000000002'
+      stub_login('000000002', role: 'privileged', groups: [])
       host.request = instance_double('ActionDispatch::Request', get?: false, head?: false)
 
       host.send(:reject_writes_in_view_as)
 
-      expect(host.view_as?).to be(false)
-      expect(host.redirected[:opts][:alert]).to match(/Write attempted during View-as/)
+      expect(host.view_as?).to be(true)
+      expect(host.redirected[:opts]).to include(status: :see_other)
+      expect(host.redirected[:opts][:alert])
+        .to eq("You can't make changes while viewing as User 000000002. Nothing was saved.")
+    end
+
+    it 'names no one when the target will not hydrate' do
+      host.session[:view_as_nuid] = '000000002'
+      allow(AtlasRb::Authentication).to receive(:login).and_return(nil)
+
+      expect(host.view_as_write_refusal).to include('while viewing as another user')
     end
 
     it 'permits a GET request during view-as' do
