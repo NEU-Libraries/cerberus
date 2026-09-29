@@ -34,12 +34,13 @@ RSpec.describe 'Admin::Tombstones', type: :request do
              groups: [Permissions::STAFF_EDIT_GROUP, Permissions::ADMIN_GROUP])
   end
 
-  def tombstoned_doc(noid:, title:, klass: 'Work')
+  def tombstoned_doc(noid:, title:, klass: 'Work', parent: nil, tombstoned: true)
     SolrDocument.new('id'                      => "uuid-#{noid}",
                      'alternate_ids_tesim'     => ["id-#{noid}"],
                      'internal_resource_tesim' => klass,
                      'title_tsim'              => [title],
-                     'tombstoned_bsi'          => true)
+                     'tombstoned_bsi'          => tombstoned,
+                     'a_member_of_ssi'         => parent)
   end
 
   def fake_results(*docs, total: docs.size)
@@ -95,6 +96,30 @@ RSpec.describe 'Admin::Tombstones', type: :request do
 
         expect(response).to have_http_status(:ok)
         expect(response.body).to include('Withdrawn Thesis', 'abc', 'Old Community', 'Restore')
+      end
+
+      # A tombstoned parent is named but not linked: its page is the gone page,
+      # and it has to be restored before its child can be.
+      it "names each row's parent, links a live one, and marks a tombstoned one" do
+        work = tombstoned_doc(noid: 'abc', title: 'Withdrawn Thesis', parent: 'id-uuid-live')
+        orphan = tombstoned_doc(noid: 'def', title: 'Orphaned Work', parent: 'id-uuid-gone')
+        root = tombstoned_doc(noid: 'xyz', title: 'Old Community', klass: 'Community')
+        allow(TombstonedItems).to receive(:call).and_return(fake_results(work, orphan, root))
+        allow(StructuralParents).to receive(:call).and_return(
+          'uuid-live' => tombstoned_doc(noid: 'live1', title: 'Theses Collection', klass: 'Collection',
+                                        tombstoned: false),
+          'uuid-gone' => tombstoned_doc(noid: 'gone1', title: 'Withdrawn Collection', klass: 'Collection')
+        )
+
+        get '/admin/tombstones'
+
+        page = response.parsed_body
+        expect(page.css('th').map(&:text)).to include('Parent')
+        expect(page.at_css('a[href="/collections/live1"]')&.text).to eq('Theses Collection')
+        expect(response.body).to include('Withdrawn Collection', '· tombstoned')
+        expect(page.css('a[href="/collections/gone1"]')).to be_empty
+        rows = page.css('tbody tr').map { |row| row.css('td')[1].text.squish }
+        expect(rows.last).to eq('—')
       end
 
       it 'counts every withdrawn item, not just the page on screen' do

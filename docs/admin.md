@@ -180,6 +180,20 @@ The index borrows `CatalogController`'s Solr configuration with
 `copy_blacklight_config_from`, so the `TombstonedItems` SearchBuilder behaves
 like the catalog's. `ReparentController` does the same.
 
+### The Parent column
+
+Each row names its structural parent, the collection or community it sits
+in. `StructuralParents` reads them in one Solr query per page, from each
+document's `a_member_of_ssi`. A Work carries no ancestor chain, but its direct
+parent is all the column needs.
+
+The query uses the raw index rather than a SearchBuilder. The catalog's default
+filter drops tombstoned documents, and a tombstoned parent is the one an admin
+most needs to see, because it has to be restored before its child can be. Such a
+parent is named and marked "tombstoned" but not linked, since its page is the
+gone page. A top-level Community has no parent and shows a dash. A failed read
+leaves every cell a dash rather than failing the registry.
+
 ### Reading a refusal on these two verbs
 
 Restore and destroy are not among atlas_rb's typed-error paths — those are

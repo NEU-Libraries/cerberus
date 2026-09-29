@@ -37,6 +37,7 @@ module Admin
 
     def index
       @response = TombstonedItems.call(scope: self, page: params[:page], query: params[:q])
+      @parents = StructuralParents.call(documents: @response.documents)
     end
 
     def restore

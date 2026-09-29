@@ -27,5 +27,17 @@ module Admin
       blocks << PURGE_CONTAINER_CAVEAT if CONTAINER_TYPES.include?(doc.klass_type.to_s)
       blocks.join("\n\n")
     end
+
+    # A tombstoned parent is named but not linked, since its page is the gone
+    # page, and says so: it has to be restored before this row can be.
+    def tombstone_parent_cell(parent)
+      return content_tag(:span, '—', class: 'text-muted') if parent.nil?
+      unless parent['tombstoned_bsi']
+        return link_to(finder_doc_heading(parent), resource_path(parent.klass_type, parent.to_param))
+      end
+
+      safe_join([finder_doc_heading(parent),
+                 content_tag(:span, ' · tombstoned', class: 'text-muted small')])
+    end
   end
 end
