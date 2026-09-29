@@ -58,6 +58,13 @@ RSpec.describe UsageChartsHelper do
     end
   end
 
+  describe '#usage_empty_message' do
+    it 'names the range and says when the statistics refresh' do
+      expect(helper.usage_empty_message(report))
+        .to eq('No activity between July 9, 2026 and July 13, 2026. Usage statistics are refreshed daily.')
+    end
+  end
+
   describe '#usage_visitors_series' do
     it 'zero-fills the visitor series across the whole range' do
       series = helper.usage_visitors_series(report).first

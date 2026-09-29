@@ -74,10 +74,10 @@
         .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-dataset-value' => usage_visitors_series(@analytics).to_json, 'usage-chart-colors-value' => %w[#5d569b].to_json}}
 
     #analytics-files.tab-pane{'aria-labelledby' => 'analytics-files-tab', role: 'tabpanel'}
-      = render 'shared/container_analytics_top_table', entries: @analytics.top_works, empty: 'No file activity in this range.'
+      = render 'shared/container_analytics_top_table', entries: @analytics.top_works, empty: usage_empty_message(@analytics)
     - if @analytics.scope.show_collections_tab?
       #analytics-collections.tab-pane{'aria-labelledby' => 'analytics-collections-tab', role: 'tabpanel'}
-        = render 'shared/container_analytics_top_table', entries: @analytics.top_containers, empty: 'No container activity in this range.'
+        = render 'shared/container_analytics_top_table', entries: @analytics.top_containers, empty: usage_empty_message(@analytics)
     #analytics-composition.tab-pane.active{'aria-labelledby' => 'analytics-composition-tab', role: 'tabpanel'}
       = render 'admin/impressions/composition', composition: @analytics_composition,
                                                 scope_phrase: "in #{plain_text(@analytics_base_item[:title])}"

@@ -38,6 +38,11 @@ module UsageChartsHelper
     (report.unique_visitors_series.values.sum.to_f / days).round(1)
   end
 
+  def usage_empty_message(report)
+    from, to = [report.range.begin, report.range.end].map { |day| day.strftime('%B %-d, %Y') }
+    "No activity between #{from} and #{to}. Usage statistics are refreshed daily."
+  end
+
   private
 
     # Every day in the range, zero-filled. The underlying rollups carry no row
