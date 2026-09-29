@@ -7,20 +7,25 @@ Source files:
 
 - `app/services/ingest_dispatch.rb`
 - `app/jobs/multipage_ingest_job.rb`
+- `app/jobs/multipage_item_job.rb`
 - `app/services/xml_validator.rb`
+- `app/services/mods_record_validator.rb`
 
 ## Routing a staged upload
 
-`IngestDispatch` is the single home for "what does this file type get?". Both
-the single-file deposit (`WorksController`) and the XML loader (`XmlIngestJob`)
-call it, so the two ingest paths cannot drift apart.
+`IngestDispatch` is the single home for "what does this file type get?". The
+single-file deposit (`WorksController`) and the XML loader (`XmlIngestJob`) both
+call it, so the two ingest paths cannot drift apart. The replace path
+(`FileReplacementJob`) and the rollback path (`FileDerivativeRefreshJob`) call it
+too, to re-derive a Work's assets.
 
 | Staged type | Enrichment |
 |---|---|
 | `image/*` | `IiifAssetsJob` — JP2 and thumbnail Delegates |
 | `application/pdf` | `IiifAssetsJob` — `MasterJp2` rasterizes page 1 via vips and poppler |
 | Word, PowerPoint | `PdfRenditionJob` — LibreOffice writes a PDF rendition Blob, and thumbnails come from that rendition's first page |
-| everything | `ContentCreationJob` — the primary Blob. Enrichment never gates or blocks it |
+| `video/*`, `audio/*` | `MediaRenditionJob` — an MP4 remux when the container needs one, and a poster frame for video |
+| everything | `ContentCreationJob` — the primary Blob, unless `include_primary: false`. Enrichment never gates or blocks it |
 
 Full text rides alongside, for body-text search and the "Full Text Match"
 snippet. Native PDFs and plain text get `FullTextExtractionJob` from here, which
@@ -29,9 +34,10 @@ rendition instead: `PdfRenditionJob` enqueues it on the converted PDF, so
 LibreOffice runs once rather than twice.
 
 No `derivative_widths` pass through here. A deposit gets thumbnails at upload
-time only. Small, medium and large are opt-in download renditions, chosen later
-on the metadata page by `DepositDerivativesJob`. By policy a document gets
-thumbnails only, never S/M/L.
+time only. Small, medium and large are opt-in download renditions. The depositor
+chooses them later on the metadata page, and `DepositDerivativesJob` generates
+them. The page offers them only when `StagedImageProbe` finds a staged image, so
+a document gets thumbnails only, never S/M/L.
 
 ### Two flags that look alike and are not
 
@@ -41,10 +47,11 @@ second name for the other will break a path.
 **`include_primary:`** controls whether this call creates the primary Blob.
 
 - The deposit and loader paths leave it `true`; the primary Blob is created here.
-- The admin "replace a file" path passes `false`. `Blob.update` writes the
-  primary bytes separately and preserves the NOID, so only the type-routed
-  *derivative* refresh is wanted here — never a second `ContentCreationJob` or
-  `Blob.create`.
+- The replace and rollback paths pass `false`. The primary Blob already holds
+  the new bytes: `FileReplacementJob` writes them with `Blob.update`, which
+  preserves the NOID, and a rollback reinstates them inside Atlas. Only the
+  type-routed *derivative* refresh is wanted, never a second
+  `ContentCreationJob` or `Blob.create`.
 
 **`complete_work:`** asks whether anything still owes this Work its metadata.
 
@@ -62,10 +69,12 @@ fact, and two names drift.
 
 ### Idempotency keys are derived, never minted
 
-`rendition_key` derives its key with `uuid_v5` rather than minting a fresh one.
-That makes the rendition Blob converge on the same Atlas idempotency key across
-two different repeats: a Solid Queue retry, and a re-dispatched loader row. It
-is the same dedup story as the primary Blob's key.
+`rendition_key` derives its key from the caller's `idempotency_key` with
+`uuid_v5`, rather than minting a fresh one. The rendition Blob therefore
+converges on the same Atlas idempotency key across two kinds of repeat: a Solid
+Queue retry, and a re-dispatched loader row. The primary Blob's key dedups the
+same way. A replace passes a fresh `idempotency_key`, so its derived key differs
+and Atlas regenerates the rendition rather than skipping it.
 
 Minting a key here would create a second Blob on every retry.
 
@@ -89,9 +98,10 @@ Each page becomes an ordered FileSet — position is the manifest Sequence —
 holding the page binary as its Blob. Page jobs parallelise safely, because each
 job touches only its own FileSet, across every item in the load.
 
-The job stops early if the load report has already failed. The unzip job fails
-the report structurally, when a sibling page's archive goes missing mid-extract
-for instance. There is no point building onto a Work the report has given up on.
+The job stops early if the load report has already failed, because there is no
+point building onto a Work the report has given up on. `MultipageUnzipJob` fails
+the whole report when it crashes, and it may already have enqueued some item
+jobs by then.
 
 ### The two Atlas writes behave differently
 
@@ -133,10 +143,11 @@ page filename.
 
 ### Per-page deep zoom
 
-Every page gets its own image-service pointer, not just page 1. That means a JP2
-written into Cantaloupe's volume, and a service base PATCHed onto that page's
-FileSet under `Role.service_file`. That is the per-Canvas image service the IIIF
-manifest assembles from.
+Every page gets its own image service, not just page 1. `MasterJp2` writes the
+page's JP2s into Cantaloupe's volume, and `FileSet.set_iiif_service` PATCHes the
+gated base onto that page's FileSet as its `service_file` Delegate. The IIIF
+manifest assembles each Canvas's image service from it. An unreadable page logs
+a warning and skips its service rather than failing the row.
 
 Atlas upserts the Delegate, so re-PATCHing is never additive and a retry is
 safe. `page_service_present?` is consulted only on a resume. It distinguishes a
@@ -157,13 +168,19 @@ self-guards on an existing thumbnail.
 and only if that array is empty. Errors stringify cleanly for display, because
 `Nokogiri::XML::SyntaxError` responds to `to_s` and the rest are plain strings.
 
-Syntax runs first. If the document does not parse, schema checks are skipped —
-you cannot schema-validate XML that does not parse.
+The checks run in this order, and each of the first two stops the rest:
+
+1. Characters XML 1.0 cannot store (`Metadata::ControlCharacters`).
+2. Syntax. XML that does not parse cannot be schema-validated.
+3. Document checks: UTF-8 encoding and an `xmlns:mods` declaration.
+4. Schema, against every XSD the root's `schemaLocation` names. A schema that
+   cannot be fetched becomes an error row, never a 500.
 
 ### The phases this class deliberately omits
 
-**Phase 3, business rules**, is not here on purpose. Layering them onto this
-generic XSD-floor validator would widen every consumer's contract at once.
+**Business rules** are not here on purpose. Layering them onto this generic
+XSD-floor validator would widen every consumer's contract at once. The required
+fields below live in `MODSRecordValidator` instead.
 
 ### Required fields
 
@@ -186,7 +203,7 @@ The IPTC loader builds its MODS itself, so it enforces the same two fields
 before building: `Iptc::MODSBuilder` refuses a blank Headline, and a Keywords
 list (or Subject fallback) with nothing but blank values.
 
-**Phase 4, does the MODS-display partial render?** belongs to the caller, via
+**Whether the MODS-display partial renders** belongs to the caller, via
 `AtlasRb::Resource.preview`, because rendering lives in Atlas.
 
 ### Reporting an impossible character before the parse

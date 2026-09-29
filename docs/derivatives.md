@@ -13,11 +13,14 @@ Source files:
 ## Seeding a Work's IIIF assets
 
 `IiifAssetsJob` seeds from one staged source: an image, or a PDF whose first
-page `MasterJp2` rasterizes. The PDF may have been deposited directly or
-converted from Word or PowerPoint by `PdfRenditionJob`.
+page `MasterJp2` rasterizes. `IngestDispatch` sends an image or a deposited PDF
+straight here. `PdfRenditionJob` sends the PDF it converts from Word or
+PowerPoint, and `MediaRenditionJob` sends a video's poster frame.
 
-`MasterJp2` mints two JP2s — a capped display copy and a full-resolution copy.
-This job PATCHes their Delegate URLs to Atlas.
+`MasterJp2` mints two JP2s: an open copy capped at 500 pixels wide, and a gated
+full-resolution copy. This job PATCHes their Delegate URLs to Atlas, one at a
+time. The Delegates attach to the same FileSet, and parallel PATCHes race
+Atlas's optimistic lock on it.
 
 ### Three asset families, each on its own pipe
 
@@ -38,8 +41,8 @@ caller treats nil as "no thumbnail" and falls back to the type icon.
 
 `service_file` does double duty. It is the deep-zoom source, and it is the
 anchor from which `DepositDerivativesJob` later recovers the gated base for
-opt-in S/M/L. `persist_service!` writes it onto the single content FileSet, and
-skips when that FileSet is not listed yet.
+opt-in S/M/L. `persist_service!` writes it onto the Work's first FileSet, and
+skips when no FileSet is listed yet.
 
 ### Who passes widths, and who does not
 
@@ -48,8 +51,9 @@ skips when that FileSet is not listed yet.
 - **The single-file deposit** chooses sizes on the metadata page, *after* this
   job has run. `DepositDerivativesJob` handles them, recovering the gated base
   from the `service_file` Delegate this job set.
-- **Callers that pass nothing** at seed time — deposit, XML loader, multipage
-  page 1 — get thumbnails and `service_file` only.
+- **Callers that pass nothing** at seed time get thumbnails and `service_file`
+  only. These are `IngestDispatch` (deposit and XML loader), the multipage
+  loader's page 1, `PdfRenditionJob` and `MediaRenditionJob`.
 - **A replace passes no widths either**, but it is not a first seed. The sizes
   were chosen once, at deposit, and only the Work's stored rendition URIs still
   record them, so `existing_widths` reads them back. That keeps the download
@@ -59,10 +63,10 @@ skips when that FileSet is not listed yet.
 
 `refresh:` distinguishes "seed the assets" from "re-derive them".
 
-The existing-thumbnail guard is what makes a *deposit* idempotent under Solid
-Queue retries. But that same guard reads as "already done" on a Work whose bytes
-have since been replaced. That is exactly when the assets most need rebuilding.
-`refresh: true` is how a replace or rollback says the guard does not apply.
+The existing-thumbnail guard makes a *deposit* idempotent under Solid Queue
+retries. But the same guard reads as "already done" on a Work whose bytes have
+since been replaced, which is exactly when the assets most need rebuilding. A
+replace or rollback passes `refresh: true` to skip the guard.
 
 ## Attaching a caption track
 
@@ -86,17 +90,18 @@ Atlas gives every content Blob the role `original_file`, so a caption satisfies
 the `PrimaryFilePresence` test that `ConfirmDepositJob` waits on. Attaching a
 caption first would let a deposit complete around captions alone. Atlas builds
 the Work's METS structMap at completion, recording a preservation structure that
-omits the video.
+omits the recording.
 
-Waiting also orders this write after the deposit's own, so the two Blob writers
-do not race.
+Waiting also orders this write after the deposit's own. It does not remove the
+race entirely: a Blob write bumps the Work's optimistic lock, so the job still
+retries on `AtlasRb::StaleResourceError`.
 
 ### What happens when the wait runs out
 
 Exhausting the retry budget leaves the Work with no captions, and says so in the
-log. That is the right outcome. A Work whose video never landed has nothing to
-caption, and the deposit itself is already on the needs-attention list for the
-missing video.
+log. That is the right outcome. A Work whose recording never landed has nothing
+to caption. `ConfirmDepositJob` has already left that deposit in progress, on the
+needs-attention list.
 
 ### Attach-only
 

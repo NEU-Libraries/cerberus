@@ -11,6 +11,7 @@ Source files:
 - `app/controllers/concerns/parallel_atlas_reads.rb`
 - `app/services/incomplete_flag.rb`
 - `app/jobs/application_job.rb`
+- `app/lib/atlas_write.rb`
 
 Per-type enrichment routing — what a PDF or a Word document gets after the
 bytes land — is `IngestDispatch`, covered in `docs/ingest.md`. The ACL
@@ -20,7 +21,8 @@ vocabulary is in `docs/permissions.md`.
 
 `WorksController` covers deposit, show, edit, tombstone, manifest and
 downloads as one cohesive controller rather than being split by verb. That is
-why it runs past the default class-length budget and disables the cop.
+why it runs past the class-length budget, and why `.rubocop.yml` excludes it
+from `Metrics/ClassLength`.
 
 It pulls in two Blacklight modules that a plain controller does not have:
 
@@ -95,7 +97,10 @@ audience the Work does not have is rejected. That should not happen — the
 authoring form checks the default against its collection, and a visibility
 cascade re-clamps it. But the deposit must not die on the Rails error page if
 it ever does. The Work and its file already exist by that point, so raising
-abandoned a half-made deposit and told the depositor nothing.
+would abandon a half-made deposit and tell the depositor nothing.
+`apply_derivative_default` therefore rescues
+`AtlasRb::DerivativePermissionsError`, logs it, and sets
+`@derivative_default_failed`.
 
 It is not silent, though. The default exists to make renditions *more*
 restrictive than the Work. So skipping it leaves them at the Work's own
@@ -125,10 +130,10 @@ linked-member edge. It is orthogonal to placement: the Work's structural home
 is wherever it was just deposited, and promotion does not touch it.
 
 `WorkDeposit#publish_offered?` offers promotion only when the destination is
-the depositor's own personal root. That is what keeps a promoted Work in the
-depositor's own space, now that the route, not a publish branch, decides
-placement. It is the property the old publish branch got by relocating the
-Work.
+the depositor's own personal root. The route decides placement, so this check
+is what keeps a promoted Work in the depositor's own space. It keys on the
+destination, not on the button the depositor arrived by, so typing a URL cannot
+sidestep it.
 
 The showcase link is a `:system`-attributed write (`AtlasRb::System::Work`),
 not a call the depositor's own credential could make. Atlas scopes `:system`'s
@@ -150,7 +155,10 @@ see.
 | Reason token | Meaning |
 |---|---|
 | `not_personal_root` | The destination is not the depositor's own root, so the form never offered promotion here — a typed URL, or a tampered field |
-| `no_showcase` | No showcase exists for that genre in that community, or the depositor cannot see the one that does |
+| `no_showcase` | `DepositorContext#publish_showcase_id` found nothing: the depositor is not affiliated with that community, the genre is staff-only (`FeaturedContent::STAFF_ONLY`), no showcase exists for that genre there, or the depositor cannot see the one that does |
+
+A third refusal, `atlas_forbidden`, is the `ForbiddenError` rescue above. All
+three set `@publish_link_failed`.
 
 A promotion that cannot be honoured leaves the deposit standing. The Work
 already exists and is correctly placed, so there is nothing to roll back.
@@ -188,9 +196,9 @@ from the form, so it can name nothing at all.
 Both probe the **staged file**, not the Work's assets. `ContentCreationJob`
 may still be in flight when the page renders. And asking Atlas would hide the
 streaming-only toggle and the caption field from exactly the deposits that
-want them. `StagedMediaProbe` is called once and shared, since both sections
-ask the same question of the same upload: is it audio or video? `StagedImageProbe` gates the opt-in
-Image Derivatives section and is nil for non-image deposits.
+want them. `StagedMediaProbe` is called once and shared, since both sections ask the same
+question of the same upload: is it audio or video? `StagedImageProbe` gates the
+opt-in Image Derivatives section and is nil for non-image deposits.
 
 By `#edit` time the situation has reversed. The content Blob has landed and
 the staged upload is long gone, so that action decides off the Work's own
@@ -201,10 +209,9 @@ The order inside `#update_metadata` is load-bearing:
 1. `handle_metadata_update` — the descriptive save.
 2. `process_derivative_widths` — after the descriptive save, deliberately.
    With a live worker, `DepositDerivativesJob` can execute within this same
-   request, and its Delegate PATCH bumps the Work's optimistic lock.
-   Enqueueing first raced `save_descriptive!` into
-   `AtlasRb::StaleResourceError`. It was seen live and is invisible to specs,
-   whose test adapter never runs the job inline.
+   request, and its Delegate PATCH bumps the Work's optimistic lock. Enqueueing
+   it first races `save_descriptive!` into `AtlasRb::StaleResourceError`. Specs
+   cannot catch this, because the test adapter never runs the job inline.
 3. `apply_streaming_only!`.
 4. `apply_caption!` — before the confirm, so the caption Blob is queued behind
    the deposit's own finalization rather than ahead of it. `CaptionJob` waits
@@ -300,10 +307,10 @@ the raw, structure-safe update path. It preserves every curated node the form
 does not own, and skips the write — and a needless OCFL MODS version — on a
 no-op.
 
-It is wrapped in `with_stale_retry`. Right after a deposit the async
-ingest and derivative jobs are still finalizing the same Work, so this
-read-merge-write can lose an optimistic-lock race. Re-reading picks up the
-current MODS and token.
+It runs inside `with_stale_retry`, through `merge_mods!`. Right after a
+deposit, the async ingest and derivative jobs are still finalizing the same
+Work, so this read-merge-write can lose an optimistic-lock race. Re-reading
+picks up the current MODS and token.
 
 Both `save_descriptive!` and `save_advanced!` are thin calls over
 `AtlasWrite#merge_mods!`, which is the read-merge-write spine itself: read the
@@ -441,10 +448,11 @@ It records that a Work's pipeline partly failed, and clears the record when it
 later succeeds.
 
 An enrichment job that exhausts its retries leaves a Work that is complete and
-readable. What it is missing is a PDF rendition, a poster frame, its
-thumbnails, its full text. Enrichment deliberately never fails a deposit, so
-without the flag the only trace was a line in the log, and nobody found out.
-The flag makes that visible without withholding the record.
+readable. What it lacks is a PDF rendition, a streamable rendition or poster
+frame, its S/M/L download sizes, its thumbnails, or its full text. Enrichment
+deliberately never fails a deposit, so without the flag the only trace would be
+a line in the log that nobody reads. The flag makes the gap visible without
+withholding the record.
 
 It is deliberately **not** used for the two failures that already have a
 surface:
@@ -492,7 +500,7 @@ so losing the write costs visibility, not correctness.
 `ApplicationJob` carries the ambient acting NUID across the enqueue-to-perform
 boundary.
 
-Rails 8.1 has no built-in ActiveJob-to-`ActiveSupport::CurrentAttributes`
+Rails has no built-in ActiveJob-to-`ActiveSupport::CurrentAttributes`
 propagation: `Current.nuid` set on the request thread does *not* automatically
 reach the worker thread that runs the job. Background jobs that call
 `AtlasRb::*` without an explicit `nuid:` kwarg rely on the configured
@@ -501,8 +509,9 @@ perform, the request goes out with no `User:` header, and Atlas's
 `require_auth` rejects it with 400. That surfaces as an unrelated
 `NoMethodError` when the gem parses the error envelope and returns nil.
 
-`before_enqueue` captures `Current.nuid`, and `around_perform` re-sets it for
-the duration of `perform`. Child jobs enqueued mid-perform inherit the value
+`before_enqueue` captures `Current.nuid` into `current_nuid`, which
+`serialize` and `deserialize` carry with the job. `around_perform` re-sets it
+for the duration of `perform`. Child jobs enqueued mid-perform inherit the value
 the same way, because their own `before_enqueue` runs while the parent's
 `around_perform` has `Current` populated.
 
