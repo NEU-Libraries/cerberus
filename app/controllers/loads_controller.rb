@@ -14,6 +14,8 @@ class LoadsController < ApplicationController
   # the interface has settled on v1's word for it, and giving the reader two words
   # for one thing is worse than using the older one consistently.
   BAD_DESTINATION_MSG = 'Choose a destination collection (search by title or paste a collection PID).'
+  # IPTC picks from a dropdown, so this refusal means the list changed under the form.
+  IPTC_DESTINATION_MSG = 'Choose a destination collection from the list.'
 
   before_action :authenticate_user!
   before_action :set_loader
@@ -58,7 +60,7 @@ class LoadsController < ApplicationController
     archive = params.dig(:load_report, :archive)
     parent  = params.dig(:load_report, :parent_collection_id)
     return rerender_new('Please choose an archive file.', parent) if archive.blank?
-    return rerender_new(BAD_DESTINATION_MSG, parent) unless valid_destination?(parent)
+    return rerender_new(destination_alert, parent) unless LoadDestination.call(loader: @loader, parent_id: parent)
 
     @load_report = create_load_report!(archive, parent)
     save_archive(@load_report, archive)
@@ -141,22 +143,7 @@ class LoadsController < ApplicationController
       render :new, status: :unprocessable_content
     end
 
-    # IPTC's destination comes from the children dropdown (already a collection
-    # under the configured root), so it's trusted as-is. XML/multipage accept a
-    # free-typed or typeahead-picked NOID, so resolve it against Atlas and
-    # confirm it's actually a Collection before staging anything.
-    # A blank destination is left to the preview on the XML loader: an overwrite
-    # package names every Work it touches, and only a create row needs one.
-    def valid_destination?(parent_id)
-      return true if @loader.iptc?
-      return @loader.xml? if parent_id.blank?
-
-      # find returns nil for a 404 (unknown NOID) and raises ResourceError for
-      # any other non-2xx; either way the destination isn't a usable Collection.
-      AtlasRb::Resource.find(parent_id)&.klass == 'Collection'
-    rescue Faraday::Error, JSON::ParserError, AtlasRb::ResourceError
-      false
-    end
+    def destination_alert = @loader.iptc? ? IPTC_DESTINATION_MSG : BAD_DESTINATION_MSG
 
     def set_loader
       @loader = Loader.find_by(slug: params[:loader_slug])

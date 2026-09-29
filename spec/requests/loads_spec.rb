@@ -209,6 +209,29 @@ RSpec.describe 'Loads', type: :request do
       allow(UnzipJob).to receive(:perform_later)
       allow(FileUtils).to receive(:mkdir_p)
       allow(FileUtils).to receive(:cp)
+      allow(AtlasRb::Collection).to receive(:children).with('neu:fix-comm-photos-archive').and_return(['neu:c1'])
+      allow(AtlasRb::Resource).to receive(:find_many).with(['neu:c1']).and_return(
+        [AtlasRb::Mash.new('noid' => 'neu:c1', 'klass' => 'Collection', 'title' => 'Campus Life')]
+      )
+    end
+
+    # The dropdown lists only the root's Collections, but the POST can name any
+    # NOID, so the server checks it against the same list.
+    it 'refuses a destination the dropdown does not list' do
+      post '/loaders/marcom/loads',
+           params: { load_report: { archive: archive, parent_collection_id: 'neu:elsewhere' } }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include('Choose a destination collection from the list.')
+      expect(LoadReport.count).to eq(0)
+      expect(UnzipJob).not_to have_received(:perform_later)
+    end
+
+    it 'refuses a blank destination' do
+      post '/loaders/marcom/loads', params: { load_report: { archive: archive, parent_collection_id: '' } }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(LoadReport.count).to eq(0)
     end
 
     it 'creates a LoadReport linked to the loader' do
