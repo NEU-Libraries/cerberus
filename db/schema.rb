@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_31_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_29_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -234,9 +234,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_31_000001) do
   create_continuous_aggregate("impression_counts_by_day", <<-SQL, materialized_only: true)
     SELECT impressions.noid,
       impressions.action,
-      time_bucket('P1D'::interval, impressions.created_at) AS day,
+      time_bucket('PT1H'::interval, impressions.created_at) AS hour,
       count(*) AS impressions
      FROM impressions
-    GROUP BY impressions.noid, impressions.action, (time_bucket('P1D'::interval, impressions.created_at))
+    GROUP BY impressions.noid, impressions.action, (time_bucket('PT1H'::interval, impressions.created_at))
   SQL
 end
