@@ -187,6 +187,9 @@ The tab is smaller than a container's on purpose:
   picker and no Solr query.
 - It shows views, downloads and streams over the last 90 days of human traffic.
   Streams appear only for a Work that plays in the browser.
+- Each action gets its own chart on its own scale, rather than one stacked
+  chart. A Work's downloads and streams are usually a fraction of its views,
+  and would flatten under them.
 - It leaves out unique visitors, which the librarians do not use.
 - An admin or admin delegate gets a link to the Usage analytics dashboard,
   scoped to the Work, for other date ranges.

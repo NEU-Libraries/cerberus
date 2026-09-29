@@ -12,9 +12,12 @@
         %dt.usage-ledger__label= action.capitalize.pluralize
         %dd.usage-ledger__figure= number_with_delimiter(totals[action])
 
-  %section.usage-chart-block
-    %h2.usage-chart-block__title= "#{actions.map { |a| a.pluralize }.to_sentence.capitalize} in the last 90 days"
-    .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-stacked-value' => 'true', 'usage-chart-dataset-value' => usage_timeseries(report, actions:).to_json, 'usage-chart-colors-value' => usage_series_colors(actions:).to_json}}
+  -# One chart per action, each on its own scale: a Work's downloads and streams
+  -# are usually a fraction of its views, and would flatten under them.
+  - actions.each do |action|
+    %section.usage-chart-block
+      %h2.usage-chart-block__title= "#{action.capitalize.pluralize} in the last 90 days"
+      .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-dataset-value' => usage_timeseries(report, actions: [action]).to_json, 'usage-chart-colors-value' => usage_series_colors(actions: [action]).to_json}}
 
   %p.text-muted.small.mb-0
     Human visitors only. Usage statistics are refreshed daily.

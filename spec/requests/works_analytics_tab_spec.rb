@@ -39,6 +39,15 @@ RSpec.describe 'Work show page Analytics tab', type: :request do
     expect(ledger).to eq(['Views 1,234', 'Downloads 56'])
   end
 
+  it 'draws each action on its own chart' do
+    sign_in editor
+    get work_path(work.id)
+
+    titles = response.parsed_body.css('#analytics .usage-chart-block__title').map(&:text)
+    expect(titles).to eq(['Views in the last 90 days', 'Downloads in the last 90 days'])
+    expect(response.parsed_body.css('#analytics [data-usage-chart-stacked-value]')).to be_empty
+  end
+
   # Streams are counted only for a Work that plays in the browser.
   it 'leaves streams out for a Work with no player' do
     sign_in editor
