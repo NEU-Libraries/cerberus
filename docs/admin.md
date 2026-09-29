@@ -173,12 +173,17 @@ Restore is reversible — re-tombstone the item — so it needs no confirmation
 marker. A purge is not, and atlas_rb makes that explicit by demanding
 `confirm: :i_understand`.
 
-`RESOURCE_ADMINS` maps a resource class to the atlas_rb `Admin` class that
-restores and purges it. It doubles as the allow-list for the `type` param.
+Atlas restores and purges every type through one generic endpoint, which
+atlas_rb binds as `AtlasRb::Admin::Resource.restore` and `.destroy`. So the
+controller needs no per-type class. `RESTORABLE_TYPES` is only the allow-list
+for the `type` param: Work, Collection and Community. It still has to refuse a
+FileSet or a Blob, which the generic endpoint would otherwise accept.
 
 The index borrows `CatalogController`'s Solr configuration with
-`copy_blacklight_config_from`, so the `TombstonedItems` SearchBuilder behaves
-like the catalog's. `ReparentController` does the same.
+`copy_blacklight_config_from`. The `TombstonedItems` service searches through
+`TombstonedSearchBuilder`, which therefore behaves like the catalog's builder,
+except that it inverts the tombstone filter. `ReparentController` borrows the
+configuration the same way.
 
 ### The Parent column
 
