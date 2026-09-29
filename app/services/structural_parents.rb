@@ -3,7 +3,9 @@
 # The structural parent of each document on one page of results, in one Solr
 # read, for the tombstone registry's Parent column. See docs/admin.md.
 class StructuralParents < ApplicationService
-  FIELDS = 'id,title_tsim,alternate_ids_ssim,internal_resource_tesim,tombstoned_bsi'
+  # alternate_ids_tesim is what SolrDocument#to_param reads the noid from;
+  # without it every link falls back to the uuid and 404s.
+  FIELDS = 'id,title_tsim,alternate_ids_tesim,internal_resource_tesim,tombstoned_bsi'
 
   def initialize(documents:)
     @documents = Array(documents)

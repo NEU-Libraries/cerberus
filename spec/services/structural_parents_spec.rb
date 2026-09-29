@@ -39,6 +39,15 @@ RSpec.describe StructuralParents do
     end
   end
 
+  # A stub document names its own fields, so only the request shows this.
+  it 'fetches the field the parent link reads its noid from' do
+    allow(index).to receive(:search).and_return(response([]))
+
+    described_class.call(documents: [doc('a', parent: 'id-p1')])
+
+    expect(index).to have_received(:search).with(hash_including(fl: a_string_including('alternate_ids_tesim')))
+  end
+
   it 'asks nothing for rows with no parent' do
     allow(index).to receive(:search)
 
