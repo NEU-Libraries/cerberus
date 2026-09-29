@@ -6,19 +6,21 @@
 class SetPicker
   PER_PAGE = 10
 
-  def self.call(query:, page:)
-    new(query, page).call
+  # owner: nil lists the caller's own Sets.
+  def self.call(query:, page:, owner: nil)
+    new(query, page, owner).call
   end
 
-  def initialize(query, page)
+  def initialize(query, page, owner)
     @query = query.to_s.strip
     @page = [page.to_i, 1].max
+    @owner = owner
   end
 
   # @return [Array(Array<Hash>, Hash)] the compilation rows + a pagination
   #   hash in Atlas's (Pagy) vocabulary ('page' / 'pages' / 'count').
   def call
-    result = AtlasRb::Compilation.list(q: @query.presence, page: @page, per_page: PER_PAGE)
+    result = AtlasRb::Compilation.list(owner: @owner, q: @query.presence, page: @page, per_page: PER_PAGE)
     [Array(result['compilations']), result['pagination']]
   end
 end

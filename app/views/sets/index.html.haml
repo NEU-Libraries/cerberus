@@ -19,10 +19,11 @@
   %ul.nav.nav-tabs.mb-3
     %li.nav-item
       = link_to 'My Sets', sets_path, class: "nav-link #{'active' if @scope.nil?}"
-    %li.nav-item
-      = link_to 'Shared with me', sets_path(scope: 'shared'), class: "nav-link #{'active' if @scope == 'shared'}"
-    %li.nav-item
-      = link_to 'Editable by me', sets_path(scope: 'editable'), class: "nav-link #{'active' if @scope == 'editable'}"
+    - unless impersonating?
+      %li.nav-item
+        = link_to 'Shared with me', sets_path(scope: 'shared'), class: "nav-link #{'active' if @scope == 'shared'}"
+      %li.nav-item
+        = link_to 'Editable by me', sets_path(scope: 'editable'), class: "nav-link #{'active' if @scope == 'editable'}"
 
   - if @sets.any?
     .table-responsive

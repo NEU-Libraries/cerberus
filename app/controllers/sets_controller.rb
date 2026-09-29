@@ -42,9 +42,11 @@ class SetsController < CatalogController
   # from the grant-scoped modes; group membership is resolved by Atlas).
   SCOPES = %w[shared editable].freeze
 
+  # While impersonating, only My Sets follows the target: Atlas keys the grant
+  # scopes on the caller alone, so those tabs would list the admin's grants.
   def index
-    @scope = params[:scope].presence_in(SCOPES)
-    page = AtlasRb::Compilation.list(scope: @scope, page: params[:page].presence)
+    @scope = params[:scope].presence_in(SCOPES) unless impersonating?
+    page = AtlasRb::Compilation.list(owner: impersonated_owner, scope: @scope, page: params[:page].presence)
     @sets = Array(page['compilations'])
     @pagination = page['pagination']
     # Grant-scoped tabs list other people's Sets, so name each owner.
@@ -76,7 +78,7 @@ class SetsController < CatalogController
     return head :bad_request if @noid.blank?
 
     @q = params[:q].to_s.strip
-    @sets, @pagination = SetPicker.call(query: @q, page: params[:page])
+    @sets, @pagination = SetPicker.call(query: @q, page: params[:page], owner: impersonated_owner)
     @covering = picker_covering
     render layout: false
   end
@@ -138,13 +140,19 @@ class SetsController < CatalogController
 
   private
 
+    # Atlas lists another owner's Sets for a full admin only, so a delegate in
+    # view-as reaches the forbidden page here rather than their own Sets.
+    def impersonated_owner
+      effective_user&.nuid if impersonating?
+    end
+
     def load_set
       @set = require_resource!(AtlasRb::Compilation.find(params[:id]))
 
       # @owned: owner/admin — gates ownership-only UI (Sharing tab, Delete).
       # @can_edit: owner OR a grantee — gates recipe-mutation affordances.
       # Atlas re-checks every write regardless; these only shape the UI.
-      @owned = current_user.present? && (current_user.admin? || @set['depositor'] == current_user.nuid)
+      @owned = effective_user.present? && (effective_user.admin? || @set['depositor'] == effective_user.nuid)
       @can_edit = @owned || editor?
     end
 
@@ -152,10 +160,10 @@ class SetsController < CatalogController
     # membership is the caller's session groups intersected with edit_groups —
     # the same UI-side check the permissions widget uses (Atlas is the boundary).
     def editor?
-      return false unless current_user
-      return true if Array(@set['edit_users']).include?(current_user.nuid)
+      return false unless effective_user
+      return true if Array(@set['edit_users']).include?(effective_user.nuid)
 
-      Array(current_user.groups).intersect?(Array(@set['edit_groups']))
+      Array(effective_user.groups).intersect?(Array(@set['edit_groups']))
     end
 
     # The Set's resolved contents, which is what #show lists. load_set has
@@ -169,7 +177,7 @@ class SetsController < CatalogController
     end
 
     def require_curator
-      return if current_user&.curates_sets?
+      return if effective_user&.curates_sets?
 
       render template: 'errors/forbidden', status: :forbidden
     end
