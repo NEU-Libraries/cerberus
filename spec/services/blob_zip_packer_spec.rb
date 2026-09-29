@@ -37,11 +37,11 @@ RSpec.describe BlobZipPacker do
     expect(names).not_to include(a_string_matching(/UNHINGED/i))
   end
 
-  it 'writes no MANIFEST.txt for a lone file' do
+  it 'writes no inventory.csv for a lone file' do
     allow(AtlasRb::Blob).to receive(:content).with('blob1').and_yield('x')
 
     described_class.new(asset: blob(noid: 'blob1', filename: 'data.bin')).pack(zip)
 
-    expect(names).not_to include('MANIFEST.txt')
+    expect(names).not_to include('inventory.csv')
   end
 end

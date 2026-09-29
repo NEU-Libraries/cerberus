@@ -8,7 +8,7 @@
 # binary inline.
 #
 # The lone entry sits at the archive root (nil folder) and carries no
-# MANIFEST.txt — the per-work folder and manifest only earn their place in the
+# inventory.csv — the per-work folder and inventory only earn their place in the
 # multi-file packers. STORE compression and the labeled entry naming come from
 # {ZipEntryWriter}, shared so single- and bulk-file downloads can't drift.
 class BlobZipPacker

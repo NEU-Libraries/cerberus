@@ -30,7 +30,11 @@ RSpec.describe SetZipPacker do
 
   def names = zip.entries.map(&:name)
 
-  before { allow(resolver).to receive(:each_content_batch).and_yield([work_doc('bc1234')]) }
+  # The inventory reads each Work's handle; none by default.
+  before do
+    allow(resolver).to receive(:each_content_batch).and_yield([work_doc('bc1234')])
+    allow(AtlasRb::Work).to receive(:find).and_return(AtlasRb::Mash.new('handle' => nil))
+  end
 
   # The set's gated search cannot filter these out: an embargoed Work is
   # deliberately DISCOVERABLE — public metadata, withheld content — so it clears
@@ -102,17 +106,37 @@ RSpec.describe SetZipPacker do
     expect(names).not_to include(a_string_matching(/UNHINGED/i))
   end
 
-  it 'writes a trailing MANIFEST.txt listing the packed entries' do
+  it "writes a trailing inventory.csv of identifier, filename and the Work's handle" do
     allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000002')
-                                            .and_return([blob(noid: 'blob1', filename: 'pdf_blob1.pdf')])
-    allow(AtlasRb::Blob).to receive(:content).with('blob1').and_yield('x')
+                                            .and_return([blob(noid: 'blob1', filename: 'pdf_blob1.pdf'),
+                                                         blob(noid: 'blob2', filename: 'jpg_blob2.jpg')])
+    allow(AtlasRb::Blob).to receive(:content).and_yield('x')
+    allow(AtlasRb::Work).to receive(:find).with('bc1234', nuid: '000000002')
+                                          .and_return(AtlasRb::Mash.new('handle' => '2047/d20001234'))
 
     packer.pack(zip)
 
-    manifest = zip.entries.find { |e| e.name == 'MANIFEST.txt' }
-    expect(manifest).to be_present
-    expect(manifest.body).to include('bc1234/pdf_blob1.pdf')
-    expect(zip.entries.last.name).to eq('MANIFEST.txt') # written last
+    inventory = zip.entries.find { |e| e.name == 'inventory.csv' }
+    handle = ApplicationController.helpers.handle_url('2047/d20001234')
+    expect(CSV.parse(inventory.body)).to eq([%w[identifier filename handle],
+                                             ['bc1234', 'pdf_blob1.pdf', handle],
+                                             ['bc1234', 'jpg_blob2.jpg', handle]])
+    expect(zip.entries.last.name).to eq('inventory.csv') # written last
+    # One handle read per Work, not per file.
+    expect(AtlasRb::Work).to have_received(:find).once
+  end
+
+  # The files are already sent by the time the inventory is written.
+  it 'leaves the handle blank when the Work cannot be read' do
+    allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000002')
+                                            .and_return([blob(noid: 'blob1', filename: 'pdf_blob1.pdf')])
+    allow(AtlasRb::Blob).to receive(:content).and_yield('x')
+    allow(AtlasRb::Work).to receive(:find).and_raise(Faraday::TimeoutError)
+
+    packer.pack(zip)
+
+    inventory = zip.entries.find { |e| e.name == 'inventory.csv' }
+    expect(CSV.parse(inventory.body).last).to eq(['bc1234', 'pdf_blob1.pdf', nil])
   end
 
   it 'records a mid-stream fetch failure in ERRORS.txt rather than aborting the archive' do

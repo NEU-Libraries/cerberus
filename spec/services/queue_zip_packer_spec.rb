@@ -23,8 +23,10 @@ RSpec.describe QueueZipPacker do
 
   # The embargo check costs one permissions read per distinct work. Unembargoed
   # by default, so the packing examples below stay about packing.
+  # The inventory reads each Work's handle; none by default.
   before do
     allow(AtlasRb::Resource).to receive(:permissions).and_return(AtlasRb::Mash.new('embargo' => ''))
+    allow(AtlasRb::Work).to receive(:find).and_return(AtlasRb::Mash.new('handle' => nil))
   end
 
   # Work.assets re-checks READ, and an embargoed Work is readable on purpose —
@@ -90,7 +92,7 @@ RSpec.describe QueueZipPacker do
 
     described_class.new(items: items, nuid: nil, ability: ability).pack(zip)
 
-    expect(names).to eq(['MANIFEST.txt'])
+    expect(names).to eq(['inventory.csv'])
     expect(AtlasRb::Blob).not_to have_received(:content)
   end
 
@@ -117,7 +119,7 @@ RSpec.describe QueueZipPacker do
 
     described_class.new(items: items, nuid: nil, ability: ability).pack(zip)
 
-    expect(names).to eq(['MANIFEST.txt'])
+    expect(names).to eq(['inventory.csv'])
     expect(Faraday).not_to have_received(:get)
   end
 
@@ -132,13 +134,13 @@ RSpec.describe QueueZipPacker do
     expect(errors.body).to include('work1')
   end
 
-  it 'writes a trailing MANIFEST.txt' do
+  it 'writes a trailing inventory.csv' do
     items = [{ 'w' => 'work1', 'b' => 'blobA' }]
     allow(AtlasRb::Work).to receive(:assets).with('work1', nuid: nil).and_return([blob(noid: 'blobA', filename: 'a.jpg')])
     allow(AtlasRb::Blob).to receive(:content).with('blobA').and_yield('a')
 
     described_class.new(items: items, nuid: nil, ability: ability).pack(zip)
 
-    expect(zip.entries.last.name).to eq('MANIFEST.txt')
+    expect(zip.entries.last.name).to eq('inventory.csv')
   end
 end

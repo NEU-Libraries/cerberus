@@ -119,7 +119,7 @@ they enumerate.
 | `BlobZipPacker` | one Blob, at the archive root |
 
 `ZipEntryWriter` holds the per-asset write that the content packers share: STORE
-compression, the labelled consumer-facing naming, manifest accrual, and
+compression, the labelled consumer-facing naming, inventory accrual, and
 mid-stream error capture. Keeping it in one module is what stops the packers
 drifting apart.
 
@@ -134,8 +134,21 @@ drifting apart.
 - **Record a failure, do not raise it.** Once the response headers are out the
   archive cannot be un-sent, so a mid-stream fetch failure becomes an
   `ERRORS.txt` line.
-- **Write the manifest last**, so a truncated or partial archive is still
+- **Write the inventory last**, so a truncated or partial archive is still
   self-describing.
+
+### The inventory
+
+The Set and Queue archives end with `inventory.csv`, one row per packed file,
+under the header `identifier,filename,handle`. The identifier is the Work's
+NOID, which is also the file's folder. The handle is the Work's citable URL,
+built by `handle_url`.
+
+A Work's handle is on its Atlas record only, not in Solr, so the inventory
+costs one `Work.find` per Work in the archive. That is small next to the file
+bytes already streamed for each Work. A Work without a handle, or a failed
+read, leaves the cell blank rather than an error, because the files are
+already sent. A failed file still goes to `ERRORS.txt` and gets no row.
 
 ### Folders and names
 
