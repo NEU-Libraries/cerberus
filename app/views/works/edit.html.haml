@@ -21,6 +21,8 @@
           = render 'shared/descriptive_fields', f: c, descriptive: @descriptive, keywords: true
         - if @caption_offered
           = render 'works/captions', caption: @caption, removable: current_user&.admin?
+        - if @showcase
+          = render 'works/showcase_category', showcase: @showcase, genres: @showcase_genres
         .well.p-3.my-3.rounded-3
           = f.button :submit, class: "btn btn-success"
           = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"

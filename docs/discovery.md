@@ -11,6 +11,8 @@ Source files:
 - `app/services/resource_search.rb`
 - `app/services/showcase_finder.rb`
 - `app/services/showcase_provisioner.rb`
+- `app/services/work_showcase.rb`
+- `app/controllers/concerns/work_showcase_category.rb`
 - `app/services/collection_contents_resolver.rb`
 - `app/services/google_scholar_metadata.rb`
 - `app/controllers/communities_controller.rb`
@@ -132,6 +134,26 @@ The lookup matches featured Collections inside the community's subtree
 labels from `FeaturedContent`. A community holds one showcase per genre, so the
 map stays small, and a duplicate title — which provisioning does not produce —
 resolves last-writer-wins.
+
+### Changing a Work's showcase category
+
+The Work Edit page offers a Showcase category choice when the Work is already
+in a genre showcase. The Work's depositor and admins see it. Nobody else does,
+because Atlas links a Work into a showcase only on its depositor's behalf. An
+admin's change still goes through the system principal, with `on_behalf_of`
+set to the depositor.
+
+`WorkShowcase` reads where the Work is now. Atlas's `find_many` digest carries
+neither `featured` nor a parent, so it takes the Work's linked collections from
+Atlas and asks Solr which one is a featured genre showcase, and which
+community holds that showcase. `ShowcaseFinder` then lists the community's
+other showcases. A depositor is never offered a staff-only genre, as at
+deposit.
+
+The swap adds the new link before it removes the old one. If the second call
+fails, the Work sits in both showcases, which an admin can see and fix. Removing
+first could leave it in neither. Every change reaches the admin ledger as a
+`showcase_promotion`, refusals included, like a publish at deposit.
 
 ## The community landing page
 

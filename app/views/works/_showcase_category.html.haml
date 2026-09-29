@@ -1,0 +1,16 @@
+-# locals: showcase (WorkShowcase::Placement) — where the Work is published now.
+-# genres (Array<String>) — the categories this reader may choose, current one included.
+-#
+-# Rides the metadata form: an unchanged selection submits the current genre,
+-# which the controller treats as "leave it alone".
+%hr.section-divider.my-3
+
+.my-3.rounded-3
+  %h4.pb-2
+    %i.fa-solid.fa-star.me-2{ 'aria-hidden' => 'true' }
+    Showcase
+  %label.form-label{ for: 'work_showcase_genre' } Showcase category
+  = select_tag 'work[showcase_genre]', options_for_select(genres, showcase.genre),
+               id: 'work_showcase_genre', class: 'form-select', 'aria-describedby' => 'work_showcase_genre_help'
+  %p.text-muted.small.mt-2.mb-0#work_showcase_genre_help
+    This work is published in the “#{showcase.genre}” showcase. Choose another category to move it there.

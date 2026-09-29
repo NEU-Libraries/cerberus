@@ -11,6 +11,7 @@ class WorksController < ApplicationController
   include WorkChangeRequest
   include WorkCaptions
   include WorkStreamingOnly
+  include WorkShowcaseCategory
   include WorkDerivativeWidths
   include UploadStaging
   include RecordsImpressions
@@ -101,6 +102,7 @@ class WorksController < ApplicationController
     assets = AtlasRb::Work.assets(params[:id], nuid: viewer_nuid)
     load_streaming_only!(offered: StreamingOnly.applicable?(assets))
     load_caption!(offered: CaptionTrack.applicable?(assets), files: assets)
+    load_showcase_category!(@work)
     breadcrumbs(params[:id], editing: true)
   end
 
@@ -121,6 +123,7 @@ class WorksController < ApplicationController
     handle_metadata_update
     apply_streaming_only!
     apply_caption!
+    apply_showcase_category!
   end
 
   def metadata
