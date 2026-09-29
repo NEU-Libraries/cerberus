@@ -46,7 +46,7 @@ module Admin
     ROOT_REFUSED = 'The top-level community holds the whole repository, so it cannot be moved.'
 
     # Step 1 — find the node to move.
-    breadcrumb_for 'Re-parent / Move', :admin_reparent_path
+    breadcrumb_for 'Move', :admin_reparent_path
 
     def index
       @results = search_containers if params[:q].present?

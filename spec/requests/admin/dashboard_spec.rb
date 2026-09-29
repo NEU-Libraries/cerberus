@@ -32,7 +32,7 @@ RSpec.describe 'Admin::Dashboard', type: :request do
   # matrix doubles as a light smoke test that the right view rendered.
   devolved_paths = {
     '/admin'          => 'Administration',
-    '/admin/reparent' => 'Re-parent / Move'
+    '/admin/reparent' => 'find the Work, Collection, or Community you want to move'
   }
   admin_only_paths = {
     '/admin/linked_members' => 'Linked members'

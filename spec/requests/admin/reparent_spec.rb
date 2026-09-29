@@ -74,7 +74,7 @@ RSpec.describe 'Admin::Reparent', type: :request do
     it 'reaches the finder (the gate passes for :privileged + admin group)' do
       get '/admin/reparent'
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('Re-parent / Move')
+      expect(response.body).to include('find the Work, Collection, or Community you want to move')
     end
 
     it 'completes a move end-to-end, same as an admin' do
@@ -98,7 +98,7 @@ RSpec.describe 'Admin::Reparent', type: :request do
       it 'renders the finder without searching when q is blank' do
         get '/admin/reparent'
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include('Re-parent / Move')
+        expect(response.body).to include('find the Work, Collection, or Community you want to move')
       end
 
       it 'lists matching containers (with their PID) when q is present' do

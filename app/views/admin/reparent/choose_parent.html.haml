@@ -23,9 +23,7 @@
       %span.admin-registry-table__id= @node.resource.id
 
     %p.text-muted.small.mt-3.mb-3
-      Search for the
-      = @allowed_parent_label
-      to move it under. The current location and any sub-containers are excluded automatically.
+      Search by title to find the new parent #{@allowed_parent_label}. The current location and any sub-containers are excluded automatically.
 
     = render 'admin/finder/search_form', url: admin_reparent_choose_parent_path, q: params[:q], hidden: { node_id: @node.resource.id, node_uuid: params[:node_uuid] }, placeholder: 'Search for the new parent…'
 

@@ -73,7 +73,7 @@ module Admin
     def ledger_remedy(notice)
       case notice.kind
       when 'request_withdraw' then [resource_path_for('Work', notice.subject_noid), 'Open the work to withdraw it']
-      when 'request_move'     then [admin_reparent_path, 'Open the re-parent finder']
+      when 'request_move'     then [admin_reparent_path, 'Open Move']
       when 'request_restrict' then [edit_path_for(notice.detail(:subject_type), notice.subject_noid),
                                     'Open its permissions']
       end
