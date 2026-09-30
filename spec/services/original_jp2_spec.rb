@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe MasterJp2 do
+describe OriginalJp2 do
   let(:image_path) { '/test/image.jpg' }
 
   before do
@@ -18,7 +18,7 @@ describe MasterJp2 do
       allow(full).to receive(:colourspace).with(:srgb).and_return(full)
       allow(Vips::Image).to receive(:new_from_file).with(image_path).and_return(full)
 
-      result = MasterJp2.call(path: image_path)
+      result = OriginalJp2.call(path: image_path)
 
       expect(result.open_base).to eq('http://example.com/iiif/3/open-aaa.jp2')
       expect(result.gated_base).to eq('http://example.com/iiif/3/gated-bbb.jp2')
@@ -33,7 +33,7 @@ describe MasterJp2 do
       allow(portrait).to receive(:colourspace).with(:srgb).and_return(portrait)
       allow(Vips::Image).to receive(:new_from_file).with(image_path).and_return(portrait)
 
-      MasterJp2.call(path: image_path)
+      OriginalJp2.call(path: image_path)
 
       # 500 / width(1000) = 0.5 — a longest-edge cap would wrongly use 500/2000 = 0.25.
       expect(portrait).to have_received(:resize).with(0.5)
@@ -45,7 +45,7 @@ describe MasterJp2 do
       allow(small).to receive(:colourspace).with(:srgb).and_return(small)
       allow(Vips::Image).to receive(:new_from_file).with(image_path).and_return(small)
 
-      MasterJp2.call(path: image_path)
+      OriginalJp2.call(path: image_path)
 
       expect(small).not_to have_received(:resize)
       expect(small).to have_received(:jp2ksave).with('/home/cerberus/images/open-aaa.jp2')
@@ -63,7 +63,7 @@ describe MasterJp2 do
       allow(full).to receive(:colourspace).with(:srgb).and_return(full)
       allow(Vips::Image).to receive(:new_from_file).with(pdf_path, dpi: 150).and_return(full)
 
-      result = MasterJp2.call(path: pdf_path)
+      result = OriginalJp2.call(path: pdf_path)
 
       expect(result.gated_base).to eq('http://example.com/iiif/3/gated-bbb.jp2')
       expect(full).to have_received(:jp2ksave).with('/home/cerberus/images/gated-bbb.jp2')
@@ -78,7 +78,7 @@ describe MasterJp2 do
   # Unstubbed, because the bug lives in libvips: it caches a load by path, and
   # a replace or revert restages a new file to the same path as the last one.
   describe 'call on a file re-staged to the same path' do
-    let(:dir) { Dir.mktmpdir('master-jp2') }
+    let(:dir) { Dir.mktmpdir('original-jp2') }
     let(:source) { File.join(dir, 'same-name.png') }
 
     before { allow(Rails.application.config.x.cerberus).to receive(:derivatives_root).and_return(dir) }
@@ -90,16 +90,16 @@ describe MasterJp2 do
 
     it 'builds from the new file, not the one vips loaded before' do
       Vips::Image.black(40, 30).write_to_file(source)
-      expect(gated_width(MasterJp2.call(path: source))).to eq(40)
+      expect(gated_width(OriginalJp2.call(path: source))).to eq(40)
 
       Vips::Image.black(64, 20).write_to_file(source)
-      expect(gated_width(MasterJp2.call(path: source))).to eq(64)
+      expect(gated_width(OriginalJp2.call(path: source))).to eq(64)
     end
   end
 
   describe 'initialize' do
     it 'sets the path' do
-      expect(MasterJp2.new(path: image_path).instance_variable_get(:@path)).to eq(image_path)
+      expect(OriginalJp2.new(path: image_path).instance_variable_get(:@path)).to eq(image_path)
     end
   end
 end

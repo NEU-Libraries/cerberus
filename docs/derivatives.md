@@ -13,11 +13,11 @@ Source files:
 ## Seeding a Work's IIIF assets
 
 `IiifAssetsJob` seeds from one staged source: an image, or a PDF whose first
-page `MasterJp2` rasterizes. `IngestDispatch` sends an image or a deposited PDF
+page `OriginalJp2` rasterizes. `IngestDispatch` sends an image or a deposited PDF
 straight here. `PdfRenditionJob` sends the PDF it converts from Word or
 PowerPoint, and `MediaRenditionJob` sends a video's poster frame.
 
-`MasterJp2` mints two JP2s: an open copy capped at 500 pixels wide, and a gated
+`OriginalJp2` mints two JP2s: an open copy capped at 500 pixels wide, and a gated
 full-resolution copy. This job PATCHes their Delegate URLs to Atlas, one at a
 time. The Delegates attach to the same FileSet, and parallel PATCHes race
 Atlas's optimistic lock on it.

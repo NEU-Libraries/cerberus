@@ -5,9 +5,9 @@
 # filename prefix is what the delegate gates on, and a plain hyphen (not an
 # `open/…` subpath) keeps the identifier slash-free, so signed-URL paths carry
 # no `%2F` that could desync from the delegate. See docs/downloads.md.
-class MasterJp2 < ApplicationService
+class OriginalJp2 < ApplicationService
   # Capping the open copy is what keeps `full/max` on an `open-` identifier safe
-  # by construction: the master's pixels are not in that file.
+  # by construction: the original's pixels are not in that file.
   OPEN_CAP = 500
 
   Result = Struct.new(:open_base, :gated_base, keyword_init: true)

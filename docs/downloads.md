@@ -14,7 +14,7 @@ Source files:
 - `app/services/queue_zip_packer.rb`
 - `app/services/metadata_export_packer.rb`
 - `app/services/iiif_signer.rb`
-- `app/services/master_jp2.rb`
+- `app/services/original_jp2.rb`
 - `app/services/derivative_creator.rb`
 - `app/jobs/deposit_derivatives_job.rb`
 - `app/jobs/pdf_rendition_job.rb`
@@ -366,7 +366,7 @@ The delegate reads whatever `exp` it is handed, so its HMAC message,
 
 ## Minting the JP2s a download serves
 
-`MasterJp2` mints two JP2s from one source. The first is a capped display copy
+`OriginalJp2` mints two JP2s from one source. The first is a capped display copy
 for thumbnails and preview, served openly. The second is a full-resolution copy
 for small/medium/large downloads and deep zoom, served only behind the
 delegate. It returns both IIIF bases as `open_base` and `gated_base`.
@@ -465,7 +465,7 @@ A depositor can submit the metadata form before `IiifAssetsJob` has PATCHed the
 service. `ServiceNotReady` rides `retry_on` for six attempts of polynomially
 longer waits — roughly 16 minutes of cover.
 
-If the service never appears — a `MasterJp2` failure, a dead queue — the
+If the service never appears — a `OriginalJp2` failure, a dead queue — the
 attempts exhaust. The block logs a warning and sets the Work's `IncompleteFlag`
 with reason `IncompleteReasons::DERIVATIVES`, then swallows the error. The
 deposit and its metadata are untouched, and the depositor can revisit the
