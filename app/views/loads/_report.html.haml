@@ -8,7 +8,7 @@
         %i.fa-solid{class: [load_report_status_icon(load_report.status), ('fa-spin' if load_report.processing?)], 'aria-hidden' => 'true'}
         = load_report.status.humanize
     %span.admin-registry__subtitle
-      %i.fa-solid.fa-folder-tree{'aria-hidden' => 'true'}
+      %i.fa-solid.fa-file-import{'aria-hidden' => 'true'}
       = link_to loader.display_name, loader_loads_path(loader), class: 'text-decoration-none'
 
   .admin-registry__body

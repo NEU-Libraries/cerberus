@@ -16,7 +16,7 @@
           %i.fa-solid{class: load_report_status_icon('failed'), 'aria-hidden' => 'true'}
           Failed
     %span.admin-registry__subtitle
-      %i.fa-solid.fa-folder-tree{'aria-hidden' => 'true'}
+      %i.fa-solid.fa-file-import{'aria-hidden' => 'true'}
       = link_to loader.display_name, loader_loads_path(loader), class: 'text-decoration-none'
 
   .admin-registry__body
@@ -37,7 +37,7 @@
           %span.load-report-overview__label Ingest mode
           %span.load-report-overview__value
             %span.ingest-status{style: '--ingest-tone: #18bc9c'}
-              %i.fa-solid.fa-layer-group{'aria-hidden' => 'true'}
+              %i.fa-solid.fa-book-open{'aria-hidden' => 'true'}
               Create multipage Works
           %span.load-report-overview__label Items
           %span.load-report-overview__value= preview.item_count
