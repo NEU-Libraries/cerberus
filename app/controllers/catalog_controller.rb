@@ -7,7 +7,10 @@ class CatalogController < ApplicationController
 
   configure_blacklight do |config|
     config.search_service_class = GatedSearchService
-    config.view.gallery(document_component: Blacklight::Gallery::DocumentComponent, icon: Blacklight::Gallery::Icons::GalleryComponent)
+    # One column on a phone: two there leave each card narrower than the fixed
+    # 170px thumbnail, which then spills past the card's edges.
+    config.view.gallery(document_component: Blacklight::Gallery::DocumentComponent, icon: Blacklight::Gallery::Icons::GalleryComponent,
+                        classes: 'row-cols-1 row-cols-sm-2 row-cols-md-3')
 
     # The layout renders whatever this names and nothing else, so the DRS
     # header has to be reachable from here to appear at all.
