@@ -247,8 +247,9 @@ tag and label. `CaptionTrack.choice` checks the tag's shape and the label's
 length at the form, because Atlas refuses a bad one with a 422 only after the
 job has run, where nobody sees it.
 
-`DOWNLOAD_LABEL` names each caption's row on the downloads list
-`Captions (<label>)`. Atlas labels every text Blob "Text Document", which says
+`CaptionTrack.download_label` names each caption's row on the downloads list
+`<label> captions`, label first, because a label such as `Español (México)`
+carries its own brackets. Atlas labels every text Blob "Text Document", which says
 nothing about what the file is for, and two captions need telling apart.
 
 Remove takes the caption's id from the button, and `destroy_caption` checks it

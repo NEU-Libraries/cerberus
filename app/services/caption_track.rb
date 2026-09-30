@@ -39,8 +39,8 @@ class CaptionTrack
   LABEL_LIMIT = 64
 
   # Atlas labels every text Blob "Text Document"; a caption file is named for
-  # what it is instead.
-  DOWNLOAD_LABEL = 'Captions'
+  # what it is instead, and by its language, so two captions can be told apart.
+  DOWNLOAD_LABEL = 'captions'
 
   REFUSED = 'Caption files must be in WebVTT (.vtt) format. Contact repository staff for help converting ' \
             'caption files to WebVTT.'
@@ -58,6 +58,12 @@ class CaptionTrack
   # The caption in this language, or nil.
   def self.for_language(files, language)
     all(files).find { |file| language(file).casecmp?(language.to_s) }
+  end
+
+  # "Español (México) captions": the label leads, because a label can carry its
+  # own brackets and "Captions (Español (México))" would nest them.
+  def self.download_label(file)
+    "#{label(file)} #{DOWNLOAD_LABEL}"
   end
 
   def self.caption?(file)

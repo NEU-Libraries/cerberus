@@ -19,7 +19,7 @@ RSpec.describe 'works/_download_row', type: :view do
 
     render partial: 'works/download_row', locals: { file: file, work_noid: 'w-1' }
 
-    expect(rendered).to include('Captions (English)')
+    expect(rendered).to include('English captions')
     expect(rendered).not_to include('Text Document')
   end
 
@@ -29,7 +29,7 @@ RSpec.describe 'works/_download_row', type: :view do
 
     render partial: 'works/download_row', locals: { file: file, work_noid: 'w-1' }
 
-    expect(rendered).to include('Captions (Español)')
+    expect(rendered).to include('Español captions')
   end
 
   it 'offers an Add-to-queue control on a derivative row, keyed on work + slugged use' do
