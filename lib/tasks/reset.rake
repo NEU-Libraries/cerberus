@@ -42,6 +42,8 @@ namespace :reset do
       drs_service = AtlasRb::Collection.create(library_services['id'], '/home/cerberus/web/spec/fixtures/files/drs-service-collection-mods.xml', depositor: unowned)
       AtlasRb::Resource.set_permissions(drs_service['id'], { 'read' => ['public'] })
       terms_work = AtlasRb::Work.create(drs_service['id'], '/home/cerberus/web/spec/fixtures/files/drs-terms-of-participation-mods.xml')
+      terms_base = OriginalJp2.call(path: '/home/cerberus/web/spec/fixtures/files/drs-terms-of-participation.pdf').open_base
+      AtlasRb::Resource.set_thumbnails(terms_work['id'], **ThumbnailCreator.call(base: terms_base))
       AtlasRb::Resource.set_permissions(terms_work['id'], { 'read' => ['public'] })
       AtlasRb::Blob.create(terms_work['id'], '/home/cerberus/web/spec/fixtures/files/drs-terms-of-participation.pdf', 'drs-terms-of-participation.pdf')
       AtlasRb::Work.complete(terms_work['id'])
@@ -292,9 +294,8 @@ namespace :reset do
       # An embargo withholds the CONTENT, not the preview: a thumbnail is
       # generated here as it is for every other Work. A first page too sensitive
       # to show should not be the first page, and those rare items get their
-      # thumbnail replaced by hand. This is also the repository's only
-      # PDF-primary Work, so its first page is what proves a PDF previews by
-      # page one. OriginalJp2 rasterizes PDFs, so the source needs no conversion.
+      # thumbnail replaced by hand. OriginalJp2 rasterizes a PDF's first page,
+      # so the source needs no conversion.
       embargoed_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-embargoed-mods.xml')
       embargoed_base = OriginalJp2.call(path: '/home/cerberus/web/spec/fixtures/files/example.pdf').open_base
       AtlasRb::Resource.set_thumbnails(embargoed_work['id'], **ThumbnailCreator.call(base: embargoed_base))
