@@ -41,6 +41,16 @@ RSpec.describe 'Pages', type: :request do
       expect(response.body).to match(/featured-gateway__label">Communities</)
     end
 
+    # One person for Faculty & Staff, a group for Communities: each gateway's
+    # icon is the one heading the page it opens.
+    it 'gives Faculty & Staff a single-person icon and Communities a group icon' do
+      gateways = response.parsed_body.css('a.featured-gateway').to_h do |a|
+        [a.at_css('.featured-gateway__label').text, a.at_css('i')['class'].split]
+      end
+      expect(gateways['Faculty & Staff']).to include('fa-user')
+      expect(gateways['Communities']).to include('fa-users')
+    end
+
     # Nine gateways fill three rows of three; a phone gets a single column.
     it 'lays the nine gateways out in three columns, and one on a phone' do
       grid = response.parsed_body.at_css('section[aria-labelledby="featured-content-heading"] .row')

@@ -13,15 +13,13 @@ module PagesHelper
   # that category's showcases (FeaturedCategory), not a raw genre-facet browse —
   # via the `category` param. The People gateway resolves to the curated
   # Faculty & Staff directory. Nine entries make three even rows of three, and
-  # the view lays the grid out for that count.
-  #
-  # Communities takes fa-building-columns, not the Community icon fa-users,
-  # because Faculty & Staff already shows fa-users beside it.
+  # the view lays the grid out for that count. Each icon matches the page it
+  # opens: one person for Faculty & Staff, a group for Communities, as in v1.
   def featured_gateways
     genre = FeaturedContent::GENRES.map do |label, icon|
       [label, icon, genre_path(category: label)]
     end
-    genre << ['Faculty & Staff', 'fa-users', people_path]
-    genre << ['Communities', 'fa-building-columns', communities_path]
+    genre << ['Faculty & Staff', 'fa-user', people_path]
+    genre << ['Communities', 'fa-users', communities_path]
   end
 end
