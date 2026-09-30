@@ -132,9 +132,9 @@ RSpec.describe 'Admin::Files', type: :request do
             'blob_id'  => 'b1',
             'versions' => [
               { 'revision' => 2, 'version_id' => 'v4', 'created' => '2026-06-24T10:00:00Z',
-                'actor_nuid' => '000000004', 'digest' => 'sha512:aaaa' },
+                'actor_nuid' => '000000004', 'digest' => 'sha512:aaaa', 'original_filename' => 'report-final.pdf' },
               { 'revision' => 1, 'version_id' => 'v1', 'created' => '2026-06-20T09:00:00Z',
-                'actor_nuid' => '000000002', 'digest' => 'sha512:bbbb' }
+                'actor_nuid' => '000000002', 'digest' => 'sha512:bbbb', 'original_filename' => nil }
             ]
           )]
         )
@@ -155,6 +155,15 @@ RSpec.describe 'Admin::Files', type: :request do
 
         expect(chips.map { |n| n.text.strip }).to eq(%w[2 1])
         expect(chips.pluck('title')).to eq(['OCFL v4', 'OCFL v1'])
+      end
+
+      # A revision written before Atlas recorded a name per revision has none,
+      # and must read as unknown rather than borrow the current name.
+      it 'shows each version\'s own filename, and a dash where none was recorded' do
+        get '/admin/files/manage', params: { work_id: 'w1' }
+        rows = response.parsed_body.css('.admin-registry-table tbody tr')
+
+        expect(rows.map { |row| row.css('td')[1].text.strip }).to eq(['report-final.pdf', '—'])
       end
 
       it 'reads every Blob\'s history in one call, whatever the file count' do
@@ -227,8 +236,8 @@ RSpec.describe 'Admin::Files', type: :request do
         expect(response).to redirect_to(admin_files_manage_path(work_id: 'w1'))
       end
 
-      # Atlas keeps the old filename and MIME type across versions, so a new
-      # version of another type would download under the wrong name and not open.
+      # A new version of another type would leave the old type's derivatives
+      # behind, so the swap is refused in favour of adding a new file.
       it 'refuses a replacement of a different file type, and queues nothing' do
         allow(AtlasRb::Blob).to receive(:find).with('b1').and_return(AtlasRb::Mash.new('mime_type' => 'application/pdf'))
 

@@ -275,11 +275,17 @@ reinstated bytes.
 than replaced, and is filtered out.
 
 `replace` refuses a replacement whose MIME type differs from the current Blob's.
-Atlas keeps a Blob's filename and MIME type across versions, so a new version of
-another type would download under the old name and type, and would not open.
-Both sides are sniffed as ingest sniffs them, so `.jpg` against `.jpeg` is not a
-mismatch, and an unknown type on either side is allowed. To change a file's
-type, a curator adds it to the Work as a new file.
+Atlas can rename a Blob and re-derive its type on replace, but the old type's
+derivatives would stay behind: a Word file's PDF rendition, or an image's size
+tiers. No job can remove them, because Atlas has no system-principal Blob
+delete. Both sides are sniffed as ingest sniffs them, so `.jpg` against `.jpeg`
+is not a mismatch, and an unknown type on either side is allowed. To change a
+file's type, a curator adds it to the Work as a new file.
+
+`FileReplacementJob` passes the upload's filename to `Blob.update`, so each
+revision records the name it was uploaded under. The version table shows that
+name per row, from the `original_filename` on each version descriptor. A
+rollback restores the revision's own name, so it passes none.
 
 Version history comes back in one `find_many_versions` call rather than a
 versions-per-noid fan-out. That is because this page reads every held binary on

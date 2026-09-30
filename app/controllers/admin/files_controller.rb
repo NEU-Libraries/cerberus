@@ -53,10 +53,11 @@ module Admin
 
     private
 
-      # Atlas keeps a Blob's filename and MIME type across versions, so a new
-      # version of another type downloads under the old name and type and will
-      # not open. Until Atlas can change them, refuse the swap. Sniffed as ingest
-      # does, so .jpg against .jpeg is not a mismatch; unknown either side allows.
+      # A replacement of another type would leave the old type's derivatives
+      # behind (a Word file's PDF rendition, an image's size tiers), and no job
+      # can remove them. Adding the file as a new one is the supported path.
+      # Sniffed as ingest does, so .jpg against .jpeg is not a mismatch; unknown
+      # either side allows.
       def type_mismatch_message(file)
         return @type_mismatch_message if defined?(@type_mismatch_message)
 

@@ -9,7 +9,7 @@
   %p.admin-actions__lede
     Replacing a file in
     %strong= enhanced_text(@work.title)
-    creates a new version while keeping the same identifier. Information about the original file is kept, including the filename. Previous versions can be managed below.
+    creates a new version while keeping the same identifier. Each version keeps its own filename. Previous versions can be managed below.
 
 - if @blobs.empty?
   .admin-registry.my-3
@@ -55,6 +55,7 @@
           %thead
             %tr
               %th{scope: 'col'} Version
+              %th{scope: 'col'} Filename
               %th{scope: 'col'} Date Deposited
               %th{scope: 'col'} Depositor
               %th{scope: 'col'} Fixity
@@ -70,6 +71,7 @@
                   %span.admin-registry-table__id{title: ("OCFL #{version['version_id']}" if version['revision'].present?)}= version['revision'] || version['version_id']
                   - if i.zero?
                     %span.badge.rounded-pill.text-bg-light.ms-1 current
+                %td.text-break= version['original_filename'].presence || '—'
                 %td.text-muted.small{style: 'font-variant-numeric: tabular-nums'}= file_version_when(version['created'])
                 %td= file_version_who(version['actor_nuid'])
                 %td= file_version_digest(version['digest'])
