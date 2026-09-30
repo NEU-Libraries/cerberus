@@ -16,6 +16,7 @@ Rails.application.routes.draw do
 
   mount Blacklight::Engine => '/catalog'
   root to: 'pages#home'
+  get 'terms', to: 'pages#terms', as: :terms
   concern :searchable, Blacklight::Routes::Searchable.new
 
   resource :catalog, only: [], as: 'catalog', path: '/catalog', controller: 'catalog' do

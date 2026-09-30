@@ -88,6 +88,9 @@ services:
       # would look broken. Both ends run the same CNRI proxy, so the local one
       # is a true rehearsal. Production sets this to the global proxy.
       HANDLE_RESOLVER_BASE: ${HANDLE_RESOLVER_BASE:-http://localhost:8000}
+      # The full terms document the /terms page links to. Empty leaves the
+      # link off, which is right for a fresh dev stack with no such Work.
+      TERMS_DOCUMENT_URL: ${TERMS_DOCUMENT_URL:-}
     ports:
       - 3000:3000
   atlas:

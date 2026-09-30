@@ -76,4 +76,31 @@ RSpec.describe 'Pages', type: :request do
       expect(response.body).to include('Recently Added Items')
     end
   end
+
+  describe 'GET /terms' do
+    it 'links the homepage to the terms' do
+      get root_path
+      expect(response.body).to include(%(href="#{terms_path}"))
+    end
+
+    it 'shows the Introduction to anyone, signed in or not' do
+      get terms_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Policies and Terms of Participation',
+                                       'These terms do not request or require transfer of copyright to DRS.')
+    end
+
+    # The full text is a Work the library revises in the DRS, so its address is
+    # configuration, and a stack without that Work shows no dead link.
+    it 'links the full document only when its address is configured' do
+      get terms_path
+      expect(response.body).not_to include('Read the full document')
+
+      allow(Rails.application.config.x.cerberus).to receive(:terms_document_url)
+        .and_return('https://hdl.handle.net/2047/terms')
+      get terms_path
+      expect(response.body).to include('Read the full document', 'href="https://hdl.handle.net/2047/terms"')
+    end
+  end
 end

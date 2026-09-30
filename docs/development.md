@@ -55,6 +55,7 @@ What you are most likely to set:
 | `ATLAS_RAILS_MASTER_KEY` | Atlas's master key, passed to every Atlas service as `RAILS_MASTER_KEY`. It has no default: compose passes it through as given. CI supplies it from a secret. |
 | `WORKTREES_ROOT` | Absolute path to the directory holding your worktrees. Only `docker-compose.local.yml` reads it, to mount that directory into the `web` container. That file fails with a named error when it is unset. |
 | `REQUEST_DEADLINE_SECONDS` | Puts the per-request deadline back in development, where it is off by default. See [The request deadline](#the-request-deadline). |
+| `TERMS_DOCUMENT_URL` | The full terms document, deposited as a public Work. The `/terms` page links to it; unset leaves the link off. Use the Work's handle URL in production. |
 | `HANDLE_*`, `CERBERUS_PUBLIC_BASE`, `CERBERUS_IIIF_*` | Handle minting and gated-derivative signing. Compose supplies a dev default for each; see the comments in `.env.example`. An unset `CERBERUS_IIIF_SIGNING_SECRET` serves every derivative ungated. |
 
 Atlas keeps its own `.env`, on the same pattern.

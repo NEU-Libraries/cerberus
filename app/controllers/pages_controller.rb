@@ -13,6 +13,10 @@ class PagesController < CatalogController
     @recent_documents = recently_added_works
   end
 
+  def terms
+    @document_url = Rails.application.config.x.cerberus.terms_document_url
+  end
+
   private
 
     # The most recently created Works the current user can discover, newest first.
