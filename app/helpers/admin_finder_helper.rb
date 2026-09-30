@@ -6,7 +6,7 @@ module AdminFinderHelper
   RESOURCE_ICONS = {
     'Collection' => 'fa-folder-open',
     'Community'  => 'fa-users',
-    'Work'       => 'fa-file-lines'
+    'Work'       => 'fa-file'
   }.freeze
 
   def finder_type_chip(klass)
