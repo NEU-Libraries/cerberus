@@ -451,8 +451,8 @@ It records that a Work's pipeline partly failed, and clears the record when it
 later succeeds.
 
 An enrichment job that exhausts its retries leaves a Work that is complete and
-readable. What it lacks is a PDF rendition, a streamable rendition or poster
-frame, its S/M/L download sizes, its thumbnails, or its full text. Enrichment
+readable. What it lacks is a PDF rendition, a streamable rendition, its S/M/L
+download sizes, its thumbnails, or its full text. Enrichment
 deliberately never fails a deposit, so without the flag the only trace would be
 a line in the log that nobody reads. The flag makes the gap visible without
 withholding the record.

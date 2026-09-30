@@ -24,7 +24,9 @@
     %audio.video-js.vjs-default-skin.av-player__media{controls: true, preload: 'metadata', 'data-av-player-target': 'media'}
       %source{src: media_path(file.noid), type: file.mime_type}
   - else
-    %video.video-js.vjs-default-skin.av-player__media{controls: true, preload: 'metadata', playsinline: true, poster: poster, 'data-av-player-target': 'media'}
+    -# A <video> without a supplied poster shows the placeholder mark rather
+    -# than an empty black box. Posterless audio above keeps its bar.
+    %video.video-js.vjs-default-skin.av-player__media{controls: true, preload: 'metadata', playsinline: true, poster: av_poster_src(poster), 'data-av-player-target': 'media'}
       %source{src: media_path(file.noid), type: file.mime_type}
       = render 'works/caption_source', captions: captions
   -# `downloadable` comes from the same per-asset gate the downloads card and

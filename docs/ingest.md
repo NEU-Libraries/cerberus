@@ -24,7 +24,7 @@ too, to re-derive a Work's assets.
 | `image/*` | `IiifAssetsJob` — JP2 and thumbnail Delegates |
 | `application/pdf` | `IiifAssetsJob` — `OriginalJp2` rasterizes page 1 via vips and poppler |
 | Word, PowerPoint | `PdfRenditionJob` — LibreOffice writes a PDF rendition Blob, and thumbnails come from that rendition's first page |
-| `video/*`, `audio/*` | `MediaRenditionJob` — an MP4 remux when the container needs one, and a poster frame for video |
+| `video/*`, `audio/*` | `MediaRenditionJob` — an MP4 remux when the container needs one. No poster frame: see `docs/derivatives.md` |
 | everything | `ContentCreationJob` — the primary Blob, unless `include_primary: false`. Enrichment never gates or blocks it |
 
 Full text rides alongside, for body-text search and the "Full Text Match"

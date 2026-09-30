@@ -49,8 +49,27 @@ RSpec.describe 'works/_av_player', type: :view do
     before { render_player(mime: 'video/mp4', preview: 'https://iiif/v.jp2/full/500,/0/default.jpg') }
 
     it 'renders a <video> with the poster and leaves audio-poster mode off' do
-      expect(rendered).to have_css('video.av-player__media[poster]')
+      expect(rendered).to have_css('video.av-player__media[poster="https://iiif/v.jp2/full/500,/0/default.jpg"]')
       expect(rendered).to have_css('.av-player[data-av-player-audio-poster-value="false"]')
+    end
+  end
+
+  # An empty <video> is a black box, which is what testers reported.
+  describe 'without a supplied poster' do
+    it 'gives a video the placeholder mark' do
+      render_player(mime: 'video/mp4', preview: nil)
+      expect(rendered).to have_css('video.av-player__media[poster*="av-placeholder"]')
+    end
+
+    it 'gives captioned audio, which mounts on a <video>, the placeholder mark' do
+      render_player(mime: 'audio/mpeg', preview: nil, captions: captions)
+      expect(rendered).to have_css('video.av-player__media[poster*="av-placeholder"]')
+    end
+
+    it 'leaves plain audio on its <audio> bar, with no poster' do
+      render_player(mime: 'audio/mpeg', preview: nil)
+      expect(rendered).to have_css('audio.av-player__media')
+      expect(rendered).to have_no_css('[poster]')
     end
   end
 

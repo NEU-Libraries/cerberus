@@ -468,12 +468,13 @@ class CatalogController < ApplicationController
   end
 
   # The thumbnail image (with a hidden type-icon fallback for broken/missing
-  # images) or, when there's no custom thumbnail, the type icon itself.
+  # images) or, when there's no custom thumbnail, the placeholder mark for an
+  # audio or video Work and the type icon for anything else.
   def thumbnail_media(document)
     icon_class = helpers.document_type_icon(document.klass_type)
     icon_html  = view_context.content_tag(:i, '', class: "fa-solid #{icon_class} fa-2xl text-black-50")
 
-    src = helpers.renderable_thumbnail(document.thumbnail_2x_ssi.presence || document.thumbnail_ssi)
+    src = thumbnail_src(document)
     return view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback') if src.blank?
 
     fallback = view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback d-none')
@@ -481,6 +482,11 @@ class CatalogController < ApplicationController
                                  onerror: "this.classList.add('d-none'); \
                                            this.nextElementSibling.classList.remove('d-none');")
     view_context.content_tag(:span, img + fallback, class: 'thumbnail-wrapper')
+  end
+
+  def thumbnail_src(document)
+    helpers.renderable_thumbnail(document.thumbnail_2x_ssi.presence || document.thumbnail_ssi) ||
+      helpers.av_placeholder_src(document)
   end
 
   helper_method :iiif_thumbnail if respond_to? :helper_method

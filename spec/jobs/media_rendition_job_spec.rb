@@ -13,15 +13,24 @@ RSpec.describe MediaRenditionJob do
     allow(File).to receive(:exist?).and_return(true)
   end
 
-  it 'remuxes a non-MP4 video original to an MP4 Blob and seeds the poster' do
+  it 'remuxes a non-MP4 video original to an MP4 Blob' do
     allow(Marcel::MimeType).to receive(:for).and_return('video/quicktime')
-    allow(MediaRemux).to receive(:poster).and_return('/u/x-poster.jpg')
     allow(MediaRemux).to receive(:to_mp4).and_return('/u/x.mp4')
 
     described_class.perform_now('w1', '/u/x.mov', 'key1')
 
     expect(AtlasRb::Blob).to have_received(:create).with('w1', '/u/x.mp4', 'x.mp4', idempotency_key: 'key1')
-    expect(IiifAssetsJob).to have_received(:perform_now).with('w1', '/u/x-poster.jpg', refresh: false)
+  end
+
+  # A frame from a fixed offset was often film leader or black, so a Work
+  # without a supplied poster shows the placeholder mark instead.
+  it 'extracts no poster frame and sets no thumbnail' do
+    allow(Marcel::MimeType).to receive(:for).and_return('video/quicktime')
+    allow(MediaRemux).to receive(:to_mp4).and_return('/u/x.mp4')
+
+    described_class.perform_now('w1', '/u/x.mov', 'key1')
+
+    expect(IiifAssetsJob).not_to have_received(:perform_now)
   end
 
   describe 'on a replace or revert' do
@@ -31,7 +40,6 @@ RSpec.describe MediaRenditionJob do
 
     before do
       allow(Marcel::MimeType).to receive(:for).and_return('video/quicktime')
-      allow(MediaRemux).to receive(:poster).and_return('/u/talk-poster.jpg')
       allow(MediaRemux).to receive(:to_mp4).and_return('/u/talk.mp4')
       allow(AtlasRb::Blob).to receive(:update)
     end
@@ -61,26 +69,15 @@ RSpec.describe MediaRenditionJob do
     end
   end
 
-  it 'passes a refresh through, so a replaced video gets a fresh poster' do
+  it 'skips remux for an MP4 original' do
     allow(Marcel::MimeType).to receive(:for).and_return('video/mp4')
-    allow(MediaRemux).to receive(:poster).and_return('/u/x-poster.jpg')
-
-    described_class.perform_now('w1', '/u/x.mp4', 'key1', refresh: true)
-
-    expect(IiifAssetsJob).to have_received(:perform_now).with('w1', '/u/x-poster.jpg', refresh: true)
-  end
-
-  it 'skips remux for an MP4 original but still seeds the poster' do
-    allow(Marcel::MimeType).to receive(:for).and_return('video/mp4')
-    allow(MediaRemux).to receive(:poster).and_return('/u/x-poster.jpg')
 
     described_class.perform_now('w1', '/u/x.mp4', 'key1')
 
     expect(AtlasRb::Blob).not_to have_received(:create)
-    expect(IiifAssetsJob).to have_received(:perform_now)
   end
 
-  it 'does no poster and no remux for an MP3 audio original' do
+  it 'does no remux for an MP3 audio original' do
     allow(Marcel::MimeType).to receive(:for).and_return('audio/mpeg')
 
     described_class.perform_now('w1', '/u/x.mp3', 'key1')

@@ -87,6 +87,17 @@ describe CatalogController do
       expect(html).to include('thumbnail-fallback')
       expect(html).not_to include('<img')
     end
+
+    # No poster frame is extracted any more, so a recording without a supplied
+    # poster would otherwise show only the generic icon.
+    it 'shows the placeholder mark for an audio or video Work with no thumbnail' do
+      get :index
+      doc = SolrDocument.new('id' => 'w3', 'internal_resource_tesim' => ['Work'], 'classification_ssim' => ['Video'])
+
+      html = controller.view_context.iiif_thumbnail(doc)
+
+      expect(html).to match(/<img[^>]+src="[^"]*av-placeholder[^"]*\.svg"/)
+    end
   end
 
   # Every field the config names has to be one Atlas actually writes. Blacklight

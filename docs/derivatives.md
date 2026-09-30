@@ -15,7 +15,7 @@ Source files:
 `IiifAssetsJob` seeds from one staged source: an image, or a PDF whose first
 page `OriginalJp2` rasterizes. `IngestDispatch` sends an image or a deposited PDF
 straight here. `PdfRenditionJob` sends the PDF it converts from Word or
-PowerPoint, and `MediaRenditionJob` sends a video's poster frame.
+PowerPoint. Nothing sends a video's frame: see the next section.
 
 `OriginalJp2` mints two JP2s: an open copy capped at 500 pixels wide, and a gated
 full-resolution copy. This job PATCHes their Delegate URLs to Atlas, one at a
@@ -67,6 +67,32 @@ The existing-thumbnail guard makes a *deposit* idempotent under Solid Queue
 retries. But the same guard reads as "already done" on a Work whose bytes have
 since been replaced, which is exactly when the assets most need rebuilding. A
 replace or rollback passes `refresh: true` to skip the guard.
+
+## Audio and video without a poster
+
+`MediaRenditionJob` extracts no poster frame. It once took the frame at three
+seconds, and on digitised film that is often leader, white or black, so the
+poster read as a blank or black screen. A recording's poster and thumbnail now
+come only from a depositor or curator, through the Thumbnail field on the edit
+form (`Thumbable`).
+
+Without one, an audio or video Work shows the placeholder mark,
+`app/assets/images/av-placeholder.svg`. It is the Northeastern notched
+monogram, from the brand asset `NU_Notched-N_wordmark_K`, recoloured to
+`$gray-700` on black. The brand approves black, white and red only; the muted
+grey is a deliberate exception, so a placeholder does not read as a feature.
+
+- **The player.** `ThumbnailsHelper#av_poster_src` gives any `<video>` element
+  the mark when the Work has no poster, which covers video and captioned audio.
+  Plain audio without a poster keeps its `<audio>` bar, which never showed a
+  black box.
+- **The tiles.** `ThumbnailsHelper#av_placeholder_src` gives a catalog result,
+  a Set row or an association tile the mark when the document has no thumbnail
+  and its `classification_ssim` includes `Audio` or `Video`. Every other type
+  keeps its type icon.
+
+The mark is a fallback at render time. It is never written to Atlas, so a
+poster added later replaces it everywhere with no clean-up.
 
 ## Attaching a caption track
 
