@@ -9,11 +9,16 @@
       %p.small.text-muted.mb-0 No sign-in account for this person yet, so no groups.
     - else
       - @accounts.each do |account|
-        .mb-3
-          .d-flex.align-items-center.flex-wrap.gap-2.mb-1
-            %span.admin-registry-table__id= account['email']
+        %section.person-groups__account{'aria-label' => "Account #{account['email']}"}
+          .person-groups__account-head
+            %span.person-groups__label Account
+            %span.person-groups__email= account['email']
             - if account['affiliation'].present?
               %span.small.text-muted= account['affiliation'].titleize
+            - if account['preferred'] && @accounts.size > 1
+              %span.badge.rounded-pill.bg-body-secondary.text-secondary-emphasis.border
+                %i.fa-solid.fa-star.me-1{'aria-hidden' => 'true'}
+                Preferred
           - groups = Array(account['groups']).sort_by { |raw| pretty_group_name(raw).downcase }
           - if groups.empty?
             %p.small.text-muted.mb-0 No groups.

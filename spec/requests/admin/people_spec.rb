@@ -141,6 +141,8 @@ RSpec.describe 'Admin::People', type: :request do
         expect(page.css('.person-groups__name').map(&:text)).to eq(['Named Testers', 'No display name'])
         expect(page.css('.person-groups__list .admin-registry-table__id').map(&:text))
           .to eq(['test:people:named', 'test:people:unnamed'])
+        expect(page.css('.person-groups__account-head .person-groups__email').map(&:text))
+          .to eq(['dcliff@example.edu'])
       end
 
       it 'says so when the groups cannot be read' do

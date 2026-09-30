@@ -329,6 +329,37 @@
   transform: rotate(180deg);
 }
 
+// Each sign-in account heads its own group set, so the email reads as the
+// account the groups belong to rather than as one more group.
+.person-groups__account + .person-groups__account {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid $gray-200;
+}
+
+.person-groups__account-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+// The registry's column-header label, so the account reads as a heading.
+.person-groups__label {
+  color: $gray-600;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.person-groups__email {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $gray-900;
+}
+
 .person-groups__list {
   display: grid;
   grid-template-columns: max-content 1fr;
