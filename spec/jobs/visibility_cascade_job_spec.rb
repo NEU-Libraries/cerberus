@@ -237,35 +237,35 @@ RSpec.describe VisibilityCascadeJob do
     end
 
     it 'clamps the narrowed container’s own default to what it can still offer' do
-      sentinel = Sentinel.create!(target_id: 'top', policy: { 'master' => ['public'] })
+      sentinel = Sentinel.create!(target_id: 'top', policy: { 'original' => ['public'] })
       stub_targets(target('top', 'Collection'))
 
       run(read_groups: [archives])
 
-      expect(sentinel.reload.policy['master']).to eq([archives])
+      expect(sentinel.reload.policy['original']).to eq([archives])
     end
 
     it 'drops a tier whose audience the container no longer includes, leaving it to inherit' do
-      sentinel = Sentinel.create!(target_id: 'top', policy: { 'master' => [law] })
+      sentinel = Sentinel.create!(target_id: 'top', policy: { 'original' => [law] })
       stub_targets(target('top', 'Collection'))
 
       run(read_groups: [archives])
 
-      expect(sentinel.reload.policy['master']).to eq([])
+      expect(sentinel.reload.policy['original']).to eq([])
     end
 
     it 'clamps a descendant collection’s default too, not only the container’s' do
-      sentinel = Sentinel.create!(target_id: 'c1', policy: { 'master' => ['public'] })
+      sentinel = Sentinel.create!(target_id: 'c1', policy: { 'original' => ['public'] })
       stub_targets(target('c1', 'Collection'))
       allow(AtlasRb::Resource).to receive(:permissions).with('c1').and_return(envelope(read: ['public']))
 
       run(read_groups: [archives])
 
-      expect(sentinel.reload.policy['master']).to eq([archives])
+      expect(sentinel.reload.policy['original']).to eq([archives])
     end
 
     it 'leaves a default that is already within the new audience alone' do
-      sentinel = Sentinel.create!(target_id: 'top', policy: { 'master' => [archives] })
+      sentinel = Sentinel.create!(target_id: 'top', policy: { 'original' => [archives] })
       stub_targets(target('top', 'Collection'))
 
       expect { run(read_groups: [archives]) }.not_to(change { sentinel.reload.updated_at })

@@ -67,14 +67,14 @@ module AuditEventsHelper
   # Prose for the download tiers. The vocabulary and its narrowing order come
   # from Sentinel::TIERS; naming the ladder twice would let the two drift.
   TIER_LABELS = {
-    'small'   => 'Small image',
-    'medium'  => 'Medium image',
-    'large'   => 'Large image',
-    'service' => 'Service (deep zoom)',
-    'master'  => 'Master (original)',
-    'audio'   => 'Audio',
-    'video'   => 'Video',
-    'pdf'     => 'PDF'
+    'small'    => 'Small image',
+    'medium'   => 'Medium image',
+    'large'    => 'Large image',
+    'service'  => 'Service (deep zoom)',
+    'original' => 'Original',
+    'audio'    => 'Audio',
+    'video'    => 'Video',
+    'pdf'      => 'PDF'
   }.freeze
 
   def audit_event_action(event_action)

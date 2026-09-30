@@ -87,16 +87,16 @@ RSpec.describe 'Collections sentinel', type: :request do
       expect(Sentinel.find_by(target_id: collection.id).policy['large']).to eq([Permissions::STAFF_EDIT_GROUP])
     end
 
-    it 'authors the wider vocabulary — master plus independent media' do
-      params = { sentinel: { small:  { mode: 'public' },
-                             master: { mode: 'restrict', groups: [Permissions::STAFF_EDIT_GROUP] },
-                             pdf:    { mode: 'restrict', groups: [Permissions::STAFF_EDIT_GROUP] },
-                             audio:  { mode: 'public' } } }
+    it 'authors the wider vocabulary — original plus independent media' do
+      params = { sentinel: { small:    { mode: 'public' },
+                             original: { mode: 'restrict', groups: [Permissions::STAFF_EDIT_GROUP] },
+                             pdf:      { mode: 'restrict', groups: [Permissions::STAFF_EDIT_GROUP] },
+                             audio:    { mode: 'public' } } }
 
       patch sentinel_collection_path(collection.id), params: params
 
       expect(Sentinel.find_by(target_id: collection.id).policy).to eq(
-        'small' => ['public'], 'master' => [Permissions::STAFF_EDIT_GROUP],
+        'small' => ['public'], 'original' => [Permissions::STAFF_EDIT_GROUP],
         'pdf' => [Permissions::STAFF_EDIT_GROUP], 'audio' => ['public']
       )
     end

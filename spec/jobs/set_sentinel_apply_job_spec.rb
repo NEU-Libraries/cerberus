@@ -29,32 +29,32 @@ RSpec.describe SetSentinelApplyJob do
   end
 
   it 'applies the policy to each work' do
-    Sentinel.create!(target_id: 'set-1', policy: { 'master' => [archives] })
+    Sentinel.create!(target_id: 'set-1', policy: { 'original' => [archives] })
     stub_contents('w1')
     allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: ['public']))
 
     run
 
     expect(AtlasRb::Work).to have_received(:set_derivative_permissions)
-      .with('w1', policy: { 'master' => [archives] }, nuid: actor)
+      .with('w1', policy: { 'original' => [archives] }, nuid: actor)
   end
 
   # Atlas refuses a tier naming a group its Work does not grant, so a policy
   # applied as authored would fail on exactly the works most in need of a gate.
   describe 'clamping each tier against its work' do
     it 'narrows a tier to what the work actually grants' do
-      Sentinel.create!(target_id: 'set-1', policy: { 'master' => [archives, media] })
+      Sentinel.create!(target_id: 'set-1', policy: { 'original' => [archives, media] })
       stub_contents('w1')
       allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: [archives]))
 
       run
 
       expect(AtlasRb::Work).to have_received(:set_derivative_permissions)
-        .with('w1', policy: { 'master' => [archives] }, nuid: actor)
+        .with('w1', policy: { 'original' => [archives] }, nuid: actor)
     end
 
     it 'withholds a tier entirely on a private work' do
-      Sentinel.create!(target_id: 'set-1', policy: { 'master' => [archives] })
+      Sentinel.create!(target_id: 'set-1', policy: { 'original' => [archives] })
       stub_contents('w1')
       allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: []))
 
@@ -63,29 +63,29 @@ RSpec.describe SetSentinelApplyJob do
       # The only legal tier value on a private work, and the right direction for
       # a gate whose purpose is to withhold.
       expect(AtlasRb::Work).to have_received(:set_derivative_permissions)
-        .with('w1', policy: { 'master' => [] }, nuid: actor)
+        .with('w1', policy: { 'original' => [] }, nuid: actor)
     end
 
     it 'leaves a tier alone on a public work, since public is the universal audience' do
-      Sentinel.create!(target_id: 'set-1', policy: { 'master' => [archives] })
+      Sentinel.create!(target_id: 'set-1', policy: { 'original' => [archives] })
       stub_contents('w1')
       allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: ['public']))
 
       run
 
       expect(AtlasRb::Work).to have_received(:set_derivative_permissions)
-        .with('w1', policy: { 'master' => [archives] }, nuid: actor)
+        .with('w1', policy: { 'original' => [archives] }, nuid: actor)
     end
 
     it 'clamps each tier independently' do
-      Sentinel.create!(target_id: 'set-1', policy: { 'master' => [media], 'pdf' => [archives] })
+      Sentinel.create!(target_id: 'set-1', policy: { 'original' => [media], 'pdf' => [archives] })
       stub_contents('w1')
       allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: [archives]))
 
       run
 
       expect(AtlasRb::Work).to have_received(:set_derivative_permissions)
-        .with('w1', policy: { 'master' => [], 'pdf' => [archives] }, nuid: actor)
+        .with('w1', policy: { 'original' => [], 'pdf' => [archives] }, nuid: actor)
     end
   end
 
@@ -99,7 +99,7 @@ RSpec.describe SetSentinelApplyJob do
   end
 
   it 'does nothing when the set has gone' do
-    Sentinel.create!(target_id: 'set-1', policy: { 'master' => [archives] })
+    Sentinel.create!(target_id: 'set-1', policy: { 'original' => [archives] })
     allow(AtlasRb::Compilation).to receive(:find).with('set-1').and_return(nil)
 
     run
@@ -108,7 +108,7 @@ RSpec.describe SetSentinelApplyJob do
   end
 
   it 'carries on after one work fails, and names it' do
-    Sentinel.create!(target_id: 'set-1', policy: { 'master' => [archives] })
+    Sentinel.create!(target_id: 'set-1', policy: { 'original' => [archives] })
     stub_contents('w1', 'w2')
     allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: ['public']))
     allow(AtlasRb::Resource).to receive(:permissions).with('w2').and_return(envelope(read: ['public']))
@@ -124,7 +124,7 @@ RSpec.describe SetSentinelApplyJob do
   end
 
   it 'reports a clean run without the problem wording' do
-    Sentinel.create!(target_id: 'set-1', policy: { 'master' => [archives] })
+    Sentinel.create!(target_id: 'set-1', policy: { 'original' => [archives] })
     stub_contents('w1')
     allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: ['public']))
 

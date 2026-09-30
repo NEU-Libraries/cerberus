@@ -96,7 +96,7 @@ RSpec.describe StreamingOnly do
       expect(described_class.applicable?([asset('application/pdf'), asset('video/mp4')])).to be(true)
     end
 
-    it 'is true for a deposited master that is not yet browser-playable' do
+    it 'is true for a deposited original that is not yet browser-playable' do
       expect(described_class.applicable?([asset('video/quicktime')])).to be(true)
     end
 
@@ -124,12 +124,12 @@ RSpec.describe StreamingOnly do
     # The Atlas write is a whole-object replace, so anything not read back first
     # is destroyed. This is the example that fails if the read is ever dropped.
     it 'preserves the other tiers when switching on' do
-      stub_policy('large' => ['public'], 'master' => ['northeastern:drs:repository:archives'])
+      stub_policy('large' => ['public'], 'original' => ['northeastern:drs:repository:archives'])
 
       described_class.apply!('w1', enabled: true, read: ['public'], tiers: %w[video])
 
       expect(AtlasRb::Work).to have_received(:set_derivative_permissions).with(
-        'w1', policy: { 'large' => ['public'], 'master' => ['northeastern:drs:repository:archives'],
+        'w1', policy: { 'large' => ['public'], 'original' => ['northeastern:drs:repository:archives'],
                         'video' => [admin_group] }, nuid: nil
       )
     end

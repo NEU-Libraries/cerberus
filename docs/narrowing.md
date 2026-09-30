@@ -219,7 +219,7 @@ the API call.
 
 ### The tiers
 
-`IMAGE_LADDER` is `small`, `medium`, `large`, `service`, `master`: lowest
+`IMAGE_LADDER` is `small`, `medium`, `large`, `service`, `original`: lowest
 resolution and widest audience first, full-resolution source and narrowest last.
 The monotonicity check follows this order, so reordering the array changes what
 the validation means.
@@ -228,7 +228,7 @@ the validation means.
 independently. There is no meaningful resolution order between an audio file
 and a PDF, so no monotonicity ties them to each other or to the ladder.
 
-`TIERS` is the two together, and is every gateable tier. `master` and the
+`TIERS` is the two together, and is every gateable tier. `original` and the
 independent media reach non-image or original binaries, which Atlas maps onto
 the matching assets. Thumbnails are never gateable: they are the open display
 pipe, public by construction.
@@ -240,7 +240,7 @@ mapping to an Array. It does not check the Array's elements.
 
 `policy_monotonic` requires visibility to narrow as image resolution grows.
 Each present rung's audience must be a subset of the next-lower-resolution
-present rung's, so `master ⊆ service ⊆ large ⊆ medium ⊆ small`. A permissive
+present rung's, so `original ⊆ service ⊆ large ⊆ medium ⊆ small`. A permissive
 higher-resolution tier would void a stricter lower one, and the enforcement
 side's coarse zoom cookie relies on this order. Only the image ladder is
 checked; the independent media are not.

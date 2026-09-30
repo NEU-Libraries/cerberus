@@ -425,11 +425,11 @@ namespace :reset do
       # Sentinel.apply_default. A Work deposited here through the UI inherits
       # the same policy on its own.
       Sentinel.create!(target_id: nupd_media['id'],
-                       policy:    { 'small'   => ['public'],
-                                    'medium'  => ['public'],
-                                    'large'   => [nupd_media_group],
-                                    'service' => [nupd_media_group],
-                                    'master'  => [nupd_media_group] })
+                       policy:    { 'small'    => ['public'],
+                                    'medium'   => ['public'],
+                                    'large'    => [nupd_media_group],
+                                    'service'  => [nupd_media_group],
+                                    'original' => [nupd_media_group] })
       Sentinel.apply_default(nupd_media['id'], nupd_work['id'])
 
       # C: multi-group edit — two independent groups both granted edit on one

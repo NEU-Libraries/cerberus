@@ -158,7 +158,7 @@ RSpec.describe 'Histories', type: :request do
     it 'renders a rendition-gate change as tier rows, not access levels' do
       events = [perm_event(at: '2026-05-26T12:00:00Z', source: 'derivative_permissions',
                            before: { 'large' => %w[public] },
-                           after:  { 'large' => %w[staff], 'master' => %w[staff] })]
+                           after:  { 'large' => %w[staff], 'original' => %w[staff] })]
       allow(AtlasRb::Resource).to receive(:history).and_return(history_mash(events))
 
       get rights_history_path(resource_id)
@@ -166,7 +166,7 @@ RSpec.describe 'Histories', type: :request do
       expect(response.body).to include('Per-rendition download permissions')
       expect(response.body).to include('Rendition')
       expect(response.body).to include('Large image')
-      expect(response.body).to include('Master (original)')
+      expect(response.body).to include('Original')
       expect(response.body).to include('rights-diff__pill--removed">public')
       expect(response.body).to include('rights-diff__pill--added">staff')
       expect(response.body).not_to include('Edit users') # the ACL row set stayed away

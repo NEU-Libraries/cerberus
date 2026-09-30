@@ -5,9 +5,9 @@
 # fetch it; #apply_to pushes it to Atlas's per-tier gate. See docs/narrowing.md.
 class Sentinel < ApplicationRecord
   # The image resolution ladder, in narrowing order: `small` (widest audience)
-  # to `master` (narrowest). Monotonicity is checked along this order, so
+  # to `original` (narrowest). Monotonicity is checked along this order, so
   # reordering this array changes what the validation below means.
-  IMAGE_LADDER = %w[small medium large service master].freeze
+  IMAGE_LADDER = %w[small medium large service original].freeze
 
   INDEPENDENT = %w[audio video pdf].freeze
 
@@ -50,7 +50,7 @@ class Sentinel < ApplicationRecord
     end
 
     # Visibility must narrow as image resolution grows: each rung's audience ⊆
-    # the next-lower-res rung's (master ⊆ service ⊆ large ⊆ medium ⊆ small). A
+    # the next-lower-res rung's (original ⊆ service ⊆ large ⊆ medium ⊆ small). A
     # permissive higher-res tier voids a stricter lower one, and the enforcement
     # side's coarse zoom cookie relies on this ordering.
     def policy_monotonic

@@ -19,7 +19,7 @@ RSpec.describe 'works/_download_access', type: :view do
   end
 
   it 'says a tier limited to no one is withheld, rather than drawing an empty cell' do
-    expect(render_policy('master' => [])).to have_css('dd', text: 'Withheld from everyone')
+    expect(render_policy('original' => [])).to have_css('dd', text: 'Withheld from everyone')
   end
 
   it 'says every file follows the general permissions when there is no policy' do

@@ -194,8 +194,8 @@ RSpec.describe AuditEventsHelper, type: :helper do
 
     describe '#derivative_tier_rows' do
       it 'lists only the tiers a side mentions, in narrowing order' do
-        rows = helper.derivative_tier_rows({ 'large' => [] }, { 'small' => [], 'master' => [] })
-        expect(rows).to eq(%w[small large master])
+        rows = helper.derivative_tier_rows({ 'large' => [] }, { 'small' => [], 'original' => [] })
+        expect(rows).to eq(%w[small large original])
       end
 
       it 'sorts a tier it has not been taught about last rather than dropping it' do
@@ -207,7 +207,7 @@ RSpec.describe AuditEventsHelper, type: :helper do
     describe '#tier_label' do
       it 'gives the ladder prose names' do
         expect(helper.tier_label('service')).to eq('Service (deep zoom)')
-        expect(helper.tier_label('master')).to eq('Master (original)')
+        expect(helper.tier_label('original')).to eq('Original')
       end
 
       it 'falls back to the raw token for an unknown tier' do
@@ -269,8 +269,8 @@ RSpec.describe AuditEventsHelper, type: :helper do
       end
 
       it 'reports a newly gated tier' do
-        text = helper.audit_event_payload_summary(tier_event({}, { 'master' => %w[staff] }))
-        expect(text).to include('master +staff')
+        text = helper.audit_event_payload_summary(tier_event({}, { 'original' => %w[staff] }))
+        expect(text).to include('original +staff')
       end
     end
   end
