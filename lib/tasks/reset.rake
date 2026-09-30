@@ -21,11 +21,30 @@ namespace :reset do
     # the only fixture that carries the whole seed sequence without prior
     # ACL setup. The Current.set block makes atlas_rb's configured
     # default_nuid resolve to the admin NUID for every call inside.
+    terms_work = nil # assigned in the seed below, read by the report at the end
     Current.set(nuid: '000000004') do
       community = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', depositor: unowned)
       river_base = OriginalJp2.call(path: '/home/cerberus/web/spec/fixtures/files/river.jpg').open_base
       AtlasRb::Resource.set_thumbnails(community['id'], **ThumbnailCreator.call(base: river_base))
       AtlasRb::Resource.set_permissions(community['id'], { 'read' => ['public'] })
+
+      # The Policies and Terms of Participation, where v1 kept them: University
+      # Library / Library Resources and Services / Digital Repository Service.
+      # Seeded straight after the root, because the minter restarts on every
+      # reset: here the Work gets the same NOID each time, so a fixed
+      # TERMS_DOCUMENT_URL keeps working. A seed added above this block moves it.
+      library = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/library-mods.xml', depositor: unowned)
+      mountain_base = OriginalJp2.call(path: '/home/cerberus/web/spec/fixtures/files/mountain.jpg').open_base
+      AtlasRb::Resource.set_thumbnails(library['id'], **ThumbnailCreator.call(base: mountain_base))
+      AtlasRb::Resource.set_permissions(library['id'], { 'read' => ['public'] })
+      library_services = AtlasRb::Collection.create(library['id'], '/home/cerberus/web/spec/fixtures/files/library-resources-services-mods.xml', depositor: unowned)
+      AtlasRb::Resource.set_permissions(library_services['id'], { 'read' => ['public'] })
+      drs_service = AtlasRb::Collection.create(library_services['id'], '/home/cerberus/web/spec/fixtures/files/drs-service-collection-mods.xml', depositor: unowned)
+      AtlasRb::Resource.set_permissions(drs_service['id'], { 'read' => ['public'] })
+      terms_work = AtlasRb::Work.create(drs_service['id'], '/home/cerberus/web/spec/fixtures/files/drs-terms-of-participation-mods.xml')
+      AtlasRb::Resource.set_permissions(terms_work['id'], { 'read' => ['public'] })
+      AtlasRb::Blob.create(terms_work['id'], '/home/cerberus/web/spec/fixtures/files/drs-terms-of-participation.pdf', 'drs-terms-of-participation.pdf')
+      AtlasRb::Work.complete(terms_work['id'])
 
       collection = AtlasRb::Collection.create(community['id'], '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', depositor: unowned)
       field_base = OriginalJp2.call(path: '/home/cerberus/web/spec/fixtures/files/field.jpg').open_base
@@ -129,10 +148,8 @@ namespace :reset do
       # Person (Jane Doe) affiliated to it with one work she's published into the
       # Datasets showcase. Gives the deposit fork (publish branch), My DRS,
       # Featured Content, and the Faculty & Staff browse live data to demo.
-      library = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/library-mods.xml', depositor: unowned)
-      mountain_base = OriginalJp2.call(path: '/home/cerberus/web/spec/fixtures/files/mountain.jpg').open_base
-      AtlasRb::Resource.set_thumbnails(library['id'], **ThumbnailCreator.call(base: mountain_base))
-      AtlasRb::Resource.set_permissions(library['id'], { 'read' => ['public'] })
+      # The Library community itself is created above, at the head of the terms
+      # chain.
       showcases = ShowcaseProvisioner.call(community_id: library['id'])
 
       # Jane Doe — a curated Person for the staff fixture user (NUID 000000002,
@@ -490,6 +507,14 @@ namespace :reset do
     # Same reason, for /admin/ledger: an empty ledger teaches nobody what the
     # ledger is for. Also keys on what is now in Solr, so every row links out.
     LedgerSeeder.call
+
+    # The seed cannot write .env, so it says what the /terms link should be.
+    terms_path = "/works/#{terms_work['id']}"
+    configured = Rails.application.config.x.cerberus.terms_document_url
+    puts "Terms of Participation Work: #{terms_path}"
+    unless configured.to_s.end_with?(terms_path)
+      warn "TERMS_DOCUMENT_URL is #{configured.inspect}; set it to <public base>#{terms_path} and recreate web."
+    end
   end
 
   desc 'Seed representative usage impressions for the Usage Analytics dashboard'
