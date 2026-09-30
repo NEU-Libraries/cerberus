@@ -11,11 +11,16 @@ contracts with Atlas, and the reason a design rejected the obvious alternative.
 Each page names the source files it covers. Those files carry a one-line pointer
 back, so you can find either from the other.
 
-One page is not per-component. [`development.md`](development.md) covers the
+Two pages are not per-component. [`development.md`](development.md) covers the
 environment and the workflow: setup, the spec wrappers, worktrees, verification,
 the migration pause. It lives here because it versions with the scripts it
 describes, and because a developer needs it before any of the other pages make
 sense.
+
+[`design.md`](design.md) covers the look of every surface: container chrome, the
+palette, type, icons, tabs, buttons and hover. These are conventions every UI
+change has to satisfy, but they run long, so `CLAUDE.md` keeps a pointer and a
+local hook makes the page required reading before a UI edit.
 
 ## What belongs elsewhere
 

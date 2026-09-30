@@ -14,7 +14,7 @@ module PagesHelper
   # via the `category` param. The People gateway resolves to the curated
   # Faculty & Staff directory. Nine entries make three even rows of three, and
   # the view lays the grid out for that count. These icons are the site's
-  # reference vocabulary; see docs/iconography.md.
+  # reference vocabulary; see docs/design.md.
   def featured_gateways
     genre = FeaturedContent::GENRES.map do |label, icon|
       [label, icon, genre_path(category: label)]
