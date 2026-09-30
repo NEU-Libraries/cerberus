@@ -18,10 +18,14 @@
           - if groups.empty?
             %p.small.text-muted.mb-0 No groups.
           - else
-            %ul.list-unstyled.small.mb-0
+            -# Every group takes the same two cells, so a group with no display
+            -# name keeps its raw id in the id column rather than posing as a name.
+            %dl.person-groups__list.mb-0
               - groups.each do |raw|
                 - name = pretty_group_name(raw)
-                %li
-                  = name
-                  - if name != raw
-                    %span.text-muted.font-monospace.ms-1= raw
+                - if name == raw
+                  %dt.person-groups__name.person-groups__name--none No display name
+                - else
+                  %dt.person-groups__name= name
+                %dd.mb-0
+                  %span.admin-registry-table__id= raw

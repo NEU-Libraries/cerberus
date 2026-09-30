@@ -315,3 +315,34 @@
     letter-spacing: 0.02em;
   }
 }
+
+// The People index's expanding Grouper groups row. A table row cannot animate
+// its height, so Bootstrap's collapse transition only holds the row open for
+// its duration and then snaps it shut; with no transition it toggles at once.
+.person-groups-row.collapsing {
+  transition: none;
+}
+
+// The chevron flips with the toggle's own state. No transition, as with every
+// other state change on a button.
+.person-groups-toggle[aria-expanded="true"] .person-groups-toggle__chevron {
+  transform: rotate(180deg);
+}
+
+.person-groups__list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.35rem 1rem;
+  align-items: center;
+}
+
+.person-groups__name {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: $gray-900;
+
+  &--none {
+    color: $gray-600;
+    font-style: italic;
+  }
+}

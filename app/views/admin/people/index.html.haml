@@ -33,18 +33,19 @@
                 %span.admin-registry-table__id= person['nuid']
               %td.text-end.text-nowrap
                 - if person['nuid'].present?
-                  %button.btn.btn-sm.btn-tonal-secondary.me-2{type: 'button',
+                  %button.btn.btn-sm.btn-tonal-secondary.person-groups-toggle.me-2{type: 'button',
                     data: { 'bs-toggle': 'collapse', 'bs-target': "##{groups_id}" },
                     'aria-expanded' => 'false', 'aria-controls' => groups_id}
                     %i.fa-solid.fa-user-group.me-1{'aria-hidden' => 'true'}
                     Groups
+                    %i.fa-solid.fa-chevron-down.person-groups-toggle__chevron.ms-1{'aria-hidden' => 'true'}
                 = link_to edit_admin_person_path(person['id']), class: 'admin-registry-table__edit' do
                   Manage
                   %i.fa-solid.fa-arrow-right{'aria-hidden' => 'true'}
             - if person['nuid'].present?
               -# Lazy: the frame loads when the row opens and first shows, so the
               -# index costs no per-person Atlas read.
-              %tr.collapse{id: groups_id}
+              %tr.collapse.person-groups-row{id: groups_id}
                 %td{colspan: 3}
                   = turbo_frame_tag "person-groups-#{person['id']}", src: groups_admin_person_path(person['id']), loading: :lazy do
                     .py-2.px-2.small.text-muted Loading groups…

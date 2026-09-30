@@ -127,6 +127,22 @@ RSpec.describe 'Admin::People', type: :request do
                                          'northeastern:drs:repository:staff')
       end
 
+      it 'gives every group a name cell and a raw id chip, named or not' do
+        Group.create!(raw: 'test:people:named', cosmetic: 'Named Testers')
+        allow(AtlasRb::Person).to receive(:find).and_return(AtlasRb::Mash.new(person))
+        allow(AtlasRb::User).to receive(:accounts).and_return(
+          AtlasRb::Mash.new('accounts' => [{ 'email'  => 'dcliff@example.edu',
+                                             'groups' => ['test:people:named', 'test:people:unnamed'] }])
+        )
+
+        get groups_admin_person_path('cz8wbpk')
+
+        page = response.parsed_body
+        expect(page.css('.person-groups__name').map(&:text)).to eq(['Named Testers', 'No display name'])
+        expect(page.css('.person-groups__list .admin-registry-table__id').map(&:text))
+          .to eq(['test:people:named', 'test:people:unnamed'])
+      end
+
       it 'says so when the groups cannot be read' do
         allow(AtlasRb::Person).to receive(:find).and_return(AtlasRb::Mash.new(person))
         allow(AtlasRb::User).to receive(:accounts).and_raise(Faraday::ConnectionFailed, 'down')
