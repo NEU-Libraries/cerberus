@@ -36,7 +36,7 @@ RSpec.describe CaptionJob do
   end
 
   # The guard that keeps a deposit honest. Atlas gives a caption the same
-  # `original_file` role as the video master, so a caption written first would
+  # `original_file` role as the video original, so a caption written first would
   # satisfy ConfirmDepositJob's primary-file wait and let the work complete — and
   # Atlas builds the METS structMap at completion, omitting the video.
   it 'writes nothing until the primary file has landed (rides retry_on)' do

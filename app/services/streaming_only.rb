@@ -64,7 +64,7 @@ module StreamingOnly
   end
 
   # The media tiers a Work's content Blobs fall under. Delegates (image tiers)
-  # carry a `uri` and are not content; a remuxed MP4 shares its master's type.
+  # carry a `uri` and are not content; a remuxed MP4 shares its original's type.
   def self.tiers_for(files)
     tiers_for_mime_types(Array(files).select { |file| file[:uri].blank? }.map(&:mime_type))
   end

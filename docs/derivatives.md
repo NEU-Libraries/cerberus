@@ -196,7 +196,7 @@ so it is not used.
 ### When the toggle is offered at all
 
 `applicable?` asks whether the Work has an audio or video Blob. A remuxed MP4
-shares its master's media type. A Work therefore matches from the moment its
+shares its original's media type. A Work therefore matches from the moment its
 content lands, not only once it is playable. Delegates — the image tiers — carry
 a `uri` and are not content.
 

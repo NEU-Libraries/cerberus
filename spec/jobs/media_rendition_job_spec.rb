@@ -13,7 +13,7 @@ RSpec.describe MediaRenditionJob do
     allow(File).to receive(:exist?).and_return(true)
   end
 
-  it 'remuxes a non-MP4 video master to an MP4 Blob and seeds the poster' do
+  it 'remuxes a non-MP4 video original to an MP4 Blob and seeds the poster' do
     allow(Marcel::MimeType).to receive(:for).and_return('video/quicktime')
     allow(MediaRemux).to receive(:poster).and_return('/u/x-poster.jpg')
     allow(MediaRemux).to receive(:to_mp4).and_return('/u/x.mp4')
@@ -70,7 +70,7 @@ RSpec.describe MediaRenditionJob do
     expect(IiifAssetsJob).to have_received(:perform_now).with('w1', '/u/x-poster.jpg', refresh: true)
   end
 
-  it 'skips remux for an MP4 master but still seeds the poster' do
+  it 'skips remux for an MP4 original but still seeds the poster' do
     allow(Marcel::MimeType).to receive(:for).and_return('video/mp4')
     allow(MediaRemux).to receive(:poster).and_return('/u/x-poster.jpg')
 
@@ -80,7 +80,7 @@ RSpec.describe MediaRenditionJob do
     expect(IiifAssetsJob).to have_received(:perform_now)
   end
 
-  it 'does no poster and no remux for an MP3 audio master' do
+  it 'does no poster and no remux for an MP3 audio original' do
     allow(Marcel::MimeType).to receive(:for).and_return('audio/mpeg')
 
     described_class.perform_now('w1', '/u/x.mp3', 'key1')

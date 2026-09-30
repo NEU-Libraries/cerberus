@@ -58,7 +58,7 @@ wrapped are rare one-off opaque files.
 
 `authorize_show!` checks the Work. `authorize_derivative_read!` then checks the
 Blob itself, because a Blob carries its own read gate. A department may reserve
-the master, or a non-image rendition, while access copies stay public.
+the original, or a non-image rendition, while access copies stay public.
 
 That gate lives on the Work's assets payload, not on the standalone Blob. So
 the controller resolves the containing Work with `AtlasRb::Blob.work`, the same
@@ -102,7 +102,7 @@ than a download, and is handled elsewhere.
 The redirect lands on Cantaloupe, so the browser obeys *Cantaloupe's* headers
 rather than Cerberus's. A `download` attribute on the link is ignored across
 origins, and with no disposition the JPEG simply renders in a new tab. From one
-list, under one word, the master row would save a file while the size rows
+list, under one word, the original row would save a file while the size rows
 opened a viewer.
 
 Cantaloupe reads `response-content-disposition`, so `download_url_for` appends
@@ -110,7 +110,7 @@ it after signing.
 
 ### Naming a tier's file
 
-`derivative_filename` mirrors the master row's `master_<noid>.jpg`: the tier,
+`derivative_filename` mirrors the original row's `original_<noid>.jpg`: the tier,
 then the Work, as `<slug>_<work_noid>.jpg`. The slug is the parameterized `use`,
 or `derivative` when that is blank. Three tiers of three Works therefore do not
 collide in one Downloads folder. The tier slug matches the entry names
@@ -223,7 +223,7 @@ refuses them.
 **Atlas re-authorizes at the Work level, not the tier level.** The per-asset
 gate rides the returned entries as advisory `gated` and `permission` values.
 The display layer enforces them. A restricted tier — a Streaming Only recording, a
-gated master — therefore arrives looking ordinary. `DerivativeGate.readable?` is
+gated original — therefore arrives looking ordinary. `DerivativeGate.readable?` is
 what stops the archive handing out those bytes.
 
 The caller's own rights drive both checks. `ability` and `bypass_embargo` are
@@ -393,7 +393,7 @@ Cerberus and the delegate.
 and preview are all downscales of it, and nothing on the open pipe needs more.
 
 Capping there keeps `full/max` on an `open-` identifier safe by construction:
-the master's pixels are not in that file.
+the original's pixels are not in that file.
 
 `capped` caps the **width**, not the longest edge, so the width-500 request
 serves without upscaling in every orientation. A longest-edge cap would leave
@@ -549,7 +549,7 @@ Two consequences follow:
   same one, the lowest NOID, and an admin can remove the others.
 
 `MediaRenditionJob` does the same for the MP4 it remuxes from a video or audio
-master, such as `talk.mov` to `talk.mp4`, asking `RenditionAsset` with
-`mime_types: RenditionAsset::MP4`. A master that is already an MP4 is never
+original, such as `talk.mov` to `talk.mp4`, asking `RenditionAsset` with
+`mime_types: RenditionAsset::MP4`. An original that is already an MP4 is never
 remuxed, and has no other original under its stem, so it is never mistaken for
 its own rendition.

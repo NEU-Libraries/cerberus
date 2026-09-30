@@ -2,7 +2,7 @@
 
 # One WebVTT Blob, served as an audio or video Work's single player <track>. A caption is
 # discriminated by MIME TYPE, never by role: Atlas gives every content Blob the
-# role `original_file`, video master included. See docs/metadata-text.md.
+# role `original_file`, video original included. See docs/metadata-text.md.
 class CaptionTrack
   MIME = 'text/vtt'
   EXTENSION = '.vtt'

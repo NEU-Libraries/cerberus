@@ -39,7 +39,7 @@ RSpec.describe MetadataExportPacker do
 
     it 'names the original file as deposited, not a derivative or the stored name' do
       derivative = asset(role: 'small_image', uri: 'https://iiif/x')
-      original = asset(role: 'original_file', original: 'IMG_0042.jpg', stored: 'master_aaa.jpg')
+      original = asset(role: 'original_file', original: 'IMG_0042.jpg', stored: 'original_aaa.jpg')
       allow(AtlasRb::Work).to receive(:assets).with('aaa111').and_return([derivative, original])
 
       expect(file_names['aaa111']).to eq('IMG_0042.jpg')
@@ -47,9 +47,9 @@ RSpec.describe MetadataExportPacker do
 
     it 'falls back to the stored name when none was recorded' do
       allow(AtlasRb::Work).to receive(:assets).with('aaa111')
-                                              .and_return([asset(role: 'original_file', stored: 'master_aaa.jpg')])
+                                              .and_return([asset(role: 'original_file', stored: 'original_aaa.jpg')])
 
-      expect(file_names['aaa111']).to eq('master_aaa.jpg')
+      expect(file_names['aaa111']).to eq('original_aaa.jpg')
     end
 
     it 'leaves the cell blank and notes it when the file list cannot be read' do

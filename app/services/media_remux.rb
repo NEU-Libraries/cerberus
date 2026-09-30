@@ -7,7 +7,7 @@ require 'open3'
 # so this is pure container shuffling. A thin seam: MediaRenditionJob and specs
 # stub this class. `.available?` degrades gracefully on pre-ffmpeg images.
 class MediaRemux
-  # Browser-universal containers — these need no remux; serve the master.
+  # Browser-universal containers — these need no remux; serve the original.
   PLAYABLE_CONTAINER_MIMES = %w[video/mp4 audio/mpeg audio/mp4].freeze
   TIMEOUT = '300s'
 
@@ -20,7 +20,7 @@ class MediaRemux
   end
 
   # The browser-playable A/V Blob among a work's assets — a Blob (not a Delegate)
-  # in a universal container (the master if already MP4/MP3, else the ingest MP4
+  # in a universal container (the original if already MP4/MP3, else the ingest MP4
   # rendition). nil until one exists. The work-show player reads this.
   def self.playable_file(files)
     files.find { |file| file[:uri].blank? && PLAYABLE_CONTAINER_MIMES.include?(file.mime_type.to_s) }

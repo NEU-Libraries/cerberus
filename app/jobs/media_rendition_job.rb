@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Enriches an audio/video deposit so it plays in-browser: a poster frame (video)
-# fed to the thumbnail pipeline, and — when the master's container isn't already
+# fed to the thumbnail pipeline, and — when the original's container isn't already
 # browser-universal (e.g. H.264 in .mov) — a lossless `-c copy` MP4 rendition
 # attached as an ordinary Blob (the PdfRenditionJob pattern). Codecs are already
 # gated safe at deposit (Ffprobe), so this is pure container work, never an encode.
@@ -11,7 +11,7 @@
 # keyed on the artifact rather than on the Work's in_progress flag — see
 # PdfRenditionJob for why the flag is the wrong signal. Enrichment never fails a
 # deposit — a bad input, a hung ffmpeg, or a primary Blob that never lands
-# exhausts retries, logs, and leaves the deposit intact (master present, no
+# exhausts retries, logs, and leaves the deposit intact (original present, no
 # rendition, no poster).
 class MediaRenditionJob < ApplicationJob
   include PrimaryFilePresence

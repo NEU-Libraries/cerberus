@@ -62,6 +62,6 @@ RSpec.describe DerivativeWidths do
   it 'rejects values above the longest edge' do
     result = result_for({ 'large' => '589' })
     expect(result).not_to be_valid
-    expect(result.error).to include("the master image's longest edge")
+    expect(result.error).to include("the original image's longest edge")
   end
 end

@@ -260,7 +260,7 @@ file. Atlas itself types the stored Blob `text/vtt` off the name.
 ### Finding the caption Blob
 
 `CaptionTrack.caption?` tells a caption by **MIME type**, `text/vtt`, never by
-role. Atlas gives every content Blob the role `original_file`, the video master
+role. Atlas gives every content Blob the role `original_file`, the video original
 included, so the role cannot tell them apart.
 
 `CaptionTrack.for` finds at most one, because `CaptionJob` updates the bytes of

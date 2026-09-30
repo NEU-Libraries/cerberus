@@ -54,15 +54,15 @@ RSpec.describe RenditionAsset do
 
     def mp4_rendition(sets) = described_class.for(sets, mime_types: described_class::MP4)
 
-    it 'finds the MP4 remuxed from the master' do
+    it 'finds the MP4 remuxed from the original' do
       mp4 = asset('b-mp4', 'talk.mp4', 'video/mp4')
 
       expect(mp4_rendition(file_sets(mov, mp4))['noid']).to eq('b-mp4')
     end
 
-    # A master that is already an MP4 is never remuxed, so it has no rendition,
+    # An original that is already an MP4 is never remuxed, so it has no rendition,
     # and must not be mistaken for one and overwritten.
-    it 'never treats an MP4 master as its own rendition' do
+    it 'never treats an MP4 original as its own rendition' do
       expect(mp4_rendition(file_sets(asset('b-mp4', 'talk.mp4', 'video/mp4')))).to be_nil
     end
 

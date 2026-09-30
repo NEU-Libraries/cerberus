@@ -9,7 +9,7 @@ import { Controller } from "@hotwired/stimulus"
 // - a row's inputs are disabled until its checkbox is on (disabled
 //   inputs never submit — unchecked sizes simply don't arrive);
 // - enabled sizes strictly increase small → medium → large;
-// - everything stays within 1..max (the master's longest edge).
+// - everything stays within 1..max (the original's longest edge).
 //
 // All sliders deliberately share one scale (min=1, max=longest edge) so
 // the thumbs read as a sorted ledger; ordering is enforced by clamping

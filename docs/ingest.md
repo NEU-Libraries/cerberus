@@ -138,7 +138,7 @@ have consumed the source.
 
 The binary PATCH goes up as `octet-stream` and carries no name. Without an
 explicit `original_filename:`, Atlas mints an extensionless placeholder
-(`master_<token>`) that then surfaces in the download box. Pass the manifest's
+(`original_<token>`) that then surfaces in the download box. Pass the manifest's
 page filename.
 
 ### Per-page deep zoom

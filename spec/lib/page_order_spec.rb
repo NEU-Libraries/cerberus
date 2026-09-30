@@ -7,10 +7,10 @@ RSpec.describe PageOrder do
   def page(*noids) = { 'assets' => noids.map { |n| { 'noid' => n } } }
 
   it 'lists page files in page order, whatever order the assets came in' do
-    files = [asset('p2-master'), asset('p1-master')]
-    pages = [page('p1-master'), page('p2-master')]
+    files = [asset('p2-original'), asset('p1-original')]
+    pages = [page('p1-original'), page('p2-original')]
 
-    expect(described_class.sort(files, pages).pluck('noid')).to eq(%w[p1-master p2-master])
+    expect(described_class.sort(files, pages).pluck('noid')).to eq(%w[p1-original p2-original])
   end
 
   it 'keeps a page\'s own files in their order, and puts Work-level files last' do

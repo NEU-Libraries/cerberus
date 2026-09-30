@@ -1,6 +1,6 @@
 -# Opt-in download renditions for an image deposit (v1 parity). Each size is
 -# optional; enabled sizes must nest small < medium < large; everything is
--# capped at the master's longest edge (no upscaling). All three sliders share
+-# capped at the original's longest edge (no upscaling). All three sliders share
 -# one scale (1..longest_edge), so the thumb positions read as a sorted ledger
 -# of the chosen sizes. Only the number inputs carry a form name — checkboxes
 -# and sliders are UI-only, and disabled inputs never submit, so an unchecked
@@ -18,10 +18,10 @@
     %i.fa-solid.fa-images.me-2{ 'aria-hidden' => 'true' }
     Image Derivatives
   %p.text-muted.small.mb-1
-    Offer sized download copies alongside the master image. Each size is optional;
+    Offer sized download copies alongside the original image. Each size is optional;
     enabled sizes must increase from small to large.
   %p.small.mb-3
-    The master image's longest edge is
+    The original image's longest edge is
     %strong.font-monospace= longest_edge
     pixels — sizes are capped there (downloads are never upscaled).
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Dimensions of a Work's staged upload, for the deposit metadata page's
-# opt-in Image Derivatives section ("The master image's longest edge is N
+# opt-in Image Derivatives section ("The original image's longest edge is N
 # pixels", sliders capped at it).
 #
 # Depends on the deposit staging contract: WorksController#stage_upload
