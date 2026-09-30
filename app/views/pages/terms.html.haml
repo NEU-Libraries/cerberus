@@ -1,14 +1,15 @@
 - content_for(:page_title) { 'Policies and Terms of Participation' }
 - content_for(:container_header) do
   .container.p-4.my-3.well.rounded-3
-    %h3.mb-1
+    %h3.mb-3
       %i.fa-solid.fa-scale-balanced.text-primary.me-2{ 'aria-hidden' => 'true' }
       Policies and Terms of Participation
     .text-muted.mb-0 Members of the Northeastern University community wishing to participate in the Digital Repository Service must review this document, agree to terms and policies concerning collections and content, and abide by such terms and policies.
 
 -# An excerpt of the document's Introduction. The full text is a Work in the
--# DRS, so the library revises it there; see terms_document_url.
-.row.my-3
+-# DRS, so the library revises it there; see terms_document_url. The px-2
+-# insets the text from the heading well's edge, part way to its padding.
+.row.my-3.px-2
   .col-lg-8
     %h4.h5.mb-3 Introduction
     %p The Northeastern University Library’s Digital Repository Service (hereafter called DRS) is a system for collecting, distributing, managing, publishing, and preserving digital (electronic) information created by Northeastern faculty, students, and staff.
