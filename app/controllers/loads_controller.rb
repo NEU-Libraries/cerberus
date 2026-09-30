@@ -33,6 +33,11 @@ class LoadsController < ApplicationController
     # build it lazily from the staged archive (no persistence) for the show
     # view to render.
     @preview = preview_service.call(load_report: @load_report) if shows_preview?
+    # Here, not inside XmlPreview: the upload path calls XmlPreview only to ask
+    # blocked?, and must not pay for a thumbnail it never shows.
+    return unless @preview && @loader.xml? && !@preview.blocked?
+
+    @preview_file = XmlPreviewFile.call(load_report: @load_report, row: @preview.first_row)
   end
 
   def new

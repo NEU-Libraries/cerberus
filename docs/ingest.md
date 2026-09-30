@@ -10,6 +10,9 @@ Source files:
 - `app/jobs/multipage_item_job.rb`
 - `app/services/xml_validator.rb`
 - `app/services/mods_record_validator.rb`
+- `app/services/xml_preview_file.rb`
+- `app/views/loads/_preview.html.haml`
+- `app/javascript/preview_controllers/xml_viewer_controller.js`
 
 ## Routing a staged upload
 
@@ -161,6 +164,56 @@ self-guards on an existing thumbnail.
 
 `ContentCreationJob` is never enqueued here. It calls `Work.complete`, which is
 `CompleteWorkJob`'s responsibility, exactly once, after every page has landed.
+
+## The XML preview
+
+An XML load stops on a preview of the first manifest row before anything is
+written: the row's facts, its MODS, and Atlas's rendering of that MODS. Two
+parts of it are its own.
+
+### The picture of the file
+
+`XmlPreviewFile` decides what the frame opposite the facts shows.
+
+| First row | The frame shows |
+|---|---|
+| Create mode, an image or a PDF | A thumbnail of the row's content file, at most 400 px |
+| Create mode, anything else | The file-type icon, with name, size and type, and "No picture for this file type" |
+| Update mode | The existing Work's `preview` image from Atlas, else its `thumbnail` |
+
+Three constraints shape it:
+
+- **The file is only staged.** Nothing is ingested at preview time, so the
+  thumbnail is made from the archive itself. `XmlLoader::Archive#extract_one`
+  streams the one entry to disk, never into a Ruby string, as the batch-memory
+  rule requires. Anything that is not an image or a PDF is never extracted:
+  `Archive#size_of` reads its size from the zip directory or the tar header.
+- **The show page rebuilds the preview on every render.** So the thumbnail is
+  made once, into `load_reports/<id>/preview/thumbnail.jpg`, written to a temp
+  name and renamed. A vips failure leaves a `no-thumbnail` marker, so a
+  corrupt multi-GB file is not extracted again on every render. The extracted
+  source is deleted as soon as the thumbnail exists.
+- **No route serves a staged file.** The thumbnail is inlined as a `data:` URI.
+  It is about 30 KB.
+
+`LoadsController#show` calls it, and `XmlPreview` does not. The upload path
+calls `XmlPreview` only to ask whether the archive is `blocked?`, and must not
+pay for a thumbnail it never shows.
+
+The load report shows no thumbnails, per row or otherwise. That was decided
+against: it complicates the loader's report, and v1's report had none either.
+
+### The MODS panel
+
+The MODS shows in the XML editor's own Ace panel, read-only, with the same
+`eclipse` theme and XML mode, so staff scan it as they read MODS in the editor.
+`xml_viewer_controller.js` lives in the `preview_controllers` bundle, so only
+pages that ask for it load Ace. The `<pre>` it replaces stays in the markup as
+the fallback if JavaScript never runs.
+
+The page opts out of Turbo's cache (`turbo-cache-control: no-cache`), as the XML
+editor does. Turbo snapshots the page with the markup Ace injected, and a restore
+would paint the panel twice.
 
 ## Validating MODS XML
 

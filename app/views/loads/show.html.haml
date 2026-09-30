@@ -15,7 +15,8 @@
   / XML and multipage loads pause here: render the preview (no poll frame —
   / there is no background job running until the librarian confirms). A load
   / refused at preview keeps this view too, because its reason is the preview.
-  = render (@loader.multipage? ? 'multipage_preview' : 'preview'), load_report: @load_report, loader: @loader, preview: @preview
+  = render (@loader.multipage? ? 'multipage_preview' : 'preview'), load_report: @load_report, loader: @loader,
+                                                                   preview: @preview, preview_file: @preview_file
 - else
   = turbo_frame_tag 'load_report', target: '_top' do
     = render 'report', load_report: @load_report, loader: @loader

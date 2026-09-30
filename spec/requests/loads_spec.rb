@@ -574,7 +574,12 @@ RSpec.describe 'Loads', type: :request do
         )
       end
 
-      before { allow(XmlPreview).to receive(:call).and_return(preview) }
+      let(:preview_file) { XmlPreviewFile::Result.new(thumbnail_src: 'https://iiif.example/p.jpg') }
+
+      before do
+        allow(XmlPreview).to receive(:call).and_return(preview)
+        allow(XmlPreviewFile).to receive(:call).and_return(preview_file)
+      end
 
       it 'renders the preview with a Confirm action, not the poll frame' do
         get "/loaders/xml/loads/#{load_report.id}"
@@ -589,6 +594,23 @@ RSpec.describe 'Loads', type: :request do
         expect(response.body).to include('MODS XML')
         expect(response.body).to include('Display metadata')
         expect(response.body).to include('mods-display') # the decorated HTML, rendered html_safe
+      end
+
+      it 'shows the first row\'s picture opposite the overview' do
+        get "/loaders/xml/loads/#{load_report.id}"
+        figure = response.parsed_body.at_css('.load-report-overview__top figure.load-preview-file')
+        expect(figure.at_css('img')['src']).to eq('https://iiif.example/p.jpg')
+        expect(figure.text).to include('Current thumbnail of neu:test123')
+      end
+
+      # The XML editor's own Ace, read-only; the <pre> stays as the no-JS fallback.
+      it 'shows the MODS in a read-only XML viewer, loaded from the preview bundle' do
+        get "/loaders/xml/loads/#{load_report.id}"
+        html = response.parsed_body
+        expect(html.at_css('.xml-viewer[data-controller="xml-viewer"] pre[data-xml-viewer-target="source"]').text)
+          .to eq('<mods:mods/>')
+        expect(response.body).to include('preview_application')
+        expect(html.at_css('meta[name="turbo-cache-control"]')['content']).to eq('no-cache')
       end
     end
 
