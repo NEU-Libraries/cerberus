@@ -38,6 +38,18 @@ RSpec.describe 'Works deposit form', type: :request do
     expect(link['target']).to eq('_blank')
   end
 
+  # The controller disables Upload until the box is ticked. The markup leaves
+  # the button enabled, so the form still submits without JavaScript.
+  it 'wires the terms box to hold Upload until it is ticked' do
+    get new_collection_work_path(collection.id)
+
+    form = response.parsed_body.at_css('form.deposit-form')
+    expect(form['data-controller'].split).to include('terms-acceptance')
+    expect(form.at_css('input#terms_accepted')['data-terms-acceptance-target']).to eq('box')
+    upload = form.at_css('input[type=submit][data-terms-acceptance-target=submit]')
+    expect(upload['disabled']).to be_nil
+  end
+
   # The action has to be a route that accepts POST — the failure mode here was a
   # form pointing at a GET-only path, which only shows up on submit.
   it 'names a path that routes to works#create' do

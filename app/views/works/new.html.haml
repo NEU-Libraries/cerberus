@@ -1,6 +1,9 @@
 -# The destination is the route's parent segment, so this form only asks what to
 -# deposit — and, from the depositor's own root, whether to also promote it.
-= form_tag(@create_path, multipart: true, class: 'deposit-form my-3', data: (@publish_targets.present? ? { controller: 'deposit-promotion', 'deposit-promotion-genres-value': @publish_targets.transform_values { |target| target[:genres] }, 'deposit-promotion-requires-proxy-value': @publishing_for.present? } : {})) do |f|
+- form_data = { controller: 'terms-acceptance' }
+- if @publish_targets.present?
+  - form_data = { controller: 'terms-acceptance deposit-promotion', 'deposit-promotion-genres-value': @publish_targets.transform_values { |target| target[:genres] }, 'deposit-promotion-requires-proxy-value': @publishing_for.present? }
+= form_tag(@create_path, multipart: true, class: 'deposit-form my-3', data: form_data) do |f|
 
   .deposit-form__panel
     %header.deposit-form__head
@@ -62,7 +65,8 @@
       .deposit-form__field
         %span.deposit-form__field-label Terms
         .form-check
-          = check_box_tag 'terms_accepted', '1', false, class: 'form-check-input', id: 'terms_accepted', required: true
+          = check_box_tag 'terms_accepted', '1', false, class: 'form-check-input', id: 'terms_accepted', required: true,
+                          data: { terms_acceptance_target: 'box', action: 'terms-acceptance#sync' }
           %label.form-check-label{for: 'terms_accepted'}
             I have read and I accept the
             = succeed "." do
@@ -74,4 +78,4 @@
     .deposit-form__next-hint
       %i.fa-solid.fa-arrow-right{'aria-hidden' => 'true'}
       Next step: Review and confirm the descriptive metadata.
-    = submit_tag "Upload", class: 'btn btn-primary deposit-form__submit'
+    = submit_tag "Upload", class: 'btn btn-primary deposit-form__submit', data: { terms_acceptance_target: 'submit' }
