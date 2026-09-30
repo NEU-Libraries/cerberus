@@ -78,6 +78,11 @@ RSpec.describe 'Pages', type: :request do
   end
 
   describe 'GET /terms' do
+    # The container's own TERMS_DOCUMENT_URL must not decide these examples.
+    before do
+      allow(Rails.application.config.x.cerberus).to receive(:terms_document_url).and_return(nil)
+    end
+
     it 'links the homepage to the terms' do
       get root_path
       expect(response.body).to include(%(href="#{terms_path}"))
@@ -101,6 +106,22 @@ RSpec.describe 'Pages', type: :request do
         .and_return('https://hdl.handle.net/2047/terms')
       get terms_path
       expect(response.body).to include('Read the full document', 'href="https://hdl.handle.net/2047/terms"')
+    end
+
+    # The seeded Work gets a new NOID on every reset, so the seed stores its
+    # path; ENV still wins, for production's handle.
+    it 'falls back to the seeded Work the setting records' do
+      SiteSetting.set('terms_document_url', '/works/seed123')
+      get terms_path
+      expect(response.body).to include('href="/works/seed123"')
+
+      allow(Rails.application.config.x.cerberus).to receive(:terms_document_url)
+        .and_return('https://hdl.handle.net/2047/terms')
+      get terms_path
+      expect(response.body).to include('href="https://hdl.handle.net/2047/terms"')
+      expect(response.body).not_to include('href="/works/seed123"')
+    ensure
+      SiteSetting.delete_all
     end
   end
 end

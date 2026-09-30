@@ -80,7 +80,8 @@ module Cerberus
     # The full Policies and Terms of Participation, deposited in the DRS as a
     # Work. The /terms page shows an excerpt and links here, so the library can
     # revise the document with Replace file and no deploy. Point it at the
-    # Work's handle, which survives a migration. Unset leaves the link off.
+    # Work's handle, which survives a migration. Unset falls back to the
+    # terms_document_url SiteSetting, which rake reset:data writes.
     config.x.cerberus.terms_document_url = ENV.fetch('TERMS_DOCUMENT_URL', nil).presence
 
     # Acting-NUID sentinel for unauthenticated Cerberus traffic. The
