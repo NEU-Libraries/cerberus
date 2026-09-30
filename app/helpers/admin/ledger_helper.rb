@@ -9,7 +9,7 @@ module Admin
   module LedgerHelper
     KINDS = {
       'request_withdraw'         => { label: 'Withdraw',   icon: 'fa-trash-can' },
-      'request_move'             => { label: 'Move',       icon: 'fa-folder-open' },
+      'request_move'             => { label: 'Move',       icon: 'fa-sitemap' },
       'request_restrict'         => { label: 'Restrict',   icon: 'fa-lock' },
       'load_report'              => { label: 'Load',       icon: 'fa-file-import' },
       # "Incomplete" rather than anything stronger: the work is short some pages

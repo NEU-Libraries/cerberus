@@ -177,7 +177,7 @@ describe 'audit_events/_history.html.haml' do
     end
 
     it 'gives each its own Font Awesome icon and does not fall through to generic' do
-      expect(rendered).to have_css('.audit-event--reparent .audit-event__action-icon.fa-folder-tree')
+      expect(rendered).to have_css('.audit-event--reparent .audit-event__action-icon.fa-sitemap')
       expect(rendered).to have_css('.audit-event--link .audit-event__action-icon.fa-link')
       expect(rendered).to have_css('.audit-event--unlink .audit-event__action-icon.fa-link-slash')
       expect(rendered).not_to have_css('tr.audit-event--generic')

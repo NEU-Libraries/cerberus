@@ -12,7 +12,7 @@ module AuditEventsHelper
     'update'          => { tone: 'update',    icon: 'fa-pen',          label: 'Updated' },
     'tombstone'       => { tone: 'tombstone', icon: 'fa-trash-can',    label: 'Tombstoned' },
     'restore'         => { tone: 'restore',   icon: 'fa-rotate-left',  label: 'Restored' },
-    'reparent'        => { tone: 'reparent',  icon: 'fa-folder-tree',  label: 'Reparented' },
+    'reparent'        => { tone: 'reparent',  icon: 'fa-sitemap',      label: 'Reparented' },
     'link_member'     => { tone: 'link',      icon: 'fa-link',         label: 'Linked' },
     'unlink_member'   => { tone: 'unlink',    icon: 'fa-link-slash',   label: 'Unlinked' },
     # A lapse, recorded by the nightly job. "Embargo removed" is a person
