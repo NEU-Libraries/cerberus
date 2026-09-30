@@ -26,6 +26,27 @@
     @extend .admin-registry-table__id;
   }
 
+  &__heading {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  // A removed file is a record of what was taken out, not a live track, so it
+  // sits on the page grey rather than white.
+  &--removed {
+    background-color: $gray-100;
+  }
+
+  &--removed &__label {
+    color: $gray-700;
+  }
+
+  &__meta {
+    font-size: 0.875rem;
+    color: $gray-700;
+    font-variant-numeric: tabular-nums;
+  }
+
   &__actions {
     display: flex;
     gap: 0.5rem;

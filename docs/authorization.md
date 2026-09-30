@@ -48,7 +48,10 @@ Gating `edit` and `update` together closes the "form gated, write open" gap.
 
 `extra_edit:` adds controller-specific actions to the `:edit` gate.
 `WorksController` adds `metadata`, `update_metadata`, `request_change`,
-`upload`, `add_file` and `destroy_caption`. `CollectionsController` adds
+`upload`, `add_file`, `remove_caption` and `restore_caption`. The two caption
+actions also require the admin or delegated-admin tier, through
+`WorkCaptions#require_caption_steward!`, because Atlas refuses a FileSet
+tombstone or restore from anyone below it. `CollectionsController` adds
 `sentinel` and `request_restriction`, and `CommunitiesController` adds
 `request_restriction`.
 

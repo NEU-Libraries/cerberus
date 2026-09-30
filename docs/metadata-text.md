@@ -252,8 +252,23 @@ job has run, where nobody sees it.
 carries its own brackets. Atlas labels every text Blob "Text Document", which says
 nothing about what the file is for, and two captions need telling apart.
 
-Remove takes the caption's id from the button, and `destroy_caption` checks it
-against the Work's own captions before deleting.
+### Removing and restoring a caption
+
+Remove withdraws the caption's FileSet with `Resource.tombstone`, rather than
+deleting its Blob. The caption leaves `Work.assets`, so the player and the
+downloads drop it, but Atlas keeps the file and every revision of it.
+`Work.withdrawn_assets` still lists it, with the `file_set` id that
+`Admin::Resource.restore` takes. The edit page lists those under "Removed
+caption files", each with Restore.
+
+Both actions are for admins and delegated admins only, the tiers Atlas allows
+to tombstone and restore a FileSet. Each checks the id from the button against
+the Work's own captions, live or removed, before it writes. Nothing in Cerberus
+deletes a caption permanently.
+
+Restore refuses a caption whose language already has a live caption. A player
+cannot tell two tracks in one language apart, and `CaptionJob` would replace
+only one of them. The message says to remove the live one first.
 
 ### WebVTT only
 

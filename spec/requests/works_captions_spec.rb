@@ -6,7 +6,8 @@ require 'rails_helper'
 # this runs against the live Atlas test backend — a real Work with a real edit ACL
 # granted to the staff group — so the :edit gate the field rides is exercised
 # end-to-end. The attach itself is deferred to CaptionJob (asserted enqueued via
-# the test adapter), so no Blob is written here.
+# the test adapter). Only the removal examples write a caption Blob, to watch
+# Atlas withdraw and restore it.
 RSpec.describe 'Works captions', type: :request do
   include Devise::Test::IntegrationHelpers
   include ActiveJob::TestHelper
@@ -53,55 +54,128 @@ RSpec.describe 'Works captions', type: :request do
                                       nuid: '000000004')
   end
 
-  # Atlas's Blob delete is admin-only and takes every earlier revision with it,
-  # so Cerberus offers it only to admins.
-  describe 'removing the caption file' do
+  # Removal withdraws the caption's FileSet, so it is reversible, and Atlas
+  # allows it to admins and delegated admins only.
+  describe 'removing and restoring a caption file' do
     let(:admin) do
       User.new(email: 'admin@example.com', password: 'password', nuid: '000000004',
                name: 'Ad, Min', role: 'admin', groups: [Permissions::STAFF_EDIT_GROUP])
     end
-    let(:caption) { AtlasRb::Mash.new(noid: 'cap-1', mime_type: 'text/vtt', language: 'es', track_label: 'Español') }
-    let(:other_blob) { AtlasRb::Mash.new(noid: 'vid-1', mime_type: 'video/mp4') }
-
-    before do
-      allow(AtlasRb::Work).to receive(:assets).and_call_original
-      allow(AtlasRb::Work).to receive(:assets).with(work.id, anything).and_return([other_blob, caption])
-      allow(AtlasRb::Blob).to receive(:destroy).and_return(instance_double(Faraday::Response, success?: true))
+    let(:delegate) do
+      User.new(email: 'delegate@example.com', password: 'password', nuid: '000000002',
+               name: 'Del, Egate', role: 'privileged',
+               groups: [Permissions::STAFF_EDIT_GROUP, Permissions::ADMIN_GROUP])
     end
 
-    it 'deletes the chosen caption Blob for an admin and returns to the edit page' do
-      sign_in admin
-      delete caption_work_path(work.id), params: { caption_id: 'cap-1' }
-
-      expect(AtlasRb::Blob).to have_received(:destroy).with('cap-1', nuid: '000000004')
-      expect(response).to redirect_to(edit_work_path(work.id))
-      expect(flash[:notice]).to eq('Español caption file removed.')
+    def live_captions
+      CaptionTrack.all(AtlasRb::Work.assets(work.id, nuid: '000000004'))
     end
 
-    # The id arrives from the form, so it must name one of this Work's captions.
-    it 'refuses an id that is not one of the work\'s captions, and deletes nothing' do
-      sign_in admin
-      delete caption_work_path(work.id), params: { caption_id: 'vid-1' }
-
-      expect(flash[:alert]).to eq('This work has no such caption file.')
-      expect(AtlasRb::Blob).not_to have_received(:destroy)
+    def removed_captions
+      CaptionTrack.all(AtlasRb::Work.withdrawn_assets(work.id, nuid: '000000004'))
     end
 
-    it 'refuses an editor who is not an admin, and deletes nothing' do
-      sign_in editor
-      delete caption_work_path(work.id), params: { caption_id: 'cap-1' }
+    # Against the test Atlas, not stubs: the whole point is that Atlas keeps
+    # the file and names it in withdrawn_assets, which a stub would only assert.
+    context 'against Atlas' do
+      before do
+        AtlasRb::Blob.create(work.id, Rails.root.join('spec/fixtures/files/captions.vtt').to_s, 'es.vtt',
+                             language: 'es', track_label: 'Español', nuid: '000000004')
+      end
 
-      expect(response).to have_http_status(:forbidden)
-      expect(AtlasRb::Blob).not_to have_received(:destroy)
+      it 'withdraws the caption for a delegated admin, then restores it' do
+        sign_in delegate
+        caption = live_captions.sole
+
+        delete caption_work_path(work.id), params: { caption_id: caption.noid }
+        expect(flash[:notice]).to eq('Español caption file removed. It can be restored below.')
+        expect(live_captions).to be_empty
+        expect(removed_captions.map(&:noid)).to eq([caption.noid])
+
+        post restore_caption_work_path(work.id), params: { file_set_id: caption.file_set }
+        expect(flash[:notice]).to eq('Español caption file restored.')
+        expect(live_captions.map(&:noid)).to eq([caption.noid])
+        expect(removed_captions).to be_empty
+      end
+
+      # The edit page offers Captions only on a finished Work with a recording.
+      it 'lists the removed caption on the edit page, with Restore' do
+        AtlasRb::Blob.create(work.id, Rails.root.join('spec/fixtures/files/sample-video.mp4').to_s, 'sample-video.mp4',
+                             nuid: '000000004')
+        AtlasRb::Work.complete(work.id, nuid: '000000004')
+        sign_in admin
+        caption = live_captions.sole
+        delete caption_work_path(work.id), params: { caption_id: caption.noid }
+
+        get edit_work_path(work.id)
+        expect(response.body).to include('Removed caption files')
+        expect(response.parsed_body.css("button[form='restore-caption'][value='#{caption.file_set}']")).to be_present
+      end
     end
 
-    it 'says so when the work has no caption file' do
-      allow(AtlasRb::Work).to receive(:assets).with(work.id, anything).and_return([])
-      sign_in admin
-      delete caption_work_path(work.id), params: { caption_id: 'cap-1' }
+    context 'with Atlas stubbed' do
+      let(:caption) do
+        AtlasRb::Mash.new(noid: 'cap-1', file_set: 'fs-1', mime_type: 'text/vtt', language: 'es', track_label: 'Español')
+      end
+      let(:other_blob) { AtlasRb::Mash.new(noid: 'vid-1', file_set: 'fs-v', mime_type: 'video/mp4') }
+      let(:ok) { instance_double(Faraday::Response, success?: true) }
 
-      expect(flash[:alert]).to eq('This work has no such caption file.')
-      expect(AtlasRb::Blob).not_to have_received(:destroy)
+      before do
+        allow(AtlasRb::Work).to receive(:assets).and_call_original
+        allow(AtlasRb::Work).to receive(:assets).with(work.id, anything).and_return([other_blob, caption])
+        allow(AtlasRb::Work).to receive(:withdrawn_assets).and_return([])
+        allow(AtlasRb::Resource).to receive(:tombstone).and_return(ok)
+        allow(AtlasRb::Admin::Resource).to receive(:restore).and_return(ok)
+      end
+
+      # The id arrives from the form, so it must name one of this Work's captions.
+      it 'refuses an id that is not one of the work\'s captions, and withdraws nothing' do
+        sign_in admin
+        delete caption_work_path(work.id), params: { caption_id: 'vid-1' }
+
+        expect(flash[:alert]).to eq('This work has no such caption file.')
+        expect(AtlasRb::Resource).not_to have_received(:tombstone)
+      end
+
+      it 'refuses an editor below the delegate tier, and withdraws or restores nothing' do
+        sign_in editor
+        delete caption_work_path(work.id), params: { caption_id: 'cap-1' }
+        expect(response).to have_http_status(:forbidden)
+
+        post restore_caption_work_path(work.id), params: { file_set_id: 'fs-1' }
+        expect(response).to have_http_status(:forbidden)
+
+        expect(AtlasRb::Resource).not_to have_received(:tombstone)
+        expect(AtlasRb::Admin::Resource).not_to have_received(:restore)
+      end
+
+      it 'refuses to restore a file set that is not one of the work\'s removed captions' do
+        sign_in admin
+        post restore_caption_work_path(work.id), params: { file_set_id: 'fs-elsewhere' }
+
+        expect(flash[:alert]).to eq('This work has no such removed caption file.')
+        expect(AtlasRb::Admin::Resource).not_to have_received(:restore)
+      end
+
+      # Two live tracks in one language could not be told apart in the player.
+      it 'refuses to restore a caption whose language already has a live one' do
+        removed = AtlasRb::Mash.new(noid: 'cap-0', file_set: 'fs-0', mime_type: 'text/vtt', language: 'es',
+                                    track_label: 'Español')
+        allow(AtlasRb::Work).to receive(:withdrawn_assets).and_return([removed])
+        sign_in admin
+        post restore_caption_work_path(work.id), params: { file_set_id: 'fs-0' }
+
+        expect(flash[:alert]).to eq('This work already has a Español caption file. Remove it first, then restore this one.')
+        expect(AtlasRb::Admin::Resource).not_to have_received(:restore)
+      end
+
+      it 'says so when Atlas refuses the withdrawal' do
+        allow(AtlasRb::Resource).to receive(:tombstone).and_return(instance_double(Faraday::Response, success?: false))
+        sign_in admin
+        delete caption_work_path(work.id), params: { caption_id: 'cap-1' }
+
+        expect(flash[:alert]).to eq('The caption file could not be removed.')
+      end
     end
   end
 

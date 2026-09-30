@@ -38,7 +38,8 @@ class WorksController < ApplicationController
   UNSUPPORTED_AV = 'DRS streams H.264/AAC video and AAC/MP3 audio — please convert your file first.'
 
   before_action :authorize_show!, only: [:downloads, :manifest]
-  authorize_resource_writes!(extra_edit: %i[metadata update_metadata request_change upload add_file destroy_caption])
+  authorize_resource_writes!(extra_edit: %i[metadata update_metadata request_change upload add_file remove_caption
+                                            restore_caption])
   before_action :reject_if_in_progress, only: [:edit]
   after_action :record_view_impression, only: :show
 

@@ -1,6 +1,8 @@
 -# locals: captions (Array) — the Work's caption Blobs, one per language, for
--# the list of current files. removable (Boolean, optional) — offer Remove,
--# which submits the empty remove-caption form outside the metadata form.
+-# the list of current files. removed (Array, optional) — withdrawn caption
+-# assets, each carrying its `file_set`. removable (Boolean, optional) — offer
+-# Remove and Restore, which submit the empty remove-caption and
+-# restore-caption forms outside the metadata form.
 -#
 -# Offered only for a Work with audio or video content: CaptionTrack.applicable?
 -# on the edit page, StagedMediaProbe at deposit, where the Blob may still be in flight.
@@ -33,11 +35,28 @@
             - if local_assigns[:removable]
               %button.btn.btn-tonal-danger.btn-sm{ type: 'submit', form: 'remove-caption', name: 'caption_id', value: caption.noid,
                 'aria-label' => "Remove the #{label} caption file",
-                data: { turbo_confirm: "Remove the #{label} caption file? It and every earlier version of it are deleted permanently.",
+                data: { turbo_confirm: "Remove the #{label} caption file? It leaves the player and the downloads, and can be restored from this page.",
                         turbo_confirm_title: 'Remove caption file', turbo_confirm_button: 'Remove',
                         turbo_confirm_variant: 'danger' } }
                 %i.fa-solid.fa-trash-can.me-1{ 'aria-hidden' => 'true' }
                 Remove
+
+  - removed = Array(local_assigns[:removed])
+  - if local_assigns[:removable] && removed.any?
+    %h5.caption-tracks__heading Removed caption files
+    %ul.caption-tracks.caption-tracks--removed.list-unstyled.mb-3{ 'aria-label' => 'Removed caption files' }
+      - removed.each do |caption|
+        - label = CaptionTrack.label(caption)
+        %li.caption-tracks__row
+          %span.caption-tracks__label{ lang: CaptionTrack.language(caption) }= label
+          %span.caption-tracks__tag= CaptionTrack.language(caption)
+          %span.caption-tracks__meta
+            Removed #{file_version_when(caption[:tombstoned_at])} by #{file_version_who(caption[:tombstoned_by])}
+          %span.caption-tracks__actions
+            %button.btn.btn-tonal-primary.btn-sm{ type: 'submit', form: 'restore-caption', name: 'file_set_id', value: caption.file_set,
+              'aria-label' => "Restore the #{label} caption file" }
+              %i.fa-solid.fa-rotate-left.me-1{ 'aria-hidden' => 'true' }
+              Restore
 
   .row.g-2{ data: { controller: 'caption-language' } }
     .col-md-7
