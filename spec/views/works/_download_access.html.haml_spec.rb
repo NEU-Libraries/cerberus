@@ -29,4 +29,11 @@ RSpec.describe 'works/_download_access', type: :view do
   it 'offers no control to edit it' do
     expect(render_policy('small' => ['public'])).to have_no_css('input, select, button')
   end
+
+  # A readout, not a form section: a well here read as part of the Save form.
+  it 'renders as a bare section, not in a well' do
+    render_policy(nil)
+    expect(rendered).to have_css('h5', text: 'Download access by file')
+    expect(rendered).to have_no_css('.well')
+  end
 end

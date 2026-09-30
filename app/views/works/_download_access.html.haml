@@ -5,8 +5,10 @@
 -# that would be overwritten the next time that policy is applied.
 - policy = (policy || {}).to_h.transform_keys(&:to_s)
 - tiers = Sentinel::TIERS.select { |tier| policy.key?(tier) }
-.well.p-3.my-3.rounded-3
-  %h5.mb-1 Download access by file
+-# A bare section like its siblings on the Permissions tab, not a well: it is a
+-# readout with nothing to submit, and a well reads as part of the form below.
+.my-3
+  %h5.pb-2 Download access by file
   %p.small.text-muted.mb-2
     Set from a collection's or a set's Derivative access tab, and changed there. A file not listed here
     follows this work's general permissions.
