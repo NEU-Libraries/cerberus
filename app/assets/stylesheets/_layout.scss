@@ -79,6 +79,15 @@ a:not(.btn, .dropdown-item, .navbar-brand, .nav-link) {
 
 .navbar-search {
   padding-bottom: 0;
+
+  // Below lg the form wraps under the wordmark, where container-fluid's left
+  // padding would indent it from the "DRS" edge. Beside the wordmark, at lg
+  // and up, that padding is the gap between the two.
+  @include media-breakpoint-down(lg) {
+    .search-query-form {
+      padding-left: 0;
+    }
+  }
 }
 
 // Navbar icon link carrying an optional count badge (the inbox envelope, the
