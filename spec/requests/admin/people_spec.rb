@@ -179,6 +179,12 @@ RSpec.describe 'Admin::People', type: :request do
     end
 
     describe 'GET /admin/people/:noid/edit' do
+      before do
+        allow(AtlasRb::User).to receive(:accounts).and_return(
+          AtlasRb::Mash.new('accounts' => [{ 'email' => 'dcliff@example.edu', 'name' => 'Cliff, David A' }])
+        )
+      end
+
       it 'renders the identity form and resolves affiliations to community titles' do
         allow(AtlasRb::Person).to receive(:find).with('cz8wbpk', anything).and_return(person)
         allow(AtlasRb::Resource).to receive(:find_many).with(['jm640df'], anything)
@@ -216,6 +222,57 @@ RSpec.describe 'Admin::People', type: :request do
         get edit_admin_person_path('cz8wbpk')
 
         expect(response).to have_http_status(:ok)
+      end
+
+      # A librarian looking the person up in another system needs the name that
+      # system knows, which is the sign-in name, not the curated display name.
+      it 'shows the NUID and each account\'s sign-in name above the display name' do
+        allow(AtlasRb::Person).to receive(:find).and_return(person)
+        allow(AtlasRb::Resource).to receive(:find_many).and_return([])
+
+        get edit_admin_person_path('cz8wbpk')
+
+        readout = response.parsed_body.at_css('.admin-registry-form__readout')
+        expect(readout.css('dd .admin-registry-table__id').map(&:text)).to eq(%w[000000004 dcliff@example.edu])
+        expect(readout.text).to include('Cliff, David A')
+      end
+
+      it 'says a person with no account has not signed in yet' do
+        allow(AtlasRb::Person).to receive(:find).and_return(person)
+        allow(AtlasRb::Resource).to receive(:find_many).and_return([])
+        allow(AtlasRb::User).to receive(:accounts).and_return(AtlasRb::Mash.new('accounts' => []))
+
+        get edit_admin_person_path('cz8wbpk')
+
+        expect(response.body).to include('Not signed in yet.')
+      end
+
+      it 'still renders the form when the accounts cannot be read' do
+        allow(AtlasRb::Person).to receive(:find).and_return(person)
+        allow(AtlasRb::Resource).to receive(:find_many).and_return([])
+        allow(AtlasRb::User).to receive(:accounts).and_raise(Faraday::ConnectionFailed, 'down')
+
+        get edit_admin_person_path('cz8wbpk')
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('The sign-in name could not be loaded.', 'person[display_name]')
+      end
+
+      # Add and Remove act at once, so they sit in a card of their own and
+      # outside the details form that Save submits.
+      it 'keeps the affiliation controls out of the details form' do
+        allow(AtlasRb::Person).to receive(:find).and_return(person)
+        allow(AtlasRb::Resource).to receive(:find_many)
+          .and_return([AtlasRb::Mash.new('noid' => 'jm640df', 'title' => 'Communications')])
+
+        get edit_admin_person_path('cz8wbpk')
+
+        page = response.parsed_body
+        details = page.at_css("form[action='#{admin_person_path('cz8wbpk')}']")
+        expect(details.at_css('.well input[type=submit]')['value']).to eq('Save details')
+        expect(details.text).not_to include('Community affiliations')
+        expect(page.css('.admin-registry').size).to eq(2)
+        expect(page.at_css('.admin-registry__count').text).to eq('1')
       end
 
       it 'runs the community picker when a query is present' do

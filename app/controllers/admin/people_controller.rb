@@ -36,13 +36,9 @@ module Admin
     # A Person's Grouper groups live on its sign-in accounts, one set each, so
     # this reads the accounts. One Atlas read, made only when a row is opened.
     def groups
-      nuid = @person['nuid']
-      @accounts = nuid.present? ? Array(AtlasRb::User.accounts(nuid, nuid: Current.nuid)&.dig('accounts')) : []
-    rescue AtlasRb::ResourceError, Faraday::Error, JSON::ParserError => e
-      Rails.logger.warn("Admin people groups read failed for #{@noid}: #{e.class}: #{e.message}")
-      @failed = true
-    ensure
-      render layout: false unless performed?
+      @accounts = sign_in_accounts
+      @failed = @accounts.nil?
+      render layout: false
     end
 
     def new
@@ -52,6 +48,7 @@ module Admin
     def edit
       breadcrumb 'Edit', edit_admin_person_path(@noid)
       load_affiliations
+      @accounts = sign_in_accounts
       @results = community_search if params[:q].present?
     end
 
@@ -71,6 +68,7 @@ module Admin
     rescue Faraday::Error, JSON::ParserError => e
       @person = AtlasRb::Person.find(@noid, nuid: Current.nuid)
       load_affiliations
+      @accounts = sign_in_accounts
       flash.now[:alert] = "Couldn't save those details: #{e.message}"
       render :edit, status: :unprocessable_content
     end
@@ -92,6 +90,19 @@ module Admin
         @person = AtlasRb::Person.find(@noid, nuid: Current.nuid)
       rescue JSON::ParserError
         render template: 'errors/not_found', status: :not_found, locals: { obj_type: 'person' }
+      end
+
+      # The person's sign-in accounts, each with its own name and group set. A
+      # Person made before its first sign-in has none. Nil means the read
+      # failed, which the views say rather than showing an empty list.
+      def sign_in_accounts
+        nuid = @person['nuid']
+        return [] if nuid.blank?
+
+        Array(AtlasRb::User.accounts(nuid, nuid: Current.nuid)&.dig('accounts'))
+      rescue AtlasRb::ResourceError, Faraday::Error, JSON::ParserError => e
+        Rails.logger.warn("Admin people accounts read failed for #{@noid}: #{e.class}: #{e.message}")
+        nil
       end
 
       # Resolve each affiliated community NOID to a {noid, title} for display. A

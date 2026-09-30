@@ -5,7 +5,7 @@
     %span.admin-registry__title
       %i.fa-solid.fa-user-pen{'aria-hidden' => 'true'}
       Edit person
-      %span.admin-registry__count= @person['nuid']
+      %span.admin-registry__who= @person['display_name']
     .admin-registry__head-actions
       = link_to admin_people_path, class: 'btn btn-tonal-secondary btn-sm' do
         %i.fa-solid.fa-arrow-left.me-1{'aria-hidden' => 'true'}
@@ -17,6 +17,7 @@
         %h3.admin-registry-form__section-title
           %i.fa-solid.fa-signature{'aria-hidden' => 'true'}
           Identity
+        = render 'identity_readout', nuid: @person['nuid'], accounts: @accounts
         .mb-3
           = f.label :display_name, class: 'admin-registry-form__label' do
             %i.fa-solid.fa-signature{'aria-hidden' => 'true'}
@@ -26,58 +27,64 @@
 
       = render 'profile_fields', f: f, pv: @person
 
-      .d-flex.gap-2.align-items-center.mt-4
-        = f.submit 'Save details', class: 'btn btn-primary'
+      .well.p-3.my-3.rounded-3
+        = f.submit 'Save details', class: 'btn btn-success'
+        = link_to 'Cancel', admin_people_path, class: 'btn btn-warning'
 
-    .admin-registry-form__section.mt-4
-      %h3.admin-registry-form__section-title
-        %i.fa-solid.fa-users{'aria-hidden' => 'true'}
-        Community affiliations
-      .admin-registry-form__section-note
-        %i.fa-solid.fa-circle-info{'aria-hidden' => 'true'}
-        An affiliation places this person in a community’s Faculty & Staff list and allows the user to add their works to the community’s showcased scholarly content.
+-# Its own card: Add and Remove act at once, so Save above does not cover them.
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-users{'aria-hidden' => 'true'}
+      Community affiliations
+      %span.admin-registry__count= @affiliations.size
 
-      - if @affiliations.any?
-        %ul.list-unstyled.mb-0
-          - @affiliations.each do |aff|
-            %li.d-flex.align-items-center.justify-content-between.border.rounded-3.p-2.mb-2
-              %span
-                %i.fa-solid.fa-users.text-primary.me-2{'aria-hidden' => 'true'}
-                = enhanced_text(aff[:title])
-                %span.admin-registry-table__id.ms-2= aff[:noid]
-              = button_to remove_affiliation_admin_person_path(@noid, community_id: aff[:noid]),
-                          method: :delete, class: 'btn btn-sm btn-tonal-danger',
-                          form: { data: { turbo_confirm: "Remove the affiliation with #{plain_text(aff[:title])}?" } } do
-                %i.fa-solid.fa-xmark.me-1{'aria-hidden' => 'true'}
-                Remove
-      - else
-        %p.text-muted.small.mb-0 No affiliations yet.
+  .admin-registry__body
+    .admin-registry-form__section-note
+      %i.fa-solid.fa-circle-info{'aria-hidden' => 'true'}
+      An affiliation places this person in a community’s Faculty & Staff list and allows the user to add their works to the community’s showcased scholarly content.
 
-      %h4.h6.mt-4.mb-2 Add an affiliation
-      = render 'admin/finder/search_form', url: edit_admin_person_path(@noid), q: params[:q], hidden: {}, placeholder: 'Search communities to affiliate…'
+    - if @affiliations.any?
+      %ul.list-unstyled.mb-0
+        - @affiliations.each do |aff|
+          %li.d-flex.align-items-center.justify-content-between.border.rounded-3.p-2.mb-2
+            %span
+              %i.fa-solid.fa-users.text-primary.me-2{'aria-hidden' => 'true'}
+              = enhanced_text(aff[:title])
+              %span.admin-registry-table__id.ms-2= aff[:noid]
+            = button_to remove_affiliation_admin_person_path(@noid, community_id: aff[:noid]),
+                        method: :delete, class: 'btn btn-sm btn-tonal-danger',
+                        form: { data: { turbo_confirm: "Remove the affiliation with #{plain_text(aff[:title])}?" } } do
+              %i.fa-solid.fa-xmark.me-1{'aria-hidden' => 'true'}
+              Remove
+    - else
+      %p.text-muted.small.mb-0 No affiliations yet.
 
-      - if @results
-        - affiliated = @affiliations.map { |a| a[:noid] }
-        .table-responsive.mt-3
-          %table.table.table-borderless.admin-registry-table
-            %thead
+    %h4.h6.mt-4.mb-2 Add an affiliation
+    = render 'admin/finder/search_form', url: edit_admin_person_path(@noid), q: params[:q], hidden: {}, placeholder: 'Search communities to affiliate…'
+
+    - if @results
+      - affiliated = @affiliations.map { |a| a[:noid] }
+      .table-responsive.mt-3
+        %table.table.table-borderless.admin-registry-table
+          %thead
+            %tr
+              %th{scope: 'col'} Community
+              %th{scope: 'col'} Type
+              %th{scope: 'col'} PID
+              %th{scope: 'col'}
+          %tbody
+            - @results.documents.each do |doc|
               %tr
-                %th{scope: 'col'} Community
-                %th{scope: 'col'} Type
-                %th{scope: 'col'} PID
-                %th{scope: 'col'}
-            %tbody
-              - @results.documents.each do |doc|
-                %tr
-                  %td.admin-registry-table__name= finder_doc_heading(doc)
-                  %td= finder_type_chip(doc.klass_type)
-                  %td
-                    %span.admin-registry-table__id= doc.to_param
-                  %td.text-end
-                    - if affiliated.include?(doc.to_param)
-                      %span.text-muted.small Already affiliated
-                    - else
-                      = button_to add_affiliation_admin_person_path(@noid, community_id: doc.to_param),
-                                  method: :post, class: 'btn btn-sm btn-primary' do
-                        %i.fa-solid.fa-plus.me-1{'aria-hidden' => 'true'}
-                        Add
+                %td.admin-registry-table__name= finder_doc_heading(doc)
+                %td= finder_type_chip(doc.klass_type)
+                %td
+                  %span.admin-registry-table__id= doc.to_param
+                %td.text-end
+                  - if affiliated.include?(doc.to_param)
+                    %span.text-muted.small Already affiliated
+                  - else
+                    = button_to add_affiliation_admin_person_path(@noid, community_id: doc.to_param),
+                                method: :post, class: 'btn btn-sm btn-primary' do
+                      %i.fa-solid.fa-plus.me-1{'aria-hidden' => 'true'}
+                      Add
