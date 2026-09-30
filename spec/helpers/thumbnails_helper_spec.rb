@@ -31,20 +31,6 @@ describe ThumbnailsHelper do
     end
   end
 
-  describe '#av_placeholder_src' do
-    it 'names the placeholder mark for an audio or a video Work' do
-      expect(helper.av_placeholder_src({ 'classification_ssim' => ['Video'] })).to match(%r{/av-placeholder.*\.svg\z})
-      expect(helper.av_placeholder_src({ 'classification_ssim' => %w[Audio Text] })).to match(/av-placeholder/)
-    end
-
-    # Other types keep their type icon, so the mark says "a recording", not
-    # "anything without a picture".
-    it 'is nil for any other Work, or one with no classification' do
-      expect(helper.av_placeholder_src({ 'classification_ssim' => ['Image'] })).to be_nil
-      expect(helper.av_placeholder_src({})).to be_nil
-    end
-  end
-
   describe '#av_poster_src' do
     it 'keeps the Work\'s own poster' do
       expect(helper.av_poster_src('https://iiif/p.jpg')).to eq('https://iiif/p.jpg')

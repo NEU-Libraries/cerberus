@@ -74,22 +74,22 @@ replace or rollback passes `refresh: true` to skip the guard.
 seconds, and on digitised film that is often leader, white or black, so the
 poster read as a blank or black screen. A recording's poster and thumbnail now
 come only from a depositor or curator, through the Thumbnail field on the edit
-form (`Thumbable`).
+form (`Thumbable`). A supplied poster is the Work's thumbnail, so it shows in the
+player, in list and gallery results, in Sets and in associations alike.
 
-Without one, an audio or video Work shows the placeholder mark,
+Without one, an audio or video Work's player shows the placeholder mark,
 `app/assets/images/av-placeholder.svg`. It is the Northeastern notched
 monogram, from the brand asset `NU_Notched-N_wordmark_K`, recoloured to
 `$gray-700` on black. The brand approves black, white and red only; the muted
 grey is a deliberate exception, so a placeholder does not read as a feature.
 
-- **The player.** `ThumbnailsHelper#av_poster_src` gives any `<video>` element
-  the mark when the Work has no poster, which covers video and captioned audio.
-  Plain audio without a poster keeps its `<audio>` bar, which never showed a
-  black box.
-- **The tiles.** `ThumbnailsHelper#av_placeholder_src` gives a catalog result,
-  a Set row or an association tile the mark when the document has no thumbnail
-  and its `classification_ssim` includes `Audio` or `Video`. Every other type
-  keeps its type icon.
+`ThumbnailsHelper#av_poster_src` gives any `<video>` element on the show page the
+mark when the Work has no poster, which covers video and captioned audio. Plain
+audio without a poster keeps its `<audio>` bar, which never showed a black box.
+
+The mark is for the show page only. A list or gallery tile, a Set row or an
+association tile without a thumbnail keeps the type icon, as every other type
+does, so the mark never stands in for a picture across a page of results.
 
 The mark is a fallback at render time. It is never written to Atlas, so a
 poster added later replaces it everywhere with no clean-up.

@@ -88,15 +88,16 @@ describe CatalogController do
       expect(html).not_to include('<img')
     end
 
-    # No poster frame is extracted any more, so a recording without a supplied
-    # poster would otherwise show only the generic icon.
-    it 'shows the placeholder mark for an audio or video Work with no thumbnail' do
+    # The placeholder mark is the show page's poster only; across a page of
+    # results a recording without a thumbnail reads like any other type.
+    it 'gives an audio or video Work with no thumbnail the type icon, not the placeholder mark' do
       get :index
       doc = SolrDocument.new('id' => 'w3', 'internal_resource_tesim' => ['Work'], 'classification_ssim' => ['Video'])
 
       html = controller.view_context.iiif_thumbnail(doc)
 
-      expect(html).to match(/<img[^>]+src="[^"]*av-placeholder[^"]*\.svg"/)
+      expect(html).to include('thumbnail-fallback')
+      expect(html).not_to include('av-placeholder')
     end
   end
 

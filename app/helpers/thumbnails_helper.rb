@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
 # Guards the one thing a stored thumbnail can do to a page that renders it, and
-# supplies the placeholder an audio or video Work shows without one.
+# supplies the poster an audio or video Work's player shows without one.
 # See docs/derivatives.md.
 module ThumbnailsHelper
   AV_PLACEHOLDER = 'av-placeholder.svg'
-  AV_CLASSIFICATIONS = %w[Audio Video].freeze
 
   # A stored thumbnail value that is safe to hand to image_tag, or nil.
   #
@@ -21,14 +20,9 @@ module ThumbnailsHelper
     value.start_with?('http://', 'https://', '//') ? value : nil
   end
 
-  # The placeholder mark's path for an audio or video Work's Solr document, or
-  # nil for any other. The test is the Work's content classification, so a tile
-  # needs no read beyond the document it already has.
-  def av_placeholder_src(document)
-    image_path(AV_PLACEHOLDER) if Array(document['classification_ssim']).intersect?(AV_CLASSIFICATIONS)
-  end
-
-  # The player's poster: the Work's own, else the placeholder mark.
+  # The player's poster: the Work's own, else the placeholder mark. Only the
+  # show page's player uses the mark; a list or gallery tile without a
+  # thumbnail keeps the type icon, as every other type does.
   def av_poster_src(preview)
     preview.presence || image_path(AV_PLACEHOLDER)
   end
