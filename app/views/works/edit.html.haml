@@ -20,7 +20,7 @@
         = bootstrap_fields_for :work do |c|
           = render 'shared/descriptive_fields', f: c, descriptive: @descriptive, keywords: true
         - if @caption_offered
-          = render 'works/captions', caption: @caption, removable: effective_user&.admin?
+          = render 'works/captions', captions: @captions, removable: effective_user&.admin?
         - if @showcase
           = render 'works/showcase_category', showcase: @showcase, genres: @showcase_genres
         .well.p-3.my-3.rounded-3
@@ -28,7 +28,7 @@
           = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"
       -# Outside the metadata form, which cannot nest one; the Remove button in
       -# the Captions section submits it through its form attribute.
-      - if @caption && effective_user&.admin?
+      - if @captions.any? && effective_user&.admin?
         = form_tag(caption_work_path(params[:id]), method: :delete, id: 'remove-caption') {}
   #advanced.tab-pane{"aria-labelledby" => "advanced-tab", role: "tabpanel"}
     .py-2.px-1

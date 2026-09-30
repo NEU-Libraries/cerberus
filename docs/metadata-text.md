@@ -229,23 +229,30 @@ which Blob is the caption, whether to offer the field at all, and whether an
 upload is acceptable. `CaptionJob` does the writing — see `docs/derivatives.md`.
 `WorkCaptions` (`app/controllers/concerns/work_captions.rb`) takes the upload.
 
-### One track, labelled English
+### One track per language
 
-That is the whole of what the repository can currently say. A Blob carries a mime
-type and a filename and nothing a `<track>` wants. Atlas has no field for a
-caption's language or its display label. So a second caption could be stored but
-never told apart from the first. The offer therefore matches what can be
-described, and a multi-language Work waits on Atlas growing somewhere to put the
-language.
+Atlas records a `language` (BCP 47) and a `track_label` on each caption Blob,
+and `Work.assets` returns both. `CaptionTrack.all` lists a Work's captions,
+English first and then by label. The first is the player's `default` track,
+because a player shows one caption track at a time.
 
-`LANGUAGE` (`en`) and `LABEL` (`English`) are the srclang/label pair every
-track carries, since nothing records the real ones. `works/_caption_source`
-writes them onto the `<track>`. English matches v1, which hardcoded exactly
-this.
+A caption with no recorded language is English, labelled `English`. Every
+caption stored before Atlas kept a language was offered to players as exactly
+that, which matched v1's hardcoded pair. `LANGUAGE` and `LABEL` hold it.
 
-`DOWNLOAD_LABEL` names the caption's row on the downloads list `Captions`.
-Atlas labels every text Blob "Text Document", which says nothing about what the
-file is for.
+The upload form offers `CaptionTrack::LANGUAGES`, twelve languages by tag, each
+labelled by its own name (`Español`, not `Spanish`). A reader of a language
+looks for its own name in the player's captions menu. **Other** takes a free
+tag and label. `CaptionTrack.choice` checks the tag's shape and the label's
+length at the form, because Atlas refuses a bad one with a 422 only after the
+job has run, where nobody sees it.
+
+`DOWNLOAD_LABEL` names each caption's row on the downloads list
+`Captions (<label>)`. Atlas labels every text Blob "Text Document", which says
+nothing about what the file is for, and two captions need telling apart.
+
+Remove takes the caption's id from the button, and `destroy_caption` checks it
+against the Work's own captions before deleting.
 
 ### WebVTT only
 
@@ -263,8 +270,9 @@ file. Atlas itself types the stored Blob `text/vtt` off the name.
 role. Atlas gives every content Blob the role `original_file`, the video original
 included, so the role cannot tell them apart.
 
-`CaptionTrack.for` finds at most one, because `CaptionJob` updates the bytes of
-the Blob it finds rather than creating a second. Delegates — the image tiers —
+`CaptionTrack.for_language` finds at most one per language, because
+`CaptionJob` updates the bytes of the Blob it finds rather than creating a
+second. Delegates — the image tiers —
 carry a `uri` and are not content. `MediaRemux.playable_file` applies the same
 test.
 

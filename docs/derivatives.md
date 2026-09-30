@@ -76,10 +76,17 @@ wire. It stages to disk first (`UploadStaging`) for the same reason.
 
 ### It replaces rather than accumulates
 
-A Work has one caption track. A second upload rewrites the bytes of the Blob
-already there. `Blob.update` appends an OCFL revision and preserves the NOID.
-The superseded captions therefore stay retrievable, and every page already
-pointing at that Blob keeps working. Only the first upload creates.
+A Work has one caption track per language. An upload in a language the Work
+already has rewrites the bytes of that language's Blob. `Blob.update` appends an
+OCFL revision and preserves the NOID. The superseded captions therefore stay
+retrievable, and every page already pointing at that Blob keeps working. Only
+the first upload in each language creates, and it passes `language:` and
+`track_label:` to `Blob.create`.
+
+A caption with no recorded language counts as English, so the first English
+upload onto such a Work replaces it and writes the language onto it. A job
+queued with the older four-argument signature defaults to English for the same
+reason.
 
 ### Waiting for the primary file is load-bearing
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Attaches a depositor's WebVTT file to a Work as its caption track, replacing
-# rather than accumulating.
+# Attaches a depositor's WebVTT file to a Work as the caption track for one
+# language, replacing that language's caption rather than accumulating.
 #
 # The wait for the Work's primary file is load-bearing, not defensive: a caption
 # also carries the role `original_file`, so attaching one first lets a deposit
@@ -24,16 +24,21 @@ class CaptionJob < ApplicationJob
   # the deposit's own finalization even after the wait above.
   retry_on AtlasRb::StaleResourceError, attempts: 5, wait: :polynomially_longer
 
-  def perform(work_id, staged_path, original_filename, idempotency_key)
+  # `track` is { 'language', 'track_label' }. The English default covers a job
+  # queued before the form asked for a language.
+  def perform(work_id, staged_path, original_filename, idempotency_key, track = {})
     return unless File.exist?(staged_path)
     raise PrimaryFileMissing, "work #{work_id} has no primary file yet" unless primary_file?(work_id)
 
-    existing = CaptionTrack.for(AtlasRb::Work.assets(work_id))
+    language = track['language'] || CaptionTrack::LANGUAGE
+    write = { language: language, track_label: track['track_label'] || CaptionTrack::LABEL,
+              idempotency_key: idempotency_key }
+    existing = CaptionTrack.for_language(AtlasRb::Work.assets(work_id), language)
 
     if existing
-      AtlasRb::Blob.update(existing.noid, staged_path, idempotency_key: idempotency_key)
+      AtlasRb::Blob.update(existing.noid, staged_path, **write)
     else
-      AtlasRb::Blob.create(work_id, staged_path, original_filename, idempotency_key: idempotency_key)
+      AtlasRb::Blob.create(work_id, staged_path, original_filename, **write)
     end
   end
 end

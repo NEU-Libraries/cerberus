@@ -3,14 +3,14 @@
 require 'rails_helper'
 
 RSpec.describe 'works/_av_player', type: :view do
-  def render_player(mime:, preview:, downloadable: true, caption: nil, streaming_only: false)
+  def render_player(mime:, preview:, downloadable: true, captions: [], streaming_only: false)
     assign(:work, AtlasRb::Mash.new(preview: preview))
     render partial: 'works/av_player',
            locals:  { file:    AtlasRb::Mash.new(noid: 'b-1', mime_type: mime),
-                      caption: caption, downloadable: downloadable, streaming_only: streaming_only }
+                      captions: captions, downloadable: downloadable, streaming_only: streaming_only }
   end
 
-  let(:captions) { AtlasRb::Mash.new(noid: 'c-1', mime_type: 'text/vtt') }
+  let(:captions) { [AtlasRb::Mash.new(noid: 'c-1', mime_type: 'text/vtt')] }
 
   context 'audio with a poster' do
     before { render_player(mime: 'audio/mpeg', preview: 'https://iiif/x.jp2/full/500,/0/default.jpg') }
@@ -36,7 +36,7 @@ RSpec.describe 'works/_av_player', type: :view do
 
   # A bare <audio> element is one control bar tall, with nowhere to draw a caption.
   context 'audio without a poster but with captions' do
-    before { render_player(mime: 'audio/mpeg', preview: nil, caption: captions) }
+    before { render_player(mime: 'audio/mpeg', preview: nil, captions: captions) }
 
     it 'mounts on a <video> in audio-poster mode, carrying the track' do
       expect(rendered).to have_css('video.av-player__media track[kind="captions"][src="/media/c-1"]')
@@ -96,19 +96,31 @@ RSpec.describe 'works/_av_player', type: :view do
     end
 
     it 'renders the caption track inside the video element' do
-      render_player(mime: 'video/mp4', preview: nil, caption: captions)
+      render_player(mime: 'video/mp4', preview: nil, captions: captions)
       expect(rendered).to have_css('video track[kind="captions"][src="/media/c-1"]', visible: :all)
     end
 
-    it 'labels the track, since nothing records the real language' do
-      render_player(mime: 'video/mp4', preview: nil, caption: captions)
+    # A caption stored before Atlas kept a language was always offered as English.
+    it 'labels a caption with no recorded language as English' do
+      render_player(mime: 'video/mp4', preview: nil, captions: captions)
       expect(rendered).to have_css('track[srclang="en"][label="English"]', visible: :all)
+    end
+
+    it 'renders one track per language, with only the first on by default' do
+      render_player(mime: 'video/mp4', preview: nil, captions: [
+                      AtlasRb::Mash.new(noid: 'c-1', mime_type: 'text/vtt', language: 'en', track_label: 'English'),
+                      AtlasRb::Mash.new(noid: 'c-2', mime_type: 'text/vtt', language: 'es', track_label: 'Español')
+                    ])
+      tracks = Capybara.string(rendered).all('track', visible: :all)
+
+      expect(tracks.map { |t| [t[:srclang], t[:label]] }).to eq([%w[en English], %w[es Español]])
+      expect(tracks.map { |t| !t[:default].nil? }).to eq([true, false])
     end
 
     # /media, not /downloads: a caption is part of playing the file, so the
     # download gate a Streaming Only video closes must not take it down too.
     it 'serves the track from the media route even when the file may not be downloaded' do
-      render_player(mime: 'video/mp4', preview: nil, downloadable: false, caption: captions)
+      render_player(mime: 'video/mp4', preview: nil, downloadable: false, captions: captions)
       expect(rendered).to have_css('track[src="/media/c-1"]', visible: :all)
       expect(rendered).to have_no_link('Download it')
     end

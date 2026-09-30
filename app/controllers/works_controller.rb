@@ -203,7 +203,7 @@ class WorksController < ApplicationController
       @files = page_ordered_files(reads)
       @scholar = GoogleScholarMetadata.for(work: @work, permissions: @permissions, files: @files)
       @av_file = MediaRemux.playable_file(@files)
-      @caption = CaptionTrack.for(@files)
+      @captions = CaptionTrack.all(@files)
       # On the request thread, never in a worker: the gate is the search
       # service, and a worker holds no database connection.
       @associations = WorkAssociations.call(associations:   reads[:associations],

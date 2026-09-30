@@ -31,10 +31,10 @@ RSpec.describe 'Works captions', type: :request do
 
   # The descriptive fields ride along because the Captions field sits in the
   # Metadata tab's form, which always posts them.
-  def submit(file)
+  def submit(file, language: 'en', **other)
     patch work_path(work.id), params: {
       work:    { title: 'A river runs past the field', keywords: ['river'] },
-      caption: file
+      caption: file, caption_language: language, **other
     }
   end
 
@@ -60,26 +60,36 @@ RSpec.describe 'Works captions', type: :request do
       User.new(email: 'admin@example.com', password: 'password', nuid: '000000004',
                name: 'Ad, Min', role: 'admin', groups: [Permissions::STAFF_EDIT_GROUP])
     end
-    let(:caption) { AtlasRb::Mash.new(noid: 'cap-1', mime_type: 'text/vtt') }
+    let(:caption) { AtlasRb::Mash.new(noid: 'cap-1', mime_type: 'text/vtt', language: 'es', track_label: 'Español') }
+    let(:other_blob) { AtlasRb::Mash.new(noid: 'vid-1', mime_type: 'video/mp4') }
 
     before do
       allow(AtlasRb::Work).to receive(:assets).and_call_original
-      allow(AtlasRb::Work).to receive(:assets).with(work.id, anything).and_return([caption])
+      allow(AtlasRb::Work).to receive(:assets).with(work.id, anything).and_return([other_blob, caption])
       allow(AtlasRb::Blob).to receive(:destroy).and_return(instance_double(Faraday::Response, success?: true))
     end
 
-    it 'deletes the caption Blob for an admin and returns to the edit page' do
+    it 'deletes the chosen caption Blob for an admin and returns to the edit page' do
       sign_in admin
-      delete caption_work_path(work.id)
+      delete caption_work_path(work.id), params: { caption_id: 'cap-1' }
 
       expect(AtlasRb::Blob).to have_received(:destroy).with('cap-1', nuid: '000000004')
       expect(response).to redirect_to(edit_work_path(work.id))
-      expect(flash[:notice]).to eq('Caption file removed.')
+      expect(flash[:notice]).to eq('Español caption file removed.')
+    end
+
+    # The id arrives from the form, so it must name one of this Work's captions.
+    it 'refuses an id that is not one of the work\'s captions, and deletes nothing' do
+      sign_in admin
+      delete caption_work_path(work.id), params: { caption_id: 'vid-1' }
+
+      expect(flash[:alert]).to eq('This work has no such caption file.')
+      expect(AtlasRb::Blob).not_to have_received(:destroy)
     end
 
     it 'refuses an editor who is not an admin, and deletes nothing' do
       sign_in editor
-      delete caption_work_path(work.id)
+      delete caption_work_path(work.id), params: { caption_id: 'cap-1' }
 
       expect(response).to have_http_status(:forbidden)
       expect(AtlasRb::Blob).not_to have_received(:destroy)
@@ -88,9 +98,9 @@ RSpec.describe 'Works captions', type: :request do
     it 'says so when the work has no caption file' do
       allow(AtlasRb::Work).to receive(:assets).with(work.id, anything).and_return([])
       sign_in admin
-      delete caption_work_path(work.id)
+      delete caption_work_path(work.id), params: { caption_id: 'cap-1' }
 
-      expect(flash[:alert]).to eq('This work has no caption file.')
+      expect(flash[:alert]).to eq('This work has no such caption file.')
       expect(AtlasRb::Blob).not_to have_received(:destroy)
     end
   end
@@ -111,9 +121,30 @@ RSpec.describe 'Works captions', type: :request do
   describe 'as an in-group editor' do
     before { sign_in editor }
 
-    it 'stages the upload and queues CaptionJob' do
-      expect { submit(upload('captions.vtt')) }
-        .to have_enqueued_job(CaptionJob).with(work.id, kind_of(String), 'captions.vtt', kind_of(String))
+    it 'stages the upload and queues CaptionJob with the chosen language' do
+      expect { submit(upload('captions.vtt'), language: 'es') }
+        .to have_enqueued_job(CaptionJob)
+        .with(work.id, kind_of(String), 'captions.vtt', kind_of(String),
+              'language' => 'es', 'track_label' => 'Español')
+    end
+
+    it 'queues an Other language from its tag and label' do
+      expect do
+        submit(upload('captions.vtt'), language: 'other', caption_language_tag: 'es-MX',
+                                       caption_language_label: 'Español (México)')
+      end.to have_enqueued_job(CaptionJob)
+        .with(work.id, kind_of(String), 'captions.vtt', kind_of(String),
+              'language' => 'es-MX', 'track_label' => 'Español (México)')
+    end
+
+    # Atlas would refuse a malformed tag with 422 only after the job ran, where
+    # nobody would see it.
+    it 'refuses a malformed Other tag at the form, says why, and queues nothing' do
+      expect do
+        submit(upload('captions.vtt'), language: 'other', caption_language_tag: 'Spanish!',
+                                       caption_language_label: 'Español')
+      end.not_to have_enqueued_job(CaptionJob)
+      expect(flash[:alert]).to eq(CaptionTrack::REFUSED_LANGUAGE)
     end
 
     # A browser <track> reads WebVTT only, and this application converts nothing,

@@ -8,7 +8,7 @@
 -# redirects to a signed URL — rather than linking the URI directly. They are
 -# always image renditions, so they take the image icon even though the
 -# pointer-only delegate carries no mime type.
-- display_label = CaptionTrack.caption?(file) ? CaptionTrack::DOWNLOAD_LABEL : (file.label.presence || file[:use])
+- display_label = CaptionTrack.caption?(file) ? "#{CaptionTrack::DOWNLOAD_LABEL} (#{CaptionTrack.label(file)})" : (file.label.presence || file[:use])
 - icon = file[:uri].present? ? file_type_icon('image/jpeg') : file_type_icon(file.mime_type)
 %li.list-group-item.d-flex.align-items-center
   %span.fa-regular{class: icon, 'aria-hidden' => true}

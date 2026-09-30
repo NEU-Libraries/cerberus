@@ -3,8 +3,12 @@
 require 'rails_helper'
 
 RSpec.describe 'works/_captions', type: :view do
-  def render_section(caption: nil)
-    render partial: 'works/captions', locals: { caption: caption }
+  def render_section(captions: [], removable: false)
+    render partial: 'works/captions', locals: { captions: captions, removable: removable }
+  end
+
+  def caption(noid, language: nil, label: nil)
+    AtlasRb::Mash.new(noid: noid, mime_type: 'text/vtt', language: language, track_label: label)
   end
 
   it 'offers a file input the browser filters to WebVTT' do
@@ -14,7 +18,27 @@ RSpec.describe 'works/_captions', type: :view do
 
   it 'labels the input' do
     render_section
-    expect(rendered).to have_css('label[for="caption"]', text: 'Captions file')
+    expect(rendered).to have_css('label[for="caption"]', text: 'Caption file')
+  end
+
+  describe 'the language select' do
+    before { render_section }
+
+    it 'offers every listed language by tag, English first, then Other' do
+      values = Capybara.string(rendered).all('select#caption_language option').map(&:value)
+      expect(values).to eq(CaptionTrack::LANGUAGES.map(&:first) + [CaptionTrack::OTHER])
+    end
+
+    it 'names a language in English and in its own name' do
+      expect(rendered).to have_css('option[value="es"]', text: 'Spanish — Español')
+    end
+
+    # Hidden until Other is chosen, but present, so the fields submit when used.
+    it 'carries the Other tag and label fields, hidden until Other is chosen' do
+      expect(rendered).to have_css('[hidden] input#caption_language_tag[name="caption_language_tag"]', visible: :all)
+      expect(rendered).to have_css("input#caption_language_label[maxlength=\"#{CaptionTrack::LABEL_LIMIT}\"]",
+                                   visible: :all)
+    end
   end
 
   context 'when the work has no captions' do
@@ -33,26 +57,44 @@ RSpec.describe 'works/_captions', type: :view do
       expect(rendered).to have_no_css('.vtt')
     end
 
-    it 'offers no link to a file that does not exist' do
+    it 'lists no current files' do
+      expect(rendered).to have_no_css('.caption-tracks')
       expect(rendered).to have_no_link
     end
   end
 
-  context 'when the work already has captions' do
-    before { render_section(caption: AtlasRb::Mash.new(noid: 'c-1', mime_type: 'text/vtt')) }
+  context 'when the work has captions in two languages' do
+    let(:captions) { [caption('c-1'), caption('c-2', language: 'es', label: 'Español')] }
+
+    before { render_section(captions: captions) }
 
     # The media route, not the download one: a reader who can play the video can
     # read its captions, whatever the download gate says.
-    it 'links the current file for review' do
-      expect(rendered).to have_link('View the current caption file', href: '/media/c-1')
+    it 'lists each language with a link to its file' do
+      expect(rendered).to have_link('View', href: '/media/c-1')
+      expect(rendered).to have_link('View', href: '/media/c-2')
+      expect(rendered).to have_css('.caption-tracks__label[lang="es"]', text: 'Español')
     end
 
-    it 'says the file it replaces is kept' do
-      expect(rendered).to have_text('Older caption files are retained in this work’s version history.')
+    it 'shows each language tag as an identifier' do
+      expect(Capybara.string(rendered).all('.caption-tracks__tag').map(&:text)).to eq(%w[en es])
     end
 
-    it 'still states the format a replacement must be in' do
-      expect(rendered).to have_text('Caption files must be in WebVTT (.vtt) format.')
+    it 'says a same-language upload replaces that file and keeps the old one' do
+      expect(rendered).to have_text("replaces that language's file, and the earlier one is kept in its version history")
+    end
+
+    it 'offers no Remove unless the caller allows it' do
+      expect(rendered).to have_no_button('Remove')
+    end
+  end
+
+  context 'when Remove is allowed' do
+    before { render_section(captions: [caption('c-2', language: 'es', label: 'Español')], removable: true) }
+
+    it 'submits the remove form with that caption\'s id, after a named confirmation' do
+      expect(rendered).to have_css('button[form="remove-caption"][name="caption_id"][value="c-2"]' \
+                                   '[data-turbo-confirm^="Remove the Español caption file?"]')
     end
   end
 end

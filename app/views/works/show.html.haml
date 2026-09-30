@@ -80,7 +80,7 @@
         -# one, decided by the same per-asset gate as the downloads card.
         = render partial: 'av_player',
                  locals: { file:         @av_file,
-                           caption:      @caption,
+                           captions:     @captions,
                            downloadable: derivative_readable?(@av_file, embargo_date: @permissions&.embargo),
                            streaming_only: StreamingOnly.on?(StreamingOnly.policy_from(@work), tiers: StreamingOnly.tiers_for([@av_file]), read: @permissions&.read) }
       - else
