@@ -12,21 +12,13 @@ class CommunitiesController < CatalogController
   include RecordsImpressions
   include ContainerAnalytics
   include ContainerRestrictionRequest
+  include CommunitiesIndex
 
   atlas_resource AtlasRb::Community, key: :community, route: :community
   authorize_resource_writes!(extra_edit: %i[request_restriction])
   after_action :record_view_impression, only: :show
 
   MEMBERSHIP_FIELDS = [MembershipQuery::STRUCTURAL_FIELD, MembershipQuery::LINKED_FIELD].freeze
-
-  # Scope the inherited Blacklight index to Communities, on :index alone.
-  # Without it /communities lists every resource type; applied to :show it would
-  # strip the child Collections find_children has to surface.
-  def search_service_context
-    return super unless action_name == 'index'
-
-    super.merge(resource_type_scope: 'Community')
-  end
 
   # Before the find: Atlas refuses the People Community to everyone but full
   # admins, so the flag has to come from Solr (see StructuralContainers).

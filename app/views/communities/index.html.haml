@@ -1,0 +1,20 @@
+- content_for(:page_title) { 'Communities' }
+-# The heading well rides :container_header so it spans the full main width
+-# above the sidebar and results, as on the People index and the show pages.
+- content_for(:container_header) do
+  .container.p-4.my-3.well.rounded-3
+    .d-flex.align-items-start
+      .flex-grow-1
+        %h3.mb-1
+          %i.fa-solid.fa-users.text-primary.me-2{ 'aria-hidden' => 'true' }
+          Communities
+        .text-muted.mb-0 Browse Northeastern departments and groups by name.
+      - if @response.documents.present? || params[:q].present?
+        .ms-md-3
+          = render 'shared/scoped_search', path: communities_path, label: 'Search communities'
+
+- if @response.documents.present?
+  - content_for(:sidebar) do
+    = render 'catalog/search_sidebar'
+
+= render 'catalog/search_results'

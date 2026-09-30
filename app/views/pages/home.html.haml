@@ -12,7 +12,9 @@
 
 %section.my-4{ aria: { labelledby: 'featured-content-heading' } }
   %h2#featured-content-heading.h4.mb-3 Featured Content
-  .row.row-cols-2.row-cols-md-4.g-2
+  -# Nine gateways: three even rows of three, or one column on a phone, where
+  -# two columns wrapped the long labels to uneven heights.
+  .row.row-cols-1.row-cols-md-3.g-2
     - featured_gateways.each do |label, icon, href|
       .col
         = link_to href, class: 'featured-gateway featured-gateway--row' do
@@ -25,7 +27,9 @@
     -# documents-gallery scopes the shared 170×170 .document-thumbnail sizing
     -# (app/assets/stylesheets/_blacklight_discovery.scss) so these cards match
     -# the catalog gallery view's square thumbnails instead of rendering squashed.
-    .row.row-cols-2.row-cols-md-3.row-cols-lg-4.g-3.documents-gallery
+    -# One card per row on a phone, two by two on a tablet, four across on a
+    -# desktop, so HOME_RECENT_COUNT's four cards never leave a short row.
+    .row.row-cols-1.row-cols-md-2.row-cols-lg-4.g-3.documents-gallery
       - @recent_documents.each_with_index do |doc, i|
         = render Blacklight::Gallery::DocumentComponent.new(document: document_presenter(doc), counter: i + 1)
   - else

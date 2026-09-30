@@ -193,14 +193,20 @@ pagination are Blacklight's.
 
 ### Scoping the index
 
-`search_service_context` scopes the index action to Communities, and only the
-index action. Two things depend on that split:
+`CommunitiesIndex#search_service_context` scopes the index action to
+Communities, and only the index action. Two things depend on that split:
 
 - Without the scope, `/communities` inherits the unscoped browse and lists every
   resource type, Collections, Works and People included. The context key is
   `resource_type_scope`, and `SearchBuilder#scope_to_resource_type` applies it.
 - The show page must not be scoped. Its `find_children` surfaces the child
   Collections inside a community, which a Community-only filter would remove.
+
+The index is the homepage's Communities gateway, so it has its own view,
+`communities/index`, with the People index's heading well and a search scoped to
+communities. With no query it sorts by title, as v1's did, because relevance has
+nothing to rank and would list communities in the order they were made. A query
+keeps relevance.
 
 ### Hiding empty showcases
 

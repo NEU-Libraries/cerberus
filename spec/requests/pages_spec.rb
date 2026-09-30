@@ -34,6 +34,20 @@ RSpec.describe 'Pages', type: :request do
       expect(response.body).to include("href=\"#{people_path}\"")
     end
 
+    # The communities index, not the root community: a visitor browses the
+    # communities themselves, whatever the root is called or numbered.
+    it 'offers a Communities gateway into the communities index' do
+      expect(response.body).to include("href=\"#{communities_path}\"")
+      expect(response.body).to match(/featured-gateway__label">Communities</)
+    end
+
+    # Nine gateways fill three rows of three; a phone gets a single column.
+    it 'lays the nine gateways out in three columns, and one on a phone' do
+      grid = response.parsed_body.at_css('section[aria-labelledby="featured-content-heading"] .row')
+      expect(grid['class'].split).to include('row-cols-1', 'row-cols-md-3')
+      expect(grid.css('.featured-gateway').size).to eq(9)
+    end
+
     it 'surfaces the Recently Added Items section' do
       # The grid is driven by a gated query over the newest Works; its contents
       # are render-smoke-tested here (test Solr is nondeterministic) and the live
