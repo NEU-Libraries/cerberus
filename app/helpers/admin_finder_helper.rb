@@ -3,6 +3,7 @@
 # Shared view helpers for the admin finder and registry surfaces (re-parent,
 # linked members, deposit triage). See docs/admin.md.
 module AdminFinderHelper
+  # The same icon per type as the catalog. See docs/iconography.md.
   RESOURCE_ICONS = {
     'Collection' => 'fa-folder-open',
     'Community'  => 'fa-users',

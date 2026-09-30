@@ -22,6 +22,7 @@ module ApplicationHelper
     nuid_sign_in_available? ? atlas_login_path : new_user_session_path
   end
 
+  # One icon per concept, shared across the site. See docs/iconography.md.
   def document_type_icon(klass_type)
     case klass_type
     when 'Community'  then 'fa-users'
