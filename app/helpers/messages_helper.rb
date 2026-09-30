@@ -24,7 +24,7 @@ module MessagesHelper
 
   def message_group_chip(message)
     tag.span(class: 'inbox-group-chip') do
-      safe_join([tag.i(class: 'fa-solid fa-users me-1', 'aria-hidden': 'true'),
+      safe_join([tag.i(class: 'fa-solid fa-user-group me-1', 'aria-hidden': 'true'),
                  pretty_group_name(message.recipient_group)])
     end
   end

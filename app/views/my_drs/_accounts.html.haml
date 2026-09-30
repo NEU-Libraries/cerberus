@@ -32,7 +32,7 @@
                   Preferred
             %span.account-row__email.font-monospace= account['email']
             %p.account-row__meta.small.text-muted.mb-0.mt-1
-              %i.fa-solid.fa-users.me-1{ 'aria-hidden' => 'true' }
+              %i.fa-solid.fa-user-group.me-1{ 'aria-hidden' => 'true' }
               = pluralize(Array(account['groups']).size, 'group')
             - if single && Array(account['groups']).any?
               - shown, extra = account_diff_chips(Array(account['groups']).map { |raw| pretty_group_name(raw) }.sort)
