@@ -31,7 +31,7 @@
             (fragment = @document.highlight_field('full_text_tsim').find(&:present?)) %>
         <div class="full-text-match">
           <div class="full-text-match__label">Full Text Match</div>
-          <div class="full-text-match__snippet">… <%= sanitize(fragment, tags: %w[em]) %> …</div>
+          <div class="full-text-match__snippet mb-2">… <%= sanitize(fragment, tags: %w[em]) %> …</div>
         </div>
       <% end %>
 
