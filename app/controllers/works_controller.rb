@@ -36,6 +36,7 @@ class WorksController < ApplicationController
   DERIVATIVE_DEFAULT_FAILED = 'File uploaded — please review the metadata. The collection\'s download ' \
                               'restrictions could not be applied to it; contact DRS staff before sharing it.'
   UNSUPPORTED_AV = 'DRS streams H.264/AAC video and AAC/MP3 audio — please convert your file first.'
+  TERMS_REQUIRED = 'Please accept the Terms of Participation to deposit a file.'
 
   before_action :authorize_show!, only: [:downloads, :manifest]
   authorize_resource_writes!(extra_edit: %i[metadata update_metadata request_change upload add_file remove_caption
@@ -115,6 +116,7 @@ class WorksController < ApplicationController
   def create
     file = params[:binary]
 
+    return redirect_to(new_child_path('work'), alert: TERMS_REQUIRED) unless params[:terms_accepted] == '1'
     return redirect_to(new_child_path('work'), alert: UNSUPPORTED_AV) if unsupported_av?(file)
 
     create_at_destination(file)

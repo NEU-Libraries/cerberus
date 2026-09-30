@@ -213,7 +213,7 @@ describe WorksController do
 
     it 'enqueues both jobs and redirects to the metadata page' do
       expect do
-        post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id }
       end.to have_enqueued_job(IiifAssetsJob)
         .and have_enqueued_job(ContentCreationJob)
@@ -225,7 +225,7 @@ describe WorksController do
     # complete_work: false is what keeps the deposit in_progress until its
     # depositor saves the metadata page — and hidden from the public until then.
     it 'leaves the work for its depositor to complete rather than completing on ingest' do
-      post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+      post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                               collection_id: collection.id }
 
       expect(ContentCreationJob).to have_been_enqueued.with(anything, anything, anything, anything,
@@ -235,7 +235,7 @@ describe WorksController do
     # The filename title is written before the depositor sees the metadata
     # page, so it must not read as a Metadata form edit in the audit log.
     it 'tags the filename titling as the deposit, not the Metadata form' do
-      post :create, params: { binary:        fixture_file_upload('plain.txt', 'text/plain'),
+      post :create, params: { terms_accepted: '1', binary: fixture_file_upload('plain.txt', 'text/plain'),
                               collection_id: collection.id }
 
       expect(mods_edit_origins(assigns(:work).id)).to eq(['deposit'])
@@ -243,7 +243,7 @@ describe WorksController do
 
     it 'does not enqueue any enrichment job for unenriched uploads' do
       expect do
-        post :create, params: { binary:        fixture_file_upload('plain.txt', 'text/plain'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('plain.txt', 'text/plain'),
                                 collection_id: collection.id }
       end.to have_enqueued_job(ContentCreationJob)
         .with(anything, anything, 'plain.txt', a_string_matching(uuid_re), complete_work: false)
@@ -253,7 +253,7 @@ describe WorksController do
 
     it 'routes PDF uploads to IiifAssetsJob for first-page thumbnails' do
       expect do
-        post :create, params: { binary:        fixture_file_upload('example.pdf', 'application/pdf'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('example.pdf', 'application/pdf'),
                                 collection_id: collection.id }
       end.to have_enqueued_job(IiifAssetsJob)
         .and have_enqueued_job(ContentCreationJob)
@@ -263,12 +263,20 @@ describe WorksController do
     it 'routes Word uploads to PdfRenditionJob with a derived rendition key' do
       docx_mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
       expect do
-        post :create, params: { binary:        fixture_file_upload('example.docx', docx_mime),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('example.docx', docx_mime),
                                 collection_id: collection.id }
       end.to have_enqueued_job(PdfRenditionJob)
         .with(anything, anything, a_string_matching(uuid_re), refresh: false)
         .and have_enqueued_job(ContentCreationJob)
         .and not_have_enqueued_job(IiifAssetsJob)
+    end
+
+    it 'refuses a deposit whose terms box is unticked, before creating a work' do
+      expect(AtlasRb::Work).not_to receive(:create)
+      post :create, params: { binary: fixture_file_upload('image.png', 'image/png'), collection_id: collection.id }
+
+      expect(response).to redirect_to(new_collection_work_path(collection.id))
+      expect(flash[:alert]).to eq(described_class::TERMS_REQUIRED)
     end
 
     it 'rejects an A/V upload outside the safe codec set without creating a work' do
@@ -277,7 +285,7 @@ describe WorksController do
       allow(Marcel::MimeType).to receive(:for).and_return('video/quicktime')
 
       expect(AtlasRb::Work).not_to receive(:create)
-      post :create, params: { binary:        fixture_file_upload('image.png', 'video/quicktime'),
+      post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'video/quicktime'),
                               collection_id: collection.id }
 
       expect(response).to redirect_to(new_collection_work_path(collection.id))
@@ -285,7 +293,7 @@ describe WorksController do
     end
 
     it 'seeds the work title from the uploaded filename via the structure-safe MODS path' do
-      post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+      post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                               collection_id: collection.id }
       work_id = assigns(:work).id
       expect(AtlasRb::Work.find(work_id).title).to eq('image.png')
@@ -297,7 +305,7 @@ describe WorksController do
       it 'explicitly attributes to the acting user when upload_as is missing (default)' do
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id }
 
         expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
@@ -306,7 +314,7 @@ describe WorksController do
       it 'explicitly attributes to the acting user when upload_as is "myself"' do
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id,
                                 upload_as:     'myself' }
 
@@ -316,7 +324,7 @@ describe WorksController do
       it 'forwards the parent collection depositor when upload_as is "proxy"' do
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id,
                                 upload_as:     'proxy' }
 
@@ -330,7 +338,7 @@ describe WorksController do
         # the operating admin. (proxy_uploader-empty is enforced Atlas-side.)
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params:  { binary:        fixture_file_upload('image.png', 'image/png'),
+        post :create, params:  { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                  collection_id: collection.id,
                                  upload_as:     'myself' },
                       session: { acting_as_nuid: '000000002' }
@@ -360,7 +368,7 @@ describe WorksController do
         allow(AtlasRb::System::Work).to receive(:add_linked_member)
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id, publish: '1',
                                 publish_community_id: 'comm1', publish_genre: 'Datasets' }
 
@@ -380,7 +388,7 @@ describe WorksController do
         allow(AtlasRb::System::Work).to receive(:add_linked_member)
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params:  { binary: fixture_file_upload('image.png', 'image/png'),
+        post :create, params:  { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                  collection_id: collection.id, publish: '1',
                                  publish_community_id: 'comm1', publish_genre: 'Datasets' },
                       session: { acting_as_nuid: '000000002' }
@@ -408,7 +416,7 @@ describe WorksController do
         allow(ShowcaseFinder).to receive(:call).and_return('tdnoid')
         allow(AtlasRb::System::Work).to receive(:add_linked_member)
 
-        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id, publish: '1',
                                 publish_community_id: 'comm1', publish_genre: 'Theses & Dissertations' }
 
@@ -424,7 +432,7 @@ describe WorksController do
         allow(AtlasRb::System::Work).to receive(:add_linked_member).and_raise(AtlasRb::ForbiddenError.new('forbidden'))
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id, publish: '1',
                                 publish_community_id: 'comm1', publish_genre: 'Datasets' }
 
@@ -481,7 +489,7 @@ describe WorksController do
           allow(AtlasRb::System::Work).to receive(:add_linked_member)
           allow(AtlasRb::Work).to receive(:create).and_call_original
 
-          post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+          post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                   collection_id: collection.id, upload_as: 'proxy', publish: '1',
                                   publish_community_id: 'comm1', publish_genre: 'Datasets' }
 
@@ -499,7 +507,7 @@ describe WorksController do
           allow(ShowcaseFinder).to receive(:call).and_return('showcasenoid')
           allow(AtlasRb::System::Work).to receive(:add_linked_member)
 
-          post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+          post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                   collection_id: collection.id, upload_as: 'myself', publish: '1',
                                   publish_community_id: 'comm1', publish_genre: 'Datasets' }
 
@@ -519,7 +527,7 @@ describe WorksController do
         allow(Sentinel).to receive(:apply_default)
           .and_raise(AtlasRb::DerivativePermissionsError.new('a derivative tier cannot be more visible than the Work'))
 
-        post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id }
 
         expect(response).to redirect_to(metadata_work_path(assigns(:work).id))
@@ -537,7 +545,7 @@ describe WorksController do
         allow(AtlasRb::System::Work).to receive(:add_linked_member)
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id, publish: '1',
                                 publish_community_id: 'comm1', publish_genre: 'Datasets' }
 
@@ -553,7 +561,7 @@ describe WorksController do
         allow(AtlasRb::System::Work).to receive(:add_linked_member)
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id }
 
         expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
@@ -586,7 +594,7 @@ describe WorksController do
       end
 
       def deposit(**overrides)
-        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id, publish: '1',
                                 publish_community_id: 'comm1', publish_genre: 'Datasets' }.merge(overrides)
       end

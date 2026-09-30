@@ -58,6 +58,18 @@
       - if @publish_targets.present? && @publishing_for
         = render 'works/promote', targets: @publish_targets, owner: @publishing_for
 
+      -# Checked again on the server; the acceptance itself is not recorded.
+      .deposit-form__field
+        %span.deposit-form__field-label Terms
+        .form-check
+          = check_box_tag 'terms_accepted', '1', false, class: 'form-check-input', id: 'terms_accepted', required: true
+          %label.form-check-label{for: 'terms_accepted'}
+            I have read and I accept the
+            = succeed "." do
+              = link_to 'Terms of Participation', terms_path, target: '_blank', rel: 'noopener'
+        %p.deposit-form__field-hint
+          The terms open in a new tab.
+
   .deposit-form__actions
     .deposit-form__next-hint
       %i.fa-solid.fa-arrow-right{'aria-hidden' => 'true'}

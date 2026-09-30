@@ -28,6 +28,16 @@ RSpec.describe 'Works deposit form', type: :request do
     expect(response.body).not_to include(%(action="#{new_collection_work_path(collection.id)}"))
   end
 
+  it 'requires the terms box, which links the terms in a new tab' do
+    get new_collection_work_path(collection.id)
+
+    box = response.parsed_body.at_css('input#terms_accepted')
+    expect(box['required']).to be_present
+    expect(box['value']).to eq('1')
+    link = response.parsed_body.at_css("label[for=terms_accepted] a[href='#{terms_path}']")
+    expect(link['target']).to eq('_blank')
+  end
+
   # The action has to be a route that accepts POST — the failure mode here was a
   # form pointing at a GET-only path, which only shows up on submit.
   it 'names a path that routes to works#create' do
