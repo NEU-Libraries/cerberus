@@ -87,12 +87,15 @@ class WorksController < ApplicationController
   # parent segment, already :edit-gated by authorize_destination!.
   def new
     @work = Work.new
-    @parent = require_resource!(AtlasRb::Collection.find(@destination_id))
+    @parent = require_resource!(destination_collection)
 
     # Required: without it form_tag posts back to /collections/:id/works/new,
     # which routes nowhere for POST, and the deposit 404s on submit.
     @create_path = child_create_path('works')
-    @publish_targets = publish_offered? ? publish_targets : {}
+    @publishing_for = workspace_owner if publishing_for_someone_else?
+    # Publishing for someone else needs the proxy radio; without it the server
+    # would refuse the promotion, so the form must not offer it.
+    @publish_targets = publish_offered? && (@publishing_for.nil? || offers_proxy_deposit?) ? publish_targets : {}
   end
 
   def edit

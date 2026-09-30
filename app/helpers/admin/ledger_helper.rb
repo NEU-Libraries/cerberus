@@ -29,9 +29,10 @@ module Admin
     # Plain words for the refusal tokens the payload stores. The payload keeps
     # the token so the reason stays queryable; the page speaks English.
     PROMOTION_REASONS = {
-      'not_personal_root' => 'The deposit was not in the depositor’s own space, so the form never offered it.',
-      'no_showcase'       => 'That community has no showcase for the genre, or the depositor cannot see it.',
-      'atlas_forbidden'   => 'Atlas refused the link. The showcase may not be marked featured.'
+      'not_personal_root'   => 'The deposit was not in a person’s workspace, so the form never offered it.',
+      'not_workspace_owner' => 'It was published from someone else’s workspace without a proxy deposit for them.',
+      'no_showcase'         => 'That community has no showcase for the genre, or the depositor cannot see it.',
+      'atlas_forbidden'     => 'Atlas refused the link. The showcase may not be marked featured.'
     }.freeze
 
     # Narrowing a community does not cascade, and no form offers it — so

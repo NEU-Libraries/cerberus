@@ -36,11 +36,29 @@ module DepositorContext
       effective_user.nuid.to_s.gsub(/["\\]/, '')
     end
 
-    # Empty hides the publish branch entirely, so the personal_root_id check is
-    # the gate on publishing, not a display detail.
+    # The Person whose personal root the destination is: the depositor's own, or
+    # another person's that staff are depositing into for them. Nil for any
+    # other destination, which is what keeps promotion to workspaces. See
+    # docs/deposit.md ("Publishing for someone else").
+    def workspace_owner
+      return @workspace_owner if defined?(@workspace_owner)
+
+      own = deposit_person
+      @workspace_owner = own if own && own['personal_root_id'].to_s == @destination_id.to_s
+      @workspace_owner ||= other_workspace_owner
+    end
+
+    # True when the workspace is someone else's, so a promotion has to be made
+    # as a proxy deposit for them.
+    def publishing_for_someone_else?
+      workspace_owner.present? && workspace_owner['nuid'].to_s != effective_user&.nuid.to_s
+    end
+
+    # Empty hides the publish branch entirely, so the owner check is the gate on
+    # publishing, not a display detail.
     def publish_targets
-      person = deposit_person
-      return {} unless person && person['personal_root_id'].present?
+      person = workspace_owner
+      return {} unless person
 
       Array(person['affiliated_community_ids']).each_with_object({}) do |noid, targets|
         genres = ShowcaseFinder.call(scope: self, community_noid: noid).except(*FeaturedContent::STAFF_ONLY)
@@ -50,11 +68,10 @@ module DepositorContext
       end
     end
 
-    # Resolves a showcase only — it does NOT check where the Work is going. The
-    # caller must confirm separately that the destination is the depositor's own
-    # root before offering promotion.
+    # Resolves a showcase in one of the workspace owner's communities only. The
+    # caller must confirm separately that the Work's depositor is that owner.
     def publish_showcase_id
-      person = deposit_person
+      person = workspace_owner
       return nil if person.blank?
 
       community_noid = params[:publish_community_id].to_s
@@ -63,6 +80,24 @@ module DepositorContext
 
       ShowcaseFinder.call(scope: self, community_noid: community_noid,
                           genre_label: params[:publish_genre])
+    end
+
+    # Atlas mints a personal root with its owner as depositor, and the owner's
+    # Person names it back as personal_root_id. Both have to agree.
+    def other_workspace_owner
+      root = destination_collection
+      return nil unless root && root['personal_root'] && root['depositor'].present?
+
+      person = Array(AtlasRb::Person.resolve([root['depositor']])).first
+      person if person && person['personal_root_id'].to_s == @destination_id.to_s
+    rescue AtlasRb::Error, Faraday::Error, JSON::ParserError
+      nil
+    end
+
+    def destination_collection
+      return @destination_collection if defined?(@destination_collection)
+
+      @destination_collection = (AtlasRb::Collection.find(@destination_id) if @destination_id.present?)
     end
 
     def community_name(noid)

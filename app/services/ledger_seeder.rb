@@ -20,7 +20,7 @@ class LedgerSeeder
 
   # Enough of each refusal to show every reason the ledger explains, since those
   # are the rows staff read the showcase list for.
-  REFUSAL_REASONS = %w[no_showcase not_personal_root atlas_forbidden].freeze
+  REFUSAL_REASONS = %w[no_showcase not_personal_root not_workspace_owner atlas_forbidden].freeze
 
   PLACEHOLDER_WORKS = [
     'Coastal erosion survey, 2026',

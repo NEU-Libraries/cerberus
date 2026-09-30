@@ -7,23 +7,32 @@
 module WorkDeposit
   extend ActiveSupport::Concern
 
+  included do
+    helper_method :offers_proxy_deposit?
+  end
+
   private
+
+    # The Ownership radios, and so a proxy deposit, are for admins and privileged
+    # users, and never while acting as someone: impersonation already fixes who
+    # the depositor is.
+    def offers_proxy_deposit?
+      (effective_user&.admin? || effective_user&.privileged?) && !acting_as?
+    end
 
     # The Work lives where the depositor navigated; nothing later moves it.
     def create_at_destination(file)
-      parent = require_resource!(AtlasRb::Collection.find(@destination_id))
+      parent = require_resource!(destination_collection)
 
       @depositor_nuid = deposit_attribution(parent)
       @work = AtlasRb::Work.create(parent.id, depositor: @depositor_nuid)
       finalize_new_work(file, parent.id)
     end
 
-    # Keys on the DESTINATION being the depositor's own personal root, not on
-    # which button you arrived by, so it can't be sidestepped by typing a URL.
-    # See docs/deposit.md.
+    # Keys on the DESTINATION being a person's personal root, not on which button
+    # you arrived by, so it can't be sidestepped by typing a URL. See docs/deposit.md.
     def publish_offered?
-      root = deposit_person&.[]('personal_root_id').presence
-      root.present? && root.to_s == @destination_id.to_s
+      workspace_owner.present?
     end
 
     # A promotion that can't be honoured leaves the deposit standing and flags
@@ -31,6 +40,10 @@ module WorkDeposit
     def promote_if_requested
       return unless ActiveModel::Type::Boolean.new.cast(params[:publish])
       return refuse_promotion('not_personal_root') unless publish_offered?
+      # A showcase entry is the depositor's own, so in someone else's workspace
+      # the deposit must be a proxy for them. The form hides the option until
+      # Proxy is chosen; this is the rule, not a courtesy.
+      return refuse_promotion('not_workspace_owner') unless @depositor_nuid.to_s == workspace_owner['nuid'].to_s
 
       showcase_id = publish_showcase_id
       return refuse_promotion('no_showcase') if showcase_id.blank?

@@ -1,6 +1,6 @@
 -# The destination is the route's parent segment, so this form only asks what to
 -# deposit — and, from the depositor's own root, whether to also promote it.
-= form_tag(@create_path, multipart: true, class: 'deposit-form my-3', data: (@publish_targets.present? ? { controller: 'deposit-promotion', 'deposit-promotion-genres-value': @publish_targets.transform_values { |target| target[:genres] } } : {})) do |f|
+= form_tag(@create_path, multipart: true, class: 'deposit-form my-3', data: (@publish_targets.present? ? { controller: 'deposit-promotion', 'deposit-promotion-genres-value': @publish_targets.transform_values { |target| target[:genres] }, 'deposit-promotion-requires-proxy-value': @publishing_for.present? } : {})) do |f|
 
   .deposit-form__panel
     %header.deposit-form__head
@@ -14,37 +14,16 @@
         .well.p-3.rounded-3
           .deposit-form__radio-title
             %i.fa-solid.fa-folder-open{'aria-hidden' => 'true'}
-            = enhanced_text(@parent.title)
+            = @publishing_for ? "#{@publishing_for['display_name']}’s workspace" : enhanced_text(@parent.title)
           .deposit-form__radio-desc.mt-1
             The new work will be added to this collection.
 
-      -# Promotion — an optional extra act, not a destination. Offered only from
-      -# the depositor's own personal root (WorksController#publish_offered?),
-      -# which is what keeps a promoted Work in their own space.
-      - if @publish_targets.present?
-        %fieldset.deposit-form__field.deposit-form__promote
-          %label.deposit-form__radio{for: 'publish'}
-            = check_box_tag 'publish', '1', false, class: 'deposit-form__radio-input', id: 'publish', data: { action: 'deposit-promotion#toggle' }
-            .deposit-form__radio-body
-              .deposit-form__radio-title
-                %i.fa-solid.fa-graduation-cap{'aria-hidden' => 'true'}
-                Also promote to a community showcase
-              .deposit-form__radio-desc
-                Surfaces this work in your community's featured showcase for a category — a deliberate, public act. It still lives here.
-          .deposit-form__promote-fields.d-none{data: { 'deposit-promotion-target' => 'fields' }}
-            - if @publish_targets.size > 1
-              %label.deposit-form__field-label{for: 'publish_community_id'} Community
-              %select.form-select#publish_community_id{name: 'publish_community_id', data: { 'deposit-promotion-target' => 'community', action: 'deposit-promotion#communityChanged' }}
-                - @publish_targets.each do |noid, target|
-                  %option{value: noid}= target[:name]
-            - else
-              = hidden_field_tag 'publish_community_id', @publish_targets.keys.first
-            %label.deposit-form__field-label.mt-3{for: 'publish_genre'} Category
-            %select.form-select#publish_genre{name: 'publish_genre', data: { 'deposit-promotion-target' => 'genre' }}
-              -# Populated by Stimulus from the genres value; the first community's
-              -# genres are rendered here as a no-JS fallback.
-              - @publish_targets.values.first[:genres].each_key do |label|
-                %option{value: label}= label
+      -# Promotion — an optional extra act, not a destination. Offered only into
+      -# a person's personal root (WorksController#publish_offered?), which keeps a
+      -# promoted Work in their own space. In someone else's workspace it waits
+      -# under Ownership for a proxy deposit instead; see below.
+      - if @publish_targets.present? && @publishing_for.nil?
+        = render 'works/promote', targets: @publish_targets, owner: nil
 
       .deposit-form__field
         %label.deposit-form__field-label{for: 'binary'} File
@@ -55,12 +34,12 @@
       -# Hidden during an acting-as session: impersonation already fixes the
       -# attribution (to the target), so offering the proxy radio would be a
       -# second, conflicting attribution mechanism. See WorksController#deposit_attribution.
-      - if (effective_user&.admin? || effective_user&.privileged?) && !acting_as?
+      - if offers_proxy_deposit?
         %fieldset.deposit-form__field
           %legend.deposit-form__field-label Ownership
           .deposit-form__radio-grid
             %label.deposit-form__radio{for: 'upload_as_myself'}
-              = radio_button_tag 'upload_as', 'myself', true, class: 'deposit-form__radio-input', id: 'upload_as_myself'
+              = radio_button_tag 'upload_as', 'myself', true, class: 'deposit-form__radio-input', id: 'upload_as_myself', data: { action: 'deposit-promotion#proxyChanged' }
               .deposit-form__radio-body
                 .deposit-form__radio-title
                   %i.fa-solid.fa-user{'aria-hidden' => 'true'}
@@ -68,13 +47,16 @@
                 .deposit-form__radio-desc
                   You will be recorded as the depositor in the audit trail.
             %label.deposit-form__radio{for: 'upload_as_proxy'}
-              = radio_button_tag 'upload_as', 'proxy', false, class: 'deposit-form__radio-input', id: 'upload_as_proxy'
+              = radio_button_tag 'upload_as', 'proxy', false, class: 'deposit-form__radio-input', id: 'upload_as_proxy', data: { action: 'deposit-promotion#proxyChanged' }
               .deposit-form__radio-body
                 .deposit-form__radio-title
                   %i.fa-solid.fa-people-arrows{'aria-hidden' => 'true'}
                   Proxy deposit
                 .deposit-form__radio-desc
                   You are depositing this file on behalf of the collection owner. You will be recorded as the proxy depositor in the audit trail and the collection owner will be recorded as the depositor.
+
+      - if @publish_targets.present? && @publishing_for
+        = render 'works/promote', targets: @publish_targets, owner: @publishing_for
 
   .deposit-form__actions
     .deposit-form__next-hint

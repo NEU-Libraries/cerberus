@@ -129,11 +129,42 @@ Promotion surfaces the new Work in a community genre showcase via a
 linked-member edge. It is orthogonal to placement: the Work's structural home
 is wherever it was just deposited, and promotion does not touch it.
 
-`WorkDeposit#publish_offered?` offers promotion only when the destination is
-the depositor's own personal root. The route decides placement, so this check
-is what keeps a promoted Work in the depositor's own space. It keys on the
-destination, not on the button the depositor arrived by, so typing a URL cannot
-sidestep it.
+`WorkDeposit#publish_offered?` offers promotion only when the destination is a
+person's personal root: `DepositorContext#workspace_owner` resolves that person.
+The route decides placement, so this check is what keeps a promoted Work in its
+owner's own space. It keys on the destination, not on the button the depositor
+arrived by, so typing a URL cannot sidestep it.
+
+### Publishing for someone else
+
+Staff reach another person's workspace from that person's profile (the
+breadcrumb Add), and can deposit there for them as a proxy. The workspace owner
+is the Person whose root the destination is, resolved from both sides:
+
+1. Atlas mints a personal root with `personal_root: true`, and its owner as
+   `depositor`.
+2. `Person.resolve` of that depositor must name this root as its
+   `personal_root_id`.
+
+When the owner is someone other than the signed-in user, three things follow:
+
+- **The targets are the owner's.** `publish_targets` and `publish_showcase_id`
+  read the owner's affiliated communities, not the signed-in user's, and leave
+  out `FeaturedContent::STAFF_ONLY`, exactly as on the owner's own form.
+- **A proxy deposit is required.** A showcase entry is its depositor's own, and
+  only a proxy deposit makes the owner the depositor. `promote_if_requested`
+  refuses with `not_workspace_owner` unless the Work's depositor is the owner.
+  The form enforces the same rule: `works/_promote` renders under Ownership,
+  hidden until Proxy deposit is chosen (`deposit_promotion_controller.js`,
+  `requiresProxy`), and turning Proxy off unticks and disables the promotion.
+  The server check is the rule; the form only keeps it honest.
+- **It needs the proxy radio.** `offers_proxy_deposit?` (admins and privileged
+  users, never while acting as someone) decides both the radio and whether the
+  form offers publishing here. Without the radio the promotion could never be
+  honoured, so the form offers none.
+
+The destination panel names the owner ("Jane Doe's workspace") rather than
+the root's stored title, "Personal Root", which says nothing about whose it is.
 
 The showcase link is a `:system`-attributed write (`AtlasRb::System::Work`),
 not a call the depositor's own credential could make. Atlas scopes `:system`'s
@@ -151,17 +182,18 @@ failed. `@publish_link_failed` lets `#create` say exactly that, rather than a
 false "published" notice or a 403 page hiding a Work the depositor can already
 see.
 
-### The two refusals
+### The refusals
 
-`WorkDeposit#promote_if_requested` refuses in two cases before it tries:
+`WorkDeposit#promote_if_requested` refuses in three cases before it tries:
 
 | Reason token | Meaning |
 |---|---|
-| `not_personal_root` | The destination is not the depositor's own root, so the form never offered promotion here — a typed URL, or a tampered field |
+| `not_personal_root` | The destination is not a person's personal root, so the form never offered promotion here — a typed URL, or a tampered field |
+| `not_workspace_owner` | The destination is someone else's workspace, and the deposit was not a proxy for them, so its depositor is not the owner |
 | `no_showcase` | `DepositorContext#publish_showcase_id` found nothing: the depositor is not affiliated with that community, the genre is staff-only (`FeaturedContent::STAFF_ONLY`), no showcase exists for that genre there, or the depositor cannot see the one that does |
 
-A third refusal, `atlas_forbidden`, is the `ForbiddenError` rescue above. All
-three set `@publish_link_failed`.
+A fourth refusal, `atlas_forbidden`, is the `ForbiddenError` rescue above. All
+four set `@publish_link_failed`.
 
 A promotion that cannot be honoured leaves the deposit standing. The Work
 already exists and is correctly placed, so there is nothing to roll back.

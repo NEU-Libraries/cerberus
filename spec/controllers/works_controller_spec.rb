@@ -345,10 +345,13 @@ describe WorksController do
     # deposit standing.
     context 'promotion to a community showcase' do
       # publish_offered? requires the destination to BE the depositor's own root.
+      # Resolves whoever is asked for, as Atlas does, so an acting-as target
+      # resolves as themselves rather than as the signed-in admin.
       def stub_person_rooted_at(collection_id)
-        person = AtlasRb::Mash.new('nuid' => user.nuid, 'personal_root_id' => collection_id,
-                                   'affiliated_community_ids' => ['comm1'])
-        allow(AtlasRb::Person).to receive(:resolve).and_return([person])
+        allow(AtlasRb::Person).to receive(:resolve) do |nuids|
+          [AtlasRb::Mash.new('nuid' => nuids.first, 'personal_root_id' => collection_id,
+                             'affiliated_community_ids' => ['comm1'])]
+        end
       end
 
       it 'links the work into the showcase while leaving it in the destination' do
@@ -430,6 +433,82 @@ describe WorksController do
         expect(flash[:notice]).to eq(described_class::PUBLISH_LINK_FAILED)
       ensure
         AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
+      # Staff proxy-publish: the destination is SOMEONE ELSE'S personal root. The
+      # collection is marked as the owner's root, and the owner resolves with that
+      # root, as Atlas mints them.
+      context 'in someone else\'s workspace' do
+        let(:owner_nuid) { '000000006' }
+        let(:admin) { User.new(email: 'admin@example.com', nuid: '000000004', role: 'admin', groups: ['editors']) }
+
+        before do
+          allow(AtlasRb::Collection).to receive(:find).and_wrap_original do |original, id, *rest, **kw|
+            found = original.call(id, *rest, **kw)
+            id.to_s == collection.id.to_s ? found.merge('personal_root' => true, 'depositor' => owner_nuid) : found
+          end
+          allow(AtlasRb::Person).to receive(:resolve) do |nuids|
+            root = nuids.first == owner_nuid ? collection.id : 'elsewhere'
+            [AtlasRb::Mash.new('nuid' => nuids.first, 'display_name' => 'Jane Doe', 'personal_root_id' => root,
+                               'affiliated_community_ids' => ['comm1'])]
+          end
+          allow(AtlasRb::Community).to receive(:find).with('comm1').and_return(AtlasRb::Mash.new('title' => 'A Community'))
+        end
+
+        it 'offers the owner\'s showcases, and names the owner, to staff who can proxy' do
+          sign_in admin
+          allow(ShowcaseFinder).to receive(:call).and_return('Datasets' => 'ds1')
+
+          get :new, params: { collection_id: collection.id }
+
+          expect(assigns(:publishing_for)['nuid']).to eq(owner_nuid)
+          expect(assigns(:publish_targets).keys).to eq(['comm1'])
+        end
+
+        # Without the proxy radio the promotion could never be honoured.
+        it 'offers no publishing to a user who cannot choose a proxy deposit' do
+          allow(ShowcaseFinder).to receive(:call).and_return('Datasets' => 'ds1')
+
+          get :new, params: { collection_id: collection.id }
+
+          expect(assigns(:publishing_for)['nuid']).to eq(owner_nuid)
+          expect(assigns(:publish_targets)).to eq({})
+        end
+
+        it 'links a proxy deposit into the owner\'s showcase, on the owner\'s behalf' do
+          sign_in admin
+          allow(ShowcaseFinder).to receive(:call).and_return('showcasenoid')
+          allow(AtlasRb::System::Work).to receive(:add_linked_member)
+          allow(AtlasRb::Work).to receive(:create).and_call_original
+
+          post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+                                  collection_id: collection.id, upload_as: 'proxy', publish: '1',
+                                  publish_community_id: 'comm1', publish_genre: 'Datasets' }
+
+          expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: owner_nuid)
+          expect(AtlasRb::System::Work).to have_received(:add_linked_member)
+            .with(assigns(:work).id, 'showcasenoid', on_behalf_of: owner_nuid)
+        ensure
+          AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
+        end
+
+        # A showcase entry is its depositor's own; a self-deposit here would put
+        # staff's own work in the owner's showcase.
+        it 'refuses to publish a self-deposit, but keeps the deposit and records why' do
+          sign_in admin
+          allow(ShowcaseFinder).to receive(:call).and_return('showcasenoid')
+          allow(AtlasRb::System::Work).to receive(:add_linked_member)
+
+          post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+                                  collection_id: collection.id, upload_as: 'myself', publish: '1',
+                                  publish_community_id: 'comm1', publish_genre: 'Datasets' }
+
+          expect(AtlasRb::System::Work).not_to have_received(:add_linked_member)
+          expect(flash[:notice]).to eq(described_class::PUBLISH_LINK_FAILED)
+          expect(AdminNotice.where(kind: 'showcase_promotion').last.payload['reason']).to eq('not_workspace_owner')
+        ensure
+          AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
+        end
       end
 
       # Atlas refuses a derivative tier more visible than its Work. The collection
