@@ -3,7 +3,7 @@
 .admin-registry.my-3
   %header.admin-registry__head
     %span.admin-registry__title
-      %i.fa-solid.fa-users{'aria-hidden' => 'true'}
+      %i.fa-solid.fa-user{'aria-hidden' => 'true'}
       People registry
       -# A count only when it is the whole registry: a full page may not be.
       - if @people.any? && @page == 1 && !@more
@@ -64,7 +64,7 @@
       = link_to 'Previous page', admin_people_path(page: @page - 1), class: 'btn btn-tonal-secondary btn-sm'
   - else
     .admin-registry__empty
-      %i.fa-solid.fa-users.admin-registry__empty-icon{'aria-hidden' => 'true'}
+      %i.fa-solid.fa-user.admin-registry__empty-icon{'aria-hidden' => 'true'}
       %p.mb-1.fw-semibold.text-body No people registered
       %p.mb-3.small.text-muted
         Create a Person record to curate a display name and community affiliations.
