@@ -297,10 +297,10 @@ test.
 `CaptionTrack.applicable?` offers captions on audio as well as video. v1 offered
 them on video only, and the librarians asked for audio too.
 
-A plain `<audio>` element is one control bar tall and has nowhere to draw a
-caption. So `works/_av_player` mounts captioned audio on a `<video>` element in
-video.js's `audioPosterMode`, the same element a poster already puts it on.
-Posterless audio without captions keeps the plain `<audio>` player.
+A plain `<audio>` element has nowhere to draw a caption. `works/_av_player`
+mounts every recording on a `<video>` element, audio in video.js's
+`audioPosterMode`, so captions draw over the poster, or over the placeholder
+mark when the Work has none.
 
 The caption rides `/media`, not `/downloads`. A caption is part of playing the
 file, so anyone who can play it must reach it. The download gate that a

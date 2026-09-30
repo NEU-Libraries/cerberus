@@ -83,9 +83,11 @@ monogram, from the brand asset `NU_Notched-N_wordmark_K`, recoloured to
 `$gray-700` on black. The brand approves black, white and red only; the muted
 grey is a deliberate exception, so a placeholder does not read as a feature.
 
-`ThumbnailsHelper#av_poster_src` gives any `<video>` element on the show page the
-mark when the Work has no poster, which covers video and captioned audio. Plain
-audio without a poster keeps its `<audio>` bar, which never showed a black box.
+`ThumbnailsHelper#av_poster_src` gives the show page's player the mark when the
+Work has no poster. Every recording mounts on a `<video>` element, audio in
+video.js's `audioPosterMode`, so every player shows a picture, as v1's podcast
+pages did. A bare `<audio>` was never the slim bar it looked like in the
+template: video.js wraps it in a fluid 16:9 box, which read as a black screen.
 
 The mark is for the show page only. A list or gallery tile, a Set row or an
 association tile without a thumbnail keeps the type icon, as every other type

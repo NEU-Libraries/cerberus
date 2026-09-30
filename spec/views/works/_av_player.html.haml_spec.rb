@@ -25,16 +25,18 @@ RSpec.describe 'works/_av_player', type: :view do
     end
   end
 
+  # video.js wraps a bare <audio> in a 16:9 box it cannot fill, which read as a
+  # black screen, so no recording mounts on one.
   context 'audio without a poster' do
     before { render_player(mime: 'audio/mpeg', preview: nil) }
 
-    it 'falls back to a bare <audio> element' do
-      expect(rendered).to have_css('audio.av-player__media')
-      expect(rendered).to have_no_css('video')
+    it 'mounts on a <video> in audio-poster mode, showing the placeholder mark' do
+      expect(rendered).to have_css('video.av-player__media[poster*="av-placeholder"]')
+      expect(rendered).to have_css('.av-player[data-av-player-audio-poster-value="true"]')
+      expect(rendered).to have_no_css('audio')
     end
   end
 
-  # A bare <audio> element is one control bar tall, with nowhere to draw a caption.
   context 'audio without a poster but with captions' do
     before { render_player(mime: 'audio/mpeg', preview: nil, captions: captions) }
 
@@ -64,12 +66,6 @@ RSpec.describe 'works/_av_player', type: :view do
     it 'gives captioned audio, which mounts on a <video>, the placeholder mark' do
       render_player(mime: 'audio/mpeg', preview: nil, captions: captions)
       expect(rendered).to have_css('video.av-player__media[poster*="av-placeholder"]')
-    end
-
-    it 'leaves plain audio on its <audio> bar, with no poster' do
-      render_player(mime: 'audio/mpeg', preview: nil)
-      expect(rendered).to have_css('audio.av-player__media')
-      expect(rendered).to have_no_css('[poster]')
     end
   end
 

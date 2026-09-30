@@ -1,13 +1,12 @@
 -# In-page A/V player (video.js). Audio and video both mount video.js on the
 -# Range-capable /media/:id endpoint (seekable); video.js arrives via dynamic
--# import in av_player_controller, so non-A/V pages never pay for it. When the
--# Work has a poster, audio renders through a <video> element in video.js
--# audioPosterMode — a bare <audio> element can't show a poster, so this keeps
--# the still on screen while the sound plays, matching video (and v1). Posterless
--# audio falls back to a plain <audio> player, unless it has captions: an <audio>
--# element is one control bar tall and has nowhere to draw them, so captioned
--# audio mounts on <video> in audioPosterMode too. file = the browser-playable
--# Blob (original or the ingest MP4 rendition).
+-# import in av_player_controller, so non-A/V pages never pay for it. Every
+-# recording mounts on a <video> element, audio in video.js audioPosterMode, so
+-# the player always shows a picture while the sound plays, as v1's did: the
+-# Work's own poster, else the placeholder mark. video.js wraps a bare <audio>
+-# in a 16:9 box it cannot fill, which read as a black screen, and it has nowhere
+-# to draw captions. file = the browser-playable Blob (original or the ingest
+-# MP4 rendition).
 -#
 -# captions = the Work's WebVTT Blobs, one per language, English first. They
 -# ride /media rather than /downloads deliberately: a caption is part of playing
@@ -17,18 +16,11 @@
 -# is needed here.
 - captions = Array(local_assigns[:captions])
 - audio = file.mime_type.to_s.start_with?('audio/')
-- poster = @work.preview.presence
-- audio_on_video = audio && (poster.present? || captions.any?)
-.av-player{data: { controller: 'av-player', 'av-player-audio-poster-value': audio_on_video.to_s }}
-  - if audio && !audio_on_video
-    %audio.video-js.vjs-default-skin.av-player__media{controls: true, preload: 'metadata', 'data-av-player-target': 'media'}
-      %source{src: media_path(file.noid), type: file.mime_type}
-  - else
-    -# A <video> without a supplied poster shows the placeholder mark rather
-    -# than an empty black box. Posterless audio above keeps its bar.
-    %video.video-js.vjs-default-skin.av-player__media{controls: true, preload: 'metadata', playsinline: true, poster: av_poster_src(poster), 'data-av-player-target': 'media'}
-      %source{src: media_path(file.noid), type: file.mime_type}
-      = render 'works/caption_source', captions: captions
+- poster = av_poster_src(@work.preview)
+.av-player{data: { controller: 'av-player', 'av-player-audio-poster-value': audio.to_s }}
+  %video.video-js.vjs-default-skin.av-player__media{controls: true, preload: 'metadata', playsinline: true, poster: poster, 'data-av-player-target': 'media'}
+    %source{src: media_path(file.noid), type: file.mime_type}
+    = render 'works/caption_source', captions: captions
   -# `downloadable` comes from the same per-asset gate the downloads card and
   -# DownloadsController use, so a Streaming Only video, a gated tier and an
   -# active embargo all suppress this line alike, and a reader is never told to
