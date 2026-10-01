@@ -20,9 +20,8 @@ RSpec.describe 'Admin::Associations', type: :request do
              nuid: '000000006', name: 'Williams, Susan', role: 'privileged',
              groups: ['northeastern:drs:repository:staff'])
   end
-  # :privileged + the admin group jointly — the devolved-admin tier. Atlas
-  # grants that tier the association write, but this surface stays :admin-only,
-  # matching the other finder surfaces it sits beside.
+  # :privileged + the admin group jointly — the devolved-admin tier, which
+  # Atlas grants the association write.
   let(:delegate_user) do
     User.new(email: 'delegate@example.com', password: 'password',
              nuid: '000000002', name: 'Doe, Jane', role: 'privileged',
@@ -61,13 +60,21 @@ RSpec.describe 'Admin::Associations', type: :request do
       expect(response).to have_http_status(:forbidden)
     end
 
-    # Atlas would accept the write from this tier; Cerberus does not offer it
-    # here, so the refusal is Cerberus's own and must be asserted as such.
-    it 'forbids the devolved-admin delegate' do
+    it 'lets the devolved-admin delegate find, manage, add and remove' do
       sign_in delegate_user
-      expect(AtlasRb::Work).not_to receive(:associate)
+      stub_manage('outbound' => {}, 'inbound' => {})
+      expect(AtlasRb::Work).to receive(:associate).with('a', 'b', type: 'is_codebook_for')
+      expect(AtlasRb::Work).to receive(:disassociate).with('a', 'b', type: 'is_codebook_for')
+
+      get '/admin/associations'
+      expect(response).to have_http_status(:ok)
+      get '/admin/associations/manage', params: { work_id: 'a' }
+      expect(response).to have_http_status(:ok)
       post '/admin/associations/add', params: { work_id: 'a', target_id: 'b', type: 'is_codebook_for' }
-      expect(response).to have_http_status(:forbidden)
+      expect(response).to redirect_to(admin_associations_manage_path(work_id: 'a'))
+      delete '/admin/associations/remove', params: { work_id: 'a', holder_id: 'a', target_id: 'b',
+                                                     type: 'is_codebook_for' }
+      expect(response).to redirect_to(admin_associations_manage_path(work_id: 'a'))
     end
 
     it 'redirects the unauthenticated to sign in' do

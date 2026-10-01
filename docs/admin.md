@@ -157,6 +157,7 @@ action between controllers.
 | Reindex a Work or a Set | `:admin` or the devolved-admin tier | Atlas applies no per-user check on this path at all |
 | The ledger | `:admin` or the devolved-admin tier | the same audience as deposit triage |
 | Linked members | `:admin` only | it edits placement, which the delegate tier does not manage |
+| Associated works | `:admin` or the devolved-admin tier | Atlas grants `:associate` to both. A delegate's reads stay group-gated, so a Work they cannot read gets the forbidden page, and an edge to one shows its bare NOID |
 | Rights and MODS history | `:read, :audit_event` | the same gate as the Audit History tab it is reached from. Only `:admin` holds it, through `can :manage, :all` |
 
 `HistoriesController` is the odd one out. It sits outside `Admin::`, inherits

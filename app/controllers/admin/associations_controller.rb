@@ -1,12 +1,15 @@
 # frozen_string_literal: true
 
 module Admin
-  # Admin-only management of the typed edges between Works. Admin-only because
-  # Atlas is: the claim renders on the TARGET's page too, and the asserter often
-  # holds no rights there. `add` always writes from the managed Work outward,
-  # since the edge is stored on the Work that asserts it. See
-  # docs/edit-surfaces.md.
+  # Management of the typed edges between Works, for :admin and the
+  # devolved-admin tier, matching Atlas's :associate grant. Not :edit: the claim
+  # renders on the TARGET's page too, and the asserter often holds no rights
+  # there. `add` always writes from the managed Work outward, since the edge is
+  # stored on the Work that asserts it. See docs/edit-surfaces.md.
   class AssociationsController < BaseController
+    skip_before_action :require_admin
+    before_action :require_admin_or_delegate
+
     breadcrumb_for 'Associated works', :admin_associations_path
 
     include Blacklight::Configurable

@@ -452,6 +452,11 @@ Two surfaces read those edges, and they resolve titles differently on purpose.
 | The public association box (`WorkAssociations`) | The gated Blacklight search | A viewer must not learn that a Work they cannot see exists |
 | The admin panel (`Admin::AssociationsController`) | `AtlasRb::Resource.find_many` | A management surface must show every edge, including one to a tombstoned Work. The gated search drops that Work, and the edge would then be unremovable |
 
+The admin panel is open to `:admin` and the devolved-admin tier, the two that
+Atlas grants `:associate`. Atlas gates a delegate's reads by group, so
+`find_many` can drop a Work the delegate cannot read. `titles_for` then shows
+the bare NOID, and the edge stays removable.
+
 ### The public box
 
 `WorkAssociations` resolves Atlas's edges to the Solr documents the viewer may

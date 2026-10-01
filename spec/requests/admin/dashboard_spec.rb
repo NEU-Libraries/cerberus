@@ -3,8 +3,9 @@
 require 'rails_helper'
 
 # Covers the admin actions hub (/admin) and its structure-operation entry
-# surfaces. /admin and /admin/reparent are devolved (User#admin_delegate?
-# passes, not just :admin); /admin/linked_members stays :admin-only. (Mirrors
+# surfaces. /admin, /admin/reparent and /admin/associations are devolved
+# (User#admin_delegate? passes, not just :admin); /admin/linked_members stays
+# :admin-only. (Mirrors
 # the authz matrix in spec/requests/admin/loaders_spec.rb.)
 RSpec.describe 'Admin::Dashboard', type: :request do
   include Devise::Test::IntegrationHelpers
@@ -31,8 +32,9 @@ RSpec.describe 'Admin::Dashboard', type: :request do
   # path => the icon/label we expect the rendered surface to carry, so the
   # matrix doubles as a light smoke test that the right view rendered.
   devolved_paths = {
-    '/admin'          => 'Administration',
-    '/admin/reparent' => 'find the Work, Collection, or Community you want to move'
+    '/admin'              => 'Administration',
+    '/admin/reparent'     => 'find the Work, Collection, or Community you want to move',
+    '/admin/associations' => 'Associated works'
   }
   admin_only_paths = {
     '/admin/linked_members' => 'Linked members'
@@ -97,7 +99,7 @@ RSpec.describe 'Admin::Dashboard', type: :request do
       sign_in admin_user
       get '/admin'
       expect(response.body).to include(admin_reparent_path, admin_linked_members_path,
-                                       admin_impersonation_path, admin_files_path,
+                                       admin_associations_path, admin_impersonation_path, admin_files_path,
                                        admin_groups_path, admin_impressions_path)
     end
 
@@ -105,8 +107,9 @@ RSpec.describe 'Admin::Dashboard', type: :request do
       sign_in delegate_user
       get '/admin'
 
-      expect(response.body).to include(admin_reparent_path, admin_impersonation_path,
-                                       admin_files_path, admin_impressions_path)
+      expect(response.body).to include(admin_reparent_path, admin_associations_path,
+                                       admin_impersonation_path, admin_files_path,
+                                       admin_impressions_path)
       expect(response.body).not_to include(admin_linked_members_path, admin_groups_path)
       # The admin pages carry no access-tier label for either tier.
       expect(response.body).not_to include('Delegated admin access', 'Admin-only')
