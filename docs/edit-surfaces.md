@@ -452,10 +452,9 @@ Two surfaces read those edges, and they resolve titles differently on purpose.
 | The public association box (`WorkAssociations`) | The gated Blacklight search | A viewer must not learn that a Work they cannot see exists |
 | The admin panel (`Admin::AssociationsController`) | `AtlasRb::Resource.find_many` | A management surface must show every edge, including one to a tombstoned Work. The gated search drops that Work, and the edge would then be unremovable |
 
-The admin panel is open to `:admin` and the devolved-admin tier, the two that
-Atlas grants `:associate`. Atlas gates a delegate's reads by group, so
-`find_many` can drop a Work the delegate cannot read. `titles_for` then shows
-the bare NOID, and the edge stays removable.
+Atlas gates a delegated admin's reads by group, so on the admin panel
+`find_many` can drop a Work that admin cannot read. `titles_for` then shows the
+bare NOID, and the edge stays removable.
 
 ### The public box
 
@@ -541,11 +540,10 @@ direction.
 Nothing moves in the containment tree and no permissions change. An
 association is descriptive.
 
-It is admin-only because Atlas is. Atlas gates the write to admins and the
-devolved tier; Cerberus gates this panel to full admins, through
-`Admin::BaseController#require_admin`. The claim renders on the *target's* page
-too, and the asserter often holds no rights over it. That is stricter than
-"descriptive" suggests. It is also why this is an `/admin/*` surface rather
+It is open to admins and the devolved tier, the two that Atlas grants the
+write, through `require_admin_or_delegate`. It is not an `:edit` check: the
+claim renders on the *target's* page too, and the asserter often holds no rights
+over it. That is stricter than "descriptive" suggests. It is also why this is an `/admin/*` surface rather
 than a tab on the Work edit page: a tab would be dead chrome for every depositor
 and editor who could reach it.
 
