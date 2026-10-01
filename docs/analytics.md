@@ -360,6 +360,17 @@ A Work counts only itself, through `MembershipQuery.identity_fq`. A facet
 narrows the traffic figures only, because the Content overview is an inventory
 of the scoped item, not of its traffic.
 
+### Storage used
+
+`storage_bytes` sums Atlas's `storage_bytes_ls` over the same scope, with a Solr
+JSON facet, `sum(storage_bytes_ls)`. Atlas gives each Work, Collection and
+Community the bytes its own OCFL objects hold on disk: every revision of every
+file, withdrawn files, MODS and METS versions, and OCFL's bookkeeping. The
+measure is storage cost, so a Work replaced a hundred times outweighs one that
+never changed. `subtree_fq` keeps tombstoned documents, so withdrawn files
+count, as they still take disk. Bytes outside OCFL are not counted: Cerberus's
+JP2s, its staged uploads and the IIIF cache.
+
 Person docs sit outside the structural containment tree that `subtree_fq`
 matches, so a scoped `entity_counts` always reads 0 Person whatever the
 container. That is correct for a Collection, since a Person never belongs to one,

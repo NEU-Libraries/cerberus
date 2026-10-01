@@ -3,7 +3,7 @@
 - scope_phrase ||= 'across the DRS'
 
 %p.text-muted.small.mb-3
-  Unfiltered counts of the communities, collections and works #{scope_phrase}.
+  Unfiltered counts of the communities, collections and works #{scope_phrase}. Storage used counts every stored version of every file, withdrawn files included.
 
 %dl.usage-ledger
   .usage-ledger__item.usage-ledger__item--communities
@@ -20,6 +20,9 @@
     %dd.usage-ledger__figure= number_with_delimiter(entity['Person'])
 
 %dl.usage-ledger
+  .usage-ledger__item
+    %dt.usage-ledger__label Storage used
+    %dd.usage-ledger__figure= number_to_human_size(composition.storage_bytes)
   .usage-ledger__item.usage-ledger__item--public
     %dt.usage-ledger__label Public works
     %dd.usage-ledger__figure= number_with_delimiter(visibility[:public])

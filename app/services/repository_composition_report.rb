@@ -37,6 +37,15 @@ class RepositoryCompositionReport
     )
   end
 
+  # Atlas puts on each Work and container the bytes its own OCFL objects hold
+  # on disk, every revision and withdrawn file included, so the sum over a
+  # subtree is that subtree's storage. Bytes outside OCFL are not counted.
+  def storage_bytes
+    @storage_bytes ||= Blacklight.default_index.search(
+      q: '*:*', fq: scope_filters, rows: 0, 'json.facet': { total: 'sum(storage_bytes_ls)' }.to_json
+    ).dig('facets', 'total').to_i
+  end
+
   def scoped?
     @scope_fq.present?
   end
