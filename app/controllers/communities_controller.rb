@@ -13,12 +13,11 @@ class CommunitiesController < CatalogController
   include ContainerAnalytics
   include ContainerRestrictionRequest
   include CommunitiesIndex
+  include CommunityShowcases
 
   atlas_resource AtlasRb::Community, key: :community, route: :community
   authorize_resource_writes!(extra_edit: %i[request_restriction])
   after_action :record_view_impression, only: :show
-
-  MEMBERSHIP_FIELDS = [MembershipQuery::STRUCTURAL_FIELD, MembershipQuery::LINKED_FIELD].freeze
 
   # Before the find: Atlas refuses the People Community to everyone but full
   # admins, so the flag has to come from Solr (see StructuralContainers).
@@ -82,21 +81,15 @@ class CommunitiesController < CatalogController
       authorize_show!
       showcases = featured_showcase_uuids(@community.valkyrie_id)
       child_membership_filters(@community.valkyrie_id, params[:id],
-                               exclude_uuids: empty_showcase_uuids(showcases))
+                               exclude_uuids: hidden_showcase_uuids(empty_showcase_uuids(showcases)))
     end
 
     def load_children_and_deletability
       showcases = featured_showcase_uuids(@community.valkyrie_id)
-      @response = find_children(@community.valkyrie_id, params[:id],
-                                exclude_uuids: empty_showcase_uuids(showcases))
+      empty = empty_showcase_uuids(showcases)
+      @response = find_children(@community.valkyrie_id, params[:id], exclude_uuids: hidden_showcase_uuids(empty))
+      mark_empty_showcases(empty)
       @deletable = deletable?(showcases)
-    end
-
-    # Exclude the empty showcases at query time, as an fq on find_children, and
-    # never as a Ruby post-filter on the returned documents: a post-filter leaves
-    # Solr's Type facet counting the rows it hid.
-    def empty_showcase_uuids(showcase_uuids)
-      showcase_uuids - populated_showcase_ids(showcase_uuids).to_a
     end
 
     # The listing is not the whole test. Atlas refuses a tombstone while any live
@@ -105,35 +98,6 @@ class CommunitiesController < CatalogController
     # on a community that then fails to delete.
     def deletable?(showcase_uuids)
       @response.documents.empty? && showcase_uuids.empty?
-    end
-
-    def featured_showcase_uuids(community_uuid)
-      builder = search_service.search_builder.with({}).with_filters(
-        'internal_resource_tesim:Collection', 'featured_bsi:true', '-tombstoned_bsi:true',
-        MembershipQuery.members_fq([community_uuid], include_linked: false)
-      ).merge(rows: 100)
-      Blacklight.default_index.search(params: builder).documents.map(&:id)
-    end
-
-    def populated_showcase_ids(showcase_uuids)
-      return Set.new if showcase_uuids.empty?
-
-      counts = showcase_member_counts(showcase_uuids)
-      MEMBERSHIP_FIELDS.each_with_object(Set.new) do |field, ids|
-        each_positive_facet(counts[field]) { |value| ids << value.delete_prefix('id-') }
-      end
-    end
-
-    def showcase_member_counts(showcase_uuids)
-      members = MembershipQuery.members_fq(showcase_uuids, include_linked: true)
-      builder = search_service.search_builder.with({}).with_filters(members)
-                              .merge(rows: 0, facet: true, 'facet.mincount': 1, 'facet.field': MEMBERSHIP_FIELDS)
-      Blacklight.default_index.search(params: builder).dig('facet_counts', 'facet_fields') || {}
-    end
-
-    # Solr returns facet_fields as a flat [value, hits, value, hits, ...] array.
-    def each_positive_facet(pairs)
-      Array(pairs).each_slice(2) { |value, hits| yield value.to_s if hits.to_i.positive? }
     end
 
     # The synthetic row is not in Solr, so raise the response total by one or

@@ -203,6 +203,12 @@ describe ApplicationHelper do
       expect(helper.pill_label(doc)).to eq('Featured')
     end
 
+    it 'labels an empty showcase "Empty" ahead of Featured' do
+      doc = SolrDocument.new(id: '1', internal_resource_tesim: ['Collection'], featured_bsi: true,
+                             empty_showcase_bsi: true)
+      expect(helper.pill_label(doc)).to eq('Empty')
+    end
+
     it 'labels the synthetic Faculty & Staff row "People"' do
       doc = SolrDocument.new(id: '1', internal_resource_tesim: ['Community'], people_browse_bsi: true)
       expect(helper.pill_label(doc)).to eq('People')

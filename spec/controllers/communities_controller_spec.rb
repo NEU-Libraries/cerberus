@@ -517,6 +517,41 @@ describe CommunitiesController do
     ensure
       AtlasRb::Resource.tombstone(showcase.id) if showcase
     end
+
+    # An admin loads into a showcase by its PID, so must be able to find it
+    # while it is still empty.
+    it 'lists an empty showcase to an admin, flagged as empty' do
+      sign_in User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin')
+      AtlasRb::Resource.set_permissions(community.id, { 'read' => ['public'] }, nuid: '000000004')
+      showcase = AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml',
+                                            featured: true, nuid: '000000004')
+
+      get :show, params: { id: community.id }
+
+      listed = assigns(:response).documents.find { |doc| doc.id == showcase.valkyrie_id }
+      expect(listed).to be_present
+      expect(listed.empty_showcase?).to be(true)
+      expect(response.body).to include('Empty')
+    ensure
+      AtlasRb::Resource.tombstone(showcase.id) if showcase
+    end
+  end
+
+  describe '#hidden_showcase_uuids (private)' do
+    def hidden_for(user)
+      allow(controller).to receive(:effective_user).and_return(user)
+      controller.send(:hidden_showcase_uuids, %w[a b])
+    end
+
+    it 'hides nothing from an admin or a delegated admin' do
+      expect(hidden_for(User.new(role: 'admin'))).to eq([])
+      expect(hidden_for(User.new(role: 'privileged', groups: [Permissions::ADMIN_GROUP]))).to eq([])
+    end
+
+    it 'hides the empty showcases from anyone else' do
+      expect(hidden_for(User.new(role: 'privileged', groups: []))).to eq(%w[a b])
+      expect(hidden_for(nil)).to eq(%w[a b])
+    end
   end
 
   describe '#populated_showcase_ids (private)' do

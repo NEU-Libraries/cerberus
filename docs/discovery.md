@@ -16,6 +16,7 @@ Source files:
 - `app/services/collection_contents_resolver.rb`
 - `app/services/google_scholar_metadata.rb`
 - `app/controllers/communities_controller.rb`
+- `app/controllers/concerns/community_showcases.rb`
 - `app/controllers/my_drs_controller.rb`
 - `app/controllers/concerns/show_scoped_search.rb`
 - `app/controllers/concerns/without_facet_modal.rb`
@@ -220,12 +221,20 @@ post-filter over the returned documents. Solr computes its facet counts
 server-side, so a post-filter leaves the Type facet counting rows the reader
 cannot see.
 
+Admins and delegated admins see the empty showcases anyway, each with an "Empty"
+pill (`showcase_manager?`, `hidden_showcase_uuids`). They are the people who
+load into a showcase, and a load asks for the destination's PID: a new
+community's Theses & Dissertations Collection has to be findable before it holds
+anything. The check reads `effective_user`, so an admin viewing as someone else
+sees that person's listing. A response document is frozen, so
+`mark_empty_showcases` swaps in a flagged copy rather than setting the flag.
+
 Only `featured?` showcases are hidden. An ordinary empty Collection stays
 listed, because showing someone the empty collection they just made is the point.
 The rule pairs with the Faculty & Staff row: both curated affordances appear
 only when populated.
 
-`populated_showcase_ids` asks one gated, `rows: 0` facet query over the two
+`CommunityShowcases#populated_showcase_ids` asks one gated, `rows: 0` facet query over the two
 membership fields (`MEMBERSHIP_FIELDS`), restricted to members of those
 showcases. It reads the raw
 `facet_counts` rather than a Blacklight facet, so the answer does not depend on
