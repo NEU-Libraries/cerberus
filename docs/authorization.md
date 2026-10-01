@@ -7,6 +7,7 @@ container.
 Source files:
 
 - `app/controllers/concerns/authorizable.rb`
+- `app/controllers/concerns/tombstoning.rb`
 - `app/controllers/concerns/permissions_form.rb`
 - `app/jobs/visibility_cascade_job.rb`
 
@@ -179,14 +180,16 @@ own second raise for an unknown version id.
 
 ### Tombstones
 
-`perform_tombstone!` calls `AtlasRb::Resource.tombstone(params[:id])` and turns
-the response into a redirect and flash. It takes no arguments: the flash names
-the controller's `solr_type`.
+`Tombstoning#perform_tombstone!` calls `AtlasRb::Resource.tombstone(params[:id],
+reason:)` and turns the response into a redirect and flash. It takes no
+arguments: the flash names the controller's `solr_type`. How the reason is
+chosen is in [`docs/admin.md`](admin.md#the-removal-reason).
 
 | Response | Result |
 |---|---|
 | success | redirect to `return_to`, or else the parent, with "deleted" |
-| 422 | redirect back with "can't be deleted while it still contains live members" |
+| 422 `invalid_reason` | redirect back with "Choose one of the listed removal reasons" |
+| any other 422 | redirect back with "can't be deleted while it still contains live members" |
 | anything else | redirect back with "could not be deleted" |
 
 The tombstone binding returns the raw `Faraday::Response`. atlas_rb does **not**

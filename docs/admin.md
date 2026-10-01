@@ -7,6 +7,7 @@ Source files:
 
 - `app/controllers/admin/base_controller.rb`
 - `app/models/admin_notice.rb`
+- `app/lib/tombstone_reasons.rb`
 - `app/controllers/admin/tombstones_controller.rb`
 - `app/helpers/admin/tombstones_helper.rb`
 - `app/services/tombstoned_items.rb`
@@ -162,6 +163,33 @@ action between controllers.
 `ApplicationController`, and asks CanCan directly rather than using
 `require_admin`. The role predicates behind all of these live in
 [`docs/identity.md`](identity.md).
+
+## The removal reason
+
+The library's withdrawal policy requires a note on every withdrawn item, and it
+fixes the wording: five notes, held in `TombstoneReasons::ALL`. Atlas keeps the
+same list and answers `422 invalid_reason` for any other value. So a change to
+the wording needs an Atlas release as well.
+
+The note is chosen in the Delete dialog on the show pages
+(`shared/_tombstone_modal`):
+
+- **An admin or a delegated admin** chooses from all five. The choice is
+  required.
+- **Anyone else** who may delete the item, such as its depositor or proxy
+  uploader, records the curator's note (`TombstoneReasons::CURATOR`). The form
+  sends it as a hidden field, but `Tombstoning#removal_reason` replaces any
+  other value with it. A crafted request therefore cannot record "legal order".
+- **A cancelled deposit** records no note. The deposit's Cancel, My DRS and the
+  triage "Cancel deposit" use the same tombstone route but send no `reason`,
+  because a Work that was never published has not been withdrawn from view.
+
+Atlas returns the note as `tombstone_reason` and clears it on restore. The gone
+page joins it to the date from `tombstoned_at`: *"Sample Report" was removed
+from view at Northeastern University Library's discretion on September 30,
+2026.* An item withdrawn with no note says only that it has been removed. The
+tombstone row on the History tab shows the note too, because Atlas records it on
+the audit event.
 
 ## Restoring and permanently deleting a tombstoned item
 
