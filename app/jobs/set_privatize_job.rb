@@ -8,15 +8,17 @@
 #
 # Re-running is safe. A Work that is already private is skipped, so a retry
 # after a partial run only finishes the remainder.
+#
+# The ledger entry lists each Work it made private with the read audience it
+# had, so a developer can undo it from that list (docs/sets.md).
 class SetPrivatizeJob < ApplicationJob
   include SetSweep
 
   queue_as :default
 
-  # Atlas retries its own optimistic-lock conflicts and surfaces this only once
-  # its budget is exhausted. Backing off and re-running is safe here precisely
-  # because the sweep is idempotent.
-  retry_on AtlasRb::StaleResourceError, wait: :polynomially_longer, attempts: 5
+  # A lock conflict is retried on the one Work, not through retry_on: a re-run
+  # skips what is already private, and its ledger entry would leave it out.
+  LOCK_ATTEMPTS = 3
 
   def perform(set_noid:)
     actor = Current.nuid
@@ -25,6 +27,7 @@ class SetPrivatizeJob < ApplicationJob
     compilation = AtlasRb::Compilation.find(set_noid)
     return if compilation.nil?
 
+    @changed = []
     outcome = sweep_set(set_noid: set_noid, nuid: actor) { |noid| privatize(noid) }
 
     report(actor: actor, set_noid: set_noid, title: compilation['title'], outcome: outcome)
@@ -32,7 +35,7 @@ class SetPrivatizeJob < ApplicationJob
 
   private
 
-    def privatize(noid)
+    def privatize(noid, attempt: 1)
       current = AtlasRb::Resource.permissions(noid)
       return :already_private if current.nil?
 
@@ -40,7 +43,14 @@ class SetPrivatizeJob < ApplicationJob
       return :already_private unless read.include?('public')
 
       AtlasRb::Resource.set_permissions(noid, { 'read' => read.without('public') })
+      @changed << { 'noid' => noid, 'read_before' => read }
       :privatized
+    rescue AtlasRb::StaleResourceError => e
+      return privatize(noid, attempt: attempt + 1) if attempt < LOCK_ATTEMPTS
+
+      # A plain error, so SetSweep names it as this Work's failure rather than
+      # handing it on as a lock conflict to retry the whole job.
+      raise AtlasRb::Error, e.message
     end
 
     def report(actor:, set_noid:, title:, outcome:)
@@ -52,7 +62,7 @@ class SetPrivatizeJob < ApplicationJob
         subject_noid: set_noid,
         payload:      { title: title, privatized: outcome.counts[:privatized],
                         already_private: outcome.counts[:already_private],
-                        truncated: outcome.truncated, failures: outcome.failures }
+                        truncated: outcome.truncated, failures: outcome.failures, changed: @changed }
       )
     end
 
