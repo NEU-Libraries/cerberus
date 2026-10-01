@@ -32,7 +32,7 @@ RSpec.describe 'Admin::Communities', type: :request do
 
     expect(response).to have_http_status(:ok)
     expect(response.body).to include('College of Engineering', 'eng1234', '1 community',
-                                     edit_community_path('eng1234'), CGI.escapeHTML(edit_community_path('eng1234', tab: 'people')))
+                                     edit_community_path('eng1234'), admin_community_people_path('eng1234'))
   end
 
   # The People tab is admin-only, so its link is too.
@@ -43,7 +43,7 @@ RSpec.describe 'Admin::Communities', type: :request do
 
     expect(response).to have_http_status(:ok)
     expect(response.body).to include(edit_community_path('eng1234'))
-    expect(response.body).not_to include('tab=people')
+    expect(response.body).not_to include(admin_community_people_path('eng1234'))
   end
 
   it 'sorts by title when browsing and by relevance when searching' do

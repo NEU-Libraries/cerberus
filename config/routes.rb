@@ -81,10 +81,6 @@ Rails.application.routes.draw do
       # Private option — narrowing a community does not reach what is inside it
       # — so this is the only route. Edit-gated via authorize_resource_writes!.
       post :request_restriction
-      # The People tab: a Person's affiliation, written from the community's
-      # side. Admin-only, in CommunityAffiliationsController.
-      post   'affiliations',            to: 'community_affiliations#create',  as: :affiliations
-      delete 'affiliations/:person_id', to: 'community_affiliations#destroy', as: :affiliation
     end
   end
   resources :collections, except: %i[new create destroy], shallow: true do
@@ -268,6 +264,11 @@ Rails.application.routes.draw do
 
     # Communities — every community, to open its page, Edit page or People tab.
     get 'communities', to: 'communities#index'
+    # A community's people: a Person's affiliation, written from the community's
+    # side. Keyed by NOID, like the People registry.
+    get    'communities/:noid/people',            to: 'community_people#show',    as: :community_people
+    post   'communities/:noid/people',            to: 'community_people#create'
+    delete 'communities/:noid/people/:person_id', to: 'community_people#destroy', as: :community_person
 
     # People — the curatorial Person registry: create a Person by NUID, edit the
     # authoritative display_name / title / bio / orcid, and manage community

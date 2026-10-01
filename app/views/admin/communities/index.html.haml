@@ -37,11 +37,11 @@
                 %span.admin-registry-table__id= doc.to_param
               %td.text-end.text-nowrap
                 .d-inline-flex.gap-3.align-items-center
-                  -# Full loads: the Edit page picks its pane after the document loads.
                   - if current_user&.admin?
-                    = link_to edit_community_path(doc.to_param, tab: 'people'), class: 'admin-registry-table__edit', data: { turbo: false } do
+                    = link_to admin_community_people_path(doc.to_param), class: 'admin-registry-table__edit' do
                       %i.fa-solid.fa-user{'aria-hidden' => 'true'}
                       People
+                  -# A full load: the Edit page picks its pane after the document loads.
                   = link_to edit_community_path(doc.to_param), class: 'admin-registry-table__edit', data: { turbo: false } do
                     Edit
                     %i.fa-solid.fa-arrow-right{'aria-hidden' => 'true'}

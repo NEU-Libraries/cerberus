@@ -14,7 +14,6 @@ class CommunitiesController < CatalogController
   include ContainerRestrictionRequest
   include CommunitiesIndex
   include CommunityShowcases
-  include CommunityPeopleTab
 
   atlas_resource AtlasRb::Community, key: :community, route: :community
   authorize_resource_writes!(extra_edit: %i[request_restriction])
@@ -52,7 +51,6 @@ class CommunitiesController < CatalogController
     form_preparation(@permissions, resource: @community)
     load_descriptive!
     load_container_analytics(@community, 'Community')
-    load_people_tab(params[:id])
     breadcrumbs(params[:id], editing: true)
   end
 

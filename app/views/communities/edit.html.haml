@@ -8,13 +8,10 @@
   Edit Community -
   = enhanced_text(@community.title)
 
--# tab names the pane to open: the People tab's Add and Remove redirect back
--# with it, since Turbo drops a URL fragment when it follows a redirect.
-- open_tab = edit_tab_open_key('Community', open: params[:tab])
-= render 'shared/edit_tabs', klass: 'Community', id: params[:id], active: nil, open: open_tab
+= render 'shared/edit_tabs', klass: 'Community', id: params[:id], active: nil
 
 .tab-content
-  #metadata.tab-pane{class: ('active' if open_tab == 'metadata'), "aria-labelledby" => "metadata-tab", role: "tabpanel"}
+  #metadata.tab-pane.active{"aria-labelledby" => "metadata-tab", role: "tabpanel"}
     .py-2.px-1
       = bootstrap_form_tag(url: community_path(params[:id]), method: :patch, multipart: true) do |f|
         = f.hidden_field :id, value: params[:id]
@@ -40,9 +37,6 @@
     -# that asks an administrator to do it would be a dead end.
     - unless @narrowing_allowed
       = render 'shared/restriction_request', resource: 'community'
-  - if edit_tab_visible?('people')
-    #people.tab-pane{class: ('active' if open_tab == 'people'), "aria-labelledby" => "people-tab", role: "tabpanel"}
-      = render 'communities/people_tab', community_id: params[:id]
   - if edit_tab_visible?('history')
     #history.tab-pane{"aria-labelledby" => "history-tab", role: "tabpanel"}
       = render 'audit_events/history', resource_id: params[:id]

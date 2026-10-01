@@ -6,9 +6,9 @@ RSpec.describe EditTabsHelper do
   # Gates read off the view context's own can? / effective_user. The bare test
   # controller lacks ImpersonationSession's helper_method, so verifying partial
   # doubles rejects a stub of effective_user; define a real singleton instead.
-  def allow_gates(history:, loader:, admin: true)
+  def allow_gates(history:, loader:)
     allow(helper).to receive(:can?).with(:read, :audit_event).and_return(history)
-    user = instance_double(User, loader_tier?: loader, admin?: admin)
+    user = instance_double(User, loader_tier?: loader)
     helper.define_singleton_method(:effective_user) { user }
   end
 
@@ -21,13 +21,7 @@ RSpec.describe EditTabsHelper do
       expect(helper.edit_tab_keys('Collection'))
         .to eq(%w[metadata permissions xml derivative-access export history analytics])
       expect(helper.edit_tab_keys('Community'))
-        .to eq(%w[metadata permissions people xml history analytics])
-    end
-
-    # Atlas lets only admins write affiliations, so nobody else gets the tab.
-    it 'shows the community People tab to admins only' do
-      allow_gates(history: true, loader: true, admin: false)
-      expect(helper.edit_tab_keys('Community')).not_to include('people')
+        .to eq(%w[metadata permissions xml history analytics])
     end
 
     # Class-specific membership is data, not a conditional, so these are simply
