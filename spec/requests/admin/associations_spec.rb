@@ -63,7 +63,7 @@ RSpec.describe 'Admin::Associations', type: :request do
     it 'lets the devolved-admin delegate find, manage, add and remove' do
       sign_in delegate_user
       stub_manage('outbound' => {}, 'inbound' => {})
-      expect(AtlasRb::Work).to receive(:associate).with('a', 'b', type: 'is_codebook_for')
+      expect(AtlasRb::Work).to receive(:associate).with('b', 'a', type: 'is_codebook_for')
       expect(AtlasRb::Work).to receive(:disassociate).with('a', 'b', type: 'is_codebook_for')
 
       get '/admin/associations'
@@ -139,25 +139,32 @@ RSpec.describe 'Admin::Associations', type: :request do
     end
 
     describe 'POST add' do
-      it 'asserts the edge outward from the managed Work' do
+      # Staff manage the primary Work and pick its codebook, but the edge is
+      # stored on the codebook, so the picked Work is the one that asserts it.
+      it 'asserts the edge from the picked Work toward the managed one' do
         expect(AtlasRb::Work).to receive(:associate)
           .with('codebook', 'dataset', type: 'is_codebook_for')
 
-        post '/admin/associations/add', params: { work_id: 'codebook', target_id: 'dataset',
+        post '/admin/associations/add', params: { work_id: 'dataset', target_id: 'codebook',
                                                   type: 'is_codebook_for' }
 
-        expect(response).to redirect_to(admin_associations_manage_path(work_id: 'codebook'))
+        expect(response).to redirect_to(admin_associations_manage_path(work_id: 'dataset'))
         expect(flash[:notice]).to include('Association added')
       end
 
-      it 'names the reason when Atlas refuses' do
-        allow(AtlasRb::Work).to receive(:associate)
-          .and_raise(AtlasRb::WorkAssociationError.new('nope', code: 'tombstoned_target'))
+      # Atlas's target is the managed Work, so its tombstoned_target is "this"
+      # Work and tombstoned_work is the picked one.
+      { 'tombstoned_target' => 'This Work is withdrawn',
+        'tombstoned_work'   => 'That Work is withdrawn' }.each do |code, phrase|
+        it "names the right Work when Atlas refuses with #{code}" do
+          allow(AtlasRb::Work).to receive(:associate)
+            .and_raise(AtlasRb::WorkAssociationError.new('nope', code: code))
 
-        post '/admin/associations/add', params: { work_id: 'codebook', target_id: 'dataset',
-                                                  type: 'is_codebook_for' }
+          post '/admin/associations/add', params: { work_id: 'dataset', target_id: 'codebook',
+                                                    type: 'is_codebook_for' }
 
-        expect(flash[:alert]).to include('That Work is withdrawn')
+          expect(flash[:alert]).to include(phrase)
+        end
       end
 
       # A code Cerberus has no phrase for must still say something true.

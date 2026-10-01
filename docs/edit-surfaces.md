@@ -547,8 +547,12 @@ over it. That is stricter than "descriptive" suggests. It is also why this is an
 than a tab on the Work edit page: a tab would be dead chrome for every depositor
 and editor who could reach it.
 
-`add` always writes from the managed Work outward, because the edge is stored
-on the Work that asserts it. To assert the reverse claim, manage the other Work.
+`add` writes from the picked Work toward the managed one. Staff start from the
+primary Work and pick the Work that supports it, but the edge is stored on the
+supporting Work, which asserts it. So `add` sends the picked Work as Atlas's
+`work` and the managed Work as its `target`. The swap also reverses Atlas's
+two tombstone codes, which `REFUSALS` phrases accordingly. To assert the reverse
+claim, manage the other Work.
 `remove` takes `holder_id` explicitly, so one panel can retract either
 direction. An admin can do that because they hold rights on both ends.
 

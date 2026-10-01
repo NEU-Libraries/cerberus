@@ -46,9 +46,9 @@
 
     %h2.linked-members__subhead.mt-4 Assert a relationship
     %p.text-muted.small.mb-3
-      The edge is stored on this work, so it reads outward: this work is the codebook, figure or transcription
+      Pick the work that supports this one: its codebook, figure or transcription. The relationship reads inward, so the work you pick is the codebook, figure or transcription
       %em for
-      the one you pick. To record the reverse, manage the other work instead.
+      this work. To record the reverse, manage the other work instead.
     = render 'admin/finder/search_form', url: admin_associations_manage_path, q: params[:q], hidden: { work_id: params[:work_id] }, placeholder: 'Search works to associate…'
 
   - if @results
@@ -75,8 +75,9 @@
                 = form_with url: admin_associations_add_path, method: :post, class: 'work-association-add' do |form|
                   = form.hidden_field :work_id, value: params[:work_id]
                   = form.hidden_field :target_id, value: doc.to_param
-                  = form.label :type, 'This work is the', class: 'work-association-add__label', for: "type_#{doc.to_param}"
+                  = form.label :type, 'It is the', class: 'work-association-add__label', for: "type_#{doc.to_param}"
                   = form.select :type, association_type_options, {}, class: 'form-select form-select-sm work-association-add__select', id: "type_#{doc.to_param}"
+                  %span.work-association-add__label this work
                   = form.submit 'Add', class: 'linked-members__btn linked-members__btn--add'
 
   .px-3.pb-3
