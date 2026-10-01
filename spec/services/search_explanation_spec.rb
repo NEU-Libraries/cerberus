@@ -41,6 +41,13 @@ RSpec.describe SearchExplanation do
     end
 
     # The phrase bonus outweighed either word alone in the captured tree.
+    it 'keeps each word’s clause apart, though a field label holds an “and”' do
+      expect(explanation.summary).to start_with(
+        'This appeared because “coastal” is in its title, description, and keywords and subjects, ' \
+        'and “survey” is in its title.'
+      )
+    end
+
     it 'names the phrase as what counted most' do
       expect(explanation.summary).to end_with('The words “coastal survey” also appear together in its title. ' \
                                               'The words appearing together in its title count most.')

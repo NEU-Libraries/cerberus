@@ -77,7 +77,9 @@ class SearchExplanation
   def summary
     return if words.empty?
 
-    sentence = "This appeared because #{words.map { |word| word_clause(word) }.to_sentence}."
+    # ", and" between two clauses too: a field label can hold "and" of its own.
+    clauses = words.map { |word| word_clause(word) }.to_sentence(two_words_connector: ', and ')
+    sentence = "This appeared because #{clauses}."
     [sentence, phrase_sentence, strongest_sentence].compact.join(' ')
   end
 
