@@ -46,9 +46,7 @@
 
     %h2.linked-members__subhead.mt-4 Assert a relationship
     %p.text-muted.small.mb-3
-      Pick the work that supports this one: its codebook, figure or transcription. The relationship reads inward, so the work you pick is the codebook, figure or transcription
-      %em for
-      this work. To record the reverse, manage the other work instead.
+      Pick the work that supports this one: its codebook, figure or transcription.
     = render 'admin/finder/search_form', url: admin_associations_manage_path, q: params[:q], hidden: { work_id: params[:work_id] }, placeholder: 'Search works to associate…'
 
   - if @results
