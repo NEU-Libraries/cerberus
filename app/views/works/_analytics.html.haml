@@ -6,7 +6,7 @@
 - actions = media ? ImpressionsReport::ACTIONS : ImpressionsReport::ACTIONS - %w[stream]
 - totals = report.totals
 
-.pt-3
+.work-usage-card
   %dl.usage-ledger
     - actions.each do |action|
       .usage-ledger__item{class: "usage-ledger__item--#{action}"}

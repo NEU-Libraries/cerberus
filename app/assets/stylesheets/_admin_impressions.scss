@@ -89,6 +89,18 @@ $usage-private:     $orange;
   }
 }
 
+// The Work page's Analytics pane sits straight on the grey page, so it takes
+// the card shell these blocks have on the admin dashboard. The card stays apart
+// from the tabs, because the tab strip is shared with the Metadata pane.
+.work-usage-card {
+  margin-top: 0.9rem;
+  padding: 1rem 1.1rem;
+  background-color: #fff;
+  border: 1px solid $gray-300;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+}
+
 // maintainAspectRatio is off (so the chart fills the card width); give the
 // canvas an explicit, restrained height.
 .usage-chart {
