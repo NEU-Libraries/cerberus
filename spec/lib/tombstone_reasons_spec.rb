@@ -12,6 +12,10 @@ describe TombstoneReasons do
                'discretion on September 30, 2026.')
     end
 
+    it 'does not pad a single-digit day' do
+      expect(described_class.sentence('Sample Report', reason, '2026-10-01T14:05:00Z')).to end_with('on October 1, 2026.')
+    end
+
     it 'drops the date when Atlas sent none, or one that does not parse' do
       expected = "\"Sample Report\" was removed from view at Northeastern University Library's discretion."
       expect(described_class.sentence('Sample Report', reason, nil)).to eq(expected)

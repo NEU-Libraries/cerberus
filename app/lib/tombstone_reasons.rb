@@ -25,7 +25,7 @@ module TombstoneReasons
 
     date = removal_date(tombstoned_at)
     note = reason[0].downcase + reason[1..]
-    "\"#{title}\" was #{note}#{" on #{date.to_fs(:long)}" if date}."
+    "\"#{title}\" was #{note}#{" on #{date.strftime('%B %-d, %Y')}" if date}."
   end
 
   def self.removal_date(tombstoned_at)
