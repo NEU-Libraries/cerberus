@@ -52,10 +52,8 @@ class LoadsController < ApplicationController
   # title, gated-discovery aware (an admin sees non-public collections). Returns
   # `[{ value: <noid>, label: <title> }]`; fail-soft to [] so it never 500s.
   def collection_search
-    results = ResourceSearch.call(scope: self, query: params[:q], types: %w[Collection])
-    render json: results.documents.map { |doc|
-      { value: doc.to_param, label: Array(doc['title_tsim']).first.presence || '(untitled)' }
-    }
+    documents = ResourceSearch.call(scope: self, query: params[:q], types: %w[Collection]).documents
+    render json: LoaderDestinationOptions.call(documents: documents)
   rescue Faraday::Error, JSON::ParserError => e
     Rails.logger.error("LoadsController#collection_search: #{e.class} #{e.message}")
     render json: []

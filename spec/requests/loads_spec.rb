@@ -552,6 +552,27 @@ RSpec.describe 'Loads', type: :request do
         expect(response.parsed_body).to eq([{ 'value' => 'neu:abc123', 'label' => 'Theses and Dissertations' }])
       end
 
+      # Every community has a "Theses & Dissertations" showcase, so the title
+      # alone cannot tell them apart.
+      it 'names the community a showcase belongs to' do
+        showcase = SolrDocument.new(id: 'uuid-show', 'title_tsim' => ['Theses & Dissertations'], 'featured_bsi' => true,
+                                    MembershipQuery::STRUCTURAL_FIELD => 'id-uuid-comm')
+        allow(showcase).to receive(:to_param).and_return('show123')
+        allow(ResourceSearch).to receive(:call)
+          .and_return(instance_double(Blacklight::Solr::Response, documents: [showcase, doc]))
+        allow(doc).to receive(:to_param).and_return('neu:abc123')
+        allow(StructuralParents).to receive(:call).with(documents: [showcase])
+                                                  .and_return('uuid-comm' => SolrDocument.new(id: 'uuid-comm', 'title_tsim' => ['College of Engineering']))
+
+        get '/loaders/xml/loads/collection_search', params: { q: 'thes' }
+
+        expect(response.parsed_body).to eq([
+                                             { 'value' => 'show123',
+                                               'label' => 'Theses & Dissertations · College of Engineering' },
+                                             { 'value' => 'neu:abc123', 'label' => 'Theses and Dissertations' }
+                                           ])
+      end
+
       it 'fails soft to [] when Atlas/Solr is unreachable' do
         allow(ResourceSearch).to receive(:call).and_raise(Faraday::ConnectionFailed, 'down')
         get '/loaders/xml/loads/collection_search', params: { q: 'thes' }
