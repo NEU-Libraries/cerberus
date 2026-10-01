@@ -73,7 +73,8 @@
               %td.text-end.text-nowrap
                 = button_to affiliation_community_path(community_id, doc['noid_ssi']), method: :delete,
                             class: 'btn btn-sm btn-tonal-danger', form: { class: 'd-inline',
-                            data: { turbo_confirm: "Remove #{doc['display_name_ssi']} from this community? They leave its Faculty & Staff list. Their record and works are not changed." } } do
+                            data: { turbo_confirm: "Remove #{doc['display_name_ssi']} from this community? They leave its Faculty & Staff list. Their record and works are not changed.",
+                                    turbo_confirm_title: 'Remove from community', turbo_confirm_button: 'Remove' } } do
                   %i.fa-solid.fa-xmark.me-1{'aria-hidden' => 'true'}
                   Remove
     - if @affiliates.total > people.size
