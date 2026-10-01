@@ -34,16 +34,7 @@ class AtlasController < ApplicationController
     end
 
     def sign_in_from_atlas(nuid)
-      user_values = AtlasRb::Authentication.login(nuid)
-      user = User.new(
-        email:       user_values.email,
-        nuid:        user_values.nuid,
-        name:        user_values.name,
-        groups:      user_values.groups,
-        role:        user_values.role,
-        affiliation: user_values.affiliation
-      )
-      sign_in(user)
+      sign_in(User.from_atlas(AtlasRb::Authentication.login(nuid)))
       # A fresh login lands on the preferred account — clear any prior switch so
       # atlas_rb resolves preferred rather than a stale selection.
       session.delete(:account_email)

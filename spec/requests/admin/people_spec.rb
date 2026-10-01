@@ -301,6 +301,14 @@ RSpec.describe 'Admin::People', type: :request do
 
         expect(response).to redirect_to(edit_admin_person_path('cz8wbpk'))
       end
+
+      # Otherwise a rename waits out NuidResolver's 12-hour cache.
+      it "forgets the person's cached name" do
+        allow(AtlasRb::Person).to receive_messages(find: person, update: person)
+        expect(NuidResolver).to receive(:forget).with('000000004')
+
+        patch admin_person_path('cz8wbpk'), params: { person: { display_name: 'David C.' } }
+      end
     end
 
     describe 'affiliations' do

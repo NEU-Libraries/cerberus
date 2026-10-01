@@ -54,6 +54,7 @@ module Admin
 
     def create
       person = AtlasRb::Person.create(**create_params, on_behalf_of: Current.nuid)
+      NuidResolver.forget(create_params[:nuid])
       # The Person resource is addressed by its NOID, which atlas_rb returns in `id`.
       redirect_to edit_admin_person_path(person['id']),
                   notice: "Person '#{person['display_name']}' created. Add community affiliations below."
@@ -64,6 +65,7 @@ module Admin
 
     def update
       AtlasRb::Person.update(@noid, **update_params, nuid: Current.nuid)
+      NuidResolver.forget(@person['nuid'])
       redirect_to edit_admin_person_path(@noid), notice: 'Person details saved.'
     rescue Faraday::Error, JSON::ParserError => e
       @person = AtlasRb::Person.find(@noid, nuid: Current.nuid)

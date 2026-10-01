@@ -133,6 +133,18 @@ RSpec.describe NuidResolver do
     end
   end
 
+  describe '.forget' do
+    it 'drops a cached name, so the next read sees a rename' do
+      allow(AtlasRb::User).to receive(:resolve).and_return([{ 'nuid' => '000000002', 'name' => 'Cliff, David' }])
+      described_class.name_for('000000002')
+      allow(AtlasRb::Person).to receive(:resolve).and_return([{ 'nuid' => '000000002', 'display_name' => 'D. Cliff' }])
+
+      described_class.forget('000000002')
+
+      expect(described_class.name_for('000000002')).to eq('D. Cliff')
+    end
+  end
+
   describe '.prettify' do
     it 'reorders "Family, Given" into display order' do
       expect(described_class.prettify('Cliff, David')).to eq('David Cliff')

@@ -132,6 +132,18 @@ RSpec.describe 'Admin::Impersonations', type: :request do
       expect(response.parsed_body).to eq([{ 'nuid' => '000000002', 'name' => 'Jane Doe' }])
     end
 
+    # Atlas matches the curated name too, so a hit on it must show it.
+    it 'shows the curated Person name verbatim when the entry has one' do
+      sign_in admin_user
+      allow(AtlasRb::User).to receive(:search).with('gasper', nuid: admin_user.nuid)
+                                              .and_return([{ 'nuid' => '000000014', 'name' => 'Reader, Licensed',
+                                                             'display_name' => 'Mickey Gasper' }])
+
+      get admin_impersonation_recipients_path, params: { q: 'gasper' }
+
+      expect(response.parsed_body).to eq([{ 'nuid' => '000000014', 'name' => 'Mickey Gasper' }])
+    end
+
     it 'returns [] for a blank query without calling Atlas' do
       sign_in admin_user
       allow(AtlasRb::User).to receive(:search)

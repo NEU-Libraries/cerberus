@@ -22,8 +22,7 @@ class AccountsController < ApplicationController
     return reject('That account is not one of yours.') unless own_account?(email)
 
     values = AtlasRb::Authentication.login(current_user.nuid, email: email)
-    sign_in(User.new(email: values.email, nuid: values.nuid, name: values.name,
-                     groups: values.groups, role: values.role, affiliation: values.affiliation))
+    sign_in(User.from_atlas(values))
     # Carry the selection so atlas_rb signs it as the acct claim on later
     # requests; set after sign_in so it survives the Warden session update.
     session[:account_email] = email

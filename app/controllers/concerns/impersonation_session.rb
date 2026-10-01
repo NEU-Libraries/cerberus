@@ -189,17 +189,13 @@ module ImpersonationSession
     def hydrate_user(nuid)
       return if nuid.blank?
 
-      values = Current.set(on_behalf_of: nil) { AtlasRb::Authentication.login(nuid) }
-      # A NUID Atlas does not know reads as nil; the callers fail closed on nil.
-      return nil if values.nil?
-
-      User.new(
-        email:  values.email,
-        nuid:   values.nuid,
-        name:   values.name,
-        groups: values.groups,
-        role:   values.role
-      )
+      # The curated-name read in from_atlas is the same kind of self-lookup, so
+      # it sits inside the same guard.
+      Current.set(on_behalf_of: nil) do
+        values = AtlasRb::Authentication.login(nuid)
+        # A NUID Atlas does not know reads as nil; the callers fail closed on nil.
+        values && User.from_atlas(values)
+      end
     rescue AtlasRb::Error, Faraday::Error, JSON::ParserError => e
       Rails.logger.error("Impersonation hydrate failed for #{nuid}: #{e.class} #{e.message}")
       nil

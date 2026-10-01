@@ -53,7 +53,15 @@ against Atlas that would validate it is not wired here. The app signs in through
 
 ### Displaying a name
 
-`pretty_name` runs the stored name through Namae, which understands only
+A librarian can curate a Person's display name, and it wins over the SSO name
+wherever a name renders. `User.from_atlas` reads it once, at sign-in, account
+switch and impersonation, and the session carries it as `display_name`. It is
+read then rather than per render because the layout shows the name on every
+page, and the test and dev caches are null stores. A rename therefore reaches
+the user's own menu at their next sign-in. `pretty_name` returns a curated name
+verbatim.
+
+Without one, `pretty_name` runs the stored name through Namae, which understands only
 person-shaped names. A descriptive or organisational name, such as "Law Library
 Staffer", parses to nothing. Keep the fallback to the raw name. An empty display
 name blanks the whole user block in the navbar, and that block holds Log Out.
