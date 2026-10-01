@@ -101,7 +101,7 @@
                 %i.fa-solid.fa-chart-simple.me-1{'aria-hidden' => 'true'}
                 Analytics
           .tab-content
-            #metadata.tab-pane.active.pt-3{role: 'tabpanel', 'aria-labelledby' => 'metadata-tab'}
+            #metadata.tab-pane.active.p-1{role: 'tabpanel', 'aria-labelledby' => 'metadata-tab'}
               = @mods&.html_safe
             #analytics.tab-pane{role: 'tabpanel', 'aria-labelledby' => 'analytics-tab'}
               = render 'works/analytics', report: @work_analytics, media: @av_file.present?
