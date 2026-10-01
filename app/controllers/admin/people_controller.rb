@@ -25,12 +25,14 @@ module Admin
     # take it unasked, so everyone past the tenth person was missing.
     PER_PAGE = 50
 
-    # atlas_rb returns the rows without Atlas's page count, so Next is offered
-    # when a page comes back full; at worst it leads to one empty page.
+    # With q, Atlas matches display name, account email and a NUID prefix, and
+    # the pagination block counts the matches rather than the registry.
     def index
-      @page = [params[:page].to_i, 1].max
-      @people = Array(AtlasRb::Person.list(page: @page, per_page: PER_PAGE, nuid: Current.nuid))
-      @more = @people.size == PER_PAGE
+      @q = params[:q].to_s.strip.presence
+      result = AtlasRb::Person.page(q: @q, page: [params[:page].to_i, 1].max, per_page: PER_PAGE,
+                                    nuid: Current.nuid)
+      @people = Array(result&.dig('people'))
+      @pagination = result&.dig('pagination') || {}
     end
 
     # A Person's Grouper groups live on its sign-in accounts, one set each, so

@@ -40,6 +40,10 @@ RSpec.describe 'Admin::People', type: :request do
       'affiliated_community_ids' => ['jm640df'] }
   end
 
+  def page_of(people, page: 1, pages: 1, count: people.size)
+    { 'people' => people, 'pagination' => { 'page' => page, 'pages' => pages, 'count' => count } }
+  end
+
   describe 'admin gate' do
     it 'forbids non-admin staff' do
       sign_in staff_user
@@ -64,7 +68,7 @@ RSpec.describe 'Admin::People', type: :request do
 
     describe 'GET /admin/people' do
       it 'lists the curated people' do
-        allow(AtlasRb::Person).to receive(:list).and_return([person])
+        allow(AtlasRb::Person).to receive(:page).and_return(page_of([person]))
 
         get admin_people_path
 
@@ -79,28 +83,57 @@ RSpec.describe 'Admin::People', type: :request do
     # so everyone past the tenth person was missing.
     describe 'GET /admin/people paging' do
       it 'asks Atlas for a full page, and for the page requested' do
-        allow(AtlasRb::Person).to receive(:list).and_return([person])
+        allow(AtlasRb::Person).to receive(:page).and_return(page_of([person]))
 
         get admin_people_path(page: 3)
 
-        expect(AtlasRb::Person).to have_received(:list)
-          .with(page: 3, per_page: Admin::PeopleController::PER_PAGE, nuid: anything)
+        expect(AtlasRb::Person).to have_received(:page)
+          .with(q: nil, page: 3, per_page: Admin::PeopleController::PER_PAGE, nuid: anything)
       end
 
-      it 'offers Next only when the page came back full' do
-        allow(AtlasRb::Person).to receive(:list).and_return(Array.new(Admin::PeopleController::PER_PAGE) { person })
-        get admin_people_path
-        expect(response.body).to include(admin_people_path(page: 2))
+      it "shows Atlas's count and page count, and links the next page" do
+        allow(AtlasRb::Person).to receive(:page).and_return(page_of([person], page: 2, pages: 7, count: 320))
 
-        allow(AtlasRb::Person).to receive(:list).and_return([person])
+        get admin_people_path(page: 2)
+
+        expect(response.body).to include('320 people', 'Page 2 of 7', admin_people_path(page: 3))
+      end
+
+      it 'offers no pagination on a single page' do
+        allow(AtlasRb::Person).to receive(:page).and_return(page_of([person]))
         get admin_people_path
-        expect(response.body).not_to include(admin_people_path(page: 2))
+        expect(response.body).not_to include('People pages')
       end
 
       it 'says there are no more people on an empty later page' do
-        allow(AtlasRb::Person).to receive(:list).and_return([])
+        allow(AtlasRb::Person).to receive(:page).and_return(page_of([], page: 2, pages: 1, count: 3))
         get admin_people_path(page: 2)
-        expect(response.body).to include('No more people.').and include(admin_people_path(page: 1))
+        expect(response.body).to include('No more people.', admin_people_path)
+      end
+    end
+
+    describe 'GET /admin/people search' do
+      it 'passes the query to Atlas and counts the matches' do
+        allow(AtlasRb::Person).to receive(:page).and_return(page_of([person], count: 1))
+
+        get admin_people_path(q: ' gasp ')
+
+        expect(AtlasRb::Person).to have_received(:page).with(hash_including(q: 'gasp'))
+        expect(response.body).to include('1 match for “gasp”', 'value="gasp"')
+      end
+
+      # The query must survive paging, or Next lands on the whole registry.
+      it 'keeps the query on the page links' do
+        allow(AtlasRb::Person).to receive(:page).and_return(page_of([person], pages: 2, count: 60))
+        get admin_people_path(q: 'doe')
+        expect(response.body).to include(CGI.escapeHTML(admin_people_path(q: 'doe', page: 2)))
+      end
+
+      it 'says so when nothing matches' do
+        allow(AtlasRb::Person).to receive(:page).and_return(page_of([], count: 0, pages: 0))
+        get admin_people_path(q: 'zzz')
+        expect(response.body).to include('No people match “zzz”.')
+        expect(response.body).not_to include('No people registered')
       end
     end
 
@@ -108,7 +141,7 @@ RSpec.describe 'Admin::People', type: :request do
     # holds a lazy frame, so the index costs no per-person Atlas read.
     describe 'Grouper groups' do
       it 'gives each person with a NUID a lazy groups frame' do
-        allow(AtlasRb::Person).to receive(:list).and_return([person])
+        allow(AtlasRb::Person).to receive(:page).and_return(page_of([person]))
         get admin_people_path
         expect(response.body).to include(%(src="#{groups_admin_person_path('cz8wbpk')}"))
         expect(response.body).to include('loading="lazy"')
