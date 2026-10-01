@@ -236,6 +236,31 @@ and anything it could not. A developer restores from that list, parents first,
 because Atlas refuses to restore a child under a tombstoned parent. The
 registry still restores one item at a time.
 
+The Requests & activity row shows only the summary. The list is in the
+`AdminNotice` payload, under `withdrawn`, as `{ "noid", "type" }` pairs, with
+`failures`, `reason`, `subject_type` and `subject_title` beside it.
+
+#### Restoring a cascade at the console
+
+The job withdraws deepest first and appends each item as it goes, so the list
+runs leaf to container. Restoring it in reverse puts each parent back before its
+children, which is the order Atlas requires. Run it as an admin, so Atlas
+records who restored each item:
+
+```ruby
+notice = AdminNotice.where(kind: 'tombstone_cascade', subject_noid: '<container noid>').last
+notice.detail(:withdrawn).reverse_each do |item|
+  response = AtlasRb::Admin::Resource.restore(item['noid'], nuid: '<admin nuid>')
+  puts "#{item['type']} #{item['noid']}: #{response.status}"
+end
+```
+
+Restore only what the list names. An item withdrawn before the cascade is
+absent from it on purpose, and its own tombstone still stands. A container that
+had live members the job could not withdraw is on `failures`, not `withdrawn`,
+and was never tombstoned. Each restore clears that item's removal reason and
+records a restore on its History tab.
+
 ## Restoring and permanently deleting a tombstoned item
 
 `Admin::TombstonesController` is the registry: the staff counterpart to the
