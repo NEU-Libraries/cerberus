@@ -41,6 +41,16 @@
           Open
           %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
 
+    = link_to admin_communities_path, class: 'admin-action-card admin-action-card--structure', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-users{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Communities
+      %span.admin-action-card__desc
+        Find any community, private ones included, and open its page, its details and permissions, or the people affiliated with it.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
     = link_to admin_associations_path, class: 'admin-action-card admin-action-card--link', role: 'listitem' do
       %span.admin-action-card__icon
         %i.fa-solid.fa-diagram-project{'aria-hidden' => 'true'}

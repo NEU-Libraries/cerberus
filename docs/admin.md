@@ -158,6 +158,7 @@ action between controllers.
 | The ledger | `:admin` or the devolved-admin tier | the same audience as deposit triage |
 | Linked members | `:admin` only | it edits placement, which the delegate tier does not manage |
 | Associated works | `:admin` or the devolved-admin tier | Atlas grants `:associate` to both. A delegate's reads stay group-gated, so a Work they cannot read gets the forbidden page, and an edge to one shows its bare NOID |
+| Communities registry | `:admin` or the devolved-admin tier | it only lists and links, through the gated search, so a delegate sees what they may discover. Its People link is `:admin` only, as the community People tab is, because Atlas grants Person `:update` to admins alone |
 | Rights and MODS history | `:read, :audit_event` | the same gate as the Audit History tab it is reached from. Only `:admin` holds it, through `can :manage, :all` |
 
 `HistoriesController` is the odd one out. It sits outside `Admin::`, inherits

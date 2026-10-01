@@ -266,6 +266,9 @@ Rails.application.routes.draw do
     post   'associations/add',    to: 'associations#add',     as: :associations_add
     delete 'associations/remove', to: 'associations#remove',  as: :associations_remove
 
+    # Communities — every community, to open its page, Edit page or People tab.
+    get 'communities', to: 'communities#index'
+
     # People — the curatorial Person registry: create a Person by NUID, edit the
     # authoritative display_name / title / bio / orcid, and manage community
     # affiliations (the edges that drive the Faculty & Staff browse). Keyed by

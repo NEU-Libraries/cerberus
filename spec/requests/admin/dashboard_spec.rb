@@ -34,7 +34,8 @@ RSpec.describe 'Admin::Dashboard', type: :request do
   devolved_paths = {
     '/admin'              => 'Administration',
     '/admin/reparent'     => 'find the Work, Collection, or Community you want to move',
-    '/admin/associations' => 'Associated works'
+    '/admin/associations' => 'Associated works',
+    '/admin/communities'  => 'Every community in the DRS'
   }
   admin_only_paths = {
     '/admin/linked_members' => 'Linked members'
@@ -108,8 +109,8 @@ RSpec.describe 'Admin::Dashboard', type: :request do
       get '/admin'
 
       expect(response.body).to include(admin_reparent_path, admin_associations_path,
-                                       admin_impersonation_path, admin_files_path,
-                                       admin_impressions_path)
+                                       admin_communities_path, admin_impersonation_path,
+                                       admin_files_path, admin_impressions_path)
       expect(response.body).not_to include(admin_linked_members_path, admin_groups_path)
       # The admin pages carry no access-tier label for either tier.
       expect(response.body).not_to include('Delegated admin access', 'Admin-only')
