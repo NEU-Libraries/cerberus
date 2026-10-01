@@ -274,4 +274,19 @@ RSpec.describe AuditEventsHelper, type: :helper do
       end
     end
   end
+
+  describe 'tombstone events' do
+    it 'shows the removal reason Atlas recorded' do
+      text = helper.audit_event_payload_summary(
+        event(action: 'tombstone', change_type: 'lifecycle',
+              payload: { 'reason' => TombstoneReasons::CURATOR })
+      )
+      expect(CGI.unescapeHTML(text)).to include(TombstoneReasons::CURATOR)
+    end
+
+    it 'shows no summary for a tombstone recorded without one' do
+      expect(helper.audit_event_payload_summary(event(action: 'tombstone', change_type: 'lifecycle',
+                                                      payload: {}))).to be_nil
+    end
+  end
 end

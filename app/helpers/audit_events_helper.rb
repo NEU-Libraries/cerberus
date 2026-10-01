@@ -284,6 +284,7 @@ module AuditEventsHelper
       when 'reparent'      then targeted_summary('moved to', payload['to'])
       when 'link_member'   then targeted_summary('to', payload['collection'])
       when 'unlink_member' then targeted_summary('from', payload['collection'])
+      when 'tombstone'     then payload['reason']
       end
     end
 

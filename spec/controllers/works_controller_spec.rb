@@ -1226,18 +1226,78 @@ describe WorksController do
       allow(AtlasRb::Resource).to receive(:tombstone)
         .and_return(instance_double(Faraday::Response, success?: true))
       post :tombstone, params: { id: work.id }
-      expect(AtlasRb::Resource).to have_received(:tombstone).with(work.id)
+      expect(AtlasRb::Resource).to have_received(:tombstone).with(work.id, reason: nil)
       expect(subject).to redirect_to(collection_path(collection.id))
       expect(flash[:notice]).to eq('Work deleted.')
     end
 
+    it 'records the curator note for a non-admin, whatever reason the form sent' do
+      allow(AtlasRb::Resource).to receive(:tombstone)
+        .and_return(instance_double(Faraday::Response, success?: true))
+      post :tombstone, params: { id: work.id, reason: TombstoneReasons::ALL.first }
+      expect(AtlasRb::Resource).to have_received(:tombstone).with(work.id, reason: TombstoneReasons::CURATOR)
+    end
+
     it 'reports a 422 live-members refusal without claiming success' do
       allow(AtlasRb::Resource).to receive(:tombstone)
-        .and_return(instance_double(Faraday::Response, success?: false, status: 422))
+        .and_return(instance_double(Faraday::Response, success?: false, status: 422,
+                                                       body: '{"code":"has_live_children"}'))
       request.env['HTTP_REFERER'] = work_path(work.id)
       post :tombstone, params: { id: work.id }
       expect(flash[:notice]).to be_nil
       expect(flash[:alert]).to match(/live members/)
+    end
+  end
+
+  describe 'the Delete dialog on the show page' do
+    render_views
+
+    before do
+      AtlasRb::Resource.set_permissions(work.id,
+                                        { 'edit' => [Permissions::STAFF_EDIT_GROUP] }, nuid: '000000004')
+    end
+
+    it 'asks an admin to choose a removal reason' do
+      sign_in User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin')
+      get :show, params: { id: work.id }
+      page = Capybara.string(response.body)
+      expect(page).to have_select('reason', with_options: TombstoneReasons::ALL)
+      expect(page.find('select[name="reason"]')['required']).to be_present
+    end
+
+    it 'records the curator note for staff, without a choice' do
+      sign_in User.new(email: 'staff@example.com', nuid: '000000002', groups: [Permissions::STAFF_EDIT_GROUP])
+      get :show, params: { id: work.id }
+      page = Capybara.string(response.body)
+      expect(page).to have_no_select('reason')
+      expect(page).to have_field('reason', type: :hidden, with: TombstoneReasons::CURATOR, visible: false)
+    end
+  end
+
+  # Live against Atlas: its list of removal notes must match Cerberus's word for
+  # word, or the dialog offers a choice Atlas refuses.
+  describe 'tombstone with a removal reason, as an admin' do
+    before do
+      sign_in User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin')
+    end
+
+    it 'records every reason the dialog offers, and restore clears it' do
+      TombstoneReasons::ALL.each do |reason|
+        post :tombstone, params: { id: work.id, reason: reason }
+        expect(flash[:notice]).to eq('Work deleted.')
+        expect(AtlasRb::Work.find(work.id, nuid: '000000004')['tombstone_reason']).to eq(reason)
+
+        AtlasRb::Admin::Resource.restore(work.id, nuid: '000000004')
+        expect(AtlasRb::Work.find(work.id, nuid: '000000004')['tombstone_reason']).to be_nil
+      end
+    end
+
+    it 'reports a reason Atlas refuses without claiming success' do
+      request.env['HTTP_REFERER'] = work_path(work.id)
+      post :tombstone, params: { id: work.id, reason: 'Removed because' }
+      expect(flash[:notice]).to be_nil
+      expect(flash[:alert]).to match(/Choose one of the listed removal reasons/)
+      expect(AtlasRb::Work.find(work.id, nuid: '000000004')['tombstoned']).to be(false)
     end
   end
 
@@ -1256,6 +1316,16 @@ describe WorksController do
       get :show, params: { id: work.id }
       expect(response).to render_template('errors/gone')
       expect(response).to have_http_status(:gone)
+    end
+
+    it 'states the removal reason and its date' do
+      tombstoned = AtlasRb::Work.find(work.id)
+      tombstoned['tombstone_reason'] = TombstoneReasons::CURATOR
+      tombstoned['tombstoned_at'] = '2026-09-30T14:05:00Z'
+
+      get :show, params: { id: work.id }
+      expect(CGI.unescapeHTML(response.body))
+        .to include("was removed from view at contributor or content curator's discretion on September 30, 2026.")
     end
   end
 

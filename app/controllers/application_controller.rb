@@ -5,6 +5,7 @@
 class ApplicationController < ActionController::Base
   include Blacklight::Controller
   include Authorizable
+  include Tombstoning
   include UnfinishedDepositGate
   include ImpersonationSession
   include StructuralContainers

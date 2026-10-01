@@ -397,14 +397,15 @@ describe CommunitiesController do
       allow(AtlasRb::Resource).to receive(:tombstone)
         .and_return(instance_double(Faraday::Response, success?: true))
       post :tombstone, params: { id: community.id }
-      expect(AtlasRb::Resource).to have_received(:tombstone).with(community.id)
+      expect(AtlasRb::Resource).to have_received(:tombstone).with(community.id, reason: nil)
       expect(subject).to redirect_to(root_path)
       expect(flash[:notice]).to eq('Community deleted.')
     end
 
     it 'reports a 422 live-members refusal without claiming success' do
       allow(AtlasRb::Resource).to receive(:tombstone)
-        .and_return(instance_double(Faraday::Response, success?: false, status: 422))
+        .and_return(instance_double(Faraday::Response, success?: false, status: 422,
+                                                       body: '{"code":"has_live_children"}'))
       request.env['HTTP_REFERER'] = community_path(community.id)
       post :tombstone, params: { id: community.id }
       expect(flash[:notice]).to be_nil
