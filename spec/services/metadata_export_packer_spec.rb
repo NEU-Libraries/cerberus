@@ -75,6 +75,17 @@ RSpec.describe MetadataExportPacker do
     entries
   end
 
+  def manifest_headers(xlsx_bytes)
+    file = Tempfile.new(['manifest', '.xlsx'])
+    file.binmode
+    file.write(xlsx_bytes)
+    file.close
+    sheet = Roo::Excelx.new(file.path)
+    sheet.row(sheet.first_row)
+  ensure
+    file&.unlink
+  end
+
   # Round-trip the bundled manifest.xlsx back through the loader's own parser.
   def manifest_rows(xlsx_bytes)
     file = Tempfile.new(['manifest', '.xlsx'])
@@ -95,6 +106,7 @@ RSpec.describe MetadataExportPacker do
     end
 
     it 'writes a manifest.xlsx that re-parses through XmlLoader::Manifest' do
+      expect(manifest_headers(entries.fetch('manifest.xlsx'))).to eq(described_class::HEADERS)
       rows = manifest_rows(entries.fetch('manifest.xlsx'))
 
       expect(rows.map(&:identifier)).to eq(%w[aaa111 bbb222])
@@ -116,9 +128,13 @@ RSpec.describe MetadataExportPacker do
       expect(entries.keys).not_to include(a_string_matching(%r{\Amods/}))
     end
 
-    it 'leaves the MODS XML File Path column blank' do
-      rows = manifest_rows(entries.fetch('manifest.xlsx'))
+    # There is no MODS file to point at, so the column is left out rather than
+    # left blank. The loader finds columns by label, so the rest still parse.
+    it 'leaves out the MODS XML File Path column' do
+      expect(manifest_headers(entries.fetch('manifest.xlsx')))
+        .to eq(['PIDs', 'File Name', 'Embargoed?', 'Embargo Date', 'Date Ingested'])
 
+      rows = manifest_rows(entries.fetch('manifest.xlsx'))
       expect(rows.map(&:identifier)).to eq(%w[aaa111 bbb222])
       expect(rows.map(&:xml_path)).to all(be_nil)
     end

@@ -8,9 +8,14 @@ require 'caxlsx'
 # in the `docs:` enumerator, not here. See docs/downloads.md.
 class MetadataExportPacker
   # The first five must match XmlLoader::Manifest::COLUMN_LABELS, or the
-  # exported bundle no longer loads back into the XML loader. Columns after
-  # them are for the reader only; the loader ignores columns it does not know.
+  # exported bundle no longer loads back into the XML loader. The loader finds a
+  # column by its label, not its position, and ignores labels it does not know.
   HEADERS = ['PIDs', 'MODS XML File Path', 'File Name', 'Embargoed?', 'Embargo Date', 'Date Ingested'].freeze
+
+  # A manifest-only export bundles no MODS, so the column would point at nothing.
+  # A full export keeps it even where one fetch failed: that row's blank cell is
+  # a failure, and ERRORS.txt names it.
+  MODS_PATH_HEADER = 'MODS XML File Path'
 
   # Every Solr field this packer reads off a doc, so a resolver's `fl` can be
   # taken from here instead of guessed. A field read but not fetched raises
@@ -63,9 +68,14 @@ class MetadataExportPacker
       nil
     end
 
-    # A row in HEADERS order.
+    # A row in headers order.
     def manifest_row(doc, noid, xml_path, file_name)
-      [noid, xml_path, file_name, embargoed(doc), embargo_date(doc), ingest_date(doc)]
+      row = [noid, file_name, embargoed(doc), embargo_date(doc), ingest_date(doc)]
+      @include_mods ? row.insert(1, xml_path) : row
+    end
+
+    def headers
+      @include_mods ? HEADERS : HEADERS - [MODS_PATH_HEADER]
     end
 
     # The name the Work's content file was deposited under, as a create row
@@ -103,7 +113,7 @@ class MetadataExportPacker
     def write_manifest(zip, rows)
       package = Axlsx::Package.new
       package.workbook.add_worksheet(name: 'Manifest') do |sheet|
-        sheet.add_row HEADERS
+        sheet.add_row headers
         rows.each { |row| sheet.add_row row }
       end
       write_text(zip, 'manifest.xlsx', package.to_stream.read)

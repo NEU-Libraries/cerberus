@@ -273,6 +273,11 @@ that prefix, and skip a doc with no noid.
 `manifest.xlsx`, in the exact column shape the XML batch loader reads
 (`XmlLoader::Manifest`). Optionally it adds one `mods/<noid>.xml` per item.
 
+A manifest-only export leaves out the "MODS XML File Path" column, since there
+is no MODS file to point at. The loader finds each column by its label, so the
+rest still parse. A full export keeps the column even where one item's MODS
+fetch failed: that blank cell is a failure, and `ERRORS.txt` names it.
+
 It is the inverse of the XML loader: export the records, edit the MODS offline,
 re-feed the bundle as updates. Every row carries a NOID, so
 `XmlLoader::Manifest::Row#update?` is true for all of them.
