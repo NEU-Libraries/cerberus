@@ -637,4 +637,3 @@ are in browse order. A sort other than relevance gets a note that the score did
 not set the item's place. `SearchExplanation::LABELS` names each `qf` field as
 the page does; a field missing from it shows its Solr name. Add one there when
 `qf` gains a field.
-
