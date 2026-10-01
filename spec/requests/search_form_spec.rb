@@ -17,6 +17,13 @@ RSpec.describe 'The header search form', type: :request do
     expect(hidden_fields.keys).not_to include('controller', 'action')
   end
 
+  # A nested value travels as Rails' bracket form, so the next search keeps it.
+  it 'keeps a facet filter as a facet filter' do
+    get '/catalog', params: { q: 'coastal', f: { human_readable_type_ssim: ['Work'] } }
+
+    expect(hidden_fields).to eq('f[human_readable_type_ssim][]' => 'Work')
+  end
+
   it 'sends the query once, from its box, and keeps the sort' do
     get '/catalog', params: { q: 'coastal', sort: 'title' }
 
