@@ -1,0 +1,14 @@
+<%# "Why this result?" on a search result, for admins and delegated admins.
+    Carries the search the page ran, so the dialog explains this score. %>
+<% if effective_user&.admin? || effective_user&.admin_delegate? %>
+  <button type="button"
+          class="btn btn-sm btn-link p-0 me-2"
+          data-bs-toggle="modal"
+          data-bs-target="#explainModal"
+          data-explain-url="<%= search_explanation_path(document.id, q: params[:q], sort: params[:sort]) %>"
+          data-controller="tooltip"
+          data-bs-title="Why this result?">
+    <span class="visually-hidden">Why this result?</span>
+    <i class="fa-solid fa-magnifying-glass-chart" aria-hidden="true"></i>
+  </button>
+<% end %>

@@ -117,6 +117,7 @@ the page it opens show the same icon.
 | My DRS | `fa-folder-tree` | The My DRS page and its menu entry |
 | A loader | `fa-file-import` | Its dashboard card, the Loader registry, the loader chip on load pages |
 | Move (reparent) | `fa-sitemap` | Its dashboard card and pages, the audit "Reparented" row, the Requests "Move" row |
+| Why this result? | `fa-magnifying-glass-chart` | Each search result's action rail, for admins, and the dialog it opens. Not `fa-magnifying-glass`, which is search itself |
 | A genre | its `FeaturedContent::GENRES` icon | Its homepage gateway, its landing page heading and empty state |
 
 The genre icons are `fa-file-lines` (Research Publications),

@@ -47,6 +47,7 @@
             <span class="visually-hidden">Report a problem</span>
             <i class="fa-regular fa-comment-dots" aria-hidden="true"></i>
           <% end %>
+          <%= helpers.render 'shared/explain_button', document: @document %>
           <%= helpers.document_status_icons(@document) %>
         </div>
         <% if helpers.effective_user&.curates_sets? && %w[Work Collection].include?(@document.klass_type) %>

@@ -3,7 +3,7 @@
 # Reads Solr's structured score explanation (`[explain style=nl]`) for one
 # search result into what an admin can repeat to a curious user: which words
 # matched in which fields, which match counted most, and any phrase bonus or
-# score adjustment. See docs/search.md ("Why this result?").
+# score adjustment. See docs/discovery.md ("Why this result?").
 #
 # The shape it reads is edismax's: one "max plus 0.01 times others" node per
 # query word, holding a weight per field the word matched in, so the best field

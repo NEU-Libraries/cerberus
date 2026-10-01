@@ -10,6 +10,8 @@ Source files:
 - `app/services/mods_browse_links.rb`
 - `app/services/resource_search.rb`
 - `app/services/showcase_finder.rb`
+- `app/services/search_explanation.rb`
+- `app/controllers/search_explanations_controller.rb`
 - `app/services/showcase_provisioner.rb`
 - `app/services/work_showcase.rb`
 - `app/controllers/concerns/work_showcase_category.rb`
@@ -605,3 +607,34 @@ one composed value, `Emergency management -- Planning`, not its two topics. The
 marker carries that same composed value. A Solr index built before Atlas
 composed headings still holds the separate topics, so its links come back empty.
 That is exactly the symptom a wrong `AXES` entry would produce.
+
+## Why this result?
+
+Admins and delegated admins get a `fa-magnifying-glass-chart` button on each
+search result, in the list and gallery views (`shared/_explain_button`). It
+opens one shared dialog per results page (`shared/_explain_modal`), which loads
+`SearchExplanationsController#show` only when it opens. Regular users see
+nothing new, on purpose: the detail is for staff, to understand a result for
+themselves and to explain it to a user in plain words.
+
+The action reruns the search the page ran, with the same `q`, through the
+asker's own gated search builder, narrowed to the one result by `fq=id:"<uuid>"`,
+and asks for `fl=score,[explain style=nl]`. A filter never changes a score, so
+the explanation is of the score the page ranked by. The gated builder means a
+delegated admin cannot explain a record they could not find. It needs
+`search_service_context` with the user, or the search gates as anonymous.
+
+`SearchExplanation` reads edismax's tree. Each query word has a "max plus 0.01
+times others" node: the field it matched best counts in full, and each other
+field adds a hundredth of its own score. The phrase boost (`pf`) adds a second
+such node, whose weights carry a quoted phrase. A boost function multiplies the
+whole: Person records score 0.9. The dialog leads with a sentence an admin can
+copy and pass on, then a table of word, field and points, the adjustments, the
+score, and Solr's full tree, collapsed.
+
+Two cases have nothing to score. A browse with no search terms says its results
+are in browse order. A sort other than relevance gets a note that the score did
+not set the item's place. `SearchExplanation::LABELS` names each `qf` field as
+the page does; a field missing from it shows its Solr name. Add one there when
+`qf` gains a field.
+

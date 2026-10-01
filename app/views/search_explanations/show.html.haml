@@ -1,0 +1,75 @@
+-# The body of the shared "Why this result?" dialog (shared/_explain_modal),
+-# loaded into its frame. Leads with a sentence an admin can pass on, then the
+-# detail behind it. See docs/discovery.md ("Why this result?").
+= turbo_frame_tag 'explain-modal-frame' do
+  .p-3
+    - if @query.nil?
+      %p.mb-0
+        This list has no search terms, so nothing was matched. Its results are in browse order.
+    - elsif @document.nil?
+      %p.mb-0
+        This item is not in your results for
+        = succeed '.' do
+          %strong “#{@query}”
+        There is nothing to explain.
+    - else
+      - explanation = @explanation
+      - summary = explanation.summary
+      - if summary
+        .d-flex.align-items-start.gap-2.mb-3{data: { controller: 'clipboard', 'clipboard-text-value': summary }}
+          %p.mb-0.flex-grow-1= summary
+          %button.btn.btn-sm.btn-tonal-secondary.flex-shrink-0{type: 'button', data: { action: 'clipboard#copy' }}
+            %i.fa-regular.fa-copy.me-1{'aria-hidden' => 'true'}
+            %span{data: { 'clipboard-target': 'label' }} Copy
+      - else
+        %p No word of “#{@query}” matched a field Solr scores, so this explanation has nothing to summarize.
+      - if @sorted_by && @sorted_by != 'relevance'
+        .alert.alert-warning.py-2.px-3.small.d-flex.align-items-start
+          %i.fa-solid.fa-triangle-exclamation.me-2.mt-1{'aria-hidden' => 'true'}
+          %span The list is sorted by #{@sorted_by.tr('-', ' ')}, so this score did not set the item’s place in it.
+
+      %h3.h6.mt-3 What matched
+      %p.small.text-muted
+        For each word, the field it matched best counts in full, and every other field adds only a hundredth of its own score.
+      .table-responsive
+        %table.table.table-borderless.admin-registry-table.mb-2
+          %thead
+            %tr
+              %th{scope: 'col'} Words
+              %th{scope: 'col'} Field
+              %th.text-end{scope: 'col'} Points
+          %tbody
+            - strongest = explanation.strongest
+            - explanation.words.each do |word|
+              - word.matches.each_with_index do |match, index|
+                %tr
+                  %td
+                    - if index.zero?
+                      “#{word.term}”
+                  %td
+                    = match.label.capitalize
+                    - if match.word_form?
+                      %span.small.text-muted (word forms)
+                    - if match.equal?(strongest)
+                      %span.badge.text-bg-light.ms-1 counts most
+                  %td.text-end.tnum= number_with_precision(match.points, precision: 2)
+            - explanation.phrases.each do |match|
+              %tr
+                %td “#{match.display_term}” together
+                %td
+                  = match.label.capitalize
+                  - if match.equal?(strongest)
+                    %span.badge.text-bg-light.ms-1 counts most
+                %td.text-end.tnum= number_with_precision(match.points, precision: 2)
+      - explanation.adjustments.each do |factor|
+        %p.small.mb-1
+          The score was multiplied by #{number_with_precision(factor, precision: 2, strip_insignificant_zeros: true)}.
+          - if (factor - 0.9).abs < 1e-6
+            People records rank slightly lower than works and collections.
+      %p.small.mb-0
+        Score:
+        %strong.tnum= number_with_precision(explanation.score, precision: 2)
+
+      %details.mt-3
+        %summary.small Solr’s full explanation
+        = render 'search_explanations/node', node: explanation.tree

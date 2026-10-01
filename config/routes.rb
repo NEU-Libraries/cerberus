@@ -349,6 +349,10 @@ Rails.application.routes.draw do
   get '/resources/:id/rights_history', to: 'histories#rights', as: :rights_history
   get '/resources/:id/mods_history',   to: 'histories#mods',   as: :mods_history
 
+  # "Why this result?" on a search result, for admins: :id is the result's Solr
+  # id, and q is the search it came from.
+  get 'search_explanations/:id', to: 'search_explanations#show', as: :search_explanation
+
   # xml
   get '/xml/editor/:id' => 'xml#editor', as: 'xml_editor'
   put '/xml/validate' => 'xml#validate'
