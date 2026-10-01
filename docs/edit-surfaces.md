@@ -207,7 +207,7 @@ treats a value as a set of group tokens, and an embargo is a single date.
 
 ### Which surface made a MODS upload
 
-Four Cerberus writers send a full MODS document through
+Several Cerberus writers send a full MODS document through
 `AtlasRb::Resource.put_mods`. Three are editing surfaces: the simple Metadata
 form, the Advanced tab and the raw XML editor. The first two merge into the
 stored document through `AtlasWrite#merge_mods!`; the XML editor replaces it
@@ -223,6 +223,7 @@ string verbatim beside `source` in the payload:
 | Advanced tab | `AdvancedMetadata#save_advanced!` | `advanced_form` |
 | Raw XML editor | `XmlController#update` | `xml_editor` |
 | Deposit, titling a new Work from its filename | `WorkDeposit#finalize_new_work` | `deposit` |
+| XML loader, replacing an existing Work's document | `XmlIngestJob#update_work` | `xml_loader` |
 
 The deposit row is not a form. It is the write that titles a new Work before
 its depositor has seen the metadata page. It takes its own tag so the audit log
@@ -233,9 +234,8 @@ does not show a Metadata form edit that nobody made.
 Atlas never branches on the value, so a new surface needs no Atlas change.
 
 The renderer must tolerate an absent origin. Two kinds of event have none:
-every row written before the field existed, and the programmatic writes that
-send no tag. `ShowcaseProvisioner` passes `origin: nil`, and `XmlIngestJob`
-calls `put_mods` without one. Atlas omits the key rather than sending it empty,
+every row written before the field existed, and the system write that sends
+no tag: `ShowcaseProvisioner` passes `origin: nil`. Atlas omits the key rather than sending it empty,
 so those rows fall back to the bare "MODS document".
 
 ### The two permission payloads

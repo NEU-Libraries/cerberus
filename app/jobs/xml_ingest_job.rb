@@ -93,7 +93,7 @@ class XmlIngestJob < ApplicationJob
     # retry re-applies the same document. work_pid (= the NOID) is recorded so
     # the dashboard can link to the Work.
     def update_work(ingest, noid, mods)
-      with_mods_file(mods) { |path| AtlasRb::Resource.put_mods(noid, path) }
+      with_mods_file(mods) { |path| AtlasRb::Resource.put_mods(noid, path, origin: 'xml_loader') }
       ingest.update!(work_pid: noid)
       noid
     end

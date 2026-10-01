@@ -61,6 +61,7 @@ module AuditEventsHelper
     'metadata_form' => 'Metadata form',
     'advanced_form' => 'Advanced form',
     'xml_editor'    => 'XML editor',
+    'xml_loader'    => 'XML loader',
     'deposit'       => 'Deposit'
   }.freeze
 

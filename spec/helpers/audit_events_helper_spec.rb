@@ -250,6 +250,14 @@ RSpec.describe AuditEventsHelper, type: :helper do
         expect(text).to include('MODS document · via XML editor')
       end
 
+      it 'names the XML loader when a load replaced the document' do
+        text = helper.audit_event_payload_summary(
+          event(action: 'update', change_type: 'metadata',
+                payload: { 'source' => 'mods', 'origin' => 'xml_loader' })
+        )
+        expect(text).to include('MODS document · via XML loader')
+      end
+
       # Atlas omits the key rather than sending it empty, so an event from a
       # programmatic write or from before the field existed has to keep reading.
       it 'labels a MODS update carrying no origin exactly as before' do
