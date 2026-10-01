@@ -8,7 +8,7 @@ class AdminNotice < ApplicationRecord
 
   ACTIVITY_KINDS = %w[load_report work_completion_mismatch visibility_cascade
                       set_reindex showcase_promotion set_privatize
-                      set_sentinel_apply].freeze
+                      set_sentinel_apply tombstone_cascade].freeze
 
   DIGEST = 'daily_digest'
 

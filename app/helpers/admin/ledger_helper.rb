@@ -23,6 +23,7 @@ module Admin
       'set_privatize'            => { label: 'Privatize',  icon: 'fa-user-lock' },
       'set_sentinel_apply'       => { label: 'Derivative access', icon: 'fa-images' },
       'showcase_promotion'       => { label: 'Showcase',   icon: 'fa-star' },
+      'tombstone_cascade'        => { label: 'Deleted',    icon: 'fa-trash-can' },
       'daily_digest'             => { label: 'Digest',     icon: 'fa-book' }
     }.freeze
 
@@ -97,6 +98,7 @@ module Admin
       when 'set_reindex', 'set_privatize', 'set_sentinel_apply'
         safe_path(:set_path, notice.subject_noid)
       when 'visibility_cascade' then safe_path(:collection_path, notice.subject_noid)
+      when 'tombstone_cascade' then resource_path_for(notice.detail(:subject_type), notice.subject_noid)
       when 'work_completion_mismatch', 'showcase_promotion' then safe_path(:work_path, notice.subject_noid)
       end
     end
