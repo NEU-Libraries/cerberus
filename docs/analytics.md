@@ -371,6 +371,55 @@ never changed. `subtree_fq` keeps tombstoned documents, so withdrawn files
 count, as they still take disk. Bytes outside OCFL are not counted: Cerberus's
 JP2s, its staged uploads and the IIIF cache.
 
+#### Checking the figure
+
+Two equations should hold. Each can be checked without touching the code.
+
+**The repository total is the disk, less the root's own files.** Atlas counts
+bytes as it writes them, so its ledger is checkable against a walk of the
+storage root. A storage root holds three files that belong to no object, and
+so to no owner: `0=ocfl_1.1`, `ocfl_layout.json` and `extensions/`. With one
+root:
+
+```
+bytes of every file under the storage root
+  = sum(storage_bytes_ls) over the whole index + the root's own files
+```
+
+Walk the root inside the Atlas container, then sum the field in Solr:
+
+```bash
+docker exec cerberus-atlas-1 sh -c \
+  'find /home/atlas/storage -type f -printf "%s\n" | awk "{s+=\$1} END {print s}"'
+curl -s http://localhost:8983/solr/blacklight-core/select \
+  --data-urlencode 'q=*:*' --data-urlencode 'rows=0' \
+  --data-urlencode 'json.facet={"total":"sum(storage_bytes_ls)"}'
+```
+
+A difference larger than those three files means the ledger has drifted from
+the disk, and Atlas's `atlas:storage:rebuild_footprints` corrects it.
+
+**The repository total is the root community, plus the People community.**
+Every community hangs off the root, except the People community, which holds
+personal workspaces and the Works deposited into them. It is a system
+container outside the root's tree. So the root community's Analytics tab reads
+less than the dashboard by exactly the People community's subtree:
+
+```
+dashboard total = root community's subtree + People community's subtree
+```
+
+Sum the People subtree in Solr through `a_member_of_ssi`, the membership field
+`subtree_fq` uses, over the personal roots and the system container plus the
+docs that are their members. Do not filter on `ancestor_ids_ssim`: only
+containers carry it, so it bounds a subtree's collections but none of its Works.
+
+A worked example, from development data: the walk gave 53,446,800 bytes and
+the ledger 53,446,414, a difference of 386 bytes, which is
+`0=ocfl_1.1` (9), `ocfl_layout.json` (137) and `extensions/` (240). The People
+subtree held 925,016 bytes, and 53,446,414 − 925,016 = 52,521,398 bytes is the
+root community's 50.1 MB. The figure is shown in units of 1,024.
+
 Person docs sit outside the structural containment tree that `subtree_fq`
 matches, so a scoped `entity_counts` always reads 0 Person whatever the
 container. That is correct for a Collection, since a Person never belongs to one,
