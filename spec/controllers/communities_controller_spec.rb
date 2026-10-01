@@ -59,6 +59,55 @@ describe CommunitiesController do
       expect(response.body).not_to include('breadcrumb-add') # Add dropdown suppressed on edit
     end
 
+    context 'the People tab' do
+      let(:admin_user) { User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin') }
+      let(:person) do
+        SolrDocument.new('id' => 'u1', 'noid_ssi' => 'pers123', 'display_name_ssi' => 'Mickey Gasper',
+                         'nuid_ssi' => '000000014')
+      end
+
+      before do
+        allow(CommunityAffiliates).to receive(:call)
+          .and_return(CommunityAffiliates::Result.new([person], 1))
+      end
+
+      it "lists an admin the community's people, each removable" do
+        sign_in admin_user
+
+        get :edit, params: { id: community.id }
+
+        expect(response.body).to include('Mickey Gasper', '000000014', '1 person',
+                                         affiliation_community_path(community.id, 'pers123'))
+      end
+
+      it 'opens the pane the redirect names' do
+        sign_in admin_user
+
+        get :edit, params: { id: community.id, tab: 'people' }
+
+        expect(response.body).to match(/id="people"[^>]*class="[^"]*active|class="[^"]*active[^"]*"[^>]*id="people"/)
+      end
+
+      it 'offers Add only for someone not already in the community' do
+        sign_in admin_user
+        allow(AtlasRb::Person).to receive(:list).with(hash_including(q: 'gas'))
+                                                .and_return([{ 'id' => 'pers123', 'display_name' => 'Mickey Gasper' },
+                                                             { 'id' => 'pers999', 'display_name' => 'Gas Lamp' }])
+
+        get :edit, params: { id: community.id, tab: 'people', person_q: 'gas' }
+
+        expect(response.body).to include('Already in this community', 'Gas Lamp')
+        expect(response.body.scan(%(name="person_id")).size).to eq(1)
+      end
+
+      it 'is not shown to a non-admin editor' do
+        get :edit, params: { id: community.id }
+
+        expect(CommunityAffiliates).not_to have_received(:call)
+        expect(response.body).not_to include('id="people-tab"')
+      end
+    end
+
     # Private on a community reaches that object and nothing else: its own page
     # goes dark while every collection inside stays readable and searchable.
     # Only an admin is offered it, and the copy has to say what it does not do —

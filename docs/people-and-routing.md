@@ -7,6 +7,9 @@ background jobs that sweep or reindex a Set's Works.
 Source files:
 
 - `app/controllers/people_controller.rb`
+- `app/controllers/community_affiliations_controller.rb`
+- `app/controllers/concerns/community_people_tab.rb`
+- `app/services/community_affiliates.rb`
 - `app/controllers/legacy_controller.rb`
 - `app/models/legacy_identifier.rb`
 - `app/controllers/application_controller.rb`
@@ -34,6 +37,25 @@ Source files:
 The controller inherits `CatalogController`, which is where the gated
 `search_service` comes from. It includes `WithoutFacetModal`, because it owns no
 `facet` route for the sidebar's "See more" link (see `docs/discovery.md`).
+
+### Affiliations from the community's side
+
+A Person holds its own affiliations, `affiliated_community_ids`. The admin
+People registry edits them from the person's side. The People tab on a
+community's Edit page edits the same list from the community's side, so a
+change made on either shows on the other at once.
+
+| Piece | Does |
+|---|---|
+| `CommunityAffiliates` | Lists the community's People from Solr, on the Faculty & Staff browse's `affiliated_community_ids_ssim` filter, in name order, up to `LIMIT` |
+| `CommunityPeopleTab` | Loads that list and the tab's person search (`Person.list(q:)`) into the Edit page |
+| `CommunityAffiliationsController` | Adds and removes, through `Person.add_affiliation` and `remove_affiliation`, then redirects back with `tab: 'people'` |
+
+The tab, its search and its writes are admin-only. Atlas grants Person `:update`
+to admins and the system principal only, so a delegated admin would see controls
+that always fail. The tab shows NUIDs, as the admin People registry does; both
+are admin surfaces. `CommunityAffiliates` reads the raw index rather than a
+SearchBuilder, which is safe only because the tab is admin-only.
 
 ### A Person is addressed by NOID
 

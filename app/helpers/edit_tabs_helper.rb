@@ -9,7 +9,7 @@ module EditTabsHelper
   TABS = {
     'Work'       => %w[metadata advanced permissions move delete xml history],
     'Collection' => %w[metadata permissions xml derivative-access export history analytics],
-    'Community'  => %w[metadata permissions xml history analytics]
+    'Community'  => %w[metadata permissions people xml history analytics]
   }.freeze
 
   # Only where the label isn't the key humanized (see #edit_tab_label).
@@ -40,6 +40,9 @@ module EditTabsHelper
     case key
     when 'history' then can?(:read, :audit_event)
     when 'export'  then effective_user&.loader_tier?.present?
+    # Atlas grants Person :update to admins only, so a delegate would see
+    # controls that always fail.
+    when 'people'  then effective_user&.admin?.present?
     else true
     end
   end

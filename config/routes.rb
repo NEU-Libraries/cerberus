@@ -81,6 +81,10 @@ Rails.application.routes.draw do
       # Private option — narrowing a community does not reach what is inside it
       # — so this is the only route. Edit-gated via authorize_resource_writes!.
       post :request_restriction
+      # The People tab: a Person's affiliation, written from the community's
+      # side. Admin-only, in CommunityAffiliationsController.
+      post   'affiliations',            to: 'community_affiliations#create',  as: :affiliations
+      delete 'affiliations/:person_id', to: 'community_affiliations#destroy', as: :affiliation
     end
   end
   resources :collections, except: %i[new create destroy], shallow: true do

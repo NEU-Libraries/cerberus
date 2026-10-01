@@ -1,0 +1,83 @@
+-# The community's side of a Person's affiliations. The admin People registry
+-# edits the same affiliations from the person's side.
+-#
+-# Locals:
+-#   community_id — the community's NOID
+- people = @affiliates&.people || []
+- affiliated = people.to_set { |doc| doc['noid_ssi'] }
+.py-2.px-1
+  %h5.pb-2 People
+  %p.text-muted.small
+    People affiliated with this community appear in its Faculty &amp; Staff list and can add their works to its showcases.
+
+  .well.p-3.my-3.rounded-3
+    = form_with url: edit_community_path(community_id), method: :get, class: 'reparent-search', data: { turbo: false } do
+      = hidden_field_tag :tab, 'people'
+      = label_tag :person_q, 'Add a person', class: 'form-label'
+      .input-group
+        = text_field_tag :person_q, @person_q, class: 'form-control', autocomplete: 'off',
+                         placeholder: 'Search by name, email or NUID…'
+        = button_tag class: 'btn btn-primary' do
+          %i.fa-solid.fa-magnifying-glass.me-1{'aria-hidden' => 'true'}
+          Search
+  - if @person_q
+    - if @person_results.present?
+      .table-responsive.mt-2
+        %table.table.table-borderless.admin-registry-table.mb-0
+          %thead
+            %tr
+              %th{scope: 'col'} Name
+              %th{scope: 'col'} NUID
+              %th{scope: 'col'}
+                %span.visually-hidden Actions
+          %tbody
+            - @person_results.each do |person|
+              %tr
+                %td.admin-registry-table__name
+                  %i.fa-solid.fa-user.text-primary.me-2{'aria-hidden' => 'true'}
+                  = person['display_name'].presence || '(no name)'
+                %td
+                  %span.admin-registry-table__id= person['nuid']
+                %td.text-end.text-nowrap
+                  - if affiliated.include?(person['id'])
+                    %span.small.text-muted Already in this community
+                  - else
+                    = button_to affiliations_community_path(community_id), params: { person_id: person['id'] },
+                                class: 'btn btn-sm btn-tonal-primary', form: { class: 'd-inline' } do
+                      %i.fa-solid.fa-user-plus.me-1{'aria-hidden' => 'true'}
+                      Add
+    - else
+      %p.small.text-muted
+        No people match “#{@person_q}”. A person needs a record in the People registry before they can be added.
+
+  %h6.mt-4
+    In this community
+    %span.admin-registry__count.tnum= pluralize(@affiliates&.total.to_i, 'person')
+  - if people.any?
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table
+        %thead
+          %tr
+            %th{scope: 'col'} Name
+            %th{scope: 'col'} NUID
+            %th{scope: 'col'}
+              %span.visually-hidden Actions
+        %tbody
+          - people.each do |doc|
+            %tr
+              %td.admin-registry-table__name
+                %i.fa-solid.fa-user.text-primary.me-2{'aria-hidden' => 'true'}
+                = link_to doc['display_name_ssi'].presence || '(no name)', edit_admin_person_path(doc['noid_ssi'])
+              %td
+                %span.admin-registry-table__id= doc['nuid_ssi']
+              %td.text-end.text-nowrap
+                = button_to affiliation_community_path(community_id, doc['noid_ssi']), method: :delete,
+                            class: 'btn btn-sm btn-tonal-danger', form: { class: 'd-inline',
+                            data: { turbo_confirm: "Remove #{doc['display_name_ssi']} from this community? They leave its Faculty & Staff list. Their record and works are not changed." } } do
+                  %i.fa-solid.fa-xmark.me-1{'aria-hidden' => 'true'}
+                  Remove
+    - if @affiliates.total > people.size
+      %p.small.text-muted
+        Showing the first #{people.size} of #{@affiliates.total}, by name.
+  - else
+    %p.small.text-muted No people are affiliated with this community yet. Search above to add someone.
