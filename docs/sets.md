@@ -261,6 +261,31 @@ is the acting operator, and scopes the walk.
 `Faraday::Error`) against that Work, and the walk continues. The exception is
 `AtlasRb::StaleResourceError`. It escapes to the job's `retry_on`, because
 re-running an idempotent sweep only re-skips the Works already done.
+`SetSentinelApplyJob` relies on that. `SetPrivatizeJob` does not: its step
+retries a lock conflict in place, up to `LOCK_ATTEMPTS`, and then raises a plain
+`AtlasRb::Error`, so the Work is named as a failure. A re-run would skip the
+Works already private, and its ledger entry would leave them out.
+
+### Undoing a Set privatize
+
+The `set_privatize` entry's payload lists every Work the job made private under
+`changed`, as `{ "noid", "read_before" }`, beside the counts and the
+`failures`. Making the Set public again does not put a Work's audience back, so
+this list is how a developer undoes one at the console:
+
+```ruby
+notice = AdminNotice.where(kind: 'set_privatize', subject_noid: '<set noid>').last
+notice.detail(:changed).each do |item|
+  AtlasRb::Resource.set_permissions(item['noid'], { 'read' => item['read_before'] }, nuid: '<admin nuid>')
+rescue AtlasRb::Error => e
+  puts "Work #{item['noid']}: refused, #{e.message}"
+end
+```
+
+A Work the Set already held privately is not on the list and is left alone. The
+Works' parents were not changed, so the order does not matter, unless a parent
+has been narrowed since: Atlas refuses a Work more visible than its parent, and
+that Work's write fails.
 
 `Outcome` records what one sweep did: `counts`, `failures` and `truncated`.
 `counts` tallies outcomes by the symbol the step returned, so a sweep names its

@@ -360,16 +360,55 @@ Atlas keeps the descendant's other keys.
 
 ### Retrying on a lock conflict
 
-`retry_on AtlasRb::StaleResourceError` backs off polynomially for five
-attempts. Atlas retries its own optimistic-lock conflicts, and raises this only
-once its budget is spent. During a deposit, that means finalize jobs are still
-touching the same resources. Backing off and re-running is safe only because
-the cascade is idempotent.
+Atlas retries its own optimistic-lock conflicts and raises
+`AtlasRb::StaleResourceError` only once its budget is spent. During a deposit,
+that means finalize jobs are still touching the same resources.
 
-Inside the loop, the job re-raises a lock conflict rather than recording it as
-a failure, so it reaches `retry_on`. The conflict is transient. Re-running the
-cascade costs only skipping the writes it already made. The job collects any
-other `AtlasRb::Error` as a per-target failure.
+The job retries that one target in place, up to `LOCK_ATTEMPTS`, and then names
+it as a failure. It does not use `retry_on`. A re-run would be safe, since the
+cascade is idempotent, but it would skip the items already narrowed, and its
+ledger entry would leave them out. The job collects any other `AtlasRb::Error`
+as a per-target failure too.
+
+### What the ledger keeps
+
+The `visibility_cascade` entry's payload lists every item the job changed under
+`changed`, as `{ "noid", "type", "read_before" }`, the container included,
+beside the `narrowed` and `unchanged` counts and the `failures`. The container
+is read before it is written only for this record; the write is still the
+submitted envelope. The Requests & activity row shows only the summary.
+
+A narrowing is one-way. Widening the container again leaves everything inside
+it as narrowed as it was, so undoing one means putting each item's own audience
+back, and items under one collection need not have shared one. The list is
+written in the order the job narrowed, deepest first. Undo it in reverse, the
+container first: Atlas refuses a resource more visible than its parent
+(`PermissionsWriteGuard`, `visibility_exceeds_parent`), so a child cannot be
+widened until its parent has been.
+
+#### Undoing a narrowing at the console
+
+```ruby
+notice = AdminNotice.where(kind: 'visibility_cascade', subject_noid: '<container noid>').last
+notice.detail(:changed).reverse_each do |item|
+  AtlasRb::Resource.set_permissions(item['noid'], { 'read' => item['read_before'] }, nuid: '<admin nuid>')
+  puts "#{item['type']} #{item['noid']}: #{item['read_before'].inspect}"
+rescue AtlasRb::Error => e
+  puts "#{item['type']} #{item['noid']}: refused, #{e.message}"
+end
+```
+
+This restores the read audience only, which is all the cascade changed below the
+container. For the container itself, the entry restores its read audience; any
+edit-group or embargo change made in the same submit is on its History tab.
+Atlas records each write as a permissions change there, with the before and
+after.
+
+Two things the list does not put back. The cascade also clamped each
+container's derivative-access default (`Sentinel`) to the narrowed audience;
+widen those on the Derivative access tab. And an item whose parent has been
+narrowed again since is refused by the guard above, with the refusal printed
+for that item.
 
 ### Writing the container
 
