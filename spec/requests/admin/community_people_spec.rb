@@ -34,6 +34,23 @@ RSpec.describe 'Admin::CommunityPeople', type: :request do
                                        admin_community_person_path('comm456', 'pers123'))
     end
 
+    # The trail stays in the admin hub: no crumb leads out to the community page.
+    it "ends the trail on the community's People, with no crumb out of the hub" do
+      get admin_community_people_path('comm456')
+
+      crumbs = response.parsed_body.css('nav[aria-label="breadcrumb"] li')
+                       .map { |li| li.text.strip.delete_prefix('/').strip }
+      expect(crumbs).to eq(['Administration', 'Communities', 'School of Law’s People'])
+    end
+
+    it 'gives a title ending in s the bare apostrophe' do
+      allow(AtlasRb::Community).to receive(:find).with('comm456').and_return(OpenStruct.new(title: 'Communications'))
+
+      get admin_community_people_path('comm456')
+
+      expect(response.body).to include('Communications’ People')
+    end
+
     it 'offers Add only for someone not already in the community' do
       allow(AtlasRb::Person).to receive(:list).with(hash_including(q: 'gas'))
                                               .and_return([{ 'id' => 'pers123', 'display_name' => 'Mickey Gasper' },

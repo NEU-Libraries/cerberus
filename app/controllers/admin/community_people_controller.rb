@@ -17,8 +17,7 @@ module Admin
     before_action :load_community
 
     def show
-      breadcrumb @title, community_path(params[:noid])
-      breadcrumb 'People', admin_community_people_path(params[:noid])
+      breadcrumb people_crumb, admin_community_people_path(params[:noid])
       @affiliates = CommunityAffiliates.call(community_noid: params[:noid])
       @q = params[:q].to_s.strip.presence
       @person_results = person_search if @q
@@ -39,6 +38,13 @@ module Admin
     end
 
     private
+
+      # One crumb, so the trail never leaves the admin hub; the header's
+      # Community page button is the way out. A title ending in "s" takes the
+      # bare apostrophe ("Communications' People").
+      def people_crumb
+        "#{@title}#{@title.end_with?('s') ? '’' : '’s'} People"
+      end
 
       def load_community
         community = require_resource!(AtlasRb::Community.find(params[:noid]))
