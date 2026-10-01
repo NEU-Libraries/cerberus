@@ -202,6 +202,10 @@ For Communities that is the usual case. `CommunitiesController#create` runs
 `ShowcaseProvisioner`, which gives each new Community live showcase
 Collections. So Atlas refuses a Community's tombstone until those are gone.
 
+A container that still holds items can be deleted whole by an admin, or a
+collection by a delegated admin. That path is `CascadeTombstoning` and a job,
+described in [`docs/admin.md`](admin.md#deleting-a-container-that-is-not-empty).
+
 `return_to` lets a list that offers the delete, such as deposit triage or My
 DRS, take the user back to itself. `url_from` drops an off-host value, so it
 cannot become an open redirect.

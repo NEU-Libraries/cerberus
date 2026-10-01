@@ -30,11 +30,15 @@
               -# @deletable rather than the listing: a community's empty showcases
               -# are live members Atlas refuses to tombstone around, and they are
               -# hidden from that listing. See CommunitiesController#deletable?.
-              - if @can_tombstone && @deletable
+              -# One that holds items is offered the cascading delete, to an admin
+              -# (@cascade_targets, from CascadeTombstoning).
+              - if @can_tombstone && (@deletable || @cascade_targets)
                 = render 'shared/tombstone_modal',
-                         id:   @community.id,
-                         kind: 'community',
-                         path: tombstone_community_path(@community.id)
+                         id:      @community.id,
+                         kind:    'community',
+                         path:    tombstone_community_path(@community.id),
+                         cascade: @cascade_targets,
+                         title:   @community.title
 
 -# Only mount the facet sidebar when the community has children. An empty
 -# community falls through to catalog/_zero_results' calm empty state and goes

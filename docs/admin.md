@@ -194,6 +194,48 @@ from view at Northeastern University Library's discretion on September 30,
 tombstone row on the History tab shows the note too, because Atlas records it on
 the audit event.
 
+## Deleting a container that is not empty
+
+Atlas refuses to tombstone a Collection or Community that still holds a live
+member, so a plain Delete appears only on an empty one. For a container that
+holds items, `CascadeTombstoning` offers a delete that withdraws it and
+everything live beneath it.
+
+| Who | May delete a non-empty |
+|---|---|
+| `:admin` | Collection or Community |
+| The devolved-admin tier | Collection only. A community holds other people's collections and showcases |
+| Anyone else with tombstone rights | Neither, so they keep the empty-only Delete |
+
+The confirmation (`shared/_tombstone_modal` with `cascade:`) counts what it will
+withdraw by type, through `TombstoneTargets#counts`. It asks for the removal
+reason, says there is no one-step restore, and keeps its button disabled until
+the title is typed (`confirm-title` Stimulus controller). Formatting and spacing
+do not count, because a title can carry sub- and superscript markup. The server
+repeats every check: role, title, reason, and a size limit
+(`TombstoneTargets::LIMIT`, the narrowing cascade's). Above the limit there is
+no form, only a pointer to the development team.
+
+`TombstoneCascadeJob` does the work. `TombstoneTargets` walks the subtree
+deepest first, as the narrowing walk does, widened to communities and limited to
+what is not already withdrawn, and the job tombstones each with the one reason.
+Linked members are not part of the structural subtree, so they stay untouched. A
+lock conflict is retried in place, not through `retry_on`, because a re-run
+would rebuild the walk without what it had already withdrawn. A container
+refuses while a member beneath it failed, so a failure leaves the path above it
+live, not half-withdrawn.
+
+### There is no cascading restore
+
+On purpose. A restore that put everything back would have to tell this delete's
+tombstones from items withdrawn earlier, for policy, and must not resurrect
+those. Restoring is rare and consequential enough to want the development team.
+So the job records one `tombstone_cascade` ledger entry, through
+`CompletionNotice`, whose payload lists every NOID it withdrew, with its type,
+and anything it could not. A developer restores from that list, parents first,
+because Atlas refuses to restore a child under a tombstoned parent. The
+registry still restores one item at a time.
+
 ## Restoring and permanently deleting a tombstoned item
 
 `Admin::TombstonesController` is the registry: the staff counterpart to the

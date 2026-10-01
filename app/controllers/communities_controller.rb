@@ -14,6 +14,7 @@ class CommunitiesController < CatalogController
   include ContainerRestrictionRequest
   include CommunitiesIndex
   include CommunityShowcases
+  include CascadeTombstoning
 
   atlas_resource AtlasRb::Community, key: :community, route: :community
   authorize_resource_writes!(extra_edit: %i[request_restriction])
@@ -31,11 +32,13 @@ class CommunitiesController < CatalogController
     load_children_and_deletability
     prepend_faculty_staff_entry(params[:id])
     assign_show_abilities!
+    offer_cascade_delete
     breadcrumbs(params[:id])
   end
 
+  # cascade is the confirmation's flag for a container that is not empty.
   def tombstone
-    perform_tombstone!
+    params[:cascade].present? ? perform_cascade_tombstone! : perform_tombstone!
   end
 
   def new

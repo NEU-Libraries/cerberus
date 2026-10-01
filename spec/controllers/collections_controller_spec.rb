@@ -411,6 +411,76 @@ describe CollectionsController do
     end
   end
 
+  # A collection that still holds items: CascadeTombstoning, then
+  # TombstoneCascadeJob. The job is enqueued, never run, so nothing is withdrawn.
+  describe 'tombstone with cascade' do
+    let(:admin) { User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin') }
+    let(:delegate) do
+      User.new(email: 'jane@example.com', nuid: '000000002', role: 'privileged',
+               groups: [Permissions::STAFF_EDIT_GROUP, Permissions::ADMIN_GROUP])
+    end
+    let(:editor) do
+      User.new(email: 'staff@example.com', nuid: '000000006', role: 'privileged',
+               groups: [Permissions::STAFF_EDIT_GROUP])
+    end
+    let(:title) { AtlasRb::Collection.find(collection.id).title }
+
+    before do
+      AtlasRb::Resource.set_permissions(collection.id,
+                                        { 'edit' => [Permissions::STAFF_EDIT_GROUP] }, nuid: '000000004')
+      allow(TombstoneTargets).to receive(:new)
+        .and_return(instance_double(TombstoneTargets, total: 3, over_limit?: false))
+    end
+
+    def cascade(confirm_title: title, reason: TombstoneReasons::CURATOR)
+      post :tombstone, params: { id: collection.id, cascade: '1', confirm_title: confirm_title, reason: reason }
+    end
+
+    it 'enqueues the cascade for an admin who typed the title' do
+      sign_in admin
+
+      expect { cascade(confirm_title: "  #{title}  ") }.to have_enqueued_job(TombstoneCascadeJob)
+        .with(hash_including(noid: collection.id, klass: 'Collection', reason: TombstoneReasons::CURATOR))
+      expect(flash[:notice]).to include('and the 3 items in it')
+    end
+
+    it 'lets a delegated admin delete a collection' do
+      sign_in delegate
+      expect { cascade }.to have_enqueued_job(TombstoneCascadeJob)
+    end
+
+    it 'refuses an editor who may delete only an empty collection' do
+      sign_in editor
+      expect { cascade }.not_to have_enqueued_job(TombstoneCascadeJob)
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it 'refuses without the exact title' do
+      sign_in admin
+      expect { cascade(confirm_title: 'not it') }.not_to have_enqueued_job(TombstoneCascadeJob)
+      expect(flash[:alert]).to include('Type the title exactly')
+    end
+
+    it 'refuses a subtree over the limit and points to the development team' do
+      sign_in admin
+      allow(TombstoneTargets).to receive(:new)
+        .and_return(instance_double(TombstoneTargets, total: 10_001, over_limit?: true))
+
+      expect { cascade }.not_to have_enqueued_job(TombstoneCascadeJob)
+      expect(flash[:alert]).to include('Ask the development team')
+    end
+
+    # The plain delete never reaches the cascade, whoever asks.
+    it 'leaves the plain delete alone' do
+      sign_in admin
+      allow(AtlasRb::Resource).to receive(:tombstone)
+        .and_return(instance_double(Faraday::Response, success?: true))
+
+      expect { post :tombstone, params: { id: collection.id } }.not_to have_enqueued_job(TombstoneCascadeJob)
+      expect(AtlasRb::Resource).to have_received(:tombstone)
+    end
+  end
+
   describe 'create' do
     let(:user) { User.new(email: 'creator@example.com', nuid: '000000004', groups: ['editors']) }
 

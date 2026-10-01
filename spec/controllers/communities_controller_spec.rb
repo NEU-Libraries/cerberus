@@ -380,6 +380,34 @@ describe CommunitiesController do
     end
   end
 
+  # Only an admin may withdraw a community whole: it holds other people's
+  # collections and showcases.
+  describe 'tombstone with cascade' do
+    before do
+      AtlasRb::Resource.set_permissions(community.id,
+                                        { 'edit' => [Permissions::STAFF_EDIT_GROUP] }, nuid: '000000004')
+      allow(TombstoneTargets).to receive(:new)
+        .and_return(instance_double(TombstoneTargets, total: 9, over_limit?: false))
+    end
+
+    def cascade
+      post :tombstone, params: { id: community.id, cascade: '1', reason: TombstoneReasons::CURATOR,
+                                 confirm_title: AtlasRb::Community.find(community.id).title }
+    end
+
+    it 'enqueues the cascade for an admin' do
+      sign_in User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin')
+      expect { cascade }.to have_enqueued_job(TombstoneCascadeJob).with(hash_including(klass: 'Community'))
+    end
+
+    it 'refuses a delegated admin' do
+      sign_in User.new(email: 'jane@example.com', nuid: '000000002', role: 'privileged',
+                       groups: [Permissions::STAFF_EDIT_GROUP, Permissions::ADMIN_GROUP])
+      expect { cascade }.not_to have_enqueued_job(TombstoneCascadeJob)
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
+
   describe 'tombstone' do
     let(:user) do
       User.new(email: 'staff@example.com', nuid: '000000002',

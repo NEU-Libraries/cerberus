@@ -6,10 +6,17 @@
 -#   path          — POST route that performs the tombstone
 -#   trigger_class — class string for the trigger link (matches the
 -#                   sibling Edit link on the host page).
+-#   cascade       — a TombstoneTargets, for a container that still holds items:
+-#                   the confirmation then counts them, says there is no
+-#                   one-step restore, and asks for the title. See docs/admin.md.
+-#   title         — the container's title, with cascade.
 - modal_id = "tombstone-modal-#{id}"
 - label_id = "tombstone-label-#{id}"
 - reason_id = "tombstone-reason-#{id}"
 - trigger_class = local_assigns.fetch(:trigger_class, 'px-3')
+- cascade = local_assigns[:cascade]
+- confirm_id = "tombstone-confirm-#{id}"
+- expected_title = plain_text(local_assigns[:title]).squish
 
 = link_to 'Delete', "##{modal_id}", class: trigger_class, data: { 'bs-toggle': 'modal' }
 
@@ -24,12 +31,17 @@
         %button.btn-close{type: 'button', 'aria-label': 'Close', data: { 'bs-dismiss': 'modal' }}
       -# The reason is what the item's removal page shows. Its wording is fixed
       -# by the withdrawal policy, and Atlas refuses anything else.
-      = form_with url: path, method: :post do
+      = form_with url: path, method: :post, data: (cascade ? { controller: 'confirm-title', 'confirm-title-expected-value': expected_title } : {}) do
         .modal-body
-          %p
-            Are you sure you want to delete this
-            = "#{kind}?"
-          - if chooses_removal_reason?
+          - if cascade
+            = render 'shared/tombstone_cascade_summary', cascade: cascade, kind: kind, title: expected_title
+          - else
+            %p
+              Are you sure you want to delete this
+              = "#{kind}?"
+          - if cascade&.over_limit?
+            -# Nothing to confirm: the server refuses a cascade this size too.
+          - elsif chooses_removal_reason?
             %p.small.text-muted
               This item will no longer be accessible. Its page will show the reason you choose.
             %label.form-label{for: reason_id} Reason for removal
@@ -41,6 +53,16 @@
             %p.small.text-muted.mb-0
               This item will no longer be accessible. Its page will say that it was
               removed at the contributor or content curator's discretion.
+          - if cascade && !cascade.over_limit?
+            = hidden_field_tag :cascade, '1', id: nil
+            %label.form-label.mt-3{for: confirm_id}
+              Type
+              %strong= expected_title
+              to confirm.
+            = text_field_tag :confirm_title, nil, id: confirm_id, class: 'form-control', autocomplete: 'off',
+                             spellcheck: false, data: { 'confirm-title-target': 'input', action: 'input->confirm-title#sync' }
         .modal-footer
           %button.btn.btn-secondary{type: 'button', data: { 'bs-dismiss': 'modal' }} Cancel
-          %button.btn.btn-danger{type: 'submit'} Delete
+          - unless cascade&.over_limit?
+            %button.btn.btn-danger{type: 'submit', data: (cascade ? { 'confirm-title-target': 'submit' } : {})}
+              = cascade ? "Delete this #{kind} and everything in it" : 'Delete'
