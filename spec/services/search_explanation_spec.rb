@@ -20,8 +20,8 @@ RSpec.describe SearchExplanation do
 
     it 'says it in a sentence an admin can pass on' do
       expect(explanation.summary)
-        .to eq('This appeared because “coastal” is in its title, description, and keywords and subjects. ' \
-               'The title match counts most.')
+        .to eq('This appeared because “coastal” is in its title, description, and keywords and subjects fields. ' \
+               'The match in its title field counts most.')
     end
 
     it 'notes the stemmed title and description, so "title" listed twice reads as two matches' do
@@ -50,8 +50,8 @@ RSpec.describe SearchExplanation do
     # The phrase bonus outweighed either word alone in the captured tree.
     it 'keeps each word’s clause apart, though a field label holds an “and”' do
       expect(explanation.summary).to start_with(
-        'This appeared because “coastal” is in its title, description, and keywords and subjects, ' \
-        'and “survey” is in its title.'
+        'This appeared because “coastal” is in its title, description, and keywords and subjects fields, ' \
+        'and “survey” is in its title field.'
       )
     end
 
@@ -67,20 +67,20 @@ RSpec.describe SearchExplanation do
       explanation.field_labels = { 'descriptive_keywords_tesim' => 'creator' }
 
       expect(explanation.summary).to start_with('This appeared because “coastal” is in its title, description, ' \
-                                                'and creator,')
+                                                'and creator fields,')
     end
 
     it 'speaks the words as typed once it knows them, and keeps Solr’s form otherwise' do
       explanation.typed_terms = { 'survey' => 'Surveys' }
 
       expect(explanation.summary).to start_with('This appeared because “coastal” is in its title, description, ' \
-                                                'and keywords and subjects, and “Surveys” is in its title.')
+                                                'and keywords and subjects fields, and “Surveys” is in its title field.')
       expect(explanation.typed('coastal survey')).to eq('coastal Surveys')
     end
 
     it 'names the phrase as what counted most' do
-      expect(explanation.summary).to end_with('The words “coastal survey” also appear together in its title. ' \
-                                              'The words appearing together in its title count most.')
+      expect(explanation.summary).to end_with('The words “coastal survey” also appear together in its title field. ' \
+                                              'The words appearing together in its title field count most.')
     end
   end
 

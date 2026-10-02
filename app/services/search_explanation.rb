@@ -138,14 +138,15 @@ class SearchExplanation
     end
 
     def word_clause(word)
-      "“#{typed(word.term)}” is in its #{word.matches.map { |match| label_for(match) }.uniq.to_sentence}"
+      labels = word.matches.map { |match| label_for(match) }.uniq
+      "“#{typed(word.term)}” is in its #{labels.to_sentence} #{labels.one? ? 'field' : 'fields'}"
     end
 
     def phrase_sentence
       phrase = phrases.first
       return if phrase.nil?
 
-      "The words “#{typed(phrase.display_term)}” also appear together in its #{label_for(phrase)}."
+      "The words “#{typed(phrase.display_term)}” also appear together in its #{label_for(phrase)} field."
     end
 
     def strongest_sentence
@@ -153,9 +154,9 @@ class SearchExplanation
       return if match.nil? || words.sum { |word| word.matches.size } + phrases.size < 2
 
       if match.phrase
-        "The words appearing together in its #{label_for(match)} count most."
+        "The words appearing together in its #{label_for(match)} field count most."
       else
-        "The #{label_for(match)} match counts most."
+        "The match in its #{label_for(match)} field counts most."
       end
     end
 end
