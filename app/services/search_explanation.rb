@@ -11,8 +11,9 @@
 # (`pf`), whose weights carry a quoted phrase; and the boost function
 # multiplying the whole. Anything it does not recognise is left to the raw tree.
 class SearchExplanation
-  # Solr field → what the page calls it. Stemmed and variant fields fold into
-  # the field a reader knows; the table keeps them apart with `word forms`.
+  # Solr field → what the page calls it. A field indexed more than one way
+  # folds into the name a reader knows, so the table can list "Title" twice; a
+  # FORMS note tells the rows apart, and the dialog's legend explains each note.
   LABELS = {
     'title_tsim'                 => 'title',
     'title_stem_tesim'           => 'title',
@@ -29,15 +30,33 @@ class SearchExplanation
     'identifier_tesim'           => 'identifier'
   }.freeze
 
-  # Fields whose match is on a word's stem or a variant spelling, not the word.
-  WORD_FORM_FIELDS = %w[title_stem_tesim title_variant_tesim description_stem_tesim].freeze
+  # The fields that match something other than the text as written.
+  FORMS = {
+    'title_stem_tesim'       => :stem_variation,
+    'description_stem_tesim' => :stem_variation,
+    'title_variant_tesim'    => :alternative_title,
+    'title_plain_tsim'       => :plain_text
+  }.freeze
+
+  # Each form's note in the table, and its legend entry.
+  FORM_NOTES = {
+    stem_variation:    ['stem variation', 'Matched once words were cut to their stem, so a plural or another ' \
+                                          'ending matches too, such as “whale” for “whales”. ' \
+                                          'It counts for less than the word as written.'],
+    alternative_title: ['alternative title', 'Matched an alternative, uniform, translated or abbreviated title, ' \
+                                             'not the main one.'],
+    plain_text:        ['without formatting', 'Matched the title with its subscript and superscript removed, ' \
+                                              'so “Bi2Sr2CaCu2O8” finds a title that sets its numbers as subscripts.']
+  }.freeze
 
   WEIGHT = /\Aweight\((?<field>[a-z_]+):(?<term>"[^"]+"(?:~\d+)?|\S+) in \d+\)/
   BEST_FIELD = 'max plus'
 
   Match = Struct.new(:field, :term, :points, :phrase, keyword_init: true) do
     def label = LABELS.fetch(field, field)
-    def word_form? = WORD_FORM_FIELDS.include?(field)
+    def form = FORMS[field]
+    def form_note = FORM_NOTES.dig(form, 0)
+    def stem_variation? = form == :stem_variation
     def display_term = term.sub(/~\d+\z/, '').delete('"')
   end
   Word = Struct.new(:term, :matches, :points, keyword_init: true)
@@ -69,7 +88,12 @@ class SearchExplanation
   end
 
   def strongest
-    (words.flat_map(&:matches) + phrases).max_by(&:points)
+    rows.max_by(&:points)
+  end
+
+  # The notes the table shows, in the order the legend lists them.
+  def forms
+    FORM_NOTES.keys & rows.filter_map(&:form)
   end
 
   # The sentence an admin can pass on. Nil when nothing matched by word, as for
@@ -84,6 +108,10 @@ class SearchExplanation
   end
 
   private
+
+    def rows
+      words.flat_map(&:matches) + phrases
+    end
 
     def best_field_nodes
       collect(@tree) { |node| node['description'].to_s.start_with?(BEST_FIELD) }
@@ -112,7 +140,7 @@ class SearchExplanation
       matches = matches_in(node).sort_by { |match| -match.points }
       return if matches.empty?
 
-      term = (matches.find { |match| !match.word_form? } || matches.first).display_term
+      term = (matches.find { |match| !match.stem_variation? } || matches.first).display_term
       Word.new(term: term, matches: matches, points: node['value'].to_f)
     end
 

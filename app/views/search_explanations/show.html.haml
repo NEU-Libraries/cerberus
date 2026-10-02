@@ -48,8 +48,8 @@
                       “#{word.term}”
                   %td
                     = match.label.capitalize
-                    - if match.word_form?
-                      %span.small.text-muted (word forms)
+                    - if match.form_note
+                      %span.small.text-muted (#{match.form_note})
                     - if match.equal?(strongest)
                       %span.badge.text-bg-light.ms-1 counts most
                   %td.text-end.tnum= number_with_precision(match.points, precision: 2)
@@ -58,9 +58,22 @@
                 %td “#{match.display_term}” together
                 %td
                   = match.label.capitalize
+                  - if match.form_note
+                    %span.small.text-muted (#{match.form_note})
                   - if match.equal?(strongest)
                     %span.badge.text-bg-light.ms-1 counts most
                 %td.text-end.tnum= number_with_precision(match.points, precision: 2)
+      - if explanation.forms.any?
+        .small.text-muted.mb-3
+          %p.mb-1
+            A field can be listed more than once, because the DRS searches some fields in more than one way.
+            A row with no note matched the text as written.
+          %dl.mb-0
+            - explanation.forms.each do |form|
+              - note, meaning = SearchExplanation::FORM_NOTES.fetch(form)
+              .d-flex.gap-1
+                %dt.fw-semibold.text-nowrap #{note.capitalize}:
+                %dd.mb-0= meaning
       - explanation.adjustments.each do |factor|
         %p.small.mb-1
           The score was multiplied by #{number_with_precision(factor, precision: 2, strip_insignificant_zeros: true)}.

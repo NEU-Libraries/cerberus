@@ -32,7 +32,9 @@ RSpec.describe 'SearchExplanations', type: :request do
 
     expect(response).to have_http_status(:ok)
     expect(response.body).to include('This appeared because “coastal” is in its title', 'counts most',
+                                     '(stem variation)', 'A field can be listed more than once',
                                      'Solr’s full explanation', 'id="explain-modal-frame"')
+    expect(response.body).not_to include('Alternative title:')
   end
 
   # The search reruns narrowed to this one result, so its score is the one the

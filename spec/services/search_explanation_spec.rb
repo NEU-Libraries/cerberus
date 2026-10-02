@@ -24,6 +24,13 @@ RSpec.describe SearchExplanation do
                'The title match counts most.')
     end
 
+    it 'notes the stemmed title and description, so "title" listed twice reads as two matches' do
+      notes = explanation.words.sole.matches.to_h { |match| [match.field, match.form_note] }
+      expect(notes).to include('title_tsim' => nil, 'title_stem_tesim' => 'stem variation',
+                               'description_stem_tesim' => 'stem variation')
+      expect(explanation.forms).to eq([:stem_variation])
+    end
+
     it 'reports the score and no adjustment for a Work' do
       expect(explanation.score).to be_within(0.001).of(11.128)
       expect(explanation.adjustments).to eq([])
@@ -52,6 +59,19 @@ RSpec.describe SearchExplanation do
       expect(explanation.summary).to end_with('The words “coastal survey” also appear together in its title. ' \
                                               'The words appearing together in its title count most.')
     end
+  end
+
+  # One word matching the title four ways, each with a different note.
+  it 'tells the alternative and unformatted titles apart from stem variations, in the legend order' do
+    weights = %w[title_plain_tsim title_variant_tesim title_stem_tesim title_tsim].map do |field|
+      { 'value' => 1.0, 'description' => "weight(#{field}:whale in 3) [SchemaSimilarity], result of:" }
+    end
+    explanation = described_class.new({ 'value' => 1.0, 'description' => 'max plus 0.01 times others of:',
+                                        'details' => weights })
+
+    expect(explanation.words.sole.matches.map(&:form_note))
+      .to contain_exactly('without formatting', 'alternative title', 'stem variation', nil)
+    expect(explanation.forms).to eq(%i[stem_variation alternative_title plain_text])
   end
 
   it 'has no sentence when nothing matched by word' do

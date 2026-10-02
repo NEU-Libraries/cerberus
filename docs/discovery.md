@@ -637,3 +637,10 @@ are in browse order. A sort other than relevance gets a note that the score did
 not set the item's place. `SearchExplanation::LABELS` names each `qf` field as
 the page does; a field missing from it shows its Solr name. Add one there when
 `qf` gains a field.
+
+Several `qf` fields fold into one label: the title is searched as written, as
+stem variations (so a plural matches), without its sub- and superscript markup,
+and as its alternative titles. So one word can list "Title" more than once.
+`SearchExplanation::FORMS` gives each such field a note on its row, and the
+dialog shows a legend for the notes in the table. A new derived field needs an
+entry in both `FORMS` and `FORM_NOTES`, or its row reads as a plain duplicate.
