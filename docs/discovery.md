@@ -669,6 +669,13 @@ word as the record writes it.
   is converted before it slices the text.
 - **Markup.** Each value loses its sub- and superscript tags before analysis, by
   pattern (never by HTML parsing, see `docs/metadata-text.md`).
+- **The words as typed.** Solr's score tree holds only the searched form, so a
+  stemmed match reads "survey" for a search on "Surveys". The same analysis
+  response lists the query at every stage, and each token keeps its position
+  through them all, so `MatchedWords` maps each searched form back to the word
+  as typed. `SearchExplanation#typed` uses that map in the summary and the
+  points. A word that matched only a field with no text to analyse keeps Solr's
+  form.
 - **No text to show.** The creator-name variants are computed by Atlas and not
   stored, and the full text is too long to send. Each says so instead
   (`MatchedWords::NO_TEXT`). A Solr failure gives the same kind of note, not an

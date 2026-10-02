@@ -54,8 +54,9 @@
                     %p.text-muted.mb-1= line.reason
                 %td.text-end
                   - field.scores.each do |score|
+                    - term = "“#{explanation.typed(score.term)}”"
                     .text-nowrap
-                      %span.small= score.phrase? ? "“#{score.term}” together" : "“#{score.term}”"
+                      %span.small= score.phrase? ? "#{term} together" : term
                       %span.tnum.ms-1= number_with_precision(score.match.points, precision: 2)
                     - if score.match.equal?(strongest)
                       %span.badge.text-bg-light counts most

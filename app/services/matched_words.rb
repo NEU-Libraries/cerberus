@@ -43,7 +43,7 @@ class MatchedWords < ApplicationService
   MAX_VALUES = 3
 
   Segment = Struct.new(:text, :matched)
-  Line = Struct.new(:match, :excerpts, :reason, keyword_init: true)
+  Line = Struct.new(:match, :excerpts, :reason, :typed, keyword_init: true)
 
   # @param document [SolrDocument] carrying the STORED fields
   # @param matches [Array<SearchExplanation::Match>] one per matched field
@@ -55,23 +55,26 @@ class MatchedWords < ApplicationService
     super()
   end
 
-  # @return [Array<Line>] in the order of the matches
+  # @return [Array<Line>] in the order of the matches. Each line's `typed` maps
+  #   the field's searched tokens back to the words as typed.
   def call
-    @matches.map do |match|
-      excerpts = excerpts_for(match.field)
-      Line.new(match: match, excerpts: excerpts, reason: (NO_TEXT.fetch(match.field, UNMATCHED) if excerpts.empty?))
-    end
+    @matches.map { |match| line_for(match) }
   end
 
   private
 
-    def excerpts_for(field)
-      values = SOURCES.fetch(field, []).flat_map { |source| Array(@document[source]) }
-                      .map { |value| value.to_s.gsub(EnhancedTextHelper::TAG_PATTERN, '') }.compact_blank
-      return [] if values.empty?
+    def line_for(match)
+      values = source_values(match.field)
+      text = values.join("\n")
+      analysis = analyse(match.field, text) if values.any?
+      excerpts = analysis ? per_value(values, matched_ranges(analysis, text)).first(MAX_VALUES) : []
+      Line.new(match: match, excerpts: excerpts, typed: analysis ? typed_words(analysis) : {},
+               reason: (NO_TEXT.fetch(match.field, UNMATCHED) if excerpts.empty?))
+    end
 
-      ranges = matched_ranges(field, values.join("\n"))
-      per_value(values, ranges).first(MAX_VALUES)
+    def source_values(field)
+      SOURCES.fetch(field, []).flat_map { |source| Array(@document[source]) }
+             .map { |value| value.to_s.gsub(EnhancedTextHelper::TAG_PATTERN, '') }.compact_blank
     end
 
     # One request for every value of the field: joined by newlines, which every
@@ -90,24 +93,37 @@ class MatchedWords < ApplicationService
     # Solr's offsets count UTF-16 code units, Ruby's string indexes count
     # characters. They differ past any character outside the BMP, such as an
     # emoji, so each offset is converted before it slices the text.
-    def matched_ranges(field, text)
+    def matched_ranges(analysis, text)
       utf16 = text.encode('UTF-16LE')
-      index_tokens(field, text).select { |token| token['match'] }.map do |token|
+      final_tokens(analysis['index']).select { |token| token['match'] }.map do |token|
         char_index(utf16, token['start'])...char_index(utf16, token['end'])
       end.uniq
-    rescue RSolr::Error::Http, RSolr::Error::ConnectionRefused, Faraday::Error => e
-      Rails.logger.warn("MatchedWords: #{e.class} #{e.message}")
-      []
+    end
+
+    # Every stage keeps a token's position, so the searched form ("survey")
+    # traces back to the word as typed ("Surveys") even after stop words drop.
+    def typed_words(analysis)
+      stages = Array(analysis['query']).grep(Array)
+      typed = Array(stages.first).to_h { |token| [token['position'], token['text']] }
+      final_tokens(analysis['query']).to_h { |token| [token['text'], typed[token['position']]] }.compact
+    end
+
+    # The stages alternate filter name and tokens; the last tokens are the ones searched.
+    def final_tokens(stages)
+      Array(Array(stages).grep(Array).last)
     end
 
     # POST, not GET: a long description would overflow Solr's request line.
-    # The tokens after the last index-time filter are the ones searched.
-    def index_tokens(field, text)
+    # Nil when Solr does not answer, which the line reports instead of failing.
+    def analyse(field, text)
       response = Blacklight.default_index.connection.post(
         'analysis/field', data: { 'analysis.fieldname' => field, 'analysis.fieldvalue' => text,
                                   'analysis.query' => @query, 'analysis.showmatch' => true }
       )
-      Array(Array(response.dig('analysis', 'field_names', field, 'index')).last)
+      response.dig('analysis', 'field_names', field)
+    rescue RSolr::Error::Http, RSolr::Error::ConnectionRefused, Faraday::Error => e
+      Rails.logger.warn("MatchedWords: #{e.class} #{e.message}")
+      nil
     end
 
     def char_index(utf16, units)

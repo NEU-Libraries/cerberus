@@ -53,6 +53,13 @@ RSpec.describe MatchedWords do
     expect(excerpt).to match(/\A…Before\./).and match(/After\.…\z/)
   end
 
+  # Positions survive every stage, so the stem traces back past the stop words.
+  it 'maps each searched form back to the word as typed' do
+    line = lines({ 'title_tsim' => ['Coastal surveys'] }, %w[title_stem_tesim], 'Coastal Surveys of the libraries').sole
+
+    expect(line.typed).to eq('coastal' => 'Coastal', 'survey' => 'Surveys', 'library' => 'libraries')
+  end
+
   it 'explains a field it has no text for' do
     line = lines({}, %w[full_text_tesimv], 'harbor').sole
 
@@ -67,5 +74,6 @@ RSpec.describe MatchedWords do
 
     expect(line.excerpts).to eq([])
     expect(line.reason).to eq(MatchedWords::UNMATCHED)
+    expect(line.typed).to eq({})
   end
 end

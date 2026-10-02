@@ -35,7 +35,9 @@ class SearchExplanationsController < ApplicationController
 
     @explanation = SearchExplanation.new(@document.fetch('[explain]', nil))
     fields = @explanation.fields
-    @rows = fields.zip(MatchedWords.call(document: @document, matches: fields.map(&:match), query: @query))
+    lines = MatchedWords.call(document: @document, matches: fields.map(&:match), query: @query)
+    @explanation.typed_terms = lines.map(&:typed).reduce({}, :merge)
+    @rows = fields.zip(lines)
   end
 
   private

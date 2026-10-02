@@ -26,6 +26,10 @@ class SearchExplanation
 
   attr_reader :score
 
+  # Searched token → the word as typed, from MatchedWords. Solr's tree holds
+  # only the searched form, which for a stemmed match is "survey", not "Surveys".
+  attr_writer :typed_terms
+
   # @param tree [Hash] the `[explain]` value, as { 'value', 'description', 'details' }
   def initialize(tree)
     @tree = tree || {}
@@ -48,6 +52,11 @@ class SearchExplanation
     @adjustments ||= collect(@tree) { |node| node['description'].to_s.start_with?('if(') }
                      .map { |node| node['value'].to_f }
                      .reject { |value| (value - 1.0).abs < 1e-6 }
+  end
+
+  # A term, or each word of a phrase, as the asker typed it where that is known.
+  def typed(term)
+    term.split.map { |word| (@typed_terms || {}).fetch(word, word) }.join(' ')
   end
 
   def strongest
@@ -121,14 +130,14 @@ class SearchExplanation
     end
 
     def word_clause(word)
-      "“#{word.term}” is in its #{word.matches.map(&:label).uniq.to_sentence}"
+      "“#{typed(word.term)}” is in its #{word.matches.map(&:label).uniq.to_sentence}"
     end
 
     def phrase_sentence
       phrase = phrases.first
       return if phrase.nil?
 
-      "The words “#{phrase.display_term}” also appear together in its #{phrase.label}."
+      "The words “#{typed(phrase.display_term)}” also appear together in its #{phrase.label}."
     end
 
     def strongest_sentence

@@ -63,6 +63,14 @@ RSpec.describe SearchExplanation do
       expect(explanation.fields.map(&:points)).to eq(explanation.fields.map(&:points).sort.reverse)
     end
 
+    it 'speaks the words as typed once it knows them, and keeps Solr’s form otherwise' do
+      explanation.typed_terms = { 'survey' => 'Surveys' }
+
+      expect(explanation.summary).to start_with('This appeared because “coastal” is in its title, description, ' \
+                                                'and keywords and subjects, and “Surveys” is in its title.')
+      expect(explanation.typed('coastal survey')).to eq('coastal Surveys')
+    end
+
     it 'names the phrase as what counted most' do
       expect(explanation.summary).to end_with('The words “coastal survey” also appear together in its title. ' \
                                               'The words appearing together in its title count most.')
