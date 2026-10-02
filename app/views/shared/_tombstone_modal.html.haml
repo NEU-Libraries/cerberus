@@ -21,7 +21,9 @@
 = link_to 'Delete', "##{modal_id}", class: trigger_class, data: { 'bs-toggle': 'modal' }
 
 .modal.fade{id: modal_id, tabindex: '-1', 'aria-labelledby': label_id, 'aria-hidden': 'true'}
-  .modal-dialog.modal-dialog-centered
+  -# A cascade carries a count list, a warning and a typed title, which the
+  -# default width crams; the plain confirmation stays compact.
+  .modal-dialog.modal-dialog-centered{class: ('modal-lg' if cascade)}
     -# `text-start` and `text-wrap` defend against the `.text-end` and
     -# `.text-nowrap` ancestors on the host page (e.g. works/show) bleeding into
     -# the modal contents.
