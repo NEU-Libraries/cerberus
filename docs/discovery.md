@@ -608,6 +608,32 @@ marker carries that same composed value. A Solr index built before Atlas
 composed headings still holds the separate topics, so its links come back empty.
 That is exactly the symptom a wrong `AXES` entry would produce.
 
+## Search operators
+
+The catalog search is Solr's edismax, so a reader can use its operators: `AND`
+(or `&&`), `OR` (or `||`), `NOT` (or a leading `-`), `+` to require a word,
+parentheses to group, and quotation marks for a phrase. Only the uppercase forms
+are operators. Lowercase "and", "or" and "not" are ordinary words, so a title
+typed as written searches as it reads, and Solr's `lowercaseOperators` stays off
+on purpose.
+
+### An explicit OR relaxes the minimum match
+
+The search handler's `mm` (`2<-1 5<-2 6<90%` in `blacklight-core`'s
+`solrconfig.xml`) requires both words of a two-word search, and most words of a
+longer one. Solr 9 applies it to an explicit `OR` as well, so `coastal OR
+disaster` required both words and found nothing. Neither `q.op=OR` nor
+`mm.autoRelax` changes that.
+
+`SearchBuilder#honour_explicit_or` sends `mm=1` when the search holds an
+uppercase `OR` or `||` outside quotation marks, which is what Solr parses as an
+operator. A plain search keeps the handler's `mm`, because relaxing it for
+everything would loosen every search. One side effect follows from Solr, not from
+this step: an uppercase `OR` in a typed title, such as "Portland, OR", is an
+operator, and the search now matches either side of it rather than requiring
+both. A group in parentheses is untouched either way, because `mm` applies only
+to the top level.
+
 ## Why this result?
 
 Admins and delegated admins get a `fa-magnifying-glass-chart` button on each

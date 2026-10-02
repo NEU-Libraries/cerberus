@@ -4,7 +4,11 @@ class SearchBuilder < Blacklight::SearchBuilder
   include Blacklight::Solr::SearchBuilderBehavior
 
   self.default_processor_chain += [:apply_gated_discovery, :append_extra_filters, :exclude_curation_containers,
-                                   :scope_to_resource_type, :exclude_unfinished_deposits]
+                                   :scope_to_resource_type, :exclude_unfinished_deposits, :honour_explicit_or]
+
+  # An uppercase OR or ||, standing alone outside quotation marks: what Solr
+  # itself parses as an operator. Lowercase "or" is a word, as in a title.
+  EXPLICIT_OR = /(?<![^\s(])(?:OR|\|\|)(?![^\s)])/
 
   # Blacklight's step of this name asks `search_state.controller.action_name`
   # whether the advanced search form is being rendered. A builder's search
@@ -114,6 +118,17 @@ class SearchBuilder < Blacklight::SearchBuilder
 
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << "internal_resource_tesim:#{type}"
+  end
+
+  # The handler's mm ("2<-1 …") requires both words of a two-word search, and
+  # Solr 9 applies it to an explicit OR too, so "coastal OR disaster" required
+  # both and found nothing. Relax it only when the search says OR: a plain
+  # search keeps its precision. See docs/discovery.md ("Search operators").
+  def honour_explicit_or(solr_parameters)
+    query = solr_parameters[:q]
+    return unless query.is_a?(String) && query.gsub(/"[^"]*"/, '').match?(EXPLICIT_OR)
+
+    solr_parameters[:mm] = '1'
   end
 
   private

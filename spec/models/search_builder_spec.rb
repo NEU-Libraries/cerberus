@@ -271,4 +271,64 @@ RSpec.describe SearchBuilder do
       expect(unfinished_fq(user).first).to start_with('((*:* -')
     end
   end
+
+  describe '#honour_explicit_or' do
+    let(:user) { nil }
+
+    def minimum_match(query)
+      params = { q: query }
+      builder.honour_explicit_or(params)
+      params[:mm]
+    end
+
+    it 'lets either side of an explicit OR match' do
+      expect(minimum_match('coastal OR disaster')).to eq('1')
+      expect(minimum_match('(coastal || disaster) AND resilience')).to eq('1')
+    end
+
+    # A title typed as written must search as it always has.
+    it 'leaves a lowercase or, a quoted OR and a word containing OR alone' do
+      expect(minimum_match('war or peace')).to be_nil
+      expect(minimum_match('War Or Peace')).to be_nil
+      expect(minimum_match('"coastal OR disaster"')).to be_nil
+      expect(minimum_match('ORCHID ORegon')).to be_nil
+      expect(minimum_match('coastal AND survey')).to be_nil
+    end
+  end
+
+  # Against the live test Solr: the handler's own mm is what made OR act as AND,
+  # so only real records with a word each can show the fix.
+  describe 'an explicit OR against Solr' do
+    include AtlasFixtures
+
+    let(:user) { User.new(nuid: '000000004', name: 'User, Admin', role: 'admin') }
+    let(:left) { "zz#{SecureRandom.alphanumeric(8).downcase.tr('0-9', 'a-j')}" }
+    let(:right) { "zz#{SecureRandom.alphanumeric(8).downcase.tr('0-9', 'a-j')}" }
+
+    def titled_work(parent_id, word)
+      mods = Tempfile.new(['work-mods', '.xml'])
+      mods.write(File.read(mods_path('work')).sub("<mods:title>What's New</mods:title>", "<mods:title>#{word}</mods:title>"))
+      mods.close
+      work = AtlasRb::Work.create(parent_id, mods.path, nuid: admin_nuid)
+      AtlasRb::Work.complete(work.id, nuid: admin_nuid)
+    ensure
+      mods&.unlink
+    end
+
+    def found(query)
+      params = builder.with(q: query).merge(rows: 0).to_hash
+      Blacklight.default_index.search(params: params).total
+    end
+
+    before do
+      collection = create_collection(create_community.id)
+      titled_work(collection.id, left)
+      titled_work(collection.id, right)
+    end
+
+    it 'finds the records either word finds, where the plain search needs both' do
+      expect(found("#{left} OR #{right}")).to eq(2)
+      expect(found("#{left} #{right}")).to eq(0)
+    end
+  end
 end
