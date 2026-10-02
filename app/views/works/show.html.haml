@@ -72,7 +72,11 @@
         = stylesheet_link_tag 'tify', 'data-turbo-track': 'false'
         .iiif-viewer{data: { controller: 'iiif-viewer',
                              'iiif-viewer-url-value': manifest_work_path(@work.id) }}
-      - elsif @av_file
+      - elsif @av_file && !embargo_withholds?(@permissions&.embargo)
+        -# An embargo the viewer cannot bypass refuses /media, so a mounted
+        -# player would only show its generic load error; they get the
+        -# thumbnail, and the banner above gives the date.
+        -#
         -# In-page audio/video player. Like Tify, the skin CSS ships separately
         -# and video.js arrives via dynamic import, so other pages never pay.
         = stylesheet_link_tag 'video-js', 'data-turbo-track': 'false'

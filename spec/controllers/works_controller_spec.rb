@@ -152,6 +152,24 @@ describe WorksController do
         expect(response.body).to include('under embargo')
         expect(response.body).to include((Date.current + 30).strftime('%B %-d, %Y'))
       end
+
+      context 'with a recording' do
+        before do
+          AtlasRb::Blob.create(work.id, Rails.root.join('spec/fixtures/files/sample-audio.mp3').to_s,
+                               'sample-audio.mp3', nuid: '000000004')
+        end
+
+        it 'mounts no player for a guest, whom /media would refuse' do
+          get :show, params: { id: work.id }
+          expect(response.body).not_to include('av-player')
+        end
+
+        it 'mounts the player for staff, who may bypass the embargo' do
+          sign_in User.new(email: 'staff@example.com', nuid: '000000002', groups: [Permissions::STAFF_EDIT_GROUP])
+          get :show, params: { id: work.id }
+          expect(response.body).to include('av-player')
+        end
+      end
     end
   end
 
