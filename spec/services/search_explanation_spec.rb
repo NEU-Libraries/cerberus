@@ -127,6 +127,18 @@ RSpec.describe SearchExplanation do
     expect(described_class.new(tree('explain_two_words')).skipped_words?).to be(false)
   end
 
+  # A quoted search: one phrase node, no per-word nodes, as Solr returns it.
+  it 'explains a quoted search by its phrase alone' do
+    weights = [['description_tsim:"people ? cities"~1', 7.79], ['description_stem_tesim:"people ? city"~1', 3.9]]
+    phrase = { 'value' => 7.83, 'description' => 'max plus 0.01 times others of:',
+               'details' => weights.map do |term, value|
+                 { 'value' => value, 'description' => "weight(#{term} in 181) [SchemaSimilarity], result of:" }
+               end }
+
+    expect(described_class.new(phrase).summary)
+      .to eq('This appeared because the words “people ? cities” appear together in its description field.')
+  end
+
   it 'has no sentence when nothing matched by word' do
     expect(described_class.new({ 'value' => 1.0, 'description' => 'MatchAllDocsQuery', 'details' => [] }).summary)
       .to be_nil

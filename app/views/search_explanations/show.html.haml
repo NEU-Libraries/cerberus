@@ -22,7 +22,7 @@
             %i.fa-regular.fa-copy.me-1{'aria-hidden' => 'true'}
             %span{data: { 'clipboard-target': 'label' }} Copy
       - else
-        %p No word of “#{@query}” matched a field Solr scores, so this explanation has nothing to summarize.
+        %p No word of “#{@query.delete_prefix('"').delete_suffix('"')}” matched a field Solr scores, so this explanation has nothing to summarize.
       - if @sorted_by && @sorted_by != 'relevance'
         .alert.alert-warning.py-2.px-3.small.d-flex.align-items-start
           %i.fa-solid.fa-triangle-exclamation.me-2.mt-1{'aria-hidden' => 'true'}

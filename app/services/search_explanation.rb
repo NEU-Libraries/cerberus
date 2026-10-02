@@ -92,8 +92,12 @@ class SearchExplanation
 
   # The sentence an admin can pass on. Nil when nothing matched by word, as for
   # a browse with no search terms.
+  #
+  # A quoted search is scored as one phrase, with no per-word nodes at all, so
+  # the phrase alone has to carry the sentence then.
   def summary
-    return if words.empty?
+    return if words.empty? && phrases.empty?
+    return phrase_only_sentence if words.empty?
 
     # ", and" between two clauses too: a field label can hold "and" of its own.
     clauses = word_groups.map { |group| group_clause(group) }.to_sentence(two_words_connector: ', and ')
@@ -157,6 +161,13 @@ class SearchExplanation
       labels = field_labels_of(group.first)
       terms = group.map { |word| "“#{typed(word.term)}”" }.to_sentence
       "#{terms} #{group.one? ? 'is' : 'are'} in its #{labels.to_sentence} #{labels.one? ? 'field' : 'fields'}"
+    end
+
+    # Phrases come strongest first, so the first names the field that counted most.
+    def phrase_only_sentence
+      labels = phrases.map { |phrase| label_for(phrase) }.uniq
+      "This appeared because the words “#{typed(phrases.first.display_term)}” appear together in its " \
+        "#{labels.to_sentence} #{labels.one? ? 'field' : 'fields'}."
     end
 
     def phrase_sentence
