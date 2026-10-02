@@ -53,6 +53,12 @@ RSpec.describe 'sign-in and zero-result affordances', type: :request do
       expect(link['href']).not_to include('genre_ssim')
     end
 
+    it 'prints a quoted phrase search inside one pair of quotes' do
+      get search_catalog_path, params: { q: '"zzzqqq xyzzy"' }
+
+      expect(response.body).to include('No results for “zzzqqq xyzzy”')
+    end
+
     it 'speaks of the filters when no words were typed' do
       get search_catalog_path, params: { f: { genre_ssim: ['zzzqqqxyzzy'] } }
 

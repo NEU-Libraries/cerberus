@@ -11,7 +11,8 @@
     A genre landing carries its genre as a filter on a legacy link, so only
     typed words make it a search. %>
 <% if params[:q].present? || (search_state.filters.any? && controller_name != 'genres') %>
-  <% query = params[:q].to_s.strip %>
+  <%# A quoted phrase search would print inside a second pair of quotes. %>
+  <% query = params[:q].to_s.strip.delete_prefix('"').delete_suffix('"').strip %>
   <% scoped_field = params[:search_field].presence && params[:search_field] != blacklight_config.default_search_field&.key %>
   <div id="documents" class="empty-container-state noresults">
     <i class="empty-container-state__icon fa-solid fa-magnifying-glass" aria-hidden="true"></i>
