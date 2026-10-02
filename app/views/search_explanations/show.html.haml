@@ -83,6 +83,16 @@
         Score:
         %strong.tnum= number_with_precision(explanation.score, precision: 2)
 
-      %details.mt-3
-        %summary.small Solr’s full explanation
-        = render 'search_explanations/node', node: explanation.tree
+      - if @matched_words.any?
+        %h3.h6.mt-3 Where it matched
+        - @matched_words.each do |line|
+          .mb-2
+            .small.fw-semibold
+              = line.match.label.capitalize
+              - if line.match.form_note
+                %span.fw-normal.text-muted (#{line.match.form_note})
+            - line.excerpts.each do |segments|
+              -# One line, so no whitespace lands between a word and its punctuation.
+              %p.small.mb-1= safe_join(segments.map { |segment| segment.matched ? tag.strong(segment.text) : segment.text })
+            - if line.reason
+              %p.small.text-muted.mb-1= line.reason

@@ -630,7 +630,8 @@ field adds a hundredth of its own score. The phrase boost (`pf`) adds a second
 such node, whose weights carry a quoted phrase. A boost function multiplies the
 whole: Person records score 0.9. The dialog leads with a sentence an admin can
 copy and pass on, then a table of word, field and points, the adjustments, the
-score, and Solr's full tree, collapsed.
+score, and the words that matched in the record's own text. It does not show
+Solr's raw tree: the audience is staff explaining a result, not developers.
 
 Two cases have nothing to score. A browse with no search terms says its results
 are in browse order. A sort other than relevance gets a note that the score did
@@ -644,3 +645,28 @@ and as its alternative titles. So one word can list "Title" more than once.
 `SearchExplanation::FORMS` gives each such field a note on its row, and the
 dialog shows a legend for the notes in the table. A new derived field needs an
 entry in both `FORMS` and `FORM_NOTES`, or its row reads as a plain duplicate.
+
+### Where it matched
+
+`MatchedWords` finds the record's words for each matched field through Solr's
+field analysis handler (`/analysis/field` in `blacklight-core`). It sends the
+record's stored text and the search words, and the handler runs both through
+that field's analyzer and flags each record token that matches. So a stemmed
+field bolds "Libraries" for a search on "library", and the bold falls on the
+word as the record writes it.
+
+- **Which text.** A derived field stores nothing, so `MatchedWords::SOURCES`
+  maps each searched field to the stored fields it is copied from, mirroring
+  the copyFields in `schema.xml`. Change both together. The controller asks for
+  those stored fields (`MatchedWords::STORED`) in the explained search.
+- **One request per field.** A field's values are joined by newlines and sent
+  as one POST, never a GET: a long description overflows Solr's request line.
+- **Offsets.** Solr counts UTF-16 code units, and Ruby counts characters. They
+  differ after an emoji or any other character outside the BMP, so each offset
+  is converted before it slices the text.
+- **Markup.** Each value loses its sub- and superscript tags before analysis, by
+  pattern (never by HTML parsing, see `docs/metadata-text.md`).
+- **No text to show.** The creator-name variants are computed by Atlas and not
+  stored, and the full text is too long to send. Each says so instead
+  (`MatchedWords::NO_TEXT`). A Solr failure gives the same kind of note, not an
+  error.

@@ -91,6 +91,11 @@ class SearchExplanation
     rows.max_by(&:points)
   end
 
+  # One row per field, in table order, for the words that matched in each.
+  def matched_fields
+    rows.uniq(&:field)
+  end
+
   # The notes the table shows, in the order the legend lists them.
   def forms
     FORM_NOTES.keys & rows.filter_map(&:form)

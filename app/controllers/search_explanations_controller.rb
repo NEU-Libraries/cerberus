@@ -31,7 +31,10 @@ class SearchExplanationsController < ApplicationController
     return if @query.nil?
 
     @document = explained_document
-    @explanation = SearchExplanation.new(@document&.fetch('[explain]', nil)) if @document
+    return if @document.nil?
+
+    @explanation = SearchExplanation.new(@document.fetch('[explain]', nil))
+    @matched_words = MatchedWords.call(document: @document, matches: @explanation.matched_fields, query: @query)
   end
 
   private
@@ -43,9 +46,10 @@ class SearchExplanationsController < ApplicationController
     end
 
     def explained_document
+      fl = ['id', 'score', '[explain style=nl]', *MatchedWords::STORED].join(',')
       builder = search_service.search_builder.with(q: @query)
                               .with_filters(%(id:"#{params[:id].to_s.gsub(/["\\]/, '')}"))
-                              .merge(rows: 1, hl: false, fl: 'id,title_tsim,score,[explain style=nl]')
+                              .merge(rows: 1, hl: false, fl: fl)
       Blacklight.default_index.search(params: builder).documents.first
     end
 end
