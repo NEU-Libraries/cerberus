@@ -23,6 +23,9 @@ class SetsController < CatalogController
   before_action :authenticate_user!, except: %i[show facet facet_suggest]
   before_action :require_curator,    except: %i[show facet facet_suggest]
   before_action :load_set,           except: [:index, :new, :create, :picker, :recipients]
+  # The edit page is a form, so one the caller could never save is refused up
+  # front rather than left for Atlas to refuse on Save. Atlas stays the boundary.
+  before_action :require_set_editor, only: :edit
   # Declared here rather than in SetBulkActions so it lands after the two gates
   # above: an anonymous request has to reach authenticate_user! and be sent to
   # sign in, not be told it is forbidden. The three actions it names live in that
@@ -174,6 +177,12 @@ class SetsController < CatalogController
     def facet_scope_filters
       @resolver = SetResolver.new(compilation: @set, search_service: search_service)
       @resolver.contents_fqs
+    end
+
+    def require_set_editor
+      return if @can_edit
+
+      render template: 'errors/forbidden', status: :forbidden
     end
 
     def require_curator

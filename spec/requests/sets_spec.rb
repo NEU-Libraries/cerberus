@@ -335,6 +335,26 @@ RSpec.describe 'Sets', type: :request do
       expect(response.body).not_to include(set_aside_set_path(set['id']))
       expect(response.body).not_to include(edit_set_path(set['id']))
     end
+
+    it 'refuses the edit page to a non-owner with read access, who could never save it' do
+      set = make_set('Owned Set')
+      AtlasRb::Compilation.update(set['id'],
+                                  permissions: { read: ['public'], edit: [], edit_users: [] },
+                                  nuid:        nuid)
+      sign_in other_user
+      get edit_set_path(set['id'], tab: 'export')
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it 'still opens the edit page to a person granted edit access' do
+      set = make_set('Shared Set')
+      AtlasRb::Compilation.update(set['id'],
+                                  permissions: { read: ['public'], edit: [], edit_users: [other_user.nuid] },
+                                  nuid:        nuid)
+      sign_in other_user
+      get edit_set_path(set['id'])
+      expect(response).to have_http_status(:ok)
+    end
   end
 
   describe 'navbar user menu' do
