@@ -34,7 +34,9 @@ class SearchExplanationsController < ApplicationController
     return if @document.nil?
 
     @explanation = SearchExplanation.new(@document.fetch('[explain]', nil))
+    @terms = SearchTerms.new(@query)
     @rows = explain_matches
+    @summary = summary
   end
 
   private
@@ -43,10 +45,16 @@ class SearchExplanationsController < ApplicationController
     # typed, and each field's label as the record gives it.
     def explain_matches
       fields = @explanation.fields
-      lines = MatchedWords.call(document: @document, matches: fields.map(&:match), query: @query)
+      lines = MatchedWords.call(document: @document, matches: fields.map(&:match), query: @terms.included)
       @explanation.typed_terms = lines.map(&:typed).reduce({}, :merge)
       @explanation.field_labels = lines.to_h { |line| [line.match.field, line.label.downcase] }
       fields.zip(lines)
+    end
+
+    # An excluded word never scores, so Solr's explanation cannot mention it.
+    def summary
+      scored = @explanation.summary
+      [scored, @terms.exclusion_sentence(opening: scored.nil?)].compact.join(' ').presence
     end
 
     def require_admin_or_delegate

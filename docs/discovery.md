@@ -675,6 +675,16 @@ and as its alternative titles. So one word can list "Title" more than once.
 dialog shows a legend for the notes in the table. A new derived field needs an
 entry in both `FORMS` and `FORM_NOTES`, or its row reads as a plain duplicate.
 
+### Excluded words
+
+An excluded word (`NOT survey`, `-survey`) never scores, so Solr's explanation
+holds nothing about it. `SearchTerms` reads the typed search the way Solr reads
+its uppercase operators. It gives `MatchedWords` only the words that can match,
+with no operators or exclusions, and it adds a sentence naming the excluded
+words to the summary, so the Copy button carries it too. A search that only
+excludes (`NOT coastal`) scores every result the same, so the dialog says that
+in place of an empty table.
+
 ### The record's matched words
 
 `MatchedWords` finds the record's words for each matched field through Solr's
