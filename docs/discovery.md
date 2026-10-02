@@ -629,24 +629,27 @@ times others" node: the field it matched best counts in full, and each other
 field adds a hundredth of its own score. The phrase boost (`pf`) adds a second
 such node, whose weights carry a quoted phrase. A boost function multiplies the
 whole: Person records score 0.9. The dialog leads with a sentence an admin can
-copy and pass on, then a table of word, field and points, the adjustments, the
-score, and the words that matched in the record's own text. It does not show
-Solr's raw tree: the audience is staff explaining a result, not developers.
+copy and pass on, then a table with one row per matched field, strongest
+first: the record's own text with the matched words in bold, and the points
+each search word earned there. Then the adjustments and the score. It does not
+show Solr's raw tree: the audience is staff explaining a result, not
+developers. A row is a field, not a word, so a field that several words matched
+shows its text once (`SearchExplanation#fields`).
 
 Two cases have nothing to score. A browse with no search terms says its results
 are in browse order. A sort other than relevance gets a note that the score did
-not set the item's place. `SearchExplanation::LABELS` names each `qf` field as
+not set the item's place. `SearchExplanation::Match::LABELS` names each `qf` field as
 the page does; a field missing from it shows its Solr name. Add one there when
 `qf` gains a field.
 
 Several `qf` fields fold into one label: the title is searched as written, as
 stem variations (so a plural matches), without its sub- and superscript markup,
 and as its alternative titles. So one word can list "Title" more than once.
-`SearchExplanation::FORMS` gives each such field a note on its row, and the
+`SearchExplanation::Match::FORMS` gives each such field a note on its row, and the
 dialog shows a legend for the notes in the table. A new derived field needs an
 entry in both `FORMS` and `FORM_NOTES`, or its row reads as a plain duplicate.
 
-### Where it matched
+### The record's matched words
 
 `MatchedWords` finds the record's words for each matched field through Solr's
 field analysis handler (`/analysis/field` in `blacklight-core`). It sends the

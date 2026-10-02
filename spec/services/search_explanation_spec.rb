@@ -55,6 +55,14 @@ RSpec.describe SearchExplanation do
       )
     end
 
+    it 'groups the scores by field, strongest field first, so each field shows its text once' do
+      title = explanation.fields.first
+      expect(title.match.label).to eq('title')
+      expect(title.scores.map(&:term)).to include('coastal', 'survey', 'coastal survey')
+      expect(explanation.fields.map { |field| field.match.field }).to eq(explanation.fields.map { |f| f.match.field }.uniq)
+      expect(explanation.fields.map(&:points)).to eq(explanation.fields.map(&:points).sort.reverse)
+    end
+
     it 'names the phrase as what counted most' do
       expect(explanation.summary).to end_with('The words “coastal survey” also appear together in its title. ' \
                                               'The words appearing together in its title count most.')

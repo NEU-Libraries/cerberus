@@ -33,7 +33,7 @@ RSpec.describe 'SearchExplanations', type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.body).to include('This appeared because “coastal” is in its title', 'counts most',
                                      '(stem variation)', 'A field can be listed more than once',
-                                     'Where it matched', 'id="explain-modal-frame"')
+                                     'In the record', 'id="explain-modal-frame"')
     expect(response.body).not_to include('Alternative title:')
   end
 

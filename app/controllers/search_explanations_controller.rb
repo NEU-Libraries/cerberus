@@ -34,7 +34,8 @@ class SearchExplanationsController < ApplicationController
     return if @document.nil?
 
     @explanation = SearchExplanation.new(@document.fetch('[explain]', nil))
-    @matched_words = MatchedWords.call(document: @document, matches: @explanation.matched_fields, query: @query)
+    fields = @explanation.fields
+    @rows = fields.zip(MatchedWords.call(document: @document, matches: fields.map(&:match), query: @query))
   end
 
   private
