@@ -1,7 +1,0 @@
--# One node of Solr's explanation tree, and its children beneath it.
-%ul.list-unstyled.small.ms-3.mb-0.font-monospace
-  %li
-    %span.tnum= number_with_precision(node['value'].to_f, precision: 3)
-    = node['description']
-    - Array(node['details']).each do |child|
-      = render 'search_explanations/node', node: child

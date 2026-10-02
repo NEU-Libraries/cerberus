@@ -31,10 +31,31 @@ class SearchExplanationsController < ApplicationController
     return if @query.nil?
 
     @document = explained_document
-    @explanation = SearchExplanation.new(@document&.fetch('[explain]', nil)) if @document
+    return if @document.nil?
+
+    @explanation = SearchExplanation.new(@document.fetch('[explain]', nil))
+    @terms = SearchTerms.new(@query)
+    @rows = explain_matches
+    @summary = summary
   end
 
   private
+
+    # The record's matched words feed back into the summary: the words as
+    # typed, and each field's label as the record gives it.
+    def explain_matches
+      fields = @explanation.fields
+      lines = MatchedWords.call(document: @document, matches: fields.map(&:match), query: @terms.included)
+      @explanation.typed_terms = lines.map(&:typed).reduce({}, :merge)
+      @explanation.field_labels = lines.to_h { |line| [line.match.field, line.label.downcase] }
+      fields.zip(lines)
+    end
+
+    # An excluded word never scores, so Solr's explanation cannot mention it.
+    def summary
+      scored = @explanation.summary
+      [scored, @terms.exclusion_sentence(opening: scored.nil?)].compact.join(' ').presence
+    end
 
     def require_admin_or_delegate
       return if effective_user&.admin? || effective_user&.admin_delegate?
@@ -43,9 +64,10 @@ class SearchExplanationsController < ApplicationController
     end
 
     def explained_document
+      fl = ['id', 'score', '[explain style=nl]', *MatchedWords::STORED].join(',')
       builder = search_service.search_builder.with(q: @query)
                               .with_filters(%(id:"#{params[:id].to_s.gsub(/["\\]/, '')}"))
-                              .merge(rows: 1, hl: false, fl: 'id,title_tsim,score,[explain style=nl]')
+                              .merge(rows: 1, hl: false, fl: fl)
       Blacklight.default_index.search(params: builder).documents.first
     end
 end

@@ -608,6 +608,32 @@ marker carries that same composed value. A Solr index built before Atlas
 composed headings still holds the separate topics, so its links come back empty.
 That is exactly the symptom a wrong `AXES` entry would produce.
 
+## Search operators
+
+The catalog search is Solr's edismax, so a reader can use its operators: `AND`
+(or `&&`), `OR` (or `||`), `NOT` (or a leading `-`), `+` to require a word,
+parentheses to group, and quotation marks for a phrase. Only the uppercase forms
+are operators. Lowercase "and", "or" and "not" are ordinary words, so a title
+typed as written searches as it reads, and Solr's `lowercaseOperators` stays off
+on purpose.
+
+### An explicit OR relaxes the minimum match
+
+The search handler's `mm` (`2<-1 5<-2 6<90%` in `blacklight-core`'s
+`solrconfig.xml`) requires both words of a two-word search, and most words of a
+longer one. Solr 9 applies it to an explicit `OR` as well, so `coastal OR
+disaster` required both words and found nothing. Neither `q.op=OR` nor
+`mm.autoRelax` changes that.
+
+`SearchBuilder#honour_explicit_or` sends `mm=1` when the search holds an
+uppercase `OR` or `||` outside quotation marks, which is what Solr parses as an
+operator. A plain search keeps the handler's `mm`, because relaxing it for
+everything would loosen every search. One side effect follows from Solr, not from
+this step: an uppercase `OR` in a typed title, such as "Portland, OR", is an
+operator, and the search now matches either side of it rather than requiring
+both. A group in parentheses is untouched either way, because `mm` applies only
+to the top level.
+
 ## Why this result?
 
 Admins and delegated admins get a `fa-magnifying-glass-chart` button on each
@@ -629,11 +655,71 @@ times others" node: the field it matched best counts in full, and each other
 field adds a hundredth of its own score. The phrase boost (`pf`) adds a second
 such node, whose weights carry a quoted phrase. A boost function multiplies the
 whole: Person records score 0.9. The dialog leads with a sentence an admin can
-copy and pass on, then a table of word, field and points, the adjustments, the
-score, and Solr's full tree, collapsed.
+copy and pass on, then a table with one row per matched field, strongest
+first: the record's own text with the matched words in bold, and the points
+each search word earned there. Then the adjustments and the score. It does not
+show Solr's raw tree: the audience is staff explaining a result, not
+developers. A row is a field, not a word, so a field that several words matched
+shows its text once (`SearchExplanation#fields`).
 
 Two cases have nothing to score. A browse with no search terms says its results
 are in browse order. A sort other than relevance gets a note that the score did
-not set the item's place. `SearchExplanation::LABELS` names each `qf` field as
+not set the item's place. `SearchExplanation::Match::LABELS` names each `qf` field as
 the page does; a field missing from it shows its Solr name. Add one there when
 `qf` gains a field.
+
+Several `qf` fields fold into one label: the title is searched as written, as
+stem variations (so a plural matches), without its sub- and superscript markup,
+and as its alternative titles. So one word can list "Title" more than once.
+`SearchExplanation::Match::FORMS` gives each such field a note on its row, and the
+dialog shows a legend for the notes in the table. A new derived field needs an
+entry in both `FORMS` and `FORM_NOTES`, or its row reads as a plain duplicate.
+
+### Excluded words
+
+An excluded word (`NOT survey`, `-survey`) never scores, so Solr's explanation
+holds nothing about it. `SearchTerms` reads the typed search the way Solr reads
+its uppercase operators. It gives `MatchedWords` only the words that can match,
+with no operators or exclusions, and it adds a sentence naming the excluded
+words to the summary, so the Copy button carries it too. A search that only
+excludes (`NOT coastal`) scores every result the same, so the dialog says that
+in place of an empty table.
+
+### The record's matched words
+
+`MatchedWords` finds the record's words for each matched field through Solr's
+field analysis handler (`/analysis/field` in `blacklight-core`). It sends the
+record's stored text and the search words, and the handler runs both through
+that field's analyzer and flags each record token that matches. So a stemmed
+field bolds "Libraries" for a search on "library", and the bold falls on the
+word as the record writes it.
+
+- **Which text.** A derived field stores nothing, so `MatchedWords::SOURCES`
+  maps each searched field to the stored fields it is copied from, mirroring
+  the copyFields in `schema.xml`. Change both together. The controller asks for
+  those stored fields (`MatchedWords::STORED`) in the explained search.
+- **Which source.** The keywords field gathers eleven stored fields (subjects,
+  creator, contributor, genre, publisher, place, photo category), so its own
+  label would call a creator match a keyword. Each excerpt keeps the stored
+  field it came from, and the row takes that field's facet label from
+  `CatalogController` ("Creator") when every matched value shares one source.
+  With mixed sources the row keeps "Keywords and subjects" and each value names
+  its own.
+- **One request per field.** A field's values are joined by newlines and sent
+  as one POST, never a GET: a long description overflows Solr's request line.
+- **Offsets.** Solr counts UTF-16 code units, and Ruby counts characters. They
+  differ after an emoji or any other character outside the BMP, so each offset
+  is converted before it slices the text.
+- **Markup.** Each value loses its sub- and superscript tags before analysis, by
+  pattern (never by HTML parsing, see `docs/metadata-text.md`).
+- **The words as typed.** Solr's score tree holds only the searched form, so a
+  stemmed match reads "survey" for a search on "Surveys". The same analysis
+  response lists the query at every stage, and each token keeps its position
+  through them all, so `MatchedWords` maps each searched form back to the word
+  as typed. `SearchExplanation#typed` uses that map in the summary and the
+  points. A word that matched only a field with no text to analyse keeps Solr's
+  form.
+- **No text to show.** The creator-name variants are computed by Atlas and not
+  stored, and the full text is too long to send. Each says so instead
+  (`MatchedWords::NO_TEXT`). A Solr failure gives the same kind of note, not an
+  error.

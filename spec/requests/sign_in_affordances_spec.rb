@@ -5,6 +5,8 @@ require 'rails_helper'
 # Two places a signed-out visitor can get stranded, and one piece of advice that
 # named a control the screen does not offer.
 RSpec.describe 'sign-in and zero-result affordances', type: :request do
+  include Devise::Test::IntegrationHelpers
+
   describe 'the session form' do
     # Anything gated bounces a signed-out visitor here, but the accounts people
     # test with in dev and staging have no password — they sign in by NUID. Without
@@ -27,9 +29,50 @@ RSpec.describe 'sign-in and zero-result affordances', type: :request do
     it 'does not send the reader to facet links that are not there' do
       get search_catalog_path, params: { q: 'zzzqqqxyzzy', search_field: 'all_fields' }
 
-      expect(response.body).to include('No results found')
+      expect(response.body).to include('No results for “zzzqqqxyzzy”')
       expect(response.body).not_to include('using the links on the left')
-      expect(response.body).to match(/fewer or more general keywords/i)
+      expect(response.body).to match(/fewer or more general words/i)
+    end
+
+    # The gated search hides restricted items from a signed-out visitor, so
+    # signing in can turn up what this search could not.
+    it 'tells a signed-out visitor that signing in may find more, and a signed-in one nothing of it' do
+      get search_catalog_path, params: { q: 'zzzqqqxyzzy' }
+      expect(response.body).to include('to include items shared only with the Northeastern community')
+
+      sign_in User.new(email: 'staff@example.com', nuid: '000000006', groups: [Permissions::STAFF_EDIT_GROUP])
+      get search_catalog_path, params: { q: 'zzzqqqxyzzy' }
+      expect(response.body).not_to include('to include items shared only with the Northeastern community')
+    end
+
+    it 'offers to drop the filters, keeping the words' do
+      get search_catalog_path, params: { q: 'zzzqqqxyzzy', f: { genre_ssim: ['Datasets'] } }
+
+      link = response.parsed_body.at_css('a:contains("Remove the filters")')
+      expect(link['href']).to include('q=zzzqqqxyzzy')
+      expect(link['href']).not_to include('genre_ssim')
+    end
+
+    it 'prints a quoted phrase search inside one pair of quotes' do
+      get search_catalog_path, params: { q: '"zzzqqq xyzzy"' }
+
+      expect(response.body).to include('No results for “zzzqqq xyzzy”')
+    end
+
+    it 'speaks of the filters when no words were typed' do
+      get search_catalog_path, params: { f: { genre_ssim: ['zzzqqqxyzzy'] } }
+
+      expect(response.body).to include('No items match these filters')
+      expect(response.body).not_to match(/check the spelling/i)
+    end
+
+    # Every facet is empty after a search that matched nothing, so the panel
+    # would be a bare heading. The empty state runs full width instead.
+    it 'drops the empty facet panel' do
+      get search_catalog_path, params: { q: 'zzzqqqxyzzy', search_field: 'all_fields' }
+
+      expect(response.body).not_to include('Limit your search')
+      expect(response.body).not_to include('id="sidebar"')
     end
   end
 end

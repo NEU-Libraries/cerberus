@@ -34,6 +34,7 @@ bracketing.
 | A standalone form or action page | the `.admin-registry` card shell | `admin/groups/new` |
 | A page heading plate | `.container.p-4.my-3.well.rounded-3` on `:container_header` | the People and Communities indexes |
 | A ledger surface | the richer `.audit-history` card shell | the Audit History tab |
+| An empty state: nothing found, or nothing here yet | `.empty-container-state`, bare and centred: a muted icon, a title, a hint, and for a search a `__steps` list of only the next steps that apply, each with its link | `catalog/_zero_results` |
 
 `.admin-registry` is shared chrome despite its name: the impersonation form, My
 DRS and the Inbox all reuse it on surfaces that are not admin pages.

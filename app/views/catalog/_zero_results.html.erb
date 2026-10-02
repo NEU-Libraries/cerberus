@@ -1,27 +1,46 @@
 <%# Cerberus override of Blacklight's catalog/_zero_results.
 
-    Container show pages (communities/collections) render the catalog search
-    machinery to list their children, so an EMPTY container falls through to
-    this partial — but the user never ran a search, they just clicked into an
-    empty thing. Blacklight's "No results found for your search / Try modifying
-    your search / Use fewer keywords" advice is nonsensical there.
+    Two empty states, one look. A search or a filter that matched nothing gets
+    the next steps that apply to it, each with its link. A browse into an empty
+    container (communities, collections, genres) never ran a search, so search
+    advice is nonsense there: it gets a calm "this is empty" instead.
 
-    We discriminate on params[:q]: a present query is a real search (keep the
-    upstream advice); a blank query is a browse/show of an empty container, so
-    we render a calm, neutral empty state instead. The "Limit your search"
-    sidebar and the sort/per-page controls are suppressed upstream for this
-    case (communities/collections show + _search_sidebar guard). %>
-<% if params[:q].present? %>
-  <h2><%= t 'blacklight.search.zero_results.title' %></h2>
-  <div id="documents" class="noresults">
-    <h3><%= t 'blacklight.search.zero_results.modify_search' %></h3>
-    <ul>
-      <li><%= t 'blacklight.search.zero_results.use_fewer_keywords' %></li>
-      <% if params[:q] && params[:search_field] && params[:search_field] != blacklight_config.default_search_field&.key %>
+    The sidebar is not mounted on an empty response (catalog/_search_sidebar),
+    so both states run full width.
+
+    A genre landing carries its genre as a filter on a legacy link, so only
+    typed words make it a search. %>
+<% if params[:q].present? || (search_state.filters.any? && controller_name != 'genres') %>
+  <%# A quoted phrase search would print inside a second pair of quotes. %>
+  <% query = params[:q].to_s.strip.delete_prefix('"').delete_suffix('"').strip %>
+  <% scoped_field = params[:search_field].presence && params[:search_field] != blacklight_config.default_search_field&.key %>
+  <div id="documents" class="empty-container-state noresults">
+    <i class="empty-container-state__icon fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+    <h2 class="empty-container-state__title">
+      <%= query.present? ? "No results for “#{query}”" : 'No items match these filters' %>
+    </h2>
+    <p class="empty-container-state__hint">No item you have access to matches this search.</p>
+    <ul class="empty-container-state__steps">
+      <% if query.present? %>
+        <li><%= t 'blacklight.search.zero_results.use_fewer_keywords' %></li>
+      <% end %>
+      <% if query.present? && scoped_field %>
         <li>
-          <%= t 'blacklight.search.zero_results.search_fields', search_fields: search_field_label(params) %> -
-          <%= link_to t('blacklight.search.zero_results.search_everything', field: blacklight_config.default_search_field.label),
+          <%= link_to "Search all fields",
                       url_for(search_state.params_for_search(search_field: blacklight_config.default_search_field.key)) %>
+          instead of only <%= search_field_label(params) %>.
+        </li>
+      <% end %>
+      <% if search_state.filters.any? %>
+        <li>
+          <%= link_to 'Remove the filters', search_action_path(q: params[:q].presence, search_field: params[:search_field].presence) %>
+          and keep only your search words.
+        </li>
+      <% end %>
+      <% unless user_signed_in? %>
+        <li>
+          <%= link_to 'Sign in', sign_in_path_for_environment %>
+          to include items shared only with the Northeastern community.
         </li>
       <% end %>
     </ul>

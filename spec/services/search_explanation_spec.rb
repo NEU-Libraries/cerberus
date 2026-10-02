@@ -20,8 +20,15 @@ RSpec.describe SearchExplanation do
 
     it 'says it in a sentence an admin can pass on' do
       expect(explanation.summary)
-        .to eq('This appeared because “coastal” is in its title, description, and keywords and subjects. ' \
-               'The title match counts most.')
+        .to eq('This appeared because “coastal” is in its title, description, and keywords and subjects fields. ' \
+               'The match in its title field counts most.')
+    end
+
+    it 'notes the stemmed title and description, so "title" listed twice reads as two matches' do
+      notes = explanation.words.sole.matches.to_h { |match| [match.field, match.form_note] }
+      expect(notes).to include('title_tsim' => nil, 'title_stem_tesim' => 'stem variation',
+                               'description_stem_tesim' => 'stem variation')
+      expect(explanation.forms).to eq([:stem_variation])
     end
 
     it 'reports the score and no adjustment for a Work' do
@@ -43,15 +50,93 @@ RSpec.describe SearchExplanation do
     # The phrase bonus outweighed either word alone in the captured tree.
     it 'keeps each word’s clause apart, though a field label holds an “and”' do
       expect(explanation.summary).to start_with(
-        'This appeared because “coastal” is in its title, description, and keywords and subjects, ' \
-        'and “survey” is in its title.'
+        'This appeared because “coastal” is in its title, description, and keywords and subjects fields, ' \
+        'and “survey” is in its title field.'
       )
     end
 
-    it 'names the phrase as what counted most' do
-      expect(explanation.summary).to end_with('The words “coastal survey” also appear together in its title. ' \
-                                              'The words appearing together in its title count most.')
+    it 'groups the scores by field, strongest field first, so each field shows its text once' do
+      title = explanation.fields.first
+      expect(title.match.label).to eq('title')
+      expect(title.scores.map(&:term)).to include('coastal', 'survey', 'coastal survey')
+      expect(explanation.fields.map { |field| field.match.field }).to eq(explanation.fields.map { |f| f.match.field }.uniq)
+      expect(explanation.fields.map(&:points)).to eq(explanation.fields.map(&:points).sort.reverse)
     end
+
+    it 'names a field by the label the record gave it, such as the creator for a keyword match' do
+      explanation.field_labels = { 'descriptive_keywords_tesim' => 'creator' }
+
+      expect(explanation.summary).to start_with('This appeared because “coastal” is in its title, description, ' \
+                                                'and creator fields,')
+    end
+
+    it 'speaks the words as typed once it knows them, and keeps Solr’s form otherwise' do
+      explanation.typed_terms = { 'survey' => 'Surveys' }
+
+      expect(explanation.summary).to start_with('This appeared because “coastal” is in its title, description, ' \
+                                                'and keywords and subjects fields, and “Surveys” is in its title field.')
+      expect(explanation.typed('coastal survey')).to eq('coastal Surveys')
+    end
+
+    it 'names the phrase as what counted most' do
+      expect(explanation.summary).to end_with('The words “coastal survey” also appear together in its title field. ' \
+                                              'The words appearing together in its title field count most.')
+    end
+  end
+
+  # One word matching the title four ways, each with a different note.
+  it 'tells the alternative and unformatted titles apart from stem variations, in the legend order' do
+    weights = %w[title_plain_tsim title_variant_tesim title_stem_tesim title_tsim].map do |field|
+      { 'value' => 1.0, 'description' => "weight(#{field}:whale in 3) [SchemaSimilarity], result of:" }
+    end
+    explanation = described_class.new({ 'value' => 1.0, 'description' => 'max plus 0.01 times others of:',
+                                        'details' => weights })
+
+    expect(explanation.words.sole.matches.map(&:form_note))
+      .to contain_exactly('without formatting', 'alternative title', 'stem variation', nil)
+    expect(explanation.forms).to eq(%i[stem_variation alternative_title plain_text])
+  end
+
+  # One best-field node per word, as edismax builds them.
+  def word_node(term, fields)
+    weights = fields.map do |field|
+      { 'value' => 1.0, 'description' => "weight(#{field}:#{term} in 3) [SchemaSimilarity], result of:" }
+    end
+    { 'value' => 1.0, 'description' => 'max plus 0.01 times others of:', 'details' => weights }
+  end
+
+  it 'gives the words that matched the same fields one clause' do
+    tree = { 'value' => 3.0, 'description' => 'sum of:', 'details' => [
+      word_node('how', %w[title_tsim description_tsim]), word_node('we', %w[title_tsim]),
+      word_node('respond', %w[title_tsim description_tsim])
+    ] }
+
+    expect(described_class.new(tree).summary).to start_with(
+      'This appeared because “how” and “respond” are in its title and description fields, ' \
+      'and “we” is in its title field.'
+    )
+  end
+
+  # Lucene prints a dropped stop word's kept position as "?".
+  it 'notices a phrase with a skipped word in it' do
+    phrase = { 'value' => 1.0, 'description' => 'max plus 0.01 times others of:', 'details' => [
+      { 'value' => 1.0, 'description' => 'weight(title_tsim:"how we respond ? disaster" in 3) [SchemaSimilarity]' }
+    ] }
+
+    expect(described_class.new(phrase).skipped_words?).to be(true)
+    expect(described_class.new(tree('explain_two_words')).skipped_words?).to be(false)
+  end
+
+  # A quoted search: one phrase node, no per-word nodes, as Solr returns it.
+  it 'explains a quoted search by its phrase alone' do
+    weights = [['description_tsim:"people ? cities"~1', 7.79], ['description_stem_tesim:"people ? city"~1', 3.9]]
+    phrase = { 'value' => 7.83, 'description' => 'max plus 0.01 times others of:',
+               'details' => weights.map do |term, value|
+                 { 'value' => value, 'description' => "weight(#{term} in 181) [SchemaSimilarity], result of:" }
+               end }
+
+    expect(described_class.new(phrase).summary)
+      .to eq('This appeared because the words “people ? cities” appear together in its description field.')
   end
 
   it 'has no sentence when nothing matched by word' do

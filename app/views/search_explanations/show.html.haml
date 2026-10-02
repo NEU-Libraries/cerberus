@@ -14,7 +14,7 @@
         There is nothing to explain.
     - else
       - explanation = @explanation
-      - summary = explanation.summary
+      - summary = @summary
       - if summary
         .d-flex.align-items-start.gap-2.mb-3{data: { controller: 'clipboard', 'clipboard-text-value': summary }}
           %p.mb-0.flex-grow-1= summary
@@ -22,45 +22,65 @@
             %i.fa-regular.fa-copy.me-1{'aria-hidden' => 'true'}
             %span{data: { 'clipboard-target': 'label' }} Copy
       - else
-        %p No word of “#{@query}” matched a field Solr scores, so this explanation has nothing to summarize.
+        %p No word of “#{@query.delete_prefix('"').delete_suffix('"')}” matched a field Solr scores, so this explanation has nothing to summarize.
       - if @sorted_by && @sorted_by != 'relevance'
         .alert.alert-warning.py-2.px-3.small.d-flex.align-items-start
           %i.fa-solid.fa-triangle-exclamation.me-2.mt-1{'aria-hidden' => 'true'}
           %span The list is sorted by #{@sorted_by.tr('-', ' ')}, so this score did not set the item’s place in it.
 
-      %h3.h6.mt-3 What matched
-      %p.small.text-muted
-        For each word, the field it matched best counts in full, and every other field adds only a hundredth of its own score.
-      .table-responsive
-        %table.table.table-borderless.admin-registry-table.mb-2
-          %thead
-            %tr
-              %th{scope: 'col'} Words
-              %th{scope: 'col'} Field
-              %th.text-end{scope: 'col'} Points
-          %tbody
-            - strongest = explanation.strongest
-            - explanation.words.each do |word|
-              - word.matches.each_with_index do |match, index|
-                %tr
-                  %td
-                    - if index.zero?
-                      “#{word.term}”
-                  %td
-                    = match.label.capitalize
-                    - if match.word_form?
-                      %span.small.text-muted (word forms)
-                    - if match.equal?(strongest)
-                      %span.badge.text-bg-light.ms-1 counts most
-                  %td.text-end.tnum= number_with_precision(match.points, precision: 2)
-            - explanation.phrases.each do |match|
+      - if @rows.any?
+        %h3.h6.mt-3 What matched
+        %p.small.text-muted
+          For each word, the field it matched best counts in full, and every other field adds only a hundredth of its own score.
+        .table-responsive
+          %table.table.table-borderless.admin-registry-table.mb-2
+            %thead
               %tr
-                %td “#{match.display_term}” together
-                %td
-                  = match.label.capitalize
-                  - if match.equal?(strongest)
-                    %span.badge.text-bg-light.ms-1 counts most
-                %td.text-end.tnum= number_with_precision(match.points, precision: 2)
+                %th{scope: 'col'} Field
+                %th{scope: 'col'} In the record
+                %th.text-end{scope: 'col'} Points
+            %tbody
+              - strongest = explanation.strongest
+              - @rows.each do |field, line|
+                %tr
+                  %td.text-nowrap
+                    = line.label
+                    - if field.match.form_note
+                      .small.text-muted (#{field.match.form_note})
+                  %td.small
+                    - line.excerpts.each do |excerpt|
+                      -# One line, so no whitespace lands between a word and its punctuation.
+                      - words = safe_join(excerpt.segments.map { |segment| segment.matched ? tag.strong(segment.text) : segment.text })
+                      %p.mb-1
+                        - if line.labelled_excerpts?
+                          %span.text-muted #{excerpt.source_label}:
+                        = words
+                    - if line.reason
+                      %p.text-muted.mb-1= line.reason
+                  %td.text-end
+                    - field.scores.each do |score|
+                      - term = "“#{explanation.typed(score.term)}”"
+                      .text-nowrap
+                        %span.small= score.phrase? ? "#{term} together" : term
+                        %span.tnum.ms-1= number_with_precision(score.match.points, precision: 2)
+                      - if score.match.equal?(strongest)
+                        %span.badge.text-bg-light counts most
+      - if explanation.forms.any? || explanation.skipped_words?
+        .small.text-muted.mb-3
+          - if explanation.forms.any?
+            %p.mb-1
+              A field can be listed more than once, because the DRS searches some fields in more than one way.
+              A row with no note matched the text as written.
+          %dl.mb-0
+            - explanation.forms.each do |form|
+              - note, meaning = SearchExplanation::Match::FORM_NOTES.fetch(form)
+              .d-flex.gap-1
+                %dt.fw-semibold.text-nowrap #{note.capitalize}:
+                %dd.mb-0= meaning
+            - if explanation.skipped_words?
+              .d-flex.gap-1
+                %dt.fw-semibold.text-nowrap ?:
+                %dd.mb-0 A common word, such as “to” or “the”, that the search skips. Any word in that place still matches.
       - explanation.adjustments.each do |factor|
         %p.small.mb-1
           The score was multiplied by #{number_with_precision(factor, precision: 2, strip_insignificant_zeros: true)}.
@@ -69,7 +89,3 @@
       %p.small.mb-0
         Score:
         %strong.tnum= number_with_precision(explanation.score, precision: 2)
-
-      %details.mt-3
-        %summary.small Solr’s full explanation
-        = render 'search_explanations/node', node: explanation.tree

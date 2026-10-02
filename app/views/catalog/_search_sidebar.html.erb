@@ -8,15 +8,16 @@
     (no visible label — the controls are self-evident; the section's aria-label
     carries the accessible name).
 
-    Controls only render when there are results to act on; an empty container
-    suppresses the whole sidebar upstream (communities/collections show), so we
-    never get here with an empty response in that case. %>
-<% conf = blacklight_config.view_config(document_index_view_type) %>
-<%= render conf.sidebar_component.new(blacklight_config: blacklight_config,
-                                      response: @response,
-                                      view_config: conf) %>
-
+    Nothing renders on an empty response: every facet is empty there, so the
+    panel would be a bare "Limit your search" heading. Rendering nothing leaves
+    content_for?(:sidebar) false, and the layout runs the empty state full
+    width (catalog/_zero_results). The constraint chips still remove a filter. %>
 <% if @response && @response.total_count.to_i.positive? %>
+  <% conf = blacklight_config.view_config(document_index_view_type) %>
+  <%= render conf.sidebar_component.new(blacklight_config: blacklight_config,
+                                        response: @response,
+                                        view_config: conf) %>
+
   <section class="sidebar-display-controls" aria-label="<%= t('blacklight.search.per_page.aria_label') %>">
     <%= render_results_collection_tools wrapping_class: "search-widgets" %>
   </section>

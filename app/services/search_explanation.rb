@@ -9,40 +9,30 @@
 # query word, holding a weight per field the word matched in, so the best field
 # counts and the rest add 1% each; a second such node for the phrase boost
 # (`pf`), whose weights carry a quoted phrase; and the boost function
-# multiplying the whole. Anything it does not recognise is left to the raw tree.
+# multiplying the whole. Anything it does not recognise is left out.
 class SearchExplanation
-  # Solr field → what the page calls it. Stemmed and variant fields fold into
-  # the field a reader knows; the table keeps them apart with `word forms`.
-  LABELS = {
-    'title_tsim'                 => 'title',
-    'title_stem_tesim'           => 'title',
-    'title_plain_tsim'           => 'title',
-    'title_variant_tesim'        => 'title',
-    'description_tsim'           => 'description',
-    'description_stem_tesim'     => 'description',
-    'descriptive_keywords_tesim' => 'keywords and subjects',
-    'subject_title_tesim'        => 'subjects',
-    'name_variant_teim'          => 'creator names',
-    'full_text_tesimv'           => 'full text',
-    'contents_tesim'             => 'contents',
-    'alternate_ids_tsim'         => 'identifier',
-    'identifier_tesim'           => 'identifier'
-  }.freeze
-
-  # Fields whose match is on a word's stem or a variant spelling, not the word.
-  WORD_FORM_FIELDS = %w[title_stem_tesim title_variant_tesim description_stem_tesim].freeze
-
   WEIGHT = /\Aweight\((?<field>[a-z_]+):(?<term>"[^"]+"(?:~\d+)?|\S+) in \d+\)/
   BEST_FIELD = 'max plus'
 
-  Match = Struct.new(:field, :term, :points, :phrase, keyword_init: true) do
-    def label = LABELS.fetch(field, field)
-    def word_form? = WORD_FORM_FIELDS.include?(field)
-    def display_term = term.sub(/~\d+\z/, '').delete('"')
-  end
   Word = Struct.new(:term, :matches, :points, keyword_init: true)
+  # One searched word's (or the phrase's) share of a field's score.
+  Score = Struct.new(:term, :match, keyword_init: true) do
+    def phrase? = match.phrase
+  end
+  # A field the record matched in, with every score it earned there.
+  Field = Struct.new(:match, :scores, keyword_init: true) do
+    def points = scores.map { |score| score.match.points }.max
+  end
 
-  attr_reader :score, :tree
+  attr_reader :score
+
+  # Searched token → the word as typed, from MatchedWords. Solr's tree holds
+  # only the searched form, which for a stemmed match is "survey", not "Surveys".
+  attr_writer :typed_terms
+
+  # Field → the label MatchedWords found from the record, such as "creator" for
+  # the keywords field, so the summary names the field the table row names.
+  attr_writer :field_labels
 
   # @param tree [Hash] the `[explain]` value, as { 'value', 'description', 'details' }
   def initialize(tree)
@@ -68,22 +58,63 @@ class SearchExplanation
                      .reject { |value| (value - 1.0).abs < 1e-6 }
   end
 
+  # A term, or each word of a phrase, as the asker typed it where that is known.
+  def label_for(match)
+    (@field_labels || {}).fetch(match.field, match.label)
+  end
+
+  def typed(term)
+    term.split.map { |word| (@typed_terms || {}).fetch(word, word) }.join(' ')
+  end
+
   def strongest
-    (words.flat_map(&:matches) + phrases).max_by(&:points)
+    rows.max_by(&:points)
+  end
+
+  # Whether a phrase holds a gap Lucene prints as "?": a stop word the analyzer
+  # dropped, whose position the phrase still keeps.
+  def skipped_words?
+    phrases.any? { |phrase| phrase.display_term.split.include?('?') }
+  end
+
+  # One row per field the record matched in, strongest first. A field holds
+  # every word that matched it, and the phrase, so its excerpt shows once.
+  def fields
+    @fields ||= scores.group_by { |score| score.match.field }
+                      .map { |_field, group| Field.new(match: group.first.match, scores: group) }
+                      .sort_by { |field| -field.points }
+  end
+
+  # The notes the table shows, in the order the legend lists them.
+  def forms
+    Match::FORM_NOTES.keys & rows.filter_map(&:form)
   end
 
   # The sentence an admin can pass on. Nil when nothing matched by word, as for
   # a browse with no search terms.
+  #
+  # A quoted search is scored as one phrase, with no per-word nodes at all, so
+  # the phrase alone has to carry the sentence then.
   def summary
-    return if words.empty?
+    return if words.empty? && phrases.empty?
+    return phrase_only_sentence if words.empty?
 
     # ", and" between two clauses too: a field label can hold "and" of its own.
-    clauses = words.map { |word| word_clause(word) }.to_sentence(two_words_connector: ', and ')
+    clauses = word_groups.map { |group| group_clause(group) }.to_sentence(two_words_connector: ', and ')
     sentence = "This appeared because #{clauses}."
     [sentence, phrase_sentence, strongest_sentence].compact.join(' ')
   end
 
   private
+
+    def rows
+      words.flat_map(&:matches) + phrases
+    end
+
+    def scores
+      words.flat_map { |word| word.matches.map { |match| Score.new(term: word.term, match: match) } } +
+        phrases.map { |match| Score.new(term: match.display_term, match: match) }
+    end
 
     def best_field_nodes
       collect(@tree) { |node| node['description'].to_s.start_with?(BEST_FIELD) }
@@ -112,19 +143,38 @@ class SearchExplanation
       matches = matches_in(node).sort_by { |match| -match.points }
       return if matches.empty?
 
-      term = (matches.find { |match| !match.word_form? } || matches.first).display_term
+      term = (matches.find { |match| !match.stem_variation? } || matches.first).display_term
       Word.new(term: term, matches: matches, points: node['value'].to_f)
     end
 
-    def word_clause(word)
-      "“#{word.term}” is in its #{word.matches.map(&:label).uniq.to_sentence}"
+    # Words that matched the same fields share one clause, so a four-word
+    # search does not repeat "is in its title and description fields" four times.
+    def word_groups
+      words.group_by { |word| field_labels_of(word).sort }.values
+    end
+
+    def field_labels_of(word)
+      word.matches.map { |match| label_for(match) }.uniq
+    end
+
+    def group_clause(group)
+      labels = field_labels_of(group.first)
+      terms = group.map { |word| "“#{typed(word.term)}”" }.to_sentence
+      "#{terms} #{group.one? ? 'is' : 'are'} in its #{labels.to_sentence} #{labels.one? ? 'field' : 'fields'}"
+    end
+
+    # Phrases come strongest first, so the first names the field that counted most.
+    def phrase_only_sentence
+      labels = phrases.map { |phrase| label_for(phrase) }.uniq
+      "This appeared because the words “#{typed(phrases.first.display_term)}” appear together in its " \
+        "#{labels.to_sentence} #{labels.one? ? 'field' : 'fields'}."
     end
 
     def phrase_sentence
       phrase = phrases.first
       return if phrase.nil?
 
-      "The words “#{phrase.display_term}” also appear together in its #{phrase.label}."
+      "The words “#{typed(phrase.display_term)}” also appear together in its #{label_for(phrase)} field."
     end
 
     def strongest_sentence
@@ -132,9 +182,9 @@ class SearchExplanation
       return if match.nil? || words.sum { |word| word.matches.size } + phrases.size < 2
 
       if match.phrase
-        "The words appearing together in its #{match.label} count most."
+        "The words appearing together in its #{label_for(match)} field count most."
       else
-        "The #{match.label} match counts most."
+        "The match in its #{label_for(match)} field counts most."
       end
     end
 end

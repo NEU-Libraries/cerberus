@@ -32,7 +32,22 @@ RSpec.describe 'SearchExplanations', type: :request do
 
     expect(response).to have_http_status(:ok)
     expect(response.body).to include('This appeared because “coastal” is in its title', 'counts most',
-                                     'Solr’s full explanation', 'id="explain-modal-frame"')
+                                     '(stem variation)', 'A field can be listed more than once',
+                                     'In the record', 'id="explain-modal-frame"')
+    expect(response.body).not_to include('Alternative title:', 'that the search skips')
+  end
+
+  # An excluded word never scores, so the explanation has to say it.
+  it 'explains a search that only excludes, without an empty table' do
+    sign_in admin
+    flat = SolrDocument.new('id' => 'uuid-1', 'score' => 1.0,
+                            '[explain]' => { 'value' => 1.0, 'description' => 'sum of:', 'details' => [] })
+    stub_solr([flat])
+
+    get search_explanation_path('uuid-1', q: 'NOT coastal')
+
+    expect(response.body).to include('This appeared because it does not contain “coastal”', 'browse order')
+    expect(response.body).not_to include('What matched', 'In the record', 'No word of')
   end
 
   # The search reruns narrowed to this one result, so its score is the one the
