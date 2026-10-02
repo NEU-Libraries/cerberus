@@ -225,6 +225,17 @@ would rebuild the walk without what it had already withdrawn. A container
 refuses while a member beneath it failed, so a failure leaves the path above it
 live, not half-withdrawn.
 
+### The top-level communities cannot be deleted
+
+The repository root and the People Community have no parent, and the whole
+tree hangs from them. Atlas refuses to withdraw, purge or move either one
+(`top_level_community`), on the API only: a developer at the console still can.
+`CommunitiesController` offers no Delete on either, and refuses the tombstone
+request before anything else. That order matters for the cascade, because
+`TombstoneCascadeJob` withdraws the container last. If the request reached the
+job, Atlas would refuse the root only after everything beneath it was gone. The
+Move tool refuses the root the same way (`Admin::ReparentController::ROOT_REFUSED`).
+
 ### There is no cascading restore
 
 On purpose. A restore that put everything back would have to tell this delete's

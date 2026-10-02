@@ -6,6 +6,8 @@
 module Tombstoning
   extend ActiveSupport::Concern
 
+  TOP_LEVEL_REFUSED = 'The top-level community holds the whole repository, so it cannot be deleted.'
+
   included do
     helper_method :chooses_removal_reason?
   end
@@ -46,8 +48,11 @@ module Tombstoning
     end
 
     def tombstone_refusal(response)
-      if tombstone_refusal_code(response) == 'invalid_reason'
+      case tombstone_refusal_code(response)
+      when 'invalid_reason'
         "#{solr_type} could not be deleted. Choose one of the listed removal reasons."
+      when 'top_level_community'
+        TOP_LEVEL_REFUSED
       else
         "#{solr_type} can't be deleted while it still contains live members. Withdraw or move them first."
       end

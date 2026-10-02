@@ -37,7 +37,11 @@ class CommunitiesController < CatalogController
   end
 
   # cascade is the confirmation's flag for a container that is not empty.
+  # The top-level refusal must come first: Atlas refuses the root itself, but
+  # only after the cascade has withdrawn everything beneath it.
   def tombstone
+    return refuse_top_level_tombstone if top_level?(require_resource!(AtlasRb::Community.find(params[:id])))
+
     params[:cascade].present? ? perform_cascade_tombstone! : perform_tombstone!
   end
 
@@ -101,6 +105,22 @@ class CommunitiesController < CatalogController
     # on a community that then fails to delete.
     def deletable?(showcase_uuids)
       @response.documents.empty? && showcase_uuids.empty?
+    end
+
+    # Before offer_cascade_delete, which reads @can_tombstone.
+    def assign_show_abilities!
+      super
+      @can_tombstone &&= !top_level?(@community)
+    end
+
+    # The repository root or the People Community: the two Communities with no
+    # parent, and the two the whole tree hangs from.
+    def top_level?(community)
+      Array(community.ancestors).empty?
+    end
+
+    def refuse_top_level_tombstone
+      redirect_back_or_to(community_path(params[:id]), alert: Tombstoning::TOP_LEVEL_REFUSED)
     end
 
     # The synthetic row is not in Solr, so raise the response total by one or
