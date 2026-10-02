@@ -97,6 +97,36 @@ RSpec.describe SearchExplanation do
     expect(explanation.forms).to eq(%i[stem_variation alternative_title plain_text])
   end
 
+  # One best-field node per word, as edismax builds them.
+  def word_node(term, fields)
+    weights = fields.map do |field|
+      { 'value' => 1.0, 'description' => "weight(#{field}:#{term} in 3) [SchemaSimilarity], result of:" }
+    end
+    { 'value' => 1.0, 'description' => 'max plus 0.01 times others of:', 'details' => weights }
+  end
+
+  it 'gives the words that matched the same fields one clause' do
+    tree = { 'value' => 3.0, 'description' => 'sum of:', 'details' => [
+      word_node('how', %w[title_tsim description_tsim]), word_node('we', %w[title_tsim]),
+      word_node('respond', %w[title_tsim description_tsim])
+    ] }
+
+    expect(described_class.new(tree).summary).to start_with(
+      'This appeared because “how” and “respond” are in its title and description fields, ' \
+      'and “we” is in its title field.'
+    )
+  end
+
+  # Lucene prints a dropped stop word's kept position as "?".
+  it 'notices a phrase with a skipped word in it' do
+    phrase = { 'value' => 1.0, 'description' => 'max plus 0.01 times others of:', 'details' => [
+      { 'value' => 1.0, 'description' => 'weight(title_tsim:"how we respond ? disaster" in 3) [SchemaSimilarity]' }
+    ] }
+
+    expect(described_class.new(phrase).skipped_words?).to be(true)
+    expect(described_class.new(tree('explain_two_words')).skipped_words?).to be(false)
+  end
+
   it 'has no sentence when nothing matched by word' do
     expect(described_class.new({ 'value' => 1.0, 'description' => 'MatchAllDocsQuery', 'details' => [] }).summary)
       .to be_nil

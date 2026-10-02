@@ -71,6 +71,12 @@ class SearchExplanation
     rows.max_by(&:points)
   end
 
+  # Whether a phrase holds a gap Lucene prints as "?": a stop word the analyzer
+  # dropped, whose position the phrase still keeps.
+  def skipped_words?
+    phrases.any? { |phrase| phrase.display_term.split.include?('?') }
+  end
+
   # One row per field the record matched in, strongest first. A field holds
   # every word that matched it, and the phrase, so its excerpt shows once.
   def fields
@@ -90,7 +96,7 @@ class SearchExplanation
     return if words.empty?
 
     # ", and" between two clauses too: a field label can hold "and" of its own.
-    clauses = words.map { |word| word_clause(word) }.to_sentence(two_words_connector: ', and ')
+    clauses = word_groups.map { |group| group_clause(group) }.to_sentence(two_words_connector: ', and ')
     sentence = "This appeared because #{clauses}."
     [sentence, phrase_sentence, strongest_sentence].compact.join(' ')
   end
@@ -137,9 +143,20 @@ class SearchExplanation
       Word.new(term: term, matches: matches, points: node['value'].to_f)
     end
 
-    def word_clause(word)
-      labels = word.matches.map { |match| label_for(match) }.uniq
-      "“#{typed(word.term)}” is in its #{labels.to_sentence} #{labels.one? ? 'field' : 'fields'}"
+    # Words that matched the same fields share one clause, so a four-word
+    # search does not repeat "is in its title and description fields" four times.
+    def word_groups
+      words.group_by { |word| field_labels_of(word).sort }.values
+    end
+
+    def field_labels_of(word)
+      word.matches.map { |match| label_for(match) }.uniq
+    end
+
+    def group_clause(group)
+      labels = field_labels_of(group.first)
+      terms = group.map { |word| "“#{typed(word.term)}”" }.to_sentence
+      "#{terms} #{group.one? ? 'is' : 'are'} in its #{labels.to_sentence} #{labels.one? ? 'field' : 'fields'}"
     end
 
     def phrase_sentence
