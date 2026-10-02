@@ -104,6 +104,14 @@ RSpec.describe 'The maintenance window', type: :request do
       expect(response).to have_http_status(:ok)
     end
 
+    it 'shows when it opened in local time, not as a raw timestamp' do
+      sign_in admin
+      get '/admin/maintenance'
+
+      expect(response.body).to include('Aug 25, 2026 · 05:14 EDT')
+      expect(response.body).not_to include('>2026-08-25T09:14:00Z<')
+    end
+
     it 'lets an admin close it' do
       allow(MaintenanceMode).to receive(:close!).and_return(AtlasRb::Mash.new('read_only' => false))
       sign_in admin

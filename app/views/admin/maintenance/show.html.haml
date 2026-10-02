@@ -23,7 +23,7 @@
         %dd= source == 'deploy' ? 'The deploy orchestrator' : 'An operator'
         - if @window.since.present?
           %dt.text-uppercase.small.text-body-secondary Since
-          %dd= @window.since
+          %dd= maintenance_since(@window.since)
         - if @window.message.present?
           %dt.text-uppercase.small.text-body-secondary Message
           %dd= @window.message
