@@ -177,7 +177,7 @@ describe 'audit_events/_history.html.haml' do
     end
 
     it 'gives each its own Font Awesome icon and does not fall through to generic' do
-      expect(rendered).to have_css('.audit-event--reparent .audit-event__action-icon.fa-folder-tree')
+      expect(rendered).to have_css('.audit-event--reparent .audit-event__action-icon.fa-sitemap')
       expect(rendered).to have_css('.audit-event--link .audit-event__action-icon.fa-link')
       expect(rendered).to have_css('.audit-event--unlink .audit-event__action-icon.fa-link-slash')
       expect(rendered).not_to have_css('tr.audit-event--generic')
@@ -187,6 +187,26 @@ describe 'audit_events/_history.html.haml' do
       expect(rendered).to have_css('.audit-event__detail-summary', text: 'moved to col987')
       expect(rendered).to have_css('.audit-event__detail-summary', text: 'to col456')
       expect(rendered).to have_css('.audit-event__detail-summary', text: 'from col456')
+    end
+  end
+
+  context 'with a lapsed embargo recorded by the nightly job' do
+    before do
+      render_with(events: [event(action: 'release_embargo', change_type: 'permissions',
+                                 payload: { 'release_date' => '2026-05-26' })])
+    end
+
+    it 'renders "Embargo released" on the permissions tone, not the generic fallback' do
+      expect(rendered).to have_css('.audit-event--update .audit-event__action-label', text: 'Embargo released')
+      expect(rendered).to have_css('.audit-event__action-icon.fa-lock-open')
+      expect(rendered).not_to have_css('tr.audit-event--generic')
+    end
+
+    # The row carries no before/after snapshot, so there is no diff to open.
+    it 'offers no View link and no payload summary' do
+      expect(rendered).to have_css('.audit-event__change-type', text: 'Permissions')
+      expect(rendered).not_to have_link('View')
+      expect(rendered).not_to have_css('.audit-event__detail-summary')
     end
   end
 

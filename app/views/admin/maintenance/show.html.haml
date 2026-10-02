@@ -8,10 +8,6 @@
       %i.fa-solid.fa-screwdriver-wrench{'aria-hidden' => 'true'}
       Maintenance window
       %span.admin-registry__count= open_now ? 'Read-only' : 'Accepting writes'
-    .admin-registry__head-actions
-      %span.admin-registry__subtitle
-        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
-        Admin-only
 
   .p-3
     %p.text-body-secondary
@@ -27,7 +23,7 @@
         %dd= source == 'deploy' ? 'The deploy orchestrator' : 'An operator'
         - if @window.since.present?
           %dt.text-uppercase.small.text-body-secondary Since
-          %dd= @window.since
+          %dd= maintenance_since(@window.since)
         - if @window.message.present?
           %dt.text-uppercase.small.text-body-secondary Message
           %dd= @window.message

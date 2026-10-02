@@ -17,7 +17,7 @@
 # `impressions` via HumanImpressionsQuery instead of waiting on a rollup that
 # was never going to exist for this shape.
 class ImpressionsReport
-  ACTIONS      = %w[view download].freeze # stream deferred (no Range endpoint)
+  ACTIONS      = %w[view download stream].freeze
   DEFAULT_DAYS = 90
   TOP_LIMIT    = 10
   TITLE_FIELD  = 'title_tsim'
@@ -46,12 +46,16 @@ class ImpressionsReport
     ACTIONS.index_with { |action| series(action).values.sum }
   end
 
-  # chartkick-ready { day => count } for one action, honouring the segment
+  # chartkick-ready { Date => count } for one action, honouring the segment
   # and any active scope.
+  #
+  # Grouped on the leaf's own day_sql, which yields Dates: the :all leaf holds
+  # UTC hours, and grouped raw its keys would be times that miss every Date
+  # lookup in the chart's zero-fill.
   def series(action)
     scoped_leaf = leaf.for_action(action).in_range(range)
     scoped_leaf = scoped_leaf.where(noid: scope.overview_noids) if scoped?
-    scoped_leaf.group(:day).order(:day).sum(sum_column)
+    scoped_leaf.group(leaf.day_sql).order(leaf.day_sql).sum(sum_column)
   end
 
   # { day => unique non-bot visitors } (human only; §10) — repo-wide rollup

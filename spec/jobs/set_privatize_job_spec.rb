@@ -88,15 +88,51 @@ RSpec.describe SetPrivatizeJob do
     expect(notice.subject).to include('problems')
   end
 
-  # A lock conflict is transient and the sweep is idempotent, so it belongs to
-  # retry_on rather than to the report. retry_on handles the exception, so
-  # perform_now never propagates it — the observable effect is that no notice is
-  # written, because perform aborted before it could report.
-  it 'does not record a stale-lock conflict as a permanent failure' do
-    stub_contents('w1')
-    allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_raise(AtlasRb::StaleResourceError.new('conflict'))
+  # A lock conflict is transient, so it is retried on the one Work. Not through
+  # retry_on: a re-run skips what is already private, and its ledger entry
+  # would leave those Works out.
+  describe 'a lock conflict' do
+    before do
+      stub_contents('w1')
+      allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: ['public']))
+    end
 
-    expect { run }.not_to change(AdminNotice, :count)
+    it 'is retried in place, and the Work is still listed' do
+      calls = 0
+      allow(AtlasRb::Resource).to receive(:set_permissions) do
+        calls += 1
+        raise AtlasRb::StaleResourceError, 'conflict' if calls == 1
+      end
+
+      run
+
+      notice = AdminNotice.find_by(kind: 'set_privatize')
+      expect(notice.detail(:changed)).to eq([{ 'noid' => 'w1', 'read_before' => ['public'] }])
+      expect(notice.detail(:failures)).to eq([])
+    end
+
+    it 'is named as a failure once the attempts run out' do
+      allow(AtlasRb::Resource).to receive(:set_permissions).and_raise(AtlasRb::StaleResourceError, 'conflict')
+
+      run
+
+      expect(AtlasRb::Resource).to have_received(:set_permissions).exactly(described_class::LOCK_ATTEMPTS).times
+      expect(AdminNotice.find_by(kind: 'set_privatize').detail(:failures)).to eq(['Work w1: conflict'])
+    end
+  end
+
+  # Making the Set public again does not put a Work's audience back, so the
+  # ledger keeps each Work it changed with the audience it had.
+  it 'lists each Work it made private with its audience before, and not the ones already private' do
+    stub_contents('w1', 'w2')
+    allow(AtlasRb::Resource).to receive(:permissions).with('w1')
+                                                     .and_return(envelope(read: ['public', 'northeastern:drs:x']))
+    allow(AtlasRb::Resource).to receive(:permissions).with('w2').and_return(envelope(read: ['northeastern:drs:x']))
+
+    run
+
+    expect(AdminNotice.find_by(kind: 'set_privatize').detail(:changed))
+      .to eq([{ 'noid' => 'w1', 'read_before' => ['public', 'northeastern:drs:x'] }])
   end
 
   it 'does nothing when the set has gone' do

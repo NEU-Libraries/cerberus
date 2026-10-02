@@ -11,6 +11,7 @@ class WorksController < ApplicationController
   include WorkChangeRequest
   include WorkCaptions
   include WorkStreamingOnly
+  include WorkShowcaseCategory
   include WorkDerivativeWidths
   include UploadStaging
   include RecordsImpressions
@@ -35,9 +36,11 @@ class WorksController < ApplicationController
   DERIVATIVE_DEFAULT_FAILED = 'File uploaded — please review the metadata. The collection\'s download ' \
                               'restrictions could not be applied to it; contact DRS staff before sharing it.'
   UNSUPPORTED_AV = 'DRS streams H.264/AAC video and AAC/MP3 audio — please convert your file first.'
+  TERMS_REQUIRED = 'Please accept the Terms of Participation to deposit a file.'
 
   before_action :authorize_show!, only: [:downloads, :manifest]
-  authorize_resource_writes!(extra_edit: %i[metadata update_metadata request_change upload add_file])
+  authorize_resource_writes!(extra_edit: %i[metadata update_metadata request_change upload add_file remove_caption
+                                            restore_caption])
   before_action :reject_if_in_progress, only: [:edit]
   after_action :record_view_impression, only: :show
 
@@ -56,6 +59,8 @@ class WorksController < ApplicationController
     deny_if_unfinished!(@work)
     flash.now[:alert] = in_progress_notice(@work) if @work.in_progress
     prepare_show_view
+    # After prepare_show_view, which sets @can_edit.
+    load_work_analytics
   end
 
   def tombstone
@@ -72,7 +77,10 @@ class WorksController < ApplicationController
   end
 
   def downloads
-    @files = AtlasRb::Work.assets(params[:id], nuid: viewer_nuid)
+    nuid = viewer_nuid
+    reads = parallel_atlas_reads(files:     -> { AtlasRb::Work.assets(params[:id], nuid: nuid) },
+                                 file_sets: -> { AtlasRb::Work.file_sets(params[:id], nuid: nuid) })
+    @files = page_ordered_files(reads)
     render layout: false
   end
 
@@ -80,12 +88,15 @@ class WorksController < ApplicationController
   # parent segment, already :edit-gated by authorize_destination!.
   def new
     @work = Work.new
-    @parent = require_resource!(AtlasRb::Collection.find(@destination_id))
+    @parent = require_resource!(destination_collection)
 
     # Required: without it form_tag posts back to /collections/:id/works/new,
     # which routes nowhere for POST, and the deposit 404s on submit.
     @create_path = child_create_path('works')
-    @publish_targets = publish_offered? ? publish_targets : {}
+    @publishing_for = workspace_owner if publishing_for_someone_else?
+    # Publishing for someone else needs the proxy radio; without it the server
+    # would refuse the promotion, so the form must not offer it.
+    @publish_targets = publish_offered? && (@publishing_for.nil? || offers_proxy_deposit?) ? publish_targets : {}
   end
 
   def edit
@@ -96,14 +107,16 @@ class WorksController < ApplicationController
     # The Work's own assets, not the staged upload #metadata probes: by edit
     # time the content Blob has landed and the staged file is long gone.
     assets = AtlasRb::Work.assets(params[:id], nuid: viewer_nuid)
-    load_streaming_only!(offered: StreamingOnly.applicable?(assets))
+    load_streaming_only!(tiers: StreamingOnly.tiers_for(assets))
     load_caption!(offered: CaptionTrack.applicable?(assets), files: assets)
+    load_showcase_category!(@work)
     breadcrumbs(params[:id], editing: true)
   end
 
   def create
     file = params[:binary]
 
+    return redirect_to(new_child_path('work'), alert: TERMS_REQUIRED) unless params[:terms_accepted] == '1'
     return redirect_to(new_child_path('work'), alert: UNSUPPORTED_AV) if unsupported_av?(file)
 
     create_at_destination(file)
@@ -116,8 +129,9 @@ class WorksController < ApplicationController
   # with disjoint fields. See docs/deposit.md.
   def update
     handle_metadata_update
-    apply_streaming_only!
+    apply_streaming_only! { StreamingOnly.tiers_for(AtlasRb::Work.assets(params[:id], nuid: viewer_nuid)) }
     apply_caption!
+    apply_showcase_category!
   end
 
   def metadata
@@ -135,9 +149,9 @@ class WorksController < ApplicationController
     # Probe the STAGED file, never the Work's assets: ContentCreationJob may
     # still be in flight here, and Atlas would hide the toggle and the caption
     # field from exactly the deposits that want them.
-    video = StagedVideoProbe.call(work_id: params[:id])
-    load_streaming_only!(offered: video)
-    load_caption!(offered: video)
+    tiers = StagedMediaProbe.call(work_id: params[:id])
+    load_streaming_only!(tiers: tiers)
+    load_caption!(offered: tiers.any?)
   end
 
   def update_metadata
@@ -147,7 +161,7 @@ class WorksController < ApplicationController
     # bumps the lock, racing save_descriptive! into StaleResourceError. Specs
     # never see it — the test adapter does not run the job inline.
     process_derivative_widths
-    apply_streaming_only!
+    apply_streaming_only! { StagedMediaProbe.call(work_id: params[:id]) }
     # Before the confirm, so the caption Blob queues behind the deposit's own
     # finalization rather than ahead of it.
     apply_caption!
@@ -192,10 +206,10 @@ class WorksController < ApplicationController
     def prepare_show_view
       reads = parallel_show_reads
       @mods = browsable_mods(reads[:mods])
-      @files = reads[:files]
+      @files = page_ordered_files(reads)
       @scholar = GoogleScholarMetadata.for(work: @work, permissions: @permissions, files: @files)
       @av_file = MediaRemux.playable_file(@files)
-      @caption = CaptionTrack.for(@files)
+      @captions = CaptionTrack.all(@files)
       # On the request thread, never in a worker: the gate is the search
       # service, and a worker holds no database connection.
       @associations = WorkAssociations.call(associations:   reads[:associations],
@@ -204,6 +218,16 @@ class WorksController < ApplicationController
       assign_show_abilities!
       ancestor_trail(@work.ancestors, item: @work)
       add_breadcrumb_for(@work.id, 'Work', @work.title)
+    end
+
+    # The show page's Analytics tab, for the same :edit audience as a
+    # container's. A Work scope resolves to its own noid, so this costs the
+    # rollup reads and no Solr query. See docs/analytics.md.
+    def load_work_analytics
+      return unless @can_edit
+
+      item = { noid: @work.id, uuid: @work.valkyrie_id, klass: 'Work', title: @work.title }
+      @work_analytics = ImpressionsReport.new(scope: ImpressionScope.new(item:))
     end
 
     # The facet list comes from the live Blacklight config rather than a second
@@ -216,6 +240,10 @@ class WorksController < ApplicationController
     # mods deliberately carries no nuid — Current.nuid, the real user, gates it.
     # The view-as NUID is resolved here rather than inside a task because the
     # workers must not touch ActiveRecord. See docs/deposit.md.
+    def page_ordered_files(reads)
+      PageOrder.sort(reads[:files], reads[:file_sets])
+    end
+
     def parallel_show_reads
       nuid = viewer_nuid
       parallel_atlas_reads(

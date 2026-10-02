@@ -13,11 +13,14 @@ Source files:
 ## Seeding a Work's IIIF assets
 
 `IiifAssetsJob` seeds from one staged source: an image, or a PDF whose first
-page `MasterJp2` rasterizes. The PDF may have been deposited directly or
-converted from Word or PowerPoint by `PdfRenditionJob`.
+page `OriginalJp2` rasterizes. `IngestDispatch` sends an image or a deposited PDF
+straight here. `PdfRenditionJob` sends the PDF it converts from Word or
+PowerPoint. Nothing sends a video's frame: see the next section.
 
-`MasterJp2` mints two JP2s — a capped display copy and a full-resolution copy.
-This job PATCHes their Delegate URLs to Atlas.
+`OriginalJp2` mints two JP2s: an open copy capped at 500 pixels wide, and a gated
+full-resolution copy. This job PATCHes their Delegate URLs to Atlas, one at a
+time. The Delegates attach to the same FileSet, and parallel PATCHes race
+Atlas's optimistic lock on it.
 
 ### Three asset families, each on its own pipe
 
@@ -38,8 +41,8 @@ caller treats nil as "no thumbnail" and falls back to the type icon.
 
 `service_file` does double duty. It is the deep-zoom source, and it is the
 anchor from which `DepositDerivativesJob` later recovers the gated base for
-opt-in S/M/L. `persist_service!` writes it onto the single content FileSet, and
-skips when that FileSet is not listed yet.
+opt-in S/M/L. `persist_service!` writes it onto the Work's first FileSet, and
+skips when no FileSet is listed yet.
 
 ### Who passes widths, and who does not
 
@@ -48,8 +51,9 @@ skips when that FileSet is not listed yet.
 - **The single-file deposit** chooses sizes on the metadata page, *after* this
   job has run. `DepositDerivativesJob` handles them, recovering the gated base
   from the `service_file` Delegate this job set.
-- **Callers that pass nothing** at seed time — deposit, XML loader, multipage
-  page 1 — get thumbnails and `service_file` only.
+- **Callers that pass nothing** at seed time get thumbnails and `service_file`
+  only. These are `IngestDispatch` (deposit and XML loader), the multipage
+  loader's page 1, `PdfRenditionJob` and `MediaRenditionJob`.
 - **A replace passes no widths either**, but it is not a first seed. The sizes
   were chosen once, at deposit, and only the Work's stored rendition URIs still
   record them, so `existing_widths` reads them back. That keeps the download
@@ -59,10 +63,38 @@ skips when that FileSet is not listed yet.
 
 `refresh:` distinguishes "seed the assets" from "re-derive them".
 
-The existing-thumbnail guard is what makes a *deposit* idempotent under Solid
-Queue retries. But that same guard reads as "already done" on a Work whose bytes
-have since been replaced. That is exactly when the assets most need rebuilding.
-`refresh: true` is how a replace or rollback says the guard does not apply.
+The existing-thumbnail guard makes a *deposit* idempotent under Solid Queue
+retries. But the same guard reads as "already done" on a Work whose bytes have
+since been replaced, which is exactly when the assets most need rebuilding. A
+replace or rollback passes `refresh: true` to skip the guard.
+
+## Audio and video without a poster
+
+`MediaRenditionJob` extracts no poster frame. It once took the frame at three
+seconds, and on digitised film that is often leader, white or black, so the
+poster read as a blank or black screen. A recording's poster and thumbnail now
+come only from a depositor or curator, through the Thumbnail field on the edit
+form (`Thumbable`). A supplied poster is the Work's thumbnail, so it shows in the
+player, in list and gallery results, in Sets and in associations alike.
+
+Without one, an audio or video Work's player shows the placeholder mark,
+`app/assets/images/av-placeholder.svg`. It is the Northeastern notched
+monogram, from the brand asset `NU_Notched-N_wordmark_K`, recoloured to
+`$gray-700` on black. The brand approves black, white and red only; the muted
+grey is a deliberate exception, so a placeholder does not read as a feature.
+
+`ThumbnailsHelper#av_poster_src` gives the show page's player the mark when the
+Work has no poster. Every recording mounts on a `<video>` element, audio in
+video.js's `audioPosterMode`, so every player shows a picture, as v1's podcast
+pages did. A bare `<audio>` was never the slim bar it looked like in the
+template: video.js wraps it in a fluid 16:9 box, which read as a black screen.
+
+The mark is for the show page only. A list or gallery tile, a Set row or an
+association tile without a thumbnail keeps the type icon, as every other type
+does, so the mark never stands in for a picture across a page of results.
+
+The mark is a fallback at render time. It is never written to Atlas, so a
+poster added later replaces it everywhere with no clean-up.
 
 ## Attaching a caption track
 
@@ -72,10 +104,17 @@ wire. It stages to disk first (`UploadStaging`) for the same reason.
 
 ### It replaces rather than accumulates
 
-A Work has one caption track. A second upload rewrites the bytes of the Blob
-already there. `Blob.update` appends an OCFL revision and preserves the NOID.
-The superseded captions therefore stay retrievable, and every page already
-pointing at that Blob keeps working. Only the first upload creates.
+A Work has one caption track per language. An upload in a language the Work
+already has rewrites the bytes of that language's Blob. `Blob.update` appends an
+OCFL revision and preserves the NOID. The superseded captions therefore stay
+retrievable, and every page already pointing at that Blob keeps working. Only
+the first upload in each language creates, and it passes `language:` and
+`track_label:` to `Blob.create`.
+
+A caption with no recorded language counts as English, so the first English
+upload onto such a Work replaces it and writes the language onto it. A job
+queued with the older four-argument signature defaults to English for the same
+reason.
 
 ### Waiting for the primary file is load-bearing
 
@@ -86,26 +125,28 @@ Atlas gives every content Blob the role `original_file`, so a caption satisfies
 the `PrimaryFilePresence` test that `ConfirmDepositJob` waits on. Attaching a
 caption first would let a deposit complete around captions alone. Atlas builds
 the Work's METS structMap at completion, recording a preservation structure that
-omits the video.
+omits the recording.
 
-Waiting also orders this write after the deposit's own, so the two Blob writers
-do not race.
+Waiting also orders this write after the deposit's own. It does not remove the
+race entirely: a Blob write bumps the Work's optimistic lock, so the job still
+retries on `AtlasRb::StaleResourceError`.
 
 ### What happens when the wait runs out
 
 Exhausting the retry budget leaves the Work with no captions, and says so in the
-log. That is the right outcome. A Work whose video never landed has nothing to
-caption, and the deposit itself is already on the needs-attention list for the
-missing video.
+log. That is the right outcome. A Work whose recording never landed has nothing
+to caption. `ConfirmDepositJob` has already left that deposit in progress, on the
+needs-attention list.
 
 ### Attach-only
 
 Like `AddFileJob`, this job runs no derivative enrichment. A caption upload
 leaves the Work's thumbnail, poster and player untouched.
 
-## Streaming-only video
+## Streaming-only audio and video
 
-`StreamingOnly` decides whether a Work's video may be played but not taken away.
+`StreamingOnly` decides whether a Work's audio or video may be played but not
+taken away.
 
 It is a **licensing affordance, not a security boundary**. Anyone who can play a
 file can capture it, and nothing here pretends otherwise. What it owes the
@@ -120,20 +161,26 @@ The repository therefore offers none of these:
 
 ### It is expressed in vocabulary Atlas already has
 
-There is no flag of its own. A video Blob is reachable by two routes that are
-gated differently:
+There is no flag of its own. An audio or video Blob is reachable by two routes
+that are gated differently:
 
 | Route | Gated by |
 |---|---|
 | `MediaController` — playback | the Work's own read ACL |
 | `DownloadsController` — download | the Work's read ACL **and** the per-asset derivative gate |
 
-So "may I watch this" is a property of the Work, and "may I keep a copy" is a
-property of the `video` tier. Restricting that tier is the whole feature.
+So "may I play this" is a property of the Work, and "may I keep a copy" is a
+property of the Work's media tier. Atlas keys that tier by media type, `audio`
+or `video`. Restricting it is the whole feature.
 
-An absent `video` key means the tier rides the Work's own visibility, which is
-what "not streaming only" means. Turning the toggle off therefore **removes**
-the key rather than setting it public.
+An absent key means the tier rides the Work's own visibility, which is what
+"not streaming only" means. Turning the toggle off therefore **removes** the key
+rather than setting it public.
+
+Only the Work's own media type is written. `tiers_for` reads it off the Work's
+content Blobs. A Collection's Sentinel default writes these same keys, and the
+Permissions tab lists every key present, so writing both on every Work would
+show an "Audio" limit on a video Work.
 
 ### Computing the audience
 
@@ -159,7 +206,7 @@ consult.
 
 ### Reading the toggle back
 
-`on?` is an exact match on purpose. A `video` tier written by something else,
+`on?` is an exact match on purpose. A media tier written by something else,
 such as a Collection's Sentinel default, leaves the toggle reading "off".
 Turning it off can therefore never quietly widen a restriction this feature did
 not impose.
@@ -183,7 +230,10 @@ so it is not used.
 
 ### When the toggle is offered at all
 
-`applicable?` asks whether the Work has a video Blob. Both the deposited master
-and any remuxed MP4 are `video/*`. A Work therefore matches from the moment its
+`applicable?` asks whether the Work has an audio or video Blob. A remuxed MP4
+shares its original's media type. A Work therefore matches from the moment its
 content lands, not only once it is playable. Delegates — the image tiers — carry
 a `uri` and are not content.
+
+At deposit the Blob may still be in flight, so the metadata page asks
+`StagedMediaProbe` instead, which reads the staged upload's media type.

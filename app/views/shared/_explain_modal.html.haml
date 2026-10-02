@@ -1,0 +1,16 @@
+-# The shared "Why this result?" dialog, once per results page. Each result's
+-# magnifying-glass-chart button passes its own URL; the body loads only when
+-# the dialog opens. Admins and delegated admins only, as the action is.
+- if effective_user&.admin? || effective_user&.admin_delegate?
+  .modal#explainModal{tabindex: '-1', 'aria-labelledby' => 'explainModalLabel', 'aria-hidden' => 'true',
+                      data: { controller: 'explain-modal' }}
+    .modal-dialog.modal-dialog-centered.modal-lg.modal-dialog-scrollable
+      .modal-content{style: 'min-height: 12rem;'}
+        .modal-header
+          %h2.modal-title.h5#explainModalLabel Why this result?
+          %button.btn-close{type: 'button', 'data-bs-dismiss' => 'modal', 'aria-label' => 'Close'}
+        .modal-body.p-0
+          %turbo-frame#explain-modal-frame{data: { 'explain-modal-target' => 'frame' }}
+            .p-4.text-center
+              .spinner-border{role: 'status'}
+                %span.visually-hidden Loading…

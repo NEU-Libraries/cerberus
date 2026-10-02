@@ -18,6 +18,20 @@ module LoadsHelper
     'previewing'              => 'fa-eye'
   }.freeze
 
+  # A load's destination as the librarians read it: "Title (PID)", linked. The
+  # report polls every few seconds, so the title is cached per collection; a
+  # title that cannot be read falls back to the PID alone.
+  def load_destination(noid)
+    return '—' if noid.blank?
+
+    title = Rails.cache.fetch("load-destination-title/#{noid}", expires_in: 10.minutes) do
+      AtlasRb::Collection.find(noid)&.dig('title').presence
+    end
+    link_to(title ? "#{title} (#{noid})" : noid, collection_path(noid), class: 'text-decoration-none')
+  rescue AtlasRb::ResourceError, Faraday::Error, JSON::ParserError
+    link_to(noid, collection_path(noid), class: 'text-decoration-none')
+  end
+
   def ingest_status_icon(status)
     STATUS_ICONS.fetch(status.to_s, 'fa-circle')
   end

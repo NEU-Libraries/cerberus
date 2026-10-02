@@ -1,0 +1,8 @@
+-# A lapse recorded by the nightly job. It rides the permissions change_type
+-# with no before/after snapshot, so the View cell stays empty.
+%tr.audit-event.audit-event--update
+  %td= audit_event_timestamp(event)
+  %td= audit_event_action_badge(event)
+  %td.audit-event__detail-cell= audit_event_detail_cell(event)
+  %td= audit_event_who(event)
+  %td.audit-event__view-cell= audit_event_view_cell(event, resource_id)

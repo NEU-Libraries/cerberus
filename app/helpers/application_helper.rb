@@ -22,6 +22,7 @@ module ApplicationHelper
     nuid_sign_in_available? ? atlas_login_path : new_user_session_path
   end
 
+  # One icon per concept, shared across the site. See docs/design.md.
   def document_type_icon(klass_type)
     case klass_type
     when 'Community'  then 'fa-users'
@@ -42,13 +43,16 @@ module ApplicationHelper
   # anything else — including ahead of "Incomplete", which is a maintenance fact
   # about a record anyone can still read, and which has surfaces of its own.
   #
-  # Then "Featured" for curated showcases; "People" for the synthetic Faculty &
+  # Then "Empty" for a showcase listed to an admin before it holds anything, so
+  # it does not read as a browsable Featured collection; "Featured" for curated
+  # showcases; "People" for the synthetic Faculty &
   # Staff browse row (a browse-to-many, not an individual); else the document's
   # resource type.
   def pill_label(document)
     return 'In progress' if document.try(:in_progress?)
     return 'Embargoed' if document.try(:embargoed?)
     return 'Incomplete' if document.try(:incomplete?)
+    return 'Empty' if document.try(:empty_showcase?)
     return 'Featured' if document.try(:featured?)
     return 'People' if document.try(:people_browse?)
 

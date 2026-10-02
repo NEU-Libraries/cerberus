@@ -20,9 +20,10 @@
             %i.fa-solid.fa-plus.me-1{ 'aria-hidden' => 'true' }
             Deposit
 
--# Multi-account switcher — only for a person whose NUID holds more than one
--# account. Full-width above the workspace/published split.
-- if @accounts.to_a.size > 1
+-# Every signed-in person gets the card: with one account it shows the email and
+-# groups for troubleshooting, and with more it is the switcher. Full-width above
+-# the workspace/published split.
+- if @accounts.present?
   = render 'accounts', accounts: @accounts
 
 -# Deposits started and never confirmed. Above the split because these are the
@@ -128,6 +129,7 @@
 -# Programmatic access — a personal-access token for the Atlas API, shown only to
 -# members of the API group. Full-width below the workspace/published split; the
 -# initial (no-token) state, which AtlasTokensController later swaps in place.
-- if current_user&.member_of?(Permissions::API_GROUP)
+-# Hidden while impersonating: a token is minted for the real person, not the target.
+- if effective_user&.member_of?(Permissions::API_GROUP) && !impersonating?
   .mt-4
     = render 'programmatic_access', token: nil, notice: nil

@@ -31,7 +31,7 @@
             (fragment = @document.highlight_field('full_text_tsim').find(&:present?)) %>
         <div class="full-text-match">
           <div class="full-text-match__label">Full Text Match</div>
-          <div class="full-text-match__snippet">… <%= sanitize(fragment, tags: %w[em]) %> …</div>
+          <div class="full-text-match__snippet mb-2">… <%= sanitize(fragment, tags: %w[em]) %> …</div>
         </div>
       <% end %>
 
@@ -60,7 +60,7 @@
         <% end %>
         <%# klass_type (string), not klass: in this template's scope a bare
             `Collection` is ViewComponent::Collection, not the app model. %>
-        <% if helpers.current_user&.curates_sets? && %w[Work Collection].include?(@document.klass_type) %>
+        <% if helpers.effective_user&.curates_sets? && %w[Work Collection].include?(@document.klass_type) %>
           <a href="#add-to-set-<%= @document.to_param %>"
              class="btn btn-sm btn-link p-0 me-2"
              role="button"
@@ -79,9 +79,10 @@
           <span class="visually-hidden">Report a problem</span>
           <i class="fa-regular fa-comment-dots" aria-hidden="true"></i>
         <% end %>
+        <%= helpers.render 'shared/explain_button', document: @document %>
         <%= helpers.document_status_icons(@document) %>
       </div>
-      <% if helpers.current_user&.curates_sets? && %w[Work Collection].include?(@document.klass_type) %>
+      <% if helpers.effective_user&.curates_sets? && %w[Work Collection].include?(@document.klass_type) %>
         <%= render 'sets/picker_modal',
                    kind: @document.klass_type.downcase,
                    noid: @document.to_param %>

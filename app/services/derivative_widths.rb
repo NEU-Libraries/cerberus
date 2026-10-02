@@ -43,7 +43,7 @@ class DerivativeWidths < ApplicationService
 
     def range_error
       Result.new(widths: {}, error: 'Each size must be a whole number between 1 and ' \
-                                    "#{@longest_edge} pixels (the master image's longest edge).")
+                                    "#{@longest_edge} pixels (the original image's longest edge).")
     end
 
     def ordering_error

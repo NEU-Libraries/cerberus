@@ -186,6 +186,9 @@ RSpec.describe 'Admin::Impressions', type: :request do
       allow(Blacklight.default_index).to receive(:search)
         .with(hash_including(fq: ['internal_resource_tesim:Work', 'read_access_group_ssim:public', *scope_fq]))
         .and_return(instance_double(Blacklight::Solr::Response, total: 150))
+      allow(Blacklight.default_index).to receive(:search)
+        .with(hash_including(fq: scope_fq, 'json.facet': '{"total":"sum(storage_bytes_ls)"}'))
+        .and_return({ 'facets' => { 'total' => 3.5e9 } })
     end
 
     it 'counts the whole repository when unscoped, ignoring the date range and segment' do
@@ -195,7 +198,7 @@ RSpec.describe 'Admin::Impressions', type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('Content overview', 'Faculty', 'Staff', 'Public works', 'Private works',
-                                       'works across the DRS')
+                                       'works across the DRS', 'Storage used', '3.26 GB')
     end
 
     it "counts a scoped Collection's own subtree" do

@@ -5,14 +5,6 @@
     %span.admin-registry__title
       %i.fa-solid.fa-arrows-rotate{'aria-hidden' => 'true'}
       Replace a file
-    .admin-registry__head-actions
-      %span.admin-registry__subtitle
-        - if current_user&.admin?
-          %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
-          Admin-only
-        - else
-          %i.fa-solid.fa-user-shield{'aria-hidden' => 'true'}
-          Delegated admin access
 
   .p-3
     %p.text-muted.small.mb-3

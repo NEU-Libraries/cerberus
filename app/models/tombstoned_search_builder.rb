@@ -16,6 +16,7 @@
 # Gated discovery still runs (inherited from SearchBuilder), but short-circuits
 # for admins, and this builder is only ever driven from the admin-gated
 # TombstonedItems service — so an admin sees every withdrawn resource.
+# See docs/admin.md.
 class TombstonedSearchBuilder < SearchBuilder
   self.default_processor_chain += [:only_tombstoned]
 

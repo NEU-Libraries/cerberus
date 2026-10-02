@@ -6,6 +6,10 @@
 # like the deposit's ContentCreationJob so a multi-GB upload never blocks the
 # request.
 #
+# The upload's own filename goes with the bytes, so each revision records the
+# name it was deposited under and the version table can show it. The type guard
+# in Admin::FilesController keeps that name the same type as the one it replaces.
+#
 # After the primary bytes land, the type-routed *derivative* enrichment is
 # re-dispatched (include_primary: false — IngestDispatch must NOT create a second
 # primary Blob) so thumbnails / JP2 / PDF renditions track the new content rather
@@ -18,7 +22,8 @@ class FileReplacementJob < ApplicationJob
   def perform(blob_noid, work_id, staged_path, original_filename, idempotency_key)
     return unless File.exist?(staged_path)
 
-    AtlasRb::Blob.update(blob_noid, staged_path, idempotency_key: idempotency_key)
+    AtlasRb::Blob.update(blob_noid, staged_path, original_filename: original_filename,
+                                                 idempotency_key:   idempotency_key)
     IngestDispatch.call(work_id: work_id, staged_path: staged_path,
                         original_filename: original_filename,
                         idempotency_key: idempotency_key, include_primary: false)

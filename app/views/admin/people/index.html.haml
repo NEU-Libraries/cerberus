@@ -3,44 +3,93 @@
 .admin-registry.my-3
   %header.admin-registry__head
     %span.admin-registry__title
-      %i.fa-solid.fa-users{'aria-hidden' => 'true'}
+      %i.fa-solid.fa-user{'aria-hidden' => 'true'}
       People registry
-      - if @people.any?
-        %span.admin-registry__count= pluralize(@people.size, 'person')
     .admin-registry__head-actions
-      %span.admin-registry__subtitle
-        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
-        Admin-only
       = link_to new_admin_person_path, class: 'btn btn-primary btn-sm' do
         %i.fa-solid.fa-user-plus.me-1{'aria-hidden' => 'true'}
         New person
 
-  - if @people.any?
-    .table-responsive
-      %table.table.table-borderless.admin-registry-table
-        %thead
-          %tr
-            %th{scope: 'col'} Display name
-            %th{scope: 'col'} NUID
-            %th{scope: 'col'}
-        %tbody
-          - @people.each do |person|
+  -# The form sits outside the frame it fills, so the input keeps focus and
+  -# its value while the results refresh under it.
+  .px-3.pt-3
+    %form{action: admin_people_path, method: 'get', role: 'search',
+          data: { controller: 'picker-search', turbo_frame: 'people-registry' }}
+      %input.form-control{type: 'search', name: 'q', value: @q, autocomplete: 'off',
+                          placeholder: 'Search by name, email or NUID…',
+                          'aria-label' => 'Search people by name, email or NUID',
+                          data: { action: 'input->picker-search#search' }}
+
+  -# advance, so a search or a page lands in the URL and survives a reload.
+  = turbo_frame_tag 'people-registry', data: { turbo_action: 'advance' } do
+    - count = @pagination['count'].to_i
+    - page = [@pagination['page'].to_i, 1].max
+    - pages = @pagination['pages'].to_i
+    - if @people.any?
+      %p.px-3.pt-2.mb-0.small.text-muted.tnum
+        - if @q
+          #{pluralize(count, 'match')} for “#{@q}”
+        - else
+          = pluralize(count, 'person')
+      .table-responsive
+        %table.table.table-borderless.admin-registry-table
+          %thead
             %tr
-              %td.admin-registry-table__name
-                %i.fa-solid.fa-user.text-primary.me-2{'aria-hidden' => 'true'}
-                = person['display_name'].presence || '(no name)'
-              %td
-                %span.admin-registry-table__id= person['nuid']
-              %td.text-end
-                = link_to edit_admin_person_path(person['id']), class: 'admin-registry-table__edit' do
-                  Manage
-                  %i.fa-solid.fa-arrow-right{'aria-hidden' => 'true'}
-  - else
-    .admin-registry__empty
-      %i.fa-solid.fa-users.admin-registry__empty-icon{'aria-hidden' => 'true'}
-      %p.mb-1.fw-semibold.text-body No people registered
-      %p.mb-3.small.text-muted
-        Create a Person record to curate a display name and community affiliations.
-      = link_to new_admin_person_path, class: 'btn btn-primary btn-sm' do
-        %i.fa-solid.fa-user-plus.me-1{'aria-hidden' => 'true'}
-        New person
+              %th{scope: 'col'} Display name
+              %th{scope: 'col'} NUID
+              %th{scope: 'col'}
+                %span.visually-hidden Actions
+          %tbody
+            - @people.each do |person|
+              - groups_id = "person-groups-row-#{person['id']}"
+              %tr
+                %td.admin-registry-table__name
+                  %i.fa-solid.fa-user.text-primary.me-2{'aria-hidden' => 'true'}
+                  = person['display_name'].presence || '(no name)'
+                %td
+                  %span.admin-registry-table__id= person['nuid']
+                %td.text-end.text-nowrap
+                  - if person['nuid'].present?
+                    %button.btn.btn-sm.btn-tonal-secondary.person-groups-toggle.me-2{type: 'button',
+                      data: { 'bs-toggle': 'collapse', 'bs-target': "##{groups_id}" },
+                      'aria-expanded' => 'false', 'aria-controls' => groups_id}
+                      %i.fa-solid.fa-user-group.me-1{'aria-hidden' => 'true'}
+                      Groups
+                      %i.fa-solid.fa-chevron-down.person-groups-toggle__chevron.ms-1{'aria-hidden' => 'true'}
+                  -# _top: Manage leaves the registry, so it must not load into the frame.
+                  = link_to edit_admin_person_path(person['id']), class: 'admin-registry-table__edit', data: { turbo_frame: '_top' } do
+                    Manage
+                    %i.fa-solid.fa-arrow-right{'aria-hidden' => 'true'}
+              - if person['nuid'].present?
+                -# Lazy: the frame loads when the row opens and first shows, so the
+                -# index costs no per-person Atlas read.
+                %tr.collapse.person-groups-row{id: groups_id}
+                  %td{colspan: 3}
+                    = turbo_frame_tag "person-groups-#{person['id']}", src: groups_admin_person_path(person['id']), loading: :lazy do
+                      .py-2.px-2.small.text-muted Loading groups…
+      - if pages > 1
+        %nav.px-3.pb-3{'aria-label' => 'People pages'}
+          %ul.pagination.pagination-sm.mb-0
+            %li.page-item{class: ('disabled' if page <= 1)}
+              = link_to 'Previous', admin_people_path(q: @q, page: page - 1), class: 'page-link'
+            %li.page-item.disabled
+              %span.page-link.tnum Page #{page} of #{pages}
+            %li.page-item{class: ('disabled' if page >= pages)}
+              = link_to 'Next', admin_people_path(q: @q, page: page + 1), class: 'page-link'
+    - elsif page > 1
+      -# Reached by a stale or hand-typed page past the last one.
+      .admin-registry__empty
+        %p.mb-2.text-muted No more people.
+        = link_to 'First page', admin_people_path(q: @q), class: 'btn btn-tonal-secondary btn-sm'
+    - elsif @q
+      .admin-registry__empty
+        %p.mb-0.text-muted No people match “#{@q}”.
+    - else
+      .admin-registry__empty
+        %i.fa-solid.fa-user.admin-registry__empty-icon{'aria-hidden' => 'true'}
+        %p.mb-1.fw-semibold.text-body No people registered
+        %p.mb-3.small.text-muted
+          Create a Person record to curate a display name and community affiliations.
+        = link_to new_admin_person_path, class: 'btn btn-primary btn-sm', data: { turbo_frame: '_top' } do
+          %i.fa-solid.fa-user-plus.me-1{'aria-hidden' => 'true'}
+          New person

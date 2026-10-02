@@ -53,7 +53,7 @@ RSpec.describe 'Maintenance write-route inventory', type: :request do
   # while STARTING a session (view_as or act_as) records an AuditEvent in Atlas
   # and is refused. The exact-action list is consulted first, so both hold.
   REFUSED_CONTROLLERS = %w[
-    accounts admin/associations admin/files admin/groups admin/impersonations
+    accounts admin/associations admin/community_people admin/files admin/groups admin/impersonations
     admin/linked_members
     admin/loaders admin/people admin/reindex admin/reparent admin/tombstones
     atlas atlas_tokens collections communities loads messages sets works xml

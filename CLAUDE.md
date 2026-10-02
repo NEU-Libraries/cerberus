@@ -37,41 +37,9 @@ When making changes to the UI, ensure that any new UI elements are accessible an
 
 When creating a Rails interface whole-cloth or editing one in place, invoke the **`/frontend-design`** skill rather than reaching for bare Bootstrap defaults. The skill is for raising the design quality bar — but on this project it must be paired with the **existing DRS aesthetic** so we don't ship marketing-flashy UI on what is an institutional repository surface.
 
-**The aesthetic, in one phrase:** *restrained, librarian/archival, institutional.* Concretely:
+**The aesthetic, in one phrase:** *restrained, librarian/archival, institutional.*
 
-- **Container chrome.** Two distinct idioms, and they are not interchangeable:
-  - **`.well`** — form-section blocks bracket in `.well.p-3.my-3.rounded-3`. It is a **fill only**: `background-color: $well-bg` and nothing else. **No border, no shadow.** It has never had a border and must not gain one: the fill alone is what makes it read as a panel, and `$well-bg` is pinned by contrast maths (see **Palette** below), so it cannot be lightened to compensate for a weaker edge.
-  - **The bordered card shell** — `1px solid $gray-300` + `rounded-3` on a white or off-white fill, used by audit history, the admin registry, the deposit form, sets, and full-text snippets. This is the one to match when a **new** component needs a card.
-
-  Either way: subtle shadow at most. Avoid heavy drop shadows, gradients, or coloured card backgrounds.
-- **Palette.** The Cerberus tokens in `app/assets/stylesheets/_colors.scss` are deliberately desaturated from Bootstrap defaults — `$blue: #2666a6` (navy/teal), `$success: darkened $green: #18bc9c` (teal-green, not punchy emerald), `$danger: #e74c3c`, footer `#385775`. Reach for these via SCSS variables rather than hardcoding hex. When adding new tones (e.g. action-typed audit colours), derive *desaturated* values, not Bootstrap candy.
-
-  **Four tokens are a coupled system — do not hand-tune them.** `$link-blue`, `$well-bg`, `$gray-100` and `$gray-900` are pinned to each other by two opposing WCAG rules. Ordinary links carry no underline, so a link must clear 4.5:1 against every background it sits on (pushing it *darker*) **and** 3:1 against surrounding body text (pushing it *lighter*). The window between those is a few thousandths of relative luminance wide, and two of the four current ratios are hairlines (4.51 against 4.50, 3.01 against 3.00). `spec/assets/color_contrast_spec.rb` asserts all of them; run it after touching any of the four. Darkening `$link-blue` to `$blue` looks obvious and silently trades one audit failure for another — it has been tried.
-
-  Hue, though, is free: contrast depends on relative luminance alone, so any hue at the required lightness is fair game.
-- **Typography & numerics.** Bootstrap defaults for body. For tabular data (audit rows, NUIDs, file sizes, timestamps), turn on `font-variant-numeric: tabular-nums` and consider a monospace chip — identifiers should *look like* identifiers, not body words.
-- **Iconography.** Font Awesome solid set is already wired in. Match existing usage: `fa-folder-open` (Collection), `fa-users` (Community), `fa-file*` (Work / files). New iconography should be semantic + restrained.
-- **Tabs / nav.** The Edit pages use Bootstrap `nav-tabs` with `data-controller="tab-hash"`. Add new tabs by extending that pattern; don't introduce a different navigation idiom.
-- **Buttons.** Never use `btn-outline-*` or `btn-light`. An outline button is transparent, and `btn-light` is the body's own `$gray-100`, so both take the colour of whatever they sit on and read as text in a box. Give each surface one solid button for its main action (`btn-primary`, or `btn-success` for Save). Every other button takes a variant from `_tonal_buttons.scss`:
-  - `btn-tonal-primary` for row and file actions: Download, export, Regenerate, New upload.
-  - `btn-tonal-secondary` for quiet actions: Copy, Clear, Add to queue, Back links, inactive filter chips.
-  - `btn-tonal-danger` for destructive actions: Discard, Revoke, Remove.
-  - `btn-tonal-success` for status chips such as "In queue".
-
-  Buttons come in two sizes, default and `btn-sm`, and no custom ones. A form's actions (Save, Cancel, and the tab's main action) take the default size on every tab, so switching tabs never resizes them. `btn-sm` is for actions inside a table row, a chip group, or a compact toolbar strip such as the Analytics header.
-
-  A Cancel that abandons a form is always `btn-warning`, with no icon. A Back link only navigates, so it is tonal-secondary rather than orange. Keep the tonal border at full strength: it is what clears WCAG's 3:1 edge contrast against both the grey page and white cards, and a softer border falls to about 2:1.
-- **Hover.** Hover must never move or resize the element under the pointer: no `translateY` lift, and no border-width, padding or font-weight change. The element's edge slides out from under a resting pointer, the hover drops, the element slides back, and it flickers. Signal hover with colour, border and shadow instead, and switch it instantly rather than fading: a fade that swaps dark text on a pale fill for white on a dark one passes through a point where the label vanishes. `_layout.scss` switches off Bootstrap's fade on every `.btn`, so don't add a `transition` to a hover that changes colour, on a button or anywhere else.
-- **Don't.** Don't introduce Tailwind, a different CSS framework, or a different design system. Don't add new web fonts. Don't add maximalist effects (gradient meshes, grain overlays, animated heroes) — they fight the institutional register the rest of the site sets.
-
-**Reference example — the Audit History tab.** When in doubt about how to combine "use the skill" with "match this aesthetic", read these:
-
-- `app/views/audit_events/_history.html.haml` — card-shell + header-strip pattern, gated render, partial dispatch.
-- `app/views/audit_events/_event_*.html.haml` — per-action partials sharing helper-rendered cells, varying only the action chip's class.
-- `app/helpers/audit_events_helper.rb` — formatting helpers (timestamp split, NUID chip, action descriptor table with a generic fallback for unknown verbs).
-- `app/assets/stylesheets/cerberus.scss` (search `audit-history` / `audit-event-table`) — left rail via `::before` + tinted action chips driven by a `--audit-action-color` CSS custom property, so adding a new tone is one map entry + one CSS line. Tones are derived via `color-mix(in srgb, ..., white)` for the chip background; full tone for icon + label.
-
-That component is the worked example of the register to land on: a forensic ledger that fits next to Blacklight's search UI without looking like a different product. Use it as a starting point when designing comparable admin / metadata / audit surfaces.
+**Read [`docs/design.md`](docs/design.md) before changing any view, component or stylesheet.** It holds the rules: which container a surface gets (a `.well` is for form sections and footers only), the palette and the four coupled contrast tokens, type, the one-icon-per-concept vocabulary, tabs, buttons, hover, what not to add, and the Audit History tab as the worked example. A local `PreToolUse` hook blocks UI edits until the page has been read in the session.
 
 ## Project Status
 

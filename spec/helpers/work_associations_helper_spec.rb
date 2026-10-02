@@ -43,7 +43,7 @@ RSpec.describe WorkAssociationsHelper do
         .to eq(%w[is_supplemental_material_for is_codebook_for is_appendix_to])
     end
 
-    it 'phrases each one as the tail of “This work is the …”' do
+    it 'phrases each one as the middle of “It is the … this work”' do
       expect(helper.association_type_options).to include(['codebook for', 'is_codebook_for'],
                                                          ['transcription of', 'is_transcription_of'])
     end

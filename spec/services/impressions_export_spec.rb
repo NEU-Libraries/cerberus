@@ -6,17 +6,17 @@ RSpec.describe ImpressionsExport do
   let(:report) do
     instance_double(
       ImpressionsReport,
-      top_works:      [{ noid: 'w1', doc: nil, counts: { 'view' => 10, 'download' => 4 }, total: 14 }],
-      top_containers: [{ noid: 'c1', doc: nil, counts: { 'view' => 120, 'download' => 0 }, total: 120 }]
+      top_works:      [{ noid: 'w1', doc: nil, counts: { 'view' => 10, 'download' => 4, 'stream' => 2 }, total: 16 }],
+      top_containers: [{ noid: 'c1', doc: nil, counts: { 'view' => 120, 'download' => 0, 'stream' => 0 }, total: 120 }]
     )
   end
 
   it 'renders CSV with a header plus work and container rows' do
     csv = described_class.new(report).csv
 
-    expect(csv).to include('Kind,NOID,Title,View,Download,Total')
-    expect(csv).to include('Work,w1,w1,10,4,14')
-    expect(csv).to include('Container,c1,c1,120,0,120')
+    expect(csv).to include('Kind,NOID,Title,View,Download,Stream,Total')
+    expect(csv).to include('Work,w1,w1,10,4,2,16')
+    expect(csv).to include('Container,c1,c1,120,0,0,120')
   end
 
   it 'renders a non-empty xlsx workbook (zip envelope)' do
@@ -31,20 +31,20 @@ RSpec.describe ImpressionsExport do
     it 'exports only the work rows for kind: work' do
       csv = described_class.new(report, kind: 'work').csv
 
-      expect(csv).to include('Work,w1,w1,10,4,14')
+      expect(csv).to include('Work,w1,w1,10,4,2,16')
       expect(csv).not_to include('Container,c1')
     end
 
     it 'exports only the container rows for kind: container' do
       csv = described_class.new(report, kind: 'container').csv
 
-      expect(csv).to include('Container,c1,c1,120,0,120')
+      expect(csv).to include('Container,c1,c1,120,0,0,120')
       expect(csv).not_to include('Work,w1')
     end
 
     it 'keeps the header on a scoped export' do
       expect(described_class.new(report, kind: 'work').csv)
-        .to include('Kind,NOID,Title,View,Download,Total')
+        .to include('Kind,NOID,Title,View,Download,Stream,Total')
     end
 
     it 'names the scope for the filename, and nothing when it covers both' do

@@ -20,10 +20,20 @@
         = bootstrap_fields_for :work do |c|
           = render 'shared/descriptive_fields', f: c, descriptive: @descriptive, keywords: true
         - if @caption_offered
-          = render 'works/captions', caption: @caption
+          = render 'works/captions', captions: @captions, removed: @removed_captions,
+                                     removable: caption_steward?(effective_user)
+        - if @showcase
+          = render 'works/showcase_category', showcase: @showcase, genres: @showcase_genres
         .well.p-3.my-3.rounded-3
           = f.button :submit, class: "btn btn-success"
           = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"
+      -# Outside the metadata form, which cannot nest one; the Remove button in
+      -# the Captions section submits it through its form attribute.
+      - if caption_steward?(effective_user)
+        - if @captions.any?
+          = form_tag(caption_work_path(params[:id]), method: :delete, id: 'remove-caption') {}
+        - if @removed_captions.any?
+          = form_tag(restore_caption_work_path(params[:id]), method: :post, id: 'restore-caption') {}
   #advanced.tab-pane{"aria-labelledby" => "advanced-tab", role: "tabpanel"}
     .py-2.px-1
       = bootstrap_form_tag(url: work_path(params[:id]), method: :patch, multipart: true) do |f|
@@ -52,8 +62,9 @@
                 %i.fa-solid.fa-lock-open.me-1{'aria-hidden' => 'true'}
                 Remove embargo
         = render 'shared/group_permissions', resource: 'work'
+        = render 'works/download_access', policy: @work&.dig('derivative_permissions')
         - if @streaming_only_offered
-          = render 'works/streaming_only', enabled: @streaming_only
+          = render 'works/streaming_only', enabled: @streaming_only, audio: @streaming_only_audio
         %div
           .well.p-3.my-3.rounded-3
             = f.button :submit, class: "btn btn-success"

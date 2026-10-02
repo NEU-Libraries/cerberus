@@ -42,8 +42,11 @@ RSpec.describe 'LoadReport end-to-end batch flow', type: :request do
     allow(AtlasRb::Collection).to receive(:children)
       .with('neu:fix-comm-photos-archive')
       .and_return(['neu:c1'])
-    allow(AtlasRb::Collection).to receive(:find).with('neu:c1')
-                                                .and_return(double(id: 'neu:c1', title: 'Campus Life (Photographs)'))
+    campus_life = AtlasRb::Mash.new('noid' => 'neu:c1', 'id' => 'neu:c1', 'klass' => 'Collection',
+                                    'title' => 'Campus Life (Photographs)')
+    allow(AtlasRb::Collection).to receive(:find).with('neu:c1').and_return(campus_life)
+    # LoadsController#create refuses a destination the picker would not list.
+    allow(AtlasRb::Resource).to receive(:find_many).with(['neu:c1']).and_return([campus_life])
 
     # Atlas Work mint — IptcIngestJob#ensure_work calls this
     allow(AtlasRb::Work).to receive(:create) { double(id: "w-#{SecureRandom.hex(4)}") }

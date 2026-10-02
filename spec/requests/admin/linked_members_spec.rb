@@ -123,6 +123,28 @@ RSpec.describe 'Admin::LinkedMembers', type: :request do
         post '/admin/linked_members/add', params: { work_id: 'w1', collection_id: 'c' }
         expect(response).to redirect_to(admin_linked_members_manage_path(work_id: 'w1'))
       end
+
+      # atlas_rb raises Atlas's 422, which no rescue_from catches; unhandled,
+      # it was a 500.
+      it 'explains a link Atlas refuses, rather than failing' do
+        allow(AtlasRb::Work).to receive(:add_linked_member)
+          .and_raise(AtlasRb::LinkedMemberError.new('already a structural member', code: 'already_structural_member'))
+
+        post '/admin/linked_members/add', params: { work_id: 'w1', collection_id: 'c' }
+
+        expect(response).to redirect_to(admin_linked_members_manage_path(work_id: 'w1'))
+        expect(flash[:alert]).to eq('The work already lives in that collection, so it cannot also be linked there.')
+        expect(flash[:notice]).to be_nil
+      end
+
+      it "falls back to Atlas's message for a code it does not know" do
+        allow(AtlasRb::Work).to receive(:add_linked_member)
+          .and_raise(AtlasRb::LinkedMemberError.new('target not found', code: 'target_not_found'))
+
+        post '/admin/linked_members/add', params: { work_id: 'w1', collection_id: 'c' }
+
+        expect(flash[:alert]).to eq('The link was refused: target not found')
+      end
     end
 
     describe 'DELETE remove' do
@@ -130,6 +152,15 @@ RSpec.describe 'Admin::LinkedMembers', type: :request do
         expect(AtlasRb::Work).to receive(:remove_linked_member).with('w1', 'c')
         delete '/admin/linked_members/remove', params: { work_id: 'w1', collection_id: 'c' }
         expect(response).to redirect_to(admin_linked_members_manage_path(work_id: 'w1'))
+      end
+
+      it 'explains a removal Atlas refuses' do
+        allow(AtlasRb::Work).to receive(:remove_linked_member)
+          .and_raise(AtlasRb::LinkedMemberError.new('cannot link a tombstoned work', code: 'tombstoned_work'))
+
+        delete '/admin/linked_members/remove', params: { work_id: 'w1', collection_id: 'c' }
+
+        expect(flash[:alert]).to eq('This work is tombstoned, so it cannot be linked anywhere.')
       end
     end
   end

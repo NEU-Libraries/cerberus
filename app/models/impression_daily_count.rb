@@ -8,7 +8,10 @@ class ImpressionDailyCount < ApplicationRecord
   self.table_name = 'impression_daily_counts'
   self.primary_key = nil
 
-  scope :in_range,   ->(range)  { where(day: range) }
+  scope :in_range,   ->(range) { where(day: range) }
+
+  # Already an Eastern date: RollupImpressionsJob groups by ImpressionDay.
+  def self.day_sql = Arel.sql('day')
   scope :for_action, ->(action) { where(action:) }
 
   # Daily totals for one noid+action, as a chartkick-ready { day => count } hash.

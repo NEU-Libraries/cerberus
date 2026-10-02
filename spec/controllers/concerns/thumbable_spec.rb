@@ -29,7 +29,7 @@ describe Thumbable do
   describe '#apply_thumbnail' do
     it 'no-ops when no file was uploaded (no mint, no Atlas write)' do
       obj = thumbable_class.new({ thumbnail: nil })
-      expect(MasterJp2).not_to receive(:call)
+      expect(OriginalJp2).not_to receive(:call)
       expect(AtlasRb::Resource).not_to receive(:set_thumbnails)
 
       expect(obj.apply_thumbnail('w-1')).to be_nil
@@ -37,8 +37,8 @@ describe Thumbable do
 
     it 'mints the open JP2 from the upload and persists it via set_thumbnails' do
       obj = thumbable_class.new({ thumbnail: file })
-      allow(MasterJp2).to receive(:call).with(path: '/tmp/upload.png')
-                                        .and_return(MasterJp2::Result.new(open_base: 'BASE', gated_base: 'G'))
+      allow(OriginalJp2).to receive(:call).with(path: '/tmp/upload.png')
+                                          .and_return(OriginalJp2::Result.new(open_base: 'BASE', gated_base: 'G'))
       allow(ThumbnailCreator).to receive(:call).with(base: 'BASE').and_return(urls)
 
       expect(AtlasRb::Resource).to receive(:set_thumbnails).with('w-1', **urls)

@@ -79,6 +79,15 @@ a:not(.btn, .dropdown-item, .navbar-brand, .nav-link) {
 
 .navbar-search {
   padding-bottom: 0;
+
+  // Below lg the form wraps under the wordmark, where container-fluid's left
+  // padding would indent it from the "DRS" edge. Beside the wordmark, at lg
+  // and up, that padding is the gap between the two.
+  @include media-breakpoint-down(lg) {
+    .search-query-form {
+      padding-left: 0;
+    }
+  }
 }
 
 // Navbar icon link carrying an optional count badge (the inbox envelope, the
@@ -228,8 +237,18 @@ ol.breadcrumb {
   color: $gray-800;
 }
 
+// Bootstrap paints the active tab, and the bottom edge it lays over the tab
+// line, with --bs-body-bg. That stays white while the page is $gray-100, so set
+// both to the surface the tabs actually sit on.
 .nav-tabs {
   margin: 10px 0px 10px 0px;
+  --bs-nav-tabs-link-active-bg: #{$gray-100};
+  --bs-nav-tabs-link-active-border-color: var(--bs-border-color) var(--bs-border-color) #{$gray-100};
+}
+
+.admin-registry .nav-tabs {
+  --bs-nav-tabs-link-active-bg: #fff;
+  --bs-nav-tabs-link-active-border-color: var(--bs-border-color) var(--bs-border-color) #fff;
 }
 
 .loading-state {

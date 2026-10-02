@@ -4,7 +4,7 @@ require 'rails_helper'
 
 # The per-blob download gate. Beyond the work-level authorize_show!,
 # DownloadsController re-checks the blob's own read gate (`gated`/`permission` on
-# the Work's assets payload) so a department-reserved master or rendition can't be
+# the Work's assets payload) so a department-reserved original or rendition can't be
 # pulled by its direct /downloads/:id URL even when the containing Work is public.
 # Stubs the Atlas calls (like the derivative-download spec) to exercise the authz
 # branch without a live backend; the work-level gate is stubbed to pass throughout.
@@ -34,7 +34,7 @@ RSpec.describe 'Blob downloads', type: :request do
   # Only reached once the gate authorizes — stub the stream so show completes.
   def stub_stream!
     allow(AtlasRb::Blob).to receive(:find)
-      .and_return(AtlasRb::Mash.new(mime_type: 'image/tiff', filename: 'master.tif'))
+      .and_return(AtlasRb::Mash.new(mime_type: 'image/tiff', filename: 'original.tif'))
     allow(AtlasRb::Blob).to receive(:content).and_yield('bytes').and_return({})
   end
 
@@ -51,7 +51,7 @@ RSpec.describe 'Blob downloads', type: :request do
     get download_path(blob_id)
 
     expect(response).to have_http_status(:ok)
-    expect(response.headers['Content-Disposition']).to include('master.tif')
+    expect(response.headers['Content-Disposition']).to include('original.tif')
   end
 
   # The Live stream carries no Content-Length; without this a buffering proxy
@@ -75,7 +75,7 @@ RSpec.describe 'Blob downloads', type: :request do
 
     expect(response).to have_http_status(:ok)
     expect(response.headers['Content-Type']).to eq('application/zip')
-    expect(response.headers['Content-Disposition']).to include('master.zip') # base from blob.filename
+    expect(response.headers['Content-Disposition']).to include('original.zip') # base from blob.filename
   end
 
   # The discriminator is the classification, not the label: a typed blob (and,
@@ -88,7 +88,7 @@ RSpec.describe 'Blob downloads', type: :request do
 
     expect(response).to have_http_status(:ok)
     expect(response.headers['Content-Type']).to eq('image/tiff')
-    expect(response.headers['Content-Disposition']).to include('master.tif')
+    expect(response.headers['Content-Disposition']).to include('original.tif')
   end
 
   it 'forbids a gated blob for a guest (permission withheld)' do

@@ -9,13 +9,13 @@ class LoadersController < ApplicationController
   before_action :require_loader_role
 
   def index
-    @loaders = Loader.available_to(current_user)
+    @loaders = Loader.available_to(effective_user)
   end
 
   private
 
     def require_loader_role
-      return if current_user&.loader_tier?
+      return if effective_user&.loader_tier?
 
       render template: 'errors/forbidden', status: :forbidden, layout: 'application'
     end

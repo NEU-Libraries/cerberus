@@ -6,8 +6,14 @@
 <% if impersonating? %>
   <% mode = acting_as? ? 'acting-as' : 'view-as' %>
   <% target_nuid = acting_as? ? acting_as_nuid : view_as_nuid %>
-  <aside class="impersonation-banner impersonation-banner--<%= mode %>"
-         role="status" aria-live="polite">
+  <%# In view-as, the guard's allowed paths are the writes that must still work: %>
+  <%# Exit, a mode switch, and Log Out. %>
+  <% guard = view_as? ? { controller: 'view-as-guard',
+                          view_as_guard_message_value: view_as_write_refusal,
+                          view_as_guard_allowed_value: [admin_impersonation_path, admin_act_as_path,
+                                                        admin_view_as_path, destroy_user_session_path].to_json } : {} %>
+  <%= tag.aside class: "impersonation-banner impersonation-banner--#{mode}",
+                role: 'status', aria: { live: 'polite' }, data: guard do %>
     <div class="<%= container_classes %> impersonation-banner__inner">
       <span class="impersonation-banner__badge">
         <i class="fa-solid <%= acting_as? ? 'fa-user-pen' : 'fa-eye' %>" aria-hidden="true"></i>
@@ -22,7 +28,7 @@
       </span>
 
       <span class="impersonation-banner__note">
-        <%= acting_as? ? 'Writes are attributed to this user.' : 'Read-only — a write attempt is blocked and ends the session.' %>
+        <%= acting_as? ? 'Writes are attributed to this user.' : 'Read-only — changes are blocked and nothing is saved.' %>
       </span>
 
       <%= button_to admin_impersonation_path, method: :delete,
@@ -32,5 +38,5 @@
         Exit
       <% end %>
     </div>
-  </aside>
+  <% end %>
 <% end %>

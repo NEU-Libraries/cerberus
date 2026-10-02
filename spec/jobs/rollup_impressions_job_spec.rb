@@ -30,6 +30,22 @@ RSpec.describe RollupImpressionsJob do
     expect(ImpressionDailyCount.find_by(noid: 'w1', action: 'view', day: today)[:count]).to eq(1)
   end
 
+  # Stored in UTC, 10:30 p.m. Eastern is already tomorrow's date, so a UTC day
+  # put an evening's traffic on the wrong day.
+  it 'counts an impression toward its Eastern day, not its UTC day' do
+    yesterday = today - 1
+    evening = Time.zone.local(yesterday.year, yesterday.month, yesterday.day, 22, 30)
+    insert_impression(noid: 'w9', ip_address: '10.0.0.5', user_agent: 'Mozilla/5.0', recorded_at: evening)
+    insert_impression(noid: 'w9', ip_address: '10.0.0.6', user_agent: 'Mozilla/5.0',
+                      recorded_at: Time.zone.local(today.year, today.month, today.day, 0, 30))
+
+    described_class.perform_now
+
+    expect(ImpressionDailyCount.where(noid: 'w9', action: 'view').pluck(:day, :count).to_h)
+      .to eq(yesterday => 1, today => 1)
+    expect(ImpressionDailyVisitor.find_by(day: yesterday)&.unique_visitors).to eq(1)
+  end
+
   it 'excludes volume-offending (ip, day) pairs but rescues the allowlist' do
     original = config.impression_volume_threshold
     config.impression_volume_threshold = 2

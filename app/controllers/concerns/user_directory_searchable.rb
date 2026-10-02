@@ -25,10 +25,16 @@ module UserDirectorySearchable
       return [] if query.blank?
 
       AtlasRb::User.search(query, nuid: current_user.nuid)
-                   .map { |user| { nuid: user['nuid'], name: NuidResolver.prettify(user['name']) } }
+                   .map { |user| { nuid: user['nuid'], name: directory_name(user) } }
                    .uniq { |result| result[:nuid] }
     rescue Faraday::Error, JSON::ParserError => e
       Rails.logger.error("#{self.class.name}#recipients: #{e.class} #{e.message}")
       []
+    end
+
+    # Atlas matches the curated Person name too, so a result found by it must
+    # show it. A curated name renders verbatim; only the SSO name is Namae'd.
+    def directory_name(user)
+      user['display_name'].presence || NuidResolver.prettify(user['name'])
     end
 end

@@ -1,0 +1,28 @@
+-# locals: report (ImpressionsReport) — scoped to this Work. media (Boolean) —
+-# the Work plays in the browser, so streams are counted.
+-#
+-# Human traffic over the last 90 days, like a container's Analytics tab.
+-# See docs/analytics.md.
+- actions = media ? ImpressionsReport::ACTIONS : ImpressionsReport::ACTIONS - %w[stream]
+- totals = report.totals
+
+.work-usage-card
+  %dl.usage-ledger
+    - actions.each do |action|
+      .usage-ledger__item{class: "usage-ledger__item--#{action}"}
+        %dt.usage-ledger__label= action.capitalize.pluralize
+        %dd.usage-ledger__figure= number_with_delimiter(totals[action])
+
+  -# One chart per action, each on its own scale: a Work's downloads and streams
+  -# are usually a fraction of its views, and would flatten under them.
+  - actions.each do |action|
+    %section.usage-chart-block
+      %h2.usage-chart-block__title= "#{action.capitalize.pluralize} in the last 90 days"
+      .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-dataset-value' => usage_timeseries(report, actions: [action]).to_json, 'usage-chart-colors-value' => usage_series_colors(actions: [action]).to_json}}
+
+  %p.text-muted.small.mb-0
+    Human visitors only. Usage statistics are refreshed daily.
+    - if effective_user&.admin? || effective_user&.admin_delegate?
+      = link_to 'See other date ranges in Usage analytics',
+                admin_impressions_path(item_noid: @work.id, item_uuid: @work.valkyrie_id, item_klass: 'Work',
+                                       item_title: plain_text(@work.title))

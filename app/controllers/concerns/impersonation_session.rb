@@ -13,7 +13,8 @@ module ImpersonationSession
     before_action :reject_writes_in_view_as
     helper_method :acting_as?, :view_as?, :impersonating?,
                   :acting_as_nuid, :view_as_nuid,
-                  :impersonation_target, :effective_user
+                  :impersonation_target, :effective_user,
+                  :view_as_write_refusal
   end
 
   def acting_as?
@@ -36,21 +37,27 @@ module ImpersonationSession
     session[:view_as_nuid]
   end
 
-  # The user whose READ view is rendered, and the single user both Ability and
-  # SearchBuilder must consult — never current_user directly. Fails closed: a
-  # view-as target that will not hydrate falls back to a guest-shaped user
-  # rather than leaking the admin's own view under a view-as banner.
+  # The user the page renders as: the impersonation target in either mode, so an
+  # admin sees exactly the target's screens, menus and permissions. Ability and
+  # SearchBuilder consult it, never current_user. current_user stays the real
+  # person, for the write identity, audit actors and admin surfaces; see
+  # docs/identity.md for which call sites use which. Fails closed: a target
+  # that will not hydrate renders as a guest, never as the admin.
   def effective_user
-    @effective_user ||= view_as? ? view_as_target : current_user
+    @effective_user ||= impersonating? ? impersonation_target || User.new(groups: [], role: 'guest') : current_user
   end
 
-  # The NUID a gated READ is evaluated as. Every read that wants it passes it
-  # explicitly, and that is deliberate: `mods` and `find` gate on the real user
-  # through atlas_rb's ambient User: header, so reading this from Current
+  # The NUID a gated Atlas READ is evaluated as. Every read that wants it passes
+  # it explicitly, and that is deliberate: `mods` and `find` gate on the real
+  # user through atlas_rb's ambient User: header, so reading this from Current
   # instead would apply view-as to them silently. Current.view_as_nuid is
   # read-side bookkeeping and never a write header.
+  #
+  # Acting-as keeps the admin here even though the page renders as the target:
+  # the request also carries On-Behalf-Of, and Atlas refuses that header from a
+  # non-admin User:, so the target's NUID would 403 every gated read.
   def viewer_nuid
-    effective_user&.nuid
+    view_as? ? effective_user&.nuid : current_user&.nuid
   end
 
   def impersonation_target
@@ -73,6 +80,13 @@ module ImpersonationSession
     emit_impersonation_event('impersonation_started', target_nuid, 'view_as')
     session[:view_as_nuid] = target_nuid
     stamp_impersonation_clock
+  end
+
+  # The one message for a write refused under view-as, shared by the server
+  # guard's flash and the client guard's modal.
+  def view_as_write_refusal
+    name = impersonation_target&.pretty_name.presence || 'another user'
+    "You can't make changes while viewing as #{name}. Nothing was saved."
   end
 
   def end_impersonation
@@ -100,30 +114,43 @@ module ImpersonationSession
 
   private
 
-    # Runs after ApplicationController#set_current_nuid has set the admin
-    # identity. on_behalf_of drives write attribution; view_as_nuid is read-only
-    # bookkeeping and must never become a write header.
+    # Copies the session's targets into Current. It runs before
+    # ApplicationController#set_current_nuid, since this concern's callbacks
+    # register first, and needs no NUID of its own. on_behalf_of drives write
+    # attribution; view_as_nuid is read-only bookkeeping and must never become
+    # a write header.
     def set_impersonation_context
       Current.on_behalf_of = acting_as_nuid
       Current.view_as_nuid = view_as_nuid
     end
 
-    # View-as is read-only: a state-changing request ends the session loudly.
+    # View-as is read-only: a state-changing request is refused before the
+    # action runs, and the session stays open. The view-as-guard Stimulus
+    # controller stops most writes before they are sent; this is the backstop.
     # A redirect is discarded when the write came from inside a turbo-frame, so
     # the reply has to be a turbo-stream refresh instead.
     def reject_writes_in_view_as
       return unless view_as?
       return if request.get? || request.head?
+      return if signing_out?
 
-      end_impersonation
-      alert = 'Write attempted during View-as — the session has ended.'
-      return redirect_to(root_path, alert: alert) unless turbo_frame_request?
+      # :see_other, because a Turbo DELETE or PATCH would repeat its own verb on
+      # a 302 and land on a route that does not take it.
+      unless turbo_frame_request?
+        return redirect_back_or_to(root_path, alert: view_as_write_refusal, status: :see_other)
+      end
 
-      flash[:alert] = alert
+      flash[:alert] = view_as_write_refusal
       # request_id: nil is load-bearing. It defaults to the current request's id,
       # and Turbo drops a refresh whose id it has already seen — which is true of
       # every refresh issued in reply to the request that triggered it.
       render turbo_stream: turbo_stream.refresh(request_id: nil)
+    end
+
+    # Devise's sessions controller inherits the guard, and refusing its DELETE
+    # would leave the admin unable to log out while viewing as someone.
+    def signing_out?
+      devise_controller? && controller_name == 'sessions' && action_name == 'destroy'
     end
 
     def enforce_impersonation_ttl
@@ -162,21 +189,15 @@ module ImpersonationSession
     def hydrate_user(nuid)
       return if nuid.blank?
 
-      values = Current.set(on_behalf_of: nil) { AtlasRb::Authentication.login(nuid) }
-      User.new(
-        email:  values.email,
-        nuid:   values.nuid,
-        name:   values.name,
-        groups: values.groups,
-        role:   values.role
-      )
-    rescue Faraday::Error, JSON::ParserError => e
+      # The curated-name read in from_atlas is the same kind of self-lookup, so
+      # it sits inside the same guard.
+      Current.set(on_behalf_of: nil) do
+        values = AtlasRb::Authentication.login(nuid)
+        # A NUID Atlas does not know reads as nil; the callers fail closed on nil.
+        values && User.from_atlas(values)
+      end
+    rescue AtlasRb::Error, Faraday::Error, JSON::ParserError => e
       Rails.logger.error("Impersonation hydrate failed for #{nuid}: #{e.class} #{e.message}")
       nil
-    end
-
-    # Fail-closed: a hydration miss yields a public-only guest, not the admin.
-    def view_as_target
-      @view_as_target ||= hydrate_user(view_as_nuid) || User.new(groups: [], role: 'guest')
     end
 end

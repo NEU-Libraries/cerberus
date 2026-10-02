@@ -40,6 +40,35 @@ RSpec.describe PdfRenditionJob, type: :job do
     expect(IiifAssetsJob).to have_received(:perform_now).with(work_id, pdf_path, refresh: true)
   end
 
+  describe 'on a replace or revert' do
+    def asset(noid, name, mime)
+      AtlasRb::Mash.new(role: 'original_file', noid: noid, original_filename: name, mime_type: mime)
+    end
+
+    before { allow(AtlasRb::Blob).to receive(:update) }
+
+    it "updates the Work's existing PDF instead of attaching another" do
+      allow(AtlasRb::Work).to receive(:file_sets).with(work_id).and_return(
+        [AtlasRb::Mash.new(assets: [asset('b-1', 'thesis.docx', 'application/msword')]),
+         AtlasRb::Mash.new(assets: [asset('b-2', 'thesis.pdf', 'application/pdf')])]
+      )
+
+      described_class.new.perform(work_id, staged_path, rendition_key, refresh: true)
+
+      expect(AtlasRb::Blob).to have_received(:update).with('b-2', pdf_path, idempotency_key: rendition_key)
+      expect(AtlasRb::Blob).not_to have_received(:create)
+    end
+
+    # The first rendition may never have landed, for instance when soffice
+    # timed out at deposit.
+    it 'attaches a PDF when the Work has none yet' do
+      described_class.new.perform(work_id, staged_path, rendition_key, refresh: true)
+
+      expect(AtlasRb::Blob).to have_received(:create)
+      expect(AtlasRb::Blob).not_to have_received(:update)
+    end
+  end
+
   it 'enqueues full-text extraction from the rendition PDF (Office text path)' do
     expect { described_class.new.perform(work_id, staged_path, rendition_key) }
       .to have_enqueued_job(FullTextExtractionJob).with(work_id, pdf_path)

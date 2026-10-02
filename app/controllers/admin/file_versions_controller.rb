@@ -9,6 +9,7 @@ module Admin
   # this is the other half of the same "replace a file" surface. Lives apart from
   # FilesController so Live's stream semantics don't bleed onto the
   # finder/mutation actions.
+  # See docs/admin.md.
   class FileVersionsController < BaseController
     skip_before_action :require_admin
     before_action :require_admin_or_delegate

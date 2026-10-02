@@ -3,13 +3,6 @@
     %span.admin-actions__title
       %i.fa-solid.fa-screwdriver-wrench{'aria-hidden' => 'true'}
       DRS Administration
-    %span.admin-actions__subtitle
-      - if current_user&.admin?
-        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
-        Admin-only
-      - else
-        %i.fa-solid.fa-user-shield{'aria-hidden' => 'true'}
-        Delegated admin access
 
   %p.admin-actions__lede
     Repository-management operations. These actions change how objects are arranged and displayed across the repository.
@@ -30,9 +23,9 @@
     = link_to admin_reparent_path, class: 'admin-action-card admin-action-card--structure', role: 'listitem' do
       %span.admin-action-card__icon
         %i.fa-solid.fa-sitemap{'aria-hidden' => 'true'}
-      %span.admin-action-card__title Re-parent / Move
+      %span.admin-action-card__title Move
       %span.admin-action-card__desc
-        Move a Work, Collection, or Community to a new parent. Re-orders the structural tree and re-flows every descendant's breadcrumb and contents.
+        Move a Work, Collection, or Community to a new parent. This updates the structural tree and refreshes every descendant's breadcrumb and contents.
       %span.admin-action-card__cta
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
@@ -48,19 +41,30 @@
           Open
           %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
 
-      = link_to admin_associations_path, class: 'admin-action-card admin-action-card--link', role: 'listitem' do
-        %span.admin-action-card__icon
-          %i.fa-solid.fa-diagram-project{'aria-hidden' => 'true'}
-        %span.admin-action-card__title Associated works
-        %span.admin-action-card__desc
-          Record that one Work is the codebook, figure, transcription, instructional material or supplemental material for another. Both works keep their own page; each shows the relationship from its own end.
-        %span.admin-action-card__cta
-          Open
-          %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+    = link_to admin_communities_path, class: 'admin-action-card admin-action-card--structure', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-users{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Communities
+      %span.admin-action-card__desc
+        Find any community, private ones included, and open its page, its details and permissions, or the people affiliated with it.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
 
+    = link_to admin_associations_path, class: 'admin-action-card admin-action-card--link', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-diagram-project{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Associated works
+      %span.admin-action-card__desc
+        Record that one Work is the codebook, figure, transcription, instructional material or supplemental material for another. Both works keep their own page; each shows the relationship from its own end.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
+    - if current_user&.admin?
       = link_to admin_people_path, class: 'admin-action-card admin-action-card--people', role: 'listitem' do
         %span.admin-action-card__icon
-          %i.fa-solid.fa-users{'aria-hidden' => 'true'}
+          %i.fa-solid.fa-user{'aria-hidden' => 'true'}
         %span.admin-action-card__title Manage people
         %span.admin-action-card__desc
           Create new person records and manage details in existing records, including names, ORCIDs, and community affiliations.

@@ -40,7 +40,7 @@ class PdfRenditionJob < ApplicationJob
 
     raise PrimaryFileMissing, "work #{work_id} has no primary file yet" unless primary_file?(work_id)
 
-    AtlasRb::Blob.create(work_id, pdf_path, File.basename(pdf_path), idempotency_key: rendition_key)
+    attach_rendition(work_id, pdf_path, rendition_key, refresh: refresh)
     # perform_now so the ambient acting NUID carries through (see ApplicationJob).
     IiifAssetsJob.perform_now(work_id, pdf_path, refresh: refresh)
     FullTextExtractionJob.perform_later(work_id, pdf_path)
@@ -48,6 +48,18 @@ class PdfRenditionJob < ApplicationJob
   end
 
   private
+
+    # A replace or revert updates the Work's one PDF rather than adding another.
+    # Deleting the stale PDF is not an option: a Blob delete is admin-only in
+    # Atlas, and this job runs as whoever replaced the file.
+    def attach_rendition(work_id, pdf_path, rendition_key, refresh:)
+      existing = RenditionAsset.for(AtlasRb::Work.file_sets(work_id), mime_types: RenditionAsset::PDF) if refresh
+      if existing
+        AtlasRb::Blob.update(existing['noid'], pdf_path, idempotency_key: rendition_key)
+      else
+        AtlasRb::Blob.create(work_id, pdf_path, File.basename(pdf_path), idempotency_key: rendition_key)
+      end
+    end
 
     def rendition_path(staged_path)
       File.join(File.dirname(staged_path), "#{File.basename(staged_path, '.*')}.pdf")

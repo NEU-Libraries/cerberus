@@ -12,7 +12,15 @@
       form grows to fill the navbar row and wraps the wordmark onto two
       lines. %>
   <%= form_tag('/catalog', method: :get, class: 'search-query-form container-fluid me-0 pe-0 col-md-12 col-lg-8') do -%>
-    <%= render Blacklight::HiddenSearchStateComponent.new(params: params) %>
+    <%# Carries the search state (facets, sort, per page) into the next search,
+        less what must not travel: the query, which the box below supplies,
+        and the route's own parameters (controller, action, a page's id).
+        HiddenSearchStateComponent drops only page and utf8. A plain hash,
+        because it unpacks nested values only from a Hash, and Parameters is
+        not one: a facet filter would otherwise travel as one garbled field. %>
+    <%= render Blacklight::HiddenSearchStateComponent.new(
+          params: params.except(:q, :search_field, *request.path_parameters.keys).to_unsafe_h
+        ) %>
     <div class="input-group">
       <input type="text" class="form-control" placeholder="Search..." id="q" name="q" value="<%= params[:q] %>">
       <button class="btn btn-primary" type="submit">

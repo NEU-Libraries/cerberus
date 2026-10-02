@@ -110,7 +110,7 @@ module SetsHelper
       if chips_count.positive? && added_count.positive?
         clauses << "plus #{pluralize(added_count, 'item')} you added individually"
       end
-      clauses << "minus #{pluralize(aside_count, 'item')} you set aside" if aside_count.positive?
+      clauses << "minus #{pluralize(aside_count, 'item')} you hid" if aside_count.positive?
       clauses
     end
 end

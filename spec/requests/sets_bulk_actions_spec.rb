@@ -84,7 +84,7 @@ RSpec.describe 'Sets bulk actions', type: :request do
 
     it 'refuses the policy write to a non-operator' do
       sign_in owner
-      patch "/sets/#{set['id']}/sentinel", params: { sentinel: { master: { mode: 'restrict', groups: [staff] } } }
+      patch "/sets/#{set['id']}/sentinel", params: { sentinel: { original: { mode: 'restrict', groups: [staff] } } }
 
       expect(response).to have_http_status(:forbidden)
       expect(Sentinel.find_by(target_id: set['id'])).to be_nil
@@ -117,7 +117,7 @@ RSpec.describe 'Sets bulk actions', type: :request do
     end
 
     it 'enqueues the sweep once a policy exists' do
-      Sentinel.create!(target_id: set['id'], policy: { 'master' => [staff] })
+      Sentinel.create!(target_id: set['id'], policy: { 'original' => [staff] })
       sign_in admin
       post "/sets/#{set['id']}/apply_sentinel"
 
@@ -129,9 +129,9 @@ RSpec.describe 'Sets bulk actions', type: :request do
   describe 'authoring the policy' do
     it 'saves a restricted tier' do
       sign_in admin
-      patch "/sets/#{set['id']}/sentinel", params: { sentinel: { master: { mode: 'restrict', groups: [staff] } } }
+      patch "/sets/#{set['id']}/sentinel", params: { sentinel: { original: { mode: 'restrict', groups: [staff] } } }
 
-      expect(Sentinel.find_by(target_id: set['id']).policy).to eq({ 'master' => [staff] })
+      expect(Sentinel.find_by(target_id: set['id']).policy).to eq({ 'original' => [staff] })
       expect(response).to redirect_to(edit_set_path(set['id'], tab: 'derivative-access'))
     end
 
@@ -141,19 +141,19 @@ RSpec.describe 'Sets bulk actions', type: :request do
     it 'omits an unrestricted tier instead of claiming public' do
       sign_in admin
       patch "/sets/#{set['id']}/sentinel",
-            params: { sentinel: { small: { mode: 'public' }, master: { mode: 'restrict', groups: [staff] } } }
+            params: { sentinel: { small: { mode: 'public' }, original: { mode: 'restrict', groups: [staff] } } }
 
-      expect(Sentinel.find_by(target_id: set['id']).policy).to eq({ 'master' => [staff] })
+      expect(Sentinel.find_by(target_id: set['id']).policy).to eq({ 'original' => [staff] })
     end
 
     it 'refuses a policy that widens as resolution grows, and re-renders the ladder' do
       sign_in admin
       patch "/sets/#{set['id']}/sentinel",
-            params: { sentinel: { small:  { mode: 'restrict', groups: [] },
-                                  master: { mode: 'restrict', groups: [staff] } } }
+            params: { sentinel: { small:    { mode: 'restrict', groups: [] },
+                                  original: { mode: 'restrict', groups: [staff] } } }
 
       # Monotonicity is a property of the ladder, so it still applies without a
-      # container: master must not be more open than small.
+      # container: original must not be more open than small.
       expect(response).to have_http_status(:unprocessable_content)
       expect(Sentinel.find_by(target_id: set['id'])).to be_nil
     end

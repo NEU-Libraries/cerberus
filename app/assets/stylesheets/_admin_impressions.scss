@@ -7,13 +7,14 @@
 // ---------------------------------------------------------------------
 
 // Per-metric accent tones (desaturated, matching the existing palette):
-// views = Cerberus navy, downloads = teal-green success, visitors = indigo
-// (the audit-history "reparent" tone). Composition tab reuses the same
+// views = Cerberus navy, downloads = teal-green success, streams = amber (the
+// audit-history "restore" tone), visitors = indigo (the "reparent" tone). Composition tab reuses the same
 // ledger with its own set — communities/collections/works/people trace the
 // structural-home hierarchy top to bottom; public/private mirrors the
 // open/restricted register used elsewhere (success = open, orange = gated).
 $usage-view:     $blue;
 $usage-download: $success;
+$usage-stream:   #c46410;
 $usage-visitor:  #5d569b;
 $usage-communities: $teal;
 $usage-collections: $cyan;
@@ -43,6 +44,7 @@ $usage-private:     $orange;
     --usage-accent: #{$gray-500};
     &--view        { --usage-accent: #{$usage-view}; }
     &--download    { --usage-accent: #{$usage-download}; }
+    &--stream      { --usage-accent: #{$usage-stream}; }
     &--visitors    { --usage-accent: #{$usage-visitor}; }
     &--communities { --usage-accent: #{$usage-communities}; }
     &--collections { --usage-accent: #{$usage-collections}; }
@@ -85,6 +87,18 @@ $usage-private:     $orange;
     color: $gray-500;
     margin-bottom: 0.6rem;
   }
+}
+
+// The Work page's Analytics pane sits straight on the grey page, so it takes
+// the card shell these blocks have on the admin dashboard. The card stays apart
+// from the tabs, because the tab strip is shared with the Metadata pane.
+.work-usage-card {
+  margin-top: 0.9rem;
+  padding: 1rem 1.1rem;
+  background-color: #fff;
+  border: 1px solid $gray-300;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
 }
 
 // maintainAspectRatio is off (so the chart fills the card width); give the

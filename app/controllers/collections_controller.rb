@@ -7,6 +7,7 @@ class CollectionsController < CatalogController
   include RecordsImpressions
   include ContainerAnalytics
   include ContainerRestrictionRequest
+  include CascadeTombstoning
 
   atlas_resource AtlasRb::Collection, key: :collection, route: :collection
   authorize_resource_writes!(extra_edit: %i[sentinel request_restriction])
@@ -30,11 +31,13 @@ class CollectionsController < CatalogController
     authorize_show!
     @response = find_children(@collection.valkyrie_id, params[:id])
     assign_show_abilities!
+    offer_cascade_delete
     breadcrumbs(params[:id])
   end
 
+  # cascade is the confirmation's flag for a container that is not empty.
   def tombstone
-    perform_tombstone!
+    params[:cascade].present? ? perform_cascade_tombstone! : perform_tombstone!
   end
 
   def new

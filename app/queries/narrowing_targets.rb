@@ -61,9 +61,14 @@ class NarrowingTargets
     # silently truncate the set that actually reaches a job.
     def documents
       Blacklight.default_index.search(
-        q: '*:*', fq: [subtree_fq, AFFECTED_TYPES], rows: MAX_ROWS,
+        q: '*:*', fq: filters, rows: MAX_ROWS,
         fl: "id,alternate_ids_ssim,internal_resource_tesim,#{ANCESTOR_FIELD}"
       ).documents
+    end
+
+    # TombstoneTargets widens the types and drops what is already withdrawn.
+    def filters
+      [subtree_fq, AFFECTED_TYPES]
     end
 
     def subtree_fq

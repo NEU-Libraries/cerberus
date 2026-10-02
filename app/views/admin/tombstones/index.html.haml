@@ -9,14 +9,6 @@
       Tombstoned items
       - if documents.any?
         %span.admin-registry__count= pluralize(@response.total, 'item')
-    .admin-registry__head-actions
-      %span.admin-registry__subtitle
-        - if current_user&.admin?
-          %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
-          Admin-only
-        - else
-          %i.fa-solid.fa-user-shield{'aria-hidden' => 'true'}
-          Delegated admin access
 
   .p-3
     %p.text-muted.small.mb-0
@@ -24,6 +16,9 @@
     - if current_user&.admin?
       %p.text-muted.small.mb-0.mt-2
         Permanent deletion is the other way out of a withdrawal, and nothing reverses it: it removes the item and every preserved copy of its files, earlier versions included, leaving only the audit record. A Collection or Community must be emptied first, and its tombstoned members count.
+    .mt-3
+      = render 'admin/finder/search_form', url: admin_tombstones_path, q: params[:q], hidden: {},
+               placeholder: 'Search tombstoned items by title or PID…'
 
   - if documents.any?
     .table-responsive
@@ -31,6 +26,7 @@
         %thead
           %tr
             %th{scope: 'col'} Title
+            %th{scope: 'col'} Parent
             %th{scope: 'col'} Type
             %th{scope: 'col'} PID
             %th{scope: 'col'}
@@ -39,6 +35,7 @@
             %tr
               %td
                 .admin-registry-table__name= finder_doc_heading(doc)
+              %td= tombstone_parent_cell(@parents[StructuralParents.parent_uuid(doc)])
               %td= finder_type_chip(doc.klass_type)
               %td
                 %span.admin-registry-table__id= doc.to_param
@@ -55,6 +52,10 @@
     - if @response.respond_to?(:total_pages) && @response.total_pages > 1
       .px-3.pt-2
         = paginate @response
+  - elsif params[:q].present?
+    .admin-registry__empty
+      %p.mb-2.text-muted No tombstoned items match “#{params[:q]}”.
+      = link_to 'Show all tombstoned items', admin_tombstones_path, class: 'btn btn-tonal-secondary btn-sm'
   - else
     .admin-registry__empty
       %i.fa-solid.fa-trash-can-arrow-up.admin-registry__empty-icon{'aria-hidden' => 'true'}

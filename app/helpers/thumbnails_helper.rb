@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
-# Guards the one thing a stored thumbnail can do to a page that renders it.
+# Guards the one thing a stored thumbnail can do to a page that renders it, and
+# supplies the poster an audio or video Work's player shows without one.
 # See docs/derivatives.md.
 module ThumbnailsHelper
+  AV_PLACEHOLDER = 'av-placeholder.svg'
+
   # A stored thumbnail value that is safe to hand to image_tag, or nil.
   #
   # Atlas writes every thumbnail as an absolute IIIF URL, and image_tag passes a
@@ -15,5 +18,12 @@ module ThumbnailsHelper
   def renderable_thumbnail(src)
     value = src.to_s
     value.start_with?('http://', 'https://', '//') ? value : nil
+  end
+
+  # The player's poster: the Work's own, else the placeholder mark. Only the
+  # show page's player uses the mark; a list or gallery tile without a
+  # thumbnail keeps the type icon, as every other type does.
+  def av_poster_src(preview)
+    preview.presence || image_path(AV_PLACEHOLDER)
   end
 end

@@ -1,7 +1,11 @@
 -# Shared title/description form (new + edit). The recipe itself is never
 -# edited here — works and collections join a set from their own pages, and
 -# leave it from the set page's definition panel.
+- pending = local_assigns[:pending]
 = form_with scope: :set, url: url, method: method do |f|
+  - if pending
+    = hidden_field_tag "#{pending[:kind]}_id", pending[:noid]
+    = hidden_field_tag :return_to, pending[:return_to] if pending[:return_to]
   .p-2
     .mb-3
       -# The asterisk is visual only: the input's required attribute is what

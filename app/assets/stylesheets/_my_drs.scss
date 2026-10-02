@@ -36,17 +36,15 @@
 }
 
 // "Your accounts" switcher. Rows are divided by hairlines (the admin-registry
-// ledger feel) and the account you're on gets the same near-white wash as the
-// card head. The group diff is the one considered element — a quiet gain/loss
-// ledger (desaturated teal for access gained, struck-through muted for access
-// lost) instead of two long raw group lists.
+// ledger feel). The Current badge marks the account you're on; the row keeps
+// the white body of the other My DRS cards, because a fill the colour of the
+// card head made a one-account card read as all header. The group diff is the
+// one considered element — a quiet gain/loss ledger (desaturated teal for
+// access gained, struck-through muted for access lost) instead of two long raw
+// group lists.
 .account-row {
   & + & {
     border-top: 1px solid $gray-300;
-  }
-
-  &--current {
-    background-color: #f6f8fa;
   }
 
   &__affiliation {

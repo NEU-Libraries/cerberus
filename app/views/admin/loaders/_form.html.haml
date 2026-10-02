@@ -30,7 +30,8 @@
       = f.label :kind, class: 'admin-registry-form__label' do
         %i.fa-solid.fa-diagram-project{'aria-hidden' => 'true'}
         Loader type
-      = f.select :kind, Loader.kinds.keys.map { |k| [k.upcase, k] }, {}, class: 'form-select'
+      = f.select :kind, Loader.kinds.keys.map { |k| [k.upcase, k] }, { include_blank: 'Select a loader type…' },
+                 class: 'form-select', required: true
       .admin-registry-form__hint
         <strong>IPTC</strong> ingests image archives and builds MODS from embedded IPTC tags. <strong>XML</strong> ingests a <code class="admin-registry-table__id">manifest.xlsx</code> plus per-row MODS files to update existing objects or create new ones. <strong>MULTIPAGE</strong> ingests an archive whose <code class="admin-registry-table__id">manifest.xlsx</code> lists one or more items (MODS + ordered page images per item); each item becomes its own Work with ordered pages.
 
@@ -44,7 +45,7 @@
 
     .mb-3
       = f.label :group, 'Grouper group', class: 'admin-registry-form__label' do
-        %i.fa-solid.fa-users{'aria-hidden' => 'true'}
+        %i.fa-solid.fa-user-group{'aria-hidden' => 'true'}
         Grouper group
       = f.text_field :group, class: 'form-control admin-registry-form__input--id', placeholder: 'northeastern:drs:repository:loaders:marcom', autocomplete: 'off'
       .admin-registry-form__hint

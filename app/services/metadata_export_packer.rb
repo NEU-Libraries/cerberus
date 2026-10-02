@@ -8,9 +8,14 @@ require 'caxlsx'
 # in the `docs:` enumerator, not here. See docs/downloads.md.
 class MetadataExportPacker
   # The first five must match XmlLoader::Manifest::COLUMN_LABELS, or the
-  # exported bundle no longer loads back into the XML loader. Columns after
-  # them are for the reader only; the loader ignores columns it does not know.
+  # exported bundle no longer loads back into the XML loader. The loader finds a
+  # column by its label, not its position, and ignores labels it does not know.
   HEADERS = ['PIDs', 'MODS XML File Path', 'File Name', 'Embargoed?', 'Embargo Date', 'Date Ingested'].freeze
+
+  # A manifest-only export bundles no MODS, so the column would point at nothing.
+  # A full export keeps it even where one fetch failed: that row's blank cell is
+  # a failure, and ERRORS.txt names it.
+  MODS_PATH_HEADER = 'MODS XML File Path'
 
   # Every Solr field this packer reads off a doc, so a resolver's `fl` can be
   # taken from here instead of guessed. A field read but not fetched raises
@@ -19,7 +24,6 @@ class MetadataExportPacker
     id
     alternate_ids_ssim
     embargo_release_date_dtsi
-    embargoed_bsi
     created_at_dtsi
   ].freeze
 
@@ -38,7 +42,7 @@ class MetadataExportPacker
         next if noid.blank?
 
         xml_path = write_mods(zip, noid, errors) if @include_mods
-        rows << manifest_row(doc, noid, xml_path)
+        rows << manifest_row(doc, noid, xml_path, file_name(noid, errors))
       end
     end
 
@@ -64,9 +68,28 @@ class MetadataExportPacker
       nil
     end
 
-    # A row in HEADERS order.
-    def manifest_row(doc, noid, xml_path)
-      [noid, xml_path, nil, embargoed(doc), embargo_date(doc), ingest_date(doc)]
+    # A row in headers order.
+    def manifest_row(doc, noid, xml_path, file_name)
+      row = [noid, file_name, embargoed(doc), embargo_date(doc), ingest_date(doc)]
+      @include_mods ? row.insert(1, xml_path) : row
+    end
+
+    def headers
+      @include_mods ? HEADERS : HEADERS - [MODS_PATH_HEADER]
+    end
+
+    # The name the Work's content file was deposited under, as a create row
+    # would name it. Solr carries no filename, so this is an Atlas read per Work.
+    # A row with a PID updates on re-load and the loader ignores this cell, so a
+    # failed lookup costs only the reader's information: blank, and noted.
+    def file_name(noid, errors)
+      original = Array(AtlasRb::Work.assets(noid)).find do |asset|
+        asset['uri'].blank? && asset['role'].to_s == 'original_file'
+      end
+      original && (original['original_filename'].presence || original['filename'])
+    rescue Faraday::Error, JSON::ParserError, AtlasRb::ResourceError => e
+      errors << "#{noid}: file list fetch failed — #{e.class}: #{e.message}"
+      nil
     end
 
     # The day the Work was created, in Eastern time like every date in the UI.
@@ -75,11 +98,11 @@ class MetadataExportPacker
       stamp.present? ? Time.zone.parse(stamp.to_s)&.to_date&.iso8601 : nil
     end
 
-    # embargoed_bsi is boolean-as-string (Atlas's _bsi convention) — compare
-    # against the string, not `true`.
+    # A lapsed date is not an embargo. Atlas indexes only the date, never a
+    # flag, because nothing re-indexes a Work on its release day; an
+    # `embargoed_bsi` still in the index is a stale leftover and stays true.
     def embargoed(doc)
-      'true' if Array(doc['embargo_release_date_dtsi']).first.present? ||
-                Array(doc['embargoed_bsi']).first.to_s == 'true'
+      'true' if Embargo.active?(Array(doc['embargo_release_date_dtsi']).first)
     end
 
     def embargo_date(doc)
@@ -90,7 +113,7 @@ class MetadataExportPacker
     def write_manifest(zip, rows)
       package = Axlsx::Package.new
       package.workbook.add_worksheet(name: 'Manifest') do |sheet|
-        sheet.add_row HEADERS
+        sheet.add_row headers
         rows.each { |row| sheet.add_row row }
       end
       write_text(zip, 'manifest.xlsx', package.to_stream.read)

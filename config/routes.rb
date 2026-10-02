@@ -16,6 +16,7 @@ Rails.application.routes.draw do
 
   mount Blacklight::Engine => '/catalog'
   root to: 'pages#home'
+  get 'terms', to: 'pages#terms', as: :terms
   concern :searchable, Blacklight::Routes::Searchable.new
 
   resource :catalog, only: [], as: 'catalog', path: '/catalog', controller: 'catalog' do
@@ -107,6 +108,11 @@ Rails.application.routes.draw do
       get :manifest
       get :metadata
       patch :metadata, action: :update_metadata
+      # Withdraw one of the Work's caption files, or restore a withdrawn one.
+      # Admins and delegated admins only, like the Atlas FileSet tombstone and
+      # restore beneath them (WorkCaptions).
+      delete :caption, action: :remove_caption
+      post :restore_caption
       # Add an arbitrary binary to an existing Work: GET renders the upload
       # form, POST stages the file and queues the attach (AddFileJob). Both are
       # edit-gated via authorize_resource_writes!'s extra_edit list.
@@ -256,6 +262,14 @@ Rails.application.routes.draw do
     post   'associations/add',    to: 'associations#add',     as: :associations_add
     delete 'associations/remove', to: 'associations#remove',  as: :associations_remove
 
+    # Communities — every community, to open its page, Edit page or People tab.
+    get 'communities', to: 'communities#index'
+    # A community's people: a Person's affiliation, written from the community's
+    # side. Keyed by NOID, like the People registry.
+    get    'communities/:noid/people',            to: 'community_people#show',    as: :community_people
+    post   'communities/:noid/people',            to: 'community_people#create'
+    delete 'communities/:noid/people/:person_id', to: 'community_people#destroy', as: :community_person
+
     # People — the curatorial Person registry: create a Person by NUID, edit the
     # authoritative display_name / title / bio / orcid, and manage community
     # affiliations (the edges that drive the Faculty & Staff browse). Keyed by
@@ -263,6 +277,8 @@ Rails.application.routes.draw do
     resources :people, only: %i[index new create edit update], param: :noid do
       member do
         post   'affiliations', to: 'people#add_affiliation', as: :add_affiliation
+        # The index row's expandable Grouper groups, loaded only when opened.
+        get    'groups', to: 'people#groups', as: :groups
         delete 'affiliations/:community_id', to: 'people#remove_affiliation', as: :remove_affiliation
       end
     end
@@ -332,6 +348,10 @@ Rails.application.routes.draw do
   # a single flat route serves Work / Collection / Community alike.
   get '/resources/:id/rights_history', to: 'histories#rights', as: :rights_history
   get '/resources/:id/mods_history',   to: 'histories#mods',   as: :mods_history
+
+  # "Why this result?" on a search result, for admins: :id is the result's Solr
+  # id, and q is the search it came from.
+  get 'search_explanations/:id', to: 'search_explanations#show', as: :search_explanation
 
   # xml
   get '/xml/editor/:id' => 'xml#editor', as: 'xml_editor'

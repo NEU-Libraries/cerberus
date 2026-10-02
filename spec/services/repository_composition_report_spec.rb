@@ -89,4 +89,29 @@ RSpec.describe RepositoryCompositionReport do
       scoped.classification_counts
     end
   end
+
+  describe '#storage_bytes' do
+    def solr_returning(facets)
+      instance_double(Blacklight::Solr::Response, dig: nil).tap do |response|
+        allow(response).to receive(:dig).with('facets', 'total').and_return(facets)
+      end
+    end
+
+    it "sums Atlas's storage_bytes_ls over the scope" do
+      scoped = described_class.new(scope_fq: '{!terms f=id}uuid-1')
+      expect(Blacklight.default_index).to receive(:search)
+        .with(hash_including(fq: ['{!terms f=id}uuid-1'], rows: 0,
+                             'json.facet': '{"total":"sum(storage_bytes_ls)"}'))
+        .and_return(solr_returning(3.5e9))
+
+      expect(scoped.storage_bytes).to eq(3_500_000_000)
+    end
+
+    # Solr leaves the key out when nothing matches.
+    it 'is 0 when no document carries the field' do
+      allow(Blacklight.default_index).to receive(:search).and_return(solr_returning(nil))
+
+      expect(report.storage_bytes).to eq(0)
+    end
+  end
 end

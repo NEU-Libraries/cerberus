@@ -100,7 +100,7 @@ RSpec.describe 'Admin::Impersonations', type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('Target user')
-      # Matches the rest of the admin-action UX (Re-parent / Linked members),
+      # Matches the rest of the admin-action UX (Move / Linked members),
       # not the old .well form-section chrome.
       expect(response.body).to include('admin-registry')
       expect(response.body).not_to include('impersonation-start')
@@ -108,7 +108,7 @@ RSpec.describe 'Admin::Impersonations', type: :request do
       expect(response.body).to include('data-controller="impersonation-search"')
       expect(response.body).to include(admin_impersonation_recipients_path)
       # Full admin: both modes offered.
-      expect(response.body).to include('value="Act as"', 'value="View as"', 'Admin-only')
+      expect(response.body).to include('value="Act as"', 'value="View as"')
     end
 
     it 'renders View-as only (no Act-as control) for a devolved-admin delegate' do
@@ -118,8 +118,6 @@ RSpec.describe 'Admin::Impersonations', type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('value="View as"')
       expect(response.body).not_to include('value="Act as"')
-      expect(response.body).to include('Delegated admin access')
-      expect(response.body).not_to include('Admin-only')
     end
   end
 
@@ -132,6 +130,18 @@ RSpec.describe 'Admin::Impersonations', type: :request do
       get admin_impersonation_recipients_path, params: { q: 'doe' }
 
       expect(response.parsed_body).to eq([{ 'nuid' => '000000002', 'name' => 'Jane Doe' }])
+    end
+
+    # Atlas matches the curated name too, so a hit on it must show it.
+    it 'shows the curated Person name verbatim when the entry has one' do
+      sign_in admin_user
+      allow(AtlasRb::User).to receive(:search).with('gasper', nuid: admin_user.nuid)
+                                              .and_return([{ 'nuid' => '000000014', 'name' => 'Reader, Licensed',
+                                                             'display_name' => 'Mickey Gasper' }])
+
+      get admin_impersonation_recipients_path, params: { q: 'gasper' }
+
+      expect(response.parsed_body).to eq([{ 'nuid' => '000000014', 'name' => 'Mickey Gasper' }])
     end
 
     it 'returns [] for a blank query without calling Atlas' do
@@ -250,6 +260,16 @@ RSpec.describe 'Admin::Impersonations', type: :request do
         expect(flash[:alert]).to match(/valid NUID/)
       end
 
+      # A status-guarded read answers an unknown NUID with nil, not a raise.
+      it 'refuses to start when Atlas does not know the NUID' do
+        allow(AtlasRb::Authentication).to receive(:login).and_return(nil)
+        post admin_act_as_path, params: { nuid: '999999999' }
+
+        expect(session[:acting_as_nuid]).to be_blank
+        expect(response).to redirect_to(admin_root_path)
+        expect(flash[:alert]).to match(/valid NUID/)
+      end
+
       it 'refuses to start on a blank NUID without calling Atlas' do
         expect(AtlasRb::Authentication).not_to receive(:login)
         post admin_act_as_path, params: { nuid: '' }
@@ -281,14 +301,40 @@ RSpec.describe 'Admin::Impersonations', type: :request do
         expect(session[:view_as_nuid]).to eq('000000002')
       end
 
-      it 'ends the session on a write to a guarded route, before the action runs' do
+      it 'refuses a write to a guarded route before the action runs, and keeps the session' do
         # PATCH /works/:id would hit Atlas in the action — the guard fires
         # first, so no stub is needed and Atlas is never touched.
         patch work_path('anything')
 
-        expect(session[:view_as_nuid]).to be_blank
+        expect(session[:view_as_nuid]).to eq('000000002')
         expect(response).to redirect_to(root_path)
-        expect(flash[:alert]).to match(/Write attempted during View-as/)
+        expect(response).to have_http_status(:see_other)
+        expect(flash[:alert]).to match(/can't make changes while viewing as .*Nothing was saved/)
+      end
+
+      it 'returns to the page the write came from' do
+        patch work_path('anything'), headers: { 'Referer' => 'http://www.example.com/works/anything/edit' }
+
+        expect(response).to redirect_to('http://www.example.com/works/anything/edit')
+      end
+
+      it 'lets the admin log out' do
+        delete destroy_user_session_path
+
+        expect(flash[:alert]).to be_blank
+        expect(session[:view_as_nuid]).to be_blank
+        get my_drs_path
+        expect(response).to redirect_to(root_path)
+      end
+
+      it 'mounts the client guard on the banner with the same message' do
+        get admin_root_path
+
+        banner = response.parsed_body.at_css('aside.impersonation-banner')
+        expect(banner['data-controller']).to eq('view-as-guard')
+        expect(banner['data-view-as-guard-message-value']).to match(/Nothing was saved/)
+        expect(JSON.parse(banner['data-view-as-guard-allowed-value']))
+          .to include(admin_impersonation_path, destroy_user_session_path)
       end
 
       it 'permits a GET and keeps the session' do
@@ -319,11 +365,11 @@ RSpec.describe 'Admin::Impersonations', type: :request do
           expect(response.body).not_to include('request-id')
         end
 
-        it 'still ends the session and still says so' do
+        it 'keeps the session and still says so' do
           patch work_path('anything'), headers: frame_headers
 
-          expect(session[:view_as_nuid]).to be_blank
-          expect(flash[:alert]).to match(/Write attempted during View-as/)
+          expect(session[:view_as_nuid]).to eq('000000002')
+          expect(flash[:alert]).to match(/Nothing was saved/)
         end
       end
 

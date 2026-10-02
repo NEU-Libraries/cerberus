@@ -1,0 +1,59 @@
+= render 'admin/breadcrumb_header'
+
+- documents = @response.documents
+
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-users{'aria-hidden' => 'true'}
+      Communities
+      - if documents.any?
+        %span.admin-registry__count= pluralize(@response.total, 'community', plural: 'communities')
+
+  .p-3
+    %p.text-muted.small.mb-0
+      Every community in the DRS, private ones included. Open a community to see its collections and showcases, or edit its details, permissions and people.
+    .mt-3
+      = render 'admin/finder/search_form', url: admin_communities_path, q: @q, hidden: {},
+               placeholder: 'Search communities by title or PID…'
+
+  - if documents.any?
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table
+        %thead
+          %tr
+            %th{scope: 'col'} Title
+            %th{scope: 'col'} Parent
+            %th{scope: 'col'} PID
+            %th{scope: 'col'}
+              %span.visually-hidden Actions
+        %tbody
+          - documents.each do |doc|
+            %tr
+              %td
+                .admin-registry-table__name= link_to finder_doc_title(doc), community_path(doc.to_param)
+              %td= tombstone_parent_cell(@parents[StructuralParents.parent_uuid(doc)])
+              %td
+                %span.admin-registry-table__id= doc.to_param
+              %td.text-end.text-nowrap
+                .d-inline-flex.gap-3.align-items-center
+                  - if current_user&.admin?
+                    = link_to admin_community_people_path(doc.to_param), class: 'admin-registry-table__edit' do
+                      %i.fa-solid.fa-user{'aria-hidden' => 'true'}
+                      People
+                  -# A full load: the Edit page picks its pane after the document loads.
+                  = link_to edit_community_path(doc.to_param), class: 'admin-registry-table__edit', data: { turbo: false } do
+                    Edit
+                    %i.fa-solid.fa-arrow-right{'aria-hidden' => 'true'}
+
+    - if @response.respond_to?(:total_pages) && @response.total_pages > 1
+      .px-3.pt-2
+        = paginate @response
+  - elsif @q
+    .admin-registry__empty
+      %p.mb-2.text-muted No communities match “#{@q}”.
+      = link_to 'Show all communities', admin_communities_path, class: 'btn btn-tonal-secondary btn-sm'
+  - else
+    .admin-registry__empty
+      %i.fa-solid.fa-users.admin-registry__empty-icon{'aria-hidden' => 'true'}
+      %p.mb-0.text-muted No communities yet.

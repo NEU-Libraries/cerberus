@@ -9,7 +9,7 @@ RSpec.describe SetsHelper do
       sentence = helper.set_recipe_sentence(chips_count: 2, added_count: 1, aside_count: 3)
 
       expect(sentence).to eq('This set contains everything in 2 collections, plus 1 item you added ' \
-                             'individually, minus 3 items you set aside. It updates automatically as ' \
+                             'individually, minus 3 items you hid. It updates automatically as ' \
                              'those collections change.')
     end
 

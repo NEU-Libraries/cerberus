@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'csv'
+
 # Shared per-asset write for the streaming-zip packers (SetZipPacker,
 # QueueZipPacker, BlobZipPacker), which differ only in what they enumerate.
 # Folder is the caller's choice; nil puts the entry at the archive root.
@@ -11,11 +13,11 @@ module ZipEntryWriter
     # deflate — do NOT switch to write_file/write_deflated_file. A mid-stream
     # failure is recorded, never raised; the archive can't be un-sent.
     def write_asset(zip, folder, asset, manifest, errors)
-      entry = [folder, entry_filename(asset)].compact.join('/')
-      zip.write_stored_file(entry) do |sink|
+      name = entry_filename(asset)
+      zip.write_stored_file([folder, name].compact.join('/')) do |sink|
         AtlasRb::Blob.content(asset.noid) { |chunk| sink << chunk }
       end
-      manifest << entry
+      manifest << { identifier: folder, filename: name }
     rescue Faraday::Error, JSON::ParserError => e
       errors << "#{folder}: #{asset.noid} failed — #{e.class}: #{e.message}"
     end
@@ -25,12 +27,12 @@ module ZipEntryWriter
     # sink — never buffer the whole JPEG. A mid-stream failure is recorded, not
     # raised.
     def write_derivative(zip, folder, delegate, manifest, errors)
-      entry = [folder, derivative_filename(delegate)].compact.join('/')
+      name = derivative_filename(delegate)
       url = IiifSigner.sign_url(internal_iiif_url(delegate[:uri]))
-      zip.write_stored_file(entry) do |sink|
+      zip.write_stored_file([folder, name].compact.join('/')) do |sink|
         Faraday.get(url) { |req| req.options.on_data = proc { |chunk, _received| sink << chunk } }
       end
-      manifest << entry
+      manifest << { identifier: folder, filename: name }
     rescue Faraday::Error => e
       errors << "#{folder}: #{delegate[:use]} failed — #{e.class}: #{e.message}"
     end
@@ -68,12 +70,29 @@ module ZipEntryWriter
 
     # Written last, so a truncated archive is still self-describing.
     def write_manifest(zip, manifest, errors)
-      write_text(zip, 'MANIFEST.txt', manifest_body(manifest))
+      write_text(zip, 'inventory.csv', inventory_csv(manifest))
       write_text(zip, 'ERRORS.txt', errors.join("\n")) if errors.any?
     end
 
-    def manifest_body(entries)
-      (["# #{entries.size} file(s)", ''] + entries).join("\n")
+    # One row per packed file; the identifier is the Work's NOID, which is also
+    # the file's folder.
+    def inventory_csv(entries)
+      handles = Hash.new { |cache, noid| cache[noid] = work_handle_url(noid) }
+      CSV.generate do |csv|
+        csv << %w[identifier filename handle]
+        entries.each { |row| csv << [row[:identifier], row[:filename], handles[row[:identifier]]] }
+      end
+    end
+
+    # The handle is on the Work record only, not in Solr, so this is one read per
+    # Work. A Work without a handle, or a failed read, leaves the cell blank:
+    # the files are already sent.
+    def work_handle_url(noid)
+      return nil if noid.blank?
+
+      ApplicationController.helpers.handle_url(AtlasRb::Work.find(noid, nuid: @nuid)&.handle)
+    rescue AtlasRb::Error, Faraday::Error, JSON::ParserError
+      nil
     end
 
     def write_text(zip, name, body)

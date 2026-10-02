@@ -23,7 +23,7 @@ module PermissionsForm
   end
 
   # Reads `current_user`, NOT `effective_user`: Atlas resolves its actor from
-  # the NUID signed off `Current.nuid`, so consulting the view-as target would
+  # the NUID signed off `Current.nuid`, so consulting the impersonation target would
   # lock rows against a different principal than the write is evaluated as. A
   # nil user stays conservative. See docs/authorization.md.
   def revocable_grant?(group)

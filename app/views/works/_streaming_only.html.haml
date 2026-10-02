@@ -1,7 +1,8 @@
--# locals: enabled (Boolean) — the stored state, for the checkbox.
+-# locals: enabled (Boolean) — the stored state, for the checkbox. audio (Boolean,
+-# optional) — the Work's content is audio only, so the label names a recording.
 -#
--# Offered only for a Work with video content: StreamingOnly.applicable? on the
--# edit page, StagedVideoProbe at deposit, where the Blob may still be in flight.
+-# Offered only for a Work with audio or video content: StreamingOnly.tiers_for on
+-# the edit page, StagedMediaProbe at deposit, where the Blob may still be in flight.
 -#
 -# The unchecked hidden field rides along deliberately. A cleared checkbox submits
 -# nothing, so without it the controller cannot tell "turn this off" from "this
@@ -11,13 +12,13 @@
 
 .my-3.rounded-3
   %h4.pb-2
-    %i.fa-solid.fa-film.me-2{ 'aria-hidden' => 'true' }
+    %i.fa-solid.me-2{ class: local_assigns[:audio] ? 'fa-file-audio' : 'fa-film', 'aria-hidden' => 'true' }
     Streaming Only
   .form-check
     = hidden_field_tag 'work[streaming_only]', '0', id: nil
     = check_box_tag 'work[streaming_only]', '1', enabled, class: 'form-check-input'
     %label.form-check-label{ for: 'work_streaming_only' }
-      Play this video on its page, but do not offer it for download
+      Play this #{local_assigns[:audio] ? 'recording' : 'video'} on its page, but do not offer it for download
   %p.text-muted.small.mt-2.mb-0
     Media marked as “streaming only” can only be viewed in the browser and may not
     be downloaded for offline viewing or sharing.

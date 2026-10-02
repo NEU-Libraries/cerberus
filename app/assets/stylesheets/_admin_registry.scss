@@ -58,6 +58,13 @@
     vertical-align: middle;
   }
 
+  // Whose record the card holds, beside its title.
+  &__who {
+    font-weight: 400;
+    color: $gray-600;
+    margin-left: 0.3rem;
+  }
+
   &__subtitle {
     font-size: 0.7rem;
     color: $gray-500;
@@ -247,6 +254,14 @@
       border-bottom: 0;
       margin-bottom: 0.5rem;
     }
+
+    // A form footer well already closes the form, so the rule above it would
+    // double the break.
+    &:has(+ .well) {
+      border-bottom: 0;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
   }
 
   &__section-title {
@@ -313,5 +328,110 @@
     font-size: 0.9rem;
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.02em;
+  }
+
+  // Read-only facts above a form's fields: the label column matches
+  // &__label, so a readout and an editable field read as one list.
+  &__readout {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 0.5rem 1rem;
+    align-items: baseline;
+    margin-bottom: 1rem;
+
+    dt {
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: $gray-700;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+
+      .fa-solid {
+        color: $gray-500;
+        font-size: 0.92em;
+      }
+    }
+
+    dd {
+      margin: 0;
+      min-width: 0;
+    }
+
+    @include media-breakpoint-down(sm) {
+      grid-template-columns: 1fr;
+      gap: 0.15rem;
+
+      dd { margin-bottom: 0.5rem; }
+    }
+  }
+
+  &__readout-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+}
+
+// The People index's expanding Grouper groups row. A table row cannot animate
+// its height, so Bootstrap's collapse transition only holds the row open for
+// its duration and then snaps it shut; with no transition it toggles at once.
+.person-groups-row.collapsing {
+  transition: none;
+}
+
+// The chevron flips with the toggle's own state. No transition, as with every
+// other state change on a button.
+.person-groups-toggle[aria-expanded="true"] .person-groups-toggle__chevron {
+  transform: rotate(180deg);
+}
+
+// Each sign-in account heads its own group set, so the email reads as the
+// account the groups belong to rather than as one more group.
+.person-groups__account + .person-groups__account {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid $gray-200;
+}
+
+.person-groups__account-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+// The registry's column-header label, so the account reads as a heading.
+.person-groups__label {
+  color: $gray-600;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.person-groups__email {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $gray-900;
+}
+
+.person-groups__list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.35rem 1rem;
+  align-items: center;
+}
+
+.person-groups__name {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: $gray-900;
+
+  &--none {
+    color: $gray-600;
+    font-style: italic;
   }
 }

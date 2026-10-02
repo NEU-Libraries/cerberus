@@ -16,7 +16,7 @@ RSpec.describe ImpressionsReport do
   end
 
   it 'totals each action across all noids in the range' do
-    expect(report.totals).to eq('view' => 109, 'download' => 4)
+    expect(report.totals).to eq('view' => 109, 'download' => 4, 'stream' => 0)
   end
 
   it 'returns a day => count series for an action' do
@@ -34,7 +34,7 @@ RSpec.describe ImpressionsReport do
 
     works = report.top_works
     expect(works.pluck(:noid)).to eq(['w1'])
-    expect(works.first[:counts]).to eq('view' => 10, 'download' => 4)
+    expect(works.first[:counts]).to eq('view' => 10, 'download' => 4, 'stream' => 0)
     expect(works.first[:total]).to eq(14)
   end
 
@@ -53,6 +53,41 @@ RSpec.describe ImpressionsReport do
     all_report.series('view')
   end
 
+  # The aggregate holds UTC hours. Grouped raw its keys would be times, which
+  # the chart's Date zero-fill never finds, and a UTC date lands an evening on
+  # tomorrow. Both rows here are 10:30 p.m. Eastern the day before, in summer
+  # (UTC-4) and in winter (UTC-5), so daylight saving is covered too.
+  describe 'the :all series' do
+    def hourly(*rows)
+      values = rows.map { |hour, n| "('w1'::text, 'view'::text, '#{hour}'::timestamp, #{n}::bigint)" }
+      ImpressionCountByDay.from(<<~SQL.squish)
+        (SELECT * FROM (VALUES #{values.join(', ')}) AS t(noid, action, hour, impressions)) impression_counts_by_day
+      SQL
+    end
+
+    def series_for(range, leaf)
+      report = described_class.new(range:, segment: :all)
+      allow(report).to receive(:leaf).and_return(leaf)
+      report.series('view')
+    end
+
+    it 'keys each hour by its Eastern day, as a Date, across daylight saving' do
+      leaf = hourly(['2026-07-10 02:30:00', 5], ['2026-01-10 03:30:00', 3])
+
+      expect(series_for(Date.new(2026, 1, 1)..Date.new(2026, 7, 31), leaf))
+        .to eq(Date.new(2026, 1, 9) => 3, Date.new(2026, 7, 9) => 5)
+    end
+
+    # 04:30 UTC on 1 July is 12:30 a.m. Eastern on 1 July, so a range that starts
+    # that day includes it, and one that ends the day before does not.
+    it 'bounds a range by Eastern midnight, not UTC midnight' do
+      leaf = hourly(['2026-07-01 04:30:00', 2])
+
+      expect(series_for(Date.new(2026, 7, 1)..Date.new(2026, 7, 2), leaf)).to eq(Date.new(2026, 7, 1) => 2)
+      expect(series_for(Date.new(2026, 6, 29)..Date.new(2026, 6, 30), leaf)).to eq({})
+    end
+  end
+
   it 'is unscoped without a scope, and show_collections_tab? defaults true' do
     expect(report.scoped?).to be false
     expect(report.show_collections_tab?).to be true
@@ -67,7 +102,7 @@ RSpec.describe ImpressionsReport do
     subject(:scoped_report) { described_class.new(range:, segment: :human, scope:) }
 
     it 'restricts totals/series to the scope noid set (c1 excluded)' do
-      expect(scoped_report.totals).to eq('view' => 10, 'download' => 4)
+      expect(scoped_report.totals).to eq('view' => 10, 'download' => 4, 'stream' => 0)
     end
 
     it 'restricts top_works ranking to the scope' do

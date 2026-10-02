@@ -1,0 +1,91 @@
+= render 'admin/breadcrumb_header'
+
+-# The community's side of a Person's affiliations. The People registry edits
+-# the same affiliations from the person's side.
+- people = @affiliates.people
+- affiliated = people.to_set { |doc| doc['noid_ssi'] }
+
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-users{'aria-hidden' => 'true'}
+      = @title
+      %span.admin-registry__count.tnum= pluralize(@affiliates.total, 'person')
+    .admin-registry__head-actions
+      = link_to 'Community page', community_path(params[:noid]), class: 'btn btn-tonal-secondary btn-sm'
+
+  .p-3
+    %p.text-muted.small.mb-0
+      People affiliated with this community appear in its Faculty &amp; Staff list and can add their works to its showcases.
+    .mt-3
+      = render 'admin/finder/search_form', url: admin_community_people_path(params[:noid]), q: @q, hidden: {},
+               placeholder: 'Find a person to add, by name, email or NUID…'
+
+  - if @q
+    - if @person_results.present?
+      .table-responsive
+        %table.table.table-borderless.admin-registry-table
+          %caption.px-3.small.text-muted Matches for “#{@q}”
+          %thead
+            %tr
+              %th{scope: 'col'} Name
+              %th{scope: 'col'} NUID
+              %th{scope: 'col'}
+                %span.visually-hidden Actions
+          %tbody
+            - @person_results.each do |person|
+              %tr
+                %td.admin-registry-table__name
+                  %i.fa-solid.fa-user.text-primary.me-2{'aria-hidden' => 'true'}
+                  = person['display_name'].presence || '(no name)'
+                %td
+                  %span.admin-registry-table__id= person['nuid']
+                %td.text-end.text-nowrap
+                  - if affiliated.include?(person['id'])
+                    %span.small.text-muted Already in this community
+                  - else
+                    = button_to admin_community_people_path(params[:noid]), params: { person_id: person['id'] },
+                                class: 'btn btn-sm btn-tonal-primary', form: { class: 'd-inline' } do
+                      %i.fa-solid.fa-user-plus.me-1{'aria-hidden' => 'true'}
+                      Add
+    - else
+      %p.px-3.small.text-muted
+        No people match “#{@q}”. A person needs a record in the People registry before they can be added.
+
+  %h2.linked-members__subhead.px-3.mt-2 In this community
+  - if people.any?
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table
+        %thead
+          %tr
+            %th{scope: 'col'} Name
+            %th{scope: 'col'} NUID
+            %th{scope: 'col'}
+              %span.visually-hidden Actions
+        %tbody
+          - people.each do |doc|
+            %tr
+              %td.admin-registry-table__name
+                %i.fa-solid.fa-user.text-primary.me-2{'aria-hidden' => 'true'}
+                = link_to doc['display_name_ssi'].presence || '(no name)', edit_admin_person_path(doc['noid_ssi'])
+              %td
+                %span.admin-registry-table__id= doc['nuid_ssi']
+              %td.text-end.text-nowrap
+                = button_to admin_community_person_path(params[:noid], doc['noid_ssi']), method: :delete,
+                            class: 'btn btn-sm btn-tonal-danger', form: { class: 'd-inline',
+                            data: { turbo_confirm: "Remove #{doc['display_name_ssi']} from this community? They leave its Faculty & Staff list. Their record and works are not changed.",
+                                    turbo_confirm_title: 'Remove from community', turbo_confirm_button: 'Remove' } } do
+                  %i.fa-solid.fa-xmark.me-1{'aria-hidden' => 'true'}
+                  Remove
+    - if @affiliates.total > people.size
+      %p.px-3.small.text-muted
+        Showing the first #{people.size} of #{@affiliates.total}, by name.
+  - else
+    .admin-registry__empty
+      %i.fa-solid.fa-user.admin-registry__empty-icon{'aria-hidden' => 'true'}
+      %p.mb-0.text-muted No people are affiliated with this community yet. Search above to add someone.
+
+  .px-3.pb-3
+    = link_to admin_communities_path, class: 'reparent-back' do
+      %i.fa-solid.fa-arrow-left.me-1{'aria-hidden' => 'true'}
+      All communities

@@ -29,9 +29,14 @@ describe ImpersonationSession do
       # target frame is absent from the response. A plain write takes the redirect,
       # which is the path these examples exercise.
       def turbo_frame_request? = false
+      def devise_controller? = false
 
       def redirect_to(target, **opts)
         @redirected = { target: target, opts: opts }
+      end
+
+      def redirect_back_or_to(fallback, **opts)
+        @redirected = { target: fallback, opts: opts }
       end
     end
   end
@@ -230,6 +235,43 @@ describe ImpersonationSession do
       expect(host.effective_user.groups).to eq([])
       expect(host.effective_user.admin?).to be(false)
     end
+
+    it 'is the hydrated target during acting-as, so the page renders as the target' do
+      host.session[:acting_as_nuid] = '000000002'
+      stub_login('000000002', role: 'staff', groups: ['public-readers'])
+
+      expect(host.effective_user.nuid).to eq('000000002')
+      expect(host.effective_user.admin?).to be(false)
+    end
+
+    it 'fails closed to a guest during acting-as too' do
+      host.session[:acting_as_nuid] = '000000002'
+      allow(AtlasRb::Authentication).to receive(:login).and_raise(JSON::ParserError)
+
+      expect(host.effective_user.role).to eq('guest')
+      expect(host.effective_user.admin?).to be(false)
+    end
+  end
+
+  describe '#viewer_nuid' do
+    before { stub_login('000000002', role: 'staff', groups: []) }
+
+    it 'is the target during view-as' do
+      host.session[:view_as_nuid] = '000000002'
+
+      expect(host.viewer_nuid).to eq('000000002')
+    end
+
+    # Acting-as sends On-Behalf-Of, which Atlas refuses from a non-admin User:.
+    it 'stays the admin during acting-as' do
+      host.session[:acting_as_nuid] = '000000002'
+
+      expect(host.viewer_nuid).to eq('000000004')
+    end
+
+    it 'is the real user when not impersonating' do
+      expect(host.viewer_nuid).to eq('000000004')
+    end
   end
 
   describe 'profile hydration' do
@@ -255,14 +297,24 @@ describe ImpersonationSession do
   end
 
   describe '#reject_writes_in_view_as' do
-    it 'ends the session and redirects on a non-GET request during view-as' do
+    it 'refuses a non-GET request during view-as and keeps the session' do
       host.session[:view_as_nuid] = '000000002'
+      stub_login('000000002', role: 'privileged', groups: [])
       host.request = instance_double('ActionDispatch::Request', get?: false, head?: false)
 
       host.send(:reject_writes_in_view_as)
 
-      expect(host.view_as?).to be(false)
-      expect(host.redirected[:opts][:alert]).to match(/Write attempted during View-as/)
+      expect(host.view_as?).to be(true)
+      expect(host.redirected[:opts]).to include(status: :see_other)
+      expect(host.redirected[:opts][:alert])
+        .to eq("You can't make changes while viewing as User 000000002. Nothing was saved.")
+    end
+
+    it 'names no one when the target will not hydrate' do
+      host.session[:view_as_nuid] = '000000002'
+      allow(AtlasRb::Authentication).to receive(:login).and_return(nil)
+
+      expect(host.view_as_write_refusal).to include('while viewing as another user')
     end
 
     it 'permits a GET request during view-as' do

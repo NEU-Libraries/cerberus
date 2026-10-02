@@ -7,7 +7,10 @@ class CatalogController < ApplicationController
 
   configure_blacklight do |config|
     config.search_service_class = GatedSearchService
-    config.view.gallery(document_component: Blacklight::Gallery::DocumentComponent, icon: Blacklight::Gallery::Icons::GalleryComponent)
+    # One column on a phone: two there leave each card narrower than the fixed
+    # 170px thumbnail, which then spills past the card's edges.
+    config.view.gallery(document_component: Blacklight::Gallery::DocumentComponent, icon: Blacklight::Gallery::Icons::GalleryComponent,
+                        classes: 'row-cols-1 row-cols-sm-2 row-cols-md-3')
 
     # The layout renders whatever this names and nothing else, so the DRS
     # header has to be reachable from here to appear at all.
@@ -341,7 +344,7 @@ class CatalogController < ApplicationController
   # current_user/effective_user — so without this, SearchBuilder#gated_user is
   # nil and gated discovery silently collapses to public-only, ignoring group
   # membership and the admin short-circuit (across container/set contents and
-  # the catalog index alike). `effective_user` honors a view-as session.
+  # the catalog index alike). `effective_user` is the target in either impersonation mode.
   def search_service_context
     { current_user: current_user, effective_user: effective_user,
       catalog_index: catalog_index? }

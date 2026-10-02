@@ -85,6 +85,30 @@ RSpec.describe 'Admin deposit triage', type: :request do
       expect(response.body).to include(work_path(flagged.id))
     end
 
+    # Cancel sits beside Finish on the unconfirmed list only: a flagged work is
+    # finished and published, and deleting it is not a triage action.
+    it 'offers Cancel deposit on unconfirmed rows only' do
+      get admin_deposit_triage_path
+      expect(response.body).to include(tombstone_work_path(unconfirmed.id))
+
+      get admin_deposit_triage_path(state: 'incomplete')
+      expect(response.body).not_to include(tombstone_work_path(flagged.id))
+    end
+
+    it 'cancels a deposit and returns to the list, which no longer shows it' do
+      post tombstone_work_path(unconfirmed.id, return_to: admin_deposit_triage_path)
+
+      expect(response).to redirect_to(admin_deposit_triage_path)
+      follow_redirect!
+      expect(response.body).not_to include(metadata_work_path(unconfirmed.id))
+    end
+
+    it 'ignores an off-host return_to and lands on the parent instead' do
+      post tombstone_work_path(unconfirmed.id, return_to: 'https://evil.example/phish')
+
+      expect(response).to redirect_to(collection_path(collection.id))
+    end
+
     # Each Work belongs on one list only, and on the one whose action is the next
     # thing that has to happen: an unconfirmed deposit needs finishing before
     # anybody worries about its thumbnails.

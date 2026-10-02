@@ -44,15 +44,15 @@ RSpec.describe Sentinel do
     end
   end
 
-  describe 'the extended image ladder (master is the floor)' do
-    it 'accepts master ⊆ service ⊆ large ⊆ medium ⊆ small' do
+  describe 'the extended image ladder (original is the floor)' do
+    it 'accepts original ⊆ service ⊆ large ⊆ medium ⊆ small' do
       policy = { 'small' => ['public'], 'medium' => ['public'], 'large' => %w[g:arch g:staff],
-                 'service' => ['g:arch'], 'master' => ['g:arch'] }
+                 'service' => ['g:arch'], 'original' => ['g:arch'] }
       expect(Sentinel.new(target_id: 'c', policy: policy)).to be_valid
     end
 
-    it 'rejects master more permissive than service' do
-      policy = { 'service' => ['g:arch'], 'master' => %w[g:arch g:staff] }
+    it 'rejects original more permissive than service' do
+      policy = { 'service' => ['g:arch'], 'original' => %w[g:arch g:staff] }
       expect(Sentinel.new(target_id: 'c', policy: policy)).not_to be_valid
     end
   end
@@ -64,8 +64,8 @@ RSpec.describe Sentinel do
     end
 
     it 'does not tie independent media to the image ladder' do
-      # master group-gated while audio stays public is fine — different media, no ordering.
-      policy = { 'master' => ['g:arch'], 'audio' => ['public'] }
+      # original group-gated while audio stays public is fine — different media, no ordering.
+      policy = { 'original' => ['g:arch'], 'audio' => ['public'] }
       expect(Sentinel.new(target_id: 'c', policy: policy)).to be_valid
     end
   end
@@ -76,7 +76,7 @@ RSpec.describe Sentinel do
     end
 
     it 'accepts tiers within the container audience' do
-      sentinel = Sentinel.new(target_id: 'c', policy: { 'master' => ['g:arch'] })
+      sentinel = Sentinel.new(target_id: 'c', policy: { 'original' => ['g:arch'] })
       sentinel.resource_read_groups = %w[g:arch g:staff]
       expect(sentinel).to be_valid
     end
@@ -88,7 +88,7 @@ RSpec.describe Sentinel do
     end
 
     it 'treats a public container as the universal ceiling' do
-      sentinel = Sentinel.new(target_id: 'c', policy: { 'small' => ['public'], 'master' => ['g:arch'] })
+      sentinel = Sentinel.new(target_id: 'c', policy: { 'small' => ['public'], 'original' => ['g:arch'] })
       sentinel.resource_read_groups = ['public']
       expect(sentinel).to be_valid
     end
@@ -97,8 +97,8 @@ RSpec.describe Sentinel do
   describe '#tier_policy' do
     it 'keeps the extended vocabulary and drops stray keys' do
       sentinel = Sentinel.new(target_id: 'c',
-                              policy:    { 'master' => ['g:arch'], 'pdf' => ['public'], 'nope' => ['x'] })
-      expect(sentinel.tier_policy).to eq('master' => ['g:arch'], 'pdf' => ['public'])
+                              policy:    { 'original' => ['g:arch'], 'pdf' => ['public'], 'nope' => ['x'] })
+      expect(sentinel.tier_policy).to eq('original' => ['g:arch'], 'pdf' => ['public'])
     end
   end
 

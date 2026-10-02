@@ -8,8 +8,12 @@
 -# Locals:
 -#   path  - the show path to submit against (e.g. collection_path(id))
 -#   label - placeholder / aria-label (e.g. "Search this collection")
+-#
+-# A plain hash, not Parameters: the component unpacks nested values only from
+-# a Hash, so a facet filter would otherwise travel as one garbled field and the
+-# search would drop it. Route parameters go too, since the form posts to path.
 = form_tag(path, method: :get, role: 'search', class: 'scoped-search') do
-  = render Blacklight::HiddenSearchStateComponent.new(params: params.except(:q, :id, :controller, :action, :page))
+  = render Blacklight::HiddenSearchStateComponent.new(params: params.except(:q, :page, *request.path_parameters.keys).to_unsafe_h)
   .input-group
     %input.form-control{ type: 'search', name: 'q', value: params[:q],
                          placeholder: label, 'aria-label': label }

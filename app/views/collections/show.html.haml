@@ -27,11 +27,15 @@
                 -# tab from the URL fragment after the document loads, so a Turbo swap can
                 -# show the previous pane for a frame before tab-hash corrects it.
                 = link_to "Edit", edit_collection_path(@collection.id), class: "px-3", data: { turbo: false }
-              - if @can_tombstone && @response.documents.empty?
+              -# A collection that holds items is offered the cascading delete,
+              -# to whom CascadeTombstoning allows it (@cascade_targets).
+              - if @can_tombstone && (@response.documents.empty? || @cascade_targets)
                 = render 'shared/tombstone_modal',
-                         id:   @collection.id,
-                         kind: 'collection',
-                         path: tombstone_collection_path(@collection.id)
+                         id:      @collection.id,
+                         kind:    'collection',
+                         path:    tombstone_collection_path(@collection.id),
+                         cascade: @cascade_targets,
+                         title:   @collection.title
 
 -# Only mount the facet sidebar when the collection has children. An empty
 -# collection falls through to catalog/_zero_results' calm empty state and goes
@@ -42,3 +46,4 @@
 
 = render 'catalog/search_results'
 = render 'shared/downloads_modal'
+= render 'shared/explain_modal'

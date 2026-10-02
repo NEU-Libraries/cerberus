@@ -2,7 +2,7 @@ require_relative 'boot'
 
 # Not `rails/all`. Active Storage's vips shim calls `Vips.block_untrusted(true)`
 # at load, which disables libvips' unfuzzed loaders — pdfload among them — and
-# MasterJp2 renders PDF cover pages through vips directly. Loading a framework
+# OriginalJp2 renders PDF cover pages through vips directly. Loading a framework
 # nothing here uses would cost that capability for a safety property that only
 # matters for untrusted uploads Active Storage would be handling.
 #
@@ -60,7 +60,7 @@ module Cerberus
     # means "same as public".
     config.x.cerberus.iiif_internal_host = ENV.fetch('CERBERUS_IIIF_INTERNAL_HOST', nil)
 
-    # Gated-derivative model. MasterJp2 writes both the capped display JP2 and
+    # Gated-derivative model. OriginalJp2 writes both the capped display JP2 and
     # the full-res JP2 to the one derivatives root Cantaloupe reads,
     # distinguished by an `open-`/`gated-` filename prefix; the gated Cantaloupe
     # delegate serves `open-*` freely and requires a signed credential for
@@ -76,6 +76,13 @@ module Cerberus
     # the variable through whether or not .env defines it.
     config.x.cerberus.handle_resolver_base = ENV.fetch('HANDLE_RESOLVER_BASE', nil).presence ||
                                              'https://hdl.handle.net'
+
+    # The full Policies and Terms of Participation, deposited in the DRS as a
+    # Work. The /terms page shows an excerpt and links here, so the library can
+    # revise the document with Replace file and no deploy. Point it at the
+    # Work's handle, which survives a migration. Unset falls back to the
+    # terms_document_url SiteSetting, which rake reset:data writes.
+    config.x.cerberus.terms_document_url = ENV.fetch('TERMS_DOCUMENT_URL', nil).presence
 
     # Acting-NUID sentinel for unauthenticated Cerberus traffic. The
     # logged-out path threads this NUID as the acting user, so the signed

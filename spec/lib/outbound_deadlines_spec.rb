@@ -9,8 +9,9 @@ require 'rails_helper'
 # Net::HTTP's 60s, RSolr forwards a timeout only when given one, and a bare
 # `Faraday.get` inherits the same 60s — so an unset pair is not "the library's
 # sensible default", it is a minute of a Puma thread per call. Puma has no
-# request timeout and there is no rack-timeout, so the client is the only place
-# the bound can live. See docs/development.md.
+# request timeout, and RequestDeadline is only the backstop beneath these: it
+# skips the streaming routes, and when it fires it names no dependency. So the
+# client is where each call's bound has to live. See docs/development.md.
 #
 # Asserted on the connection rather than on the config file, because the config
 # only matters if it arrives: RSolr silently ignores an option it does not

@@ -101,18 +101,6 @@
     padding: 0;
   }
 
-  // Privileged-only marker on the Attribution legend — same color-mix
-  // pattern as the audit-history action chip, in the Cerberus blue tone.
-  &__field-pill {
-    padding: 0.05rem 0.4rem;
-    background-color: color-mix(in srgb, #{$blue} 12%, white);
-    border: 1px solid color-mix(in srgb, #{$blue} 28%, white);
-    color: $blue;
-    border-radius: 0.25rem;
-    font-size: 0.62rem;
-    letter-spacing: 0.05em;
-  }
-
   &__field-hint {
     margin-top: 0.5rem;
     margin-bottom: 0;

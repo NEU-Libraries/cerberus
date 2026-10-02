@@ -32,7 +32,7 @@
       = render 'derivative_fields', longest_edge: @image_probe.longest_edge
 
     - if @caption_offered
-      = render 'works/captions', caption: @caption
+      = render 'works/captions', captions: @captions
 
     %h4.pt-4.pb-2 Permissions
     .row
@@ -46,7 +46,7 @@
     = render 'shared/group_permissions', resource: 'work'
 
     - if @streaming_only_offered
-      = render 'works/streaming_only', enabled: @streaming_only
+      = render 'works/streaming_only', enabled: @streaming_only, audio: @streaming_only_audio
 
     .well.p-3.my-3.rounded-3
       = f.button :submit, class: 'btn btn-success'

@@ -19,10 +19,28 @@ module Admin
 
     breadcrumb_for 'Manage people', :admin_people_path
 
-    before_action :set_person, only: %i[edit update add_affiliation remove_affiliation]
+    before_action :set_person, only: %i[edit update add_affiliation remove_affiliation groups]
 
+    # Asked for explicitly: Atlas's default page is 10, and this index used to
+    # take it unasked, so everyone past the tenth person was missing.
+    PER_PAGE = 50
+
+    # With q, Atlas matches display name, account email and a NUID prefix, and
+    # the pagination block counts the matches rather than the registry.
     def index
-      @people = AtlasRb::Person.list(nuid: Current.nuid)
+      @q = params[:q].to_s.strip.presence
+      result = AtlasRb::Person.page(q: @q, page: [params[:page].to_i, 1].max, per_page: PER_PAGE,
+                                    nuid: Current.nuid)
+      @people = Array(result&.dig('people'))
+      @pagination = result&.dig('pagination') || {}
+    end
+
+    # A Person's Grouper groups live on its sign-in accounts, one set each, so
+    # this reads the accounts. One Atlas read, made only when a row is opened.
+    def groups
+      @accounts = sign_in_accounts
+      @failed = @accounts.nil?
+      render layout: false
     end
 
     def new
@@ -32,11 +50,13 @@ module Admin
     def edit
       breadcrumb 'Edit', edit_admin_person_path(@noid)
       load_affiliations
+      @accounts = sign_in_accounts
       @results = community_search if params[:q].present?
     end
 
     def create
       person = AtlasRb::Person.create(**create_params, on_behalf_of: Current.nuid)
+      NuidResolver.forget(create_params[:nuid])
       # The Person resource is addressed by its NOID, which atlas_rb returns in `id`.
       redirect_to edit_admin_person_path(person['id']),
                   notice: "Person '#{person['display_name']}' created. Add community affiliations below."
@@ -47,10 +67,12 @@ module Admin
 
     def update
       AtlasRb::Person.update(@noid, **update_params, nuid: Current.nuid)
+      NuidResolver.forget(@person['nuid'])
       redirect_to edit_admin_person_path(@noid), notice: 'Person details saved.'
     rescue Faraday::Error, JSON::ParserError => e
       @person = AtlasRb::Person.find(@noid, nuid: Current.nuid)
       load_affiliations
+      @accounts = sign_in_accounts
       flash.now[:alert] = "Couldn't save those details: #{e.message}"
       render :edit, status: :unprocessable_content
     end
@@ -72,6 +94,19 @@ module Admin
         @person = AtlasRb::Person.find(@noid, nuid: Current.nuid)
       rescue JSON::ParserError
         render template: 'errors/not_found', status: :not_found, locals: { obj_type: 'person' }
+      end
+
+      # The person's sign-in accounts, each with its own name and group set. A
+      # Person made before its first sign-in has none. Nil means the read
+      # failed, which the views say rather than showing an empty list.
+      def sign_in_accounts
+        nuid = @person['nuid']
+        return [] if nuid.blank?
+
+        Array(AtlasRb::User.accounts(nuid, nuid: Current.nuid)&.dig('accounts'))
+      rescue AtlasRb::ResourceError, Faraday::Error, JSON::ParserError => e
+        Rails.logger.warn("Admin people accounts read failed for #{@noid}: #{e.class}: #{e.message}")
+        nil
       end
 
       # Resolve each affiliated community NOID to a {noid, title} for display. A

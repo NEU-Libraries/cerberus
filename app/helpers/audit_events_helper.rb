@@ -8,13 +8,16 @@ module AuditEventsHelper
   # hasn't been taught about MUST still render: unknown verbs fall through
   # to GENERIC_ACTION rather than raising or rendering an empty chip.
   ACTION_DESCRIPTORS = {
-    'create'        => { tone: 'create',    icon: 'fa-circle-plus',  label: 'Created' },
-    'update'        => { tone: 'update',    icon: 'fa-pen',          label: 'Updated' },
-    'tombstone'     => { tone: 'tombstone', icon: 'fa-trash-can',    label: 'Tombstoned' },
-    'restore'       => { tone: 'restore',   icon: 'fa-rotate-left',  label: 'Restored' },
-    'reparent'      => { tone: 'reparent',  icon: 'fa-folder-tree',  label: 'Reparented' },
-    'link_member'   => { tone: 'link',      icon: 'fa-link',         label: 'Linked' },
-    'unlink_member' => { tone: 'unlink',    icon: 'fa-link-slash',   label: 'Unlinked' }
+    'create'          => { tone: 'create',    icon: 'fa-circle-plus',  label: 'Created' },
+    'update'          => { tone: 'update',    icon: 'fa-pen',          label: 'Updated' },
+    'tombstone'       => { tone: 'tombstone', icon: 'fa-trash-can',    label: 'Tombstoned' },
+    'restore'         => { tone: 'restore',   icon: 'fa-rotate-left',  label: 'Restored' },
+    'reparent'        => { tone: 'reparent',  icon: 'fa-sitemap',      label: 'Reparented' },
+    'link_member'     => { tone: 'link',      icon: 'fa-link',         label: 'Linked' },
+    'unlink_member'   => { tone: 'unlink',    icon: 'fa-link-slash',   label: 'Unlinked' },
+    # A lapse, recorded by the nightly job. "Embargo removed" is a person
+    # clearing one early, on an `update` row; the two must not read alike.
+    'release_embargo' => { tone: 'update',    icon: 'fa-lock-open',    label: 'Embargo released' }
   }.freeze
 
   GENERIC_ACTION = { tone: 'generic', icon: 'fa-circle-info', label: nil }.freeze
@@ -58,20 +61,21 @@ module AuditEventsHelper
     'metadata_form' => 'Metadata form',
     'advanced_form' => 'Advanced form',
     'xml_editor'    => 'XML editor',
+    'xml_loader'    => 'XML loader',
     'deposit'       => 'Deposit'
   }.freeze
 
   # Prose for the download tiers. The vocabulary and its narrowing order come
   # from Sentinel::TIERS; naming the ladder twice would let the two drift.
   TIER_LABELS = {
-    'small'   => 'Small image',
-    'medium'  => 'Medium image',
-    'large'   => 'Large image',
-    'service' => 'Service (deep zoom)',
-    'master'  => 'Master (original)',
-    'audio'   => 'Audio',
-    'video'   => 'Video',
-    'pdf'     => 'PDF'
+    'small'    => 'Small image',
+    'medium'   => 'Medium image',
+    'large'    => 'Large image',
+    'service'  => 'Service (deep zoom)',
+    'original' => 'Original',
+    'audio'    => 'Audio',
+    'video'    => 'Video',
+    'pdf'      => 'PDF'
   }.freeze
 
   def audit_event_action(event_action)
@@ -281,6 +285,7 @@ module AuditEventsHelper
       when 'reparent'      then targeted_summary('moved to', payload['to'])
       when 'link_member'   then targeted_summary('to', payload['collection'])
       when 'unlink_member' then targeted_summary('from', payload['collection'])
+      when 'tombstone'     then payload['reason']
       end
     end
 

@@ -81,7 +81,7 @@ class MultipageIngestJob < ApplicationJob
       return if ingest.blob_attached_at.present?
       return ingest.update!(blob_attached_at: Time.current) if verify && file_set_has_content?(ingest)
 
-      # Without a name Atlas mints an extensionless master_<token> placeholder,
+      # Without a name Atlas mints an extensionless original_<token> placeholder,
       # which then surfaces in the download box.
       AtlasRb::FileSet.update(ingest.file_set_pid, staged, original_filename: ingest.source_filename)
       ingest.update!(blob_attached_at: Time.current)
@@ -95,7 +95,7 @@ class MultipageIngestJob < ApplicationJob
     def persist_page_service!(ingest, staged, verify:)
       return if verify && page_service_present?(ingest)
 
-      result = MasterJp2.call(path: staged)
+      result = OriginalJp2.call(path: staged)
       AtlasRb::FileSet.set_iiif_service(ingest.file_set_pid, result.gated_base)
     rescue Vips::Error => e
       Rails.logger.warn(

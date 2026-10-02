@@ -10,6 +10,7 @@
 # its caller to restart it — a job the bypassed shim normally does. libreconv
 # passes a fresh -env:UserInstallation per run, so EVERY run is "first-time";
 # without the retry, every conversion dies with exit 81 and empty output.
+# See docs/downloads.md.
 /usr/bin/timeout --kill-after=10s 120s /usr/lib/libreoffice/program/soffice.bin "$@"
 ret=$?
 if [ "$ret" -eq 81 ]; then

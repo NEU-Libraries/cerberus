@@ -31,9 +31,9 @@ class RollupImpressionsJob < ApplicationJob
       conn.execute("DELETE FROM impression_daily_counts WHERE day >= #{window_start}::date")
       conn.execute(<<~SQL.squish)
         INSERT INTO impression_daily_counts (noid, action, day, count)
-        SELECT i.noid, i.action, i.created_at::date AS day, count(*) AS count
+        SELECT i.noid, i.action, #{ImpressionDay.of('i.created_at')} AS day, count(*) AS count
         #{human}
-        GROUP BY i.noid, i.action, i.created_at::date
+        GROUP BY i.noid, i.action, #{ImpressionDay.of('i.created_at')}
       SQL
     end
 
@@ -41,9 +41,9 @@ class RollupImpressionsJob < ApplicationJob
       conn.execute("DELETE FROM impression_daily_visitors WHERE day >= #{window_start}::date")
       conn.execute(<<~SQL.squish)
         INSERT INTO impression_daily_visitors (day, unique_visitors)
-        SELECT i.created_at::date AS day, count(DISTINCT i.ip_address) AS unique_visitors
+        SELECT #{ImpressionDay.of('i.created_at')} AS day, count(DISTINCT i.ip_address) AS unique_visitors
         #{human}
-        GROUP BY i.created_at::date
+        GROUP BY #{ImpressionDay.of('i.created_at')}
       SQL
     end
 end

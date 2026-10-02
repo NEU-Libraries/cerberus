@@ -8,6 +8,7 @@
 # can't reuse it and has to read raw. Only ever asked for one scope at a time
 # (a single dashboard render), so the extra cost over the persisted rollup is
 # fine here in a way it wouldn't be for the repo-wide case.
+# See docs/analytics.md.
 class ScopedVisitorsQuery
   # @param range [Range<Date>] inclusive date range.
   # @param segment [:human, :all, String] :human applies the same bot/volume
@@ -46,19 +47,19 @@ class ScopedVisitorsQuery
     def human_sql
       from_where = HumanImpressionsQuery.new(conn: @conn, window_start:, range_end:, noids: @noids).from_where_sql
       <<~SQL.squish
-        SELECT i.created_at::date AS day, count(DISTINCT i.ip_address) AS unique_visitors
+        SELECT #{ImpressionDay.of('i.created_at')} AS day, count(DISTINCT i.ip_address) AS unique_visitors
         #{from_where}
-        GROUP BY i.created_at::date
+        GROUP BY #{ImpressionDay.of('i.created_at')}
       SQL
     end
 
     def all_traffic_sql
       <<~SQL.squish
-        SELECT created_at::date AS day, count(DISTINCT ip_address) AS unique_visitors
+        SELECT #{ImpressionDay.of('created_at')} AS day, count(DISTINCT ip_address) AS unique_visitors
         FROM impressions
         WHERE created_at >= #{@conn.quote(window_start)} AND created_at < #{@conn.quote(range_end)}
           AND noid IN (#{@noids.map { |n| @conn.quote(n) }.join(', ')})
-        GROUP BY created_at::date
+        GROUP BY #{ImpressionDay.of('created_at')}
       SQL
     end
 end

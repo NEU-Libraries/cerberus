@@ -10,6 +10,7 @@
 # which inverts the catalog's default `-tombstoned_bsi:true` exclusion. Paginated
 # (withdrawals are rare, but the result rides Blacklight's Kaminari integration
 # so the registry never dumps an unbounded list).
+# See docs/admin.md.
 class TombstonedItems < ApplicationService
   PER_PAGE = 50
 
@@ -17,9 +18,12 @@ class TombstonedItems < ApplicationService
   #   the Blacklight config (copied from CatalogController) and the acting user
   #   that gated discovery reads (admins short-circuit it, seeing every resource).
   # @param page [Integer, String, nil] 1-based page number.
-  def initialize(scope:, page: nil)
+  # @param query [String, nil] words to search titles and PIDs by. v1 holds
+  #   8,000+ tombstoned items, so a migrated registry needs it.
+  def initialize(scope:, page: nil, query: nil)
     @scope = scope
     @page = page
+    @query = query.to_s.strip.presence
     super()
   end
 
@@ -28,10 +32,12 @@ class TombstonedItems < ApplicationService
   #   so `updated_at_dtsi` is the withdrawal time in all but name — which is the
   #   order an admin wants on a restore screen, since the thing just withdrawn in
   #   error is the thing being looked for.
+  #
+  #   A search ranks by relevance instead: the order only helps when nothing
+  #   narrows the list.
   def call
-    builder = TombstonedSearchBuilder.new(@scope)
-                                     .with(q: '*:*', per_page: PER_PAGE, page: @page)
-                                     .merge(sort: 'updated_at_dtsi desc')
+    builder = TombstonedSearchBuilder.new(@scope).with(q: @query || '*:*', per_page: PER_PAGE, page: @page)
+    builder = builder.merge(sort: 'updated_at_dtsi desc') if @query.nil?
     Blacklight.default_index.search(params: builder)
   end
 end

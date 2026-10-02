@@ -380,6 +380,50 @@ describe CommunitiesController do
     end
   end
 
+  # A community under the top-level one: Atlas refuses to withdraw a Community
+  # with no parent, so only a child can be deleted.
+  let(:child) do
+    AtlasRb::Community.create(community.id, '/home/cerberus/web/spec/fixtures/files/community-mods.xml',
+                              nuid: '000000004')
+  end
+  let(:admin) { User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin') }
+
+  # Only an admin may withdraw a community whole: it holds other people's
+  # collections and showcases.
+  describe 'tombstone with cascade' do
+    before do
+      AtlasRb::Resource.set_permissions(child.id,
+                                        { 'edit' => [Permissions::STAFF_EDIT_GROUP] }, nuid: '000000004')
+      allow(TombstoneTargets).to receive(:new)
+        .and_return(instance_double(TombstoneTargets, total: 9, over_limit?: false))
+    end
+
+    def cascade(id = child.id)
+      post :tombstone, params: { id: id, cascade: '1', reason: TombstoneReasons::CURATOR,
+                                 confirm_title: AtlasRb::Community.find(id).title }
+    end
+
+    it 'enqueues the cascade for an admin' do
+      sign_in admin
+      expect { cascade }.to have_enqueued_job(TombstoneCascadeJob).with(hash_including(klass: 'Community'))
+    end
+
+    it 'refuses a delegated admin' do
+      sign_in User.new(email: 'jane@example.com', nuid: '000000002', role: 'privileged',
+                       groups: [Permissions::STAFF_EDIT_GROUP, Permissions::ADMIN_GROUP])
+      expect { cascade }.not_to have_enqueued_job(TombstoneCascadeJob)
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    # The job withdraws the root last, so Atlas's own refusal would arrive only
+    # after everything beneath it was gone.
+    it 'refuses a top-level community before enqueueing anything' do
+      sign_in admin
+      expect { cascade(community.id) }.not_to have_enqueued_job(TombstoneCascadeJob)
+      expect(flash[:alert]).to eq(Tombstoning::TOP_LEVEL_REFUSED)
+    end
+  end
+
   describe 'tombstone' do
     let(:user) do
       User.new(email: 'staff@example.com', nuid: '000000002',
@@ -387,28 +431,66 @@ describe CommunitiesController do
     end
 
     before do
-      AtlasRb::Resource.set_permissions(community.id,
-                                        { 'edit' => [Permissions::STAFF_EDIT_GROUP] }, nuid: '000000004')
+      [community, child].each do |c|
+        AtlasRb::Resource.set_permissions(c.id, { 'edit' => [Permissions::STAFF_EDIT_GROUP] }, nuid: '000000004')
+      end
       sign_in user
     end
 
-    # A top-level community has no parent, so this also covers the fallback.
-    it 'tombstones through the generic endpoint and reports success on a 2xx' do
+    it 'tombstones through the generic endpoint and returns to the parent on a 2xx' do
       allow(AtlasRb::Resource).to receive(:tombstone)
         .and_return(instance_double(Faraday::Response, success?: true))
-      post :tombstone, params: { id: community.id }
-      expect(AtlasRb::Resource).to have_received(:tombstone).with(community.id)
-      expect(subject).to redirect_to(root_path)
+      post :tombstone, params: { id: child.id }
+      expect(AtlasRb::Resource).to have_received(:tombstone).with(child.id, reason: nil)
+      expect(subject).to redirect_to(community_path(community.id))
       expect(flash[:notice]).to eq('Community deleted.')
     end
 
     it 'reports a 422 live-members refusal without claiming success' do
       allow(AtlasRb::Resource).to receive(:tombstone)
-        .and_return(instance_double(Faraday::Response, success?: false, status: 422))
-      request.env['HTTP_REFERER'] = community_path(community.id)
-      post :tombstone, params: { id: community.id }
+        .and_return(instance_double(Faraday::Response, success?: false, status: 422,
+                                                       body: '{"code":"has_live_children"}'))
+      request.env['HTTP_REFERER'] = community_path(child.id)
+      post :tombstone, params: { id: child.id }
       expect(flash[:notice]).to be_nil
       expect(flash[:alert]).to match(/live members/)
+    end
+
+    it "names Atlas's top-level refusal rather than blaming live members" do
+      allow(AtlasRb::Resource).to receive(:tombstone)
+        .and_return(instance_double(Faraday::Response, success?: false, status: 422,
+                                                       body: '{"code":"top_level_community"}'))
+      post :tombstone, params: { id: child.id }
+      expect(flash[:alert]).to eq(Tombstoning::TOP_LEVEL_REFUSED)
+    end
+
+    it 'refuses a top-level community without asking Atlas' do
+      allow(AtlasRb::Resource).to receive(:tombstone)
+      post :tombstone, params: { id: community.id }
+      expect(AtlasRb::Resource).not_to have_received(:tombstone)
+      expect(response).to redirect_to(community_path(community.id))
+      expect(flash[:alert]).to eq(Tombstoning::TOP_LEVEL_REFUSED)
+    end
+  end
+
+  describe 'show offers no Delete on a top-level community' do
+    before do
+      AtlasRb::Resource.set_permissions(community.id, { 'read' => ['public'] }, nuid: '000000004')
+      allow(TombstoneTargets).to receive(:new)
+        .and_return(instance_double(TombstoneTargets, total: 1, over_limit?: false))
+      sign_in admin
+    end
+
+    it 'withholds both the plain and the cascading delete from an admin' do
+      get :show, params: { id: community.id }
+      expect(assigns(:can_tombstone)).to be(false)
+      expect(assigns(:cascade_targets)).to be_nil
+    end
+
+    it 'still offers it on a community below the top level' do
+      AtlasRb::Resource.set_permissions(child.id, { 'read' => ['public'] }, nuid: '000000004')
+      get :show, params: { id: child.id }
+      expect(assigns(:can_tombstone)).to be(true)
     end
   end
 
@@ -515,6 +597,41 @@ describe CommunitiesController do
       expect(assigns(:response).documents.map(&:id)).not_to include(showcase.valkyrie_id)
     ensure
       AtlasRb::Resource.tombstone(showcase.id) if showcase
+    end
+
+    # An admin loads into a showcase by its PID, so must be able to find it
+    # while it is still empty.
+    it 'lists an empty showcase to an admin, flagged as empty' do
+      sign_in User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin')
+      AtlasRb::Resource.set_permissions(community.id, { 'read' => ['public'] }, nuid: '000000004')
+      showcase = AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml',
+                                            featured: true, nuid: '000000004')
+
+      get :show, params: { id: community.id }
+
+      listed = assigns(:response).documents.find { |doc| doc.id == showcase.valkyrie_id }
+      expect(listed).to be_present
+      expect(listed.empty_showcase?).to be(true)
+      expect(response.body).to include('Empty')
+    ensure
+      AtlasRb::Resource.tombstone(showcase.id) if showcase
+    end
+  end
+
+  describe '#hidden_showcase_uuids (private)' do
+    def hidden_for(user)
+      allow(controller).to receive(:effective_user).and_return(user)
+      controller.send(:hidden_showcase_uuids, %w[a b])
+    end
+
+    it 'hides nothing from an admin or a delegated admin' do
+      expect(hidden_for(User.new(role: 'admin'))).to eq([])
+      expect(hidden_for(User.new(role: 'privileged', groups: [Permissions::ADMIN_GROUP]))).to eq([])
+    end
+
+    it 'hides the empty showcases from anyone else' do
+      expect(hidden_for(User.new(role: 'privileged', groups: []))).to eq(%w[a b])
+      expect(hidden_for(nil)).to eq(%w[a b])
     end
   end
 

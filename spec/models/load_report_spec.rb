@@ -90,6 +90,23 @@ RSpec.describe LoadReport, type: :model do
     end
   end
 
+  # Every job calls start_load before it can fail a report, so this tells a load
+  # the preview refused from one that failed while running.
+  describe '#failed_at_preview?' do
+    it 'is true for a load failed before it started' do
+      report = create(:load_report, status: :previewing)
+      report.fail_load
+      expect(report).to be_failed_at_preview
+    end
+
+    it 'is false for a load that failed while running' do
+      report = create(:load_report, status: :pending)
+      report.start_load
+      report.fail_load
+      expect(report).not_to be_failed_at_preview
+    end
+  end
+
   describe '#status_tally' do
     it 'tallies every ingest table under the enum label' do
       report = create(:load_report)

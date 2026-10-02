@@ -3,14 +3,16 @@
 # My DRS — the depositor's workspace and published spaces. See
 # docs/discovery.md.
 #
-# Every panel is a gated Solr query through `search_service.search_builder`, and
-# the work panels narrow to this depositor with `depositor_ssi`. Both halves
-# matter: drop either one and a depositor is shown rows that are not theirs.
+# The work panels are gated Solr queries through `search_service.search_builder`,
+# narrowed to this depositor with `depositor_ssi`. Both halves matter: drop
+# either one and a depositor is shown rows that are not theirs. The workspace
+# panel is the exception, ungated on purpose and bounded to the depositor's own
+# personal root instead (DepositorContext#workspace_collections).
 class MyDrsController < CatalogController
   include DepositorContext
 
   def index
-    return redirect_to(root_path, alert: 'Sign in to see your DRS.') unless current_user&.nuid
+    return redirect_to(root_path, alert: 'Sign in to see your DRS.') unless effective_user&.nuid
 
     @accounts = account_list
     @workspace_collections = workspace_collections
@@ -22,12 +24,14 @@ class MyDrsController < CatalogController
 
   private
 
-    # An Atlas fault degrades to an empty list rather than a broken My DRS.
+    # An Atlas fault degrades to an empty list rather than a broken My DRS. The
+    # list is the effective user's, but the caller stays the real person, so an
+    # impersonating admin's own credentials authorize the lookup.
     def account_list
-      accounts = AtlasRb::User.accounts(current_user.nuid, nuid: current_user.nuid)
+      accounts = AtlasRb::User.accounts(effective_user.nuid, nuid: current_user.nuid)
       Array(accounts && accounts['accounts'])
     rescue Faraday::Error, JSON::ParserError => e
-      Rails.logger.error("My DRS account lookup failed for #{current_user.nuid}: #{e.class} #{e.message}")
+      Rails.logger.error("My DRS account lookup failed for #{effective_user.nuid}: #{e.class} #{e.message}")
       []
     end
 
@@ -55,8 +59,12 @@ class MyDrsController < CatalogController
 
     # The gated search's own unfinished-deposit filter already holds a depositor
     # to their own rows, so this composes with it rather than working around it.
+    # A proxy uploader finds the deposits they started for someone else here too:
+    # the depositor never uploaded them and may not know they exist.
     def unfinished_deposits
-      own_works('in_progress_bsi:true')
+      phrase = depositor_phrase
+      own_works('in_progress_bsi:true',
+                owner: %((depositor_ssi:"#{phrase}" OR proxy_uploader_ssi:"#{phrase}")))
     end
 
     # `-in_progress_bsi:true` is not redundant here: it keeps the two panels
@@ -65,10 +73,10 @@ class MyDrsController < CatalogController
       own_works('incomplete_bsi:true', '-in_progress_bsi:true')
     end
 
-    def own_works(*filters)
+    def own_works(*filters, owner: %(depositor_ssi:"#{depositor_phrase}"))
       builder = search_service.search_builder.with({}).with_filters(
         'internal_resource_tesim:Work',
-        %(depositor_ssi:"#{depositor_phrase}"),
+        owner,
         '-tombstoned_bsi:true',
         *filters
       ).merge(rows: 50)

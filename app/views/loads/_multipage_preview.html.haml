@@ -11,8 +11,12 @@
       %i.fa-solid.fa-eye{'aria-hidden' => 'true'}
       Preview
       %span.text-muted.fw-normal= load_report.source_filename
+      - if load_report.failed?
+        %span.ingest-status.ingest-status--failed.ms-2
+          %i.fa-solid{class: load_report_status_icon('failed'), 'aria-hidden' => 'true'}
+          Failed
     %span.admin-registry__subtitle
-      %i.fa-solid.fa-folder-tree{'aria-hidden' => 'true'}
+      %i.fa-solid.fa-file-import{'aria-hidden' => 'true'}
       = link_to loader.display_name, loader_loads_path(loader), class: 'text-decoration-none'
 
   .admin-registry__body
@@ -30,10 +34,10 @@
 
       .load-report-overview
         .load-report-overview__meta
-          %span.load-report-overview__label Mode
+          %span.load-report-overview__label Ingest mode
           %span.load-report-overview__value
             %span.ingest-status{style: '--ingest-tone: #18bc9c'}
-              %i.fa-solid.fa-layer-group{'aria-hidden' => 'true'}
+              %i.fa-solid.fa-book-open{'aria-hidden' => 'true'}
               Create multipage Works
           %span.load-report-overview__label Items
           %span.load-report-overview__value= preview.item_count
@@ -41,8 +45,7 @@
           %span.load-report-overview__value= preview.page_count
           - if load_report.parent_collection_id.present?
             %span.load-report-overview__label Destination
-            %span.load-report-overview__value
-              %code.admin-registry-table__id= load_report.parent_collection_id
+            %span.load-report-overview__value= load_destination(load_report.parent_collection_id)
 
       - if preview.unlisted_files.any?
         .alert.alert-warning.d-flex.gap-2.mt-3.mb-0.small
@@ -71,19 +74,12 @@
               %tr
                 %th{scope: 'col'} Sequence
                 %th{scope: 'col'} Page file
-                %th{scope: 'col'} Title
-                %th{scope: 'col'} Last item
             %tbody
               - first.pages.each do |page|
                 %tr
                   %td= page.sequence
                   %td
                     %code.admin-registry-table__id= page.file_name
-                  %td.small= page.title
-                  %td
-                    - if page.last_item?
-                      %i.fa-solid.fa-flag-checkered.text-muted{'aria-hidden' => 'true'}
-                      %span.visually-hidden Last item
 
       - if preview.mods_xml.present?
         / The first item's MODS, two-up: raw document beside Atlas's rendered
@@ -107,6 +103,6 @@
         = button_to confirm_loader_load_path(loader, load_report), method: :patch, class: 'btn btn-primary' do
           %i.fa-solid.fa-play.me-1{'aria-hidden' => 'true'}
           Confirm &amp; run
-      = button_to loader_load_path(loader, load_report), method: :delete, class: 'btn btn-tonal-danger', data: { turbo_confirm: 'Discard this upload? The archive will be removed.' } do
+      = button_to loader_load_path(loader, load_report), method: :delete, params: { discard: 1 }, class: 'btn btn-tonal-danger', data: { turbo_confirm: 'Discard this upload? The archive will be removed.' } do
         %i.fa-solid.fa-trash-can.me-1{'aria-hidden' => 'true'}
         Discard

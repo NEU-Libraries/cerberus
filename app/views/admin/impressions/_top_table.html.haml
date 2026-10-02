@@ -21,6 +21,7 @@
           %th{scope: 'col'} PID
           %th.text-end{scope: 'col'} Views
           %th.text-end{scope: 'col'} Downloads
+          %th.text-end{scope: 'col'} Streams
           %th.text-end{scope: 'col'} Total
       %tbody
         - entries.each do |entry|
@@ -34,6 +35,7 @@
               %span.admin-registry-table__id= entry[:noid]
             %td.text-end.usage-num= number_with_delimiter(entry[:counts]['view'])
             %td.text-end.usage-num= number_with_delimiter(entry[:counts]['download'])
+            %td.text-end.usage-num= number_with_delimiter(entry[:counts]['stream'])
             %td.text-end.usage-num= number_with_delimiter(entry[:total])
 - else
   .admin-registry__empty

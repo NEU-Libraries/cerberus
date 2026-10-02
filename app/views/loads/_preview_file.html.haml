@@ -1,0 +1,23 @@
+-# locals: file (XmlPreviewFile::Result, or nil when the row names no file the
+-# archive holds; the row's validation errors say why), identifier (update mode).
+-# The picture of the first row's file, opposite the meta grid. See docs/ingest.md.
+- if file
+  %figure.load-preview-file
+    - if file.thumbnail_src.present?
+      %img.load-preview-file__image{ src: file.thumbnail_src,
+        alt: (file.name ? "Preview of #{file.name}" : "Current thumbnail of #{identifier}") }
+    - else
+      %i.fa-solid.fa-3x.load-preview-file__icon{ class: file_type_icon(file.mime_type), 'aria-hidden' => 'true' }
+    %figcaption.load-preview-file__caption
+      - if file.name
+        = file.name
+        &middot; #{number_to_human_size(file.byte_size)}
+        - if (type = File.extname(file.name).delete('.').upcase).present?
+          &middot; #{type}
+        - if file.thumbnail_src.blank?
+          %br
+          No picture for this file type
+      - elsif file.thumbnail_src.present?
+        Current thumbnail of #{identifier}
+      - else
+        #{identifier} has no thumbnail yet

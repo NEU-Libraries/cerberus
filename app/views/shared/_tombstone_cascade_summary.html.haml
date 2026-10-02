@@ -1,0 +1,24 @@
+-# What a cascading delete withdraws, before the reason and the typed title.
+-#
+-# Locals:
+-#   cascade — the container's TombstoneTargets
+-#   kind    — "collection" or "community"
+-#   title   — the container's title, plain text
+- parts = cascade.counts.reject { |_type, count| count.zero? }.map { |type, count| pluralize(count, type.downcase) }
+%p
+  This withdraws
+  %strong= title
+  and everything live inside it:
+%ul
+  - parts.each do |part|
+    %li= part
+- if cascade.over_limit?
+  .alert.alert-warning.py-2.px-3.small.d-flex.align-items-start.mb-0
+    %i.fa-solid.fa-triangle-exclamation.me-2.mt-1{'aria-hidden' => 'true'}
+    %span
+      That is more than #{number_with_delimiter(TombstoneTargets::LIMIT)} items, so it can't be deleted from here. Ask the development team to delete this #{kind}.
+- else
+  .alert.alert-warning.py-2.px-3.small.d-flex.align-items-start
+    %i.fa-solid.fa-triangle-exclamation.me-2.mt-1{'aria-hidden' => 'true'}
+    %span
+      There is no one-step restore. Each item can be restored on its own from the tombstone registry, parents first. To bring everything back, ask the development team: Requests &amp; activity will list every item withdrawn.

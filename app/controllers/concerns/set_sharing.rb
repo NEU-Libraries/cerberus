@@ -43,6 +43,7 @@ module SetSharing
     rescue AtlasRb::CompilationError => e
       flash.now[:alert] = e.message
       prepare_sharing_form
+      prepare_set_definition
       render :edit, status: :unprocessable_content
     end
 

@@ -54,7 +54,7 @@ module StructuralContainers
         breadcrumb('People', people_path)
       end
       breadcrumb(name, person_path(person_noid))
-    rescue AtlasRb::ResourceError, Faraday::Error, JSON::ParserError
+    rescue Authorizable::ResourceNotFound, AtlasRb::ResourceError, Faraday::Error, JSON::ParserError
       breadcrumb('People', people_path)
       breadcrumb(name, person_path(person_noid))
     end

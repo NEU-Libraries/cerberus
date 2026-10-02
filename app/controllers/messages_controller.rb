@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-# The User Inbox. Everything here is scoped to the signed-in, non-guest
-# user: the inbox query covers messages addressed to their NUID or any of
-# their session groups (read-time group delivery — see Message.inbox_for),
-# so addressing is also the authorization.
+# The User Inbox. Everything here is scoped to the effective user, so an
+# impersonating admin reads the target's inbox: the query covers messages
+# addressed to their NUID or any of their session groups (read-time group
+# delivery — see Message.inbox_for), so addressing is also the authorization.
 class MessagesController < ApplicationController
   include UserDirectorySearchable
 
@@ -12,14 +12,15 @@ class MessagesController < ApplicationController
   before_action :set_message, only: %i[show destroy]
 
   def index
-    @messages = Message.inbox_for(current_user).page(params[:page])
-    @receipts = MessageReceipt.where(nuid: current_user.nuid, message_id: @messages.map(&:id))
+    @messages = Message.inbox_for(effective_user).page(params[:page])
+    @receipts = MessageReceipt.where(nuid: effective_user.nuid, message_id: @messages.map(&:id))
                               .index_by(&:message_id)
     @sender_names = NuidResolver.names_for(@messages.map(&:sender_nuid))
   end
 
   def show
-    MessageReceipt.mark_read!(@message, current_user.nuid)
+    # Reading the target's inbox must not change what the target sees next.
+    MessageReceipt.mark_read!(@message, effective_user.nuid) unless impersonating?
     @sender_names = NuidResolver.names_for([@message.sender_nuid])
   end
 
@@ -41,7 +42,9 @@ class MessagesController < ApplicationController
   # Per-recipient soft-dismiss — the row stays for other recipients of a
   # group message; only this user's inbox hides it.
   def destroy
-    MessageReceipt.dismiss!(@message, current_user.nuid)
+    return redirect_to(messages_path, alert: 'Messages cannot be dismissed while impersonating.') if impersonating?
+
+    MessageReceipt.dismiss!(@message, effective_user.nuid)
     redirect_to messages_path, notice: 'Message dismissed.'
   end
 
@@ -53,12 +56,12 @@ class MessagesController < ApplicationController
   private
 
     def set_message
-      @message = Message.inbox_for(current_user).find_by(id: params[:id])
+      @message = Message.inbox_for(effective_user).find_by(id: params[:id])
       render template: 'errors/not_found', status: :not_found, layout: 'application' if @message.nil?
     end
 
     def require_messageable_user
-      return if current_user&.messageable?
+      return if effective_user&.messageable?
 
       render template: 'errors/forbidden', status: :forbidden, layout: 'application'
     end
@@ -72,6 +75,6 @@ class MessagesController < ApplicationController
     # via the Group table's cosmetic names. Like permissions, this is a
     # UI constraint, not a server-side membership check.
     def composable_groups
-      (current_user&.groups || []).map { |raw| { raw: raw, cosmetic: pretty_group(raw) } }
+      (effective_user&.groups || []).map { |raw| { raw: raw, cosmetic: pretty_group(raw) } }
     end
 end

@@ -67,7 +67,7 @@ class DownloadQueueController < ApplicationController
     # work_noid → { blob_noid => label }, so the page can name each queued file.
     def labels_for(work_noids)
       work_noids.index_with do |noid|
-        AtlasRb::Work.assets(noid, nuid: current_user&.nuid)
+        AtlasRb::Work.assets(noid, nuid: viewer_nuid)
                      .to_h { |asset| [asset.noid, asset.label.presence || asset[:use]] }
       rescue Faraday::Error, JSON::ParserError
         {}

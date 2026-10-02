@@ -1,0 +1,34 @@
+-# locals: targets ({ community_noid => { name:, genres: } }), owner (the other
+-# person's Person when publishing for them, else nil). See docs/deposit.md.
+-#
+-# For someone else it is the `promote` target the deposit-promotion controller
+-# hides until Proxy deposit is chosen, and starts hidden so it never flashes on
+-# a self-deposit.
+- name = owner && owner['display_name']
+%fieldset.deposit-form__field.deposit-form__promote{ class: ('d-none' if owner),
+  data: ({ 'deposit-promotion-target' => 'promote' } if owner) }
+  %label.deposit-form__radio{for: 'publish'}
+    = check_box_tag 'publish', '1', false, class: 'deposit-form__radio-input', id: 'publish', data: { action: 'deposit-promotion#toggle' }
+    .deposit-form__radio-body
+      .deposit-form__radio-title
+        %i.fa-solid.fa-graduation-cap{'aria-hidden' => 'true'}
+        = name ? "Also promote to #{name}’s community showcase" : 'Also promote to a community showcase'
+      .deposit-form__radio-desc
+        - if name
+          Surfaces this work in a featured showcase of #{name}’s community for a category, on #{name}’s behalf. #{name} is the depositor of record, and the work still lives in #{name}’s workspace.
+        - else
+          Surfaces this work in your community's featured showcase for a category — a deliberate, public act. It still lives here.
+  .deposit-form__promote-fields.d-none{data: { 'deposit-promotion-target' => 'fields' }}
+    - if targets.size > 1
+      %label.deposit-form__field-label{for: 'publish_community_id'} Community
+      %select.form-select#publish_community_id{name: 'publish_community_id', data: { 'deposit-promotion-target' => 'community', action: 'deposit-promotion#communityChanged' }}
+        - targets.each do |noid, target|
+          %option{value: noid}= target[:name]
+    - else
+      = hidden_field_tag 'publish_community_id', targets.keys.first
+    %label.deposit-form__field-label.mt-3{for: 'publish_genre'} Category
+    %select.form-select#publish_genre{name: 'publish_genre', data: { 'deposit-promotion-target' => 'genre' }}
+      -# Populated by Stimulus from the genres value; the first community's
+      -# genres are rendered here as a no-JS fallback.
+      - targets.values.first[:genres].each_key do |label|
+        %option{value: label}= label

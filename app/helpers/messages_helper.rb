@@ -4,7 +4,7 @@
 # chip so identifiers read the same across surfaces.
 module MessagesHelper
   def unread_messages_count
-    @unread_messages_count ||= current_user&.messageable? ? Message.unread_count_for(current_user) : 0
+    @unread_messages_count ||= effective_user&.messageable? ? Message.unread_count_for(effective_user) : 0
   end
 
   def inbox_aria_label
@@ -24,7 +24,7 @@ module MessagesHelper
 
   def message_group_chip(message)
     tag.span(class: 'inbox-group-chip') do
-      safe_join([tag.i(class: 'fa-solid fa-users me-1', 'aria-hidden': 'true'),
+      safe_join([tag.i(class: 'fa-solid fa-user-group me-1', 'aria-hidden': 'true'),
                  pretty_group_name(message.recipient_group)])
     end
   end

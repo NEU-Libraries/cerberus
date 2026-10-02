@@ -1,0 +1,22 @@
+-# The identifiers a librarian looks a person up by elsewhere. `accounts` is
+-# nil when the read failed, and empty before the person's first sign-in.
+%dl.admin-registry-form__readout
+  %dt
+    %i.fa-solid.fa-id-card{'aria-hidden' => 'true'}
+    NUID
+  %dd
+    %span.admin-registry-table__id= nuid
+  %dt
+    %i.fa-solid.fa-right-to-bracket{'aria-hidden' => 'true'}
+    Name at sign-in
+  %dd
+    - if accounts.nil?
+      %span.text-muted The sign-in name could not be loaded. Try again in a moment.
+    - elsif accounts.empty?
+      %span.text-muted Not signed in yet.
+    - else
+      - accounts.each do |account|
+        .admin-registry-form__readout-line
+          = account['name'].presence || 'No name supplied'
+          %span.admin-registry-table__id= account['email']
+      .admin-registry-form__hint From the university’s authentication system. It updates at each sign-in and cannot be edited here.

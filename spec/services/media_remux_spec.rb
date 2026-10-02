@@ -24,13 +24,4 @@ RSpec.describe MediaRemux do
         .with('-i', '/in.mov', '-c', 'copy', '-movflags', '+faststart', '/out.mp4')
     end
   end
-
-  describe '.poster' do
-    it 'extracts a single frame and returns the target' do
-      allow(described_class).to receive(:run)
-      expect(described_class.poster('/in.mp4', '/out.jpg')).to eq('/out.jpg')
-      expect(described_class).to have_received(:run)
-        .with('-ss', '3', '-i', '/in.mp4', '-frames:v', '1', '-q:v', '3', '/out.jpg')
-    end
-  end
 end

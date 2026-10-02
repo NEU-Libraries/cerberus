@@ -9,11 +9,19 @@
 module UsageChartsHelper
   LABEL_FORMAT = '%b %-d'
 
+  # One colour per ImpressionsReport action, in ACTIONS order; the stat ledger's
+  # accents in _admin_impressions.scss use the same three tones.
+  SERIES_COLORS = { 'view' => '#2666a6', 'download' => '#18bc9c', 'stream' => '#c46410' }.freeze
+
   # Per-action series as a chartkick multi-series array.
-  def usage_timeseries(report)
-    ImpressionsReport::ACTIONS.map do |action|
+  def usage_timeseries(report, actions: ImpressionsReport::ACTIONS)
+    actions.map do |action|
       { name: action.capitalize, data: dense_series(report.range, report.series(action)) }
     end
+  end
+
+  def usage_series_colors(actions: ImpressionsReport::ACTIONS)
+    actions.map { |action| SERIES_COLORS.fetch(action) }
   end
 
   def usage_visitors_series(report)
@@ -28,6 +36,11 @@ module UsageChartsHelper
     return 0 if days.zero?
 
     (report.unique_visitors_series.values.sum.to_f / days).round(1)
+  end
+
+  def usage_empty_message(report)
+    from, to = [report.range.begin, report.range.end].map { |day| day.strftime('%B %-d, %Y') }
+    "No activity between #{from} and #{to}. Usage statistics are refreshed daily."
   end
 
   private

@@ -13,6 +13,13 @@ class PagesController < CatalogController
     @recent_documents = recently_added_works
   end
 
+  # ENV names production's document by its handle; everywhere else the seed
+  # records the Work it made, whose NOID changes on every reset.
+  def terms
+    @document_url = Rails.application.config.x.cerberus.terms_document_url ||
+                    SiteSetting.get('terms_document_url')
+  end
+
   private
 
     # The most recently created Works the current user can discover, newest first.

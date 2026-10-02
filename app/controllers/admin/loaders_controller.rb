@@ -21,7 +21,8 @@ module Admin
     end
 
     def new
-      @loader = Loader.new
+      # Blank rather than the column's iptc default, so the admin has to choose.
+      @loader = Loader.new(kind: nil)
       breadcrumb 'New', new_admin_loader_path
     end
 

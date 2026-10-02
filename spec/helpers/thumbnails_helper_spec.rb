@@ -30,4 +30,15 @@ describe ThumbnailsHelper do
       expect(helper.renderable_thumbnail('')).to be_nil
     end
   end
+
+  describe '#av_poster_src' do
+    it 'keeps the Work\'s own poster' do
+      expect(helper.av_poster_src('https://iiif/p.jpg')).to eq('https://iiif/p.jpg')
+    end
+
+    it 'falls back to the placeholder mark' do
+      expect(helper.av_poster_src(nil)).to match(/av-placeholder/)
+      expect(helper.av_poster_src('')).to match(/av-placeholder/)
+    end
+  end
 end

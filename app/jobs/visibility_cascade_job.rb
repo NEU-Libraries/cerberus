@@ -4,57 +4,74 @@
 #
 # The caller does NOT write the container before enqueuing — this job narrows it
 # last, after everything beneath it (see NarrowingTargets for why the order is
-# load-bearing). Re-running is safe: every write is clamped and skipped when it
-# changes nothing. See docs/authorization.md.
+# load-bearing). Every write is clamped and skipped when it changes nothing. See
+# docs/authorization.md.
+#
+# The ledger entry lists each item it narrowed with the read audience it had,
+# because widening the collection again never widens what is inside it. That is
+# the list a developer undoes a narrowing from (docs/narrowing.md).
 class VisibilityCascadeJob < ApplicationJob
   queue_as :default
 
-  # Safe to back off and re-run only because the cascade is idempotent.
-  retry_on AtlasRb::StaleResourceError, wait: :polynomially_longer, attempts: 5
+  # A lock conflict is retried on the one item, not through retry_on: a re-run
+  # skips what is already narrowed, and its ledger entry would leave it out.
+  LOCK_ATTEMPTS = 3
 
   def perform(noid:, uuid:, permissions:)
     actor = Current.nuid
-    tally = { narrowed: 0, unchanged: 0, container: 0 }
+    @tally = { narrowed: 0, unchanged: 0, container: 0 }
+    @changed = []
     failures = []
     read_groups = Array(permissions['read'])
 
     NarrowingTargets.new(noid: noid, uuid: uuid).each do |target|
-      tally[target.noid == noid ? write_container(target, permissions) : apply(target, read_groups)] += 1
-    # Let a lock conflict escape to retry_on rather than recording it as a
-    # failure — it is transient, and the job is idempotent.
-    rescue AtlasRb::StaleResourceError
-      raise
+      with_lock_retry { target.noid == noid ? write_container(target, permissions) : apply(target, read_groups) }
     rescue AtlasRb::Error => e
       failures << "#{target.klass} #{target.noid}: #{e.message}"
     end
 
-    report(actor: actor, noid: noid, tally: tally, failures: failures)
+    report(actor: actor, noid: noid, failures: failures)
   end
 
   private
 
+    def with_lock_retry
+      attempts = 0
+      begin
+        yield
+      rescue AtlasRb::StaleResourceError
+        attempts += 1
+        retry if attempts < LOCK_ATTEMPTS
+        raise
+      end
+    end
+
     # The container is written last, verbatim from what was submitted, and is
     # deliberately NOT clamped: round-tripping the stored envelope instead would
     # silently drop edit-group or embargo edits made in the same submit.
-    #
-    # @return [Symbol]
     def write_container(target, permissions)
+      before = Array(AtlasRb::Resource.permissions(target.noid)&.read)
       AtlasRb::Resource.set_permissions(target.noid, permissions)
       clamp_sentinel(target.noid, Array(permissions['read']))
-      :container
+      record(target, before)
+      @tally[:container] += 1
     end
 
-    # @return [Symbol] :narrowed or :unchanged
     def apply(target, container_read)
       current = AtlasRb::Resource.permissions(target.noid)
-      return :unchanged if current.nil?
+      return @tally[:unchanged] += 1 if current.nil?
 
       clamped = Permissions.audience_intersect(Array(current.read), container_read)
-      return :unchanged if clamped.sort == Array(current.read).sort
+      return @tally[:unchanged] += 1 if clamped.sort == Array(current.read).sort
 
       AtlasRb::Resource.set_permissions(target.noid, { 'read' => clamped })
       clamp_sentinel(target.noid, clamped)
-      :narrowed
+      record(target, Array(current.read))
+      @tally[:narrowed] += 1
+    end
+
+    def record(target, read_before)
+      @changed << { 'noid' => target.noid, 'type' => target.klass, 'read_before' => read_before }
     end
 
     # The derivative-access default lives in Cerberus, not in the ACL Atlas
@@ -75,14 +92,15 @@ class VisibilityCascadeJob < ApplicationJob
 
     # Anything that failed to narrow is still exposed, so failures are named
     # rather than counted. See docs/authorization.md.
-    def report(actor:, noid:, tally:, failures:)
+    def report(actor:, noid:, failures:)
       CompletionNotice.deliver(
         kind:         'visibility_cascade',
         to_nuid:      actor,
         subject:      failures.any? ? 'Visibility change finished with problems' : 'Visibility change finished',
-        body:         body_for(noid, tally, failures),
+        body:         body_for(noid, @tally, failures),
         subject_noid: noid,
-        payload:      { narrowed: tally[:narrowed], unchanged: tally[:unchanged], failures: failures }
+        payload:      { narrowed: @tally[:narrowed], unchanged: @tally[:unchanged], failures: failures,
+                        changed: @changed }
       )
     end
 

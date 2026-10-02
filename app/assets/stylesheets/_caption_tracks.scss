@@ -1,0 +1,55 @@
+// The Work edit page's list of current caption files, one row per language.
+// Card shell (1px $gray-300, rounded-3) so it reads as a record of what is
+// stored, and the language tag takes the registry's identifier chip.
+.caption-tracks {
+  border: 1px solid $gray-300;
+  border-radius: $border-radius-lg;
+  background-color: $white;
+
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    padding: 0.5rem 0.75rem;
+
+    & + & {
+      border-top: 1px solid $gray-200;
+    }
+  }
+
+  &__label {
+    font-weight: 500;
+  }
+
+  &__tag {
+    @extend .admin-registry-table__id;
+  }
+
+  &__heading {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  // A removed file is a record of what was taken out, not a live track, so it
+  // sits on the page grey rather than white.
+  &--removed {
+    background-color: $gray-100;
+  }
+
+  &--removed &__label {
+    color: $gray-700;
+  }
+
+  &__meta {
+    font-size: 0.875rem;
+    color: $gray-700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+}

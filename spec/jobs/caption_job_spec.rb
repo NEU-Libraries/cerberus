@@ -17,26 +17,39 @@ RSpec.describe CaptionJob do
 
   let(:video) { AtlasRb::Mash.new(noid: 'v-1', mime_type: 'video/mp4') }
 
-  it 'creates the blob when the work has no captions yet' do
-    stub_work([video])
-    expect(AtlasRb::Blob).to receive(:create).with('w1', staged, 'captions.vtt', idempotency_key: 'idem')
+  let(:english) { AtlasRb::Mash.new(noid: 'c-1', mime_type: 'text/vtt') }
 
-    described_class.new.perform('w1', staged, 'captions.vtt', 'idem')
+  it 'creates the blob, with its language, when the work has no caption in it yet' do
+    stub_work([video, english])
+    expect(AtlasRb::Blob).to receive(:create)
+      .with('w1', staged, 'es.vtt', language: 'es', track_label: 'Español', idempotency_key: 'idem')
+
+    described_class.new.perform('w1', staged, 'es.vtt', 'idem', 'language' => 'es', 'track_label' => 'Español')
   end
 
-  # One caption per work: a second upload rewrites the blob already there, so the
-  # NOID every rendered page points at survives and the superseded file stays in
-  # that blob's version history.
-  it 'replaces the bytes of the existing caption blob rather than attaching a second' do
-    stub_work([video, AtlasRb::Mash.new(noid: 'c-1', mime_type: 'text/vtt')])
-    expect(AtlasRb::Blob).to receive(:update).with('c-1', staged, idempotency_key: 'idem')
+  # One caption per language: a second upload rewrites the blob already there,
+  # so the NOID every rendered page points at survives and the superseded file
+  # stays in that blob's version history.
+  it 'replaces the bytes of that language\'s caption rather than attaching a second' do
+    stub_work([video, english])
+    expect(AtlasRb::Blob).to receive(:update)
+      .with('c-1', staged, language: 'en', track_label: 'English', idempotency_key: 'idem')
     expect(AtlasRb::Blob).not_to receive(:create)
+
+    described_class.new.perform('w1', staged, 'captions.vtt', 'idem', 'language' => 'en', 'track_label' => 'English')
+  end
+
+  # A job queued before the form asked for a language carries four arguments.
+  it 'treats a job queued without a language as English' do
+    stub_work([video, english])
+    expect(AtlasRb::Blob).to receive(:update)
+      .with('c-1', staged, language: 'en', track_label: 'English', idempotency_key: 'idem')
 
     described_class.new.perform('w1', staged, 'captions.vtt', 'idem')
   end
 
   # The guard that keeps a deposit honest. Atlas gives a caption the same
-  # `original_file` role as the video master, so a caption written first would
+  # `original_file` role as the video original, so a caption written first would
   # satisfy ConfirmDepositJob's primary-file wait and let the work complete — and
   # Atlas builds the METS structMap at completion, omitting the video.
   it 'writes nothing until the primary file has landed (rides retry_on)' do

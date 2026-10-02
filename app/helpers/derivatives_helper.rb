@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # View + controller support for gated derivatives. Every downloadable asset —
-# image-tier Delegates (S/M/L) and Blobs alike (master / PDF / audio / video) —
+# image-tier Delegates (S/M/L) and Blobs alike (original / PDF / audio / video) —
 # carries a per-asset read gate (`gated`/`permission`) on the Work's assets
 # payload. The downloads UI (which files to show), DerivativeDownloadsController
 # (whether to authorize a delegate fetch), and DownloadsController (whether to
@@ -19,7 +19,7 @@ module DerivativesHelper
     DerivativeGate.document(delegate)
   end
 
-  # Can the current viewer read this asset? Blobs (master / PDF / audio / video)
+  # Can the current viewer read this asset? Blobs (original / PDF / audio / video)
   # and delegate image tiers both carry `gated`/`permission`, so both project
   # onto the same :read Ability. An asset with no gate (`gated` falsy) resolves
   # to public — the safe default for anything Atlas hasn't stamped.

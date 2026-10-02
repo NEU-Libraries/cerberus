@@ -22,6 +22,13 @@ RSpec.describe AuditEventsHelper, type: :helper do
       'on_behalf_of_nuid' => nil }
   end
 
+  describe '#audit_event_action' do
+    # "Embargo removed" is a person clearing one early; a lapse must not read alike.
+    it 'labels a lapsed embargo "Embargo released"' do
+      expect(helper.audit_event_action('release_embargo')).to include(label: 'Embargo released')
+    end
+  end
+
   describe '#audit_event_view_cell' do
     it 'links a permissions update to the rights-history page' do
       html = helper.audit_event_view_cell(event(action: 'update', change_type: 'permissions'), 'w-1')
@@ -187,8 +194,8 @@ RSpec.describe AuditEventsHelper, type: :helper do
 
     describe '#derivative_tier_rows' do
       it 'lists only the tiers a side mentions, in narrowing order' do
-        rows = helper.derivative_tier_rows({ 'large' => [] }, { 'small' => [], 'master' => [] })
-        expect(rows).to eq(%w[small large master])
+        rows = helper.derivative_tier_rows({ 'large' => [] }, { 'small' => [], 'original' => [] })
+        expect(rows).to eq(%w[small large original])
       end
 
       it 'sorts a tier it has not been taught about last rather than dropping it' do
@@ -200,7 +207,7 @@ RSpec.describe AuditEventsHelper, type: :helper do
     describe '#tier_label' do
       it 'gives the ladder prose names' do
         expect(helper.tier_label('service')).to eq('Service (deep zoom)')
-        expect(helper.tier_label('master')).to eq('Master (original)')
+        expect(helper.tier_label('original')).to eq('Original')
       end
 
       it 'falls back to the raw token for an unknown tier' do
@@ -243,6 +250,14 @@ RSpec.describe AuditEventsHelper, type: :helper do
         expect(text).to include('MODS document · via XML editor')
       end
 
+      it 'names the XML loader when a load replaced the document' do
+        text = helper.audit_event_payload_summary(
+          event(action: 'update', change_type: 'metadata',
+                payload: { 'source' => 'mods', 'origin' => 'xml_loader' })
+        )
+        expect(text).to include('MODS document · via XML loader')
+      end
+
       # Atlas omits the key rather than sending it empty, so an event from a
       # programmatic write or from before the field existed has to keep reading.
       it 'labels a MODS update carrying no origin exactly as before' do
@@ -262,9 +277,24 @@ RSpec.describe AuditEventsHelper, type: :helper do
       end
 
       it 'reports a newly gated tier' do
-        text = helper.audit_event_payload_summary(tier_event({}, { 'master' => %w[staff] }))
-        expect(text).to include('master +staff')
+        text = helper.audit_event_payload_summary(tier_event({}, { 'original' => %w[staff] }))
+        expect(text).to include('original +staff')
       end
+    end
+  end
+
+  describe 'tombstone events' do
+    it 'shows the removal reason Atlas recorded' do
+      text = helper.audit_event_payload_summary(
+        event(action: 'tombstone', change_type: 'lifecycle',
+              payload: { 'reason' => TombstoneReasons::CURATOR })
+      )
+      expect(CGI.unescapeHTML(text)).to include(TombstoneReasons::CURATOR)
+    end
+
+    it 'shows no summary for a tombstone recorded without one' do
+      expect(helper.audit_event_payload_summary(event(action: 'tombstone', change_type: 'lifecycle',
+                                                      payload: {}))).to be_nil
     end
   end
 end

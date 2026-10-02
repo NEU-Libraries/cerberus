@@ -130,6 +130,43 @@ RSpec.describe 'Sets', type: :request do
 
     before { sign_in curator }
 
+    # "+ New set" in the Add-to-set picker used to open a blank form: the new set
+    # came out empty and the user landed on it, not back on their results.
+    describe 'New set from the picker' do
+      let(:results_page) { '/catalog?q=anything' }
+
+      it 'says on the form that the chosen work will be added, and carries it' do
+        get new_set_path(work_id: lone_work.id, return_to: results_page)
+
+        expect(response.body).to include('will be added to this set when you create it')
+        expect(response.body).to include(%(name="work_id" value="#{lone_work.id}"))
+        expect(response.body).to include(%(name="return_to" value="#{results_page}"))
+      end
+
+      it 'creates the set holding the work and returns to the results' do
+        post '/sets', params: { set: { title: 'Picked Set' }, work_id: lone_work.id, return_to: results_page }
+
+        expect(response).to redirect_to(results_page)
+        expect(flash[:notice]).to include('Picked Set', 'work added')
+        created = AtlasRb::Compilation.list(nuid: nuid)['compilations'].find { |c| c['title'] == 'Picked Set' }
+        expect(AtlasRb::Compilation.find(created['id'])['included_works']).to include(lone_work.id)
+      end
+
+      it 'includes a chosen collection' do
+        post '/sets', params: { set: { title: 'Collection Set' }, collection_id: collection.id }
+
+        created = AtlasRb::Compilation.list(nuid: nuid)['compilations'].find { |c| c['title'] == 'Collection Set' }
+        expect(AtlasRb::Compilation.find(created['id'])['included_collections']).to include(collection.id)
+      end
+
+      it 'ignores an off-host return_to and lands on the new set' do
+        post '/sets', params: { set: { title: 'Offsite Set' }, work_id: lone_work.id,
+                                return_to: 'https://evil.example/phish' }
+
+        expect(response.location).to start_with("#{request.base_url}/sets/")
+      end
+    end
+
     it 'walks the whole flow: include, add, set aside, put back, remove' do
       set = make_set('Flow Set')
 
@@ -137,9 +174,13 @@ RSpec.describe 'Sets', type: :request do
       post "/sets/#{set['id']}/works",       params: { work_id: lone_work.id }
 
       get "/sets/#{set['id']}"
-      expect(response.body).to include('Flow Set')
-        .and include('added directly')
-        .and include('Set aside')
+      expect(response.body).to include('Flow Set').and include('added directly')
+      # The definition lives on the Manage page, not the set's own page.
+      expect(response.body).not_to include('Hidden works')
+
+      get "/sets/#{set['id']}/edit"
+      expect(response.parsed_body.at_css('#definition-tab').text.strip).to eq('Definition')
+      expect(response.body).to include('Hidden works')
 
       # set one collection-sourced work aside: it leaves the rows, the chip
       # count diverges, and the teaching toast carries fresh counts + Undo
@@ -147,18 +188,31 @@ RSpec.describe 'Sets', type: :request do
            params: { work_id: work_one.id, title: 'Work One', chip: collection.id }
       follow_redirect!
       expect(response.body).to include('drs-toast')
+        .and match(%r{Hid\s+<b>Work One</b>\s+from this set})
+        .and match(%r{</b>, which is still in your set})
         .and include('still in your set')
-        .and include('1</span><span class="of"> of 2')
+      # The per-collection count is drawn in the definition, on the Manage page.
+      get "/sets/#{set['id']}/edit"
+      expect(response.body).to include('1</span><span class="of"> of 2')
 
-      # put it back: divergence gone
+      # put it back from the toast's Undo: back on the set, divergence gone
       delete "/sets/#{set['id']}/aside/#{work_one.id}"
-      follow_redirect!
+      expect(response).to redirect_to(set_path(set['id']))
+      get "/sets/#{set['id']}/edit"
       expect(response.body).not_to include('of 2</span>')
 
-      # remove the include; only the direct add remains
+      # put back from the Manage page returns to its Definition tab
+      post "/sets/#{set['id']}/aside", params: { work_id: work_one.id, title: 'Work One', chip: collection.id }
+      delete "/sets/#{set['id']}/aside/#{work_one.id}", params: { return_to: 'manage' }
+      expect(response).to redirect_to(edit_set_path(set['id'], tab: 'definition'))
+
+      # remove the include from the Manage page; only the direct add remains
       delete "/sets/#{set['id']}/collections/#{collection.id}"
-      follow_redirect!
+      expect(response).to redirect_to(edit_set_path(set['id'], tab: 'definition'))
+      get "/sets/#{set['id']}"
       expect(response.body).to include('added directly')
+      get "/sets/#{set['id']}/edit"
+      expect(response.body).to include('No collections included.')
       expect(response.body).not_to include('of 2')
     end
 
@@ -179,7 +233,7 @@ RSpec.describe 'Sets', type: :request do
         expect(response.body).to include('Already in this set')
 
         get '/sets/picker', params: { work_id: work_one.id }
-        expect(response.body).to include('Set aside in this set')
+        expect(response.body).to include('Hidden in this set')
 
         get '/sets/picker', params: { work_id: lone_work.id }
         expect(response.body).to include("/sets/#{set['id']}/works")
@@ -278,8 +332,28 @@ RSpec.describe 'Sets', type: :request do
       sign_in other_user
       get "/sets/#{set['id']}"
       expect(response).to have_http_status(:ok)
-      expect(response.body).not_to include('Set aside')
+      expect(response.body).not_to include(set_aside_set_path(set['id']))
       expect(response.body).not_to include(edit_set_path(set['id']))
+    end
+
+    it 'refuses the edit page to a non-owner with read access, who could never save it' do
+      set = make_set('Owned Set')
+      AtlasRb::Compilation.update(set['id'],
+                                  permissions: { read: ['public'], edit: [], edit_users: [] },
+                                  nuid:        nuid)
+      sign_in other_user
+      get edit_set_path(set['id'], tab: 'export')
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it 'still opens the edit page to a person granted edit access' do
+      set = make_set('Shared Set')
+      AtlasRb::Compilation.update(set['id'],
+                                  permissions: { read: ['public'], edit: [], edit_users: [other_user.nuid] },
+                                  nuid:        nuid)
+      sign_in other_user
+      get edit_set_path(set['id'])
+      expect(response).to have_http_status(:ok)
     end
   end
 

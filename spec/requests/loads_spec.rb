@@ -185,6 +185,9 @@ RSpec.describe 'Loads', type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('Campus Life (Photographs)')
       expect(response.body).to include('Athletics (Photographs)')
+      # IPTC uploads and runs in one step, so it keeps "Upload".
+      expect(response.body).to include('value="Upload"')
+      expect(response.body).not_to include('value="Preview"', 'for new file ingests')
     end
 
     # A Work destination would parent every ingested Work under it.
@@ -206,6 +209,29 @@ RSpec.describe 'Loads', type: :request do
       allow(UnzipJob).to receive(:perform_later)
       allow(FileUtils).to receive(:mkdir_p)
       allow(FileUtils).to receive(:cp)
+      allow(AtlasRb::Collection).to receive(:children).with('neu:fix-comm-photos-archive').and_return(['neu:c1'])
+      allow(AtlasRb::Resource).to receive(:find_many).with(['neu:c1']).and_return(
+        [AtlasRb::Mash.new('noid' => 'neu:c1', 'klass' => 'Collection', 'title' => 'Campus Life')]
+      )
+    end
+
+    # The dropdown lists only the root's Collections, but the POST can name any
+    # NOID, so the server checks it against the same list.
+    it 'refuses a destination the dropdown does not list' do
+      post '/loaders/marcom/loads',
+           params: { load_report: { archive: archive, parent_collection_id: 'neu:elsewhere' } }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include('Choose a destination collection from the list.')
+      expect(LoadReport.count).to eq(0)
+      expect(UnzipJob).not_to have_received(:perform_later)
+    end
+
+    it 'refuses a blank destination' do
+      post '/loaders/marcom/loads', params: { load_report: { archive: archive, parent_collection_id: '' } }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(LoadReport.count).to eq(0)
     end
 
     it 'creates a LoadReport linked to the loader' do
@@ -288,6 +314,27 @@ RSpec.describe 'Loads', type: :request do
                                         parent_collection_id: 'c')
       get "/loaders/marcom/loads/#{other_report.id}"
       expect(response).to have_http_status(:not_found)
+    end
+  end
+
+  describe 'DELETE /loaders/marcom/loads/:id' do
+    let!(:load_report) do
+      LoadReport.create!(loader: marcom_loader, source_filename: 'jpgs.zip',
+                         parent_collection_id: 'neu:c1')
+    end
+
+    before { sign_in marcom_user }
+
+    it "says the upload was canceled when the preview's Discard sends it" do
+      delete "/loaders/marcom/loads/#{load_report.id}", params: { discard: 1 }
+      expect(response).to redirect_to('/loaders/marcom/loads')
+      expect(flash[:notice]).to eq('Upload canceled.')
+      expect(LoadReport.exists?(load_report.id)).to be(false)
+    end
+
+    it "says the report was deleted when the history list's Delete sends it" do
+      delete "/loaders/marcom/loads/#{load_report.id}"
+      expect(flash[:notice]).to eq('Load report deleted.')
     end
   end
 
@@ -423,6 +470,26 @@ RSpec.describe 'Loads', type: :request do
     end
 
     describe 'POST .../loads' do
+      # The archive save is stubbed above, so the real preview would find no
+      # archive and block; each example says what the preview concludes.
+      let(:open_result) { instance_double(XmlPreview::Result, blocked?: false) }
+
+      before { allow(XmlPreview).to receive(:call).and_return(open_result) }
+
+      # A blocked preview can never be confirmed; left previewing, it read as a
+      # load still waiting rather than one that had failed.
+      it 'fails a load whose preview is blocked, and runs nothing' do
+        allow(XmlPreview).to receive(:call).and_return(instance_double(XmlPreview::Result, blocked?: true))
+
+        post '/loaders/xml/loads', params: { load_report: { archive: archive } }
+
+        lr = LoadReport.last
+        expect(lr).to be_failed
+        expect(lr).to be_failed_at_preview
+        expect(XmlUnzipJob).not_to have_received(:perform_later)
+        expect(response).to redirect_to(loader_load_path(xml_loader, lr))
+      end
+
       it 'stages a previewing LoadReport and enqueues no job yet' do
         post '/loaders/xml/loads',
              params: { load_report: { archive: archive, parent_collection_id: 'neu:c1' } }
@@ -465,6 +532,7 @@ RSpec.describe 'Loads', type: :request do
         expect(response).to have_http_status(:ok)
         expect(response.body).to include('data-controller="collection-picker"')
         expect(response.body).to include('Search by collection title')
+        expect(response.body).to include('Destination collection for new file ingests', 'value="Preview"')
       end
     end
 
@@ -482,6 +550,27 @@ RSpec.describe 'Loads', type: :request do
         get '/loaders/xml/loads/collection_search', params: { q: 'thes' }
         expect(response).to have_http_status(:ok)
         expect(response.parsed_body).to eq([{ 'value' => 'neu:abc123', 'label' => 'Theses and Dissertations' }])
+      end
+
+      # Every community has a "Theses & Dissertations" showcase, so the title
+      # alone cannot tell them apart.
+      it 'names the community a showcase belongs to' do
+        showcase = SolrDocument.new(id: 'uuid-show', 'title_tsim' => ['Theses & Dissertations'], 'featured_bsi' => true,
+                                    MembershipQuery::STRUCTURAL_FIELD => 'id-uuid-comm')
+        allow(showcase).to receive(:to_param).and_return('show123')
+        allow(ResourceSearch).to receive(:call)
+          .and_return(instance_double(Blacklight::Solr::Response, documents: [showcase, doc]))
+        allow(doc).to receive(:to_param).and_return('neu:abc123')
+        allow(StructuralParents).to receive(:call).with(documents: [showcase])
+                                                  .and_return('uuid-comm' => SolrDocument.new(id: 'uuid-comm', 'title_tsim' => ['College of Engineering']))
+
+        get '/loaders/xml/loads/collection_search', params: { q: 'thes' }
+
+        expect(response.parsed_body).to eq([
+                                             { 'value' => 'show123',
+                                               'label' => 'Theses & Dissertations · College of Engineering' },
+                                             { 'value' => 'neu:abc123', 'label' => 'Theses and Dissertations' }
+                                           ])
       end
 
       it 'fails soft to [] when Atlas/Solr is unreachable' do
@@ -506,7 +595,12 @@ RSpec.describe 'Loads', type: :request do
         )
       end
 
-      before { allow(XmlPreview).to receive(:call).and_return(preview) }
+      let(:preview_file) { XmlPreviewFile::Result.new(thumbnail_src: 'https://iiif.example/p.jpg') }
+
+      before do
+        allow(XmlPreview).to receive(:call).and_return(preview)
+        allow(XmlPreviewFile).to receive(:call).and_return(preview_file)
+      end
 
       it 'renders the preview with a Confirm action, not the poll frame' do
         get "/loaders/xml/loads/#{load_report.id}"
@@ -521,6 +615,47 @@ RSpec.describe 'Loads', type: :request do
         expect(response.body).to include('MODS XML')
         expect(response.body).to include('Display metadata')
         expect(response.body).to include('mods-display') # the decorated HTML, rendered html_safe
+      end
+
+      it 'shows the first row\'s picture opposite the overview' do
+        get "/loaders/xml/loads/#{load_report.id}"
+        figure = response.parsed_body.at_css('.load-report-overview__top figure.load-preview-file')
+        expect(figure.at_css('img')['src']).to eq('https://iiif.example/p.jpg')
+        expect(figure.text).to include('Current thumbnail of neu:test123')
+      end
+
+      # The XML editor's own Ace, read-only; the <pre> stays as the no-JS fallback.
+      it 'shows the MODS in a read-only XML viewer, loaded from the preview bundle' do
+        get "/loaders/xml/loads/#{load_report.id}"
+        html = response.parsed_body
+        expect(html.at_css('.xml-viewer[data-controller="xml-viewer"] pre[data-xml-viewer-target="source"]').text)
+          .to eq('<mods:mods/>')
+        expect(response.body).to include('preview_application')
+        expect(html.at_css('meta[name="turbo-cache-control"]')['content']).to eq('no-cache')
+      end
+    end
+
+    describe 'GET .../loads/:id after the preview refused it' do
+      let!(:load_report) do
+        LoadReport.create!(loader: xml_loader, source_filename: 'no_manifest.zip',
+                           status: :failed, finished_at: Time.current)
+      end
+
+      before do
+        allow(XmlPreview).to receive(:call).and_return(
+          XmlPreview::Result.new(structural_errors: ['No manifest.xlsx was found in the uploaded archive.'],
+                                 validation_errors: [])
+        )
+      end
+
+      # The reason lives only in the preview, so the page keeps showing it,
+      # marked Failed, with Discard but no Confirm.
+      it 'shows the preview and its reason, marked Failed, with no Confirm' do
+        get "/loaders/xml/loads/#{load_report.id}"
+
+        expect(response.body).to include('No manifest.xlsx was found', 'Failed', 'Discard')
+        expect(response.body).not_to include('Confirm &amp; run')
+        expect(response.body).not_to include('data-controller="load-poll"')
       end
     end
 

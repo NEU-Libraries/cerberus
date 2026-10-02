@@ -41,9 +41,9 @@ RSpec.describe 'export Solr field contract' do
   end
 
   it 'has the packer declare every field it reads' do
-    # Guards the declaration itself: the embargo columns are computed from these.
+    # Guards the declaration itself: both embargo columns are computed from the date.
     expect(MetadataExportPacker::REQUIRED_DOC_FIELDS)
-      .to include('embargo_release_date_dtsi', 'embargoed_bsi', 'alternate_ids_ssim')
+      .to include('embargo_release_date_dtsi', 'alternate_ids_ssim')
   end
 
   it 'asks Solr for every field the packer reads, on the COLLECTION path' do

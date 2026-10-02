@@ -1,8 +1,9 @@
--# locals: caption (AtlasRb::Mash, nil) — the Work's WebVTT Blob.
+-# locals: captions (Array) — the Work's WebVTT Blobs, English first.
 -#
--# The one <track> line, rendered inside whichever element the player mounted, so
--# the audio and video branches of works/_av_player cannot drift apart. srclang
--# and label are fixed because nothing records the real ones — see CaptionTrack.
-- if caption
+-# The <track> lines, rendered inside whichever element the player mounted, so
+-# the audio and video branches of works/_av_player cannot drift apart. Only the
+-# first is `default`: a player shows one caption track at a time, and the
+-# reader picks another from the captions menu.
+- captions.each_with_index do |caption, index|
   %track{ kind: 'captions', src: media_path(caption.noid),
-          srclang: CaptionTrack::LANGUAGE, label: CaptionTrack::LABEL, default: true }/
+          srclang: CaptionTrack.language(caption), label: CaptionTrack.label(caption), default: index.zero? }/

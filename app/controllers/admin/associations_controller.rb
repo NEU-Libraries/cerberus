@@ -1,12 +1,16 @@
 # frozen_string_literal: true
 
 module Admin
-  # Admin-only management of the typed edges between Works. Admin-only because
-  # Atlas is: the claim renders on the TARGET's page too, and the asserter often
-  # holds no rights there. `add` always writes from the managed Work outward,
-  # since the edge is stored on the Work that asserts it. See
-  # docs/edit-surfaces.md.
+  # Management of the typed edges between Works, for :admin and the
+  # devolved-admin tier, matching Atlas's :associate grant. Not :edit: the claim
+  # renders on the TARGET's page too, and the asserter often holds no rights
+  # there. `add` writes from the picked Work toward the managed one, so an admin
+  # starts from the primary Work; Atlas stores the edge on the supporting Work
+  # that asserts it. See docs/edit-surfaces.md.
   class AssociationsController < BaseController
+    skip_before_action :require_admin
+    before_action :require_admin_or_delegate
+
     breadcrumb_for 'Associated works', :admin_associations_path
 
     include Blacklight::Configurable
@@ -16,13 +20,15 @@ module Admin
     # Atlas's 422 codes on an association write, in the admin's terms. Keyed on
     # the envelope's `error` discriminator, which atlas_rb hands back as a
     # String. An unrecognised or absent code falls through to GENERIC_REFUSAL.
+    # Atlas's "work" is the picked Work and its "target" the managed one, so
+    # the two tombstone phrasings point the other way from the codes' names.
     REFUSALS = {
       'invalid_type'        => 'That is not a relationship Atlas recognises.',
       'target_not_found'    => 'No Work with that PID — nothing was linked.',
       'invalid_target_type' => 'An association joins two Works. That PID names something else.',
       'self_association'    => 'A Work cannot be associated with itself.',
-      'tombstoned_work'     => 'This Work is withdrawn. Restore it before you associate it.',
-      'tombstoned_target'   => 'That Work is withdrawn. Restore it before you associate it.'
+      'tombstoned_work'     => 'That Work is withdrawn. Restore it before you associate it.',
+      'tombstoned_target'   => 'This Work is withdrawn. Restore it before you associate it.'
     }.freeze
 
     GENERIC_REFUSAL = 'Atlas refused the change — nothing was written.'
@@ -41,7 +47,7 @@ module Admin
     end
 
     def add
-      AtlasRb::Work.associate(params[:work_id], params[:target_id], type: params[:type])
+      AtlasRb::Work.associate(params[:target_id], params[:work_id], type: params[:type])
       redirect_to manage_path, notice: 'Association added.'
     rescue AtlasRb::WorkAssociationError => e
       redirect_to manage_path, alert: REFUSALS.fetch(e.code, GENERIC_REFUSAL)

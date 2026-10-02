@@ -66,23 +66,23 @@
       -# Stacking views onto downloads also makes the bar height read as total
       -# activity for the day.
       %section.usage-chart-block
-        %h2.usage-chart-block__title Views & downloads in the last 90 days
-        .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-stacked-value' => 'true', 'usage-chart-dataset-value' => usage_timeseries(@analytics).to_json, 'usage-chart-colors-value' => %w[#2666a6 #18bc9c].to_json}}
+        %h2.usage-chart-block__title Views, downloads & streams in the last 90 days
+        .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-stacked-value' => 'true', 'usage-chart-dataset-value' => usage_timeseries(@analytics).to_json, 'usage-chart-colors-value' => usage_series_colors.to_json}}
 
       %section.usage-chart-block
         %h2.usage-chart-block__title Unique visitors in the last 90 days
         .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-dataset-value' => usage_visitors_series(@analytics).to_json, 'usage-chart-colors-value' => %w[#5d569b].to_json}}
 
     #analytics-files.tab-pane{'aria-labelledby' => 'analytics-files-tab', role: 'tabpanel'}
-      = render 'shared/container_analytics_top_table', entries: @analytics.top_works, empty: 'No file activity in this range.'
+      = render 'shared/container_analytics_top_table', entries: @analytics.top_works, empty: usage_empty_message(@analytics)
     - if @analytics.scope.show_collections_tab?
       #analytics-collections.tab-pane{'aria-labelledby' => 'analytics-collections-tab', role: 'tabpanel'}
-        = render 'shared/container_analytics_top_table', entries: @analytics.top_containers, empty: 'No container activity in this range.'
+        = render 'shared/container_analytics_top_table', entries: @analytics.top_containers, empty: usage_empty_message(@analytics)
     #analytics-composition.tab-pane.active{'aria-labelledby' => 'analytics-composition-tab', role: 'tabpanel'}
       = render 'admin/impressions/composition', composition: @analytics_composition,
                                                 scope_phrase: "in #{plain_text(@analytics_base_item[:title])}"
 
-  - if current_user&.admin? || current_user&.admin_delegate?
+  - if effective_user&.admin? || effective_user&.admin_delegate?
     .mt-3.text-center
       = link_to admin_impressions_path(open_in_usage_analytics_params(@analytics_effective_item, @analytics)), class: 'btn btn-sm btn-tonal-primary' do
         %i.fa-solid.fa-chart-line.me-1{'aria-hidden' => 'true'}

@@ -1,0 +1,36 @@
+-# The expandable row's contents on the People index (see index.html.haml),
+-# rendered into its lazy frame. One block per sign-in account, because each
+-# account carries its own group set.
+= turbo_frame_tag "person-groups-#{@noid}" do
+  .person-groups.py-2.px-2
+    - if @failed
+      %p.small.text-muted.mb-0 The groups could not be loaded. Try again in a moment.
+    - elsif @accounts.empty?
+      %p.small.text-muted.mb-0 No sign-in account for this person yet, so no groups.
+    - else
+      - @accounts.each do |account|
+        %section.person-groups__account{'aria-label' => "Account #{account['email']}"}
+          .person-groups__account-head
+            %span.person-groups__label Account
+            %span.person-groups__email= account['email']
+            - if account['affiliation'].present?
+              %span.small.text-muted= account['affiliation'].titleize
+            - if account['preferred'] && @accounts.size > 1
+              %span.badge.rounded-pill.bg-body-secondary.text-secondary-emphasis.border
+                %i.fa-solid.fa-star.me-1{'aria-hidden' => 'true'}
+                Preferred
+          - groups = Array(account['groups']).sort_by { |raw| pretty_group_name(raw).downcase }
+          - if groups.empty?
+            %p.small.text-muted.mb-0 No groups.
+          - else
+            -# Every group takes the same two cells, so a group with no display
+            -# name keeps its raw id in the id column rather than posing as a name.
+            %dl.person-groups__list.mb-0
+              - groups.each do |raw|
+                - name = pretty_group_name(raw)
+                - if name == raw
+                  %dt.person-groups__name.person-groups__name--none No display name
+                - else
+                  %dt.person-groups__name= name
+                %dd.mb-0
+                  %span.admin-registry-table__id= raw

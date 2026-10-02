@@ -25,6 +25,12 @@ class NuidResolver
     names_for([nuid])[nuid]
   end
 
+  # Drops one NUID's cached name, so a curator's rename shows at once rather
+  # than after CACHE_TTL.
+  def self.forget(nuid)
+    Rails.cache.delete(cache_key(nuid)) if nuid.present?
+  end
+
   # "Family, Given" (or any Namae-parsable form) → "Given Family".
   # Unparsable input passes through untouched.
   def self.prettify(name)
@@ -48,8 +54,8 @@ class NuidResolver
     found.each { |nuid, name| Rails.cache.write(cache_key(nuid), name, expires_in: CACHE_TTL) }
     # Atlas silently drops unresolvables — backfill so every key resolves.
     # Misses are deliberately not cached: a person/user provisioned a minute
-    # later should resolve without waiting out the TTL. (A curator's name edit
-    # likewise takes up to CACHE_TTL to propagate.)
+    # later should resolve without waiting out the TTL. A curator's name edit
+    # calls `forget`, so it does not wait either.
     nuids.index_with { |nuid| found[nuid] || nuid }
   end
   private_class_method :fetch_names

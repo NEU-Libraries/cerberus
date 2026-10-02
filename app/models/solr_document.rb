@@ -42,6 +42,12 @@ class SolrDocument
     value == true || value.to_s == 'true'
   end
 
+  # Set by CommunitiesController, never indexed: a showcase it lists to an
+  # admin while the showcase holds nothing.
+  def empty_showcase?
+    self['empty_showcase_bsi'] == true
+  end
+
   # The synthetic "Faculty & Staff" community row (CommunitiesController's
   # faculty_staff_stub) — a browse-to-many affordance, not an individual. Drives
   # the pluralized "People" thumbnail pill while the row keeps the Person icon.

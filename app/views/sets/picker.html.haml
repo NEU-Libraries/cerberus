@@ -21,10 +21,10 @@
               %span.state Already in this set — via a collection it contains
         - when :aside
           .picker-row.is-noop
-            %i.fa-solid.fa-box-archive{'aria-hidden' => 'true'}
+            %i.fa-solid.fa-eye-slash{'aria-hidden' => 'true'}
             %span.nm
               = set['title']
-              %span.state Set aside in this set — put it back from the set's page
+              %span.state Hidden in this set — put it back from the set's page
         - else
           = button_to (@kind == 'collection' ? add_collection_set_path(set['id']) : add_work_set_path(set['id'])),
             params: { :"#{@kind}_id" => @noid }, class: 'picker-row is-add',

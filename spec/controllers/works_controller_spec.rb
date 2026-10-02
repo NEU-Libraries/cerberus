@@ -152,6 +152,24 @@ describe WorksController do
         expect(response.body).to include('under embargo')
         expect(response.body).to include((Date.current + 30).strftime('%B %-d, %Y'))
       end
+
+      context 'with a recording' do
+        before do
+          AtlasRb::Blob.create(work.id, Rails.root.join('spec/fixtures/files/sample-audio.mp3').to_s,
+                               'sample-audio.mp3', nuid: '000000004')
+        end
+
+        it 'mounts no player for a guest, whom /media would refuse' do
+          get :show, params: { id: work.id }
+          expect(response.body).not_to include('av-player')
+        end
+
+        it 'mounts the player for staff, who may bypass the embargo' do
+          sign_in User.new(email: 'staff@example.com', nuid: '000000002', groups: [Permissions::STAFF_EDIT_GROUP])
+          get :show, params: { id: work.id }
+          expect(response.body).to include('av-player')
+        end
+      end
     end
   end
 
@@ -213,7 +231,7 @@ describe WorksController do
 
     it 'enqueues both jobs and redirects to the metadata page' do
       expect do
-        post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id }
       end.to have_enqueued_job(IiifAssetsJob)
         .and have_enqueued_job(ContentCreationJob)
@@ -225,7 +243,7 @@ describe WorksController do
     # complete_work: false is what keeps the deposit in_progress until its
     # depositor saves the metadata page — and hidden from the public until then.
     it 'leaves the work for its depositor to complete rather than completing on ingest' do
-      post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+      post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                               collection_id: collection.id }
 
       expect(ContentCreationJob).to have_been_enqueued.with(anything, anything, anything, anything,
@@ -235,7 +253,7 @@ describe WorksController do
     # The filename title is written before the depositor sees the metadata
     # page, so it must not read as a Metadata form edit in the audit log.
     it 'tags the filename titling as the deposit, not the Metadata form' do
-      post :create, params: { binary:        fixture_file_upload('plain.txt', 'text/plain'),
+      post :create, params: { terms_accepted: '1', binary: fixture_file_upload('plain.txt', 'text/plain'),
                               collection_id: collection.id }
 
       expect(mods_edit_origins(assigns(:work).id)).to eq(['deposit'])
@@ -243,7 +261,7 @@ describe WorksController do
 
     it 'does not enqueue any enrichment job for unenriched uploads' do
       expect do
-        post :create, params: { binary:        fixture_file_upload('plain.txt', 'text/plain'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('plain.txt', 'text/plain'),
                                 collection_id: collection.id }
       end.to have_enqueued_job(ContentCreationJob)
         .with(anything, anything, 'plain.txt', a_string_matching(uuid_re), complete_work: false)
@@ -253,7 +271,7 @@ describe WorksController do
 
     it 'routes PDF uploads to IiifAssetsJob for first-page thumbnails' do
       expect do
-        post :create, params: { binary:        fixture_file_upload('example.pdf', 'application/pdf'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('example.pdf', 'application/pdf'),
                                 collection_id: collection.id }
       end.to have_enqueued_job(IiifAssetsJob)
         .and have_enqueued_job(ContentCreationJob)
@@ -263,12 +281,20 @@ describe WorksController do
     it 'routes Word uploads to PdfRenditionJob with a derived rendition key' do
       docx_mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
       expect do
-        post :create, params: { binary:        fixture_file_upload('example.docx', docx_mime),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('example.docx', docx_mime),
                                 collection_id: collection.id }
       end.to have_enqueued_job(PdfRenditionJob)
         .with(anything, anything, a_string_matching(uuid_re), refresh: false)
         .and have_enqueued_job(ContentCreationJob)
         .and not_have_enqueued_job(IiifAssetsJob)
+    end
+
+    it 'refuses a deposit whose terms box is unticked, before creating a work' do
+      expect(AtlasRb::Work).not_to receive(:create)
+      post :create, params: { binary: fixture_file_upload('image.png', 'image/png'), collection_id: collection.id }
+
+      expect(response).to redirect_to(new_collection_work_path(collection.id))
+      expect(flash[:alert]).to eq(described_class::TERMS_REQUIRED)
     end
 
     it 'rejects an A/V upload outside the safe codec set without creating a work' do
@@ -277,7 +303,7 @@ describe WorksController do
       allow(Marcel::MimeType).to receive(:for).and_return('video/quicktime')
 
       expect(AtlasRb::Work).not_to receive(:create)
-      post :create, params: { binary:        fixture_file_upload('image.png', 'video/quicktime'),
+      post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'video/quicktime'),
                               collection_id: collection.id }
 
       expect(response).to redirect_to(new_collection_work_path(collection.id))
@@ -285,7 +311,7 @@ describe WorksController do
     end
 
     it 'seeds the work title from the uploaded filename via the structure-safe MODS path' do
-      post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+      post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                               collection_id: collection.id }
       work_id = assigns(:work).id
       expect(AtlasRb::Work.find(work_id).title).to eq('image.png')
@@ -297,7 +323,7 @@ describe WorksController do
       it 'explicitly attributes to the acting user when upload_as is missing (default)' do
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id }
 
         expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
@@ -306,7 +332,7 @@ describe WorksController do
       it 'explicitly attributes to the acting user when upload_as is "myself"' do
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id,
                                 upload_as:     'myself' }
 
@@ -316,7 +342,7 @@ describe WorksController do
       it 'forwards the parent collection depositor when upload_as is "proxy"' do
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id,
                                 upload_as:     'proxy' }
 
@@ -330,7 +356,7 @@ describe WorksController do
         # the operating admin. (proxy_uploader-empty is enforced Atlas-side.)
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params:  { binary:        fixture_file_upload('image.png', 'image/png'),
+        post :create, params:  { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                  collection_id: collection.id,
                                  upload_as:     'myself' },
                       session: { acting_as_nuid: '000000002' }
@@ -345,10 +371,13 @@ describe WorksController do
     # deposit standing.
     context 'promotion to a community showcase' do
       # publish_offered? requires the destination to BE the depositor's own root.
+      # Resolves whoever is asked for, as Atlas does, so an acting-as target
+      # resolves as themselves rather than as the signed-in admin.
       def stub_person_rooted_at(collection_id)
-        person = AtlasRb::Mash.new('nuid' => user.nuid, 'personal_root_id' => collection_id,
-                                   'affiliated_community_ids' => ['comm1'])
-        allow(AtlasRb::Person).to receive(:resolve).and_return([person])
+        allow(AtlasRb::Person).to receive(:resolve) do |nuids|
+          [AtlasRb::Mash.new('nuid' => nuids.first, 'personal_root_id' => collection_id,
+                             'affiliated_community_ids' => ['comm1'])]
+        end
       end
 
       it 'links the work into the showcase while leaving it in the destination' do
@@ -357,7 +386,7 @@ describe WorksController do
         allow(AtlasRb::System::Work).to receive(:add_linked_member)
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id, publish: '1',
                                 publish_community_id: 'comm1', publish_genre: 'Datasets' }
 
@@ -365,6 +394,26 @@ describe WorksController do
         expect(AtlasRb::System::Work).to have_received(:add_linked_member)
           .with(assigns(:work).id, 'showcasenoid', on_behalf_of: user.nuid)
         expect(response).to redirect_to(metadata_work_path(assigns(:work).id))
+      ensure
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
+      # Atlas links only on the Work's depositor's behalf. Acting as someone, the
+      # depositor is the target, so sending the signed-in admin was refused.
+      it 'links on behalf of the acting-as target, who is the depositor' do
+        stub_person_rooted_at(collection.id)
+        allow(ShowcaseFinder).to receive(:call).and_return('showcasenoid')
+        allow(AtlasRb::System::Work).to receive(:add_linked_member)
+        allow(AtlasRb::Work).to receive(:create).and_call_original
+
+        post :create, params:  { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
+                                 collection_id: collection.id, publish: '1',
+                                 publish_community_id: 'comm1', publish_genre: 'Datasets' },
+                      session: { acting_as_nuid: '000000002' }
+
+        expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: '000000002')
+        expect(AtlasRb::System::Work).to have_received(:add_linked_member)
+          .with(assigns(:work).id, 'showcasenoid', on_behalf_of: '000000002')
       ensure
         AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
@@ -385,7 +434,7 @@ describe WorksController do
         allow(ShowcaseFinder).to receive(:call).and_return('tdnoid')
         allow(AtlasRb::System::Work).to receive(:add_linked_member)
 
-        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id, publish: '1',
                                 publish_community_id: 'comm1', publish_genre: 'Theses & Dissertations' }
 
@@ -401,7 +450,7 @@ describe WorksController do
         allow(AtlasRb::System::Work).to receive(:add_linked_member).and_raise(AtlasRb::ForbiddenError.new('forbidden'))
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id, publish: '1',
                                 publish_community_id: 'comm1', publish_genre: 'Datasets' }
 
@@ -412,6 +461,82 @@ describe WorksController do
         AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
+      # Staff proxy-publish: the destination is SOMEONE ELSE'S personal root. The
+      # collection is marked as the owner's root, and the owner resolves with that
+      # root, as Atlas mints them.
+      context 'in someone else\'s workspace' do
+        let(:owner_nuid) { '000000006' }
+        let(:admin) { User.new(email: 'admin@example.com', nuid: '000000004', role: 'admin', groups: ['editors']) }
+
+        before do
+          allow(AtlasRb::Collection).to receive(:find).and_wrap_original do |original, id, *rest, **kw|
+            found = original.call(id, *rest, **kw)
+            id.to_s == collection.id.to_s ? found.merge('personal_root' => true, 'depositor' => owner_nuid) : found
+          end
+          allow(AtlasRb::Person).to receive(:resolve) do |nuids|
+            root = nuids.first == owner_nuid ? collection.id : 'elsewhere'
+            [AtlasRb::Mash.new('nuid' => nuids.first, 'display_name' => 'Jane Doe', 'personal_root_id' => root,
+                               'affiliated_community_ids' => ['comm1'])]
+          end
+          allow(AtlasRb::Community).to receive(:find).with('comm1').and_return(AtlasRb::Mash.new('title' => 'A Community'))
+        end
+
+        it 'offers the owner\'s showcases, and names the owner, to staff who can proxy' do
+          sign_in admin
+          allow(ShowcaseFinder).to receive(:call).and_return('Datasets' => 'ds1')
+
+          get :new, params: { collection_id: collection.id }
+
+          expect(assigns(:publishing_for)['nuid']).to eq(owner_nuid)
+          expect(assigns(:publish_targets).keys).to eq(['comm1'])
+        end
+
+        # Without the proxy radio the promotion could never be honoured.
+        it 'offers no publishing to a user who cannot choose a proxy deposit' do
+          allow(ShowcaseFinder).to receive(:call).and_return('Datasets' => 'ds1')
+
+          get :new, params: { collection_id: collection.id }
+
+          expect(assigns(:publishing_for)['nuid']).to eq(owner_nuid)
+          expect(assigns(:publish_targets)).to eq({})
+        end
+
+        it 'links a proxy deposit into the owner\'s showcase, on the owner\'s behalf' do
+          sign_in admin
+          allow(ShowcaseFinder).to receive(:call).and_return('showcasenoid')
+          allow(AtlasRb::System::Work).to receive(:add_linked_member)
+          allow(AtlasRb::Work).to receive(:create).and_call_original
+
+          post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
+                                  collection_id: collection.id, upload_as: 'proxy', publish: '1',
+                                  publish_community_id: 'comm1', publish_genre: 'Datasets' }
+
+          expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: owner_nuid)
+          expect(AtlasRb::System::Work).to have_received(:add_linked_member)
+            .with(assigns(:work).id, 'showcasenoid', on_behalf_of: owner_nuid)
+        ensure
+          AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
+        end
+
+        # A showcase entry is its depositor's own; a self-deposit here would put
+        # staff's own work in the owner's showcase.
+        it 'refuses to publish a self-deposit, but keeps the deposit and records why' do
+          sign_in admin
+          allow(ShowcaseFinder).to receive(:call).and_return('showcasenoid')
+          allow(AtlasRb::System::Work).to receive(:add_linked_member)
+
+          post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
+                                  collection_id: collection.id, upload_as: 'myself', publish: '1',
+                                  publish_community_id: 'comm1', publish_genre: 'Datasets' }
+
+          expect(AtlasRb::System::Work).not_to have_received(:add_linked_member)
+          expect(flash[:notice]).to eq(described_class::PUBLISH_LINK_FAILED)
+          expect(AdminNotice.where(kind: 'showcase_promotion').last.payload['reason']).to eq('not_workspace_owner')
+        ensure
+          AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
+        end
+      end
+
       # Atlas refuses a derivative tier more visible than its Work. The collection
       # form and the visibility cascade both keep the default within its
       # collection, so this is a backstop — but it used to reach the Rails error
@@ -420,7 +545,7 @@ describe WorksController do
         allow(Sentinel).to receive(:apply_default)
           .and_raise(AtlasRb::DerivativePermissionsError.new('a derivative tier cannot be more visible than the Work'))
 
-        post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id }
 
         expect(response).to redirect_to(metadata_work_path(assigns(:work).id))
@@ -438,7 +563,7 @@ describe WorksController do
         allow(AtlasRb::System::Work).to receive(:add_linked_member)
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id, publish: '1',
                                 publish_community_id: 'comm1', publish_genre: 'Datasets' }
 
@@ -454,7 +579,7 @@ describe WorksController do
         allow(AtlasRb::System::Work).to receive(:add_linked_member)
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
-        post :create, params: { binary:        fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id }
 
         expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
@@ -487,7 +612,7 @@ describe WorksController do
       end
 
       def deposit(**overrides)
-        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id, publish: '1',
                                 publish_community_id: 'comm1', publish_genre: 'Datasets' }.merge(overrides)
       end
@@ -1078,9 +1203,9 @@ describe WorksController do
 
     # The prior thumbnail path (ThumbnailCreator.call(path:) vs base:) was masked
     # by a stub and never ran; drive the real update flow so a poster upload
-    # genuinely reaches set_thumbnails. Only MasterJp2's vips/JP2 minting is stubbed.
+    # genuinely reaches set_thumbnails. Only OriginalJp2's vips/JP2 minting is stubbed.
     it 'mints the uploaded poster and persists it via set_thumbnails' do
-      allow(MasterJp2).to receive(:call).and_return(MasterJp2::Result.new(open_base: 'BASE', gated_base: 'G'))
+      allow(OriginalJp2).to receive(:call).and_return(OriginalJp2::Result.new(open_base: 'BASE', gated_base: 'G'))
       urls = { thumbnail:    'http://example.com/t.jpg',
                thumbnail_2x: 'http://example.com/t2.jpg',
                preview:      'http://example.com/p.jpg' }
@@ -1119,18 +1244,78 @@ describe WorksController do
       allow(AtlasRb::Resource).to receive(:tombstone)
         .and_return(instance_double(Faraday::Response, success?: true))
       post :tombstone, params: { id: work.id }
-      expect(AtlasRb::Resource).to have_received(:tombstone).with(work.id)
+      expect(AtlasRb::Resource).to have_received(:tombstone).with(work.id, reason: nil)
       expect(subject).to redirect_to(collection_path(collection.id))
       expect(flash[:notice]).to eq('Work deleted.')
     end
 
+    it 'records the curator note for a non-admin, whatever reason the form sent' do
+      allow(AtlasRb::Resource).to receive(:tombstone)
+        .and_return(instance_double(Faraday::Response, success?: true))
+      post :tombstone, params: { id: work.id, reason: TombstoneReasons::ALL.first }
+      expect(AtlasRb::Resource).to have_received(:tombstone).with(work.id, reason: TombstoneReasons::CURATOR)
+    end
+
     it 'reports a 422 live-members refusal without claiming success' do
       allow(AtlasRb::Resource).to receive(:tombstone)
-        .and_return(instance_double(Faraday::Response, success?: false, status: 422))
+        .and_return(instance_double(Faraday::Response, success?: false, status: 422,
+                                                       body: '{"code":"has_live_children"}'))
       request.env['HTTP_REFERER'] = work_path(work.id)
       post :tombstone, params: { id: work.id }
       expect(flash[:notice]).to be_nil
       expect(flash[:alert]).to match(/live members/)
+    end
+  end
+
+  describe 'the Delete dialog on the show page' do
+    render_views
+
+    before do
+      AtlasRb::Resource.set_permissions(work.id,
+                                        { 'edit' => [Permissions::STAFF_EDIT_GROUP] }, nuid: '000000004')
+    end
+
+    it 'asks an admin to choose a removal reason' do
+      sign_in User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin')
+      get :show, params: { id: work.id }
+      page = Capybara.string(response.body)
+      expect(page).to have_select('reason', with_options: TombstoneReasons::ALL)
+      expect(page.find('select[name="reason"]')['required']).to be_present
+    end
+
+    it 'records the curator note for staff, without a choice' do
+      sign_in User.new(email: 'staff@example.com', nuid: '000000002', groups: [Permissions::STAFF_EDIT_GROUP])
+      get :show, params: { id: work.id }
+      page = Capybara.string(response.body)
+      expect(page).to have_no_select('reason')
+      expect(page).to have_field('reason', type: :hidden, with: TombstoneReasons::CURATOR, visible: false)
+    end
+  end
+
+  # Live against Atlas: its list of removal notes must match Cerberus's word for
+  # word, or the dialog offers a choice Atlas refuses.
+  describe 'tombstone with a removal reason, as an admin' do
+    before do
+      sign_in User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin')
+    end
+
+    it 'records every reason the dialog offers, and restore clears it' do
+      TombstoneReasons::ALL.each do |reason|
+        post :tombstone, params: { id: work.id, reason: reason }
+        expect(flash[:notice]).to eq('Work deleted.')
+        expect(AtlasRb::Work.find(work.id, nuid: '000000004')['tombstone_reason']).to eq(reason)
+
+        AtlasRb::Admin::Resource.restore(work.id, nuid: '000000004')
+        expect(AtlasRb::Work.find(work.id, nuid: '000000004')['tombstone_reason']).to be_nil
+      end
+    end
+
+    it 'reports a reason Atlas refuses without claiming success' do
+      request.env['HTTP_REFERER'] = work_path(work.id)
+      post :tombstone, params: { id: work.id, reason: 'Removed because' }
+      expect(flash[:notice]).to be_nil
+      expect(flash[:alert]).to match(/Choose one of the listed removal reasons/)
+      expect(AtlasRb::Work.find(work.id, nuid: '000000004')['tombstoned']).to be(false)
     end
   end
 
@@ -1149,6 +1334,16 @@ describe WorksController do
       get :show, params: { id: work.id }
       expect(response).to render_template('errors/gone')
       expect(response).to have_http_status(:gone)
+    end
+
+    it 'states the removal reason and its date' do
+      tombstoned = AtlasRb::Work.find(work.id)
+      tombstoned['tombstone_reason'] = TombstoneReasons::CURATOR
+      tombstoned['tombstoned_at'] = '2026-09-30T14:05:00Z'
+
+      get :show, params: { id: work.id }
+      expect(CGI.unescapeHTML(response.body))
+        .to include("was removed from view at contributor or content curator's discretion on September 30, 2026.")
     end
   end
 

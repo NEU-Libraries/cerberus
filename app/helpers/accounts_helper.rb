@@ -12,7 +12,7 @@ module AccountsHelper
   # The account the caller is currently acting as, taken from the same accounts
   # list the panel renders so the group baseline is internally consistent.
   def current_account(accounts)
-    accounts.find { |account| account['email'] == current_user&.email }
+    accounts.find { |account| account['email'] == effective_user&.email }
   end
 
   # Groups an account would GAIN and LOSE relative to the currently-acting one,

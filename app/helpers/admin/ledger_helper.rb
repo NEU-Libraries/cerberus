@@ -9,7 +9,7 @@ module Admin
   module LedgerHelper
     KINDS = {
       'request_withdraw'         => { label: 'Withdraw',   icon: 'fa-trash-can' },
-      'request_move'             => { label: 'Move',       icon: 'fa-folder-open' },
+      'request_move'             => { label: 'Move',       icon: 'fa-sitemap' },
       'request_restrict'         => { label: 'Restrict',   icon: 'fa-lock' },
       'load_report'              => { label: 'Load',       icon: 'fa-file-import' },
       # "Incomplete" rather than anything stronger: the work is short some pages
@@ -23,15 +23,17 @@ module Admin
       'set_privatize'            => { label: 'Privatize',  icon: 'fa-user-lock' },
       'set_sentinel_apply'       => { label: 'Derivative access', icon: 'fa-images' },
       'showcase_promotion'       => { label: 'Showcase',   icon: 'fa-star' },
+      'tombstone_cascade'        => { label: 'Deleted',    icon: 'fa-trash-can' },
       'daily_digest'             => { label: 'Digest',     icon: 'fa-book' }
     }.freeze
 
     # Plain words for the refusal tokens the payload stores. The payload keeps
     # the token so the reason stays queryable; the page speaks English.
     PROMOTION_REASONS = {
-      'not_personal_root' => 'The deposit was not in the depositor’s own space, so the form never offered it.',
-      'no_showcase'       => 'That community has no showcase for the genre, or the depositor cannot see it.',
-      'atlas_forbidden'   => 'Atlas refused the link. The showcase may not be marked featured.'
+      'not_personal_root'   => 'The deposit was not in a person’s workspace, so the form never offered it.',
+      'not_workspace_owner' => 'It was published from someone else’s workspace without a proxy deposit for them.',
+      'no_showcase'         => 'That community has no showcase for the genre, or the depositor cannot see it.',
+      'atlas_forbidden'     => 'Atlas refused the link. The showcase may not be marked featured.'
     }.freeze
 
     # Narrowing a community does not cascade, and no form offers it — so
@@ -73,7 +75,7 @@ module Admin
     def ledger_remedy(notice)
       case notice.kind
       when 'request_withdraw' then [resource_path_for('Work', notice.subject_noid), 'Open the work to withdraw it']
-      when 'request_move'     then [admin_reparent_path, 'Open the re-parent finder']
+      when 'request_move'     then [admin_reparent_path, 'Open Move']
       when 'request_restrict' then [edit_path_for(notice.detail(:subject_type), notice.subject_noid),
                                     'Open its permissions']
       end
@@ -96,6 +98,7 @@ module Admin
       when 'set_reindex', 'set_privatize', 'set_sentinel_apply'
         safe_path(:set_path, notice.subject_noid)
       when 'visibility_cascade' then safe_path(:collection_path, notice.subject_noid)
+      when 'tombstone_cascade' then resource_path_for(notice.detail(:subject_type), notice.subject_noid)
       when 'work_completion_mismatch', 'showcase_promotion' then safe_path(:work_path, notice.subject_noid)
       end
     end

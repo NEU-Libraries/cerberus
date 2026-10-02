@@ -5,7 +5,7 @@
       = @loader.display_name
     .admin-registry__head-actions
       %span.admin-registry__subtitle
-        %i.fa-solid.fa-folder-tree{'aria-hidden' => 'true'}
+        %i.fa-solid.fa-file-import{'aria-hidden' => 'true'}
         = @loader.slug
       = link_to new_loader_load_path(@loader), class: 'btn btn-primary btn-sm' do
         %i.fa-solid.fa-cloud-arrow-up.me-1{'aria-hidden' => 'true'}
@@ -40,7 +40,7 @@
                   %span.text-muted —
               %td
                 - if lr.parent_collection_id.present?
-                  %span.admin-registry-table__id= link_to lr.parent_collection_id, collection_path(lr.parent_collection_id), class: 'text-decoration-none'
+                  = load_destination(lr.parent_collection_id)
                 - else
                   %span.text-muted —
               %td.text-muted= load_report_progress_summary(lr)

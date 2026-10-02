@@ -191,8 +191,11 @@ RSpec.describe SetResolver do
       SetZipPacker.new(resolver: resolver(recipe(works: [embargoed])), nuid: nil,
                        ability: Ability.new(nil)).pack(zip)
 
-      expect(zip.entries.map(&:name)).to include('ERRORS.txt')
-      expect(zip.entries.map(&:name).grep_v(/\.txt\z/)).to be_empty
+      # Only the bookkeeping files: no content was packed, so the inventory
+      # carries its header and no rows.
+      expect(zip.entries.map(&:name)).to contain_exactly('inventory.csv', 'ERRORS.txt')
+      inventory = zip.entries.find { |entry| entry.name == 'inventory.csv' }
+      expect(CSV.parse(inventory.body)).to eq([%w[identifier filename handle]])
     end
 
     it 'pages through in batches, yielding every work across pages' do

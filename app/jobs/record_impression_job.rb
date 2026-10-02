@@ -4,6 +4,7 @@
 # lane so analytics writes never compete with deposit/derivative work). The
 # throttle's DB read happens here, not on the request. Current.nuid
 # auto-propagates from the enqueuing request via ApplicationJob.
+# See docs/analytics.md.
 class RecordImpressionJob < ApplicationJob
   queue_as :background
 

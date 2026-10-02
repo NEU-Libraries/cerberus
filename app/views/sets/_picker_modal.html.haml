@@ -35,7 +35,10 @@
         = turbo_frame_tag frame_id, src: picker_sets_path(:"#{kind}_id" => noid), loading: :lazy do
           .py-2.small.text-muted Loading your sets…
       .modal-footer.justify-content-between
-        = link_to new_set_path, class: 'small text-decoration-none' do
+        -# Carries the item and this page, so the new set is created with the item
+        -# already in it and the user lands back here, as an add from a row would.
+        = link_to new_set_path(:"#{kind}_id" => noid, return_to: request.fullpath),
+                  class: 'small text-decoration-none', data: { turbo_frame: '_top' } do
           %i.fa-solid.fa-plus.me-1{'aria-hidden' => 'true'}
           New set
         %button.btn.btn-secondary.btn-sm{type: 'button', data: { 'bs-dismiss': 'modal' }} Done

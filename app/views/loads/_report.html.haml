@@ -8,7 +8,7 @@
         %i.fa-solid{class: [load_report_status_icon(load_report.status), ('fa-spin' if load_report.processing?)], 'aria-hidden' => 'true'}
         = load_report.status.humanize
     %span.admin-registry__subtitle
-      %i.fa-solid.fa-folder-tree{'aria-hidden' => 'true'}
+      %i.fa-solid.fa-file-import{'aria-hidden' => 'true'}
       = link_to loader.display_name, loader_loads_path(loader), class: 'text-decoration-none'
 
   .admin-registry__body
@@ -16,11 +16,7 @@
       .load-report-overview__top
         .load-report-overview__meta
           %span.load-report-overview__label Destination
-          %span.load-report-overview__value
-            - if load_report.parent_collection_id.present?
-              %code.admin-registry-table__id= load_report.parent_collection_id
-            - else
-              —
+          %span.load-report-overview__value= load_destination(load_report.parent_collection_id)
           %span.load-report-overview__label Started
           %span.load-report-overview__value= load_report.started_at&.strftime('%Y-%m-%d %H:%M:%S') || '—'
           %span.load-report-overview__label Finished
@@ -57,7 +53,7 @@
           %tr
             %th{scope: 'col'} Status
             %th{scope: 'col'} Source file
-            %th{scope: 'col'} Result
+            %th{scope: 'col'} Work ID
             %th{scope: 'col'}
         %tbody
           = render partial: 'ingest_row',

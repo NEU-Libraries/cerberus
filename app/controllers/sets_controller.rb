@@ -14,6 +14,7 @@ class SetsController < CatalogController
 
   include ShowScopedSearch
   include SetRecipe
+  include SetPendingItem
   include SetSharing
   include SetBulkActions
 
@@ -22,6 +23,9 @@ class SetsController < CatalogController
   before_action :authenticate_user!, except: %i[show facet facet_suggest]
   before_action :require_curator,    except: %i[show facet facet_suggest]
   before_action :load_set,           except: [:index, :new, :create, :picker, :recipients]
+  # The edit page is a form, so one the caller could never save is refused up
+  # front rather than left for Atlas to refuse on Save. Atlas stays the boundary.
+  before_action :require_set_editor, only: :edit
   # Declared here rather than in SetBulkActions so it lands after the two gates
   # above: an anonymous request has to reach authenticate_user! and be sent to
   # sign in, not be told it is forbidden. The three actions it names live in that
@@ -41,9 +45,11 @@ class SetsController < CatalogController
   # from the grant-scoped modes; group membership is resolved by Atlas).
   SCOPES = %w[shared editable].freeze
 
+  # While impersonating, only My Sets follows the target: Atlas keys the grant
+  # scopes on the caller alone, so those tabs would list the admin's grants.
   def index
-    @scope = params[:scope].presence_in(SCOPES)
-    page = AtlasRb::Compilation.list(scope: @scope, page: params[:page].presence)
+    @scope = params[:scope].presence_in(SCOPES) unless impersonating?
+    page = AtlasRb::Compilation.list(owner: impersonated_owner, scope: @scope, page: params[:page].presence)
     @sets = Array(page['compilations'])
     @pagination = page['pagination']
     # Grant-scoped tabs list other people's Sets, so name each owner.
@@ -75,13 +81,14 @@ class SetsController < CatalogController
     return head :bad_request if @noid.blank?
 
     @q = params[:q].to_s.strip
-    @sets, @pagination = SetPicker.call(query: @q, page: params[:page])
+    @sets, @pagination = SetPicker.call(query: @q, page: params[:page], owner: impersonated_owner)
     @covering = picker_covering
     render layout: false
   end
 
   def new
     @set = AtlasRb::Mash.new
+    @pending = pending_item
   end
 
   # Details tab is open to any editor; the Sharing tab is owner/admin-only
@@ -90,13 +97,17 @@ class SetsController < CatalogController
   # view by #bulk_operator?).
   def edit
     edit_breadcrumbs
+    prepare_set_definition
     prepare_sharing_form if @owned
     @sentinel = Sentinel.find_by(target_id: params[:id]) if bulk_operator?
   end
 
   def create
+    @pending = pending_item
     set = AtlasRb::Compilation.create(set_params[:title], description: set_params[:description].presence)
-    redirect_to set_path(set['id']), notice: 'Set created.'
+    return redirect_to(set_path(set['id']), notice: 'Set created.') if @pending.nil?
+
+    add_pending_item(set)
   rescue AtlasRb::CompilationError => e
     @set = AtlasRb::Mash.new(set_params)
     flash.now[:alert] = e.message
@@ -112,6 +123,7 @@ class SetsController < CatalogController
     redirect_to set_path(@set['id']), notice: 'Set updated.'
   rescue AtlasRb::CompilationError => e
     flash.now[:alert] = e.message
+    prepare_set_definition
     render :edit, status: :unprocessable_content
   end
 
@@ -131,13 +143,19 @@ class SetsController < CatalogController
 
   private
 
+    # Atlas lists another owner's Sets for a full admin only, so a delegate in
+    # view-as reaches the forbidden page here rather than their own Sets.
+    def impersonated_owner
+      effective_user&.nuid if impersonating?
+    end
+
     def load_set
       @set = require_resource!(AtlasRb::Compilation.find(params[:id]))
 
       # @owned: owner/admin — gates ownership-only UI (Sharing tab, Delete).
       # @can_edit: owner OR a grantee — gates recipe-mutation affordances.
       # Atlas re-checks every write regardless; these only shape the UI.
-      @owned = current_user.present? && (current_user.admin? || @set['depositor'] == current_user.nuid)
+      @owned = effective_user.present? && (effective_user.admin? || @set['depositor'] == effective_user.nuid)
       @can_edit = @owned || editor?
     end
 
@@ -145,10 +163,10 @@ class SetsController < CatalogController
     # membership is the caller's session groups intersected with edit_groups —
     # the same UI-side check the permissions widget uses (Atlas is the boundary).
     def editor?
-      return false unless current_user
-      return true if Array(@set['edit_users']).include?(current_user.nuid)
+      return false unless effective_user
+      return true if Array(@set['edit_users']).include?(effective_user.nuid)
 
-      Array(current_user.groups).intersect?(Array(@set['edit_groups']))
+      Array(effective_user.groups).intersect?(Array(@set['edit_groups']))
     end
 
     # The Set's resolved contents, which is what #show lists. load_set has
@@ -161,8 +179,14 @@ class SetsController < CatalogController
       @resolver.contents_fqs
     end
 
+    def require_set_editor
+      return if @can_edit
+
+      render template: 'errors/forbidden', status: :forbidden
+    end
+
     def require_curator
-      return if current_user&.curates_sets?
+      return if effective_user&.curates_sets?
 
       render template: 'errors/forbidden', status: :forbidden
     end
@@ -198,17 +222,5 @@ class SetsController < CatalogController
 
       builder = search_service.search_builder.with(search_state).with_filters(*fqs)
       Blacklight.default_index.search(params: builder)
-    end
-
-    # Display digests (title / klass) for every recipe noun, keyed by noid —
-    # one batch round-trip. Unresolvable nouns are absent; views fall back to
-    # the bare noid.
-    def recipe_titles
-      noids = Array(@set['included_collections']) +
-              Array(@set['included_works']) +
-              Array(@set['excluded_works'])
-      return {} if noids.empty?
-
-      AtlasRb::Resource.find_many(noids).index_by { |digest| digest['noid'] }
     end
 end

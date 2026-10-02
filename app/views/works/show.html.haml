@@ -44,7 +44,7 @@
             -# A POST, so button_to rather than link_to. `link-action` strips the
             -# button chrome back to a plain link, because the rest of this row
             -# is plain links and a repair action should not outrank Edit.
-            - if current_user&.admin? || current_user&.admin_delegate?
+            - if effective_user&.admin? || effective_user&.admin_delegate?
               = button_to 'Reindex', admin_reindex_work_path(@work.id),
                           class:      'btn btn-link link-action px-2',
                           form_class: 'd-inline',
@@ -72,7 +72,11 @@
         = stylesheet_link_tag 'tify', 'data-turbo-track': 'false'
         .iiif-viewer{data: { controller: 'iiif-viewer',
                              'iiif-viewer-url-value': manifest_work_path(@work.id) }}
-      - elsif @av_file
+      - elsif @av_file && !embargo_withholds?(@permissions&.embargo)
+        -# An embargo the viewer cannot bypass refuses /media, so a mounted
+        -# player would only show its generic load error; they get the
+        -# thumbnail, and the banner above gives the date.
+        -#
         -# In-page audio/video player. Like Tify, the skin CSS ships separately
         -# and video.js arrives via dynamic import, so other pages never pay.
         = stylesheet_link_tag 'video-js', 'data-turbo-track': 'false'
@@ -80,13 +84,33 @@
         -# one, decided by the same per-asset gate as the downloads card.
         = render partial: 'av_player',
                  locals: { file:         @av_file,
-                           caption:      @caption,
+                           captions:     @captions,
                            downloadable: derivative_readable?(@av_file, embargo_date: @permissions&.embargo),
-                           streaming_only: StreamingOnly.on?(StreamingOnly.policy_from(@work), read: @permissions&.read) }
+                           streaming_only: StreamingOnly.on?(StreamingOnly.policy_from(@work), tiers: StreamingOnly.tiers_for([@av_file]), read: @permissions&.read) }
       - else
         = render partial: "thumbnail"
     .col-md-6.order-md-2.order-1
-      = @mods&.html_safe
+      -# Editors get v1's tabbed column; everyone else sees the metadata alone,
+      -# since a lone Metadata tab would be noise.
+      - if @work_analytics
+        -# Level with the media beside it, not the global .nav-tabs margin: the
+        -# thumbnail carries mt-1, the players and viewer sit flush.
+        - tabs_offset = @av_file || (@multipage && @can_zoom) ? 'mt-0' : 'mt-1'
+        %div{data: { controller: 'tab-hash' }}
+          %ul.nav.nav-tabs{role: 'tablist', class: tabs_offset}
+            %li.nav-item{role: 'presentation'}
+              %button#metadata-tab.nav-link.active{type: 'button', role: 'tab', 'data-bs-toggle' => 'tab', 'data-bs-target' => '#metadata', 'aria-controls' => 'metadata', 'aria-selected' => 'true'} Metadata
+            %li.nav-item{role: 'presentation'}
+              %button#analytics-tab.nav-link{type: 'button', role: 'tab', 'data-bs-toggle' => 'tab', 'data-bs-target' => '#analytics', 'aria-controls' => 'analytics', 'aria-selected' => 'false'}
+                %i.fa-solid.fa-chart-simple.me-1{'aria-hidden' => 'true'}
+                Analytics
+          .tab-content
+            #metadata.tab-pane.active.p-1{role: 'tabpanel', 'aria-labelledby' => 'metadata-tab'}
+              = @mods&.html_safe
+            #analytics.tab-pane{role: 'tabpanel', 'aria-labelledby' => 'analytics-tab'}
+              = render 'works/analytics', report: @work_analytics, media: @av_file.present?
+      - else
+        = @mods&.html_safe
 
 .clearfix.mb-4
 

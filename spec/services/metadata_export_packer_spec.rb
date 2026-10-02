@@ -23,6 +23,42 @@ RSpec.describe MetadataExportPacker do
 
   before do
     allow(AtlasRb::Work).to receive(:mods) { |noid, _fmt| "<mods><id>#{noid}</id></mods>" }
+    allow(AtlasRb::Work).to receive(:assets).and_return([])
+  end
+
+  # The librarians found the File Name column always blank. It carries the name
+  # the content file was deposited under; the loader ignores it on an update row.
+  context 'the File Name column' do
+    def asset(role:, original: nil, stored: nil, uri: nil)
+      AtlasRb::Mash.new('role' => role, 'original_filename' => original, 'filename' => stored, 'uri' => uri)
+    end
+
+    def file_names
+      manifest_rows(pack_to_entries(include_mods: false).fetch('manifest.xlsx')).to_h { |r| [r.identifier, r.file_name] }
+    end
+
+    it 'names the original file as deposited, not a derivative or the stored name' do
+      derivative = asset(role: 'small_image', uri: 'https://iiif/x')
+      original = asset(role: 'original_file', original: 'IMG_0042.jpg', stored: 'original_aaa.jpg')
+      allow(AtlasRb::Work).to receive(:assets).with('aaa111').and_return([derivative, original])
+
+      expect(file_names['aaa111']).to eq('IMG_0042.jpg')
+    end
+
+    it 'falls back to the stored name when none was recorded' do
+      allow(AtlasRb::Work).to receive(:assets).with('aaa111')
+                                              .and_return([asset(role: 'original_file', stored: 'original_aaa.jpg')])
+
+      expect(file_names['aaa111']).to eq('original_aaa.jpg')
+    end
+
+    it 'leaves the cell blank and notes it when the file list cannot be read' do
+      allow(AtlasRb::Work).to receive(:assets).with('aaa111').and_raise(Faraday::ConnectionFailed, 'down')
+
+      entries = pack_to_entries(include_mods: false)
+      expect(manifest_rows(entries.fetch('manifest.xlsx')).find { |r| r.identifier == 'aaa111' }.file_name).to be_nil
+      expect(entries['ERRORS.txt']).to include('aaa111: file list fetch failed')
+    end
   end
 
   # Pack into a buffer and return the entry-name => bytes map.
@@ -37,6 +73,17 @@ RSpec.describe MetadataExportPacker do
       archive.each { |entry| entries[entry.name] = entry.get_input_stream.read }
     end
     entries
+  end
+
+  def manifest_headers(xlsx_bytes)
+    file = Tempfile.new(['manifest', '.xlsx'])
+    file.binmode
+    file.write(xlsx_bytes)
+    file.close
+    sheet = Roo::Excelx.new(file.path)
+    sheet.row(sheet.first_row)
+  ensure
+    file&.unlink
   end
 
   # Round-trip the bundled manifest.xlsx back through the loader's own parser.
@@ -59,6 +106,7 @@ RSpec.describe MetadataExportPacker do
     end
 
     it 'writes a manifest.xlsx that re-parses through XmlLoader::Manifest' do
+      expect(manifest_headers(entries.fetch('manifest.xlsx'))).to eq(described_class::HEADERS)
       rows = manifest_rows(entries.fetch('manifest.xlsx'))
 
       expect(rows.map(&:identifier)).to eq(%w[aaa111 bbb222])
@@ -80,9 +128,13 @@ RSpec.describe MetadataExportPacker do
       expect(entries.keys).not_to include(a_string_matching(%r{\Amods/}))
     end
 
-    it 'leaves the MODS XML File Path column blank' do
-      rows = manifest_rows(entries.fetch('manifest.xlsx'))
+    # There is no MODS file to point at, so the column is left out rather than
+    # left blank. The loader finds columns by label, so the rest still parse.
+    it 'leaves out the MODS XML File Path column' do
+      expect(manifest_headers(entries.fetch('manifest.xlsx')))
+        .to eq(['PIDs', 'File Name', 'Embargoed?', 'Embargo Date', 'Date Ingested'])
 
+      rows = manifest_rows(entries.fetch('manifest.xlsx'))
       expect(rows.map(&:identifier)).to eq(%w[aaa111 bbb222])
       expect(rows.map(&:xml_path)).to all(be_nil)
     end
@@ -130,17 +182,15 @@ RSpec.describe MetadataExportPacker do
     end
   end
 
-  # Atlas's `_bsi` convention is boolean-as-string (matching TombstoneIndexer/
-  # FeaturedIndexer), so `embargoed_bsi` arrives as the STRING 'true'/'false',
-  # never a real boolean — the "Embargoed?" column must key off that shape.
   context 'embargo columns' do
     let(:docs) do
       Class.new do
         def initialize(rows) = @rows = rows
         def each_content_batch(**) = yield @rows
       end.new([
-                { 'alternate_ids_ssim' => ['id-aaa111'], 'embargo_release_date_dtsi' => '2028-07-16' },
-                { 'alternate_ids_ssim' => ['id-bbb222'], 'embargoed_bsi' => 'true' },
+                { 'alternate_ids_ssim' => ['id-aaa111'], 'embargo_release_date_dtsi' => 1.year.from_now.to_date.iso8601 },
+                { 'alternate_ids_ssim' => ['id-bbb222'], 'embargo_release_date_dtsi' => '2020-07-16',
+                  'embargoed_bsi' => 'true' },
                 { 'alternate_ids_ssim' => ['id-ccc333'] }
               ])
     end
@@ -150,14 +200,18 @@ RSpec.describe MetadataExportPacker do
       manifest_rows(entries.fetch('manifest.xlsx')).find { |r| r.identifier == identifier }
     end
 
-    it 'marks a row embargoed via the release date field' do
+    it 'marks a row embargoed while its release date is in the future' do
       row = row_for(entries, 'aaa111')
       expect(row.embargoed?).to be(true)
-      expect(row.embargo_date).to eq('2028-07-16')
+      expect(row.embargo_date).to eq(1.year.from_now.to_date.iso8601)
     end
 
-    it 'marks a row embargoed via the boolean-as-string embargoed_bsi' do
-      expect(row_for(entries, 'bbb222').embargoed?).to be(true)
+    # The date stays, because it is still a fact about the Work. A stale
+    # `embargoed_bsi` left in the index must not override it.
+    it 'leaves Embargoed? blank once the release date has passed' do
+      row = row_for(entries, 'bbb222')
+      expect(row.embargoed?).to be(false)
+      expect(row.embargo_date).to eq('2020-07-16')
     end
 
     it 'leaves a non-embargoed row blank' do

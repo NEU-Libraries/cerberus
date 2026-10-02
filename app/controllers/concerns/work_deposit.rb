@@ -7,22 +7,32 @@
 module WorkDeposit
   extend ActiveSupport::Concern
 
+  included do
+    helper_method :offers_proxy_deposit?
+  end
+
   private
+
+    # The Ownership radios, and so a proxy deposit, are for admins and privileged
+    # users, and never while acting as someone: impersonation already fixes who
+    # the depositor is.
+    def offers_proxy_deposit?
+      (effective_user&.admin? || effective_user&.privileged?) && !acting_as?
+    end
 
     # The Work lives where the depositor navigated; nothing later moves it.
     def create_at_destination(file)
-      parent = require_resource!(AtlasRb::Collection.find(@destination_id))
+      parent = require_resource!(destination_collection)
 
-      @work = AtlasRb::Work.create(parent.id, depositor: deposit_attribution(parent))
+      @depositor_nuid = deposit_attribution(parent)
+      @work = AtlasRb::Work.create(parent.id, depositor: @depositor_nuid)
       finalize_new_work(file, parent.id)
     end
 
-    # Keys on the DESTINATION being the depositor's own personal root, not on
-    # which button you arrived by, so it can't be sidestepped by typing a URL.
-    # See docs/deposit.md.
+    # Keys on the DESTINATION being a person's personal root, not on which button
+    # you arrived by, so it can't be sidestepped by typing a URL. See docs/deposit.md.
     def publish_offered?
-      root = deposit_person&.[]('personal_root_id').presence
-      root.present? && root.to_s == @destination_id.to_s
+      workspace_owner.present?
     end
 
     # A promotion that can't be honoured leaves the deposit standing and flags
@@ -30,6 +40,10 @@ module WorkDeposit
     def promote_if_requested
       return unless ActiveModel::Type::Boolean.new.cast(params[:publish])
       return refuse_promotion('not_personal_root') unless publish_offered?
+      # A showcase entry is the depositor's own, so in someone else's workspace
+      # the deposit must be a proxy for them. The form hides the option until
+      # Proxy is chosen; this is the rule, not a courtesy.
+      return refuse_promotion('not_workspace_owner') unless @depositor_nuid.to_s == workspace_owner['nuid'].to_s
 
       showcase_id = publish_showcase_id
       return refuse_promotion('no_showcase') if showcase_id.blank?
@@ -47,7 +61,9 @@ module WorkDeposit
     # the promotion failed and @publish_link_failed must say exactly that —
     # never a 403 page hiding a Work the depositor can already see.
     def promote_to_showcase(showcase_id)
-      AtlasRb::System::Work.add_linked_member(@work.id, showcase_id, on_behalf_of: current_user&.nuid)
+      # The Work's depositor, not the signed-in user: Atlas links only on the
+      # depositor's behalf, and an acting-as or proxy deposit names someone else.
+      AtlasRb::System::Work.add_linked_member(@work.id, showcase_id, on_behalf_of: @depositor_nuid)
       record_promotion(outcome: 'promoted', showcase_id: showcase_id)
     rescue AtlasRb::ForbiddenError => e
       Rails.logger.warn("[publish] add_linked_member forbidden for work #{@work.id} " \

@@ -9,7 +9,7 @@
 #     priority: 2
 #     schedule: at 5am every day
 
-production:
+production: &production
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
     schedule: every hour at minute 12
@@ -36,3 +36,15 @@ production:
     class: ReclassifyUserAgentsJob
     queue: background
     schedule: every day at 4:00am
+  # The zone is required: fugit reads a bare time in the process's system zone,
+  # not config.time_zone, and a UTC container would fire at 20:15 Eastern the
+  # evening before anything new has lapsed.
+  record_embargo_releases:
+    class: EmbargoReleaseJob
+    queue: background
+    schedule: every day at 12:15am America/New_York
+
+# Solid Queue reads the file whole when it has no key for the current env, and
+# builds tasks only from entries with a schedule, so staging would otherwise
+# start its scheduler with no tasks and no error.
+staging: *production

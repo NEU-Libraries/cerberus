@@ -11,6 +11,7 @@ module Admin
   #
   # Gating the window is not a hole in "nobody writes during a window". That
   # rule is about repository objects; the flag is an operational control.
+  # See docs/maintenance.md.
   class MaintenanceController < BaseController
     breadcrumb_for 'Maintenance', :admin_maintenance_path
 

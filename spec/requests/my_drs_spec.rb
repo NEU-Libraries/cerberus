@@ -87,6 +87,7 @@ RSpec.describe 'My DRS', type: :request do
       expect(response.body).to include('Deposits to finish')
       expect(response.body).to include('thesis.docx')
       expect(response.body).to include(metadata_work_path('unoid'))
+      expect(response.body).to include(tombstone_work_path('unoid', return_to: my_drs_path))
     end
 
     it 'omits the panel entirely when nothing is unfinished' do
@@ -141,6 +142,70 @@ RSpec.describe 'My DRS', type: :request do
       expect(response.body).to include('Your accounts')
       expect(response.body).to include('depositor@husky.neu.edu')
       expect(response.body).to include('Switch to this account')
+    end
+
+    # Librarians troubleshoot from this card, so a one-account person gets it
+    # too: the email and the group names, with nothing to switch or prefer.
+    it 'shows a single-account person their email and groups, without switch controls' do
+      allow(AtlasRb::Person).to receive(:resolve).and_return([])
+      allow(AtlasRb::User).to receive(:accounts).and_return(
+        AtlasRb::Mash.new('nuid' => '000000004', 'accounts' => [
+                            { 'email' => user.email, 'affiliation' => 'staff', 'role' => 'standard',
+                              'groups' => %w[g:alpha g:beta], 'preferred' => true }
+                          ])
+      )
+
+      get '/my_drs'
+
+      expect(response.body).to include('Your accounts', user.email, 'the groups it belongs to')
+      expect(Capybara.string(response.body)).to have_css('.account-diff__chip', count: 2)
+      expect(response.body).not_to include('Switch to this account', 'Set as default', 'Preferred')
+    end
+  end
+
+  # An admin debugging a depositor's problem must see the depositor's My DRS,
+  # but nothing on it that acts on the admin's own session or credentials.
+  context 'while an admin acts as the depositor' do
+    let(:admin) do
+      User.new(email: 'admin@example.com', password: 'password',
+               nuid: '000000009', role: 'admin', groups: [Permissions::API_GROUP])
+    end
+    let(:target_groups) { [Permissions::API_GROUP] }
+
+    before do
+      allow(AtlasRb::AuditEvent).to receive(:emit)
+      allow(AtlasRb::Authentication).to receive(:login).with(user.nuid).and_return(
+        AtlasRb::Mash.new('nuid' => user.nuid, 'name' => 'Depositor, Dee', 'email' => user.email,
+                          'role' => user.role, 'groups' => target_groups)
+      )
+      allow(AtlasRb::Person).to receive(:resolve).and_return([])
+      allow(AtlasRb::User).to receive(:accounts).and_return(
+        AtlasRb::Mash.new('nuid' => user.nuid, 'accounts' => [
+                            { 'email' => user.email, 'affiliation' => 'staff', 'role' => 'standard',
+                              'groups' => [], 'preferred' => true },
+                            { 'email' => 'depositor@husky.neu.edu', 'affiliation' => 'student',
+                              'role' => 'standard', 'groups' => [], 'preferred' => false }
+                          ])
+      )
+      sign_in admin
+      post admin_act_as_path, params: { nuid: user.nuid }
+    end
+
+    it "looks up the target's Person and accounts, with the admin as the caller" do
+      get '/my_drs'
+
+      expect(response).to have_http_status(:ok)
+      expect(AtlasRb::Person).to have_received(:resolve).with([user.nuid])
+      expect(AtlasRb::User).to have_received(:accounts).with(user.nuid, nuid: admin.nuid)
+    end
+
+    it 'marks the target\'s account current and hides switching and the API token card' do
+      get '/my_drs'
+
+      page = Capybara.string(response.body)
+      expect(page.find('.account-row', text: user.email)).to have_css('.badge', text: 'Current')
+      expect(response.body).not_to include('Switch to this account', 'Set as default')
+      expect(page).to have_no_css('.my-drs-card--api')
     end
   end
 end

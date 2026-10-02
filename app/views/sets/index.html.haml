@@ -19,10 +19,11 @@
   %ul.nav.nav-tabs.mb-3
     %li.nav-item
       = link_to 'My Sets', sets_path, class: "nav-link #{'active' if @scope.nil?}"
-    %li.nav-item
-      = link_to 'Shared with me', sets_path(scope: 'shared'), class: "nav-link #{'active' if @scope == 'shared'}"
-    %li.nav-item
-      = link_to 'Editable by me', sets_path(scope: 'editable'), class: "nav-link #{'active' if @scope == 'editable'}"
+    - unless impersonating?
+      %li.nav-item
+        = link_to 'Shared with me', sets_path(scope: 'shared'), class: "nav-link #{'active' if @scope == 'shared'}"
+      %li.nav-item
+        = link_to 'Editable by me', sets_path(scope: 'editable'), class: "nav-link #{'active' if @scope == 'editable'}"
 
   - if @sets.any?
     .table-responsive
@@ -30,7 +31,7 @@
         %thead
           %tr
             %th{scope: 'col'} Set name
-            %th{scope: 'col'} Recipe
+            %th{scope: 'col'} Contents
             %th{scope: 'col'} Works
             - if @scope
               %th{scope: 'col'} Owner
@@ -46,7 +47,7 @@
                 - parts = []
                 - parts << pluralize(Array(set['included_collections']).size, 'collection') if Array(set['included_collections']).any?
                 - parts << pluralize(Array(set['included_works']).size, 'item') if Array(set['included_works']).any?
-                - parts << "#{Array(set['excluded_works']).size} set aside" if Array(set['excluded_works']).any?
+                - parts << "#{Array(set['excluded_works']).size} hidden" if Array(set['excluded_works']).any?
                 = parts.any? ? parts.join(' · ') : 'empty'
               %td.small.text-muted
                 -# Resolved tally arrives lazily — recipe resolution is several

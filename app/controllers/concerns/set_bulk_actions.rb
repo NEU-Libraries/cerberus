@@ -17,7 +17,7 @@ module SetBulkActions
   # 403 Forbidden instead of sending it to sign in.
 
   def bulk_operator?
-    current_user&.admin? || current_user&.admin_delegate?
+    effective_user&.admin? || effective_user&.admin_delegate?
   end
 
   def sentinel_groups
@@ -67,6 +67,7 @@ module SetBulkActions
     def render_rejected_set_sentinel(record)
       prepare_sharing_form if @owned
       edit_breadcrumbs
+      prepare_set_definition
       @sentinel = record
       @open_tab = 'derivative-access'
       flash.now[:alert] = record.errors.full_messages.to_sentence

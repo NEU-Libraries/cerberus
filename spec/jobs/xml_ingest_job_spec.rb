@@ -38,7 +38,7 @@ RSpec.describe XmlIngestJob, type: :job do
   describe 'update mode (row carries an identifier)' do
     it 'replaces the existing Work MODS via Work.update by NOID' do
       described_class.new.perform(ingest.id, update_row)
-      expect(AtlasRb::Resource).to have_received(:put_mods).with('noid-9', kind_of(String))
+      expect(AtlasRb::Resource).to have_received(:put_mods).with('noid-9', kind_of(String), origin: 'xml_loader')
     end
 
     it 'records the NOID as work_pid and completes' do

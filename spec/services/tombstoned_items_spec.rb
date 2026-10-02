@@ -46,5 +46,27 @@ RSpec.describe TombstonedItems do
 
       expect(Blacklight.default_index).to have_received(:search).with(params: an_instance_of(TombstonedSearchBuilder))
     end
+
+    def searched_builder(**)
+      captured = nil
+      allow(Blacklight.default_index).to receive(:search) { |params:| captured = params }
+      described_class.call(scope: scope, **)
+      captured
+    end
+
+    it 'lists everything, most recently withdrawn first, with no query' do
+      builder = searched_builder
+
+      expect(builder.blacklight_params[:q]).to eq('*:*')
+      expect(builder.to_hash['sort']).to eq('updated_at_dtsi desc')
+    end
+
+    # v1 holds 8,000+ tombstoned items, so the registry has to be searchable.
+    it 'searches by the query, ranked by relevance' do
+      builder = searched_builder(query: '  Withdrawn thesis ')
+
+      expect(builder.blacklight_params[:q]).to eq('Withdrawn thesis')
+      expect(builder.to_hash['sort']).not_to eq('updated_at_dtsi desc')
+    end
   end
 end

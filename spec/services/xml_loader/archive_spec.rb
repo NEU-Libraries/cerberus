@@ -138,4 +138,47 @@ RSpec.describe XmlLoader::Archive do
       end
     end
   end
+
+  describe '#extract_one and #size_of' do
+    let(:create_zip) { Rails.root.join('spec/fixtures/files/xml_loader_create_sample.zip').to_s }
+    let(:dest_dir) { Dir.mktmpdir('archive-one') }
+
+    after { FileUtils.rm_rf(dest_dir) }
+
+    # A tar with one content file, built here so both archive formats are covered.
+    def build_tar(name, bytes)
+      path = File.join(dest_dir, 'sample.tar')
+      File.open(path, 'wb') do |io|
+        Gem::Package::TarWriter.new(io) { |tar| tar.add_file_simple(name, 0o644, bytes.bytesize) { |f| f.write(bytes) } }
+      end
+      path
+    end
+
+    it 'streams one zip entry to disk, matching its name case-insensitively' do
+      dest = File.join(dest_dir, 'out.jpg')
+      expect(described_class.new(create_zip).extract_one('FLOWER.JPG', dest)).to eq(dest)
+      expect(File.size(dest)).to eq(104_297)
+    end
+
+    it 'reads a zip entry\'s size from the directory, without extracting it' do
+      expect(described_class.new(create_zip).size_of('flower.jpg')).to eq(104_297)
+      expect(Dir.children(dest_dir)).to be_empty
+    end
+
+    it 'streams one tar entry to disk and reads its size from the header' do
+      tar = described_class.new(build_tar('images/photo.tif', 'x' * 2048))
+      dest = File.join(dest_dir, 'photo.tif')
+
+      expect(tar.size_of('photo.tif')).to eq(2048)
+      expect(tar.extract_one('photo.tif', dest)).to eq(dest)
+      expect(File.size(dest)).to eq(2048)
+    end
+
+    it 'is nil for an entry that is not present, and writes nothing' do
+      dest = File.join(dest_dir, 'missing.jpg')
+      expect(described_class.new(create_zip).extract_one('missing.jpg', dest)).to be_nil
+      expect(described_class.new(create_zip).size_of('missing.jpg')).to be_nil
+      expect(File).not_to exist(dest)
+    end
+  end
 end

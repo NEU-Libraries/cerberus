@@ -4,8 +4,9 @@ module Admin
   # Replace a file: find a Work, then replace or roll back one of its Blobs.
   # See docs/admin.md.
   #
-  # Reachable by :admin and by the devolved-admin tier — Atlas already grants
-  # Blob :update, :rollback and :read_versions to that pair.
+  # Reachable by :admin and by the devolved-admin tier. Atlas allows both
+  # here: every depositor role holds Blob :update, which rollback is also
+  # authorized as, and the devolved tier holds :read_versions.
   class FilesController < BaseController
     skip_before_action :require_admin
     before_action :require_admin_or_delegate
@@ -35,6 +36,7 @@ module Admin
     def replace
       file = params[:binary]
       return back_to_manage(alert: 'Choose a file to upload.') if file.blank?
+      return back_to_manage(alert: type_mismatch_message(file)) if type_mismatch_message(file)
 
       staged = stage_upload(file, params[:work_id])
       FileReplacementJob.perform_later(params[:blob_noid], params[:work_id], staged,
@@ -50,6 +52,23 @@ module Admin
     end
 
     private
+
+      # A replacement of another type would leave the old type's derivatives
+      # behind (a Word file's PDF rendition, an image's size tiers), and no job
+      # can remove them. Adding the file as a new one is the supported path.
+      # Sniffed as ingest does, so .jpg against .jpeg is not a mismatch; unknown
+      # either side allows.
+      def type_mismatch_message(file)
+        return @type_mismatch_message if defined?(@type_mismatch_message)
+
+        current = AtlasRb::Blob.find(params[:blob_noid])&.dig('mime_type').to_s
+        incoming = Marcel::MimeType.for(Pathname.new(file.tempfile.path), name: file.original_filename).to_s
+        @type_mismatch_message =
+          if current.present? && incoming.present? && current != incoming
+            "The replacement must be the same type of file as the current one (#{current}); " \
+              "this one is #{incoming}. To change a file's type, add it to the work as a new file instead."
+          end
+      end
 
       # One batched call, not a versions-per-noid fan-out. find_many_versions
       # is unordered and drops an id it cannot resolve, so index by blob_id.

@@ -6,15 +6,32 @@ import { Controller } from "@hotwired/stimulus"
 //
 // Ticking the box reveals the community/genre pair; unticking hides AND
 // disables them, so a stale selection never posts alongside an unchecked box.
+//
+// In someone else's workspace (`requiresProxy`) the whole promote block waits
+// for Proxy deposit: a showcase entry is its depositor's, and only a proxy
+// deposit makes the workspace's owner the depositor. The server refuses a
+// promotion without one either way; hiding it keeps the form honest.
 // Changing the community repopulates the genre <select> from the per-community
 // showcase map passed in as the `genres` value ({ communityNoid: { label: noid } }).
 export default class extends Controller {
-  static targets = ["fields", "community", "genre"]
-  static values  = { genres: Object }
+  static targets = ["fields", "community", "genre", "promote"]
+  static values  = { genres: Object, requiresProxy: Boolean }
 
   connect() {
-    this.toggle()
+    this.proxyChanged()
     this.communityChanged()
+  }
+
+  proxyChanged() {
+    if (this.requiresProxyValue && this.hasPromoteTarget) {
+      const proxy = this.element.querySelector("input[name='upload_as'][value='proxy']")
+      const on = proxy ? proxy.checked : false
+      this.promoteTarget.classList.toggle("d-none", !on)
+      const box = this.promoteTarget.querySelector("input[name='publish']")
+      if (box && !on) box.checked = false
+      if (box) box.disabled = !on
+    }
+    this.toggle()
   }
 
   toggle() {

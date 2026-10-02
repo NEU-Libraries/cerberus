@@ -9,15 +9,16 @@ module WorkStreamingOnly
 
   private
 
-    # State for the Streaming Only toggle. `offered` differs by page because the
+    # State for the Streaming Only toggle. `tiers` differs by page because the
     # evidence does — see the two call sites. The audience is computed from
     # @read_groups rather than @permissions: form_preparation has already
     # replaced the latter with the form's row objects by the time this runs.
-    def load_streaming_only!(offered:)
-      @streaming_only_offered = offered
-      return unless offered
+    def load_streaming_only!(tiers:)
+      @streaming_only_offered = tiers.any?
+      @streaming_only_audio = tiers == ['audio']
+      return unless @streaming_only_offered
 
-      @streaming_only = StreamingOnly.on?(StreamingOnly.stored_policy(params[:id]), read: @read_groups)
+      @streaming_only = StreamingOnly.on?(StreamingOnly.stored_policy(params[:id]), tiers: tiers, read: @read_groups)
     end
 
     # Persist the toggle, if this form carried it. The Metadata and Advanced tabs
@@ -29,13 +30,17 @@ module WorkStreamingOnly
     # Work from private to public, and the tier audience is computed against the
     # Work's read ACL. Reading it before the save would size the tier against the
     # visibility the reader was replacing.
-    def apply_streaming_only!
+    #
+    # The block names the Work's media tiers, and runs only when the form
+    # carried the field, since it may cost an Atlas read.
+    def apply_streaming_only!(&tiers)
       requested = params.dig(:work, :streaming_only)
       return if requested.nil?
 
       StreamingOnly.apply!(params[:id],
                            enabled: ActiveModel::Type::Boolean.new.cast(requested).present?,
-                           read:    Array(AtlasRb::Resource.permissions(params[:id])&.read))
+                           read:    Array(AtlasRb::Resource.permissions(params[:id])&.read),
+                           tiers:   tiers.call)
     rescue AtlasRb::DerivativePermissionsError => e
       flash[:alert] = "Streaming Only wasn't changed — Atlas refused it: #{e.message}"
     end

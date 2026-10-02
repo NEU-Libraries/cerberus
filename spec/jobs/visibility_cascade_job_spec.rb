@@ -91,11 +91,13 @@ RSpec.describe VisibilityCascadeJob do
 
   # The container is written from what was submitted, not from what is stored,
   # so an edit-group or embargo change made in the same submit survives. A
-  # round-trip would silently discard it.
+  # round-trip would silently discard it. The stored envelope is read only to
+  # record what the container's audience was.
   describe 'the container itself' do
-    it 'takes the submitted envelope verbatim, without re-reading the stored one' do
+    it 'takes the submitted envelope verbatim, reading the stored one only for the record' do
       stub_targets(target('top', 'Collection'))
-      allow(AtlasRb::Resource).to receive(:permissions)
+      allow(AtlasRb::Resource).to receive(:permissions).with('top')
+                                                       .and_return(envelope(read: ['public'], edit: ['oldgroup']))
       allow(AtlasRb::Resource).to receive(:set_permissions)
 
       submitted = { 'read' => ['northeastern:drs:library:archives'], 'edit' => ['newgroup'], 'embargo' => '' }
@@ -103,8 +105,9 @@ RSpec.describe VisibilityCascadeJob do
         described_class.perform_now(noid: 'top', uuid: 'uuid-top', permissions: submitted)
       end
 
-      expect(AtlasRb::Resource).to have_received(:set_permissions).with('top', submitted)
-      expect(AtlasRb::Resource).not_to have_received(:permissions)
+      expect(AtlasRb::Resource).to have_received(:set_permissions).once.with('top', submitted)
+      expect(AdminNotice.last.detail(:changed))
+        .to eq([{ 'noid' => 'top', 'type' => 'Collection', 'read_before' => ['public'] }])
     end
 
     # The report speaks to what ELSE changed, so the container is tallied
@@ -113,7 +116,7 @@ RSpec.describe VisibilityCascadeJob do
     it 'is not counted among the items it reports narrowing' do
       stub_targets(target('w1'), target('top', 'Collection'))
       allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: ['public']))
-      allow(AtlasRb::Resource).to receive(:set_permissions)
+      allow(AtlasRb::Resource).to receive(:permissions).with('top').and_return(envelope(read: ['public']))
       allow(AtlasRb::Resource).to receive(:set_permissions)
 
       run
@@ -211,16 +214,51 @@ RSpec.describe VisibilityCascadeJob do
     end
   end
 
-  # A lock conflict is transient and the cascade is idempotent, so it has to
-  # escape the per-target rescue and reach retry_on. Asserted by its absence
-  # from the report rather than by a raise: retry_on intercepts the exception,
-  # so perform_now never propagates it.
-  it 'does not record a stale-resource conflict as a permanent failure' do
-    stub_targets(target('w1'))
-    allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: ['public']))
-    allow(AtlasRb::Resource).to receive(:set_permissions).and_raise(AtlasRb::StaleResourceError.new('conflict'))
+  # A lock conflict is transient, so it is retried on the one item. Not through
+  # retry_on: a re-run skips what is already narrowed, and its ledger entry
+  # would leave those items out.
+  describe 'a lock conflict' do
+    before do
+      stub_targets(target('w1'))
+      allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: ['public']))
+    end
 
-    expect { run }.not_to change(Message, :count)
+    it 'is retried in place, and the item is still listed' do
+      calls = 0
+      allow(AtlasRb::Resource).to receive(:set_permissions) do
+        calls += 1
+        raise AtlasRb::StaleResourceError, 'conflict' if calls == 1
+      end
+
+      run
+
+      expect(AdminNotice.last.detail(:changed).pluck('noid')).to eq(['w1'])
+      expect(AdminNotice.last.detail(:failures)).to eq([])
+    end
+
+    it 'is named as a failure once the attempts run out' do
+      allow(AtlasRb::Resource).to receive(:set_permissions).and_raise(AtlasRb::StaleResourceError, 'conflict')
+
+      run
+
+      expect(AtlasRb::Resource).to have_received(:set_permissions).exactly(described_class::LOCK_ATTEMPTS).times
+      expect(AdminNotice.last.detail(:failures)).to eq(['Work w1: conflict'])
+    end
+  end
+
+  # Widening the collection again never widens what is inside it, so the
+  # ledger keeps each narrowed item with the audience it had.
+  it 'lists each narrowed item with its audience before, and not the unchanged ones' do
+    stub_targets(target('w1'), target('w2'))
+    allow(AtlasRb::Resource).to receive(:permissions).with('w1').and_return(envelope(read: %w[public]))
+    allow(AtlasRb::Resource).to receive(:permissions).with('w2')
+                                                     .and_return(envelope(read: ['northeastern:drs:library:archives']))
+    allow(AtlasRb::Resource).to receive(:set_permissions)
+
+    run
+
+    expect(AdminNotice.last.detail(:changed))
+      .to eq([{ 'noid' => 'w1', 'type' => 'Work', 'read_before' => ['public'] }])
   end
 
   # A derivative-access default lives in Cerberus, not in the ACL Atlas holds, so
@@ -237,35 +275,35 @@ RSpec.describe VisibilityCascadeJob do
     end
 
     it 'clamps the narrowed container’s own default to what it can still offer' do
-      sentinel = Sentinel.create!(target_id: 'top', policy: { 'master' => ['public'] })
+      sentinel = Sentinel.create!(target_id: 'top', policy: { 'original' => ['public'] })
       stub_targets(target('top', 'Collection'))
 
       run(read_groups: [archives])
 
-      expect(sentinel.reload.policy['master']).to eq([archives])
+      expect(sentinel.reload.policy['original']).to eq([archives])
     end
 
     it 'drops a tier whose audience the container no longer includes, leaving it to inherit' do
-      sentinel = Sentinel.create!(target_id: 'top', policy: { 'master' => [law] })
+      sentinel = Sentinel.create!(target_id: 'top', policy: { 'original' => [law] })
       stub_targets(target('top', 'Collection'))
 
       run(read_groups: [archives])
 
-      expect(sentinel.reload.policy['master']).to eq([])
+      expect(sentinel.reload.policy['original']).to eq([])
     end
 
     it 'clamps a descendant collection’s default too, not only the container’s' do
-      sentinel = Sentinel.create!(target_id: 'c1', policy: { 'master' => ['public'] })
+      sentinel = Sentinel.create!(target_id: 'c1', policy: { 'original' => ['public'] })
       stub_targets(target('c1', 'Collection'))
       allow(AtlasRb::Resource).to receive(:permissions).with('c1').and_return(envelope(read: ['public']))
 
       run(read_groups: [archives])
 
-      expect(sentinel.reload.policy['master']).to eq([archives])
+      expect(sentinel.reload.policy['original']).to eq([archives])
     end
 
     it 'leaves a default that is already within the new audience alone' do
-      sentinel = Sentinel.create!(target_id: 'top', policy: { 'master' => [archives] })
+      sentinel = Sentinel.create!(target_id: 'top', policy: { 'original' => [archives] })
       stub_targets(target('top', 'Collection'))
 
       expect { run(read_groups: [archives]) }.not_to(change { sentinel.reload.updated_at })
