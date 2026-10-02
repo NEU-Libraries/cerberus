@@ -5,6 +5,12 @@ require 'rails_helper'
 # The calm empty state a blank-query browse falls through to. Its icon is the
 # one heading the page, so an empty genre landing shows the genre's own icon.
 RSpec.describe 'catalog/_zero_results', type: :view do
+  # Blacklight's helpers are absent from a bare view, so verifying partial
+  # doubles refuse a stub; define the one the partial asks. The search branch
+  # needs the real Blacklight context, so it is covered in
+  # spec/requests/sign_in_affordances_spec.rb.
+  before { view.define_singleton_method(:search_state) { Struct.new(:filters).new([]) } }
+
   def render_empty(controller:, genre: nil)
     allow(view).to receive(:controller_name).and_return(controller)
     assign(:genre, genre)

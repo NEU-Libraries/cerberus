@@ -27,4 +27,4 @@ en:
         # has nothing to narrow — so it sends the reader to look at a panel with no
         # links in it. Advice that names a control the screen does not offer is
         # worse than no advice: it reads as the page being broken.
-        use_fewer_keywords: 'Try fewer or more general keywords — a narrower term has nothing left to filter.'
+        use_fewer_keywords: 'Check the spelling, or try fewer or more general words.'
