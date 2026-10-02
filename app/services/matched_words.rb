@@ -43,7 +43,27 @@ class MatchedWords < ApplicationService
   MAX_VALUES = 3
 
   Segment = Struct.new(:text, :matched)
-  Line = Struct.new(:match, :excerpts, :reason, :typed, keyword_init: true)
+
+  # One matched value, and the stored field it came from.
+  Excerpt = Struct.new(:source, :segments) do
+    # The catalog's own facet label for a keyword source ("Creator", "Topic"),
+    # so the dialog names a value as the sidebar does. Nil for any other field.
+    def source_label
+      CatalogController.blacklight_config.facet_fields[source]&.label if KEYWORD_SOURCES.include?(source)
+    end
+  end
+
+  Line = Struct.new(:match, :excerpts, :reason, :typed, keyword_init: true) do
+    # The keywords field gathers eleven stored fields, so "keywords and
+    # subjects" hides that the match was, say, the creator. Name the source when
+    # every matched value came from one; otherwise each excerpt names its own.
+    def label
+      sources = excerpts.map(&:source_label).uniq
+      sources.one? && sources.first ? sources.first : match.label.capitalize
+    end
+
+    def labelled_excerpts? = excerpts.map(&:source_label).compact.uniq.size > 1
+  end
 
   # @param document [SolrDocument] carrying the STORED fields
   # @param matches [Array<SearchExplanation::Match>] one per matched field
@@ -64,29 +84,32 @@ class MatchedWords < ApplicationService
   private
 
     def line_for(match)
-      values = source_values(match.field)
-      text = values.join("\n")
-      analysis = analyse(match.field, text) if values.any?
-      excerpts = analysis ? per_value(values, matched_ranges(analysis, text)).first(MAX_VALUES) : []
+      pairs = source_values(match.field)
+      text = pairs.map(&:last).join("\n")
+      analysis = analyse(match.field, text) if pairs.any?
+      excerpts = analysis ? per_value(pairs, matched_ranges(analysis, text)).first(MAX_VALUES) : []
       Line.new(match: match, excerpts: excerpts, typed: analysis ? typed_words(analysis) : {},
                reason: (NO_TEXT.fetch(match.field, UNMATCHED) if excerpts.empty?))
     end
 
+    # [source field, plain value] pairs, in SOURCES order.
     def source_values(field)
-      SOURCES.fetch(field, []).flat_map { |source| Array(@document[source]) }
-             .map { |value| value.to_s.gsub(EnhancedTextHelper::TAG_PATTERN, '') }.compact_blank
+      pairs = SOURCES.fetch(field, []).flat_map do |source|
+        Array(@document[source]).map { |value| [source, value.to_s.gsub(EnhancedTextHelper::TAG_PATTERN, '')] }
+      end
+      pairs.reject { |pair| pair.last.blank? }
     end
 
     # One request for every value of the field: joined by newlines, which every
     # analyzer here splits on, so the offsets still find each value.
-    def per_value(values, ranges)
+    def per_value(pairs, ranges)
       offset = 0
-      values.filter_map do |value|
+      pairs.filter_map do |source, value|
         inside = ranges.filter_map do |range|
           (range.begin - offset)...(range.end - offset) if range.begin >= offset && range.end <= offset + value.length
         end
         offset += value.length + 1
-        excerpt(value, inside) if inside.any?
+        Excerpt.new(source, excerpt(value, inside)) if inside.any?
       end
     end
 

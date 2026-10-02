@@ -43,13 +43,17 @@
             - @rows.each do |field, line|
               %tr
                 %td.text-nowrap
-                  = field.match.label.capitalize
+                  = line.label
                   - if field.match.form_note
                     .small.text-muted (#{field.match.form_note})
                 %td.small
-                  - line.excerpts.each do |segments|
+                  - line.excerpts.each do |excerpt|
                     -# One line, so no whitespace lands between a word and its punctuation.
-                    %p.mb-1= safe_join(segments.map { |segment| segment.matched ? tag.strong(segment.text) : segment.text })
+                    - words = safe_join(excerpt.segments.map { |segment| segment.matched ? tag.strong(segment.text) : segment.text })
+                    %p.mb-1
+                      - if line.labelled_excerpts?
+                        %span.text-muted #{excerpt.source_label}:
+                      = words
                   - if line.reason
                     %p.text-muted.mb-1= line.reason
                 %td.text-end

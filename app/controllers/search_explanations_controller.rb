@@ -34,13 +34,20 @@ class SearchExplanationsController < ApplicationController
     return if @document.nil?
 
     @explanation = SearchExplanation.new(@document.fetch('[explain]', nil))
-    fields = @explanation.fields
-    lines = MatchedWords.call(document: @document, matches: fields.map(&:match), query: @query)
-    @explanation.typed_terms = lines.map(&:typed).reduce({}, :merge)
-    @rows = fields.zip(lines)
+    @rows = explain_matches
   end
 
   private
+
+    # The record's matched words feed back into the summary: the words as
+    # typed, and each field's label as the record gives it.
+    def explain_matches
+      fields = @explanation.fields
+      lines = MatchedWords.call(document: @document, matches: fields.map(&:match), query: @query)
+      @explanation.typed_terms = lines.map(&:typed).reduce({}, :merge)
+      @explanation.field_labels = lines.to_h { |line| [line.match.field, line.label.downcase] }
+      fields.zip(lines)
+    end
 
     def require_admin_or_delegate
       return if effective_user&.admin? || effective_user&.admin_delegate?

@@ -662,6 +662,13 @@ word as the record writes it.
   maps each searched field to the stored fields it is copied from, mirroring
   the copyFields in `schema.xml`. Change both together. The controller asks for
   those stored fields (`MatchedWords::STORED`) in the explained search.
+- **Which source.** The keywords field gathers eleven stored fields (subjects,
+  creator, contributor, genre, publisher, place, photo category), so its own
+  label would call a creator match a keyword. Each excerpt keeps the stored
+  field it came from, and the row takes that field's facet label from
+  `CatalogController` ("Creator") when every matched value shares one source.
+  With mixed sources the row keeps "Keywords and subjects" and each value names
+  its own.
 - **One request per field.** A field's values are joined by newlines and sent
   as one POST, never a GET: a long description overflows Solr's request line.
 - **Offsets.** Solr counts UTF-16 code units, and Ruby counts characters. They

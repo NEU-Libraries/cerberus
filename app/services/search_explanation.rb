@@ -30,6 +30,10 @@ class SearchExplanation
   # only the searched form, which for a stemmed match is "survey", not "Surveys".
   attr_writer :typed_terms
 
+  # Field → the label MatchedWords found from the record, such as "creator" for
+  # the keywords field, so the summary names the field the table row names.
+  attr_writer :field_labels
+
   # @param tree [Hash] the `[explain]` value, as { 'value', 'description', 'details' }
   def initialize(tree)
     @tree = tree || {}
@@ -55,6 +59,10 @@ class SearchExplanation
   end
 
   # A term, or each word of a phrase, as the asker typed it where that is known.
+  def label_for(match)
+    (@field_labels || {}).fetch(match.field, match.label)
+  end
+
   def typed(term)
     term.split.map { |word| (@typed_terms || {}).fetch(word, word) }.join(' ')
   end
@@ -130,14 +138,14 @@ class SearchExplanation
     end
 
     def word_clause(word)
-      "“#{typed(word.term)}” is in its #{word.matches.map(&:label).uniq.to_sentence}"
+      "“#{typed(word.term)}” is in its #{word.matches.map { |match| label_for(match) }.uniq.to_sentence}"
     end
 
     def phrase_sentence
       phrase = phrases.first
       return if phrase.nil?
 
-      "The words “#{typed(phrase.display_term)}” also appear together in its #{phrase.label}."
+      "The words “#{typed(phrase.display_term)}” also appear together in its #{label_for(phrase)}."
     end
 
     def strongest_sentence
@@ -145,9 +153,9 @@ class SearchExplanation
       return if match.nil? || words.sum { |word| word.matches.size } + phrases.size < 2
 
       if match.phrase
-        "The words appearing together in its #{match.label} count most."
+        "The words appearing together in its #{label_for(match)} count most."
       else
-        "The #{match.label} match counts most."
+        "The #{label_for(match)} match counts most."
       end
     end
 end

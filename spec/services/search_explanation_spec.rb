@@ -63,6 +63,13 @@ RSpec.describe SearchExplanation do
       expect(explanation.fields.map(&:points)).to eq(explanation.fields.map(&:points).sort.reverse)
     end
 
+    it 'names a field by the label the record gave it, such as the creator for a keyword match' do
+      explanation.field_labels = { 'descriptive_keywords_tesim' => 'creator' }
+
+      expect(explanation.summary).to start_with('This appeared because “coastal” is in its title, description, ' \
+                                                'and creator,')
+    end
+
     it 'speaks the words as typed once it knows them, and keeps Solr’s form otherwise' do
       explanation.typed_terms = { 'survey' => 'Surveys' }
 

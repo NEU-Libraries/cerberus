@@ -11,7 +11,7 @@ RSpec.describe MatchedWords do
     described_class.call(document: SolrDocument.new(document), matches: fields.map { |f| field_match(f) }, query: query)
   end
 
-  def rendered(line) = line.excerpts.map { |segments| segments.map { |s| s.matched ? "[#{s.text}]" : s.text }.join }
+  def rendered(line) = line.excerpts.map { |e| e.segments.map { |s| s.matched ? "[#{s.text}]" : s.text }.join }
 
   it 'bolds the word as the record writes it, for a stemmed match' do
     line = lines({ 'title_tsim' => ['Libraries of the Northeast'] }, %w[title_stem_tesim], 'library').sole
@@ -43,6 +43,32 @@ RSpec.describe MatchedWords do
     line = lines(document, %w[descriptive_keywords_tesim], 'harbor').sole
 
     expect(rendered(line)).to eq(['Boston [Harbor]'])
+  end
+
+  # The keywords field gathers eleven stored fields, so its own label would
+  # call a creator match a keyword.
+  it 'names a keyword match by its one source, as the facet sidebar does' do
+    line = lines({ 'creator_ssim' => ['Lovelace, Ada'], 'subject_ssim' => ['Computing'] },
+                 %w[descriptive_keywords_tesim], 'ada').sole
+
+    expect(rendered(line)).to eq(['Lovelace, [Ada]'])
+    expect(line.label).to eq('Creator')
+    expect(line.labelled_excerpts?).to be(false)
+  end
+
+  it 'names each value when the keyword matches came from more than one source' do
+    line = lines({ 'creator_ssim' => ['Lovelace, Ada'], 'subject_ssim' => ['Ada (Computer program language)'] },
+                 %w[descriptive_keywords_tesim], 'ada').sole
+
+    expect(line.label).to eq('Keywords and subjects')
+    expect(line.labelled_excerpts?).to be(true)
+    expect(line.excerpts.map(&:source_label)).to eq(%w[Topic Creator])
+  end
+
+  it 'keeps the field’s own label outside the keywords field' do
+    line = lines({ 'title_tsim' => ['Coastal survey'] }, %w[title_tsim], 'survey').sole
+
+    expect(line.label).to eq('Title')
   end
 
   it 'trims a long value to the match, and says so' do
