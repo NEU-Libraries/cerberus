@@ -16,10 +16,12 @@ class MatchedWords < ApplicationService
   SOURCES = {
     'title_tsim'                 => %w[title_tsim],
     'title_stem_tesim'           => %w[title_tsim],
+    'title_kstem_tesim'          => %w[title_tsim],
     'title_plain_tsim'           => %w[title_tsim],
     'title_variant_tesim'        => %w[title_variant_tesim],
     'description_tsim'           => %w[description_tsim],
     'description_stem_tesim'     => %w[description_tsim],
+    'description_kstem_tesim'    => %w[description_tsim],
     'descriptive_keywords_tesim' => KEYWORD_SOURCES,
     'subject_title_tesim'        => %w[subject_title_tesim],
     'contents_tesim'             => %w[contents_tesim],
@@ -132,9 +134,7 @@ class MatchedWords < ApplicationService
     end
 
     # The stages alternate filter name and tokens; the last tokens are the ones searched.
-    def final_tokens(stages)
-      Array(Array(stages).grep(Array).last)
-    end
+    def final_tokens(stages) = Array(Array(stages).grep(Array).last)
 
     # POST, not GET: a long description would overflow Solr's request line.
     # Nil when Solr does not answer, which the line reports instead of failing.

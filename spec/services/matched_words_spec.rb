@@ -20,6 +20,12 @@ RSpec.describe MatchedWords do
     expect(line.reason).to be_nil
   end
 
+  it 'bolds another form of the word, for a KStem match' do
+    line = lines({ 'title_tsim' => ['Digitized Materials'] }, %w[title_kstem_tesim], 'digitize').sole
+
+    expect(rendered(line)).to eq(['[Digitized] Materials'])
+  end
+
   it 'leaves an inflected word unbolded in the field that matches only as written' do
     line = lines({ 'title_tsim' => ['Libraries of the Northeast'] }, %w[title_tsim], 'northeast libraries').sole
 
