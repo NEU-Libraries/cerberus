@@ -20,6 +20,12 @@ RSpec.describe MatchedWords do
     expect(line.reason).to be_nil
   end
 
+  it 'bolds another form of the word, for a KStem match' do
+    line = lines({ 'title_tsim' => ['Digitized Materials'] }, %w[title_kstem_tesim], 'digitize').sole
+
+    expect(rendered(line)).to eq(['[Digitized] Materials'])
+  end
+
   it 'leaves an inflected word unbolded in the field that matches only as written' do
     line = lines({ 'title_tsim' => ['Libraries of the Northeast'] }, %w[title_tsim], 'northeast libraries').sole
 
@@ -30,6 +36,21 @@ RSpec.describe MatchedWords do
     line = lines({ 'title_tsim' => ['🌊 Coastal survey'] }, %w[title_tsim], 'survey').sole
 
     expect(rendered(line)).to eq(['🌊 Coastal [survey]'])
+  end
+
+  # The split field repeats each split-off word as a zero-width token, which
+  # must not become an empty bold segment.
+  it 'bolds a word inside a filename title, for a split-title match' do
+    line = lines({ 'title_tsim' => ['nr32w29201906internet.pdf'] }, %w[title_split_tesim], 'internet').sole
+
+    expect(rendered(line)).to eq(['nr32w29201906[internet].pdf'])
+    expect(line.excerpts.sole.segments.map(&:text)).to all(be_present)
+  end
+
+  it 'bolds a word between the separators of a filename title' do
+    line = lines({ 'title_tsim' => ['DRS-terms_2026-08-12.docx'] }, %w[title_split_tesim], 'terms').sole
+
+    expect(rendered(line)).to eq(['DRS-[terms]_2026-08-12.docx'])
   end
 
   it 'drops the title markup before it is analysed' do

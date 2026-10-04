@@ -669,8 +669,9 @@ the page does; a field missing from it shows its Solr name. Add one there when
 `qf` gains a field.
 
 Several `qf` fields fold into one label: the title is searched as written, as
-stem variations (so a plural matches), without its sub- and superscript markup,
-and as its alternative titles. So one word can list "Title" more than once.
+stem variations (so a plural matches), as other forms of the word (KStem),
+without its sub- and superscript markup, split into words (for a title that is
+a filename), and as its alternative titles. So one word can list "Title" more than once.
 `SearchExplanation::Match::FORMS` gives each such field a note on its row, and the
 dialog shows a legend for the notes in the table. A new derived field needs an
 entry in both `FORMS` and `FORM_NOTES`, or its row reads as a plain duplicate.

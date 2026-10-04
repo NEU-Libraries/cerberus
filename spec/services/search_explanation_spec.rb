@@ -84,6 +84,31 @@ RSpec.describe SearchExplanation do
     end
   end
 
+  context 'with a word both stemmers match ("archive")' do
+    subject(:explanation) { described_class.new(tree('explain_word_form')) }
+
+    it 'lists a title row for each stemmer, told apart by its note' do
+      notes = explanation.fields.to_h { |field| [field.match.field, [field.match.label, field.match.form_note]] }
+      expect(notes).to include('title_stem_tesim'        => ['title', 'stem variation'],
+                               'title_kstem_tesim'       => ['title', 'word form'],
+                               'description_kstem_tesim' => ['description', 'word form'])
+    end
+
+    it 'explains the plural stem before the other word forms in the legend' do
+      expect(explanation.forms).to eq(%i[stem_variation word_form])
+    end
+  end
+
+  # A KStem match is stemmed too, so the word as written names the word.
+  it 'takes the word from the exact match, not the KStem one' do
+    tree = { 'value' => 2.0, 'description' => 'max plus 0.01 times others of:', 'details' => [
+      { 'value' => 2.0, 'description' => 'weight(title_kstem_tesim:archive in 3) [SchemaSimilarity], result of:' },
+      { 'value' => 1.0, 'description' => 'weight(title_tsim:archives in 3) [SchemaSimilarity], result of:' }
+    ] }
+
+    expect(described_class.new(tree).words.sole.term).to eq('archives')
+  end
+
   # One word matching the title four ways, each with a different note.
   it 'tells the alternative and unformatted titles apart from stem variations, in the legend order' do
     weights = %w[title_plain_tsim title_variant_tesim title_stem_tesim title_tsim].map do |field|
@@ -95,6 +120,19 @@ RSpec.describe SearchExplanation do
     expect(explanation.words.sole.matches.map(&:form_note))
       .to contain_exactly('without formatting', 'alternative title', 'stem variation', nil)
     expect(explanation.forms).to eq(%i[stem_variation alternative_title plain_text])
+  end
+
+  # A filename title joins its words, so only the split field finds one inside it.
+  it 'labels a match in the split title as the title, with its own note' do
+    tree = { 'value' => 1.0, 'description' => 'max plus 0.01 times others of:', 'details' => [
+      { 'value' => 1.0, 'description' => 'weight(title_split_tesim:internet in 3) [SchemaSimilarity], result of:' }
+    ] }
+    explanation = described_class.new(tree)
+    match = explanation.words.sole.matches.sole
+
+    expect([match.label, match.form_note]).to eq(['title', 'split into words'])
+    expect(explanation.summary).to start_with('This appeared because “internet” is in its title field.')
+    expect(explanation.forms).to eq(%i[split_words])
   end
 
   # One best-field node per word, as edismax builds them.

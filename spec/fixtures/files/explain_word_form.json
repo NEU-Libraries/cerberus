@@ -1,0 +1,366 @@
+{
+  "match": true,
+  "value": 6.530911445617676,
+  "description": "weight(FunctionScoreQuery(((description_kstem_tesim:archive)^2.5 | title_plain_tsim:archive | identifier_tesim:archive | full_text_tesimv:archive | (title_stem_tesim:archive)^5.0 | (descriptive_keywords_tesim:archive)^2.0 | (description_tsim:archive)^5.0 | name_variant_teim:archive | (title_kstem_tesim:archive)^5.0 | (description_stem_tesim:archive)^2.5 | (alternate_ids_tsim:archive)^3.0 | (title_tsim:archive)^10.0 | contents_tesim:archive | subject_title_tesim:archive | (title_variant_tesim:archive)^4.0)~0.01, scored by boost(if(exists(query(internal_resource_tesim:person,def=0.0)),const(0.9),const(1))))), result of:",
+  "details": [
+    {
+      "match": true,
+      "value": 6.530911445617676,
+      "description": "product of:",
+      "details": [
+        {
+          "match": true,
+          "value": 6.5309114,
+          "description": "max plus 0.01 times others of:",
+          "details": [
+            {
+              "match": true,
+              "value": 4.10174,
+              "description": "weight(description_kstem_tesim:archive in 259) [SchemaSimilarity], result of:",
+              "details": [
+                {
+                  "match": true,
+                  "value": 4.10174,
+                  "description": "score(freq=2.0), computed as boost * idf * tf from:",
+                  "details": [
+                    {
+                      "match": true,
+                      "value": 2.5,
+                      "description": "boost"
+                    },
+                    {
+                      "match": true,
+                      "value": 3.1292636,
+                      "description": "idf, computed as log(1 + (N - n + 0.5) / (n + 0.5)) from:",
+                      "details": [
+                        {
+                          "match": true,
+                          "value": 3,
+                          "description": "n, number of documents containing term"
+                        },
+                        {
+                          "match": true,
+                          "value": 79,
+                          "description": "N, total number of documents with field"
+                        }
+                      ]
+                    },
+                    {
+                      "match": true,
+                      "value": 0.52430737,
+                      "description": "tf, computed as freq / (freq + k1 * (1 - b + b * dl / avgdl)) from:",
+                      "details": [
+                        {
+                          "match": true,
+                          "value": 2.0,
+                          "description": "freq, occurrences of term within document"
+                        },
+                        {
+                          "match": true,
+                          "value": 1.2,
+                          "description": "k1, term saturation parameter"
+                        },
+                        {
+                          "match": true,
+                          "value": 0.75,
+                          "description": "b, length normalization parameter"
+                        },
+                        {
+                          "match": true,
+                          "value": 18.0,
+                          "description": "dl, length of field"
+                        },
+                        {
+                          "match": true,
+                          "value": 10.696202,
+                          "description": "avgdl, average length of field"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "match": true,
+              "value": 6.3480835,
+              "description": "weight(title_stem_tesim:archive in 259) [SchemaSimilarity], result of:",
+              "details": [
+                {
+                  "match": true,
+                  "value": 6.3480835,
+                  "description": "score(freq=1.0), computed as boost * idf * tf from:",
+                  "details": [
+                    {
+                      "match": true,
+                      "value": 5.0,
+                      "description": "boost"
+                    },
+                    {
+                      "match": true,
+                      "value": 3.0602708,
+                      "description": "idf, computed as log(1 + (N - n + 0.5) / (n + 0.5)) from:",
+                      "details": [
+                        {
+                          "match": true,
+                          "value": 4,
+                          "description": "n, number of documents containing term"
+                        },
+                        {
+                          "match": true,
+                          "value": 95,
+                          "description": "N, total number of documents with field"
+                        }
+                      ]
+                    },
+                    {
+                      "match": true,
+                      "value": 0.41487068,
+                      "description": "tf, computed as freq / (freq + k1 * (1 - b + b * dl / avgdl)) from:",
+                      "details": [
+                        {
+                          "match": true,
+                          "value": 1.0,
+                          "description": "freq, occurrences of term within document"
+                        },
+                        {
+                          "match": true,
+                          "value": 1.2,
+                          "description": "k1, term saturation parameter"
+                        },
+                        {
+                          "match": true,
+                          "value": 0.75,
+                          "description": "b, length normalization parameter"
+                        },
+                        {
+                          "match": true,
+                          "value": 3.0,
+                          "description": "dl, length of field"
+                        },
+                        {
+                          "match": true,
+                          "value": 2.4315789,
+                          "description": "avgdl, average length of field"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "match": true,
+              "value": 3.2902126,
+              "description": "weight(descriptive_keywords_tesim:archive in 259) [SchemaSimilarity], result of:",
+              "details": [
+                {
+                  "match": true,
+                  "value": 3.2902126,
+                  "description": "score(freq=1.0), computed as boost * idf * tf from:",
+                  "details": [
+                    {
+                      "match": true,
+                      "value": 2.0,
+                      "description": "boost"
+                    },
+                    {
+                      "match": true,
+                      "value": 2.4849067,
+                      "description": "idf, computed as log(1 + (N - n + 0.5) / (n + 0.5)) from:",
+                      "details": [
+                        {
+                          "match": true,
+                          "value": 2,
+                          "description": "n, number of documents containing term"
+                        },
+                        {
+                          "match": true,
+                          "value": 29,
+                          "description": "N, total number of documents with field"
+                        }
+                      ]
+                    },
+                    {
+                      "match": true,
+                      "value": 0.6620395,
+                      "description": "tf, computed as freq / (freq + k1 * (1 - b + b * dl / avgdl)) from:",
+                      "details": [
+                        {
+                          "match": true,
+                          "value": 1.0,
+                          "description": "freq, occurrences of term within document"
+                        },
+                        {
+                          "match": true,
+                          "value": 1.2,
+                          "description": "k1, term saturation parameter"
+                        },
+                        {
+                          "match": true,
+                          "value": 0.75,
+                          "description": "b, length normalization parameter"
+                        },
+                        {
+                          "match": true,
+                          "value": 1.0,
+                          "description": "dl, length of field"
+                        },
+                        {
+                          "match": true,
+                          "value": 4.275862,
+                          "description": "avgdl, average length of field"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "match": true,
+              "value": 6.3480835,
+              "description": "weight(title_kstem_tesim:archive in 259) [SchemaSimilarity], result of:",
+              "details": [
+                {
+                  "match": true,
+                  "value": 6.3480835,
+                  "description": "score(freq=1.0), computed as boost * idf * tf from:",
+                  "details": [
+                    {
+                      "match": true,
+                      "value": 5.0,
+                      "description": "boost"
+                    },
+                    {
+                      "match": true,
+                      "value": 3.0602708,
+                      "description": "idf, computed as log(1 + (N - n + 0.5) / (n + 0.5)) from:",
+                      "details": [
+                        {
+                          "match": true,
+                          "value": 4,
+                          "description": "n, number of documents containing term"
+                        },
+                        {
+                          "match": true,
+                          "value": 95,
+                          "description": "N, total number of documents with field"
+                        }
+                      ]
+                    },
+                    {
+                      "match": true,
+                      "value": 0.41487068,
+                      "description": "tf, computed as freq / (freq + k1 * (1 - b + b * dl / avgdl)) from:",
+                      "details": [
+                        {
+                          "match": true,
+                          "value": 1.0,
+                          "description": "freq, occurrences of term within document"
+                        },
+                        {
+                          "match": true,
+                          "value": 1.2,
+                          "description": "k1, term saturation parameter"
+                        },
+                        {
+                          "match": true,
+                          "value": 0.75,
+                          "description": "b, length normalization parameter"
+                        },
+                        {
+                          "match": true,
+                          "value": 3.0,
+                          "description": "dl, length of field"
+                        },
+                        {
+                          "match": true,
+                          "value": 2.4315789,
+                          "description": "avgdl, average length of field"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "match": true,
+              "value": 4.542777,
+              "description": "weight(description_stem_tesim:archive in 259) [SchemaSimilarity], result of:",
+              "details": [
+                {
+                  "match": true,
+                  "value": 4.542777,
+                  "description": "score(freq=2.0), computed as boost * idf * tf from:",
+                  "details": [
+                    {
+                      "match": true,
+                      "value": 2.5,
+                      "description": "boost"
+                    },
+                    {
+                      "match": true,
+                      "value": 3.465736,
+                      "description": "idf, computed as log(1 + (N - n + 0.5) / (n + 0.5)) from:",
+                      "details": [
+                        {
+                          "match": true,
+                          "value": 2,
+                          "description": "n, number of documents containing term"
+                        },
+                        {
+                          "match": true,
+                          "value": 79,
+                          "description": "N, total number of documents with field"
+                        }
+                      ]
+                    },
+                    {
+                      "match": true,
+                      "value": 0.52430737,
+                      "description": "tf, computed as freq / (freq + k1 * (1 - b + b * dl / avgdl)) from:",
+                      "details": [
+                        {
+                          "match": true,
+                          "value": 2.0,
+                          "description": "freq, occurrences of term within document"
+                        },
+                        {
+                          "match": true,
+                          "value": 1.2,
+                          "description": "k1, term saturation parameter"
+                        },
+                        {
+                          "match": true,
+                          "value": 0.75,
+                          "description": "b, length normalization parameter"
+                        },
+                        {
+                          "match": true,
+                          "value": 18.0,
+                          "description": "dl, length of field"
+                        },
+                        {
+                          "match": true,
+                          "value": 10.696202,
+                          "description": "avgdl, average length of field"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "match": true,
+          "value": 1.0,
+          "description": "if(exists(query(internal_resource_tesim:person,def=0.0)=0.0),const(0.9),const(1))"
+        }
+      ]
+    }
+  ]
+}

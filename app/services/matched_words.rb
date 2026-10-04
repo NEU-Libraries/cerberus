@@ -16,10 +16,13 @@ class MatchedWords < ApplicationService
   SOURCES = {
     'title_tsim'                 => %w[title_tsim],
     'title_stem_tesim'           => %w[title_tsim],
+    'title_kstem_tesim'          => %w[title_tsim],
     'title_plain_tsim'           => %w[title_tsim],
+    'title_split_tesim'          => %w[title_tsim],
     'title_variant_tesim'        => %w[title_variant_tesim],
     'description_tsim'           => %w[description_tsim],
     'description_stem_tesim'     => %w[description_tsim],
+    'description_kstem_tesim'    => %w[description_tsim],
     'descriptive_keywords_tesim' => KEYWORD_SOURCES,
     'subject_title_tesim'        => %w[subject_title_tesim],
     'contents_tesim'             => %w[contents_tesim],
@@ -115,10 +118,12 @@ class MatchedWords < ApplicationService
 
     # Solr's offsets count UTF-16 code units, Ruby's string indexes count
     # characters. They differ past any character outside the BMP, such as an
-    # emoji, so each offset is converted before it slices the text.
+    # emoji, so each offset is converted before it slices the text. The split
+    # title field repeats each split-off word as a zero-width token, which would
+    # render as an empty bold segment, so empty tokens are dropped.
     def matched_ranges(analysis, text)
       utf16 = text.encode('UTF-16LE')
-      final_tokens(analysis['index']).select { |token| token['match'] }.map do |token|
+      final_tokens(analysis['index']).select { |token| token['match'] && token['start'] < token['end'] }.map do |token|
         char_index(utf16, token['start'])...char_index(utf16, token['end'])
       end.uniq
     end
@@ -132,9 +137,7 @@ class MatchedWords < ApplicationService
     end
 
     # The stages alternate filter name and tokens; the last tokens are the ones searched.
-    def final_tokens(stages)
-      Array(Array(stages).grep(Array).last)
-    end
+    def final_tokens(stages) = Array(Array(stages).grep(Array).last)
 
     # POST, not GET: a long description would overflow Solr's request line.
     # Nil when Solr does not answer, which the line reports instead of failing.

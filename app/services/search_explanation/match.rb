@@ -14,10 +14,13 @@ class SearchExplanation
     LABELS = {
       'title_tsim'                 => 'title',
       'title_stem_tesim'           => 'title',
+      'title_kstem_tesim'          => 'title',
       'title_plain_tsim'           => 'title',
       'title_variant_tesim'        => 'title',
+      'title_split_tesim'          => 'title',
       'description_tsim'           => 'description',
       'description_stem_tesim'     => 'description',
+      'description_kstem_tesim'    => 'description',
       'descriptive_keywords_tesim' => 'keywords and subjects',
       'subject_title_tesim'        => 'subjects',
       'name_variant_teim'          => 'creator names',
@@ -29,27 +32,36 @@ class SearchExplanation
 
     # The fields that match something other than the text as written.
     FORMS = {
-      'title_stem_tesim'       => :stem_variation,
-      'description_stem_tesim' => :stem_variation,
-      'title_variant_tesim'    => :alternative_title,
-      'title_plain_tsim'       => :plain_text
+      'title_stem_tesim'        => :stem_variation,
+      'description_stem_tesim'  => :stem_variation,
+      'title_kstem_tesim'       => :word_form,
+      'description_kstem_tesim' => :word_form,
+      'title_variant_tesim'     => :alternative_title,
+      'title_plain_tsim'        => :plain_text,
+      'title_split_tesim'       => :split_words
     }.freeze
 
     # Each form's note in the table, and its legend entry.
     FORM_NOTES = {
-      stem_variation:    ['stem variation', 'Matched once words were cut to their stem, so a plural or another ' \
-                                            'ending matches too, such as “whale” for “whales”. ' \
-                                            'It counts for less than the word as written.'],
+      stem_variation:    ['stem variation', 'Matched once a plural was cut to its singular, so “whale” matches ' \
+                                            '“whales”. It counts for less than the word as written.'],
+      word_form:         ['word form', 'Matched another form of the same word, such as “archival” for ' \
+                                       '“archive” or “digitized” for “digitize”. ' \
+                                       'It counts for less than the word as written.'],
       alternative_title: ['alternative title', 'Matched an alternative, uniform, translated or abbreviated title, ' \
                                                'not the main one.'],
       plain_text:        ['without formatting', 'Matched the title with its subscript and superscript removed, ' \
-                                                'so “Bi2Sr2CaCu2O8” finds a title that sets its numbers as subscripts.']
+                                                'so “Bi2Sr2CaCu2O8” finds a title that sets its numbers ' \
+                                                'as subscripts.'],
+      split_words:       ['split into words', 'Matched a word inside a title written as one word, such as ' \
+                                              '“report” in “final_report_FINAL(1).docx”. ' \
+                                              'It counts for less than the title as written.']
     }.freeze
 
     def label = LABELS.fetch(field, field)
     def form = FORMS[field]
     def form_note = FORM_NOTES.dig(form, 0)
-    def stem_variation? = form == :stem_variation
+    def stemmed? = %i[stem_variation word_form].include?(form)
     def display_term = term.sub(/~\d+\z/, '').delete('"')
   end
 end

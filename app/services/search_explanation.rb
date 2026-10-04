@@ -143,7 +143,7 @@ class SearchExplanation
       matches = matches_in(node).sort_by { |match| -match.points }
       return if matches.empty?
 
-      term = (matches.find { |match| !match.stem_variation? } || matches.first).display_term
+      term = (matches.find { |match| !match.stemmed? } || matches.first).display_term
       Word.new(term: term, matches: matches, points: node['value'].to_f)
     end
 
