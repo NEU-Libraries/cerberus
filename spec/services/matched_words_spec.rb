@@ -38,6 +38,21 @@ RSpec.describe MatchedWords do
     expect(rendered(line)).to eq(['🌊 Coastal [survey]'])
   end
 
+  # The split field repeats each split-off word as a zero-width token, which
+  # must not become an empty bold segment.
+  it 'bolds a word inside a filename title, for a split-title match' do
+    line = lines({ 'title_tsim' => ['nr32w29201906internet.pdf'] }, %w[title_split_tesim], 'internet').sole
+
+    expect(rendered(line)).to eq(['nr32w29201906[internet].pdf'])
+    expect(line.excerpts.sole.segments.map(&:text)).to all(be_present)
+  end
+
+  it 'bolds a word between the separators of a filename title' do
+    line = lines({ 'title_tsim' => ['DRS-terms_2026-08-12.docx'] }, %w[title_split_tesim], 'terms').sole
+
+    expect(rendered(line)).to eq(['DRS-[terms]_2026-08-12.docx'])
+  end
+
   it 'drops the title markup before it is analysed' do
     line = lines({ 'title_tsim' => ['Bi<sub>2</sub> films'] }, %w[title_tsim], 'films').sole
 

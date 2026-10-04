@@ -17,6 +17,7 @@ class SearchExplanation
       'title_kstem_tesim'          => 'title',
       'title_plain_tsim'           => 'title',
       'title_variant_tesim'        => 'title',
+      'title_split_tesim'          => 'title',
       'description_tsim'           => 'description',
       'description_stem_tesim'     => 'description',
       'description_kstem_tesim'    => 'description',
@@ -36,7 +37,8 @@ class SearchExplanation
       'title_kstem_tesim'       => :word_form,
       'description_kstem_tesim' => :word_form,
       'title_variant_tesim'     => :alternative_title,
-      'title_plain_tsim'        => :plain_text
+      'title_plain_tsim'        => :plain_text,
+      'title_split_tesim'       => :split_words
     }.freeze
 
     # Each form's note in the table, and its legend entry.
@@ -49,7 +51,11 @@ class SearchExplanation
       alternative_title: ['alternative title', 'Matched an alternative, uniform, translated or abbreviated title, ' \
                                                'not the main one.'],
       plain_text:        ['without formatting', 'Matched the title with its subscript and superscript removed, ' \
-                                                'so “Bi2Sr2CaCu2O8” finds a title that sets its numbers as subscripts.']
+                                                'so “Bi2Sr2CaCu2O8” finds a title that sets its numbers ' \
+                                                'as subscripts.'],
+      split_words:       ['split into words', 'Matched a word inside a title written as one word, such as ' \
+                                              '“report” in “final_report_FINAL(1).docx”. ' \
+                                              'It counts for less than the title as written.']
     }.freeze
 
     def label = LABELS.fetch(field, field)

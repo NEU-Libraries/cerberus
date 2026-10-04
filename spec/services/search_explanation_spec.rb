@@ -122,6 +122,19 @@ RSpec.describe SearchExplanation do
     expect(explanation.forms).to eq(%i[stem_variation alternative_title plain_text])
   end
 
+  # A filename title joins its words, so only the split field finds one inside it.
+  it 'labels a match in the split title as the title, with its own note' do
+    tree = { 'value' => 1.0, 'description' => 'max plus 0.01 times others of:', 'details' => [
+      { 'value' => 1.0, 'description' => 'weight(title_split_tesim:internet in 3) [SchemaSimilarity], result of:' }
+    ] }
+    explanation = described_class.new(tree)
+    match = explanation.words.sole.matches.sole
+
+    expect([match.label, match.form_note]).to eq(['title', 'split into words'])
+    expect(explanation.summary).to start_with('This appeared because “internet” is in its title field.')
+    expect(explanation.forms).to eq(%i[split_words])
+  end
+
   # One best-field node per word, as edismax builds them.
   def word_node(term, fields)
     weights = fields.map do |field|
