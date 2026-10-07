@@ -2,7 +2,22 @@
 
 Cerberus checks accessibility in two layers. Template linters catch markup
 mistakes before a commit, and axe-core checks the rendered pages in the browser
-lane. The target is WCAG 2.2 at levels A and AA.
+lane.
+
+## The target
+
+**Cerberus must meet WCAG 2.0 at level AA.** That is the standard Northeastern's
+[Policy on Digital Accessibility](https://policies.northeastern.edu/policy122)
+names, and the policy asks for good-faith effort on existing systems. The target
+covers public, staff and admin pages alike.
+
+**Meet a WCAG 2.1 or 2.2 AA criterion when it costs no UX.** The site already
+passes every 2.1 and 2.2 AA rule that axe tests, so the audit keeps those rules.
+If one fails later and its fix would make the interface worse, skip that rule in
+the spec and record the reason under the known failures below.
+
+**Deposited content is outside the target.** Cerberus cannot repair the files
+that depositors upload, such as PDFs, images and media.
 
 Source files:
 

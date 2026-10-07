@@ -9,7 +9,9 @@ require 'axe-rspec'
 #
 # Each page runs as the least privileged user who can open it.
 module AxeAudit
-  # WCAG 2.2 A and AA. axe leaves the 2.2 rules out unless they are named.
+  # The target is WCAG 2.0 AA; the 2.1 and 2.2 rules stay because the site
+  # already meets them (docs/accessibility.md). axe leaves the 2.2 rules out
+  # unless they are named.
   TAGS = %i[wcag2a wcag2aa wcag21a wcag21aa wcag22aa].freeze
 
   # Known failures whose fix changes how the page looks, so each waits on a
