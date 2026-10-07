@@ -1,14 +1,20 @@
 # frozen_string_literal: true
 
-# Mints the two JP2s the gated-derivative model needs from one source: a capped
-# open display copy and a gated full-resolution copy. The `open-` / `gated-`
-# filename prefix is what the delegate gates on, and a plain hyphen (not an
-# `open/…` subpath) keeps the identifier slash-free, so signed-URL paths carry
-# no `%2F` that could desync from the delegate. See docs/downloads.md.
+# Mints the two pyramidal TIFFs the gated-derivative model needs from one
+# source: a capped open display copy and a gated full-resolution copy. The
+# `open-` / `gated-` filename prefix is what the delegate gates on, and a plain
+# hyphen (not an `open/…` subpath) keeps the identifier slash-free, so
+# signed-URL paths carry no `%2F` that could desync from the delegate. See
+# docs/downloads.md.
 class OriginalJp2 < ApplicationService
   # Capping the open copy is what keeps `full/max` on an `open-` identifier safe
   # by construction: the original's pixels are not in that file.
   OPEN_CAP = 500
+
+  # Every pyramid level must be tiled, or Cantaloupe's Java2dProcessor decodes a
+  # whole level to serve one deep-zoom region. docs/derivatives.md has the
+  # measurements behind JPEG at Q90.
+  TIFF_OPTIONS = { tile: true, pyramid: true, compression: :jpeg, Q: 90, tile_width: 256, tile_height: 256 }.freeze
 
   Result = Struct.new(:open_base, :gated_base, keyword_init: true)
 
@@ -17,10 +23,10 @@ class OriginalJp2 < ApplicationService
   end
 
   def call
-    # Normalise to 3-band sRGB before encoding, or a grayscale or CMYK source
-    # yields a JP2 whose header parses — info.json succeeds — but whose
-    # codestream Cantaloupe cannot decode, making every render 501.
+    # Normalise to three-band sRGB: JPEG compression takes neither CMYK nor an
+    # alpha channel reliably, so transparency flattens onto white.
     img = Vips::Image.new_from_file(@path, **load_options).colourspace(:srgb)
+    img = img.flatten(background: [255, 255, 255]) if img.has_alpha?
     Result.new(
       open_base:  mint(capped(img), 'open'),
       gated_base: mint(img,         'gated')
@@ -30,8 +36,8 @@ class OriginalJp2 < ApplicationService
   private
 
     def mint(img, prefix)
-      filename = "#{prefix}-#{SecureRandom.uuid}.jp2"
-      img.jp2ksave(File.join(Rails.application.config.x.cerberus.derivatives_root, filename))
+      filename = "#{prefix}-#{SecureRandom.uuid}.tif"
+      img.tiffsave(File.join(Rails.application.config.x.cerberus.derivatives_root, filename), **TIFF_OPTIONS)
       "#{Rails.application.config.iiif_host}/iiif/3/#{filename}"
     end
 
