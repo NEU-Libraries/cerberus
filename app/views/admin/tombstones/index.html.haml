@@ -37,16 +37,6 @@
           Search
 
   - if documents.any?
-    = form_with url: bulk_admin_tombstones_path, id: 'tombstone-bulk', class: 'well px-3 py-2 mx-3 mb-3 rounded-3 tombstone-bulk', data: { bulk_select_target: 'well' }, html: { hidden: true } do
-      %span.tombstone-bulk__count{role: 'status', data: { bulk_select_target: 'count' }}
-      .d-inline-flex.gap-2
-        = button_tag type: 'submit', name: 'bulk_action', value: 'restore', class: 'btn btn-tonal-primary btn-sm', data: { bulk_select_target: 'confirm', confirm_template: 'Restore {items}? Each will be discoverable again once its tombstoned parent, if any, is restored. The result arrives in your inbox.', turbo_confirm_title: 'Confirm bulk restore', turbo_confirm_button: 'Restore', turbo_confirm_variant: 'primary' } do
-          %i.fa-solid.fa-rotate-left.me-1{'aria-hidden' => 'true'}
-          Bulk restore
-        - if current_user&.admin?
-          = button_tag type: 'submit', name: 'bulk_action', value: 'delete', class: 'btn btn-tonal-danger btn-sm', data: { bulk_select_target: 'confirm', confirm_template: 'Permanently delete {items}? Nothing reverses this: each item and every preserved copy of its files is removed. Members are deleted before their containers. The result arrives in your inbox.', turbo_confirm_title: 'Confirm bulk permanent deletion', turbo_confirm_button: 'Delete permanently' } do
-            %i.fa-solid.fa-trash-can.me-1{'aria-hidden' => 'true'}
-            Bulk delete
     .table-responsive
       %table.table.table-borderless.admin-registry-table
         %thead
@@ -78,6 +68,17 @@
                     = button_to admin_tombstone_path(doc.to_param), method: :delete, params: { type: doc.klass_type }, class: 'admin-registry-table__edit admin-registry-table__edit--purge', form: { class: 'd-inline', data: { turbo_confirm: tombstone_purge_confirm(doc), turbo_confirm_title: 'Confirm permanent deletion', turbo_confirm_button: 'Delete permanently' } } do
                       %i.fa-solid.fa-trash-can{'aria-hidden' => 'true'}
                       Delete permanently
+
+    = form_with url: bulk_admin_tombstones_path, id: 'tombstone-bulk', class: 'well p-3 m-3 rounded-3 tombstone-bulk', data: { bulk_select_target: 'well' }, html: { hidden: true } do
+      .d-inline-flex.gap-2
+        = button_tag type: 'submit', name: 'bulk_action', value: 'restore', class: 'btn btn-tonal-primary', data: { bulk_select_target: 'confirm', confirm_template: 'Restore {items}? Each will be discoverable again once its tombstoned parent, if any, is restored. The result arrives in your inbox.', turbo_confirm_title: 'Confirm bulk restore', turbo_confirm_button: 'Restore', turbo_confirm_variant: 'primary' } do
+          %i.fa-solid.fa-rotate-left.me-1{'aria-hidden' => 'true'}
+          Bulk restore
+        - if current_user&.admin?
+          = button_tag type: 'submit', name: 'bulk_action', value: 'delete', class: 'btn btn-tonal-danger', data: { bulk_select_target: 'confirm', confirm_template: 'Permanently delete {items}? Nothing reverses this: each item and every preserved copy of its files is removed. Members are deleted before their containers. The result arrives in your inbox.', turbo_confirm_title: 'Confirm bulk permanent deletion', turbo_confirm_button: 'Delete permanently' } do
+            %i.fa-solid.fa-trash-can.me-1{'aria-hidden' => 'true'}
+            Bulk delete
+      %span.tombstone-bulk__count{role: 'status', data: { bulk_select_target: 'count' }}
 
     - if @response.respond_to?(:total_pages) && @response.total_pages > 1
       .px-3.pt-2

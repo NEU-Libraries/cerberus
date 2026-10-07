@@ -457,12 +457,12 @@
   padding-right: 0;
 }
 
-// Bulk actions for the checked rows: the count, then the buttons.
+// Bulk actions for the checked rows, laid out as a form footer: the buttons
+// first, then how many rows they act on.
 .tombstone-bulk {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
   gap: 0.75rem;
 
   &__count {
