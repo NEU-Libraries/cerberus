@@ -233,6 +233,13 @@ a:not(.btn, .dropdown-item, .navbar-brand, .nav-link) {
   height: 952px;
 }
 
+// Ace's eclipse theme draws line numbers at 2.97:1 on its gutter. Ace injects
+// the theme's CSS at runtime, after this stylesheet, so the extra class is what
+// lets this win. Covers the XML editor and the load preview's viewer.
+.ace_editor.ace-eclipse .ace_gutter {
+  color: #666;
+}
+
 .btn-close {
   color: transparent !important;
   @extend .float-end;
