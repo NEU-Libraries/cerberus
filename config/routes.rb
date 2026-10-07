@@ -302,9 +302,11 @@ Rails.application.routes.draw do
     # operator-only Admin namespace). :id is the resource NOID; the `type` body
     # param selects the right Admin class. The two verbs are gated differently
     # in the controller, matching Atlas: restore reaches the devolved-admin
-    # tier, destroy is :admin only.
+    # tier, destroy is :admin only. `bulk` queues either verb for the rows
+    # checked on one page, under the same split.
     resources :tombstones, only: %i[index destroy] do
       member { post :restore }
+      collection { post :bulk }
     end
 
     # Impersonation — a hub action surface (GET) hosting the start form, then
