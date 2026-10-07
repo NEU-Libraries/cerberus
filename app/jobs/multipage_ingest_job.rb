@@ -95,7 +95,7 @@ class MultipageIngestJob < ApplicationJob
     def persist_page_service!(ingest, staged, verify:)
       return if verify && page_service_present?(ingest)
 
-      result = OriginalJp2.call(path: staged)
+      result = IiifImageCreator.call(path: staged)
       AtlasRb::FileSet.set_iiif_service(ingest.file_set_pid, result.gated_base)
     rescue Vips::Error => e
       Rails.logger.warn(

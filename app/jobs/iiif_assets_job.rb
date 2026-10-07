@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Seeds a Work's IIIF assets from one staged source: an image, or a PDF whose
-# first page OriginalJp2 rasterizes.
+# first page IiifImageCreator rasterizes.
 #
 # Thumbnails come from the OPEN display-capped TIFF and are universal;
 # service_file and any S/M/L renditions come from the GATED full-resolution one.
@@ -11,7 +11,7 @@ class IiifAssetsJob < ApplicationJob
   queue_as :default
 
   # Broken or encrypted sources (poppler can't open every PDF we're handed)
-  # surface as Vips::Error from OriginalJp2. Retrying can't fix the bytes, and
+  # surface as Vips::Error from IiifImageCreator. Retrying can't fix the bytes, and
   # enrichment must never fail a deposit — skip the assets and move on
   # (v1 parity: rescue, notify, continue).
   discard_on Vips::Error do |job, exception|
@@ -25,7 +25,7 @@ class IiifAssetsJob < ApplicationJob
     return if !refresh && AtlasRb::Work.find(work_id).thumbnail.present?
     return unless File.exist?(source_path)
 
-    result = OriginalJp2.call(path: source_path)
+    result = IiifImageCreator.call(path: source_path)
     # Serial, not parallel: these all PATCH Delegates that attach to the same
     # FileSet, and parallel execution races Atlas's optimistic-lock check on
     # the FileSet (StaleObjectError → 500 → Delegates not persisted).

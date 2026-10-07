@@ -25,7 +25,7 @@ too, to re-derive a Work's assets.
 | Staged type | Enrichment |
 |---|---|
 | `image/*` | `IiifAssetsJob` — IIIF TIFF and thumbnail Delegates |
-| `application/pdf` | `IiifAssetsJob` — `OriginalJp2` rasterizes page 1 via vips and poppler |
+| `application/pdf` | `IiifAssetsJob` — `IiifImageCreator` rasterizes page 1 via vips and poppler |
 | Word, PowerPoint | `PdfRenditionJob` — LibreOffice writes a PDF rendition Blob, and thumbnails come from that rendition's first page |
 | `video/*`, `audio/*` | `MediaRenditionJob` — an MP4 remux when the container needs one. No poster frame: see `docs/derivatives.md` |
 | everything | `ContentCreationJob` — the primary Blob, unless `include_primary: false`. Enrichment never gates or blocks it |
@@ -146,7 +146,7 @@ page filename.
 
 ### Per-page deep zoom
 
-Every page gets its own image service, not just page 1. `OriginalJp2` writes the
+Every page gets its own image service, not just page 1. `IiifImageCreator` writes the
 page's TIFFs into Cantaloupe's volume, and `FileSet.set_iiif_service` PATCHes the
 gated base onto that page's FileSet as its `service_file` Delegate. The IIIF
 manifest assembles each Canvas's image service from it. An unreadable page logs

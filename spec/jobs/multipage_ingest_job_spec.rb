@@ -27,9 +27,9 @@ RSpec.describe MultipageIngestJob, type: :job do
     allow(AtlasRb::FileSet).to receive(:update)
     allow(AtlasRb::FileSet).to receive(:set_iiif_service)
     allow(AtlasRb::Work).to receive(:file_sets).and_return([])
-    allow(OriginalJp2).to receive(:call)
-      .and_return(OriginalJp2::Result.new(open_base:  'https://iiif.test/iiif/3/open.tif',
-                                          gated_base: 'https://iiif.test/iiif/3/123.tif'))
+    allow(IiifImageCreator).to receive(:call)
+      .and_return(IiifImageCreator::Result.new(open_base:  'https://iiif.test/iiif/3/open.tif',
+                                               gated_base: 'https://iiif.test/iiif/3/123.tif'))
     allow(IiifAssetsJob).to receive(:perform_later)
   end
 
@@ -61,13 +61,13 @@ RSpec.describe MultipageIngestJob, type: :job do
     it 'mints the page TIFF and persists its IIIF service pointer' do
       described_class.new.perform(ingest.id)
 
-      expect(OriginalJp2).to have_received(:call).with(path: staged_path)
+      expect(IiifImageCreator).to have_received(:call).with(path: staged_path)
       expect(AtlasRb::FileSet).to have_received(:set_iiif_service)
         .with('fs-2', 'https://iiif.test/iiif/3/123.tif')
     end
 
     it 'completes the page even when the bytes are unreadable for deep zoom' do
-      allow(OriginalJp2).to receive(:call).and_raise(Vips::Error.new('bad bytes'))
+      allow(IiifImageCreator).to receive(:call).and_raise(Vips::Error.new('bad bytes'))
       described_class.new.perform(ingest.id)
 
       expect(AtlasRb::FileSet).not_to have_received(:set_iiif_service)
@@ -128,7 +128,7 @@ RSpec.describe MultipageIngestJob, type: :job do
 
       described_class.new.perform(ingest.id)
 
-      expect(OriginalJp2).not_to have_received(:call)
+      expect(IiifImageCreator).not_to have_received(:call)
       expect(AtlasRb::FileSet).not_to have_received(:set_iiif_service)
     end
 

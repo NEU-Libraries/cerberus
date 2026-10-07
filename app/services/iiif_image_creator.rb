@@ -6,7 +6,7 @@
 # hyphen (not an `open/…` subpath) keeps the identifier slash-free, so
 # signed-URL paths carry no `%2F` that could desync from the delegate. See
 # docs/downloads.md.
-class OriginalJp2 < ApplicationService
+class IiifImageCreator < ApplicationService
   # Capping the open copy is what keeps `full/max` on an `open-` identifier safe
   # by construction: the original's pixels are not in that file.
   OPEN_CAP = 500
