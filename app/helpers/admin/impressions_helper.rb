@@ -15,7 +15,8 @@ module Admin
       link_to label,
               admin_impressions_path(request.query_parameters.merge(segment:)),
               class: "usage-toggle__option #{'is-active' if active}".strip,
-              'aria-pressed' => active.to_s
+              # A link cannot be pressed; aria-current names the segment shown.
+              'aria-current' => ('true' if active)
     end
 
     def usage_export_params(report)

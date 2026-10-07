@@ -24,6 +24,8 @@ export default class extends Controller {
       showPrintMargin: false,
     });
     this.editor.clearSelection();
+    // Ace's hidden textarea is what a screen reader lands on, so it carries the name.
+    this.editor.textInput.getElement().setAttribute('aria-label', 'MODS XML preview');
     // Read-only still draws a blinking cursor, which reads as "you can type here".
     this.editor.renderer.$cursorLayer.element.style.display = 'none';
   }
