@@ -14,10 +14,10 @@ module AxeAudit
   # unless they are named.
   TAGS = %i[wcag2a wcag2aa wcag21a wcag21aa wcag22aa].freeze
 
-  # Known failures whose fix changes how the page looks, so each waits on a
-  # design decision. docs/accessibility.md lists the elements behind each one;
-  # take a rule out of here when its decision lands.
-  SKIPPED = %i[color-contrast link-in-text-block].freeze
+  # Elements whose contrast fix still waits on a design decision;
+  # docs/accessibility.md lists them. Excluding an element hides it from every
+  # rule, so this holds only what is pending: remove an entry when its fix lands.
+  PENDING = ['.btn-warning', '.thumb-type-pill'].freeze
 
   STAFF_NUID = '000000002'
 end
@@ -31,7 +31,7 @@ RSpec.describe 'Accessibility', :browser, type: :system do
   end
 
   def expect_axe_clean
-    expect(page).to be_axe_clean.according_to(*AxeAudit::TAGS).skipping(*AxeAudit::SKIPPED)
+    expect(page).to be_axe_clean.according_to(*AxeAudit::TAGS).excluding(*AxeAudit::PENDING)
   end
 
   def self.audits(user, pages)
