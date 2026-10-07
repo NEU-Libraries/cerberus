@@ -84,5 +84,9 @@ RSpec.describe 'colour contrast' do
     it '$success clears 4.5:1 against white' do
       expect(contrast(token('success'), WHITE)).to be >= 4.5
     end
+
+    it '$danger clears 4.5:1 against white' do
+      expect(contrast(token('danger'), WHITE)).to be >= 4.5
+    end
   end
 end
