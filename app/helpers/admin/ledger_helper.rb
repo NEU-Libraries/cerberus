@@ -24,6 +24,7 @@ module Admin
       'set_sentinel_apply'       => { label: 'Derivative access', icon: 'fa-images' },
       'showcase_promotion'       => { label: 'Showcase',   icon: 'fa-star' },
       'tombstone_cascade'        => { label: 'Deleted',    icon: 'fa-trash-can' },
+      'tombstone_bulk'           => { label: 'Tombstones', icon: 'fa-trash-can-arrow-up' },
       'daily_digest'             => { label: 'Digest',     icon: 'fa-book' }
     }.freeze
 
