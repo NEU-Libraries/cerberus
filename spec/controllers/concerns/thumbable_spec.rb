@@ -35,7 +35,7 @@ describe Thumbable do
       expect(obj.apply_thumbnail('w-1')).to be_nil
     end
 
-    it 'mints the open JP2 from the upload and persists it via set_thumbnails' do
+    it 'mints the open TIFF from the upload and persists it via set_thumbnails' do
       obj = thumbable_class.new({ thumbnail: file })
       allow(OriginalJp2).to receive(:call).with(path: '/tmp/upload.png')
                                           .and_return(OriginalJp2::Result.new(open_base: 'BASE', gated_base: 'G'))

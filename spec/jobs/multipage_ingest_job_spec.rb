@@ -58,7 +58,7 @@ RSpec.describe MultipageIngestJob, type: :job do
       expect(AtlasRb::Work).not_to have_received(:file_sets)
     end
 
-    it 'mints the page JP2 and persists its IIIF service pointer' do
+    it 'mints the page TIFF and persists its IIIF service pointer' do
       described_class.new.perform(ingest.id)
 
       expect(OriginalJp2).to have_received(:call).with(path: staged_path)
@@ -119,7 +119,7 @@ RSpec.describe MultipageIngestJob, type: :job do
       expect(ingest.reload).to be_completed
     end
 
-    it 'skips the JP2 re-mint on resume when the page already carries a service pointer' do
+    it 'skips the TIFF re-mint on resume when the page already carries a service pointer' do
       ingest.update!(file_set_pid: 'fs-2', blob_attached_at: 1.minute.ago)
       allow(AtlasRb::Work).to receive(:file_sets).with('w-1').and_return(
         [{ 'noid' => 'fs-2', 'position' => 2,

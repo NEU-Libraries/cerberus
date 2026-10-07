@@ -78,7 +78,7 @@ RSpec.describe IiifAssetsJob, type: :job do
     expect(AtlasRb::FileSet).to have_received(:set_iiif_service).with('fs-1', gated_base)
   end
 
-  # A replace mints a new gated JP2, so renditions left pointing at the old base
+  # A replace mints a new gated TIFF, so renditions left pointing at the old base
   # go on serving the superseded image — while the thumbnail, the deep zoom and
   # the displayed image all move. The caller has no widths to pass: the sizes
   # were chosen at deposit and only the stored URIs still record them.

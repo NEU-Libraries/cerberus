@@ -39,8 +39,8 @@ RSpec.describe 'reset:clean' do
     expect(Dir.children(uploads)).to be_empty
   end
 
-  it 'empties the JP2 derivatives, which nothing references after a reset' do
-    File.write(File.join(images, 'open-1234.jp2'), 'orphan')
+  it 'empties the IIIF derivatives, which nothing references after a reset' do
+    File.write(File.join(images, 'open-1234.tif'), 'orphan')
 
     Rake::Task['reset:clean'].invoke
 

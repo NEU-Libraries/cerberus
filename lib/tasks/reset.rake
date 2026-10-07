@@ -541,7 +541,7 @@ namespace :reset do
 
   # Atlas mints NOIDs afresh after a clean, so an upload staged under an old
   # NOID is read as the upload of whichever new Work reuses that NOID. The
-  # JP2s are UUID-named and cannot collide, but nothing references them once
+  # IIIF images are UUID-named and cannot collide, but nothing references them once
   # Atlas is wiped. The contents go, not the directory, which can be a mount.
   def clear_contents(root)
     root = root.to_s
