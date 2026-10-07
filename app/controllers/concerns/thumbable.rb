@@ -5,7 +5,7 @@ module Thumbable
 
   # Persist a user-uploaded poster on any resource (Work / Collection /
   # Community) from the edit form's Thumbnail file input. The upload is a local
-  # image, so mint the open (display-capped) JP2 from it via the same OriginalJp2
+  # image, so mint the open (display-capped) TIFF from it via the same OriginalJp2
   # chain the deposit pipeline uses, turn that IIIF base into the thumbnail /
   # thumbnail_2x / preview URL trio, and write them through the dedicated
   # /thumbnails endpoint. Thumbnails are machine-set Delegate URIs with their own

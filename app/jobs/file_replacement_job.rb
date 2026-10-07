@@ -12,7 +12,7 @@
 #
 # After the primary bytes land, the type-routed *derivative* enrichment is
 # re-dispatched (include_primary: false — IngestDispatch must NOT create a second
-# primary Blob) so thumbnails / JP2 / PDF renditions track the new content rather
+# primary Blob) so thumbnails / IIIF TIFFs / PDF renditions track the new content rather
 # than the superseded bytes. A fresh idempotency_key per replace means the
 # rendition's derived key differs from the prior one, so Atlas regenerates rather
 # than dedup-skipping.

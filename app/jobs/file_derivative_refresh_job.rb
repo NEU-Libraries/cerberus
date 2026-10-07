@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Re-derives a Blob's derivatives (thumbnails / JP2 / PDF rendition) from its
+# Re-derives a Blob's derivatives (thumbnails / IIIF TIFFs / PDF rendition) from its
 # *current* bytes. Used after a rollback: Blob.rollback reinstates a prior
 # version server-side without sending bytes to Cerberus, but derivatives are
 # computed from pixels, so they must be regenerated from a local copy of the

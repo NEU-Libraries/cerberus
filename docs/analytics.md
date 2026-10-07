@@ -369,7 +369,7 @@ file, withdrawn files, MODS and METS versions, and OCFL's bookkeeping. The
 measure is storage cost, so a Work replaced a hundred times outweighs one that
 never changed. `subtree_fq` keeps tombstoned documents, so withdrawn files
 count, as they still take disk. Bytes outside OCFL are not counted: Cerberus's
-JP2s, its staged uploads and the IIIF cache.
+IIIF TIFFs, its staged uploads and the IIIF cache.
 
 #### Checking the figure
 

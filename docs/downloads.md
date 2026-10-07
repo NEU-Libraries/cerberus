@@ -139,7 +139,7 @@ drifting apart.
   straight into the sink, so memory stays flat regardless of set or file size. A
   derivative rides `Faraday`'s `on_data` for the same reason — the whole JPEG is
   never held.
-- **STORE, not deflate.** DRS payloads — JP2, PDF, images, curated zips — are
+- **STORE, not deflate.** DRS payloads — TIFF, PDF, images, curated zips — are
   already compressed, so deflating burns CPU for about no gain.
 - **Record a failure, do not raise it.** Once the response headers are out the
   archive cannot be un-sent, so a mid-stream fetch failure becomes an
@@ -351,7 +351,7 @@ identifier, and a token embedded there rides along on every one. Being carried
 in the URL, it needs neither a cookie nor credentialed CORS, so it works with
 IIIF's mandated cross-origin `ACAO:*`.
 
-`sign_identifier` rewrites the identifier to `<exp>~<sig>~gated-<uuid>.jp2`. The
+`sign_identifier` rewrites the identifier to `<exp>~<sig>~gated-<uuid>.tif`. The
 `~` avoids Cantaloupe's `;` meta-delimiter and keeps the identifier slash-free.
 
 ### Why the identifier's expiry is quantized
@@ -369,21 +369,20 @@ has a full `ttl` left, and tiles never 403 mid-view near a boundary.
 The delegate reads whatever `exp` it is handed, so its HMAC message,
 `<identifier>|<exp>`, is unchanged by the quantization.
 
-## Minting the JP2s a download serves
+## Minting the images a download serves
 
-`OriginalJp2` mints two JP2s from one source. The first is a capped display copy
+`OriginalJp2` mints two pyramidal TIFFs from one source. The first is a capped display copy
 for thumbnails and preview, served openly. The second is a full-resolution copy
 for small/medium/large downloads and deep zoom, served only behind the
 delegate. It returns both IIIF bases as `open_base` and `gated_base`.
 `IiifAssetsJob` calls it — see `docs/derivatives.md`.
 
-**Every source is converted to 3-band sRGB before encoding.** A grayscale or
-CMYK source otherwise yields a JP2 whose header parses, so `info.json`
-succeeds. Cantaloupe cannot decode its codestream, though, so every render
-answers 501.
+**Every source is converted to three-band sRGB before encoding.** The TIFFs
+are JPEG-compressed, which wants three-band RGB. A source with transparency
+is flattened onto white, because JPEG has no alpha channel.
 
 Both files go to the single derivatives root Cantaloupe reads
-(`config.x.cerberus.derivatives_root`), named `<prefix>-<uuid>.jp2`. They are
+(`config.x.cerberus.derivatives_root`), named `<prefix>-<uuid>.tif`. They are
 told apart by that `open-` or `gated-` prefix. That prefix is the signal the
 delegate gates on: serve `open-*` freely, require a credential for `gated-*`. It
 rides through into the IIIF identifier.
@@ -409,7 +408,7 @@ matches `DerivativeCreator`'s posture.
 
 PDFs rasterize through vips' poppler loader, first page by default. At 150 dpi
 a letter page comes out about 1275px wide — crisp for the 500px preview tile
-without an oversized JP2. `load_options` passes `dpi` only when Marcel
+without an oversized TIFF. `load_options` passes `dpi` only when Marcel
 identifies the source as a PDF, because the image loaders reject it.
 
 ## Choosing rendition sizes
@@ -440,7 +439,7 @@ returns `:unknown` for a size token this class does not emit, and
 `existing_widths` logs a warning and skips that tier. Defaulting would rebuild
 Small at full resolution, which is a permission leak.
 
-Replacing a Work's bytes mints a new gated JP2. So every rendition has to be
+Replacing a Work's bytes mints a new gated TIFF. So every rendition has to be
 rebuilt against the new base, at the sizes the Work already carries. Nothing else
 records those sizes: the depositor chose them once, on the metadata page, and
 the URIs are the only place that choice survives.
@@ -458,10 +457,10 @@ token, not on the human display label.
 depositor chose on the metadata page. It runs *after* the deposit's IIIF assets
 already exist.
 
-The chosen sizes render from the Work's **gated** full-resolution JP2. Its base
+The chosen sizes render from the Work's **gated** full-resolution TIFF. Its base
 is the URI of the `service_file` Delegate that `IiifAssetsJob` set at ingest,
 found by role in `Work.file_sets`. The thumbnail Delegate cannot stand in: it
-points at the open, capped JP2. The job hands the base to
+points at the open, capped TIFF. The job hands the base to
 `DerivativeCreationJob`, and does nothing when the depositor chose no sizes.
 
 ### The race with `IiifAssetsJob`

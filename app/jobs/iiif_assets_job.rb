@@ -3,7 +3,7 @@
 # Seeds a Work's IIIF assets from one staged source: an image, or a PDF whose
 # first page OriginalJp2 rasterizes.
 #
-# Thumbnails come from the OPEN display-capped JP2 and are universal;
+# Thumbnails come from the OPEN display-capped TIFF and are universal;
 # service_file and any S/M/L renditions come from the GATED full-resolution one.
 # Which families a call produces depends on `derivative_widths:` —
 # see docs/derivatives.md.

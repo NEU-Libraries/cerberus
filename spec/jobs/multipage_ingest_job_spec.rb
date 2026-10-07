@@ -28,8 +28,8 @@ RSpec.describe MultipageIngestJob, type: :job do
     allow(AtlasRb::FileSet).to receive(:set_iiif_service)
     allow(AtlasRb::Work).to receive(:file_sets).and_return([])
     allow(OriginalJp2).to receive(:call)
-      .and_return(OriginalJp2::Result.new(open_base:  'https://iiif.test/iiif/3/open.jp2',
-                                          gated_base: 'https://iiif.test/iiif/3/123.jp2'))
+      .and_return(OriginalJp2::Result.new(open_base:  'https://iiif.test/iiif/3/open.tif',
+                                          gated_base: 'https://iiif.test/iiif/3/123.tif'))
     allow(IiifAssetsJob).to receive(:perform_later)
   end
 
@@ -63,7 +63,7 @@ RSpec.describe MultipageIngestJob, type: :job do
 
       expect(OriginalJp2).to have_received(:call).with(path: staged_path)
       expect(AtlasRb::FileSet).to have_received(:set_iiif_service)
-        .with('fs-2', 'https://iiif.test/iiif/3/123.jp2')
+        .with('fs-2', 'https://iiif.test/iiif/3/123.tif')
     end
 
     it 'completes the page even when the bytes are unreadable for deep zoom' do
@@ -123,7 +123,7 @@ RSpec.describe MultipageIngestJob, type: :job do
       ingest.update!(file_set_pid: 'fs-2', blob_attached_at: 1.minute.ago)
       allow(AtlasRb::Work).to receive(:file_sets).with('w-1').and_return(
         [{ 'noid' => 'fs-2', 'position' => 2,
-           'assets' => [{ 'noid' => 'b-1' }, { 'uri' => 'https://iiif.test/iiif/3/old.jp2' }] }]
+           'assets' => [{ 'noid' => 'b-1' }, { 'uri' => 'https://iiif.test/iiif/3/old.tif' }] }]
       )
 
       described_class.new.perform(ingest.id)
@@ -141,7 +141,7 @@ RSpec.describe MultipageIngestJob, type: :job do
       described_class.new.perform(ingest.id)
 
       expect(AtlasRb::FileSet).to have_received(:set_iiif_service)
-        .with('fs-2', 'https://iiif.test/iiif/3/123.jp2')
+        .with('fs-2', 'https://iiif.test/iiif/3/123.tif')
     end
 
     context 'when resumed past create with no attach stamp' do

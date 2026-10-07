@@ -1203,7 +1203,7 @@ describe WorksController do
 
     # The prior thumbnail path (ThumbnailCreator.call(path:) vs base:) was masked
     # by a stub and never ran; drive the real update flow so a poster upload
-    # genuinely reaches set_thumbnails. Only OriginalJp2's vips/JP2 minting is stubbed.
+    # genuinely reaches set_thumbnails. Only OriginalJp2's vips/TIFF minting is stubbed.
     it 'mints the uploaded poster and persists it via set_thumbnails' do
       allow(OriginalJp2).to receive(:call).and_return(OriginalJp2::Result.new(open_base: 'BASE', gated_base: 'G'))
       urls = { thumbnail:    'http://example.com/t.jpg',

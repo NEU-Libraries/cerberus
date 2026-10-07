@@ -2,8 +2,8 @@
 
 # Generates the opt-in S/M/L download renditions a depositor chose on the
 # metadata page, AFTER the deposit's IIIF assets already exist. They render from
-# the Work's GATED JP2, anchored on the `service_file` Delegate: the thumbnail
-# Delegate is NOT usable, since it points at the open capped JP2. The form can
+# the Work's GATED TIFF, anchored on the `service_file` Delegate: the thumbnail
+# Delegate is NOT usable, since it points at the open capped TIFF. The form can
 # be submitted before that service exists, hence ServiceNotReady.
 # See docs/downloads.md.
 class DepositDerivativesJob < ApplicationJob
