@@ -104,54 +104,33 @@ bin/spec --tag browser spec/system/accessibility_spec.rb
 pages it visits. Pages with no fixture yet include a person, a Set, a load
 report and an inbox message.
 
+**Keyboard operation needs its own browser spec.** axe does not test it.
+`spec/system/breadcrumb_add_spec.rb` is the pattern: it checks that a control
+takes focus and that Enter operates it.
+
+## What the audit does not count
+
+Two kinds of grey are exempt from WCAG 1.4.3, so they keep `$gray-500`:
+
+- **Decorative icons.** Each one carries `aria-hidden` and sits beside text that
+  says the same thing.
+- **Disabled controls,** such as a pagination arrow with nowhere to go.
+
+Contrast for icons and control edges is WCAG 2.1's 1.4.11, which is outside the
+target. Text in grey uses `$text-subtle`; `design.md` has the palette rules.
+
 ## Known failures awaiting a design decision
 
-`AxeAudit::SKIPPED` in the spec turns off two axe rules. Fixing either rule
-changes how pages look, so each fix waits on a design decision. When a decision
-lands, fix every element under that rule and remove the rule from the list. The
-spec then guards it.
+`AxeAudit::PENDING` in the spec excludes two components from the audit. Each
+fails 1.4.3, and each fix proposed so far was rejected because it changed the
+look too much. When a decision lands, fix the component and remove its entry.
+The spec then guards it.
 
-### `color-contrast`
-
-WCAG 1.4.3 asks for 4.5:1 for normal text and 3:1 for large text.
-
-| Element | Ratio | Where |
+| Component | Now | Rejected so far |
 |---|---|---|
-| `.btn-warning` (Cancel, View as): white on `$orange` | 2.57 | every form footer, impersonation |
-| `.btn-danger` (Act as, Request deletion): white on `$danger` | 3.82 | impersonation, the Delete tab |
-| `.btn-success` (Save, Send, Atlas Login): white on `$success` | 4.02 | every form footer, sign-in |
-| `.admin-action-card__cta`: `$success` on white | 4.02 | `_admin_dashboard.scss:125` |
-| `.thumb-type-pill`: white on light grey | 1.91 | `_blacklight_discovery.scss:52` |
-| `$gray-500` small labels | 1.94 to 2.07 | `_admin_registry.scss:267`, `_deposit_form.scss:32`, `_admin_reparent.scss:26`, `_admin_impressions.scss:57`, `_audit_history.scss:78`, `_derivative_access.scss:16`, `_derivative_access.scss:70` |
-| `$gray-600` hint text on a tinted fill | 4.03 to 4.44 | `_admin_dashboard.scss:53`, `_deposit_form.scss:244`, `_deposit_form.scss:262`, `_blacklight_discovery.scss:223`, `_audit_history.scss:217` |
-| The "Created" audit chip: its tone on its own tint | 3.65 | `_audit_history.scss:217` |
-| `.text-black-50` type label beside a page title | 3.85 | the Collection and Community headers; the Set header uses the same class |
-| Ace's line numbers (the `eclipse` theme) | 2.97 | the XML editor |
+| `.btn-warning` (Cancel, View as): white on `#fd7e14` | 2.57:1 | dark text; red-orange `#cc4b00`; a tonal orange; slate tonal-secondary |
+| `.thumb-type-pill`: white on 70% light grey | 1.91:1 | an 85% `$gray-700` backing |
 
-`$success`, `$warning` and `$danger` are Bootstrap theme colours. Changing them
-changes every button and alert in that colour, not only the ones listed.
-
-### `link-in-text-block`
-
-WCAG 1.4.1 asks that a link inside a run of text differ from that text by more
-than colour. The link needs 3:1 against the text, or an underline.
-
-| Element | Ratio | Where |
-|---|---|---|
-| A link in an empty-state hint (`$gray-700` text) | 1.59 | zero results, the people index |
-| The "XML editor" link in the Advanced tab's explainer | 1.35 | the Work edit page |
-
-The site-wide link colour already clears 3:1 against body text. These links fail
-because the text around them is a lighter grey than body text. `design.md`
-explains why the four link and background tokens are coupled.
-
-### Keyboard access
-
-axe does not test keyboard operation, so this one sits outside the spec.
-
-| Element | Problem | Where |
-|---|---|---|
-| The breadcrumb "Add" menu toggle | an `<a>` with no `href` cannot take focus, so a keyboard user cannot open the menu | `app/views/shared/_breadcrumbs.html.haml` |
-
-A `<button>` fixes it. Restyling a button to match the current link changes how
-the toggle looks and how it shows focus.
+No orange as light as `#fd7e14` reaches 4.5:1 under white text at any hue. A
+Cancel that keeps white text therefore needs a deeper colour or a different
+treatment.
