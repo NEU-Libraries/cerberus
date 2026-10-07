@@ -3,7 +3,8 @@
 require 'rails_helper'
 
 # The Rights / MODS history diff pages, reached from the audit-log "View"
-# button. Admin-gated (same audience as the History tab). atlas_rb is stubbed
+# button. Gated by :read, :audit_event, the History tab's own gate, which
+# admins and delegated admins hold. atlas_rb is stubbed
 # so these exercise the Cerberus controller/view wiring, not Atlas.
 RSpec.describe 'Histories', type: :request do
   include Devise::Test::IntegrationHelpers
@@ -16,6 +17,13 @@ RSpec.describe 'Histories', type: :request do
     User.new(email: 'staff@example.com', password: 'password',
              nuid: '000000002', name: 'Doe, Jane', role: 'privileged',
              groups: ['northeastern:drs:repository:staff'])
+  end
+
+  # :privileged plus the admin group: the devolved-admin tier.
+  let(:delegate_user) do
+    User.new(email: 'delegate@example.com', password: 'password',
+             nuid: '000000002', name: 'Doe, Jane', role: 'privileged',
+             groups: [Permissions::STAFF_EDIT_GROUP, Permissions::ADMIN_GROUP])
   end
 
   let(:resource_id) { 'w-789' }
@@ -44,6 +52,15 @@ RSpec.describe 'Histories', type: :request do
       sign_in staff_user
       get rights_history_path(resource_id)
       expect(response).to have_http_status(:forbidden)
+    end
+
+    # Atlas grants the tier :read_history and still checks read on the
+    # resource, so a refusal there arrives through the resource read above.
+    it 'admits a delegated admin' do
+      sign_in delegate_user
+      allow(AtlasRb::Resource).to receive(:history).and_return(history_mash([]))
+      get rights_history_path(resource_id)
+      expect(response).to have_http_status(:ok)
     end
 
     it 'forbids the unauthenticated' do

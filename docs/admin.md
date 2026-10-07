@@ -163,7 +163,7 @@ action between controllers.
 | Associated works | `:admin` or the devolved-admin tier | Atlas grants `:associate` to both. A delegate's reads stay group-gated, so a Work they cannot read gets the forbidden page, and an edge to one shows its bare NOID |
 | Communities registry | `:admin` or the devolved-admin tier | it only lists and links, through the gated search, so a delegate sees what they may discover. Its People link is `:admin` only, as the page it opens is |
 | A community's people (`Admin::CommunityPeopleController`) | `:admin` only | Atlas grants Person `:update` to admins and the system principal alone. It is a hub page rather than a tab on the community's Edit page, because people who may edit a community's details must not be offered its people |
-| Rights and MODS history | `:read, :audit_event` | the same gate as the Audit History tab it is reached from. Only `:admin` holds it, through `can :manage, :all` |
+| The History tab, and the rights and MODS history pages | `:admin` or the devolved-admin tier, as `:read, :audit_event` | Atlas grants the delegate tier `:read_history` on Works and containers, and still checks `:read` on the resource, so a delegate reads the history of what they can open. The history of a resource that no longer resolves stays admin-only in Atlas |
 
 `HistoriesController` is the odd one out. It sits outside `Admin::`, inherits
 `ApplicationController`, and asks CanCan directly rather than using
