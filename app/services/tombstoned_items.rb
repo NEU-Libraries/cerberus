@@ -1,43 +1,106 @@
 # frozen_string_literal: true
 
 # Lists every tombstoned (withdrawn) top-level resource — Works, Collections
-# and Communities — for the admin restore registry. The companion of the
-# tombstone actions on the show pages: those withdraw, this finds what was
-# withdrawn so an admin can reverse it.
-#
-# Uses the same `Blacklight.default_index.search(params: builder)` idiom as the other
-# Solr service objects (see ResourceSearch), but through {TombstonedSearchBuilder},
-# which inverts the catalog's default `-tombstoned_bsi:true` exclusion. Paginated
-# (withdrawals are rare, but the result rides Blacklight's Kaminari integration
-# so the registry never dumps an unbounded list).
-# See docs/admin.md.
+# and Communities — for the admin tombstone registry: paginated, filterable by
+# withdrawal date, and searchable by title or PID. A search that matches a
+# container also lists the container's tombstoned descendants, because purging
+# a container means purging what it holds first. See docs/admin.md.
 class TombstonedItems < ApplicationService
-  PER_PAGE = 50
+  PER_PAGE_OPTIONS = [10, 20, 50, 100].freeze
+  DEFAULT_PER_PAGE = 50
 
-  # @param scope [#blacklight_config, #current_user] the admin controller; supplies
-  #   the Blacklight config (copied from CatalogController) and the acting user
-  #   that gated discovery reads (admins short-circuit it, seeing every resource).
+  # A search's own matches are capped before their descendants are walked, so a
+  # broad query cannot fan out into thousands of identity terms.
+  MATCH_LIMIT = 500
+  # Deeper than any DRS tree; a guard against a membership cycle.
+  MAX_DEPTH = 20
+
+  CONTAINERS = %w[Collection Community].freeze
+  DATE_FIELD = 'tombstoned_at_ssi'
+
+  # @param scope [#blacklight_config, #current_user] the admin controller.
   # @param page [Integer, String, nil] 1-based page number.
-  # @param query [String, nil] words to search titles and PIDs by. v1 holds
-  #   8,000+ tombstoned items, so a migrated registry needs it.
-  def initialize(scope:, page: nil, query: nil)
+  # @param query [String, nil] words to search titles and PIDs by.
+  # @param per_page [Integer, String, nil] one of PER_PAGE_OPTIONS.
+  # @param from [Date, nil] earliest withdrawal date, inclusive.
+  # @param to [Date, nil] latest withdrawal date, inclusive.
+  def initialize(scope:, page: nil, query: nil, per_page: nil, from: nil, to: nil)
     @scope = scope
     @page = page
     @query = query.to_s.strip.presence
+    @per_page = PER_PAGE_OPTIONS.include?(per_page.to_i) ? per_page.to_i : DEFAULT_PER_PAGE
+    @from = from
+    @to = to
     super()
   end
 
-  # @return [Blacklight::Solr::Response] the tombstoned resource documents, most
-  #   recently withdrawn first. A tombstone is the last write a resource takes,
-  #   so `updated_at_dtsi` is the withdrawal time in all but name — which is the
-  #   order an admin wants on a restore screen, since the thing just withdrawn in
-  #   error is the thing being looked for.
-  #
-  #   A search ranks by relevance instead: the order only helps when nothing
-  #   narrows the list.
+  # @return [Blacklight::Solr::Response] most recently withdrawn first; a plain
+  #   search with no descendants to add ranks by relevance instead.
   def call
-    builder = TombstonedSearchBuilder.new(@scope).with(q: @query || '*:*', per_page: PER_PAGE, page: @page)
-    builder = builder.merge(sort: 'updated_at_dtsi desc') if @query.nil?
+    identities = identity_listing
+    by_date = identities || @query.nil?
+    builder = TombstonedSearchBuilder.new(@scope).with(q: by_date ? '*:*' : @query, per_page: @per_page, page: @page)
+                                     .with_filters(*filters(identities))
+    builder = builder.merge(sort: 'updated_at_dtsi desc') if by_date
     Blacklight.default_index.search(params: builder)
   end
+
+  private
+
+    # A search that matched containers lists by identity: its own matches plus
+    # their tombstoned descendants. nil when there is nothing to add.
+    def identity_listing
+      return if @query.nil?
+
+      descendants = descendant_ids(matches)
+      matches.map(&:first) + descendants if descendants.any?
+    end
+
+    def filters(identities)
+      [date_filter, (MembershipQuery.identity_fq(identities) if identities)].compact
+    end
+
+    # [[uuid, type], ...] for the search's own matches, within the date range.
+    def matches
+      @matches ||= begin
+        builder = TombstonedSearchBuilder.new(@scope).with(q: @query, per_page: MATCH_LIMIT)
+                                         .with_filters(*[date_filter].compact)
+                                         .merge(fl: 'id,internal_resource_tesim')
+        Blacklight.default_index.search(params: builder).documents.map { |doc| [doc.id, doc.klass_type] }
+      end
+    end
+
+    # Tombstoned records carry no ancestor field, so the walk follows each
+    # record's structural parent down from the matched containers, one level per
+    # read. Linked membership is a separate field, so linked Works are not swept in.
+    def descendant_ids(matched)
+      found = []
+      frontier = matched.filter_map { |id, type| id if CONTAINERS.include?(type) }
+      MAX_DEPTH.times do
+        break if frontier.empty?
+
+        level = children_of(frontier)
+        found.concat(level.map(&:first))
+        frontier = level.filter_map { |id, type| id if CONTAINERS.include?(type) }
+      end
+      found.uniq
+    end
+
+    def children_of(parent_ids)
+      terms = parent_ids.map { |id| "id-#{id}" }.join(',')
+      Blacklight.default_index.search(q: '*:*', rows: 10_000, fl: 'id,internal_resource_tesim',
+                                      fq: ['tombstoned_bsi:true', "{!terms f=#{MembershipQuery::STRUCTURAL_FIELD}}#{terms}"])
+                .documents.map { |doc| [doc.id, doc.klass_type] }
+    end
+
+    # The withdrawal date is indexed only as a string, `datetime-2026-10-07T…`,
+    # so the range is lexical: its fixed ISO format sorts the same way dates do.
+    # The upper bound is the day after `to`, exclusive, so `to` is inclusive.
+    def date_filter
+      return if @from.nil? && @to.nil?
+
+      lower = @from ? %("datetime-#{@from.iso8601}") : '*'
+      upper = @to ? %("datetime-#{(@to + 1).iso8601}") : '*'
+      "#{DATE_FIELD}:[#{lower} TO #{upper}}"
+    end
 end
