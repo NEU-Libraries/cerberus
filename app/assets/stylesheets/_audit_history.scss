@@ -300,7 +300,7 @@ $audit-tone-unlink:    #8f5e78;
     display: block;
     margin-top: 0.15rem;
     font-size: 0.72rem;
-    color: $gray-500;
+    color: $text-subtle;
 
     @include media-breakpoint-up(lg) {
       display: inline;

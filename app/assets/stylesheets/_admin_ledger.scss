@@ -121,7 +121,7 @@ $ledger-tone-digest:   #54687a;
   text-transform: uppercase;
   letter-spacing: 0.07em;
   font-weight: 600;
-  color: $gray-500;
+  color: $text-subtle;
 }
 
 .ledger-detail {
@@ -140,7 +140,7 @@ $ledger-tone-digest:   #54687a;
   display: inline-block;
   margin-top: 0.2rem;
   font-size: 0.78rem;
-  color: $gray-500;
+  color: $text-subtle;
   font-style: italic;
 }
 
@@ -238,7 +238,7 @@ $ledger-tone-digest:   #54687a;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-weight: 700;
-    color: $gray-500;
+    color: $text-subtle;
   }
 
   &__count-value {

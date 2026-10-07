@@ -125,7 +125,7 @@ $ingest-tone-failed:     #a73a31;
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: $gray-500;
+    color: $text-subtle;
     font-weight: 600;
   }
   &__value {
@@ -221,7 +221,7 @@ $ingest-tone-failed:     #a73a31;
   &__total {
     margin-left: 0.2rem;
     font-weight: 500;
-    color: $gray-500;
+    color: $text-subtle;
   }
 
   &__track {
