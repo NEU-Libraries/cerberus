@@ -57,6 +57,16 @@ a:not(.btn, .dropdown-item, .navbar-brand, .nav-link) {
   }
 }
 
+// Inside grey hint text the link colour is too close to the text for colour
+// alone to mark a link (WCAG 1.4.1 asks for 3:1 or another cue), so these keep
+// their underline. The container class makes this outrank the rule above.
+.empty-container-state,
+.form-text {
+  a:not(.btn):link {
+    text-decoration: underline;
+  }
+}
+
 // A POST action that has to sit in a row of plain links and read as one of
 // them -- Reindex beside Edit and Delete. `button_to` can only emit a <button>,
 // and two rules pull that button away from its neighbours: `.btn` sets its own
