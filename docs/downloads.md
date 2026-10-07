@@ -120,6 +120,34 @@ one Downloads folder. The downloads row shows this name, the redirect asks
 Cantaloupe to save under it, and `ZipEntryWriter` uses it inside a zip, so all
 three agree.
 
+### Estimating a tier's size
+
+A tier has no size until Cantaloupe renders it, so the downloads row shows an
+estimate, such as "~59 KB". Screen readers hear "about 59 KB": the tilde is
+hidden from them and a visually hidden "about" takes its place.
+
+`DerivativeSizeEstimate` works from the gated TIFF the tier is cut from, which
+sits in the derivatives root the web container already mounts:
+
+1. Read the TIFF's dimensions from its header, and its size from the file.
+2. Divide the size by the full-size pixel count times 4/3, since the pyramid's
+   smaller levels add about a third, to get the source's bytes per pixel.
+3. Work out the tier's pixel count from the size token in its URI: `pct:`, a
+   `!w,h` bounding box, or `full`.
+4. Multiply the two, then by `RATIO`, 0.23.
+
+The source's bytes per pixel is what makes this work. It captures how
+compressible the content is: a plain scanned page and a detailed photograph
+differ by more than ten times. Calibrated against 72 real renditions (24
+images, three tiers each), the estimate's median error is 13%, 27% at the 90th
+percentile, and 60% at worst. A single fixed bytes-per-pixel figure did far
+worse: a 24% median error, and seven times too large at worst.
+
+The estimate is cached for good once found, because a TIFF never changes. A
+miss is not cached, so a TIFF that appears later still gets its size. When the
+TIFF or the size token cannot be read, the row shows no size rather than a
+wrong one.
+
 ## Building a ZIP
 
 Four packers stream into an already-open `zip_kit` writer. They differ in what

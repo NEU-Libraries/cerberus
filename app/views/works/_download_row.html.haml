@@ -14,14 +14,22 @@
   %span.fa-regular{class: icon, 'aria-hidden' => true}
   -# Label, filename, and size read inline on one baseline. The filename
   -# (with extension) is muted like the size and disambiguates rows that
-  -# share a generic label (two "Video File" entries, say). Blob rows carry
-  -# a filename; derivative Delegates (uri-backed) don't, so it's conditional.
+  -# share a generic label (two "Video File" entries, say). A Blob carries its
+  -# filename and size; a rendition is named by DerivativeCreator.filename and
+  -# rendered on request, so its size is an estimate, marked with a tilde.
+  - rendition = file[:uri].present? && file[:role].present?
+  - filename = rendition ? DerivativeCreator.filename(file[:role], work_noid) : file[:filename]
+  - estimate = DerivativeSizeEstimate.call(uri: file[:uri]) if rendition
   .ms-3.flex-grow-1.d-flex.align-items-baseline.flex-wrap.gap-2
     %span.fw-semibold= display_label
-    - if file[:filename].present?
-      %small.text-muted.text-break= file[:filename]
+    - if filename.present?
+      %small.text-muted.text-break= filename
     - if file[:size]
       %small.text-muted.text-nowrap= number_to_human_size(file[:size])
+    - elsif estimate
+      -# Read aloud as "about 59 KB"; the tilde alone would be read as "tilde".
+      %small.text-muted.text-nowrap{title: 'Estimated size'}
+        = safe_join([tag.span('~', 'aria-hidden': 'true'), tag.span('about ', class: 'visually-hidden'), number_to_human_size(estimate, precision: 2)])
   - if file[:uri].present?
     = link_to derivative_download_path(work_noid, file[:role]), class: 'btn btn-tonal-primary btn-sm ms-3', 'aria-label' => "Download #{display_label}", target: '_blank', rel: 'noopener' do
       %span.fa-solid.fa-download{'aria-hidden' => true}
