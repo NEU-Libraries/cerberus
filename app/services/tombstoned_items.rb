@@ -9,14 +9,14 @@ class TombstonedItems < ApplicationService
   PER_PAGE_OPTIONS = [10, 20, 50, 100].freeze
   DEFAULT_PER_PAGE = 50
 
-  # A search's own matches are capped before their descendants are walked, so a
+  # A search's own matches are capped before their descendants are read, so a
   # broad query cannot fan out into thousands of identity terms.
   MATCH_LIMIT = 500
-  # Deeper than any DRS tree; a guard against a membership cycle.
-  MAX_DEPTH = 20
+  DESCENDANT_LIMIT = 10_000
 
   CONTAINERS = %w[Collection Community].freeze
-  DATE_FIELD = 'tombstoned_at_ssi'
+  TYPE_FILTER = 'internal_resource_tesim:(Work OR Collection OR Community)'
+  DATE_FIELD = 'tombstoned_at_dtsi'
 
   # @param scope [#blacklight_config, #current_user] the admin controller.
   # @param page [Integer, String, nil] 1-based page number.
@@ -41,7 +41,7 @@ class TombstonedItems < ApplicationService
     by_date = identities || @query.nil?
     builder = TombstonedSearchBuilder.new(@scope).with(q: by_date ? '*:*' : @query, per_page: @per_page, page: @page)
                                      .with_filters(*filters(identities))
-    builder = builder.merge(sort: 'updated_at_dtsi desc') if by_date
+    builder = builder.merge(sort: "#{DATE_FIELD} desc") if by_date
     Blacklight.default_index.search(params: builder)
   end
 
@@ -53,54 +53,51 @@ class TombstonedItems < ApplicationService
       return if @query.nil?
 
       descendants = descendant_ids(matches)
-      matches.map(&:first) + descendants if descendants.any?
+      matches.map(&:id) + descendants if descendants.any?
     end
 
     def filters(identities)
       [date_filter, (MembershipQuery.identity_fq(identities) if identities)].compact
     end
 
-    # [[uuid, type], ...] for the search's own matches, within the date range.
+    # The search's own matches, within the date range.
     def matches
       @matches ||= begin
         builder = TombstonedSearchBuilder.new(@scope).with(q: @query, per_page: MATCH_LIMIT)
                                          .with_filters(*[date_filter].compact)
-                                         .merge(fl: 'id,internal_resource_tesim')
-        Blacklight.default_index.search(params: builder).documents.map { |doc| [doc.id, doc.klass_type] }
+                                         .merge(fl: 'id,internal_resource_tesim,alternate_ids_ssim')
+        Blacklight.default_index.search(params: builder).documents
       end
     end
 
-    # Tombstoned records carry no ancestor field, so the walk follows each
-    # record's structural parent down from the matched containers, one level per
-    # read. Linked membership is a separate field, so linked Works are not swept in.
+    # Two reads, because only containers carry ancestor_ids_ssim: first every
+    # container beneath the matched ones, then the members of all of them.
+    # The ancestor values are bare NOIDs; the structural parent is `id-<uuid>`.
     def descendant_ids(matched)
-      found = []
-      frontier = matched.filter_map { |id, type| id if CONTAINERS.include?(type) }
-      MAX_DEPTH.times do
-        break if frontier.empty?
+      containers = matched.select { |doc| CONTAINERS.include?(doc.klass_type) }
+      return [] if containers.empty?
 
-        level = children_of(frontier)
-        found.concat(level.map(&:first))
-        frontier = level.filter_map { |id, type| id if CONTAINERS.include?(type) }
-      end
-      found.uniq
+      noids = containers.map { |doc| Array(doc['alternate_ids_ssim']).first.to_s.delete_prefix('id-') }
+      nested = tombstoned_ids("{!terms f=ancestor_ids_ssim}#{noids.join(',')}")
+      parents = (containers.map(&:id) + nested).map { |uuid| "id-#{uuid}" }
+      members = tombstoned_ids("{!terms f=#{MembershipQuery::STRUCTURAL_FIELD}}#{parents.join(',')}")
+      (nested + members).uniq
     end
 
-    def children_of(parent_ids)
-      terms = parent_ids.map { |id| "id-#{id}" }.join(',')
-      Blacklight.default_index.search(q: '*:*', rows: 10_000, fl: 'id,internal_resource_tesim',
-                                      fq: ['tombstoned_bsi:true', "{!terms f=#{MembershipQuery::STRUCTURAL_FIELD}}#{terms}"])
-                .documents.map { |doc| [doc.id, doc.klass_type] }
+    # FileSets share the structural parent field, so the type filter keeps them
+    # out of the identity list.
+    def tombstoned_ids(filter)
+      Blacklight.default_index.search(q: '*:*', rows: DESCENDANT_LIMIT, fl: 'id',
+                                      fq: ['tombstoned_bsi:true', TYPE_FILTER, filter]).documents.map(&:id)
     end
 
-    # The withdrawal date is indexed only as a string, `datetime-2026-10-07T…`,
-    # so the range is lexical: its fixed ISO format sorts the same way dates do.
-    # The upper bound is the day after `to`, exclusive, so `to` is inclusive.
+    # Whole UTC days: the upper bound is the day after `to`, exclusive, so `to`
+    # is inclusive.
     def date_filter
       return if @from.nil? && @to.nil?
 
-      lower = @from ? %("datetime-#{@from.iso8601}") : '*'
-      upper = @to ? %("datetime-#{(@to + 1).iso8601}") : '*'
+      lower = @from ? "#{@from.iso8601}T00:00:00Z" : '*'
+      upper = @to ? "#{(@to + 1).iso8601}T00:00:00Z" : '*'
       "#{DATE_FIELD}:[#{lower} TO #{upper}}"
     end
 end

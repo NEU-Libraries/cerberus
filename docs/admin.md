@@ -316,8 +316,9 @@ the same way.
 
 `TombstonedItems` pages 50 rows at a time by default; `per_page` picks 10, 20,
 50 or 100, and any other value falls back to 50. With no search it sorts by
-`updated_at_dtsi` descending. A tombstone is the last write a resource takes, so
-that is the withdrawal time, and the item just withdrawn in error comes first.
+`tombstoned_at_dtsi` descending, the withdrawal time, so the item just withdrawn
+in error comes first. A record tombstoned before Atlas stored that field has no
+value until it is reindexed, and sorts last.
 The `q` param searches titles and PIDs, and ranks by relevance instead. v1 holds
 more than 8,000 tombstoned items, so a migrated registry needs the search.
 
@@ -328,27 +329,34 @@ included. So when a search matches a Collection or Community, the listing adds
 every tombstoned item beneath it. The admin can start from the container's PID
 and see the whole subtree on one page.
 
-Tombstoned records carry no `ancestor_ids_ssim`, so the descendants cannot be
-found with one ancestor query. `TombstonedItems` walks down instead: one raw
-index read per level, matching `a_member_of_ssi` against the containers found
-on the level above, until a level holds no containers. Linked membership is a
-separate field, so a Work linked into the container is not swept in. The walk
-stops at `MAX_DEPTH` levels, and the search's own matches are capped at
-`MATCH_LIMIT`, so a broad query cannot fan out without bound.
+Only Collections and Communities carry `ancestor_ids_ssim`, tombstoned or not.
+Works never do, because a re-parent would then have to reindex every Work beneath
+the moved container. So `TombstonedItems` finds the descendants in two raw index
+reads, the same two Atlas's `DescendantWorksQuery` uses:
 
-When the walk finds descendants, the listing becomes an identity filter
+1. `{!terms f=ancestor_ids_ssim}` over the matched containers' NOIDs returns
+   every container beneath them, at any depth. The values are bare NOIDs.
+2. `{!terms f=a_member_of_ssi}` over the matched containers and those nested
+   ones returns their members, Works included. The values are `id-<uuid>`.
+
+Linked membership is a separate field, so a Work linked into the container is not
+swept in. Atlas refuses to create anything under a tombstoned container, so
+everything beneath one is itself tombstoned and the listing is complete. The
+search's own matches are capped at `MATCH_LIMIT`, so a broad query cannot fan out
+without bound.
+
+When the reads find descendants, the listing becomes an identity filter
 (`MembershipQuery.identity_fq`) over the matches and their descendants, sorted
 by withdrawal time like the unfiltered list. When it finds none, the search runs
 as a plain relevance-ranked query.
 
 ### The withdrawal date filter
 
-`from` and `to` narrow the list by withdrawal date, both inclusive. Atlas
-indexes the date only as a string, `tombstoned_at_ssi`, in the form
-`datetime-2026-10-07T19:22:34.652+00:00`. Its fixed ISO format sorts the same
-way the dates do, so the filter is a lexical range. The upper bound is the day
-after `to`, exclusive. A date the controller cannot parse is ignored rather than
-refused.
+`from` and `to` narrow the list by withdrawal date, both inclusive, as a range
+on `tombstoned_at_dtsi` in whole UTC days. The upper bound is the start of the
+day after `to`, exclusive. A date the controller cannot parse is ignored rather
+than refused. Atlas also indexes the date as the string `tombstoned_at_ssi`;
+filter on the date field, which compares as a date.
 
 ### Bulk restore and bulk delete
 
