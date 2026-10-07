@@ -119,18 +119,67 @@ Two kinds of grey are exempt from WCAG 1.4.3, so they keep `$gray-500`:
 Contrast for icons and control edges is WCAG 2.1's 1.4.11, which is outside the
 target. Text in grey uses `$text-subtle`; `design.md` has the palette rules.
 
+## Recorded exceptions
+
+An exception is a known WCAG 2.0 AA failure kept on purpose, under the
+good-faith clause of Northeastern's
+[Policy on Digital Accessibility](https://policies.northeastern.edu/policy122).
+`AxeAudit::CONTRAST_EXCEPTIONS` in the spec excludes each one from the
+`color-contrast` rule only. Every other rule still checks it.
+
+### White text on the orange Cancel button
+
+**The failure.** `.btn-warning` (Cancel, View as) sets white text on `#fd7e14`.
+WCAG 2 measures that at 2.57:1, against the 4.5:1 that WCAG 1.4.3 requires.
+
+**Why it stays.** WCAG 2's contrast formula is known to understate how legible
+light text is on saturated mid-tones such as orange. On this button it rates
+dark text (6.00:1) far above white (2.57:1). APCA, the perceptual method
+behind the WCAG 3 draft, ranks them the other way round: white scores Lc 54.7
+and dark text Lc 50.7. Two published pieces report the same effect with users:
+
+- *The Myths of Color Contrast Accessibility*, UX Movement, 16 October 2019.
+  It argues that the WCAG 2 formula mismeasures white text on saturated
+  buttons, and reports readers preferring white text on orange and blue
+  buttons that fail the ratio.
+  <https://uxmovement.com/buttons/the-myths-of-color-contrast-accessibility/>
+- *Orange You Accessible? A Mini Case Study on Color Ratio*, Ericka O'Connor,
+  Bounteous, 22 March 2019. About 20 colour-blind colleagues compared white and
+  black text on a brand orange. 61% preferred white, although white measured
+  3.26:1 and black 6.44:1. Preferences differed by type of colour blindness:
+  the one monochrome participant preferred black. The author still advises
+  following the guidelines and calls for further research.
+  <https://www.bounteous.com/insights/2019/03/22/orange-you-accessible-mini-case-study-color-ratio/>
+  (archived:
+  <http://web.archive.org/web/20260314085740/https://www.bounteous.com/insights/2019/03/22/orange-you-accessible-mini-case-study-color-ratio/>)
+
+**What it does not claim.** Neither source makes the button conform to WCAG
+2.0 AA, and APCA's Lc 54.7 is still below the Lc 60 it suggests for text of
+this size. The exception records a reasoned trade-off, not a pass.
+
+**What was tried.** No orange as light as `#fd7e14` reaches 4.5:1 under white
+text at any hue; it has to darken to amber-brown first. These options all pass
+and were all declined, so do not re-propose them without new evidence:
+
+- Dark text on the same orange.
+- Deeper oranges with white text: red-orange `#cc4b00`, deep amber `#a15c00`,
+  ochre `#8a6a1f`, and darkened `#ec4913` or `#e68a00`.
+- A tonal orange, a slate tonal-secondary, or a text link.
+- A larger bold label on `#e66700`, which passes the 3:1 large-text rule.
+- Other hues with white text, from indigo through rose.
+
+**What would retire it.** Any Cancel style that passes 4.5:1 and is approved
+from a mock-up. Remove `.btn-warning` from `AxeAudit::CONTRAST_EXCEPTIONS`
+when it lands. Keep white-on-orange to this one button: no new surface may use
+`$warning` behind white text.
+
 ## Known failures awaiting a design decision
 
-`AxeAudit::PENDING` in the spec excludes two components from the audit. Each
-fails 1.4.3, and each fix proposed so far was rejected because it changed the
+`AxeAudit::PENDING` in the spec excludes this component from every rule. It
+fails 1.4.3, and each fix proposed so far was declined because it changed the
 look too much. When a decision lands, fix the component and remove its entry.
 The spec then guards it.
 
-| Component | Now | Rejected so far |
+| Component | Now | Declined so far |
 |---|---|---|
-| `.btn-warning` (Cancel, View as): white on `#fd7e14` | 2.57:1 | dark text; red-orange `#cc4b00`; a tonal orange; slate tonal-secondary |
-| `.thumb-type-pill`: white on 70% light grey | 1.91:1 | an 85% `$gray-700` backing |
-
-No orange as light as `#fd7e14` reaches 4.5:1 under white text at any hue. A
-Cancel that keeps white text therefore needs a deeper colour or a different
-treatment.
+| `.thumb-type-pill`: white on a 70% light grey | 1.91:1 | an 85% `$gray-700` backing; a white pill; dark text; a slate pill; a caption under the thumbnail |

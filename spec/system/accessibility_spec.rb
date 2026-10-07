@@ -14,10 +14,13 @@ module AxeAudit
   # unless they are named.
   TAGS = %i[wcag2a wcag2aa wcag21a wcag21aa wcag22aa].freeze
 
-  # Elements whose contrast fix still waits on a design decision;
-  # docs/accessibility.md lists them. Excluding an element hides it from every
-  # rule, so this holds only what is pending: remove an entry when its fix lands.
-  PENDING = ['.btn-warning', '.thumb-type-pill'].freeze
+  # Elements whose contrast fix still waits on a design decision. Excluding an
+  # element hides it from every rule, so remove an entry when its fix lands.
+  PENDING = ['.thumb-type-pill'].freeze
+
+  # Recorded contrast exceptions, excluded from color-contrast alone and still
+  # checked by every other rule. docs/accessibility.md gives the justification.
+  CONTRAST_EXCEPTIONS = ['.btn-warning'].freeze
 
   STAFF_NUID = '000000002'
 end
@@ -31,7 +34,10 @@ RSpec.describe 'Accessibility', :browser, type: :system do
   end
 
   def expect_axe_clean
-    expect(page).to be_axe_clean.according_to(*AxeAudit::TAGS).excluding(*AxeAudit::PENDING)
+    expect(page).to be_axe_clean.according_to(*AxeAudit::TAGS).skipping(:'color-contrast')
+                                .excluding(*AxeAudit::PENDING)
+    expect(page).to be_axe_clean.checking_only(:'color-contrast')
+                                .excluding(*AxeAudit::PENDING, *AxeAudit::CONTRAST_EXCEPTIONS)
   end
 
   def self.audits(user, pages)

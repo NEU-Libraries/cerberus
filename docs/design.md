@@ -114,9 +114,9 @@ A link inside grey hint text keeps its underline. The link colour sits too close
 to grey for colour alone to mark it. `.empty-container-state` and `.form-text`
 do this already; a new hint surface needs the same rule.
 
-The axe audit in the browser lane checks contrast on every page it visits,
-except the two components [`accessibility.md`](accessibility.md) lists as
-pending.
+The axe audit in the browser lane checks contrast on every page it visits. The
+orange Cancel is a recorded exception and the result type pill is pending; see
+[`accessibility.md`](accessibility.md).
 
 ## Typography and numerics
 
@@ -209,7 +209,9 @@ actions (Save, Cancel, and the tab's main action) take the default size on every
 tab, so switching tabs never resizes them. `btn-sm` is for actions inside a table
 row, a chip group, or a compact toolbar strip such as the Analytics header.
 
-A Cancel that abandons a form is always `btn-warning`, with no icon. A Back link
+A Cancel that abandons a form is always `btn-warning`, with no icon. Its white
+text on orange fails WCAG contrast and is kept as a recorded exception, so do
+not put white text on `$warning` anywhere else. A Back link
 only navigates, so it is tonal-secondary rather than orange.
 
 Keep the tonal border at full strength. It is what clears WCAG's 3:1 edge
