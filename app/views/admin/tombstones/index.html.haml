@@ -2,7 +2,7 @@
 
 - documents = @response.documents
 
-.admin-registry.my-3
+.admin-registry.my-3{data: { controller: 'bulk-select' }}
   %header.admin-registry__head
     %span.admin-registry__title
       %i.fa-solid.fa-trash-can-arrow-up{'aria-hidden' => 'true'}
@@ -16,15 +16,43 @@
     - if current_user&.admin?
       %p.text-muted.small.mb-0.mt-2
         Permanent deletion is the other way out of a withdrawal, and nothing reverses it: it removes the item and every preserved copy of its files, earlier versions included, leaving only the audit record. A Collection or Community must be emptied first, and its tombstoned members count.
-    .mt-3
-      = render 'admin/finder/search_form', url: admin_tombstones_path, q: params[:q], hidden: {},
-               placeholder: 'Search tombstoned items by title or PID…'
+    %p.text-muted.small.mb-0.mt-2
+      A search that finds a collection or community also lists everything tombstoned inside it.
+    = form_with url: admin_tombstones_path, method: :get, class: 'tombstone-filters mt-3', data: { controller: 'auto-submit' } do
+      .tombstone-filters__search
+        %label.form-label.small.mb-1{for: 'q'} Title or PID
+        = text_field_tag :q, params[:q], id: 'q', class: 'form-control', placeholder: 'Search tombstoned items…'
+      .tombstone-filters__date
+        %label.form-label.small.mb-1{for: 'from'} Withdrawn from
+        = date_field_tag :from, @from, id: 'from', class: 'form-control'
+      .tombstone-filters__date
+        %label.form-label.small.mb-1{for: 'to'} Withdrawn to
+        = date_field_tag :to, @to, id: 'to', class: 'form-control'
+      .tombstone-filters__per-page
+        %label.form-label.small.mb-1{for: 'per_page'} Per page
+        = select_tag :per_page, options_for_select(TombstonedItems::PER_PAGE_OPTIONS, @per_page || TombstonedItems::DEFAULT_PER_PAGE), id: 'per_page', class: 'form-select', data: { action: 'change->auto-submit#submit' }
+      .tombstone-filters__submit
+        = button_tag class: 'btn btn-primary', name: nil do
+          %i.fa-solid.fa-magnifying-glass.me-1{'aria-hidden' => 'true'}
+          Search
 
   - if documents.any?
+    = form_with url: bulk_admin_tombstones_path, id: 'tombstone-bulk', class: 'well px-3 py-2 mx-3 mb-3 rounded-3 tombstone-bulk', data: { bulk_select_target: 'well' }, html: { hidden: true } do
+      %span.tombstone-bulk__count{role: 'status', data: { bulk_select_target: 'count' }}
+      .d-inline-flex.gap-2
+        = button_tag type: 'submit', name: 'bulk_action', value: 'restore', class: 'btn btn-tonal-primary btn-sm', data: { bulk_select_target: 'confirm', confirm_template: 'Restore {items}? Each will be discoverable again once its tombstoned parent, if any, is restored. The result arrives in your inbox.', turbo_confirm_title: 'Confirm bulk restore', turbo_confirm_button: 'Restore', turbo_confirm_variant: 'primary' } do
+          %i.fa-solid.fa-rotate-left.me-1{'aria-hidden' => 'true'}
+          Bulk restore
+        - if current_user&.admin?
+          = button_tag type: 'submit', name: 'bulk_action', value: 'delete', class: 'btn btn-tonal-danger btn-sm', data: { bulk_select_target: 'confirm', confirm_template: 'Permanently delete {items}? Nothing reverses this: each item and every preserved copy of its files is removed. Members are deleted before their containers. The result arrives in your inbox.', turbo_confirm_title: 'Confirm bulk permanent deletion', turbo_confirm_button: 'Delete permanently' } do
+            %i.fa-solid.fa-trash-can.me-1{'aria-hidden' => 'true'}
+            Bulk delete
     .table-responsive
       %table.table.table-borderless.admin-registry-table
         %thead
           %tr
+            %th.tombstone-select{scope: 'col'}
+              = check_box_tag 'select_all', '1', false, id: 'select_all', class: 'form-check-input', 'aria-label' => 'Select every item on this page', data: { bulk_select_target: 'all', action: 'bulk-select#toggleAll' }
             %th{scope: 'col'} Title
             %th{scope: 'col'} Parent
             %th{scope: 'col'} Type
@@ -33,6 +61,8 @@
         %tbody
           - documents.each do |doc|
             %tr
+              %td.tombstone-select
+                = check_box_tag 'ids[]', doc.to_param, false, id: "select_#{doc.to_param}", form: 'tombstone-bulk', class: 'form-check-input', 'aria-label' => "Select #{finder_doc_title(doc)}", data: { bulk_select_target: 'item', action: 'bulk-select#update' }
               %td
                 .admin-registry-table__name= finder_doc_heading(doc)
               %td= tombstone_parent_cell(@parents[StructuralParents.parent_uuid(doc)])
@@ -52,9 +82,9 @@
     - if @response.respond_to?(:total_pages) && @response.total_pages > 1
       .px-3.pt-2
         = paginate @response
-  - elsif params[:q].present?
+  - elsif params[:q].present? || @from || @to
     .admin-registry__empty
-      %p.mb-2.text-muted No tombstoned items match “#{params[:q]}”.
+      %p.mb-2.text-muted No tombstoned items match these filters.
       = link_to 'Show all tombstoned items', admin_tombstones_path, class: 'btn btn-tonal-secondary btn-sm'
   - else
     .admin-registry__empty

@@ -436,3 +436,38 @@
     font-style: italic;
   }
 }
+
+// Tombstone registry filters: search, a withdrawal date range and the page
+// size on one row, wrapping to a stack at narrow widths. Search takes the
+// slack so the date inputs keep their native width.
+.tombstone-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+
+  &__search   { flex: 1 1 16rem; min-width: 0; }
+  &__date     { flex: 0 1 10.5rem; }
+  &__per-page { flex: 0 0 6rem; }
+}
+
+// The checkbox column stays as narrow as its box.
+.admin-registry-table .tombstone-select {
+  width: 1%;
+  padding-right: 0;
+}
+
+// Bulk actions for the checked rows: the count, then the buttons.
+.tombstone-bulk {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+
+  &__count {
+    font-weight: 600;
+    color: $gray-800;
+    font-variant-numeric: tabular-nums;
+  }
+}

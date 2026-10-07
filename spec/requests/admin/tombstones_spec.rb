@@ -118,7 +118,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
         expect(page.at_css('a[href="/collections/live1"]')&.text).to eq('Theses Collection')
         expect(response.body).to include('Withdrawn Collection', '· tombstoned')
         expect(page.css('a[href="/collections/gone1"]')).to be_empty
-        rows = page.css('tbody tr').map { |row| row.css('td')[1].text.squish }
+        rows = page.css('tbody tr').map { |row| row.css('td')[2].text.squish }
         expect(rows.last).to eq('—')
       end
 
@@ -137,7 +137,43 @@ RSpec.describe 'Admin::Tombstones', type: :request do
         get '/admin/tombstones', params: { q: 'thesis' }
 
         expect(TombstonedItems).to have_received(:call).with(hash_including(query: 'thesis'))
-        expect(response.body).to include('Search tombstoned items by title or PID')
+        expect(response.parsed_body.at_css('label[for="q"]').text).to eq('Title or PID')
+      end
+
+      it 'passes the page size and the withdrawal dates to the registry' do
+        allow(TombstonedItems).to receive(:call).and_return(fake_results)
+
+        get '/admin/tombstones', params: { per_page: '20', from: '2026-10-01', to: '2026-10-07' }
+
+        expect(TombstonedItems).to have_received(:call)
+          .with(hash_including(per_page: 20, from: Date.new(2026, 10, 1), to: Date.new(2026, 10, 7)))
+      end
+
+      it 'ignores a date it cannot read rather than failing' do
+        allow(TombstonedItems).to receive(:call).and_return(fake_results)
+
+        get '/admin/tombstones', params: { from: 'yesterday' }
+
+        expect(response).to have_http_status(:ok)
+        expect(TombstonedItems).to have_received(:call).with(hash_including(from: nil))
+      end
+
+      # The checkboxes sit outside the bulk form, because each row already holds
+      # its own Restore and Delete forms, so they join it by the form attribute.
+      it 'offers a checkbox per row, a select-all, and a hidden bulk well with both actions' do
+        allow(TombstonedItems).to receive(:call)
+          .and_return(fake_results(tombstoned_doc(noid: 'abc', title: 'Withdrawn Thesis')))
+
+        get '/admin/tombstones'
+
+        page = response.parsed_body
+        box = page.at_css('input[type="checkbox"][name="ids[]"][value="abc"]')
+        expect(box['form']).to eq('tombstone-bulk')
+        expect(box['aria-label']).to eq('Select Withdrawn Thesis')
+        expect(page.at_css('#select_all')['aria-label']).to eq('Select every item on this page')
+        well = page.at_css('form#tombstone-bulk')
+        expect(well['hidden']).not_to be_nil
+        expect(well.css('button[name="bulk_action"]').pluck('value')).to eq(%w[restore delete])
       end
 
       it 'says nothing matched a search, rather than that nothing is tombstoned' do
@@ -145,7 +181,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
 
         get '/admin/tombstones', params: { q: 'nomatch' }
 
-        expect(response.body).to include('No tombstoned items match').and include('Show all tombstoned items')
+        expect(response.body).to include('No tombstoned items match these filters').and include('Show all tombstoned items')
         expect(response.body).not_to include('Nothing is tombstoned')
       end
 
@@ -222,6 +258,38 @@ RSpec.describe 'Admin::Tombstones', type: :request do
         allow(AtlasRb::Admin::Resource).to receive(:restore).and_return(instance_double(Faraday::Response, success?: false))
         post '/admin/tombstones/abc/restore', params: { type: 'Collection' }
         expect(flash[:alert]).to include('tombstoned parent')
+      end
+    end
+
+    describe 'POST bulk' do
+      it 'queues the run for the checked items and says where the result will arrive' do
+        expect do
+          post '/admin/tombstones/bulk', params: { bulk_action: 'delete', ids: %w[abc xyz abc] }
+        end.to have_enqueued_job(TombstoneBulkJob).with(action: 'delete', noids: %w[abc xyz])
+
+        expect(response).to redirect_to(admin_tombstones_path)
+        expect(flash[:notice]).to include('Permanent deletion of 2 items has started', 'inbox')
+      end
+
+      it 'returns to the filtered page it was sent from' do
+        post '/admin/tombstones/bulk', params:  { bulk_action: 'restore', ids: %w[abc] },
+                                       headers: { 'HTTP_REFERER' => 'http://www.example.com/admin/tombstones?q=papers' }
+
+        expect(response).to redirect_to('http://www.example.com/admin/tombstones?q=papers')
+      end
+
+      it 'refuses an empty selection without queuing anything' do
+        expect do
+          post '/admin/tombstones/bulk', params: { bulk_action: 'restore' }
+        end.not_to have_enqueued_job(TombstoneBulkJob)
+
+        expect(flash[:alert]).to include('Select at least one item')
+      end
+
+      it 'refuses an unknown action without queuing anything' do
+        expect do
+          post '/admin/tombstones/bulk', params: { bulk_action: 'tombstone', ids: %w[abc] }
+        end.not_to have_enqueued_job(TombstoneBulkJob)
       end
     end
 
@@ -305,6 +373,21 @@ RSpec.describe 'Admin::Tombstones', type: :request do
 
       expect(response.body).to include('Restore')
       expect(response.body).not_to include('Delete permanently')
+      expect(response.parsed_body.css('button[name="bulk_action"]').pluck('value')).to eq(%w[restore])
+    end
+
+    it 'may queue a bulk restore' do
+      expect do
+        post '/admin/tombstones/bulk', params: { bulk_action: 'restore', ids: %w[abc] }
+      end.to have_enqueued_job(TombstoneBulkJob).with(action: 'restore', noids: %w[abc])
+    end
+
+    it 'is refused a bulk delete' do
+      expect do
+        post '/admin/tombstones/bulk', params: { bulk_action: 'delete', ids: %w[abc] }
+      end.not_to have_enqueued_job(TombstoneBulkJob)
+
+      expect(response).to have_http_status(:forbidden)
     end
   end
 end
