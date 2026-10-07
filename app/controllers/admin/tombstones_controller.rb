@@ -24,8 +24,10 @@ module Admin
     # a Blob, which have no business being restored from here.
     RESTORABLE_TYPES = %w[Work Collection Community].freeze
 
-    RESTORE_FAILED = 'Restore could not be completed — a tombstoned parent must be ' \
-                     'restored first. Restore that, then try again.'
+    RESTORE_PARENT_TOMBSTONED = 'Restore refused — this item’s parent is still tombstoned. ' \
+                                'Restore the parent first, then try again.'
+
+    RESTORE_FAILED = 'Restore could not be completed.'
 
     PURGED = 'Permanently deleted. The item, its files and every preserved copy are gone; ' \
              'the audit record of the deletion remains.'
@@ -52,11 +54,12 @@ module Admin
         return redirect_to(admin_tombstones_path, alert: 'Unknown resource type — nothing was restored.')
       end
 
-      if TombstoneRegistryAction.restore(params[:id]) == :ok
+      case TombstoneRegistryAction.restore(params[:id])
+      when :ok
         flash[:notice_link] = { 'label' => 'View it', 'path' => resource_path(params[:type], params[:id]) }
         redirect_to admin_tombstones_path, notice: 'The item has been restored and is now discoverable.'
-      else
-        redirect_to admin_tombstones_path, alert: RESTORE_FAILED
+      when :tombstoned_parent then redirect_to admin_tombstones_path, alert: RESTORE_PARENT_TOMBSTONED
+      else redirect_to admin_tombstones_path, alert: RESTORE_FAILED
       end
     end
 

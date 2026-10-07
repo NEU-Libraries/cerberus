@@ -13,7 +13,13 @@ RSpec.describe TombstoneRegistryAction do
       expect(described_class.restore('abc')).to eq(:ok)
     end
 
-    it 'is :failed when Atlas refuses' do
+    it 'is :tombstoned_parent when the parent has to be restored first' do
+      allow(AtlasRb::Admin::Resource).to receive(:restore)
+        .and_return(response(422, '{"error":"restore the parent first","code":"tombstoned_parent"}'))
+      expect(described_class.restore('abc')).to eq(:tombstoned_parent)
+    end
+
+    it 'is :failed on any other refusal' do
       allow(AtlasRb::Admin::Resource).to receive(:restore).and_return(response(422))
       expect(described_class.restore('abc')).to eq(:failed)
     end

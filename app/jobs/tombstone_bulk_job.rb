@@ -12,6 +12,11 @@ class TombstoneBulkJob < ApplicationJob
 
   ACTIONS = %w[restore delete].freeze
 
+  FAILURE_TEXT = {
+    has_children:      'still holds members',
+    tombstoned_parent: 'its parent is still tombstoned; restore the parent first'
+  }.freeze
+
   Item = Struct.new(:noid, :uuid, :parent_uuid, :klass, :title, keyword_init: true)
 
   def perform(action:, noids:)
@@ -75,7 +80,7 @@ class TombstoneBulkJob < ApplicationJob
     end
 
     def failure_text(outcome)
-      outcome == :has_children ? 'still holds members' : 'Atlas refused it'
+      FAILURE_TEXT.fetch(outcome, 'Atlas refused it')
     end
 
     def report(action:, done:, failures:, skipped:)

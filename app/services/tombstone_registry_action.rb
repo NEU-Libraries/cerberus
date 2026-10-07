@@ -10,9 +10,13 @@ module TombstoneRegistryAction
 
   module_function
 
-  # @return [:ok, :failed]
+  # @return [:ok, :tombstoned_parent, :failed] :tombstoned_parent when the
+  #   item's parent is still tombstoned and has to be restored first.
   def restore(noid)
-    success?(with_lock_retry { AtlasRb::Admin::Resource.restore(noid) }) ? :ok : :failed
+    response = with_lock_retry { AtlasRb::Admin::Resource.restore(noid) }
+    return :ok if success?(response)
+
+    error_code(response) == 'tombstoned_parent' ? :tombstoned_parent : :failed
   rescue Faraday::Error => e
     Rails.logger.error("TombstoneRegistryAction.restore #{noid}: #{e.class} #{e.message}")
     :failed

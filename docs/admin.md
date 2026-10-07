@@ -378,7 +378,8 @@ tombstoned when the job runs is skipped and listed as such.
 
 Both the single-item actions and the job call Atlas through
 `TombstoneRegistryAction`, which retries a 409 lock conflict and turns each
-response into `:ok`, `:has_children` or `:failed`. The job records one
+response into `:ok` or `:failed`, or the refusal the admin can act on:
+`:tombstoned_parent` for a restore, `:has_children` for a purge. The job records one
 `tombstone_bulk` ledger entry, through `CompletionNotice`, with `done`,
 `failures` and `skipped` in its payload, and the admin gets the same summary in
 their inbox.
@@ -411,8 +412,11 @@ restore reports as done. A value that does not respond to `success?` counts as a
 success. A transport-level failure, such as the host being down, still raises
 `Faraday::Error`. `TombstoneRegistryAction` logs it and reports `:failed`.
 
-A failed restore flashes `RESTORE_FAILED`, which names the likely cause: a
-tombstoned parent has to be restored first.
+A restore refused because the item's parent is still tombstoned earns its own
+message. Atlas answers with a 422 whose `code` is `tombstoned_parent`, so the
+row flashes `RESTORE_PARENT_TOMBSTONED`, and the bulk job's ledger entry tells
+the admin to restore the parent first. Any other failed restore flashes the
+generic `RESTORE_FAILED`.
 
 A failed purge earns its own message in one case: a container that still has
 members. Atlas answers with a 422 whose body carries the machine token

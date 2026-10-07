@@ -254,10 +254,20 @@ RSpec.describe 'Admin::Tombstones', type: :request do
         expect(flash[:alert]).to include('Unknown resource type')
       end
 
-      it 'reports a failure when Atlas refuses (e.g. a withdrawn parent)' do
-        allow(AtlasRb::Admin::Resource).to receive(:restore).and_return(instance_double(Faraday::Response, success?: false))
+      # Atlas names this refusal, and it is the one the admin can act on.
+      it 'says the parent must be restored first when Atlas refuses for that reason' do
+        refusal = '{"error":"restore the parent first","code":"tombstoned_parent"}'
+        allow(AtlasRb::Admin::Resource).to receive(:restore)
+          .and_return(instance_double(Faraday::Response, success?: false, status: 422, body: refusal))
         post '/admin/tombstones/abc/restore', params: { type: 'Collection' }
-        expect(flash[:alert]).to include('tombstoned parent')
+        expect(flash[:alert]).to eq(Admin::TombstonesController::RESTORE_PARENT_TOMBSTONED)
+      end
+
+      it 'falls back to the generic alert on any other refusal' do
+        allow(AtlasRb::Admin::Resource).to receive(:restore)
+          .and_return(instance_double(Faraday::Response, success?: false, status: 500, body: 'oops'))
+        post '/admin/tombstones/abc/restore', params: { type: 'Collection' }
+        expect(flash[:alert]).to eq(Admin::TombstonesController::RESTORE_FAILED)
       end
     end
 

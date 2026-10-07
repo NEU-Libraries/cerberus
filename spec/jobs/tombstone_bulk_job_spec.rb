@@ -80,6 +80,18 @@ RSpec.describe TombstoneBulkJob do
                                                         'Work w1: Atlas refused it')
   end
 
+  # A child selected without its tombstoned parent is refused, and the entry
+  # has to say how to fix that.
+  it 'tells the admin to restore the parent first when Atlas refuses for that reason' do
+    stub_tombstoned(solr_doc('w1', parent: 'unselected'))
+    allow(TombstoneRegistryAction).to receive(:restore).and_return(:tombstoned_parent)
+
+    run('restore', %w[w1])
+
+    expect(notice.detail(:failures))
+      .to eq(['Work w1: its parent is still tombstoned; restore the parent first'])
+  end
+
   # The page can be stale by the time the job runs.
   it 'skips an item that is no longer tombstoned, and says so' do
     stub_tombstoned(solr_doc('w1'))
