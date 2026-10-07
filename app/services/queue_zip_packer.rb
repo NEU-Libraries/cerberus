@@ -35,10 +35,10 @@ class QueueZipPacker
       end
 
       blob_noids = values_for(entries, 'b')
-      uses = values_for(entries, 'd')
+      roles = values_for(entries, 'd')
 
       AtlasRb::Work.assets(work_noid, nuid: @nuid).each do |asset|
-        next unless queued?(asset, blob_noids, uses)
+        next unless queued?(asset, blob_noids, roles)
 
         pack_queued_asset(zip, work_noid, asset, manifest, errors)
       end
@@ -46,8 +46,8 @@ class QueueZipPacker
       errors << "#{work_noid}: assets unavailable — #{e.class}: #{e.message}"
     end
 
-    def queued?(asset, blob_noids, uses)
-      content_blob?(asset) ? blob_noids.include?(asset.noid) : uses.include?(asset[:use])
+    def queued?(asset, blob_noids, roles)
+      content_blob?(asset) ? blob_noids.include?(asset.noid) : roles.include?(asset[:role])
     end
 
     # Atlas re-authorizes at the WORK level only; the per-asset gate rides the

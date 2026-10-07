@@ -339,7 +339,9 @@ Rails.application.routes.draw do
   get '/downloads/:id', to: 'downloads#show', as: :download
   # Gated image-derivative delivery (small/medium/large). Authorizes the tier,
   # then redirects to a short-lived signed URL on the gated Cantaloupe host.
-  get '/works/:work_id/derivatives/:use', to: 'derivative_downloads#show', as: :derivative_download
+  # `:role` is Atlas's stable token (small_image), never the `use` label.
+  get '/works/:work_id/derivatives/:role', to: 'derivative_downloads#show', as: :derivative_download,
+                                           constraints: { role: Regexp.union(DerivativeCreator::ROLES.keys) }
   # Inline, Range-capable A/V byte serving for the in-page player (download twin).
   get '/media/:id',     to: 'media#show',     as: :media
 

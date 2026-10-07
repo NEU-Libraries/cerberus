@@ -8,7 +8,7 @@ class DerivativeDownloadsController < ApplicationController
 
   def show
     delegate = AtlasRb::Work.assets(params[:work_id], nuid: viewer_nuid)
-                            .find { |asset| asset['use'] == params[:use] && asset['uri'].present? }
+                            .find { |asset| asset['role'] == params[:role] && asset['uri'].present? }
     raise Authorizable::ResourceNotFound if delegate.nil?
 
     authorize_tier!(delegate)
@@ -27,13 +27,8 @@ class DerivativeDownloadsController < ApplicationController
     # browser save rather than render. Appending the parameter after signing is
     # safe because the HMAC covers the request PATH only (see IiifSigner).
     def download_url_for(delegate)
-      "#{IiifSigner.sign_url(delegate['uri'])}&response-content-disposition=" \
-        "#{CGI.escape(ActionDispatch::Http::ContentDisposition.format(disposition: 'attachment',
-                                                                      filename:    derivative_filename(delegate)))}"
-    end
-
-    def derivative_filename(delegate)
-      slug = delegate['use'].to_s.parameterize.presence || 'derivative'
-      "#{slug}_#{params[:work_id]}.jpg"
+      filename = DerivativeCreator.filename(params[:role], params[:work_id])
+      disposition = ActionDispatch::Http::ContentDisposition.format(disposition: 'attachment', filename: filename)
+      "#{IiifSigner.sign_url(delegate['uri'])}&response-content-disposition=#{CGI.escape(disposition)}"
     end
 end

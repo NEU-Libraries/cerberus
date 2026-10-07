@@ -10,6 +10,10 @@ class DerivativeCreator < ApplicationService
   # Match on Atlas's stable `role` token, never the human `use` label.
   ROLES = { 'small_image' => :small, 'medium_image' => :medium, 'large_image' => :large }.freeze
 
+  # What a rendition saves as, wherever it is offered: the downloads row, its
+  # route's redirect and the queue's zip all name it the same way.
+  def self.filename(role, work_noid) = "#{role}_#{work_noid}.jpg"
+
   # The widths that produced a Work's current renditions, recovered from the
   # stored URIs — the only place the depositor's size choice survives. A tier
   # whose size does not parse is LEFT OUT rather than defaulted: defaulting

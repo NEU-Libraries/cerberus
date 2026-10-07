@@ -46,25 +46,25 @@ RSpec.describe DownloadQueue do
   end
 
   it 'adds a derivative rendition, tracked independently of blobs' do
-    expect(queue.add_derivative('w1', 'Large Image')).to eq(:ok)
-    expect(queue.include_derivative?('w1', 'Large Image')).to be(true)
-    expect(queue.include?('w1', 'Large Image')).to be(false) # a blob with that noid is a different entry
+    expect(queue.add_derivative('w1', 'large_image')).to eq(:ok)
+    expect(queue.include_derivative?('w1', 'large_image')).to be(true)
+    expect(queue.include?('w1', 'large_image')).to be(false) # a blob with that noid is a different entry
   end
 
   it 'stores a derivative as a distinct { w, d } pair' do
-    queue.add_derivative('w1', 'Large Image')
-    expect(session[:download_queue]).to eq([{ 'w' => 'w1', 'd' => 'Large Image' }])
+    queue.add_derivative('w1', 'large_image')
+    expect(session[:download_queue]).to eq([{ 'w' => 'w1', 'd' => 'large_image' }])
   end
 
   it 'removes a derivative' do
-    queue.add_derivative('w1', 'Large Image')
-    queue.remove_derivative('w1', 'Large Image')
-    expect(queue.include_derivative?('w1', 'Large Image')).to be(false)
+    queue.add_derivative('w1', 'large_image')
+    queue.remove_derivative('w1', 'large_image')
+    expect(queue.include_derivative?('w1', 'large_image')).to be(false)
   end
 
   it 'counts blob and derivative entries together toward the cap' do
     queue.add('w1', 'b1')
-    queue.add_derivative('w1', 'Large Image')
+    queue.add_derivative('w1', 'large_image')
     expect(queue.count).to eq(2)
   end
 end

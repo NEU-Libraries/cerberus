@@ -1,7 +1,7 @@
 -# "Add to queue" control for one downloadable asset, in a stable
 -# #queue-control-<id> wrapper so the add action's turbo_stream can swap it to
 -# the in-queue state. Polymorphic: a content Blob passes `blob_noid:`, an IIIF
--# derivative rendition passes `use:` (its identity has no blob). Add-only here;
+-# derivative rendition passes `role:` (its identity has no blob). Add-only here;
 -# removal lives on the queue page.
 -#
 -# Each aria-label opens with the control's own visible text and appends the
@@ -9,11 +9,11 @@
 -# the visible label, so a name that reads "Add <file> to download queue" fails
 -# against a button that reads "Add to queue".
 - blob_noid = local_assigns[:blob_noid]
-- use = local_assigns[:use]
+- role = local_assigns[:role]
 - label = local_assigns[:label].presence || 'this file'
-- queued = blob_noid.present? ? download_queue_includes?(work_noid, blob_noid) : download_queue_includes_derivative?(work_noid, use)
-- add_params = blob_noid.present? ? { work_noid: work_noid, blob_noid: blob_noid } : { work_noid: work_noid, use: use }
-%span.ms-2{id: queue_control_id(work_noid, blob_noid: blob_noid, use: use)}
+- queued = blob_noid.present? ? download_queue_includes?(work_noid, blob_noid) : download_queue_includes_derivative?(work_noid, role)
+- add_params = blob_noid.present? ? { work_noid: work_noid, blob_noid: blob_noid } : { work_noid: work_noid, role: role }
+%span.ms-2{id: queue_control_id(work_noid, blob_noid: blob_noid, role: role)}
   - if queued
     %span.btn.btn-tonal-success.btn-sm.disabled{'aria-label' => "In queue: #{label}"}
       %i.fa-solid.fa-check.me-1{'aria-hidden' => true}

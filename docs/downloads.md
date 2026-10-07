@@ -86,8 +86,11 @@ derivatives.
 
 Those tiers' Delegate URIs live on the gated Cantaloupe host, which serves only
 a signed request. Rather than link them directly, the downloads UI routes each
-tier through this controller. The controller finds the Delegate whose `use`
-matches the request, and raises `Authorizable::ResourceNotFound` when none does.
+tier through this controller, at `/works/:work_id/derivatives/:role`. The route
+admits only the three role tokens (`small_image`, `medium_image`,
+`large_image`), so a URL never carries the `use` label's space. The controller
+finds the Delegate whose `role` matches, and raises
+`Authorizable::ResourceNotFound` when none does.
 It re-reads the tier's per-viewer gate, refuses an unfinished or embargoed Work,
 and authorizes the effective user — reusing the app's `:read` Ability via
 `DerivativesHelper`. It then 302s to a short-lived signed URL. The signature
@@ -110,11 +113,12 @@ it after signing.
 
 ### Naming a tier's file
 
-`derivative_filename` mirrors the original row's `original_<noid>.jpg`: the tier,
-then the Work, as `<slug>_<work_noid>.jpg`. The slug is the parameterized `use`,
-or `derivative` when that is blank. Three tiers of three Works therefore do not
-collide in one Downloads folder. The tier slug matches the entry names
-`ZipEntryWriter` writes into a zip.
+`DerivativeCreator.filename` mirrors the original row's `original_<noid>.jpg`:
+the role, then the Work, as `<role>_<work_noid>.jpg`, for example
+`small_image_fttf0bf.jpg`. Three tiers of three Works therefore do not collide in
+one Downloads folder. The downloads row shows this name, the redirect asks
+Cantaloupe to save under it, and `ZipEntryWriter` uses it inside a zip, so all
+three agree.
 
 ## Building a ZIP
 
@@ -175,8 +179,8 @@ names an entry from `original_filename`.
 `extension_of` takes the extension only — from `original_filename`, else a MIME
 guess, else `bin`.
 
-A derivative has no filename, so `derivative_filename` names it by the slugged
-use, for example `small-image.jpg`.
+A derivative has no filename, so `DerivativeCreator.filename` names it, for
+example `small_image_fttf0bf.jpg`.
 
 ### Reaching Cantaloupe from the server
 
@@ -198,9 +202,9 @@ Delegates, the small/medium/large tiers among them.
 
 `QueueZipPacker` packs both kinds. Each queue entry is
 `{ 'w' => work_noid, 'b' => blob_noid }` for a content Blob, or
-`{ 'w' => work_noid, 'd' => use }` for a derivative rendition. It groups by
+`{ 'w' => work_noid, 'd' => role }` for a derivative rendition. It groups by
 Work, then matches the Work's assets against those two sets: Blobs by noid,
-renditions by use. A content Blob goes through `write_asset`; a rendition goes
+renditions by role. A content Blob goes through `write_asset`; a rendition goes
 through `write_derivative`, which fetches it from Cantaloupe over a signed URL.
 A failed assets read for one Work becomes an `ERRORS.txt` line, and the packer
 moves on to the next Work.
