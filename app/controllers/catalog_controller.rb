@@ -95,6 +95,11 @@ class CatalogController < ApplicationController
     # container row.
     config.show.document_thumbnail_component = Blacklight::Document::ThumbnailComponent
 
+    # Result titles carry the type pill's text for screen readers, on result
+    # lists and container rows alike; see Cerberus::DocumentTitleComponent.
+    config.index.document_title_component = Cerberus::DocumentTitleComponent
+    config.show.document_title_component = Cerberus::DocumentTitleComponent
+
     # config.add_results_document_tool(:bookmark, partial: 'bookmark_control', if: :render_bookmarks_control?)
     config.index.document_actions.delete(:bookmark)
     config.show.document_actions.delete(:bookmark)

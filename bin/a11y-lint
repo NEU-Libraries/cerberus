@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+#
+# Lint view templates for accessibility: haml-lint for HAML, herb-lint for ERB.
+#
+#   bin/a11y-lint                 # every template under app/
+#   bin/a11y-lint --staged        # templates staged for commit
+#   bin/a11y-lint app/views/x.html.haml app/views/y.html.erb
+#
+# Exits non-zero on any finding. Nothing is auto-corrected: an accessibility fix
+# needs a person to choose the alt text or the label. docs/accessibility.md
+# covers the axe browser specs, which see what a template linter cannot.
+#
+# haml-lint runs inside `web`, where the bundle is. herb-lint is npm-only and is
+# installed host-global, so the ERB half is skipped with a notice where it is
+# missing rather than failing a commit on a tool the repo does not ship.
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/spec-lane.sh
+source "$SCRIPT_DIR/lib/spec-lane.sh"
+lane_init
+cd "$REPO_ROOT"
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'
+  exit 0
+fi
+
+files=()
+if [[ "${1:-}" == "--staged" ]]; then
+  mapfile -t files < <(git diff --cached --name-only --diff-filter=ACMR -- 'app/*.haml' 'app/*.erb')
+  [[ ${#files[@]} -eq 0 ]] && exit 0
+elif [[ $# -gt 0 ]]; then
+  files=("$@")
+fi
+
+haml=() erb=()
+if [[ ${#files[@]} -eq 0 ]]; then
+  haml=(app) erb=(app)
+else
+  for f in "${files[@]}"; do
+    case "$f" in
+      *.haml) haml+=("$f") ;;
+      *.erb)  erb+=("$f") ;;
+    esac
+  done
+fi
+
+status=0
+
+if [[ ${#haml[@]} -gt 0 ]]; then
+  # .haml-lint.yml enables only the accessibility linters.
+  if [[ -f /.dockerenv ]]; then
+    bundle exec haml-lint "${haml[@]}" || status=1
+  else
+    docker exec -w "$CONTAINER_ROOT" cerberus-web-1 bundle exec haml-lint "${haml[@]}" || status=1
+  fi
+fi
+
+# herb-lint has no rule filter on the command line, and the repo keeps no
+# .herb.yml, so its output is narrowed to the accessibility rules here. The
+# list leaves out html-input-require-autocomplete (WCAG asks for autocomplete
+# only on fields collecting the user's own details) and html-no-title-attribute.
+HERB_A11Y='[(](a11y-[a-z-]+|html-aria-[a-z-]+|html-(anchor-require-href|avoid-both-disabled-and-aria-disabled|details-has-summary|iframe-has-title|img-require-alt|navigation-has-label|no-abstract-roles|no-aria-hidden-on-[a-z]+|no-duplicate-ids|no-empty-headings|no-nested-links|no-positive-tab-index))[)]$'
+
+if [[ ${#erb[@]} -gt 0 ]]; then
+  if command -v herb-lint >/dev/null; then
+    # --fail-level hint: the exit code is ignored, and the filter decides.
+    report="$(herb-lint --simple --no-color --no-timing --fail-level hint "${erb[@]}" 2>&1 || true)"
+    findings="$(awk -v re="$HERB_A11Y" '
+      /^[^ ].*:$/ { file = $0; next }
+      /^ +[0-9]+:[0-9]+ / && $0 ~ re { if (file != shown) { print file; shown = file } print }
+    ' <<<"$report")"
+    if [[ -n "$findings" ]]; then
+      echo "$findings"
+      status=1
+    fi
+  else
+    echo "a11y-lint: herb-lint is not installed, so ERB templates were not checked." >&2
+    echo "           npm install -g @herb-tools/linter" >&2
+  fi
+fi
+
+[[ $status -eq 0 ]] && echo "a11y-lint: no accessibility findings."
+exit $status

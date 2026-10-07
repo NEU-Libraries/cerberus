@@ -31,7 +31,7 @@
 
   &__eyebrow {
     font-size: 0.7rem;
-    color: $gray-500;
+    color: $text-subtle;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-weight: 600;
@@ -58,7 +58,7 @@
       top: 1px;
     }
     &-label {
-      color: $gray-500;
+      color: $text-subtle;
       text-transform: uppercase;
       letter-spacing: 0.06em;
       font-size: 0.7rem;
@@ -242,7 +242,7 @@
   }
 
   &__radio-desc {
-    color: $gray-600;
+    color: $text-subtle;
     font-size: 0.8rem;
     line-height: 1.45;
   }
@@ -263,7 +263,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
-    color: $gray-600;
+    color: $text-subtle;
     font-size: 0.82rem;
 
     i {

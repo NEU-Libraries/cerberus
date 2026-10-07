@@ -139,6 +139,7 @@ group :development, :test do
   gem 'parallel_tests', require: false
 
   # QA gems
+  gem 'haml_lint', require: false
   gem 'rubocop', require: false
   gem 'rubocop-rails', require: false
   gem 'simplecov', require: false
@@ -149,6 +150,9 @@ group :development, :test do
 end
 
 group :test do
+  # Runs axe-core in the browser lane; the gem vendors the axe script, so the
+  # repo stays Node-free.
+  gem 'axe-core-rspec'
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem 'capybara'
   gem 'factory_bot_rails'

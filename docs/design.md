@@ -70,10 +70,15 @@ gradients and coloured card backgrounds.
 ## Palette
 
 The tokens in `_colors.scss` are deliberately desaturated from Bootstrap's
-defaults: `$blue: #2666a6` (navy-teal), `$success` from a darkened `$green:
-#18bc9c` (teal-green, not a punchy emerald), `$danger: #e74c3c`, and the footer
-`#385775`. Use the SCSS variables rather than hard-coded hex. For a new tone,
-such as an audit action colour, derive a desaturated value, not a Bootstrap one.
+defaults: `$blue: #2666a6` (navy-teal), `$success: #107d67` (a deep
+teal-green, not a punchy emerald), `$danger: #c0392b` (a muted brick red), and
+the footer `#385775`. Use the SCSS variables rather than hard-coded hex. For a
+new tone, such as an audit action colour, derive a desaturated value, not a
+Bootstrap one.
+
+**A colour that carries white text must clear 4.5:1 against white.** `$success`
+and `$danger` are set to do that, and `color_contrast_spec.rb` asserts it. Check
+a new button tone the same way before you use it.
 
 ### Four tokens are one coupled system
 
@@ -91,6 +96,27 @@ trades one audit failure for another; it has been tried.
 
 Hue is free: contrast depends only on relative luminance, so any hue at the
 required lightness works.
+
+### Grey text
+
+**Never set text in `$gray-500`.** It reads about 2:1. Use `$text-subtle`
+(`#636b74`) for small labels, hints, captions and eyebrows; it clears 4.5:1 even
+on the `.well`. `$gray-600` (Bootstrap's `.text-muted`) passes on white but not on
+tinted fills, so prefer `$text-subtle` there too. In a view, `.text-subtle` is
+the utility. Decorative icons and disabled controls may stay lighter.
+
+A tinted chip whose label is its own tone, as in the audit history, darkens the
+label rather than the tint: mix in black until it clears 4.5:1.
+
+### Links in grey text
+
+A link inside grey hint text keeps its underline. The link colour sits too close
+to grey for colour alone to mark it. `.empty-container-state` and `.form-text`
+do this already; a new hint surface needs the same rule.
+
+The axe audit in the browser lane checks contrast on every page it visits. The
+orange Cancel and the result type pill are recorded exceptions; see
+[`accessibility.md`](accessibility.md).
 
 ## Typography and numerics
 
@@ -183,7 +209,9 @@ actions (Save, Cancel, and the tab's main action) take the default size on every
 tab, so switching tabs never resizes them. `btn-sm` is for actions inside a table
 row, a chip group, or a compact toolbar strip such as the Analytics header.
 
-A Cancel that abandons a form is always `btn-warning`, with no icon. A Back link
+A Cancel that abandons a form is always `btn-warning`, with no icon. Its white
+text on orange fails WCAG contrast and is kept as a recorded exception, so do
+not put white text on `$warning` anywhere else. A Back link
 only navigates, so it is tonal-secondary rather than orange.
 
 Keep the tonal border at full strength. It is what clears WCAG's 3:1 edge

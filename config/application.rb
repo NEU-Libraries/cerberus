@@ -2,7 +2,7 @@ require_relative 'boot'
 
 # Not `rails/all`. Active Storage's vips shim calls `Vips.block_untrusted(true)`
 # at load, which disables libvips' unfuzzed loaders — pdfload among them — and
-# OriginalJp2 renders PDF cover pages through vips directly. Loading a framework
+# IiifImageCreator renders PDF cover pages through vips directly. Loading a framework
 # nothing here uses would cost that capability for a safety property that only
 # matters for untrusted uploads Active Storage would be handling.
 #
@@ -60,8 +60,8 @@ module Cerberus
     # means "same as public".
     config.x.cerberus.iiif_internal_host = ENV.fetch('CERBERUS_IIIF_INTERNAL_HOST', nil)
 
-    # Gated-derivative model. OriginalJp2 writes both the capped display JP2 and
-    # the full-res JP2 to the one derivatives root Cantaloupe reads,
+    # Gated-derivative model. IiifImageCreator writes both the capped display TIFF
+    # and the full-res TIFF to the one derivatives root Cantaloupe reads,
     # distinguished by an `open-`/`gated-` filename prefix; the gated Cantaloupe
     # delegate serves `open-*` freely and requires a signed credential for
     # `gated-*`. iiif_signing_secret is the HMAC secret Cerberus shares with that

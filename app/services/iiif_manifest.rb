@@ -8,7 +8,7 @@
 # server on demand.
 #
 # Canvas dimensions come from each service's `info.json`, fetched once and
-# cached indefinitely — a page's JP2 is immutable, so its dimensions are
+# cached indefinitely — a page's IIIF TIFF is immutable, so its dimensions are
 # too (a re-mint gets a new identifier and so a new cache key). Pages
 # whose service or info.json is unavailable are skipped rather than
 # failing the whole manifest: a partially-zoomable book beats a 500.

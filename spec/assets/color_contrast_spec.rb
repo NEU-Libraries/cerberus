@@ -71,11 +71,29 @@ RSpec.describe 'colour contrast' do
     end
   end
 
+  describe 'secondary text' do
+    # The .well is the darkest fill that labels and hints sit on.
+    it '$text-subtle clears 4.5:1 on the .well fill' do
+      expect(contrast(token('text-subtle'), well)).to be >= 4.5
+    end
+  end
+
   describe 'the .well fill' do
     # The panel has no border, so it reads as a panel only by being darker than
     # the page behind it. Lightening it to buy link headroom has a floor.
     it 'stays darker than the page background' do
       expect(luminance(well)).to be < luminance(page_bg)
+    end
+  end
+
+  # Theme colours that carry white button labels and also sit as text on white.
+  describe 'the theme colours under white text' do
+    it '$success clears 4.5:1 against white' do
+      expect(contrast(token('success'), WHITE)).to be >= 4.5
+    end
+
+    it '$danger clears 4.5:1 against white' do
+      expect(contrast(token('danger'), WHITE)).to be >= 4.5
     end
   end
 end

@@ -98,7 +98,7 @@
       font-weight: 600;
       letter-spacing: 0.07em;
       text-transform: uppercase;
-      color: $gray-500;
+      color: $text-subtle;
     }
     // Row label (access level) — quiet, fixed width so the two grant columns
     // line up across entries.
@@ -263,7 +263,7 @@
         border-left-color: color-mix(in srgb, $audit-tone-unlink 40%, white);
       }
       &.unchanged {
-        color: $gray-500;
+        color: $text-subtle;
       }
     }
 

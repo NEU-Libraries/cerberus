@@ -31,7 +31,7 @@ Communication between Cerberus and Atlas is handled through a custom Ruby client
 
 When making changes that involve repository objects (creating/reading/updating/deleting digital objects, files, or metadata), look for atlas_rb client calls rather than direct ActiveRecord or Solr queries — those concerns live in Atlas. Search and pagination, however, are handled by Cerberus directly via Blacklight querying Solr.
 
-When making changes to the UI, ensure that any new UI elements are accessible and follow the Bootstrap 5 design system.
+When making changes to the UI, ensure that any new UI elements are accessible and follow the Bootstrap 5 design system. Run `bin/a11y-lint` on the templates you touch, and add a new page to the axe audit; [`docs/accessibility.md`](docs/accessibility.md) covers both.
 
 ## UI Design
 

@@ -1,7 +1,9 @@
 - src_2x ||= nil
+-# The thumbnail sits beside the title it depicts, so it is decorative: an
+-# empty alt keeps screen readers from announcing the file name.
 .col-md-auto
   .document-thumbnail
     - if src_2x.present?
-      %img{loading: "lazy", src: src, srcset: "#{src} 1x, #{src_2x} 2x"}/
+      %img{alt: "", loading: "lazy", src: src, srcset: "#{src} 1x, #{src_2x} 2x"}/
     - else
-      %img{loading: "lazy", src: src}/
+      %img{alt: "", loading: "lazy", src: src}/

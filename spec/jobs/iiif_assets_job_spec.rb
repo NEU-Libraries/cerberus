@@ -10,7 +10,7 @@ RSpec.describe IiifAssetsJob, type: :job do
   let(:source_path) { File.join(tmp, 'image.png') }
   let(:open_base) { 'http://example.com/iiif/3/open.jp2' }
   let(:gated_base) { 'http://example.com/iiif/3/gated.jp2' }
-  let(:result) { OriginalJp2::Result.new(open_base: open_base, gated_base: gated_base) }
+  let(:result) { IiifImageCreator::Result.new(open_base: open_base, gated_base: gated_base) }
 
   before do
     File.write(source_path, 'fake bytes')
@@ -32,7 +32,7 @@ RSpec.describe IiifAssetsJob, type: :job do
   it 'thumbnails from the open base, sets the gated service, and derivatives from the gated base' do
     widths = { small: 320, medium: 640, large: 1280 }
     allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: nil))
-    allow(OriginalJp2).to receive(:call).with(path: source_path).and_return(result)
+    allow(IiifImageCreator).to receive(:call).with(path: source_path).and_return(result)
 
     expect(ThumbnailCreationJob).to receive(:perform_now).with(work_id, open_base).ordered
     expect(DerivativeCreationJob).to receive(:perform_now).with(work_id, gated_base, widths: widths).ordered
@@ -40,12 +40,12 @@ RSpec.describe IiifAssetsJob, type: :job do
     described_class.new.perform(work_id, source_path, derivative_widths: widths)
 
     expect(AtlasRb::FileSet).to have_received(:set_iiif_service).with('fs-1', gated_base)
-    expect(OriginalJp2).to have_received(:call).with(path: source_path).once
+    expect(IiifImageCreator).to have_received(:call).with(path: source_path).once
   end
 
   it 'generates thumbnails + service only when no derivative_widths are passed (renditions are opt-in)' do
     allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: nil))
-    allow(OriginalJp2).to receive(:call).with(path: source_path).and_return(result)
+    allow(IiifImageCreator).to receive(:call).with(path: source_path).and_return(result)
 
     described_class.new.perform(work_id, source_path)
 
@@ -56,11 +56,11 @@ RSpec.describe IiifAssetsJob, type: :job do
 
   it 'noops when the work already has a thumbnail' do
     allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: 'already'))
-    allow(OriginalJp2).to receive(:call)
+    allow(IiifImageCreator).to receive(:call)
 
     described_class.new.perform(work_id, source_path)
 
-    expect(OriginalJp2).not_to have_received(:call)
+    expect(IiifImageCreator).not_to have_received(:call)
     expect(ThumbnailCreationJob).not_to have_received(:perform_now)
     expect(AtlasRb::FileSet).not_to have_received(:set_iiif_service)
   end
@@ -70,7 +70,7 @@ RSpec.describe IiifAssetsJob, type: :job do
   # they exist to do.
   it 're-derives despite an existing thumbnail when refreshing' do
     allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: 'already'))
-    allow(OriginalJp2).to receive(:call).with(path: source_path).and_return(result)
+    allow(IiifImageCreator).to receive(:call).with(path: source_path).and_return(result)
 
     described_class.new.perform(work_id, source_path, refresh: true)
 
@@ -78,7 +78,7 @@ RSpec.describe IiifAssetsJob, type: :job do
     expect(AtlasRb::FileSet).to have_received(:set_iiif_service).with('fs-1', gated_base)
   end
 
-  # A replace mints a new gated JP2, so renditions left pointing at the old base
+  # A replace mints a new gated TIFF, so renditions left pointing at the old base
   # go on serving the superseded image — while the thumbnail, the deep zoom and
   # the displayed image all move. The caller has no widths to pass: the sizes
   # were chosen at deposit and only the stored URIs still record them.
@@ -86,7 +86,7 @@ RSpec.describe IiifAssetsJob, type: :job do
     allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: 'already'))
     allow(AtlasRb::Work).to receive(:assets).with(work_id)
                                             .and_return([rendition('small', 'pct:33'), rendition('large', '!1280,1280')])
-    allow(OriginalJp2).to receive(:call).with(path: source_path).and_return(result)
+    allow(IiifImageCreator).to receive(:call).with(path: source_path).and_return(result)
 
     described_class.new.perform(work_id, source_path, refresh: true)
 
@@ -96,7 +96,7 @@ RSpec.describe IiifAssetsJob, type: :job do
 
   it 'skips the renditions on a refresh of a work that has none' do
     allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: 'already'))
-    allow(OriginalJp2).to receive(:call).with(path: source_path).and_return(result)
+    allow(IiifImageCreator).to receive(:call).with(path: source_path).and_return(result)
 
     described_class.new.perform(work_id, source_path, refresh: true)
 
@@ -108,7 +108,7 @@ RSpec.describe IiifAssetsJob, type: :job do
   it 'prefers passed widths over the recovered set' do
     allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: 'already'))
     allow(AtlasRb::Work).to receive(:assets).with(work_id).and_return([rendition('small', 'pct:33')])
-    allow(OriginalJp2).to receive(:call).with(path: source_path).and_return(result)
+    allow(IiifImageCreator).to receive(:call).with(path: source_path).and_return(result)
 
     described_class.new.perform(work_id, source_path, derivative_widths: { small: 64 }, refresh: true)
 
@@ -117,7 +117,7 @@ RSpec.describe IiifAssetsJob, type: :job do
 
   it 'does not ask Atlas for the assets when it is not refreshing' do
     allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: nil))
-    allow(OriginalJp2).to receive(:call).with(path: source_path).and_return(result)
+    allow(IiifImageCreator).to receive(:call).with(path: source_path).and_return(result)
 
     described_class.new.perform(work_id, source_path)
 
@@ -126,7 +126,7 @@ RSpec.describe IiifAssetsJob, type: :job do
 
   it 'discards with a warning when vips cannot read the source (broken/encrypted PDF)' do
     allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: nil))
-    allow(OriginalJp2).to receive(:call).and_raise(Vips::Error, 'unsupported file format')
+    allow(IiifImageCreator).to receive(:call).and_raise(Vips::Error, 'unsupported file format')
     allow(Rails.logger).to receive(:warn)
 
     expect do
@@ -139,12 +139,12 @@ RSpec.describe IiifAssetsJob, type: :job do
 
   it 'noops when the staged file is missing' do
     allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: nil))
-    allow(OriginalJp2).to receive(:call)
+    allow(IiifImageCreator).to receive(:call)
     File.delete(source_path)
 
     described_class.new.perform(work_id, source_path)
 
-    expect(OriginalJp2).not_to have_received(:call)
+    expect(IiifImageCreator).not_to have_received(:call)
     expect(ThumbnailCreationJob).not_to have_received(:perform_now)
     expect(DerivativeCreationJob).not_to have_received(:perform_now)
   end

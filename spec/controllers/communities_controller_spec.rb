@@ -247,6 +247,13 @@ describe CommunitiesController do
         expect(response.body).to include('thumb-type-pill">People')
         expect(response.body).not_to include('thumb-type-pill">Person')
       end
+
+      # Container rows build against config.show, so this guards that the
+      # pill's text reaches screen readers there too.
+      it 'repeats the row\'s pill text in its heading for screen readers' do
+        get :show, params: { id: community.id }
+        expect(response.body).to include('<span class="visually-hidden">, People</span>')
+      end
     end
 
     # You may only add a child to a container you can edit — Atlas enforces the

@@ -34,11 +34,12 @@
           - @queue.items.group_by { |item| item['w'] }.each do |work_noid, entries|
             - entries.each_with_index do |entry, index|
               -# Two kinds of queued item: a content Blob (identified by its noid)
-              -# or an IIIF derivative rendition (identified by its `use`, which is
-              -# also its display label — renditions carry no persistent identifier).
+              -# or an IIIF derivative rendition (identified by its role token, since
+              -# renditions carry no persistent identifier). Both take their label
+              -# from the work's assets; a role falls back to its titleized token.
               - derivative = entry['d'].present?
-              - file_label = derivative ? entry['d'] : (@labels.dig(work_noid, entry['b']).presence || 'File')
-              - remove_params = derivative ? { work_noid: work_noid, use: entry['d'] } : { work_noid: work_noid, blob_noid: entry['b'] }
+              - file_label = derivative ? (@labels.dig(work_noid, entry['d']).presence || entry['d'].titleize) : (@labels.dig(work_noid, entry['b']).presence || 'File')
+              - remove_params = derivative ? { work_noid: work_noid, role: entry['d'] } : { work_noid: work_noid, blob_noid: entry['b'] }
               %tr
                 %td
                   - if index.zero?

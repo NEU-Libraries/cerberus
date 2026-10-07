@@ -8,6 +8,9 @@ export default class extends Controller {
     var editor = ace.edit("editor");
     editor.setTheme("ace/theme/eclipse");
     editor.session.setMode("ace/mode/xml");
+    // Ace types into a hidden textarea of its own, which is what a screen
+    // reader lands on; without a name it is announced as a bare "edit text".
+    editor.textInput.getElement().setAttribute('aria-label', 'MODS XML');
 
     // Sync the editor's current content into the hidden raw_xml field at
     // form-submit time. Single source of truth — doesn't matter whether

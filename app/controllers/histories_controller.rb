@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 # Deep diff pages reached from the Audit History tab's per-row "View" button:
-# rights and MODS. Read-only and admin-gated via `:read, :audit_event`.
+# rights and MODS. Read-only, gated by `:read, :audit_event` (admins and
+# delegated admins).
 # Type-agnostic — one controller serves Work, Collection and Community.
 # See docs/admin.md.
 class HistoriesController < ApplicationController
@@ -34,7 +35,7 @@ class HistoriesController < ApplicationController
     # surface rather than the thing looked up, which is a resource either way.
     def not_found_label = 'resource'
 
-    # Admin-only, the same gate as the Audit History tab. A refusal lands on
+    # The same gate as the Audit History tab. A refusal lands on
     # the shared 403 page via Authorizable's rescue_from CanCan::AccessDenied.
     def authorize_history!
       authorize! :read, :audit_event

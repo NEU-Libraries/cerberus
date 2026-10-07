@@ -8,23 +8,66 @@ Source files:
 - `app/helpers/thumbnails_helper.rb`
 - `app/jobs/iiif_assets_job.rb`
 - `app/jobs/caption_job.rb`
+- `app/services/iiif_image_creator.rb`
 - `app/services/streaming_only.rb`
 
 ## Seeding a Work's IIIF assets
 
 `IiifAssetsJob` seeds from one staged source: an image, or a PDF whose first
-page `OriginalJp2` rasterizes. `IngestDispatch` sends an image or a deposited PDF
+page `IiifImageCreator` rasterizes. `IngestDispatch` sends an image or a deposited PDF
 straight here. `PdfRenditionJob` sends the PDF it converts from Word or
 PowerPoint. Nothing sends a video's frame: see the next section.
 
-`OriginalJp2` mints two JP2s: an open copy capped at 500 pixels wide, and a gated
-full-resolution copy. This job PATCHes their Delegate URLs to Atlas, one at a
-time. The Delegates attach to the same FileSet, and parallel PATCHes race
-Atlas's optimistic lock on it.
+`IiifImageCreator` mints two pyramidal TIFFs: an open copy capped at 500 pixels
+wide, and a gated full-resolution copy. This job PATCHes their Delegate URLs to
+Atlas, one at a time. The Delegates attach to the same FileSet, and parallel
+PATCHes race Atlas's optimistic lock on it.
+
+### The image format
+
+The IIIF images are pyramidal, tiled TIFFs with JPEG compression at quality 90.
+Cantaloupe serves them through `Java2dProcessor`, which reads each pyramid level
+and its tiles directly, so a deep-zoom region never decodes a whole level.
+
+They replaced JPEG 2000. OpenJPEG, the library libvips and Cantaloupe both used
+for JP2, is marked unmaintained upstream. libvips and libtiff, which write the
+TIFFs, are actively maintained.
+
+Measured on a 3368×2113 photograph, against the JP2s that libvips wrote by
+default:
+
+| | JP2 | Pyramidal TIFF, JPEG Q90 |
+|---|---|---|
+| Full-resolution file | 2.1 MB | 4.1 MB |
+| Median deep-zoom tile, uncached | 36–42 ms | 12–15 ms |
+| Signed full-size download, uncached | 423–823 ms | 173–206 ms |
+| Fidelity to the source (PSNR) | 46.0 dB | 44.3 dB |
+
+**Keep every pyramid level tiled.** An untiled level makes Cantaloupe decode the
+whole level to serve one tile.
+
+**Do not switch the compression to LZW.** It is lossless but barely compresses
+photographs: the same image came out at 16.4 MB.
+
+**Raising the quality to 95 closes the fidelity gap** at a cost in storage. Both
+figures above are past the point where a difference is visible.
+
+**A derivative keeps only its ICC profile.** `IiifImageCreator` drops the source's
+EXIF, XMP and IPTC blocks before saving; the original in OCFL keeps them. There
+are three reasons:
+
+- EXIF can carry the GPS location where a photograph was taken.
+- TIFF stores IPTC in a field whose length must be a multiple of four bytes, so
+  libvips pads it and logs `VIPS-WARNING: rounding up IPTC data length` on every
+  save.
+- Cantaloupe never serves this metadata, so it only takes up space.
+
+Keep the ICC profile: colour accuracy depends on it. libvips' `strip` option
+would remove it too, which is why the creator names the fields to drop instead.
 
 ### Three asset families, each on its own pipe
 
-| Family | Source JP2 | When it is generated |
+| Family | Source TIFF | When it is generated |
 |---|---|---|
 | Thumbnails (`thumbnail`, `thumbnail_2x`, `preview`) | the **open**, display-capped copy | always. Catalog rows and show pages need them for every image-bearing Work |
 | `service_file` | the **gated** full-resolution copy | always. PATCHed onto the content FileSet |

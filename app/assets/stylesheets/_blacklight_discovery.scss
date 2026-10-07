@@ -9,6 +9,12 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  // The heading's 1.2 line height is shorter than some fonts' full depth
+  // (Segoe UI's is about 1.33em), so overflow: hidden cut the tails off g, p
+  // and y. The padding gives descenders room inside the clip; the margin gives
+  // the same amount back, so nothing below the title moves.
+  padding-bottom: 0.2em;
+  margin-bottom: calc(0.5rem - 0.2em);
 }
 
 /* Metadata section value line clamp */
@@ -222,7 +228,7 @@ dl.document-metadata.row {
 
   &__hint {
     margin-bottom: 0;
-    color: $gray-600;
+    color: $text-subtle;
   }
 
   // Shrink-wrapped, so a short list centres under the title rather than

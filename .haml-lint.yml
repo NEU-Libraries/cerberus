@@ -1,0 +1,81 @@
+# haml-lint runs here for accessibility only; RuboCop already owns the Ruby
+# style, and the HAML style linters would re-litigate templates that predate
+# them. Every linter is listed so a gem upgrade cannot switch one on unseen.
+# docs/accessibility.md explains the layers and how to run them.
+
+linters:
+  # Accessibility
+  AltText:
+    enabled: true
+  RepeatedId:
+    enabled: true
+    severity: error
+
+  # Placeholder text is not a WCAG failure while the field also has a label,
+  # and axe already fails any field that has none.
+  NoPlaceholders:
+    enabled: false
+
+  # Style: off
+  AlignmentTabs:
+    enabled: false
+  ClassAttributeWithStaticValue:
+    enabled: false
+  ClassesBeforeIds:
+    enabled: false
+  ConsecutiveComments:
+    enabled: false
+  ConsecutiveSilentScripts:
+    enabled: false
+  EmptyObjectReference:
+    enabled: false
+  EmptyScript:
+    enabled: false
+  FinalNewline:
+    enabled: false
+  HtmlAttributes:
+    enabled: false
+  IdNames:
+    enabled: false
+  ImplicitDiv:
+    enabled: false
+  Indentation:
+    enabled: false
+  InlineStyles:
+    enabled: false
+  InstanceVariables:
+    enabled: false
+  LeadingCommentSpace:
+    enabled: false
+  LineLength:
+    enabled: false
+  MultilinePipe:
+    enabled: false
+  MultilineScript:
+    enabled: false
+  ObjectReferenceAttributes:
+    enabled: false
+  RuboCop:
+    enabled: false
+  RubyComments:
+    enabled: false
+  SpaceBeforeScript:
+    enabled: false
+  SpaceInsideHashAttributes:
+    enabled: false
+  StrictLocals:
+    enabled: false
+  TagName:
+    enabled: false
+  TrailingEmptyLines:
+    enabled: false
+  TrailingWhitespace:
+    enabled: false
+  UnescapedHtml:
+    enabled: false
+  UnnecessaryInterpolation:
+    enabled: false
+  UnnecessaryStringOutput:
+    enabled: false
+  ViewLength:
+    enabled: false

@@ -360,6 +360,9 @@ docker exec cerberus-web-1 bundle exec rake browser
 CI does not run this lane, and a default rspec run skips the `:browser` tag. A
 green pipeline therefore says nothing about these specs.
 
+The lane includes the axe accessibility audit. [`accessibility.md`](accessibility.md)
+covers it, along with `bin/a11y-lint` and the Claude Code hook that runs it.
+
 ## Migrations are a pause point
 
 When a change adds a file under `db/migrate/`, stop and run the migration

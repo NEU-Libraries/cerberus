@@ -11,6 +11,9 @@ Source files:
 - `app/controllers/admin/tombstones_controller.rb`
 - `app/helpers/admin/tombstones_helper.rb`
 - `app/services/tombstoned_items.rb`
+- `app/services/tombstone_registry_action.rb`
+- `app/jobs/tombstone_bulk_job.rb`
+- `app/javascript/controllers/bulk_select_controller.js`
 - `app/models/tombstoned_search_builder.rb`
 - `app/services/structural_parents.rb`
 - `app/controllers/admin/files_controller.rb`
@@ -151,8 +154,8 @@ action between controllers.
 
 | Surface | Gate | Why |
 |---|---|---|
-| Tombstone list and restore | `:admin` or the devolved-admin tier | Atlas grants `:restore` to both, in `apply_admin_delegate_abilities` |
-| Permanent delete | `:admin` only | Atlas omits `:destroy` from the delegate abilities, so a wider gate here only buys a 403 from Atlas |
+| Tombstone list, restore and bulk restore | `:admin` or the devolved-admin tier | Atlas grants `:restore` to both, in `apply_admin_delegate_abilities` |
+| Permanent delete and bulk delete | `:admin` only | Atlas omits `:destroy` from the delegate abilities, so a wider gate here only buys a 403 from Atlas |
 | Replace a file, roll back a version | `:admin` or the devolved-admin tier | Atlas grants Blob `:update` to every standard user, and its rollback checks `:update`. It grants `:read_versions` to the delegate tier |
 | Reindex a Work or a Set | `:admin` or the devolved-admin tier | Atlas applies no per-user check on this path at all |
 | The ledger | `:admin` or the devolved-admin tier | the same audience as deposit triage |
@@ -160,7 +163,7 @@ action between controllers.
 | Associated works | `:admin` or the devolved-admin tier | Atlas grants `:associate` to both. A delegate's reads stay group-gated, so a Work they cannot read gets the forbidden page, and an edge to one shows its bare NOID |
 | Communities registry | `:admin` or the devolved-admin tier | it only lists and links, through the gated search, so a delegate sees what they may discover. Its People link is `:admin` only, as the page it opens is |
 | A community's people (`Admin::CommunityPeopleController`) | `:admin` only | Atlas grants Person `:update` to admins and the system principal alone. It is a hub page rather than a tab on the community's Edit page, because people who may edit a community's details must not be offered its people |
-| Rights and MODS history | `:read, :audit_event` | the same gate as the Audit History tab it is reached from. Only `:admin` holds it, through `can :manage, :all` |
+| The History tab, and the rights and MODS history pages | `:admin` or the devolved-admin tier, as `:read, :audit_event` | Atlas grants the delegate tier `:read_history` on Works and containers, and still checks `:read` on the resource, so a delegate reads the history of what they can open. The history of a resource that no longer resolves stays admin-only in Atlas |
 
 `HistoriesController` is the odd one out. It sits outside `Admin::`, inherits
 `ApplicationController`, and asks CanCan directly rather than using
@@ -245,7 +248,9 @@ So the job records one `tombstone_cascade` ledger entry, through
 `CompletionNotice`, whose payload lists every NOID it withdrew, with its type,
 and anything it could not. A developer restores from that list, parents first,
 because Atlas refuses to restore a child under a tombstoned parent. The
-registry still restores one item at a time.
+registry's bulk restore can do the same from the page: search for the
+container's PID, select everything, and restore. See "Bulk restore and bulk
+delete" below.
 
 The Requests & activity row shows only the summary. The list is in the
 `AdminNotice` payload, under `withdrawn`, as `{ "noid", "type" }` pairs, with
@@ -309,11 +314,75 @@ return nothing. So its last processor step drops that clause and adds the
 inclusion. The Move tool (`Admin::ReparentController`) borrows the configuration
 the same way.
 
-`TombstonedItems` pages 50 rows at a time. With no search it sorts by
-`updated_at_dtsi` descending. A tombstone is the last write a resource takes, so
-that is the withdrawal time, and the item just withdrawn in error comes first.
+`TombstonedItems` pages 50 rows at a time by default; `per_page` picks 10, 20,
+50 or 100, and any other value falls back to 50. With no search it sorts by
+`tombstoned_at_dtsi` descending, the withdrawal time, so the item just withdrawn
+in error comes first. A record tombstoned before Atlas stored that field has no
+value until it is reindexed, and sorts last.
 The `q` param searches titles and PIDs, and ranks by relevance instead. v1 holds
 more than 8,000 tombstoned items, so a migrated registry needs the search.
+
+### A search lists a container's descendants
+
+Purging a container means purging everything it holds first, tombstoned members
+included. So when a search matches a Collection or Community, the listing adds
+every tombstoned item beneath it. The admin can start from the container's PID
+and see the whole subtree on one page.
+
+Only Collections and Communities carry `ancestor_ids_ssim`, tombstoned or not.
+Works never do, because a re-parent would then have to reindex every Work beneath
+the moved container. So `TombstonedItems` finds the descendants in two raw index
+reads, the same two Atlas's `DescendantWorksQuery` uses:
+
+1. `{!terms f=ancestor_ids_ssim}` over the matched containers' NOIDs returns
+   every container beneath them, at any depth. The values are bare NOIDs.
+2. `{!terms f=a_member_of_ssi}` over the matched containers and those nested
+   ones returns their members, Works included. The values are `id-<uuid>`.
+
+Linked membership is a separate field, so a Work linked into the container is not
+swept in. Atlas refuses to create anything under a tombstoned container, so
+everything beneath one is itself tombstoned and the listing is complete. The
+search's own matches are capped at `MATCH_LIMIT`, so a broad query cannot fan out
+without bound.
+
+When the reads find descendants, the listing becomes an identity filter
+(`MembershipQuery.identity_fq`) over the matches and their descendants, sorted
+by withdrawal time like the unfiltered list. When it finds none, the search runs
+as a plain relevance-ranked query.
+
+### The withdrawal date filter
+
+`from` and `to` narrow the list by withdrawal date, both inclusive, as a range
+on `tombstoned_at_dtsi` in whole UTC days. The upper bound is the start of the
+day after `to`, exclusive. A date the controller cannot parse is ignored rather
+than refused. Atlas also indexes the date as the string `tombstoned_at_ssi`;
+filter on the date field, which compares as a date.
+
+### Bulk restore and bulk delete
+
+Each row has a checkbox, and the header has a select-all for the visible page.
+Checking any row reveals a well with Bulk restore and, for a full admin, Bulk
+delete. The checkboxes sit outside the well's form, because each row already
+holds its own Restore and Delete forms and forms cannot nest. They join the bulk
+form through the HTML `form` attribute.
+
+`POST /admin/tombstones/bulk` queues `TombstoneBulkJob` and returns at once. The
+gates are the single-item ones: restore is open to the delegate tier, delete is
+:admin only. The action takes at most one page at the largest page size.
+
+Atlas refuses to restore a child under a tombstoned parent, and refuses to purge
+a container that still holds members. So the job orders the selection by depth
+within the selection, following each item's `a_member_of_ssi`. Restores run
+shallowest first, and deletes deepest first. An item that is no longer
+tombstoned when the job runs is skipped and listed as such.
+
+Both the single-item actions and the job call Atlas through
+`TombstoneRegistryAction`, which retries a 409 lock conflict and turns each
+response into `:ok` or `:failed`, or the refusal the admin can act on:
+`:tombstoned_parent` for a restore, `:has_children` for a purge. The job records one
+`tombstone_bulk` ledger entry, through `CompletionNotice`, with `done`,
+`failures` and `skipped` in its payload, and the admin gets the same summary in
+their inbox.
 
 ### The Parent column
 
@@ -338,18 +407,22 @@ Restore and destroy are outside atlas_rb's typed-error middleware,
 `RaiseOnResourceError`, which fires only on a narrow set of write paths
 (re-parent, linked members, associations, Compilations, and a few others). Both
 bindings return the raw `Faraday::Response`, so a non-2xx never raises. That is
-why both actions test `success?` themselves: drop the check and a refused
+why `TombstoneRegistryAction` tests `success?` itself: drop the check and a refused
 restore reports as done. A value that does not respond to `success?` counts as a
 success. A transport-level failure, such as the host being down, still raises
-`Faraday::Error`. Both actions log it and flash their failure alert.
+`Faraday::Error`. `TombstoneRegistryAction` logs it and reports `:failed`.
 
-A failed restore flashes `RESTORE_FAILED`, which names the likely cause: a
-tombstoned parent has to be restored first.
+A restore refused because the item's parent is still tombstoned earns its own
+message. Atlas answers with a 422 whose `code` is `tombstoned_parent`, so the
+row flashes `RESTORE_PARENT_TOMBSTONED`, and the bulk job's ledger entry tells
+the admin to restore the parent first. Any other failed restore flashes the
+generic `RESTORE_FAILED`.
 
 A failed purge earns its own message in one case: a container that still has
 members. Atlas answers with a 422 whose body carries the machine token
 `has_children` on `code` and the human message on `error`. That is the reverse
-of the re-parent and linked-member envelopes, so `purge_error_code` reads `code`.
+of the re-parent and linked-member envelopes, so `TombstoneRegistryAction`
+reads `code`.
 `PURGE_HAS_CHILDREN` says that tombstoned members count, because Atlas counts
 them here. The tombstone refusal counts only live members. The two differ
 because a purge cannot be undone, so a member left behind is orphaned for good.

@@ -17,6 +17,11 @@ class Ability
   private
 
     def apply_group_abilities(user)
+      # Atlas grants delegates :read_history on Works and containers, and checks
+      # read on the resource too, so every history surface here starts from a
+      # resource the user can open.
+      can :read, :audit_event if user.admin_delegate?
+
       # Edit-equivalence has to grant read too. Without it a depositor who sets
       # their own collection Private with no group rows, and a group granted
       # Manage but not View, both keep the Edit page and get a 403 on the object.

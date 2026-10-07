@@ -7,8 +7,8 @@
 # stable and value-equality drives include?/remove:
 #
 # - content Blob:        `{ 'w' => work_noid, 'b' => blob_noid }`
-# - IIIF derivative:     `{ 'w' => work_noid, 'd' => use }` (the S/M/L rendition
-#                        `use`, e.g. the same value its download route takes)
+# - IIIF derivative:     `{ 'w' => work_noid, 'd' => role }` (the S/M/L rendition's
+#                        Atlas role token, e.g. small_image, as its route takes)
 #
 # The labeled filename + the bytes are fetched at download time, never stored.
 class DownloadQueue
@@ -37,8 +37,8 @@ class DownloadQueue
     items.include?(blob_entry(work_noid, blob_noid))
   end
 
-  def include_derivative?(work_noid, use)
-    items.include?(derivative_entry(work_noid, use))
+  def include_derivative?(work_noid, role)
+    items.include?(derivative_entry(work_noid, role))
   end
 
   # @return [Symbol] :ok, :already (no-op duplicate), or :full (cap reached)
@@ -46,16 +46,16 @@ class DownloadQueue
     push(blob_entry(work_noid, blob_noid))
   end
 
-  def add_derivative(work_noid, use)
-    push(derivative_entry(work_noid, use))
+  def add_derivative(work_noid, role)
+    push(derivative_entry(work_noid, role))
   end
 
   def remove(work_noid, blob_noid)
     replace(items - [blob_entry(work_noid, blob_noid)])
   end
 
-  def remove_derivative(work_noid, use)
-    replace(items - [derivative_entry(work_noid, use)])
+  def remove_derivative(work_noid, role)
+    replace(items - [derivative_entry(work_noid, role)])
   end
 
   def clear
@@ -84,7 +84,7 @@ class DownloadQueue
       { 'w' => work_noid.to_s, 'b' => blob_noid.to_s }
     end
 
-    def derivative_entry(work_noid, use)
-      { 'w' => work_noid.to_s, 'd' => use.to_s }
+    def derivative_entry(work_noid, role)
+      { 'w' => work_noid.to_s, 'd' => role.to_s }
     end
 end

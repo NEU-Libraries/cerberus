@@ -27,7 +27,7 @@ module ZipEntryWriter
     # sink — never buffer the whole JPEG. A mid-stream failure is recorded, not
     # raised.
     def write_derivative(zip, folder, delegate, manifest, errors)
-      name = derivative_filename(delegate)
+      name = DerivativeCreator.filename(delegate[:role], folder)
       url = IiifSigner.sign_url(internal_iiif_url(delegate[:uri]))
       zip.write_stored_file([folder, name].compact.join('/')) do |sink|
         Faraday.get(url) { |req| req.options.on_data = proc { |chunk, _received| sink << chunk } }
@@ -40,10 +40,6 @@ module ZipEntryWriter
     # Delegates are pointer-only and carry a `uri`; content Blobs do not.
     def content_blob?(asset)
       asset[:uri].blank?
-    end
-
-    def derivative_filename(delegate)
-      "#{delegate[:use].to_s.parameterize.presence || 'derivative'}.jpg"
     end
 
     # Delegate URIs carry Cantaloupe's PUBLIC host, but the packer runs

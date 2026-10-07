@@ -54,22 +54,24 @@ RSpec.describe 'Download queue', type: :request do
     expect(response.body).to include('Your download queue is empty')
   end
 
-  it 'adds and removes an IIIF derivative rendition by use' do
-    post download_queue_items_path, params: { work_noid: work.id, use: 'Large Image' }
+  # The work has no Large rendition here, so the label falls back to the
+  # titleized role token.
+  it 'adds and removes an IIIF derivative rendition by role' do
+    post download_queue_items_path, params: { work_noid: work.id, role: 'large_image' }
     get download_queue_path
     expect(response.body).to include('1 file').and include('Large Image')
 
-    delete download_queue_item_path, params: { work_noid: work.id, use: 'Large Image' }
+    delete download_queue_item_path, params: { work_noid: work.id, role: 'large_image' }
     follow_redirect!
     expect(response.body).to include('Your download queue is empty')
   end
 
-  it 'keys the derivative row turbo_stream swap on work + slugged use' do
+  it 'keys the derivative row turbo_stream swap on work + role' do
     post download_queue_items_path,
-         params:  { work_noid: work.id, use: 'Large Image' },
+         params:  { work_noid: work.id, role: 'large_image' },
          headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
 
-    expect(response.body).to include("queue-control-#{work.id}-large-image")
+    expect(response.body).to include("queue-control-#{work.id}-large_image")
   end
 
   it 'clears the queue' do

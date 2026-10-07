@@ -189,6 +189,19 @@ describe Ability do
   end
 
   context 'when the user is not an Atlas :admin' do
+    # The devolved-admin tier: :privileged plus the admin group, jointly.
+    it 'can :read :audit_event as a delegated admin' do
+      delegate = User.new(nuid:   '000000002',
+                          groups: [Permissions::STAFF_EDIT_GROUP, Permissions::ADMIN_GROUP],
+                          role:   'privileged')
+      expect(described_class.new(delegate)).to be_able_to(:read, :audit_event)
+    end
+
+    it 'cannot :read :audit_event in the admin group without the :privileged role' do
+      user = User.new(nuid: '000000010', groups: [Permissions::ADMIN_GROUP], role: 'standard')
+      expect(described_class.new(user)).not_to be_able_to(:read, :audit_event)
+    end
+
     it 'cannot :read :audit_event regardless of group memberships' do
       non_admin = User.new(nuid:   '000000002',
                            groups: ['editors', Permissions::STAFF_EDIT_GROUP],

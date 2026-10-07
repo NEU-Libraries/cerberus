@@ -12,7 +12,7 @@ module Admin
     skip_before_action :require_admin, except: [:destroy]
     before_action :require_admin_or_delegate, except: [:destroy]
 
-    breadcrumb_for 'Restore a tombstoned item', :admin_tombstones_path
+    breadcrumb_for 'Tombstoned items', :admin_tombstones_path
 
     include Blacklight::Configurable
 
@@ -24,8 +24,10 @@ module Admin
     # a Blob, which have no business being restored from here.
     RESTORABLE_TYPES = %w[Work Collection Community].freeze
 
-    RESTORE_FAILED = 'Restore could not be completed — a tombstoned parent must be ' \
-                     'restored first. Restore that, then try again.'
+    RESTORE_PARENT_TOMBSTONED = 'Restore refused — this item’s parent is still tombstoned. ' \
+                                'Restore the parent first, then try again.'
+
+    RESTORE_FAILED = 'Restore could not be completed.'
 
     PURGED = 'Permanently deleted. The item, its files and every preserved copy are gone; ' \
              'the audit record of the deletion remains.'
@@ -35,8 +37,15 @@ module Admin
     PURGE_HAS_CHILDREN = 'Permanent deletion refused — this container still has members, ' \
                          'and tombstoned members count. Permanently delete each one first.'
 
+    # One page at the largest page size; a form posting more is not this page.
+    BULK_LIMIT = TombstonedItems::PER_PAGE_OPTIONS.max
+
     def index
-      @response = TombstonedItems.call(scope: self, page: params[:page], query: params[:q])
+      @per_page = TombstonedItems::PER_PAGE_OPTIONS.include?(params[:per_page].to_i) ? params[:per_page].to_i : nil
+      @from = parsed_date(params[:from])
+      @to = parsed_date(params[:to])
+      @response = TombstonedItems.call(scope: self, page: params[:page], query: params[:q],
+                                       per_page: @per_page, from: @from, to: @to)
       @parents = StructuralParents.call(documents: @response.documents)
     end
 
@@ -45,15 +54,13 @@ module Admin
         return redirect_to(admin_tombstones_path, alert: 'Unknown resource type — nothing was restored.')
       end
 
-      if restored?
+      case TombstoneRegistryAction.restore(params[:id])
+      when :ok
         flash[:notice_link] = { 'label' => 'View it', 'path' => resource_path(params[:type], params[:id]) }
         redirect_to admin_tombstones_path, notice: 'The item has been restored and is now discoverable.'
-      else
-        redirect_to admin_tombstones_path, alert: RESTORE_FAILED
+      when :tombstoned_parent then redirect_to admin_tombstones_path, alert: RESTORE_PARENT_TOMBSTONED
+      else redirect_to admin_tombstones_path, alert: RESTORE_FAILED
       end
-    rescue Faraday::Error => e
-      Rails.logger.error("Admin::TombstonesController#restore: #{e.class} #{e.message}")
-      redirect_to admin_tombstones_path, alert: RESTORE_FAILED
     end
 
     def destroy
@@ -61,10 +68,22 @@ module Admin
         return redirect_to(admin_tombstones_path, alert: 'Unknown resource type — nothing was deleted.')
       end
 
-      redirect_to admin_tombstones_path, **purge_outcome
-    rescue Faraday::Error => e
-      Rails.logger.error("Admin::TombstonesController#destroy: #{e.class} #{e.message}")
-      redirect_to admin_tombstones_path, alert: PURGE_FAILED
+      redirect_to admin_tombstones_path, **purge_flash(TombstoneRegistryAction.purge(params[:id]))
+    end
+
+    # Restore is open to the devolved-admin tier; delete stays :admin only, the
+    # same split as the single-item actions above.
+    def bulk
+      action = params[:bulk_action].to_s
+      return require_admin if action == 'delete' && !current_user.admin?
+
+      noids = bulk_noids
+      unless TombstoneBulkJob::ACTIONS.include?(action) && noids.any?
+        return redirect_to(admin_tombstones_path, alert: 'Select at least one item, then choose an action.')
+      end
+
+      TombstoneBulkJob.perform_later(action: action, noids: noids)
+      redirect_back_or_to admin_tombstones_path, notice: bulk_notice(action, noids.size)
     end
 
     private
@@ -73,33 +92,30 @@ module Admin
         RESTORABLE_TYPES.include?(params[:type])
       end
 
-      # Restore is not one of atlas_rb's typed-error paths, so a non-2xx comes
-      # back as a plain Faraday::Response instead of raising. Drop the success?
-      # check and a refused restore reports as done.
-      def restored?
-        response = AtlasRb::Admin::Resource.restore(params[:id])
-        !response.respond_to?(:success?) || response.success?
+      # A fresh hash each time: redirect_to deletes the flash keys from the hash
+      # it is given, so a shared constant would lose its message after one use.
+      def purge_flash(outcome)
+        case outcome
+        when :ok then { notice: PURGED }
+        when :has_children then { alert: PURGE_HAS_CHILDREN }
+        else { alert: PURGE_FAILED }
+        end
       end
 
-      # Destroy sits outside atlas_rb's typed-error middleware too, so the
-      # container refusal arrives as a plain 422 and has to be read off the
-      # body. It is the one failure the admin can act on.
-      def purge_outcome
-        response = AtlasRb::Admin::Resource.destroy(params[:id], confirm: :i_understand)
-        return { notice: PURGED } if !response.respond_to?(:success?) || response.success?
-        return { alert: PURGE_HAS_CHILDREN } if purge_error_code(response) == 'has_children'
-
-        { alert: PURGE_FAILED }
+      def bulk_noids
+        Array(params[:ids]).compact_blank.uniq.first(BULK_LIMIT)
       end
 
-      # Atlas's refusal envelope carries the human message on `error` and the
-      # machine token on `code` — the reverse of the re-parent and linked-member
-      # envelopes, so read `code` here, not the typed errors' discriminator.
-      def purge_error_code(response)
-        body = JSON.parse(response.body.to_s)
-        body['code'] if body.is_a?(Hash)
-      rescue JSON::ParserError
+      def parsed_date(value)
+        Date.iso8601(value) if value.present?
+      rescue Date::Error
         nil
+      end
+
+      def bulk_notice(action, count)
+        verb = action == 'delete' ? 'Permanent deletion' : 'Restore'
+        "#{verb} of #{count} item#{'s' unless count == 1} has started. " \
+          'The result will arrive in your inbox and the admin ledger.'
       end
   end
 end

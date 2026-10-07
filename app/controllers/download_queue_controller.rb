@@ -15,12 +15,12 @@ class DownloadQueueController < ApplicationController
   end
 
   # Add a content Blob or an IIIF derivative rendition (turbo-stream swaps the
-  # navbar badge + the row's button). A derivative passes `use:` (no blob noid),
+  # navbar badge + the row's button). A derivative passes `role:` (no blob noid),
   # which doubles as its label in the swapped-in "In queue" state.
   def create
     @queue = DownloadQueue.new(session)
     @work_noid = params[:work_noid].to_s
-    @use = params[:use].to_s.presence
+    @role = params[:role].to_s.presence
     @blob_noid = params[:blob_noid].to_s
     @result = add_current_item
     warn_if_full
@@ -33,8 +33,8 @@ class DownloadQueueController < ApplicationController
 
   def destroy
     queue = DownloadQueue.new(session)
-    if params[:use].present?
-      queue.remove_derivative(params[:work_noid].to_s, params[:use].to_s)
+    if params[:role].present?
+      queue.remove_derivative(params[:work_noid].to_s, params[:role].to_s)
     else
       queue.remove(params[:work_noid].to_s, params[:blob_noid].to_s)
     end
@@ -48,9 +48,9 @@ class DownloadQueueController < ApplicationController
 
   private
 
-    # Add the request's item — a derivative rendition (by use) or a Blob (by noid).
+    # Add the request's item — a derivative rendition (by role) or a Blob (by noid).
     def add_current_item
-      @use ? @queue.add_derivative(@work_noid, @use) : @queue.add(@work_noid, @blob_noid)
+      @role ? @queue.add_derivative(@work_noid, @role) : @queue.add(@work_noid, @blob_noid)
     end
 
     def warn_if_full
@@ -64,13 +64,20 @@ class DownloadQueueController < ApplicationController
       AtlasRb::Resource.find_many(work_noids).index_by { |digest| digest['noid'] }
     end
 
-    # work_noid → { blob_noid => label }, so the page can name each queued file.
+    # work_noid → { blob_noid or role => label }, so the page can name each
+    # queued file. A Blob is keyed by its noid, a rendition by its role token.
     def labels_for(work_noids)
       work_noids.index_with do |noid|
         AtlasRb::Work.assets(noid, nuid: viewer_nuid)
-                     .to_h { |asset| [asset.noid, asset.label.presence || asset[:use]] }
+                     .each_with_object({}) { |asset, labels| label_asset(labels, asset) }
       rescue Faraday::Error, JSON::ParserError
         {}
       end
+    end
+
+    def label_asset(labels, asset)
+      label = asset.label.presence || asset[:use]
+      key = asset[:uri].present? ? asset[:role] : asset.noid
+      labels[key] = label if key.present?
     end
 end

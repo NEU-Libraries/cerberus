@@ -24,7 +24,7 @@
   }
 
   &__step {
-    color: $gray-500;
+    color: $text-subtle;
 
     &.is-active { color: $blue; }
   }
@@ -73,7 +73,7 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-weight: 600;
-    color: $gray-500;
+    color: $text-subtle;
   }
 
   &__title {
@@ -125,7 +125,7 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-weight: 600;
-    color: $gray-500;
+    color: $text-subtle;
     margin-right: 0.15rem;
   }
 

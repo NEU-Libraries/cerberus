@@ -13,8 +13,8 @@
             = render 'shared/scoped_search', path: community_path(@community.id), label: 'Search this community'
         %h3.d-inline
           = enhanced_text(@community.title)
-        %h5.d-inline.text-black-50
-          %span.fa-solid.fa-users.ps-2.pe-1
+        %h5.d-inline.text-subtle
+          %span.fa-solid.fa-users.ps-2.pe-1{'aria-hidden' => 'true'}
           Community
         .clearfix.pt-3
         .container-description

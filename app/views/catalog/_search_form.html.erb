@@ -1,6 +1,6 @@
 
   <h5 class="mt-1">
-    <i class="fa-solid fa-box-archive fa-sm d-none d-xl-inline-block"></i>
+    <i class="fa-solid fa-box-archive fa-sm d-none d-xl-inline-block" aria-hidden="true"></i>
     <a class="navbar-brand" href="/">
       DRS · Digital Repository Service
     </a>
@@ -22,9 +22,9 @@
           params: params.except(:q, :search_field, *request.path_parameters.keys).to_unsafe_h
         ) %>
     <div class="input-group">
-      <input type="text" class="form-control" placeholder="Search..." id="q" name="q" value="<%= params[:q] %>">
+      <input type="text" class="form-control" placeholder="Search..." id="q" name="q" value="<%= params[:q] %>" aria-label="Search the repository">
       <button class="btn btn-primary" type="submit">
-        <i class="fa-solid fa-magnifying-glass"></i>
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
         Search
       </button>
     </div>

@@ -18,10 +18,12 @@ RSpec.describe 'Derivative downloads', type: :request do
                                           .and_return(AtlasRb::Mash.new(in_progress: false, depositor: '000000004'))
   end
 
-  def stub_tier(gated:, permission:, nuid:, use: 'large_image')
+  # Atlas sends both a display label (`use`) and a stable token (`role`); the
+  # route matches the token.
+  def stub_tier(gated:, permission:, nuid:, role: 'large_image')
     allow(AtlasRb::Work).to receive(:assets).with(work_id, nuid: nuid)
-                                            .and_return([AtlasRb::Mash.new(use: use, uri: uri, gated: gated,
-                                                                           permission: permission)])
+                                            .and_return([AtlasRb::Mash.new(use: 'Large Image', role: role, uri: uri,
+                                                                           gated: gated, permission: permission)])
   end
 
   it 'redirects a public tier to a size-bound signed URL for anyone (guest)' do
@@ -41,8 +43,6 @@ RSpec.describe 'Derivative downloads', type: :request do
 
     get derivative_download_path(work_id, 'large_image')
 
-    # The route param here is the tier `use` verbatim; in the app that is a
-    # display label ("Large Image"), which parameterizes to "large-image".
     disposition = CGI.unescape(response.location[/response-content-disposition=(.+)\z/, 1])
     expect(disposition).to eq(%(attachment; filename="large_image_#{work_id}.jpg"; ) +
                               %(filename*=UTF-8''large_image_#{work_id}.jpg))
@@ -75,12 +75,21 @@ RSpec.describe 'Derivative downloads', type: :request do
     expect(response).to have_http_status(:forbidden)
   end
 
-  it '404s an unknown tier' do
+  it '404s a tier the work does not have' do
     stub_tier(gated: false, permission: ['public'], nuid: nil)
 
-    get derivative_download_path(work_id, 'nonexistent')
+    get derivative_download_path(work_id, 'small_image')
 
     expect(response).to have_http_status(:not_found)
+  end
+
+  it 'routes only role tokens, so a display-label URL never reaches the controller' do
+    stub_tier(gated: false, permission: ['public'], nuid: nil)
+
+    get "/works/#{work_id}/derivatives/Large%20Image"
+
+    expect(response).to have_http_status(:not_found)
+    expect(AtlasRb::Work).not_to have_received(:assets)
   end
 
   context 'under an active embargo' do

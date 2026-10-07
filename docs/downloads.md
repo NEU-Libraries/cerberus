@@ -14,7 +14,7 @@ Source files:
 - `app/services/queue_zip_packer.rb`
 - `app/services/metadata_export_packer.rb`
 - `app/services/iiif_signer.rb`
-- `app/services/original_jp2.rb`
+- `app/services/iiif_image_creator.rb`
 - `app/services/derivative_creator.rb`
 - `app/jobs/deposit_derivatives_job.rb`
 - `app/jobs/pdf_rendition_job.rb`
@@ -86,8 +86,11 @@ derivatives.
 
 Those tiers' Delegate URIs live on the gated Cantaloupe host, which serves only
 a signed request. Rather than link them directly, the downloads UI routes each
-tier through this controller. The controller finds the Delegate whose `use`
-matches the request, and raises `Authorizable::ResourceNotFound` when none does.
+tier through this controller, at `/works/:work_id/derivatives/:role`. The route
+admits only the three role tokens (`small_image`, `medium_image`,
+`large_image`), so a URL never carries the `use` label's space. The controller
+finds the Delegate whose `role` matches, and raises
+`Authorizable::ResourceNotFound` when none does.
 It re-reads the tier's per-viewer gate, refuses an unfinished or embargoed Work,
 and authorizes the effective user — reusing the app's `:read` Ability via
 `DerivativesHelper`. It then 302s to a short-lived signed URL. The signature
@@ -110,11 +113,40 @@ it after signing.
 
 ### Naming a tier's file
 
-`derivative_filename` mirrors the original row's `original_<noid>.jpg`: the tier,
-then the Work, as `<slug>_<work_noid>.jpg`. The slug is the parameterized `use`,
-or `derivative` when that is blank. Three tiers of three Works therefore do not
-collide in one Downloads folder. The tier slug matches the entry names
-`ZipEntryWriter` writes into a zip.
+`DerivativeCreator.filename` mirrors the original row's `original_<noid>.jpg`:
+the role, then the Work, as `<role>_<work_noid>.jpg`, for example
+`small_image_fttf0bf.jpg`. Three tiers of three Works therefore do not collide in
+one Downloads folder. The downloads row shows this name, the redirect asks
+Cantaloupe to save under it, and `ZipEntryWriter` uses it inside a zip, so all
+three agree.
+
+### Estimating a tier's size
+
+A tier has no size until Cantaloupe renders it, so the downloads row shows an
+estimate, such as "~59 KB". Screen readers hear "about 59 KB": the tilde is
+hidden from them and a visually hidden "about" takes its place.
+
+`DerivativeSizeEstimate` works from the gated TIFF the tier is cut from, which
+sits in the derivatives root the web container already mounts:
+
+1. Read the TIFF's dimensions from its header, and its size from the file.
+2. Divide the size by the full-size pixel count times 4/3, since the pyramid's
+   smaller levels add about a third, to get the source's bytes per pixel.
+3. Work out the tier's pixel count from the size token in its URI: `pct:`, a
+   `!w,h` bounding box, or `full`.
+4. Multiply the two, then by `RATIO`, 0.23.
+
+The source's bytes per pixel is what makes this work. It captures how
+compressible the content is: a plain scanned page and a detailed photograph
+differ by more than ten times. Calibrated against 72 real renditions (24
+images, three tiers each), the estimate's median error is 13%, 27% at the 90th
+percentile, and 60% at worst. A single fixed bytes-per-pixel figure did far
+worse: a 24% median error, and seven times too large at worst.
+
+The estimate is cached for good once found, because a TIFF never changes. A
+miss is not cached, so a TIFF that appears later still gets its size. When the
+TIFF or the size token cannot be read, the row shows no size rather than a
+wrong one.
 
 ## Building a ZIP
 
@@ -139,7 +171,7 @@ drifting apart.
   straight into the sink, so memory stays flat regardless of set or file size. A
   derivative rides `Faraday`'s `on_data` for the same reason — the whole JPEG is
   never held.
-- **STORE, not deflate.** DRS payloads — JP2, PDF, images, curated zips — are
+- **STORE, not deflate.** DRS payloads — TIFF, PDF, images, curated zips — are
   already compressed, so deflating burns CPU for about no gain.
 - **Record a failure, do not raise it.** Once the response headers are out the
   archive cannot be un-sent, so a mid-stream fetch failure becomes an
@@ -175,8 +207,8 @@ names an entry from `original_filename`.
 `extension_of` takes the extension only — from `original_filename`, else a MIME
 guess, else `bin`.
 
-A derivative has no filename, so `derivative_filename` names it by the slugged
-use, for example `small-image.jpg`.
+A derivative has no filename, so `DerivativeCreator.filename` names it, for
+example `small_image_fttf0bf.jpg`.
 
 ### Reaching Cantaloupe from the server
 
@@ -198,9 +230,9 @@ Delegates, the small/medium/large tiers among them.
 
 `QueueZipPacker` packs both kinds. Each queue entry is
 `{ 'w' => work_noid, 'b' => blob_noid }` for a content Blob, or
-`{ 'w' => work_noid, 'd' => use }` for a derivative rendition. It groups by
+`{ 'w' => work_noid, 'd' => role }` for a derivative rendition. It groups by
 Work, then matches the Work's assets against those two sets: Blobs by noid,
-renditions by use. A content Blob goes through `write_asset`; a rendition goes
+renditions by role. A content Blob goes through `write_asset`; a rendition goes
 through `write_derivative`, which fetches it from Cantaloupe over a signed URL.
 A failed assets read for one Work becomes an `ERRORS.txt` line, and the packer
 moves on to the next Work.
@@ -351,7 +383,7 @@ identifier, and a token embedded there rides along on every one. Being carried
 in the URL, it needs neither a cookie nor credentialed CORS, so it works with
 IIIF's mandated cross-origin `ACAO:*`.
 
-`sign_identifier` rewrites the identifier to `<exp>~<sig>~gated-<uuid>.jp2`. The
+`sign_identifier` rewrites the identifier to `<exp>~<sig>~gated-<uuid>.tif`. The
 `~` avoids Cantaloupe's `;` meta-delimiter and keeps the identifier slash-free.
 
 ### Why the identifier's expiry is quantized
@@ -369,21 +401,20 @@ has a full `ttl` left, and tiles never 403 mid-view near a boundary.
 The delegate reads whatever `exp` it is handed, so its HMAC message,
 `<identifier>|<exp>`, is unchanged by the quantization.
 
-## Minting the JP2s a download serves
+## Minting the images a download serves
 
-`OriginalJp2` mints two JP2s from one source. The first is a capped display copy
+`IiifImageCreator` mints two pyramidal TIFFs from one source. The first is a capped display copy
 for thumbnails and preview, served openly. The second is a full-resolution copy
 for small/medium/large downloads and deep zoom, served only behind the
 delegate. It returns both IIIF bases as `open_base` and `gated_base`.
 `IiifAssetsJob` calls it — see `docs/derivatives.md`.
 
-**Every source is converted to 3-band sRGB before encoding.** A grayscale or
-CMYK source otherwise yields a JP2 whose header parses, so `info.json`
-succeeds. Cantaloupe cannot decode its codestream, though, so every render
-answers 501.
+**Every source is converted to three-band sRGB before encoding.** The TIFFs
+are JPEG-compressed, which wants three-band RGB. A source with transparency
+is flattened onto white, because JPEG has no alpha channel.
 
 Both files go to the single derivatives root Cantaloupe reads
-(`config.x.cerberus.derivatives_root`), named `<prefix>-<uuid>.jp2`. They are
+(`config.x.cerberus.derivatives_root`), named `<prefix>-<uuid>.tif`. They are
 told apart by that `open-` or `gated-` prefix. That prefix is the signal the
 delegate gates on: serve `open-*` freely, require a credential for `gated-*`. It
 rides through into the IIIF identifier.
@@ -409,7 +440,7 @@ matches `DerivativeCreator`'s posture.
 
 PDFs rasterize through vips' poppler loader, first page by default. At 150 dpi
 a letter page comes out about 1275px wide — crisp for the 500px preview tile
-without an oversized JP2. `load_options` passes `dpi` only when Marcel
+without an oversized TIFF. `load_options` passes `dpi` only when Marcel
 identifies the source as a PDF, because the image loaders reject it.
 
 ## Choosing rendition sizes
@@ -440,7 +471,7 @@ returns `:unknown` for a size token this class does not emit, and
 `existing_widths` logs a warning and skips that tier. Defaulting would rebuild
 Small at full resolution, which is a permission leak.
 
-Replacing a Work's bytes mints a new gated JP2. So every rendition has to be
+Replacing a Work's bytes mints a new gated TIFF. So every rendition has to be
 rebuilt against the new base, at the sizes the Work already carries. Nothing else
 records those sizes: the depositor chose them once, on the metadata page, and
 the URIs are the only place that choice survives.
@@ -458,10 +489,10 @@ token, not on the human display label.
 depositor chose on the metadata page. It runs *after* the deposit's IIIF assets
 already exist.
 
-The chosen sizes render from the Work's **gated** full-resolution JP2. Its base
+The chosen sizes render from the Work's **gated** full-resolution TIFF. Its base
 is the URI of the `service_file` Delegate that `IiifAssetsJob` set at ingest,
 found by role in `Work.file_sets`. The thumbnail Delegate cannot stand in: it
-points at the open, capped JP2. The job hands the base to
+points at the open, capped TIFF. The job hands the base to
 `DerivativeCreationJob`, and does nothing when the depositor chose no sizes.
 
 ### The race with `IiifAssetsJob`
@@ -470,7 +501,7 @@ A depositor can submit the metadata form before `IiifAssetsJob` has PATCHed the
 service. `ServiceNotReady` rides `retry_on` for six attempts of polynomially
 longer waits — roughly 16 minutes of cover.
 
-If the service never appears — a `OriginalJp2` failure, a dead queue — the
+If the service never appears — a `IiifImageCreator` failure, a dead queue — the
 attempts exhaust. The block logs a warning and sets the Work's `IncompleteFlag`
 with reason `IncompleteReasons::DERIVATIVES`, then swallows the error. The
 deposit and its metadata are untouched, and the depositor can revisit the

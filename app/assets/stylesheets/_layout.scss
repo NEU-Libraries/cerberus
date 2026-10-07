@@ -10,6 +10,12 @@
   transition: none;
 }
 
+// Secondary text that has to stay legible on tinted fills, where Bootstrap's
+// .text-black-50 and .text-muted fall below 4.5:1.
+.text-subtle {
+  color: $text-subtle;
+}
+
 body {
   background-color: $gray-100;
   height:100vh;
@@ -48,6 +54,16 @@ a:not(.btn, .dropdown-item, .navbar-brand, .nav-link) {
 
   &:link {
     text-decoration: none;
+  }
+}
+
+// Inside grey hint text the link colour is too close to the text for colour
+// alone to mark a link (WCAG 1.4.1 asks for 3:1 or another cue), so these keep
+// their underline. The container class makes this outrank the rule above.
+.empty-container-state,
+.form-text {
+  a:not(.btn):link {
+    text-decoration: underline;
   }
 }
 
@@ -186,6 +202,23 @@ a:not(.btn, .dropdown-item, .navbar-brand, .nav-link) {
 
 .breadcrumb-add {
   display: inline;
+
+  // A real <button>, so Tab reaches it and Enter opens the menu, stripped to
+  // look exactly like the breadcrumb text beside it.
+  &__toggle {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    vertical-align: baseline;
+
+    &:focus-visible {
+      outline: 2px solid $link-blue;
+      outline-offset: 2px;
+      border-radius: 0.2rem;
+    }
+  }
 }
 
 .dropdown-menu.show{
@@ -215,6 +248,13 @@ a:not(.btn, .dropdown-item, .navbar-brand, .nav-link) {
 
 #editor {
   height: 952px;
+}
+
+// Ace's eclipse theme draws line numbers at 2.97:1 on its gutter. Ace injects
+// the theme's CSS at runtime, after this stylesheet, so the extra class is what
+// lets this win. Covers the XML editor and the load preview's viewer.
+.ace_editor.ace-eclipse .ace_gutter {
+  color: #666;
 }
 
 .btn-close {

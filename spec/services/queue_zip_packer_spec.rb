@@ -16,7 +16,7 @@ RSpec.describe QueueZipPacker do
   end
 
   def delegate(noid:, uri:)
-    AtlasRb::Mash.new('noid' => noid, 'uri' => uri, 'use' => 'Large Image')
+    AtlasRb::Mash.new('noid' => noid, 'uri' => uri, 'use' => 'Large Image', 'role' => 'large_image')
   end
 
   def names = zip.entries.map(&:name)
@@ -97,23 +97,24 @@ RSpec.describe QueueZipPacker do
   end
 
   it 'packs a queued derivative rendition by fetching its signed IIIF URL' do
-    items = [{ 'w' => 'work1', 'd' => 'Large Image' }]
+    items = [{ 'w' => 'work1', 'd' => 'large_image' }]
     allow(AtlasRb::Work).to receive(:assets).with('work1', nuid: nil).and_return(
-      [delegate(noid: 'del1', uri: 'https://iiif.example/iiif/3/gated-x.jp2/full/pct:75/0/default.jpg')]
+      [delegate(noid: 'del1', uri: 'https://iiif.example/iiif/3/gated-x.tif/full/pct:75/0/default.jpg')]
     )
     allow(IiifSigner).to receive(:sign_url).and_return('https://iiif.example/signed')
     allow(Faraday).to receive(:get) # no real HTTP; the chunk stream is Faraday's job
 
     described_class.new(items: items, nuid: nil, ability: ability).pack(zip)
 
-    expect(names).to include('work1/large-image.jpg')
+    expect(names).to include('work1/large_image_work1.jpg')
     expect(Faraday).to have_received(:get).with('https://iiif.example/signed')
   end
 
-  it 'skips a derivative whose use is not the queued one' do
-    items = [{ 'w' => 'work1', 'd' => 'Large Image' }]
+  it 'skips a derivative whose role is not the queued one' do
+    items = [{ 'w' => 'work1', 'd' => 'large_image' }]
     allow(AtlasRb::Work).to receive(:assets).with('work1', nuid: nil).and_return(
-      [AtlasRb::Mash.new('noid' => 'd2', 'uri' => 'https://iiif.example/small', 'use' => 'Small Image')]
+      [AtlasRb::Mash.new('noid' => 'd2', 'uri' => 'https://iiif.example/small', 'use' => 'Small Image',
+                         'role' => 'small_image')]
     )
     allow(Faraday).to receive(:get)
 

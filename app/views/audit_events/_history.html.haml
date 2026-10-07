@@ -3,15 +3,15 @@
 -# Locals:
 -#   resource_id — the Atlas resource ID to fetch history for
 -#
--# Gated by `can?(:read, :audit_event)` so broadening the audience later is a
--# one-line Ability change rather than a view hunt. Per-event rendering
--# dispatches to `_event_<action>` partials with `_event_generic` as the
--# fallback — adding a new action type is a new file, not a case-statement edit.
+-# Gated by `can?(:read, :audit_event)`, which admins and delegated admins hold,
+-# so the audience is one Ability rule rather than a view hunt. Per-event
+-# rendering dispatches to `_event_<action>` partials with `_event_generic` as
+-# the fallback — adding a new action type is a new file, not a case-statement edit.
 -#
--# Performance trade-off (acceptable while admin-only): fires an inline HTTP
--# request to Atlas on every edit-page render. Broadening the audience may
--# motivate moving to a Turbo Frame so history loads asynchronously and doesn't
--# block edit-page render.
+-# Performance trade-off (acceptable for the admin tiers alone): fires an inline
+-# HTTP request to Atlas on every edit-page render. Opening the tab to editors
+-# generally may motivate moving to a Turbo Frame so history loads asynchronously
+-# and doesn't block edit-page render.
 - if can?(:read, :audit_event)
   - history = AtlasRb::Resource.history(resource_id, nuid: Current.nuid)
   - events = Array(history && history['events'])
