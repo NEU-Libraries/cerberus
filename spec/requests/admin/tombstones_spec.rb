@@ -137,7 +137,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
         get '/admin/tombstones', params: { q: 'thesis' }
 
         expect(TombstonedItems).to have_received(:call).with(hash_including(query: 'thesis'))
-        expect(response.parsed_body.at_css('label[for="q"]').text).to eq('Title or PID')
+        expect(response.parsed_body.at_css('label[for="tombstone_q"]').text).to eq('Title or PID')
       end
 
       it 'passes the page size and the withdrawal dates to the registry' do

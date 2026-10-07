@@ -20,8 +20,8 @@
       A search that finds a collection or community also lists everything tombstoned inside it.
     = form_with url: admin_tombstones_path, method: :get, class: 'tombstone-filters mt-3', data: { controller: 'auto-submit' } do
       .tombstone-filters__search
-        %label.form-label.small.mb-1{for: 'q'} Title or PID
-        = text_field_tag :q, params[:q], id: 'q', class: 'form-control', placeholder: 'Search tombstoned items…'
+        %label.form-label.small.mb-1{for: 'tombstone_q'} Title or PID
+        = text_field_tag :q, params[:q], id: 'tombstone_q', class: 'form-control', placeholder: 'Search tombstoned items…'
       .tombstone-filters__date
         %label.form-label.small.mb-1{for: 'from'} Withdrawn from
         = date_field_tag :from, @from, id: 'from', class: 'form-control'
