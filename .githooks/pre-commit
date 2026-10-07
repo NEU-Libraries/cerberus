@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-#
-# Blocks a commit whose staged templates have accessibility findings. Opt in
-# once per clone; the relative path resolves in each worktree:
-#
-#   git config core.hooksPath .githooks
-#
-# `git commit --no-verify` skips it.
-exec bin/a11y-lint --staged

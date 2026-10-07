@@ -3,7 +3,7 @@
 # Lint view templates for accessibility: haml-lint for HAML, herb-lint for ERB.
 #
 #   bin/a11y-lint                 # every template under app/
-#   bin/a11y-lint --staged        # templates staged for commit (the git hook)
+#   bin/a11y-lint --staged        # templates staged for commit
 #   bin/a11y-lint app/views/x.html.haml app/views/y.html.erb
 #
 # Exits non-zero on any finding. Nothing is auto-corrected: an accessibility fix

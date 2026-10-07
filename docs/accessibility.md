@@ -7,7 +7,6 @@ lane. The target is WCAG 2.2 at levels A and AA.
 Source files:
 
 - `bin/a11y-lint` (runs both template linters)
-- `.githooks/pre-commit` (the opt-in commit hook)
 - `.haml-lint.yml` (enables only the accessibility linters)
 - `spec/system/accessibility_spec.rb` (the axe audit, and the rules it skips)
 
@@ -50,17 +49,21 @@ rules stay out on purpose:
   fields that collect the user's own details, such as a name or an email.
 - `html-no-title-attribute`: a `title` is not a WCAG failure.
 
-## The commit hook
+## The Claude Code hook
 
-The hook lints only the templates staged for a commit. Opt in once per clone:
+A local Claude Code `PostToolUse` hook, `.claude/hooks/a11y-lint.sh`, runs
+`bin/a11y-lint` on each template Claude writes. A finding goes back to Claude as
+tool feedback, so Claude fixes it in the same turn. The hook runs the edited
+checkout's own script, so a worktree is linted with its own rules. `.claude/`
+is gitignored, so the hook lives in the main checkout's local configuration,
+not in the repository.
+
+The hook sees only Claude's edits. Before you commit a template you edited by
+hand, run:
 
 ```bash
-git config core.hooksPath .githooks
+bin/a11y-lint --staged
 ```
-
-`core.hooksPath` is shared by every worktree of the clone. The relative path
-resolves in each worktree, so each one runs its own copy of the hook. To skip
-the hook for one commit, run `git commit --no-verify`.
 
 ## The axe spec
 
