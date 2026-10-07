@@ -92,6 +92,10 @@ trades one audit failure for another; it has been tried.
 Hue is free: contrast depends only on relative luminance, so any hue at the
 required lightness works.
 
+The axe audit in the browser lane checks contrast on rendered pages. It skips
+the contrast rule for now, because several existing surfaces fail it.
+[`accessibility.md`](accessibility.md) lists them. Do not add another.
+
 ## Typography and numerics
 
 Use Bootstrap's defaults for body text, and add no web fonts. For tabular data,
