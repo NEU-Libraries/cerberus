@@ -14,6 +14,7 @@ describe IiifImageCreator do
   def source_double(name, **dims)
     double(name, tiffsave: nil, has_alpha?: false, **dims).tap do |img|
       allow(img).to receive(:colourspace).with(:srgb).and_return(img)
+      allow(img).to receive(:mutate).and_return(img)
     end
   end
 
@@ -114,6 +115,20 @@ describe IiifImageCreator do
       Vips::Image.black(64, 64, bands: 4).write_to_file(source)
 
       expect(written(IiifImageCreator.call(path: source).gated_base).bands).to eq(3)
+    end
+
+    # The fixture carries EXIF, XMP, IPTC and an ICC profile.
+    it 'drops descriptive metadata but keeps the colour profile' do
+      source = Rails.root.join('spec/fixtures/files/marcom_no_title.jpg').to_s
+      expect(Vips::Image.new_from_file(source).get_fields).to include('exif-data', 'iptc-data', 'xmp-data')
+
+      result = IiifImageCreator.call(path: source)
+
+      [result.open_base, result.gated_base].each do |base|
+        fields = written(base).get_fields
+        expect(fields).not_to include('exif-data', 'xmp-data', 'iptc-data')
+        expect(fields).to include('icc-profile-data')
+      end
     end
   end
 

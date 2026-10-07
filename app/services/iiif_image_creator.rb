@@ -11,10 +11,12 @@ class IiifImageCreator < ApplicationService
   # by construction: the original's pixels are not in that file.
   OPEN_CAP = 500
 
-  # Every pyramid level must be tiled, or Cantaloupe's Java2dProcessor decodes a
-  # whole level to serve one deep-zoom region. docs/derivatives.md has the
-  # measurements behind JPEG at Q90.
+  # Every pyramid level must be tiled, or Java2dProcessor decodes a whole level
+  # per deep-zoom tile. docs/derivatives.md has the measurements behind Q90.
   TIFF_OPTIONS = { tile: true, pyramid: true, compression: :jpeg, Q: 90, tile_width: 256, tile_height: 256 }.freeze
+
+  # Kept: the ICC profile. Dropped: everything docs/derivatives.md lists.
+  STRIPPED_METADATA = %w[exif-data xmp-data iptc-data].freeze
 
   Result = Struct.new(:open_base, :gated_base, keyword_init: true)
 
@@ -27,6 +29,7 @@ class IiifImageCreator < ApplicationService
     # alpha channel reliably, so transparency flattens onto white.
     img = Vips::Image.new_from_file(@path, **load_options).colourspace(:srgb)
     img = img.flatten(background: [255, 255, 255]) if img.has_alpha?
+    img = img.mutate { |m| STRIPPED_METADATA.each { |field| m.remove!(field) } }
     Result.new(
       open_base:  mint(capped(img), 'open'),
       gated_base: mint(img,         'gated')

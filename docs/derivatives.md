@@ -52,6 +52,19 @@ photographs: the same image came out at 16.4 MB.
 **Raising the quality to 95 closes the fidelity gap** at a cost in storage. Both
 figures above are past the point where a difference is visible.
 
+**A derivative keeps only its ICC profile.** `IiifImageCreator` drops the source's
+EXIF, XMP and IPTC blocks before saving; the original in OCFL keeps them. There
+are three reasons:
+
+- EXIF can carry the GPS location where a photograph was taken.
+- TIFF stores IPTC in a field whose length must be a multiple of four bytes, so
+  libvips pads it and logs `VIPS-WARNING: rounding up IPTC data length` on every
+  save.
+- Cantaloupe never serves this metadata, so it only takes up space.
+
+Keep the ICC profile: colour accuracy depends on it. libvips' `strip` option
+would remove it too, which is why the creator names the fields to drop instead.
+
 ### Three asset families, each on its own pipe
 
 | Family | Source TIFF | When it is generated |
