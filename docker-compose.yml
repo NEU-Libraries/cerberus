@@ -267,11 +267,13 @@ services:
     ports:
       - 8182:8182
     environment:
-      CANTALOUPE_PROCESSOR_MANUALSELECTIONSTRATEGY_JP2: 'OpenJpegProcessor'
+      # Derivatives are pyramidal, tiled JPEG-in-TIFF; Java2dProcessor reads
+      # each pyramid level and its tiles directly.
+      CANTALOUPE_PROCESSOR_MANUALSELECTIONSTRATEGY_TIF: 'Java2dProcessor'
       CANTALOUPE_PROCESSOR_SELECTION_STRATEGY: 'ManualSelectionStrategy'
       CANTALOUPE_CACHE_CLIENT_ENABLED: 'true'
       # Server-side derivative cache: re-serve processed tiles/derivatives from
-      # disk instead of re-decoding the source JP2 on every request (the client
+      # disk instead of re-decoding the source TIFF on every request (the client
       # cache above only sets browser Cache-Control headers — no server effect).
       # The info cache is on by default. Persisted to the iiif-cache volume so it
       # survives container recreation. Gated deep-zoom identifiers rotate ~daily

@@ -79,9 +79,9 @@ services:
     # assuming the decoder is at fault.
     #
     # The limit is what actually bounds this container, and it must stay well
-    # above the heap: GrokProcessor decodes JP2s by forking grk_decompress, and
-    # each concurrent decode is a separate process whose RSS lands in this cgroup
-    # and which no -Xmx constrains.
+    # above the heap: the JVM also holds metaspace, thread stacks and native
+    # buffers that no -Xmx constrains. Java2dProcessor decodes TIFFs inside the
+    # JVM, so no decoder process runs outside it.
     mem_limit: 1500m
     restart: unless-stopped
     environment:
