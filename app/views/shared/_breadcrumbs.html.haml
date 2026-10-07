@@ -12,10 +12,9 @@
     - if local_assigns.fetch(:show_add, true) && user_signed_in? && @can_edit
       %li.breadcrumb-item
         .dropdown.breadcrumb-add
-          %a#breadcrumb-add-toggle.text-decoration-none{"aria-expanded" => "false", "data-bs-toggle" => "dropdown", :type => "button"}
+          %button#breadcrumb-add-toggle.breadcrumb-add__toggle{"aria-expanded" => "false", "data-bs-toggle" => "dropdown", :type => "button"}
             %i.fa-regular.fa-square-plus{'aria-hidden' => 'true'}
-            .ms-1.d-inline
-              Add
+            %span.ms-1 Add
           %ul.dropdown-menu{"aria-labelledby" => "breadcrumb-add-toggle"}
             - if controller_name == "communities"
               %li
