@@ -115,7 +115,7 @@ to grey for colour alone to mark it. `.empty-container-state` and `.form-text`
 do this already; a new hint surface needs the same rule.
 
 The axe audit in the browser lane checks contrast on every page it visits. The
-orange Cancel is a recorded exception and the result type pill is pending; see
+orange Cancel and the result type pill are recorded exceptions; see
 [`accessibility.md`](accessibility.md).
 
 ## Typography and numerics

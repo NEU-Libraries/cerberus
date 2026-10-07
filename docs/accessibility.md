@@ -173,13 +173,29 @@ from a mock-up. Remove `.btn-warning` from `AxeAudit::CONTRAST_EXCEPTIONS`
 when it lands. Keep white-on-orange to this one button: no new surface may use
 `$warning` behind white text.
 
-## Known failures awaiting a design decision
+### White text on the result type pill
 
-`AxeAudit::PENDING` in the spec excludes this component from every rule. It
-fails 1.4.3, and each fix proposed so far was declined because it changed the
-look too much. When a decision lands, fix the component and remove its entry.
-The spec then guards it.
+**The failure.** `.thumb-type-pill`, the label laid over each result
+thumbnail, sets white text on a 70% light grey. That measures 1.91:1 against
+the 4.5:1 that WCAG 1.4.3 requires.
 
-| Component | Now | Declined so far |
-|---|---|---|
-| `.thumb-type-pill`: white on a 70% light grey | 1.91:1 | an 85% `$gray-700` backing; a white pill; dark text; a slate pill; a caption under the thumbnail |
+**Why it stays.** The pill is a quick visual cue, not the record of what a
+result is. Its text also reaches assistive technology in a form that does pass:
+`Cerberus::DocumentTitleComponent` repeats it, visually hidden, inside the
+result's heading, so a screen reader announces "Title, Work". The thumbnail
+link itself is aria-hidden, so the pill is never read twice. Specs in
+`catalog_controller_spec.rb` and `communities_controller_spec.rb` check that
+every row's heading carries its pill's text, in the list view, the gallery
+view and container rows.
+
+**What it does not claim.** A sighted reader with low vision still meets the
+low-contrast pill, so the pill does not conform. The annotation is the
+mitigation; the exception records the trade-off.
+
+**What was tried.** These options pass and were declined, so do not re-propose
+them without new evidence: an 85% `$gray-700` backing, a white pill, dark text
+on the current pill, a slate pill, and a caption under the thumbnail.
+
+**What would retire it.** Any pill style that passes 4.5:1 and is approved
+from a mock-up. Remove `.thumb-type-pill` from `AxeAudit::CONTRAST_EXCEPTIONS`
+when it lands, and keep the heading annotation.

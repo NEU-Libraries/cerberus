@@ -30,6 +30,21 @@ describe CatalogController do
       expect(response.body).to include('class="thumb-type-pill">Community')
     end
 
+    # The pill sits in an aria-hidden thumbnail link, so its text has to reach
+    # screen readers through the result heading.
+    %w[list gallery].each do |view|
+      it "repeats each row's pill text inside its heading for screen readers (#{view} view)" do
+        AtlasRb::Resource.set_permissions(community.id, { 'read' => ['public'] }, nuid: '000000004')
+        get :index, params: { view: view }
+        rows = response.parsed_body.css('.document')
+        expect(rows).not_to be_empty
+        rows.each do |row|
+          pill = row.at_css('.thumb-type-pill').text
+          expect(row.at_css('.index_title .visually-hidden')&.text).to eq(", #{pill}")
+        end
+      end
+    end
+
     it 'excludes featured showcase Collections from the global index but keeps ordinary ones' do
       publicize_ancestry!(community: community)
       featured = AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml',

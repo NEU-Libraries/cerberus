@@ -2,7 +2,7 @@
 
 module Blacklight
   module Gallery
-    class DocumentTitleComponent < Blacklight::DocumentTitleComponent
+    class DocumentTitleComponent < Cerberus::DocumentTitleComponent
       # `h5` sizes the heading. Blacklight carries it in the default class
       # list rather than in a stylesheet rule, so a replacement list has to
       # name it too or the title drops to body weight and leading.
