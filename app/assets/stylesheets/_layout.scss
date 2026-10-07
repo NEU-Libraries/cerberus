@@ -10,6 +10,12 @@
   transition: none;
 }
 
+// Secondary text that has to stay legible on tinted fills, where Bootstrap's
+// .text-black-50 and .text-muted fall below 4.5:1.
+.text-subtle {
+  color: $text-subtle;
+}
+
 body {
   background-color: $gray-100;
   height:100vh;

@@ -71,6 +71,13 @@ RSpec.describe 'colour contrast' do
     end
   end
 
+  describe 'secondary text' do
+    # The .well is the darkest fill that labels and hints sit on.
+    it '$text-subtle clears 4.5:1 on the .well fill' do
+      expect(contrast(token('text-subtle'), well)).to be >= 4.5
+    end
+  end
+
   describe 'the .well fill' do
     # The panel has no border, so it reads as a panel only by being darker than
     # the page behind it. Lightening it to buy link headroom has a floor.

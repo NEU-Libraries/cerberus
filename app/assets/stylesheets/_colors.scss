@@ -51,6 +51,12 @@ $dark:          $gray-800 !default;
 // tint of it). Not part of the link/well contrast system below.
 $slate:         #385775 !default;
 
+// Secondary text: small labels, hints and eyebrows. $gray-500 is too light for
+// text anywhere, and $gray-600 falls below 4.5:1 on the tinted fills these sit
+// on (the .well, card headers, the deposit form); this clears 4.5:1 on all of
+// them. color_contrast_spec.rb asserts it against the darkest, the .well.
+$text-subtle:   #636b74 !default;
+
 // cerberus
 // The link colour and the .well fill are a matched pair, both pinned by WCAG
 // contrast rather than chosen freely. A link must clear 4.5:1 against every
