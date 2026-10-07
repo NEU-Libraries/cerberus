@@ -217,11 +217,12 @@
     }
 
     // Restore is restorative, not navigational — teal-deep, matching the
-    // audit-history "restore" tone, instead of the default navy hover.
+    // audit-history "restore" tone, instead of the default navy hover. The
+    // text is shaded because $success itself reads 4.4:1 on its own tint.
     &--restore:hover {
-      background-color: color-mix(in srgb, #138f76 10%, white);
-      border-color: color-mix(in srgb, #138f76 28%, white);
-      color: #138f76;
+      background-color: color-mix(in srgb, $success 10%, white);
+      border-color: color-mix(in srgb, $success 28%, white);
+      color: shade-color($success, 15%);
     }
 
     // Purge borrows the audit ledger's tombstone red rather than minting a

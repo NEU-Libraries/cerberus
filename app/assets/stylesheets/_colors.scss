@@ -37,7 +37,10 @@ $cyan:    #3498db !default;
 
 $primary:       $blue !default;
 $secondary:     $gray-700 !default;
-$success:       darken($green, 10%) !default;
+// $success and $danger carry white text on buttons and sit as text on white,
+// so each must clear 4.5:1 against white; color_contrast_spec.rb asserts it.
+// Hex literals rather than darken() so that spec can read them.
+$success:       #107d67 !default;
 $info:          $cyan !default;
 $warning:       $orange !default;
 $danger:        $red !default;

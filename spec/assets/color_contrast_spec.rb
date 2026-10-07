@@ -78,4 +78,11 @@ RSpec.describe 'colour contrast' do
       expect(luminance(well)).to be < luminance(page_bg)
     end
   end
+
+  # Theme colours that carry white button labels and also sit as text on white.
+  describe 'the theme colours under white text' do
+    it '$success clears 4.5:1 against white' do
+      expect(contrast(token('success'), WHITE)).to be >= 4.5
+    end
+  end
 end
