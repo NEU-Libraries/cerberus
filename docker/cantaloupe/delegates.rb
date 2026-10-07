@@ -6,12 +6,12 @@
 #   - one-shot downloads: a signed URL (`?exp=&sig=`, HMAC over
 #     "<request-path>|<exp>" — IiifSigner.sign_url).
 #   - interactive deep-zoom: a per-image token embedded in the identifier
-#     (`<exp>~<sig>~gated-<uuid>.jp2`, HMAC over "<identifier>|<exp>" —
+#     (`<exp>~<sig>~gated-<uuid>.tif`, HMAC over "<identifier>|<exp>" —
 #     IiifSigner.sign_identifier). It rides into every tile URL the viewer
 #     derives from the image-service base, so all of them authorize without a
 #     cookie — which is what lets it work cross-origin under IIIF's mandated
 #     ACAO:*. Under ScriptLookupStrategy, `filesystemsource_pathname` strips the
-#     token back to the real `gated-<uuid>.jp2` before resolving.
+#     token back to the real `gated-<uuid>.tif` before resolving.
 # Keep these HMAC message formats in lock-step with app/services/iiif_signer.rb.
 #
 # The shared secret is CERBERUS_IIIF_SIGNING_SECRET; when it is unset the
@@ -48,12 +48,12 @@ class CustomDelegate
 
   # ScriptLookupStrategy resolution: map the IIIF identifier to an absolute file
   # under IMAGE_ROOT, stripping a deep-zoom token if present. Admits only the
-  # minted open-/gated- JP2 names (uuid-shaped), so a crafted identifier can't
+  # minted open-/gated- TIFF names (uuid-shaped), so a crafted identifier can't
   # traverse out of the image root. nil ⇒ Cantaloupe reports not-found.
   def filesystemsource_pathname(_options = {})
     _, _, real = parse_token(context['identifier'].to_s)
     name = real || context['identifier'].to_s
-    return unless /\A(open|gated)-[0-9a-f-]+\.jp2\z/.match?(name)
+    return unless /\A(open|gated)-[0-9a-f-]+\.tif\z/.match?(name)
 
     File.join(IMAGE_ROOT, name)
   end
@@ -92,8 +92,8 @@ class CustomDelegate
       secure_compare(hmac("#{request_path}|#{args['exp']}"), args['sig'])
     end
 
-    # Deep-zoom token embedded in the identifier: <exp>~<sig>~gated-<uuid>.jp2,
-    # sig = HMAC(SECRET, "gated-<uuid>.jp2|<exp>"). One token authorizes every
+    # Deep-zoom token embedded in the identifier: <exp>~<sig>~gated-<uuid>.tif,
+    # sig = HMAC(SECRET, "gated-<uuid>.tif|<exp>"). One token authorizes every
     # derived request for that one image (info.json + all tiles) until exp.
     def valid_identifier_token?(identifier)
       exp, sig, real = parse_token(identifier)
@@ -106,7 +106,7 @@ class CustomDelegate
     # `~` separates the parts (avoids Cantaloupe's `;` meta-delimiter); the real
     # identifier keeps its own hyphens.
     def parse_token(identifier)
-      m = /\A(\d+)~(\h{64})~(gated-[0-9a-f-]+\.jp2)\z/.match(identifier)
+      m = /\A(\d+)~(\h{64})~(gated-[0-9a-f-]+\.tif)\z/.match(identifier)
       m ? [m[1].to_i, m[2], m[3]] : [nil, nil, nil]
     end
 
