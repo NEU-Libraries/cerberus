@@ -13,6 +13,7 @@ describe IiifImageCreator do
 
   def source_double(name, **dims)
     double(name, tiffsave: nil, has_alpha?: false, **dims).tap do |img|
+      allow(img).to receive(:autorot).and_return(img)
       allow(img).to receive(:colourspace).with(:srgb).and_return(img)
       allow(img).to receive(:mutate).and_return(img)
     end
@@ -115,6 +116,21 @@ describe IiifImageCreator do
       Vips::Image.black(64, 64, bands: 4).write_to_file(source)
 
       expect(written(IiifImageCreator.call(path: source).gated_base).bands).to eq(3)
+    end
+
+    # A phone stores a portrait photo as landscape pixels plus an EXIF
+    # orientation. Cantaloupe serves it upright, so the cap must apply upright.
+    it 'caps an EXIF-rotated source by its upright width, and leaves no orientation tag' do
+      source = File.join(dir, 'rotated.jpg')
+      Vips::Image.black(800, 600, bands: 3)
+                 .mutate { |m| m.set_type!(GObject::GINT_TYPE, 'orientation', 6) }
+                 .write_to_file(source)
+
+      open_copy = written(IiifImageCreator.call(path: source).open_base)
+
+      expect(open_copy.width).to eq(IiifImageCreator::OPEN_CAP)
+      expect(open_copy.height).to be > open_copy.width
+      expect(open_copy.get_typeof('orientation').zero? || open_copy.get('orientation') == 1).to be(true)
     end
 
     # The fixture carries EXIF, XMP, IPTC and an ICC profile.

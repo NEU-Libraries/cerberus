@@ -431,10 +431,16 @@ and preview are all downscales of it, and nothing on the open pipe needs more.
 Capping there keeps `full/max` on an `open-` identifier safe by construction:
 the original's pixels are not in that file.
 
-`capped` caps the **width**, not the longest edge, so the width-500 request
-serves without upscaling in every orientation. A longest-edge cap would leave
-portrait sources narrower than 500. A narrower source is never upscaled, which
-matches `DerivativeCreator`'s posture.
+`capped` caps the **width**, not the longest edge, so a portrait source still
+fills the 500-wide preview. A longest-edge cap would leave it narrower. A
+narrower source is never upscaled, which matches `DerivativeCreator`'s posture.
+
+The cap applies to the **upright** image. A phone stores a portrait photo as
+landscape pixels plus an EXIF orientation, and `tiffsave` copies that
+orientation into the TIFF, where Cantaloupe honours it. So `call` runs
+`autorot` first: it rotates the pixels and drops the tag. Capping the stored
+pixels instead would leave the served image narrower than the cap: a 4000×3000
+photo with orientation 6 caps to 500×375 and serves as 375×500.
 
 ### Rasterizing a PDF
 
