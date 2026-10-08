@@ -425,8 +425,11 @@ Cerberus and the delegate.
 
 ### The open copy's cap
 
-`OPEN_CAP` is 500, the width of the `preview` hero's `500,` request. Thumbnails
-and preview are all downscales of it, and nothing on the open pipe needs more.
+`OPEN_CAP` is 500, the width of the `preview` hero. Thumbnails and preview are
+all downscales of it, and nothing on the open pipe needs more. `preview` asks
+for `full/max` rather than `500,`: the copy is already capped, and IIIF 3
+refuses a width larger than the source unless the size starts with `^`, so a
+fixed `500,` fails on any source narrower than the cap.
 
 Capping there keeps `full/max` on an `open-` identifier safe by construction:
 the original's pixels are not in that file.
