@@ -5,6 +5,10 @@
 
 /* Blacklight Gallery Title */
 .gallery-title {
+  // The title's .visually-hidden type label is position: absolute, and
+  // overflow: hidden clips it only when this element is its containing block.
+  // Without this, a long title's label escapes and widens the page on phones.
+  position: relative;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
