@@ -26,6 +26,9 @@ body {
 
 #mods {
   font-size: calc(0.8rem + 0.1vw);
+  // URLs and identifiers have no break points and are wider than a phone, so
+  // without this one value widens the whole page.
+  overflow-wrap: anywhere;
   dt {
     margin-bottom: 0.2rem;
   }

@@ -5,4 +5,7 @@
 -# preview depicts — the title is the one true thing we can say about it. It is
 -# worded as a preview so a screen reader announces something distinct from the
 -# heading beside it, instead of repeating the title twice.
-%img.mt-1{loading: "lazy", src: src, alt: alt, style: "max-width: 100%; padding: 4px; border: 1px solid rgba(0,0,0,0.2);"}/
+-#
+-# Eager and high priority because this is usually the page's LCP element:
+-# `loading: lazy` holds the request until layout, which is the delay LCP counts.
+%img.mt-1{fetchpriority: "high", src: src, alt: alt, style: "max-width: 100%; padding: 4px; border: 1px solid rgba(0,0,0,0.2);"}/
