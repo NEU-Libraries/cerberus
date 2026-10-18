@@ -695,6 +695,12 @@ Rack::Attack.throttled_response = lambda do |env|
 
     [418, {'Content-Type' => 'text/html', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, [view.render(file: 'public/challenge.html.erb')]]
   else
+    if env['rack.attack.matched'] == "challenged"
+      # Too busy to render the challenge. Forget we saw this IP, so its next
+      # request is treated as a first visit and challenged then.
+      req = Rack::Attack::Request.new(env)
+      $redis.zrem("rack_attack:unique_ips", req.remote_ip) rescue nil
+    end
     THROTTLED_RESPONSE
   end
 end
