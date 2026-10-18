@@ -336,6 +336,53 @@ Rack::Attack.blocklist("block fingerprint") do |req|
   Rails.cache.read("block fingerprint #{req.fingerprint}")
 end
 
+# Block clients that send _cerberus_app_session more than once.
+# The session cookie is host-only with path=/, so a real browser replaces it
+# rather than keeping two. Two values means a scraper merging cookie jars.
+Rack::Attack.blocklist("duplicate session cookie") do |req|
+  cookie = req.env["HTTP_COOKIE"]
+  if !cookie.blank? && cookie.scan(/(?:\A|;)\s*_cerberus_app_session=/).length > 1
+    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-duplicate-session.log", "#{req.remote_ip} - #{req.asn} - #{req.asn_org} - #{req.path} - #{req.fingerprint} - #{Time.now}" + "\n", mode: 'a')
+    true
+  end
+end
+
+# Block sessions that fetch record pages but never render them.
+# A browser showing /files/:id fetches its thumbnail; an HTML-only client does
+# not. Any thumbnail fetch marks the session as rendering and exempts it.
+# HTML_ONLY_MAX_PAGES - record pages a session may fetch with no thumbnail
+# HTML_ONLY_WINDOW    - how long the page tally and the rendered mark last
+HTML_ONLY_MAX_PAGES = 8
+HTML_ONLY_WINDOW = 1.day
+
+Rack::Attack.blocklist("html only session") do |req|
+  begin
+    sid = req.cookies["_cerberus_app_session"]
+    if !sid.blank? && (req.user_agent.blank? || !req.user_agent.downcase.include?("bot"))
+      rendered_key = "rack_attack:session_rendered:#{sid}"
+      pages_key = "rack_attack:session_pages:#{sid}"
+
+      if req.fullpath.include?("datastream_id=thumbnail")
+        $redis.setex(rendered_key, HTML_ONLY_WINDOW.to_i, "1")
+        $redis.del(pages_key)
+        false
+      elsif req.get? && req.path =~ %r{\A/files/[^/]+\z} && !$redis.exists(rendered_key)
+        pages = $redis.incr(pages_key)
+        $redis.expire(pages_key, HTML_ONLY_WINDOW.to_i) if pages == 1
+
+        if pages > HTML_ONLY_MAX_PAGES
+          File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-html-only-session.log", "#{req.remote_ip} - #{req.asn} - #{req.asn_org} - #{req.path} - #{sid} - #{pages} - #{Time.now}" + "\n", mode: 'a')
+          true
+        end
+      end
+    end
+  rescue => e
+    # Never block on our own Redis failure.
+    Rails.logger.warn("[rack_attack] html only session check failed: #{e.class}: #{e.message}")
+    false
+  end
+end
+
 Rack::Attack.blocklist("asn mismatch") do |req|
   req.asn == "22773" && !req.asn_org.include?("Cox")
 end
