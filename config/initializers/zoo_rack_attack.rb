@@ -385,6 +385,25 @@ Rack::Attack.blocklist("html only session") do |req|
   end
 end
 
+# Profile session minting. Logs only the first request seen for each session,
+# so a bot minting a fresh session per worker shows up as many lines per IP.
+# The fingerprint here leaves out the cookie so one client's sessions group.
+# ASN is resolved offline from the log to avoid a dig shell-out per session.
+Rack::Attack.track("session first use") do |req|
+  begin
+    sid = req.cookies["_cerberus_app_session"]
+    if req.get? && !sid.blank?
+      if $redis.set("rack_attack:sid_first:#{sid}", "1", nx: true, ex: HTML_ONLY_WINDOW.to_i)
+        ua_print = Base64.strict_encode64("#{req.user_agent} | #{req.env["HTTP_ACCEPT"]} | #{req.env["HTTP_ACCEPT_ENCODING"]} | #{req.env["HTTP_ACCEPT_LANGUAGE"]}")
+        File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-session-first-use.log", "#{req.remote_ip} - #{sid} - #{req.path} - #{req.referrer} - #{ua_print} - #{Time.now}" + "\n", mode: 'a')
+      end
+    end
+  rescue => e
+    Rails.logger.warn("[rack_attack] session first use check failed: #{e.class}: #{e.message}")
+  end
+  false
+end
+
 Rack::Attack.blocklist("asn mismatch") do |req|
   req.asn == "22773" && !req.asn_org.include?("Cox")
 end
