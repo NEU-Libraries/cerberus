@@ -372,6 +372,8 @@ Rack::Attack.blocklist("html only session") do |req|
 
         if pages > HTML_ONLY_MAX_PAGES
           File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-html-only-session.log", "#{req.remote_ip} - #{req.asn} - #{req.asn_org} - #{req.path} - #{sid} - #{pages} - #{Time.now}" + "\n", mode: 'a')
+          # Also block the IP as we're seeing rety mechanics from the same IP with different sessions.
+          Rails.cache.write("block #{req.remote_ip}", true)
           true
         end
       end
