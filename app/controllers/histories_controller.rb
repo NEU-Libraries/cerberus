@@ -53,7 +53,7 @@ class HistoriesController < ApplicationController
     def load_resource!
       @resource_id    = params[:id]
       found           = require_resource!(AtlasRb::Resource.find(@resource_id))
-      raise ResourceNotFound unless ModsableTypes.include?(found.klass)
+      raise ResourceNotFound unless found.resource_class.mods_editable?
 
       @resource_klass = found.klass
       @resource_title = found.resource.title

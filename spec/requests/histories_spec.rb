@@ -29,7 +29,7 @@ RSpec.describe 'Histories', type: :request do
   let(:resource_id) { 'w-789' }
 
   def found(klass: 'Work', title: 'My Work')
-    OpenStruct.new(klass: klass, resource: OpenStruct.new(title: title))
+    AtlasRb::Mash.new('klass' => klass, 'resource' => { 'title' => title })
   end
 
   def history_mash(events)
