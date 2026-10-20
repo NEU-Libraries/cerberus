@@ -667,7 +667,7 @@ its audit log.
 ### Three types, not any type
 
 `load_resource!` also gates on the type. It raises `ResourceNotFound`, a 404,
-for an unknown id or for any type outside `ModsableTypes::TYPES`. "Type-agnostic" means one controller serves
+for an unknown id or for any type whose `resource_class.mods_editable?` is false. "Type-agnostic" means one controller serves
 the three, not that any Atlas id may address it.
 
 Nothing upstream refuses the others. Atlas answers `/resources/:id`,
