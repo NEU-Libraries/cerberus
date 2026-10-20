@@ -691,6 +691,11 @@ THROTTLED_RESPONSE = [503, {'Set-Cookie' => 'cerberus_throttled=true', 'Content-
 BLOCKED_RESPONSE = [403, {'Content-Type' => 'text/plain', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, ["Forbidden\n"]].freeze
 
 Rack::Attack.throttled_response = lambda do |env|
+  # Rack::Attack runs inside the session store. Skip the session commit so
+  # these responses never set a session cookie, and so a POST carrying a live
+  # session can't write its sid into the shared THROTTLED_RESPONSE headers.
+  env['rack.session.options'][:skip] = true if env['rack.session.options']
+
   if (File.read("/proc/loadavg").split[1].to_f < 5) && (env['rack.attack.matched'] == "challenged")
     # Tally challenges served to this IP. A browser clears the tally by solving
     # the widget; a client that never runs the JS climbs to the threshold and
@@ -727,6 +732,8 @@ Rack::Attack.throttled_response = lambda do |env|
 end
 
 Rack::Attack.blocklisted_response = lambda do |env|
+  # See throttled_response: no session cookie on a block either.
+  env['rack.session.options'][:skip] = true if env['rack.session.options']
   BLOCKED_RESPONSE
 end
 
