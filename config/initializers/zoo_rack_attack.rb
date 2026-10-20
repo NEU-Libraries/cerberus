@@ -646,7 +646,6 @@ end
 Rack::Attack.throttle("challenged", limit: 0, period: 60) do |req|
   $redis.auth(ENV["REDIS_PASSWD"])
   seen    = $redis.zscore("rack_attack:unique_ips", req.remote_ip)
-  pending = $redis.get("rack_attack:challenge_pending:#{req.remote_ip}").to_i
   passed  = $redis.get("rack_attack:challenge_passed:#{req.remote_ip}")
 
   facet = req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creator") || req.fullpath.include?("rss")
@@ -662,9 +661,10 @@ Rack::Attack.throttle("challenged", limit: 0, period: 60) do |req|
         File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-challenge.log", "#{req.remote_ip} - #{req.asn} - #{req.asn_org} - #{req.path} - #{req.fingerprint} - #{Time.now}" + "\n", mode: 'a')
       end
 
-      # Challenge if never seen, or if an earlier challenge went unanswered.
+      # Challenge until the IP passes. Waiting out the pending TTL must not
+      # count as a pass, or a client that never runs the JS gets a session.
       # Cleared by ChallengeController#verify on a verified pass.
-      req.remote_ip if passed.blank? && (!seen || pending > 0)
+      req.remote_ip if passed.blank?
     end
   end
 end
