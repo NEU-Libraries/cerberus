@@ -27,6 +27,9 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     @community = create_community(public: true)
     @collection = create_collection(@community.id, public: true)
     @work = create_work(@collection.id, public: true)
+    @dwc_work = create_work(@collection.id, public: true)
+    AtlasRb::Resource.put_dwc(@dwc_work.id, Rails.root.join('spec/fixtures/files/dwc-record.xml').to_s,
+                              nuid: AtlasFixtures::ADMIN_NUID)
   end
 
   def expect_axe_clean
@@ -62,6 +65,7 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     'a community'      => -> { "/communities/#{@community.id}" },
     'a collection'     => -> { "/collections/#{@collection.id}" },
     'a work'           => -> { "/works/#{@work.id}" },
+    'Darwin Core tab'  => -> { "/works/#{@dwc_work.id}#darwin-core" },
     'the sign-in page' => -> { atlas_login_path }
   }
 

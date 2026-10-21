@@ -118,6 +118,8 @@ Rails.application.routes.draw do
       # edit-gated via authorize_resource_writes!'s extra_edit list.
       get :upload
       post :upload, action: :add_file
+      # The stored Darwin Core XML, behind the show page's read gate.
+      get :dwc, to: 'darwin_core_records#show'
       post :tombstone
       # An editor-submitted request to withdraw or move the work — notifies the
       # DRS staff inbox (no direct mutation; staff fulfill it with the tombstone

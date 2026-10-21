@@ -92,9 +92,9 @@
       - else
         = render partial: "thumbnail"
     .col-md-6.order-md-2.order-1
-      -# Editors get v1's tabbed column; everyone else sees the metadata alone,
-      -# since a lone Metadata tab would be noise.
-      - if @work_analytics
+      -# A lone Metadata tab would be noise, so the bar appears only when another
+      -# pane joins it: Darwin Core for every reader, Analytics for editors.
+      - if @dwc || @work_analytics
         -# Level with the media beside it, not the global .nav-tabs margin: the
         -# thumbnail carries mt-1, the players and viewer sit flush.
         - tabs_offset = @av_file || (@multipage && @can_zoom) ? 'mt-0' : 'mt-1'
@@ -102,15 +102,23 @@
           %ul.nav.nav-tabs{role: 'tablist', class: tabs_offset}
             %li.nav-item{role: 'presentation'}
               %button#metadata-tab.nav-link.active{type: 'button', role: 'tab', 'data-bs-toggle' => 'tab', 'data-bs-target' => '#metadata', 'aria-controls' => 'metadata', 'aria-selected' => 'true'} Metadata
-            %li.nav-item{role: 'presentation'}
-              %button#analytics-tab.nav-link{type: 'button', role: 'tab', 'data-bs-toggle' => 'tab', 'data-bs-target' => '#analytics', 'aria-controls' => 'analytics', 'aria-selected' => 'false'}
-                %i.fa-solid.fa-chart-simple.me-1{'aria-hidden' => 'true'}
-                Analytics
+            - if @dwc
+              %li.nav-item{role: 'presentation'}
+                %button#darwin-core-tab.nav-link{type: 'button', role: 'tab', 'data-bs-toggle' => 'tab', 'data-bs-target' => '#darwin-core', 'aria-controls' => 'darwin-core', 'aria-selected' => 'false'} Darwin Core
+            - if @work_analytics
+              %li.nav-item{role: 'presentation'}
+                %button#analytics-tab.nav-link{type: 'button', role: 'tab', 'data-bs-toggle' => 'tab', 'data-bs-target' => '#analytics', 'aria-controls' => 'analytics', 'aria-selected' => 'false'}
+                  %i.fa-solid.fa-chart-simple.me-1{'aria-hidden' => 'true'}
+                  Analytics
           .tab-content
             #metadata.tab-pane.active.p-1{role: 'tabpanel', 'aria-labelledby' => 'metadata-tab'}
               = @mods&.html_safe
-            #analytics.tab-pane{role: 'tabpanel', 'aria-labelledby' => 'analytics-tab'}
-              = render 'works/analytics', report: @work_analytics, media: @av_file.present?
+            - if @dwc
+              #darwin-core.tab-pane.p-1{role: 'tabpanel', 'aria-labelledby' => 'darwin-core-tab'}
+                = render 'works/darwin_core', work_id: @work.id, record: @dwc
+            - if @work_analytics
+              #analytics.tab-pane{role: 'tabpanel', 'aria-labelledby' => 'analytics-tab'}
+                = render 'works/analytics', report: @work_analytics, media: @av_file.present?
       - else
         = @mods&.html_safe
 

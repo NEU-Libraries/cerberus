@@ -1,0 +1,8 @@
+-# The Work's Darwin Core record, as Atlas renders it, with the stored XML to
+-# download. Atlas owns the labels, grouping and order. See
+-# docs/metadata-records.md.
+.d-flex.justify-content-end.pt-2.pb-1
+  = link_to dwc_work_path(work_id), class: 'btn btn-tonal-primary btn-sm', data: { turbo: false } do
+    %span.fa-solid.fa-download{'aria-hidden' => true}
+    %span.ms-1 Download XML
+= record.html_safe
