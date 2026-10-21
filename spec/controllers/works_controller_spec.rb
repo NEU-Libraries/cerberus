@@ -151,13 +151,14 @@ describe WorksController do
                                     nuid: '000000004')
         end
 
-        it 'shows the record and its download to a guest' do
+        # The XML download lives on the edit pane only, as v1 offered none here.
+        it 'shows the record to a guest, with no download' do
           get :show, params: { id: work.id }
 
           expect(response.body).to include('id="darwin-core-tab"')
           expect(response.body).to include('class="dwc-group"')
-          expect(response.body).to include(%(href="#{dwc_work_path(work.id)}"))
           expect(response.body).to include('MVZ:Mamm:14523')
+          expect(response.body).not_to include(%(href="#{dwc_work_path(work.id)}"))
         end
 
         it 'keeps Metadata as the open pane' do

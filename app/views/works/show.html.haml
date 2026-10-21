@@ -115,7 +115,7 @@
               = @mods&.html_safe
             - if @dwc
               #darwin-core.tab-pane.p-1{role: 'tabpanel', 'aria-labelledby' => 'darwin-core-tab'}
-                = render 'works/darwin_core', work_id: @work.id, record: @dwc
+                = @dwc.html_safe
             - if @work_analytics
               #analytics.tab-pane{role: 'tabpanel', 'aria-labelledby' => 'analytics-tab'}
                 = render 'works/analytics', report: @work_analytics, media: @av_file.present?

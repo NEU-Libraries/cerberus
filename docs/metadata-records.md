@@ -9,7 +9,6 @@ Source files:
 
 - `app/lib/darwin_core_record.rb`
 - `app/controllers/darwin_core_records_controller.rb`
-- `app/views/works/_darwin_core.html.haml`
 - `app/views/works/_darwin_core_edit.html.haml`
 - `app/services/darwin_core_record_validator.rb`
 - `app/jobs/xml_ingest_job.rb` (the Darwin Core step only)
@@ -48,11 +47,14 @@ so the title stays the page's heading.
 
 ## The download
 
-`GET /works/:id/dwc` serves the stored XML byte for byte, as an attachment. It
-runs the show page's gates in the show page's order: gone when the Work is
-tombstoned, refused when the reader may not read it, and not found while the
-deposit is unfinished. The file therefore downloads exactly where the tab
-appears.
+`GET /works/:id/dwc` serves the stored XML byte for byte, as an attachment. Only
+the edit pane links to it. The show tab offers no download, because v1 offered
+none there and the show page's downloads are the Work's files.
+
+The route still runs the show page's gates in the show page's order: gone when
+the Work is tombstoned, refused when the reader may not read it, and not found
+while the deposit is unfinished. A reader who has the URL can therefore fetch
+the file only where the tab would appear.
 
 ## The edit page
 
