@@ -357,6 +357,7 @@ Rails.application.routes.draw do
   # a single flat route serves Work / Collection / Community alike.
   get '/resources/:id/rights_history', to: 'histories#rights', as: :rights_history
   get '/resources/:id/mods_history',   to: 'histories#mods',   as: :mods_history
+  get '/resources/:id/dwc_history',    to: 'histories#dwc',    as: :dwc_history
 
   # "Why this result?" on a search result, for admins: :id is the result's Solr
   # id, and q is the search it came from.

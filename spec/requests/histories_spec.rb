@@ -304,6 +304,57 @@ RSpec.describe 'Histories', type: :request do
     end
   end
 
+  describe 'GET dwc_history (as admin)' do
+    before { sign_in admin_user }
+
+    let(:versions) do
+      [{ 'version_id' => 'v4', 'created' => '2026-10-20T12:00:00Z', 'actor_nuid' => '000000004', 'source' => 'dwc' },
+       { 'version_id' => 'v2', 'created' => '2026-10-19T09:00:00Z', 'actor_nuid' => '000000004', 'source' => 'dwc' }]
+    end
+
+    def dwc_mash(vers)
+      AtlasRb::Mash.new('resource_id' => resource_id, 'versions' => vers)
+    end
+
+    it 'defaults to newest vs previous and renders a line diff' do
+      allow(AtlasRb::Resource).to receive(:dwc_versions).and_return(dwc_mash(versions))
+      allow(AtlasRb::Resource).to receive(:dwc_version).with(resource_id, 'v2', nuid: anything)
+                                                       .and_return('<r><scientificName>Perognathus</scientificName></r>')
+      allow(AtlasRb::Resource).to receive(:dwc_version).with(resource_id, 'v4', nuid: anything)
+                                                       .and_return('<r><scientificName>Dipodomys</scientificName></r>')
+      get dwc_history_path(resource_id)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Darwin Core history', 'class="diff"')
+      # The diff highlights the changed letters, so the word arrives split.
+      expect(response.body).to include('<li class="del">', '<li class="ins">', '<strong>Dipodomy</strong>s')
+    end
+
+    it 'shows the empty state when no versions exist' do
+      allow(AtlasRb::Resource).to receive(:dwc_versions).and_return(dwc_mash([]))
+      get dwc_history_path(resource_id)
+      expect(response.body).to include('No Darwin Core versions recorded')
+    end
+
+    # Only a Work holds a record; Atlas would answer an empty list for anything
+    # else, so the gate refuses before reading.
+    it 'refuses a Collection without reading its versions' do
+      allow(AtlasRb::Resource).to receive(:find).with(resource_id).and_return(found(klass: 'Collection'))
+      allow(AtlasRb::Resource).to receive(:dwc_versions)
+
+      get dwc_history_path(resource_id)
+
+      expect(response).to have_http_status(:not_found)
+      expect(AtlasRb::Resource).not_to have_received(:dwc_versions)
+    end
+
+    it 'refuses a non-admin' do
+      sign_in staff_user
+      get dwc_history_path(resource_id)
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
+
   describe 'polymorphism across resource types' do
     before { sign_in admin_user }
 

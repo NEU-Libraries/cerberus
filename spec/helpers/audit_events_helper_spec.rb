@@ -50,6 +50,15 @@ RSpec.describe AuditEventsHelper, type: :helper do
       expect(html).to include('/resources/w-1/mods_history')
     end
 
+    # A Darwin Core write is a metadata update too; only its source tells it
+    # apart, and without the branch View opened the MODS diff.
+    it 'links a Darwin Core update to the Darwin Core history page' do
+      html = helper.audit_event_view_cell(
+        event(action: 'update', change_type: 'metadata', payload: { 'source' => 'dwc' }), 'w-1'
+      )
+      expect(html).to include('/resources/w-1/dwc_history')
+    end
+
     it 'also links a title/description field-patch (plain_title= edits the MODS doc too)' do
       html = helper.audit_event_view_cell(
         event(action: 'update', change_type: 'metadata', payload: { 'fields' => %w[title] }), 'w-1'
@@ -64,6 +73,31 @@ RSpec.describe AuditEventsHelper, type: :helper do
     it 'renders nothing for a metadata create row (no prior MODS version to diff)' do
       cell = helper.audit_event_view_cell(event(action: 'create', change_type: 'metadata', payload: { 'source' => 'mods' }), 'w-1')
       expect(cell).to be_nil
+    end
+  end
+
+  describe '#audit_event_payload_summary' do
+    it 'names a Darwin Core upload and its surface' do
+      summary = helper.audit_event_payload_summary(
+        event(action: 'update', change_type: 'metadata', payload: { 'source' => 'dwc', 'origin' => 'dwc_upload' })
+      )
+      expect(summary).to include('Darwin Core record · via Darwin Core upload')
+    end
+
+    # Atlas records the withdrawal as a metadata tombstone, which would
+    # otherwise read as the Work itself being withdrawn.
+    it 'names the Darwin Core record on its withdrawal' do
+      summary = helper.audit_event_payload_summary(
+        event(action: 'tombstone', change_type: 'metadata', payload: { 'source' => 'dwc' })
+      )
+      expect(summary).to include('Darwin Core record')
+    end
+
+    it 'keeps the reason on a Work tombstone' do
+      summary = helper.audit_event_payload_summary(
+        event(action: 'tombstone', change_type: 'lifecycle', payload: { 'reason' => 'Duplicate' })
+      )
+      expect(summary).to include('Duplicate')
     end
   end
 

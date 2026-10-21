@@ -81,3 +81,10 @@ dialog.
 only the standard flash keys, so the pane renders the list itself, and the
 standard alert says the record was not saved. A wrong file can break hundreds of
 schema rules, and the flash is stored in the session row.
+
+## History
+
+A Darwin Core row on the History tab links to `/resources/:id/dwc_history`,
+which diffs two versions of the record as the MODS history page does.
+[`admin.md`](admin.md#the-darwin-core-page) covers the page, and
+[`edit-surfaces.md`](edit-surfaces.md#where-view-points) covers the link.

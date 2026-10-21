@@ -163,7 +163,7 @@ action between controllers.
 | Associated works | `:admin` or the devolved-admin tier | Atlas grants `:associate` to both. A delegate's reads stay group-gated, so a Work they cannot read gets the forbidden page, and an edge to one shows its bare NOID |
 | Communities registry | `:admin` or the devolved-admin tier | it only lists and links, through the gated search, so a delegate sees what they may discover. Its People link is `:admin` only, as the page it opens is |
 | A community's people (`Admin::CommunityPeopleController`) | `:admin` only | Atlas grants Person `:update` to admins and the system principal alone. It is a hub page rather than a tab on the community's Edit page, because people who may edit a community's details must not be offered its people |
-| The History tab, and the rights and MODS history pages | `:admin` or the devolved-admin tier, as `:read, :audit_event` | Atlas grants the delegate tier `:read_history` on Works and containers, and still checks `:read` on the resource, so a delegate reads the history of what they can open. The history of a resource that no longer resolves stays admin-only in Atlas |
+| The History tab, and the rights, MODS and Darwin Core history pages | `:admin` or the devolved-admin tier, as `:read, :audit_event` | Atlas grants the delegate tier `:read_history` on Works and containers, and still checks `:read` on the resource, so a delegate reads the history of what they can open. The history of a resource that no longer resolves stays admin-only in Atlas |
 
 `HistoriesController` is the odd one out. It sits outside `Admin::`, inherits
 `ApplicationController`, and asks CanCan directly rather than using
@@ -652,11 +652,11 @@ the field keeps it honest, and it still sorts the list usefully. The deposit
 nothing has touched in a month sinks to the top. A document with no stamp shows
 a dash.
 
-## The rights and MODS history pages
+## The rights, MODS and Darwin Core history pages
 
 `HistoriesController` renders the deep diffs reached from the Audit History
-tab's per-row "View" button, at `/resources/:id/rights_history` and
-`/resources/:id/mods_history`. They succeed DRS v1's per-object "Rights History"
+tab's per-row "View" button, at `/resources/:id/rights_history`,
+`/resources/:id/mods_history` and `/resources/:id/dwc_history`. They succeed DRS v1's per-object "Rights History"
 and "MODS History" pages, and they are read-only.
 
 Every data call hits Atlas's `/resources/:id/*` endpoints, so one controller
@@ -714,3 +714,14 @@ nothing earlier to compare.
 
 Matching `?at` to a version is best-effort. The correlation is by timestamp
 against the version's `created`, so a miss falls back to the newest version.
+
+### The Darwin Core page
+
+`#dwc` is the MODS page over `dwc_versions` and `dwc_version`. The two actions
+share `compare_versions` and the `histories/_version_diff` partial, and differ
+only in their reads and their wording. `MODSDiff` is a line diff of
+pretty-printed XML with nothing MODS-specific in it, so it serves both.
+
+It also refuses any type but a Work, before reading. Only a Work holds a
+record, and Atlas answers an empty version list for anything else, so without
+the gate a Collection would show an empty history rather than a 404.
