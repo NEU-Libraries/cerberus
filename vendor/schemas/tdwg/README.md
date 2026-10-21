@@ -1,0 +1,36 @@
+# Corrected TDWG Darwin Core schemas
+
+These files stand in for TDWG's published Simple Darwin Core schemas. The
+published set does not compile under libxml, so a Darwin Core record could not
+be validated against it at all. `config/kataba_mirrors.yml` maps each published
+URL to the copy here, and Kataba reads the copy instead of fetching the
+original. The other files in the chain, from Dublin Core and the W3C, still come
+from their publishers unchanged.
+
+The Darwin Core standard and these schemas are © Biodiversity Information
+Standards (TDWG), published under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+at <https://github.com/tdwg/dwc>. The originals live at
+`http://rs.tdwg.org/dwc/xsd/`.
+
+## What changed
+
+| File | Change | Why |
+|---|---|---|
+| `tdwg_dwc_simple.xsd` | `ref="dwc:waterbody"` becomes `ref="dwc:waterBody"` | `tdwg_dwcterms.xsd` declares `waterBody`. No `waterbody` exists, so the reference does not resolve. |
+| `tdwg_dwcterms.xsd` | One added `xs:import` of `tdwg_chrono.xsd` | The file refers to `chrono:` terms without importing their namespace. |
+| `tdwg_dwc_extensions.xsd` | The same added `xs:import` | The same reason. |
+| `tdwg_chrono.xsd` | New | TDWG publishes no schema for the Chronometric Age terms. This one declares each referenced term as a string. |
+
+Each edit is one line. The copies also use LF line endings and drop TDWG's
+trailing spaces, as this repo requires, so compare them with the originals
+using `diff -b`.
+
+## Updating
+
+1. Download the new originals from `http://rs.tdwg.org/dwc/xsd/`.
+2. Reapply the changes above, if TDWG has not fixed them.
+3. Clear the Kataba schema cache on every host. Kataba never refreshes a cached
+   schema, so without this step it keeps validating against the old copy.
+
+If TDWG fixes all three defects, delete this folder and its entries in
+`config/kataba_mirrors.yml`.

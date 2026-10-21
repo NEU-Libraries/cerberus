@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dwr:SimpleDarwinRecordSet
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://rs.tdwg.org/dwc/xsd/simpledarwincore/  http://rs.tdwg.org/dwc/xsd/tdwg_dwc_simple.xsd"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:dcterms="http://purl.org/dc/terms/"
+    xmlns:dwc="http://rs.tdwg.org/dwc/terms/"
+    xmlns:dwr="http://rs.tdwg.org/dwc/xsd/simpledarwincore/">
+    <dwr:SimpleDarwinRecord>
+        <dc:type>PhysicalObject</dc:type>
+        <dcterms:modified>2009-02-12T12:43:31</dcterms:modified>
+        <dc:language>en</dc:language>
+        <dcterms:rightsHolder>Regents of the University of California</dcterms:rightsHolder>
+        <dcterms:license>http://creativecommons.org/publicdomain/zero/1.0/legalcode</dcterms:license>
+        <dwc:basisOfRecord>PreservedSpecimen</dwc:basisOfRecord>
+        <dwc:institutionCode>MVZ</dwc:institutionCode>
+        <dwc:collectionCode>Mammal specimens</dwc:collectionCode>
+        <dwc:catalogNumber>MVZ:Mamm:14523</dwc:catalogNumber>
+        <dwc:sex>male</dwc:sex>
+        <dwc:occurrenceID>http://arctos.database.museum/guid/MVZ:Mamm:14523?seid=770093</dwc:occurrenceID>
+        <dwc:country>United States</dwc:country>
+        <dwc:countryCode>US</dwc:countryCode>
+        <dwc:stateProvince>California</dwc:stateProvince>
+        <dwc:county>Kern County</dwc:county>
+        <dwc:locality>8 mi NE Bakersfield</dwc:locality>
+        <dwc:decimalLatitude>35.45038</dwc:decimalLatitude>
+        <dwc:decimalLongitude>-118.9092</dwc:decimalLongitude>
+        <dwc:geodeticDatum>epsg:4267</dwc:geodeticDatum>
+        <dwc:coordinateUncertaintyInMeters>13696</dwc:coordinateUncertaintyInMeters>
+        <dwc:eventDate>1911-05-14</dwc:eventDate>
+        <dwc:scientificName>Perognathus inornatus inornatus</dwc:scientificName>
+    </dwr:SimpleDarwinRecord>
+</dwr:SimpleDarwinRecordSet>

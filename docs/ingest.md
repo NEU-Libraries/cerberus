@@ -215,9 +215,10 @@ The page opts out of Turbo's cache (`turbo-cache-control: no-cache`), as the XML
 editor does. Turbo snapshots the page with the markup Ace injected, and a restore
 would paint the panel twice.
 
-## Validating MODS XML
+## Validating XML metadata
 
-`XmlValidator` runs phased checks and returns an Array. The document is valid if
+`XmlValidator` is the floor that every metadata format shares. It runs phased
+checks and returns an Array. The document is valid if
 and only if that array is empty. Errors stringify cleanly for display, because
 `Nokogiri::XML::SyntaxError` responds to `to_s` and the rest are plain strings.
 
@@ -225,9 +226,13 @@ The checks run in this order, and each of the first two stops the rest:
 
 1. Characters XML 1.0 cannot store (`Metadata::ControlCharacters`).
 2. Syntax. XML that does not parse cannot be schema-validated.
-3. Document checks: UTF-8 encoding and an `xmlns:mods` declaration.
+3. Document checks: UTF-8 encoding, and the namespace declaration that the
+   caller names. `MODSRecordValidator` requires `xmlns:mods`.
+   `DarwinCoreRecordValidator` passes `nil`, because it checks its root by
+   namespace URI, which accepts any prefix.
 4. Schema, against every XSD the root's `schemaLocation` names. A schema that
-   cannot be fetched becomes an error row, never a 500.
+   cannot be fetched, or that downloads but will not compile, becomes an error
+   row, never a 500.
 
 ### The phases this class deliberately omits
 
@@ -258,6 +263,36 @@ list (or Subject fallback) with nothing but blank values.
 
 **Whether the MODS-display partial renders** belongs to the caller, via
 `AtlasRb::Resource.preview`, because rendering lives in Atlas.
+
+### Darwin Core records
+
+`DarwinCoreRecordValidator` runs `XmlValidator`, then checks the shape of a
+Work's record: a `dwr:SimpleDarwinRecordSet` root holding exactly one
+`dwr:SimpleDarwinRecord`. Atlas runs the same shape checks and answers 422.
+Cerberus repeats them because the XML loader must refuse a row before it
+creates the row's Work.
+
+The schema itself refuses a term that appears twice, and a term the standard
+does not define. Atlas renders an undefined term under "Other terms", so that
+section appears only for a record written without passing through Cerberus.
+
+**TDWG's published schemas do not compile, so Cerberus validates against
+corrected copies.** The published set refers to an undeclared `dwc:waterbody`
+(the term is `waterBody`), and to `chrono:` terms whose namespace it never
+imports. `config/kataba_mirrors.yml` maps each published URL to a copy under
+`vendor/schemas/tdwg/`. That folder's README lists every change and how to
+update the copies. After changing a copy, clear the Kataba schema cache on
+every host, because Kataba never refreshes a cached schema.
+
+The corrected chain needs Kataba to resolve relative imports, to stop on the
+import cycle between `tdwg_dwc_simple.xsd` and `tdwg_dwc_extensions.xsd`, and
+to read a mirror from a local file. The live check is
+`spec/integration/kataba_tdwg_regression_spec.rb`, which runs with
+`RUN_LOC_SMOKE=1`.
+
+**An XML declaration without an encoding is refused.** The TDWG example begins
+`<?xml version="1.0"?>`, which XML reads as UTF-8, but Nokogiri reports the
+encoding as `nil` and the UTF-8 check refuses it. MODS behaves the same way.
 
 ### Reporting an impossible character before the parse
 

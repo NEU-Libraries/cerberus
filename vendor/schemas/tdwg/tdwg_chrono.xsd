@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://rs.tdwg.org/chrono/terms/"
+           elementFormDefault="qualified">
+    <!--
+      TDWG publishes no schema for the Chronometric Age terms, but
+      tdwg_dwcterms.xsd and tdwg_dwc_extensions.xsd refer to them, so libxml
+      refuses to compile the Darwin Core schema without one. Every term is a
+      plain string. Both earliestChronometricReferenceSystem and
+      earliestChronometricAgeReferenceSystem are declared, because the two
+      TDWG files spell the term differently. See README.md beside this file.
+    -->
+    <xs:element name="chronometricAgeConversionProtocol" type="xs:string"/>
+    <xs:element name="chronometricAgeDeterminedBy" type="xs:string"/>
+    <xs:element name="chronometricAgeDeterminedDate" type="xs:string"/>
+    <xs:element name="chronometricAgeID" type="xs:string"/>
+    <xs:element name="chronometricAgeProtocol" type="xs:string"/>
+    <xs:element name="chronometricAgeReferences" type="xs:string"/>
+    <xs:element name="chronometricAgeRemarks" type="xs:string"/>
+    <xs:element name="chronometricAgeUncertaintyInYears" type="xs:string"/>
+    <xs:element name="chronometricAgeUncertaintyMethod" type="xs:string"/>
+    <xs:element name="earliestChronometricAge" type="xs:string"/>
+    <xs:element name="earliestChronometricAgeReferenceSystem" type="xs:string"/>
+    <xs:element name="earliestChronometricReferenceSystem" type="xs:string"/>
+    <xs:element name="latestChronometricAge" type="xs:string"/>
+    <xs:element name="latestChronometricAgeReferenceSystem" type="xs:string"/>
+    <xs:element name="materialDated" type="xs:string"/>
+    <xs:element name="materialDatedID" type="xs:string"/>
+    <xs:element name="materialDatedRelationship" type="xs:string"/>
+    <xs:element name="uncalibratedChronometricAge" type="xs:string"/>
+    <xs:element name="verbatimChronometricAge" type="xs:string"/>
+</xs:schema>

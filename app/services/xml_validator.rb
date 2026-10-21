@@ -1,12 +1,16 @@
 # frozen_string_literal: true
 
-# Phased MODS XML validation. Returns an Array; the document is valid iff it is
-# empty. Syntax runs before schema, because unparseable XML cannot be
+# Phased XML validation, shared by every metadata format. Returns an Array; the
+# document is valid iff it is empty. Syntax runs before schema, because unparseable XML cannot be
 # schema-validated. Business rules and render checks are deliberately elsewhere
 # — see docs/ingest.md.
 class XmlValidator < ApplicationService
-  def initialize(xml:)
+  # namespace: the prefix declaration the format requires, such as
+  # 'xmlns:mods'. nil for a format whose record validator checks its root by
+  # namespace URI instead, since that accepts any prefix.
+  def initialize(xml:, namespace:)
     @xml = xml
+    @namespace = namespace
   end
 
   def call
@@ -33,7 +37,7 @@ class XmlValidator < ApplicationService
     def document_errors
       errors = []
       errors << "Document encoding must be UTF-8 (got #{doc.encoding.inspect})" unless doc.encoding == 'UTF-8'
-      errors << 'Document must declare xmlns:mods' unless doc.namespaces.key?('xmlns:mods')
+      errors << "Document must declare #{@namespace}" if @namespace && !doc.namespaces.key?(@namespace)
       errors
     end
 
@@ -51,11 +55,22 @@ class XmlValidator < ApplicationService
     # Errno::ECONNREFUSED, Errno::ETIMEDOUT and friends in one.
     #
     # An unfetchable schema is a reportable validation outcome, never a 500:
-    # the librarian gets a row saying which schema could not be read.
+    # the librarian gets a row saying which schema could not be read. The same
+    # holds for a schema that downloads but will not compile, which Kataba
+    # raises as a SyntaxError.
     def validate_against(xsd_uri)
       Kataba.fetch_schema(xsd_uri).validate(doc)
     rescue Kataba::Fetcher::FetchError, SocketError, SystemCallError => e
       ["Could not fetch schema #{xsd_uri} (#{e.class}: #{e.message})"]
+    rescue Nokogiri::XML::SyntaxError => e
+      ["Could not compile schema #{xsd_uri} (#{first_schema_error(e.message)})"]
+    end
+
+    # libxml prefixes a compile failure with "Multiple errors encountered:",
+    # which says nothing, and lists a page of import warnings before the error.
+    def first_schema_error(message)
+      lines = message.lines.map(&:strip)
+      lines.find { |line| line.include?('ERROR') } || lines.first
     end
 
     def schema_locations

@@ -1,10 +1,26 @@
 ---
-# Kataba mirror list: map a canonical XSD URI to an alternate URI to fetch
-# from. Used for `http://www.loc.gov/...` schemas whose plain-HTTP variants
-# get 503'd by LoC's Cloudflare front while the HTTPS variants serve 200.
-# MODS records authored over the last 20 years declare `schemaLocation`
-# with HTTP URLs; rewriting at fetch time keeps the records as-is and only
-# affects how we resolve them server-side.
+# Kataba mirror list: map a canonical XSD URI to where Kataba should read it
+# instead. A value that is not an http(s) URL is a file, relative to this
+# directory. Schemas not listed here are fetched as declared.
 #
-# Add new entries here as librarians introduce schemas whose canonical
-# URLs need redirection. Schemas not listed here are fetched as-declared.
+# A key must match the URI exactly as a document or an importing schema names
+# it, after Kataba resolves a relative import against the importing schema.
+# Kataba never refreshes a cached schema, so clear its cache after changing an
+# entry here.
+
+# TDWG's published Simple Darwin Core schemas do not compile, so these point at
+# corrected copies. vendor/schemas/tdwg/README.md lists the changes. TDWG
+# serves the set from three bases, and a document may name any of them, so
+# each base gets all four entries.
+"http://rs.tdwg.org/dwc/xsd/tdwg_dwc_simple.xsd": "../vendor/schemas/tdwg/tdwg_dwc_simple.xsd"
+"http://rs.tdwg.org/dwc/xsd/tdwg_dwc_extensions.xsd": "../vendor/schemas/tdwg/tdwg_dwc_extensions.xsd"
+"http://rs.tdwg.org/dwc/xsd/tdwg_dwcterms.xsd": "../vendor/schemas/tdwg/tdwg_dwcterms.xsd"
+"http://rs.tdwg.org/dwc/xsd/tdwg_chrono.xsd": "../vendor/schemas/tdwg/tdwg_chrono.xsd"
+"https://rs.tdwg.org/dwc/xsd/tdwg_dwc_simple.xsd": "../vendor/schemas/tdwg/tdwg_dwc_simple.xsd"
+"https://rs.tdwg.org/dwc/xsd/tdwg_dwc_extensions.xsd": "../vendor/schemas/tdwg/tdwg_dwc_extensions.xsd"
+"https://rs.tdwg.org/dwc/xsd/tdwg_dwcterms.xsd": "../vendor/schemas/tdwg/tdwg_dwcterms.xsd"
+"https://rs.tdwg.org/dwc/xsd/tdwg_chrono.xsd": "../vendor/schemas/tdwg/tdwg_chrono.xsd"
+"https://dwc.tdwg.org/xml/tdwg_dwc_simple.xsd": "../vendor/schemas/tdwg/tdwg_dwc_simple.xsd"
+"https://dwc.tdwg.org/xml/tdwg_dwc_extensions.xsd": "../vendor/schemas/tdwg/tdwg_dwc_extensions.xsd"
+"https://dwc.tdwg.org/xml/tdwg_dwcterms.xsd": "../vendor/schemas/tdwg/tdwg_dwcterms.xsd"
+"https://dwc.tdwg.org/xml/tdwg_chrono.xsd": "../vendor/schemas/tdwg/tdwg_chrono.xsd"
