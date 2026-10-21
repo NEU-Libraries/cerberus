@@ -27,6 +27,18 @@ It duplicates TDWG's declarations in a second namespace and drops their
 `tdwg_dwc_simple.xsd` refers to no Chronometric Age terms. If TDWG resolves
 the namespace mismatch, replace the stub with whatever they publish.
 
+## Upstream reports
+
+Each patch is reported to TDWG. When an issue is resolved, take TDWG's fix and
+drop the matching patch here.
+
+| Patch | Reported in | Retire it when |
+|---|---|---|
+| `waterBody` in `tdwg_dwc_simple.xsd` | [tdwg/dwc#1086](https://github.com/tdwg/dwc/issues/1086) | TDWG's `tdwg_dwc_simple.xsd` refers to `dwc:waterBody` |
+| The chrono imports and `tdwg_chrono.xsd` | [tdwg/dwc#1087](https://github.com/tdwg/dwc/issues/1087) | TDWG resolves the namespace mismatch. Their fix may differ from ours, so adopt theirs rather than keeping both |
+
+## The copies
+
 Each edit is one line. The copies also use LF line endings and drop TDWG's
 trailing spaces, as this repo requires, so compare them with the originals
 using `diff -b`.
@@ -34,9 +46,10 @@ using `diff -b`.
 ## Updating
 
 1. Download the new originals from `http://rs.tdwg.org/dwc/xsd/`.
-2. Reapply the changes above, if TDWG has not fixed them.
+2. Check tdwg/dwc#1086 and #1087, then reapply only the patches TDWG has not
+   fixed.
 3. Clear the Kataba schema cache on every host. Kataba never refreshes a cached
    schema, so without this step it keeps validating against the old copy.
 
-If TDWG fixes all three defects, delete this folder and its entries in
-`config/kataba_mirrors.yml`.
+If TDWG resolves both issues and its schemas compile, delete this folder and
+its entries in `config/kataba_mirrors.yml`.
