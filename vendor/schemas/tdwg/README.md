@@ -17,9 +17,15 @@ at <https://github.com/tdwg/dwc>. The originals live at
 | File | Change | Why |
 |---|---|---|
 | `tdwg_dwc_simple.xsd` | `ref="dwc:waterbody"` becomes `ref="dwc:waterBody"` | `tdwg_dwcterms.xsd` declares `waterBody`. No `waterbody` exists, so the reference does not resolve. |
-| `tdwg_dwcterms.xsd` | One added `xs:import` of `tdwg_chrono.xsd` | The file refers to `chrono:` terms without importing their namespace. |
+| `tdwg_dwcterms.xsd` | One added `xs:import` of `tdwg_chrono.xsd` | The file declares the Chronometric Age terms in its own `dwc:` namespace, but refers to them as `chrono:` terms, and never imports that namespace. |
 | `tdwg_dwc_extensions.xsd` | The same added `xs:import` | The same reason. |
-| `tdwg_chrono.xsd` | New | TDWG publishes no schema for the Chronometric Age terms. This one declares each referenced term as a string. |
+| `tdwg_chrono.xsd` | New | It declares each referenced `chrono:` term as a string, so that the references resolve. TDWG's own declarations sit in the `dwc:` namespace, and one is misspelt (`chronometriAgeID`). |
+
+**The chrono stub is a local workaround, not a correction of TDWG's design.**
+It duplicates TDWG's declarations in a second namespace and drops their
+`dwc:nonEmptyString` type. That does not affect DRS, because
+`tdwg_dwc_simple.xsd` refers to no Chronometric Age terms. If TDWG resolves
+the namespace mismatch, replace the stub with whatever they publish.
 
 Each edit is one line. The copies also use LF line endings and drop TDWG's
 trailing spaces, as this repo requires, so compare them with the originals

@@ -3,10 +3,11 @@
            targetNamespace="http://rs.tdwg.org/chrono/terms/"
            elementFormDefault="qualified">
     <!--
-      TDWG publishes no schema for the Chronometric Age terms, but
-      tdwg_dwcterms.xsd and tdwg_dwc_extensions.xsd refer to them, so libxml
-      refuses to compile the Darwin Core schema without one. Every term is a
-      plain string. Both earliestChronometricReferenceSystem and
+      tdwg_dwcterms.xsd declares the Chronometric Age terms in the dwc:
+      namespace, but it and tdwg_dwc_extensions.xsd refer to them as chrono:
+      terms, which libxml cannot resolve. This declares each referenced term
+      in the chrono namespace as a plain string, a local workaround. Both
+      earliestChronometricReferenceSystem and
       earliestChronometricAgeReferenceSystem are declared, because the two
       TDWG files spell the term differently. See README.md beside this file.
     -->

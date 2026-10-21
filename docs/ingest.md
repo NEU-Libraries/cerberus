@@ -275,12 +275,14 @@ creates the row's Work.
 The schema itself refuses a term that appears twice, and a term the standard
 does not define. It accepts `dc:type` beside `dcterms:type`, but Atlas keys its
 access copy by a term's bare name and refuses the pair as a repeat, so the
-validator refuses it too. Like Atlas, it skips a blank term when it compares. Atlas renders an undefined term under "Other terms", so that
-section appears only for a record written without passing through Cerberus.
+validator refuses it too. Like Atlas, it skips a blank term when it compares.
+Atlas renders an undefined term under "Other terms", so that section appears
+only for a record written without passing through Cerberus.
 
 **TDWG's published schemas do not compile, so Cerberus validates against
 corrected copies.** The published set refers to an undeclared `dwc:waterbody`
-(the term is `waterBody`), and to `chrono:` terms whose namespace it never
+(the term is `waterBody`). It also declares the Chronometric Age terms in the
+`dwc:` namespace, but refers to them as `chrono:` terms, a namespace it never
 imports. `config/kataba_mirrors.yml` maps each published URL to a copy under
 `vendor/schemas/tdwg/`. That folder's README lists every change and how to
 update the copies. After changing a copy, clear the Kataba schema cache on
