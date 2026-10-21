@@ -12,6 +12,7 @@ Source files:
 - `app/views/works/_darwin_core.html.haml`
 - `app/views/works/_darwin_core_edit.html.haml`
 - `app/services/darwin_core_record_validator.rb`
+- `app/jobs/xml_ingest_job.rb` (the Darwin Core step only)
 
 Validation is covered in [`ingest.md`](ingest.md#darwin-core-records), with the
 corrected TDWG schemas it needs.
@@ -88,3 +89,23 @@ A Darwin Core row on the History tab links to `/resources/:id/dwc_history`,
 which diffs two versions of the record as the MODS history page does.
 [`admin.md`](admin.md#the-darwin-core-page) covers the page, and
 [`edit-surfaces.md`](edit-surfaces.md#where-view-points) covers the link.
+
+## The XML loader
+
+A manifest may carry a "Darwin Core XML File Path" column. It is optional, and
+a blank cell means the row's Work gets no record. The job reads the named file
+from the extracted archive, as it reads the MODS.
+
+**The record is validated before any write.** `XmlIngestJob` runs
+`DarwinCoreRecordValidator` beside `MODSRecordValidator`, so a row with a bad
+record fails before its Work is created. Leaving the check to Atlas's 422 would
+leave a new Work behind without the record the row asked for.
+
+After `create_work` or `update_work`, the job calls `put_dwc` with origin
+`xml_loader`. A `PUT` replaces the whole record, so a retried job writes the
+same record again safely, as `update_work` relies on `put_mods`. The loader
+preview validates the first row's record too, and marks each of its errors
+"Darwin Core:", because the list sits under the MODS panel.
+
+The Collection metadata export writes no Darwin Core column. Reloading an
+exported manifest therefore leaves each Work's record as it is.

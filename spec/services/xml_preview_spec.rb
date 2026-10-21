@@ -114,4 +114,39 @@ RSpec.describe XmlPreview do
       expect(AtlasRb::Resource).not_to have_received(:preview)
     end
   end
+
+  # The fixture archive's manifest has no Darwin Core column, so the first row
+  # is given one, and the archive serves the named record from memory.
+  context 'when the first row names a Darwin Core record' do
+    let(:fixture) { 'metadata_existing_file.zip' }
+    let(:record) { file_fixture('dwc-record.xml').read }
+    let(:archived) { { 'rec-dwc.xml' => record } }
+
+    before do
+      allow_any_instance_of(XmlLoader::Manifest).to receive(:rows).and_wrap_original do |original|
+        original.call.map { |row| row.dup.tap { |r| r.dwc_path = 'rec-dwc.xml' } }
+      end
+      allow_any_instance_of(XmlLoader::Archive).to receive(:read).and_wrap_original do |original, name|
+        archived.key?(name) ? archived[name]&.b : original.call(name)
+      end
+    end
+
+    it 'passes a valid record' do
+      expect(described_class.call(load_report: load_report).validation_errors).to eq([])
+    end
+
+    it 'surfaces an invalid record, marked as Darwin Core' do
+      archived['rec-dwc.xml'] = record.gsub('SimpleDarwinRecordSet', 'SimpleDarwinRecordList')
+
+      errors = described_class.call(load_report: load_report).validation_errors
+      expect(errors).to eq(["Darwin Core: #{DarwinCoreRecordValidator::NOT_A_RECORD_SET}"])
+    end
+
+    it 'surfaces a record missing from the archive' do
+      archived['rec-dwc.xml'] = nil
+
+      errors = described_class.call(load_report: load_report).validation_errors
+      expect(errors).to eq(["Darwin Core XML file 'rec-dwc.xml' was not found in the archive."])
+    end
+  end
 end

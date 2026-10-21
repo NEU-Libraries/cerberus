@@ -172,6 +172,65 @@ RSpec.describe XmlIngestJob, type: :job do
     end
   end
 
+  describe 'a Darwin Core record' do
+    let(:dwc_path) { File.join(extracted_dir, 'rec-dwc.xml') }
+
+    before do
+      allow(File).to receive(:exist?).with(dwc_path).and_return(true)
+      allow(File).to receive(:read).with(dwc_path).and_return('<dwr:SimpleDarwinRecordSet/>')
+      allow(DarwinCoreRecordValidator).to receive(:call).and_return([])
+      allow(AtlasRb::Resource).to receive(:put_dwc)
+    end
+
+    it 'attaches the record to a created Work, naming the loader as its source' do
+      described_class.new.perform(ingest.id, create_row.merge('dwc_path' => 'rec-dwc.xml'))
+
+      expect(AtlasRb::Resource).to have_received(:put_dwc).with('w-new', anything, origin: 'xml_loader')
+      expect(ingest.reload).to be_completed
+    end
+
+    it 'attaches the record to an updated Work' do
+      described_class.new.perform(ingest.id, update_row.merge('dwc_path' => 'rec-dwc.xml'))
+
+      expect(AtlasRb::Resource).to have_received(:put_dwc).with('noid-9', anything, origin: 'xml_loader')
+    end
+
+    it 'writes the record again on a retry, since a PUT replaces it' do
+      ingest.update!(work_pid: 'w-existing', status: :processing)
+
+      described_class.new.perform(ingest.id, create_row.merge('dwc_path' => 'rec-dwc.xml'))
+
+      expect(AtlasRb::Resource).to have_received(:put_dwc).with('w-existing', anything, origin: 'xml_loader')
+    end
+
+    it 'writes no record for a row that names none' do
+      described_class.new.perform(ingest.id, create_row)
+
+      expect(AtlasRb::Resource).not_to have_received(:put_dwc)
+    end
+
+    # The point of validating in the job rather than leaving it to Atlas: a
+    # refused record must not leave a new Work behind.
+    it 'fails an invalid record before the Work is created' do
+      allow(DarwinCoreRecordValidator).to receive(:call).and_return(['The root element must be a <dwr:SimpleDarwinRecordSet>.'])
+
+      described_class.new.perform(ingest.id, create_row.merge('dwc_path' => 'rec-dwc.xml'))
+
+      expect(ingest.reload).to be_failed
+      expect(ingest.error_message).to match(/Invalid Darwin Core: The root element/)
+      expect(AtlasRb::Work).not_to have_received(:create)
+    end
+
+    it 'fails a row whose record is missing from the archive, before any write' do
+      allow(File).to receive(:exist?).with(dwc_path).and_return(false)
+
+      described_class.new.perform(ingest.id, update_row.merge('dwc_path' => 'rec-dwc.xml'))
+
+      expect(ingest.reload.error_message).to eq("Darwin Core XML file 'rec-dwc.xml' was not found in the archive.")
+      expect(AtlasRb::Resource).not_to have_received(:put_mods)
+    end
+  end
+
   describe 'idempotency' do
     %i[completed completed_with_warnings failed].each do |state|
       it "no-ops when already #{state}" do

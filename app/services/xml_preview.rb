@@ -12,8 +12,9 @@ require 'tempfile'
 #   no header row). Blocks the confirm action entirely.
 # - mode: :update (first row carries a NOID) or :create (file name, no NOID).
 # - first_row / mods_xml: what the first row resolves to.
-# - validation_errors: the first row's MODS run through XmlValidator, surfacing
-#   missing-file / invalid-MODS problems before the run rather than during it.
+# - validation_errors: the first row's MODS, and its Darwin Core record if it
+#   names one, run through their validators, surfacing missing-file and invalid
+#   record problems before the run rather than during it.
 #
 # Per-row processing of the remaining rows happens in XmlIngestJob; this pass
 # only inspects the first data row (v1's preview behaviour).
@@ -52,7 +53,7 @@ class XmlPreview < ApplicationService
     # text, so re-tag it before it reaches the view's <pre> (HAML can't concat
     # a binary string into the UTF-8 output buffer) and the validator.
     mods   = first.xml_path.present? ? archive.read(first.xml_path)&.force_encoding(Encoding::UTF_8) : nil
-    errors = row_errors(first, mods)
+    errors = row_errors(first, mods) + darwin_core_errors(archive, first)
 
     Result.new(
       structural_errors: [],
@@ -89,6 +90,17 @@ class XmlPreview < ApplicationService
       return ["MODS XML file '#{row.xml_path}' was not found in the archive."] if mods.nil?
 
       MODSRecordValidator.call(xml: mods, keywords: true)
+    end
+
+    # Prefixed, because the list sits under the MODS panel and a bare schema
+    # error does not say which document it came from.
+    def darwin_core_errors(archive, row)
+      return [] if row.dwc_path.blank?
+
+      dwc = archive.read(row.dwc_path)&.force_encoding(Encoding::UTF_8)
+      return ["Darwin Core XML file '#{row.dwc_path}' was not found in the archive."] if dwc.nil?
+
+      DarwinCoreRecordValidator.call(xml: dwc).map { |error| "Darwin Core: #{error}" }
     end
 
     def structural(errors)

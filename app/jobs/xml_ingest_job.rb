@@ -55,9 +55,14 @@ class XmlIngestJob < ApplicationJob
     errors = MODSRecordValidator.call(xml: mods, keywords: true)
     return finalize_failure(ingest, "Invalid MODS: #{errors.join('; ')}") if errors.any?
 
+    # Before any write, so a row with a bad record never creates its Work.
+    dwc, dwc_error = darwin_core(ingest, row['dwc_path'].presence)
+    return finalize_failure(ingest, dwc_error) if dwc_error
+
     work_pid = identifier ? update_work(ingest, identifier, mods) : create_work(ingest, mods, file_name)
     return finalize_failure(ingest, "Content file '#{file_name}' was not found in the archive.") if work_pid.nil?
 
+    attach_darwin_core(work_pid, dwc) if dwc
     apply_embargo(work_pid, row)
     finalize_success(ingest)
   rescue EmbargoError => e
@@ -85,15 +90,37 @@ class XmlIngestJob < ApplicationJob
     end
 
     def read_mods(ingest, xml_path)
-      path = File.join(XmlLoader::Paths.extracted_dir(ingest.load_report), File.basename(xml_path))
+      read_extracted(ingest, xml_path)
+    end
+
+    def read_extracted(ingest, archive_path)
+      path = File.join(XmlLoader::Paths.extracted_dir(ingest.load_report), File.basename(archive_path))
       File.exist?(path) ? File.read(path) : nil
+    end
+
+    # [xml, nil] for a valid record, [nil, message] for a row that must fail,
+    # and [nil, nil] for a row with no record.
+    def darwin_core(ingest, dwc_path)
+      return [nil, nil] if dwc_path.nil?
+
+      dwc = read_extracted(ingest, dwc_path)
+      return [nil, "Darwin Core XML file '#{dwc_path}' was not found in the archive."] if dwc.nil?
+
+      errors = DarwinCoreRecordValidator.call(xml: dwc)
+      errors.any? ? [nil, "Invalid Darwin Core: #{errors.join('; ')}"] : [dwc, nil]
+    end
+
+    # A PUT replaces the whole record, so a retry writes the same record again,
+    # as update_work relies on put_mods.
+    def attach_darwin_core(work_pid, dwc)
+      with_xml_file(dwc) { |path| AtlasRb::Resource.put_dwc(work_pid, path, origin: 'xml_loader') }
     end
 
     # Full MODS replacement on the existing Work. Naturally idempotent — a
     # retry re-applies the same document. work_pid (= the NOID) is recorded so
     # the dashboard can link to the Work.
     def update_work(ingest, noid, mods)
-      with_mods_file(mods) { |path| AtlasRb::Resource.put_mods(noid, path, origin: 'xml_loader') }
+      with_xml_file(mods) { |path| AtlasRb::Resource.put_mods(noid, path, origin: 'xml_loader') }
       ingest.update!(work_pid: noid)
       noid
     end
@@ -108,7 +135,7 @@ class XmlIngestJob < ApplicationJob
       return nil unless File.exist?(content_path)
 
       collection_id = ingest.load_report.parent_collection_id
-      work = with_mods_file(mods) do |path|
+      work = with_xml_file(mods) do |path|
         AtlasRb::Work.create(collection_id, path, idempotency_key: ingest.idempotency_key)
       end
       work_id = work.id
@@ -148,9 +175,9 @@ class XmlIngestJob < ApplicationJob
       AtlasRb::Resource.set_permissions(work_pid, { embargo: date })
     end
 
-    def with_mods_file(mods)
-      Tempfile.create(['loader_mods', '.xml']) do |f|
-        f.write(mods)
+    def with_xml_file(xml)
+      Tempfile.create(['loader', '.xml']) do |f|
+        f.write(xml)
         f.flush
         return yield(f.path)
       end

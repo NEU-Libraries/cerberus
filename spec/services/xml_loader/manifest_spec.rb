@@ -40,6 +40,26 @@ RSpec.describe XmlLoader::Manifest do
       end
     end
 
+    # Built here, because no fixture archive carries the column. The header is
+    # matched case-insensitively, as every other column is.
+    context 'a manifest with a Darwin Core column' do
+      subject(:rows) do
+        path = File.join(Dir.mktmpdir('manifest'), 'manifest.xlsx')
+        pkg = Axlsx::Package.new
+        pkg.workbook.add_worksheet(name: 'Manifest') do |sheet|
+          sheet.add_row ['PIDs', 'MODS XML File Path', 'Darwin Core XML File Path']
+          sheet.add_row ['noid-1', 'rec-1.xml', 'rec-1-dwc.xml']
+          sheet.add_row ['noid-2', 'rec-2.xml', '']
+        end
+        pkg.serialize(path)
+        described_class.new(path).rows
+      end
+
+      it 'reads the record path, and leaves a blank cell as no record' do
+        expect(rows.map(&:dwc_path)).to eq(['rec-1-dwc.xml', nil])
+      end
+    end
+
     context 'a manifest with no recognizable header (no_header.zip)' do
       it 'raises HeaderError' do
         expect { manifest_for('no_header.zip').rows }.to raise_error(described_class::HeaderError)
