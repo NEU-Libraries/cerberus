@@ -241,7 +241,7 @@ GEM
       activerecord
       kaminari-core (= 1.2.2)
     kaminari-core (1.2.2)
-    kataba (1.1.3)
+    kataba (1.1.4)
       nokogiri (>= 1.19)
     language_server-protocol (3.17.0.6)
     libreconv (0.9.5)
@@ -534,7 +534,7 @@ DEPENDENCIES
   haml_lint
   importmap-rails
   json (~> 2.21)
-  kataba (>= 1.1.3)
+  kataba (>= 1.1.4)
   libreconv
   loaf
   mini_exiftool

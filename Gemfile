@@ -98,7 +98,7 @@ gem 'json', '~> 2.21'
 # on the alternate-scheme attempt — minutes, on a librarian's request thread.
 # It also wraps a timeout as Kataba::Fetcher::FetchTimeout, which is what lets
 # XmlValidator report it rather than 500.
-gem 'kataba', '>= 1.1.3'
+gem 'kataba', '>= 1.1.4'
 gem 'libreconv'
 gem 'loaf'
 gem 'mini_exiftool'
