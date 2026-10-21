@@ -205,8 +205,7 @@ class WorksController < ApplicationController
 
     def prepare_show_view
       reads = parallel_show_reads
-      @mods = browsable_mods(reads[:mods])
-      @dwc = reads[:dwc]
+      assign_metadata_blocks(reads)
       @files = page_ordered_files(reads)
       @scholar = GoogleScholarMetadata.for(work: @work, permissions: @permissions, files: @files)
       @av_file = MediaRemux.playable_file(@files)
@@ -245,18 +244,29 @@ class WorksController < ApplicationController
       PageOrder.sort(reads[:files], reads[:file_sets])
     end
 
-    # dwc, like mods, carries no nuid, and is read only for a Work that holds a
-    # record.
     def parallel_show_reads
       nuid = viewer_nuid
-      tasks = {
-        mods:         -> { AtlasRb::Work.mods(params[:id], 'html') },
-        files:        -> { AtlasRb::Work.assets(params[:id], nuid: nuid) },
-        file_sets:    -> { AtlasRb::Work.file_sets(params[:id], nuid: nuid) },
-        associations: -> { associations_or_none(params[:id]) }
-      }
-      tasks[:dwc] = -> { AtlasRb::Work.dwc(params[:id], 'html') } if DarwinCoreRecord.held_by?(@work)
-      parallel_atlas_reads(tasks)
+      parallel_atlas_reads(
+        {
+          mods:         -> { AtlasRb::Work.mods(params[:id], 'html') },
+          files:        -> { AtlasRb::Work.assets(params[:id], nuid: nuid) },
+          file_sets:    -> { AtlasRb::Work.file_sets(params[:id], nuid: nuid) },
+          associations: -> { associations_or_none(params[:id]) }
+        }.merge(darwin_core_read)
+      )
+    end
+
+    # dwc, like mods, carries no nuid, and is read only for a Work that holds a
+    # record.
+    def darwin_core_read
+      return {} unless DarwinCoreRecord.held_by?(@work)
+
+      { dwc: -> { AtlasRb::Work.dwc(params[:id], 'html') } }
+    end
+
+    def assign_metadata_blocks(reads)
+      @mods = browsable_mods(reads[:mods])
+      @dwc  = reads[:dwc]
     end
 
     # parallel_atlas_reads re-raises any task's error, so this rescue has to
