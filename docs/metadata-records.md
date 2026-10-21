@@ -10,6 +10,7 @@ Source files:
 - `app/lib/darwin_core_record.rb`
 - `app/controllers/darwin_core_records_controller.rb`
 - `app/views/works/_darwin_core.html.haml`
+- `app/views/works/_darwin_core_edit.html.haml`
 - `app/services/darwin_core_record_validator.rb`
 
 Validation is covered in [`ingest.md`](ingest.md#darwin-core-records), with the
@@ -51,3 +52,32 @@ runs the show page's gates in the show page's order: gone when the Work is
 tombstoned, refused when the reader may not read it, and not found while the
 deposit is unfinished. The file therefore downloads exactly where the tab
 appears.
+
+## The edit page
+
+The Darwin Core pane uploads a record, replaces it, or removes it, for anyone
+who may edit the Work. `PUT /works/:id/dwc` runs `DarwinCoreRecordValidator`
+on the file and writes nothing if it finds an error. Otherwise it calls
+`put_dwc` with origin `dwc_upload`, which the History tab names "Darwin Core
+upload". A `PUT` replaces the whole record, so uploading the same file twice is
+safe.
+
+`DELETE /works/:id/dwc` withdraws the record. Atlas does not purge it: the
+record's history stays, and the next upload restores it.
+
+**Atlas repeats the shape checks and answers 422.** A file that passed
+`DarwinCoreRecordValidator` should never reach that, but the controller still
+turns a 422 into an error on the pane. Any other refusal keeps the shared
+handling in `Authorizable`.
+
+**Both actions return with `?tab=darwin-core`, not `#darwin-core`.** Turbo
+follows a redirect with fetch, and the Fetch spec strips the fragment, so a
+fragment would land on the Metadata pane. The Work edit view passes
+`params[:tab]` to `edit_tab_open_key`, which ignores a key the page does not
+offer. The forms therefore keep Turbo, which is what runs Remove's confirm
+dialog.
+
+**Errors ride the flash as `dwc_errors`, capped at ten.** The layout renders
+only the standard flash keys, so the pane renders the list itself, and the
+standard alert says the record was not saved. A wrong file can break hundreds of
+schema rules, and the flash is stored in the session row.

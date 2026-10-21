@@ -1,0 +1,39 @@
+-# The Darwin Core pane of the Work edit page: upload or replace the record, or
+-# remove it. See docs/metadata-records.md.
+- held = DarwinCoreRecord.held_by?(work)
+- errors = Array(flash[:dwc_errors])
+.py-2.px-1
+  %h5.pb-2 Darwin Core record
+  %p.text-muted.small.mb-3
+    - if held
+      This work has a Darwin Core record. Upload a file to replace it.
+    - else
+      This work has no Darwin Core record. Upload a Simple Darwin Core XML file that holds one record.
+
+  - if errors.any?
+    .alert.alert-danger.py-2.px-3.small{role: 'alert'}
+      %p.mb-1 The file has these errors:
+      %ul.mb-0
+        - errors.each do |error|
+          %li= error
+
+  = form_with url: dwc_work_path(work.id), method: :put, multipart: true do
+    .well.p-3.my-3.rounded-3
+      %label.form-label{for: 'dwc_file'} Darwin Core XML file
+      %input#dwc_file.form-control{name: 'dwc_file', type: 'file', accept: '.xml,application/xml,text/xml', required: true}/
+      .mt-3
+        %button.btn.btn-primary{type: 'submit'}= held ? 'Replace record' : 'Upload record'
+        = link_to 'Cancel', work_path(work.id), class: 'btn btn-warning'
+
+  - if held
+    .d-flex.flex-wrap.gap-2
+      = link_to dwc_work_path(work.id), class: 'btn btn-tonal-primary btn-sm', data: { turbo: false } do
+        %span.fa-solid.fa-download{'aria-hidden' => true}
+        %span.ms-1 Download XML
+      = form_with url: dwc_work_path(work.id), method: :delete, class: 'd-inline' do
+        %button.btn.btn-tonal-danger.btn-sm{type: 'submit',
+          data: { turbo_confirm: 'Remove the Darwin Core record? It leaves the show page. Uploading a file later restores it, and its history is kept.',
+                  turbo_confirm_title: 'Remove Darwin Core record', turbo_confirm_button: 'Remove',
+                  turbo_confirm_variant: 'danger' }}
+          %i.fa-solid.fa-trash-can.me-1{'aria-hidden' => 'true'}
+          Remove record

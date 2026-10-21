@@ -17,7 +17,7 @@ RSpec.describe EditTabsHelper do
   describe '#edit_tab_keys' do
     it 'gives each class its own tab set, in display order' do
       expect(helper.edit_tab_keys('Work'))
-        .to eq(%w[metadata advanced permissions move delete xml history])
+        .to eq(%w[metadata advanced darwin-core permissions move delete xml history])
       expect(helper.edit_tab_keys('Collection'))
         .to eq(%w[metadata permissions xml derivative-access export history analytics])
       expect(helper.edit_tab_keys('Community'))

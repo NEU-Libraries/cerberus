@@ -7,14 +7,15 @@ module EditTabsHelper
   # A key doubles as the pane's DOM id (`#<key>`) and its tab button's id
   # (`<key>-tab`), so it must match the `.tab-pane` id in the edit view.
   TABS = {
-    'Work'       => %w[metadata advanced permissions move delete xml history],
+    'Work'       => %w[metadata advanced darwin-core permissions move delete xml history],
     'Collection' => %w[metadata permissions xml derivative-access export history analytics],
     'Community'  => %w[metadata permissions xml history analytics]
   }.freeze
 
   # Only where the label isn't the key humanized (see #edit_tab_label).
   LABELS = {
-    'xml' => 'XML'
+    'xml'         => 'XML',
+    'darwin-core' => 'Darwin Core'
   }.freeze
 
   # Tabs that navigate to their own page instead of switching an in-page pane.

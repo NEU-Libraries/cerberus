@@ -62,6 +62,7 @@ module AuditEventsHelper
     'advanced_form' => 'Advanced form',
     'xml_editor'    => 'XML editor',
     'xml_loader'    => 'XML loader',
+    'dwc_upload'    => 'Darwin Core upload',
     'deposit'       => 'Deposit'
   }.freeze
 

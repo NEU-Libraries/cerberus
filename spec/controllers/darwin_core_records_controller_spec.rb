@@ -70,4 +70,78 @@ describe DarwinCoreRecordsController do
       expect(response).to have_http_status(:not_found)
     end
   end
+
+  describe 'writes' do
+    let(:admin) { User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin') }
+    let(:edit_tab) { edit_work_path(work.id, tab: 'darwin-core') }
+
+    # The schema check is XmlValidator's, with its own specs; the live chain is
+    # the TDWG smoke. Here it passes, so these exercise the shape rules and the
+    # Atlas writes.
+    before do
+      allow(Kataba).to receive(:fetch_schema).and_return(instance_double(Nokogiri::XML::Schema, validate: []))
+    end
+
+    describe 'update' do
+      it 'refuses a signed-in user who cannot edit the work' do
+        sign_in User.new(email: 'viewer@example.com', nuid: '000000005', role: 'standard', groups: [])
+
+        put :update, params: { id: work.id, dwc_file: fixture_file_upload('dwc-record.xml', 'application/xml') }
+
+        expect(response).to have_http_status(:forbidden)
+      end
+
+      context 'as an editor' do
+        before { sign_in admin }
+
+        it 'saves a valid record and returns to the Darwin Core pane' do
+          put :update, params: { id: work.id, dwc_file: fixture_file_upload('dwc-record.xml', 'application/xml') }
+
+          expect(response).to redirect_to(edit_tab)
+          expect(flash[:notice]).to eq(described_class::SAVED)
+          expect(AtlasRb::Work.dwc(work.id, 'xml', nuid: '000000004')).to eq(File.read(record_path))
+          expect(DarwinCoreRecord.held_by?(AtlasRb::Work.find(work.id, nuid: '000000004'))).to be(true)
+        end
+
+        it 'names the upload as the source in the audit history' do
+          put :update, params: { id: work.id, dwc_file: fixture_file_upload('dwc-record.xml', 'application/xml') }
+
+          events = AtlasRb::Resource.history(work.id, nuid: '000000004')['events']
+          expect(events.map { |event| event.dig('payload', 'origin') }).to include('dwc_upload')
+        end
+
+        it 'refuses a malformed file, writes nothing, and lists the error on the pane' do
+          put :update, params: { id:       work.id,
+                                 dwc_file: fixture_file_upload('dwc-record-broken.xml', 'application/xml') }
+
+          expect(response).to redirect_to(edit_tab)
+          expect(flash[:alert]).to eq(described_class::NOT_SAVED)
+          expect(flash[:dwc_errors]).to be_present
+          expect(AtlasRb::Work.dwc(work.id, 'xml', nuid: '000000004')).to be_nil
+        end
+
+        it 'asks for a file when none was chosen' do
+          put :update, params: { id: work.id }
+
+          expect(response).to redirect_to(edit_tab)
+          expect(flash[:alert]).to eq(described_class::NO_FILE)
+        end
+      end
+    end
+
+    describe 'destroy' do
+      before do
+        AtlasRb::Resource.put_dwc(work.id, record_path, nuid: '000000004')
+        sign_in admin
+      end
+
+      it 'withdraws the record and returns to the Darwin Core pane' do
+        delete :destroy, params: { id: work.id }
+
+        expect(response).to redirect_to(edit_tab)
+        expect(flash[:notice]).to eq(described_class::REMOVED)
+        expect(AtlasRb::Work.dwc(work.id, 'xml', nuid: '000000004')).to be_nil
+      end
+    end
+  end
 end
