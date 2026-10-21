@@ -107,5 +107,10 @@ same record again safely, as `update_work` relies on `put_mods`. The loader
 preview validates the first row's record too, and marks each of its errors
 "Darwin Core:", because the list sits under the MODS panel.
 
+**The load report does not mark which rows attached a record.** A Work does
+not need a Darwin Core record to exist, so a successful row reads the same with
+or without one. A record that cannot be attached fails its row with a named
+error, so nothing goes unreported when a record is refused.
+
 The Collection metadata export writes no Darwin Core column. Reloading an
 exported manifest therefore leaves each Work's record as it is.
