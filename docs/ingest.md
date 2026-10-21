@@ -273,7 +273,9 @@ Cerberus repeats them because the XML loader must refuse a row before it
 creates the row's Work.
 
 The schema itself refuses a term that appears twice, and a term the standard
-does not define. Atlas renders an undefined term under "Other terms", so that
+does not define. It accepts `dc:type` beside `dcterms:type`, but Atlas keys its
+access copy by a term's bare name and refuses the pair as a repeat, so the
+validator refuses it too. Like Atlas, it skips a blank term when it compares. Atlas renders an undefined term under "Other terms", so that
 section appears only for a record written without passing through Cerberus.
 
 **TDWG's published schemas do not compile, so Cerberus validates against

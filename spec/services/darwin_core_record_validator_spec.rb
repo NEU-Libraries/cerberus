@@ -54,6 +54,20 @@ describe DarwinCoreRecordValidator do
     expect(described_class.call(xml: empty)).to eq([described_class.record_count_error(0)])
   end
 
+  # The schema accepts both, but Atlas keys both as `type` and refuses the pair.
+  it 'refuses dc:type beside dcterms:type' do
+    both = record.sub('<dc:type>PhysicalObject</dc:type>',
+                      '<dc:type>PhysicalObject</dc:type><dcterms:type>PhysicalObject</dcterms:type>')
+
+    expect(described_class.call(xml: both)).to eq([described_class.duplicate_term_error('type')])
+  end
+
+  it 'ignores a blank repeat, as Atlas does' do
+    blank = record.sub('<dc:type>PhysicalObject</dc:type>', '<dc:type>PhysicalObject</dc:type><dcterms:type> </dcterms:type>')
+
+    expect(described_class.call(xml: blank)).to eq([])
+  end
+
   it 'accepts the record-set namespace under any prefix' do
     renamed = record.gsub('dwr:', 'rs:').sub('xmlns:dwr=', 'xmlns:rs=')
 
