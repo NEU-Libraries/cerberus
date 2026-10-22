@@ -39,7 +39,7 @@ Then open http://localhost:3000. Port 12345 is the rdbg listener, not the app.
 `.env` is gitignored and copied from `.env.example`, which is the authoritative
 list and explains each entry. It carries **overrides only**. Almost every value
 has a working default, so a fresh checkout boots with the file left commented
-out. The exceptions are `ATLAS_RAILS_MASTER_KEY` and `WORKTREES_ROOT`, below.
+out. The exception is `ATLAS_RAILS_MASTER_KEY`, below.
 
 You will not find the service URLs in `.env`. `ATLAS_URL` is set on the `web`
 service in `docker-compose.yml`. The Solr URL defaults in `config/blacklight.yml`
@@ -53,7 +53,7 @@ What you are most likely to set:
 |---|---|
 | `ATLAS` | Pins the Atlas image tag. Unset uses `latest`. `.atlas_version` holds the tag this commit was tested against, and CI pins to it. |
 | `ATLAS_RAILS_MASTER_KEY` | Atlas's master key, passed to every Atlas service as `RAILS_MASTER_KEY`. It has no default: compose passes it through as given. CI supplies it from a secret. |
-| `WORKTREES_ROOT` | Absolute path to the directory holding your worktrees. Only `docker-compose.local.yml` reads it, to mount that directory into the `web` container. That file fails with a named error when it is unset. |
+| `WORKTREES_ROOT` | Absolute path to the directory holding your worktrees. Only the worktrees mount in `docker-compose.local.yml` reads it. The mount ships commented out; once you uncomment it, compose fails with a named error while the variable is unset. See [Working on a worktree](#working-on-a-worktree). |
 | `REQUEST_DEADLINE_SECONDS` | Puts the per-request deadline back in development, where it is off by default. See [The request deadline](#the-request-deadline). |
 | `TERMS_DOCUMENT_URL` | The full terms document, deposited as a public Work. The `/terms` page links to it. Unset, the page links the Work that `reset:data` seeds, whose path the task stores as a `SiteSetting`, because its NOID changes on every reset. Leave it unset in development; use the Work's handle URL in production. |
 | `HANDLE_*`, `CERBERUS_PUBLIC_BASE`, `CERBERUS_IIIF_*` | Handle minting and gated-derivative signing. Compose supplies a dev default for each; see the comments in `.env.example`. An unset `CERBERUS_IIIF_SIGNING_SECRET` serves every derivative ungated. |
@@ -90,7 +90,8 @@ either way, so the stack has the same shape whatever the deadline is.
 
 `docker-compose.local.yml` is gitignored. It holds two things that cannot be
 shared: a per-service `mem_limit` sized to your machine, and the worktrees bind
-mount. Copy the example and edit the numbers to suit your host:
+mount. The mount ships commented out, so the limits work on their own. Copy the
+example and edit the numbers to suit your host:
 
 ```bash
 cp docker-compose.local.yml.example docker-compose.local.yml
@@ -227,9 +228,10 @@ crawl them as part of the primary checkout:
 git worktree add "$WORKTREES_ROOT/cerberus-<branch>" -b <branch> develop
 ```
 
-Set `WORKTREES_ROOT` in `.env` (see `.env.example`). Compose reads `.env`, but
-your shell does not, so export the same value in your shell to use the commands
-on this page as written. Name the leaf directory `<repo>-<branch>` so the same
+Set `WORKTREES_ROOT` in `.env` (see `.env.example`), and uncomment the
+worktrees mount in `docker-compose.local.yml`. Compose reads `.env`, but your
+shell does not, so export the same value in your shell to use the commands on
+this page as written. Name the leaf directory `<repo>-<branch>` so the same
 branch name in a sibling repo stays distinct.
 
 A fresh worktree lacks three files, because all three are gitignored:
@@ -267,7 +269,7 @@ your own working tree and is a recurring footgun.
 The `web` container bind-mounts only the main checkout, so it cannot see a
 worktree until `docker-compose.local.yml` mounts the worktrees parent at the
 same path on both sides. That mount is what lets `docker exec -w <worktree>`
-resolve at all.
+resolve at all. The example ships it commented out, under `web`.
 
 **Compose drops the mount whenever it recreates `web`**: on an Atlas update, a
 stack rebuild, or any `up` that omits `-f docker-compose.local.yml`. This
