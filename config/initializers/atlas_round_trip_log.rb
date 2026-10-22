@@ -26,6 +26,23 @@
 # measurements, which is what this is for; under concurrent traffic the
 # attribution blurs.
 if Rails.env.development?
+  # Atlas's own view of the same call, from the headers it sends back: x-runtime
+  # is its whole Rails stack, and Server-Timing's process_action is the action
+  # alone, which is what its /metrics/latency reports. Cerberus's time minus
+  # x-runtime is what happened outside Atlas's Rails app.
+  atlas_timings = lambda do |headers|
+    runtime = headers['x-runtime']
+    action = headers['server-timing'].to_s[/process_action\.action_controller;dur=([\d.]+)/, 1]
+    { rails_ms: runtime && (runtime.to_f * 1000), action_ms: action&.to_f }
+  end
+
+  shown = ->(ms) { ms ? format('%.1f', ms) : '-' }
+  trip_line = lambda do |call|
+    format('[atlas-trips]     %<m>-6s %<p>-58s %<ms>8.1f ms   atlas rails %<rails>s, action %<action>s',
+           m: call[:method], p: call[:path], ms: call[:ms], rails: shown.call(call[:rails_ms]),
+           action: shown.call(call[:action_ms]))
+  end
+
   Rails.application.config.after_initialize do
     buffer = []
     lock = Mutex.new
@@ -33,9 +50,10 @@ if Rails.env.development?
 
     ActiveSupport::Notifications.subscribe('request.atlas_rb') do |*args|
       event = ActiveSupport::Notifications::Event.new(*args)
+      timings = atlas_timings.call(event.payload.response_headers || {})
       lock.synchronize do
         buffer << { method: event.payload.method.to_s.upcase, path: event.payload.url.path,
-                    ms: event.duration, start_ms: event.time.to_f * 1000 }
+                    ms: event.duration, start_ms: event.time.to_f * 1000, **timings }
       end
     end
 
@@ -56,10 +74,7 @@ if Rails.env.development?
                label: "#{event.payload[:method]} #{event.payload[:path]}", count: calls.size,
                summed: summed, elapsed: elapsed, page: event.duration)
       )
-      calls.each do |call|
-        Rails.logger.info(format('[atlas-trips]     %<m>-6s %<p>-58s %<ms>8.1f ms',
-                                 m: call[:method], p: call[:path], ms: call[:ms]))
-      end
+      calls.each { |call| Rails.logger.info(trip_line.call(call)) }
     end
   end
 end
