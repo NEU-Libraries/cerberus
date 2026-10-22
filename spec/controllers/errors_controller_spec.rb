@@ -53,4 +53,24 @@ describe ErrorsController do
       expect(response.body).to include 'Search is temporarily unavailable.'
     end
   end
+
+  # What a live Postgres outage produces: the session store fails to save in
+  # middleware, after the controller has finished, and the subclass arrives at
+  # /500. The layout needs the database, so the static page answers.
+  describe 'a database outage that reached the exceptions app' do
+    render_views
+
+    before { request.env['action_dispatch.exception'] = ActiveRecord::DatabaseConnectionError.new }
+
+    it 'serves the static page at /500' do
+      get :internal_server_error
+
+      expect(response).to have_http_status(:service_unavailable)
+      expect(response.body).to include Outage::CAPABILITIES[:repository].title
+    end
+  end
+
+  it 'maps a subclass of an outage error to 503' do
+    expect(ActionDispatch::ExceptionWrapper.status_code_for_exception('ActiveRecord::DatabaseConnectionError')).to eq 503
+  end
 end

@@ -20,8 +20,8 @@ class Outage
     search:     Capability.new(
       key:   :search,
       title: 'Search is temporarily unavailable.',
-      lede:  'The DRS cannot search or browse the repository right now. A record still opens from a direct ' \
-             'link or a bookmark. Please try searching again in a few minutes.'
+      lede:  'The DRS cannot search, browse or open records right now, because each depends on the search ' \
+             'index. Nothing you had saved before now has been lost. Please try again in a few minutes.'
     ),
     records:    Capability.new(
       key:   :records,

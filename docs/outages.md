@@ -83,12 +83,18 @@ the routes. A `public/404.html` would shadow the routed 404 page. That is why
 the old static pages were removed. `spec/lib/error_pages_app_spec.rb` checks
 that `public/` stays empty of them.
 
-**An outage that escapes a controller still gets the outage page.**
-`config/initializers/outages.rb` maps the outage exceptions to 503.
-`ErrorsController#service_unavailable` and `#internal_server_error` both check
-`Outage.for` on the original exception. Both are needed because
-`ExceptionWrapper` maps statuses by exact class name. A subclass of a mapped
-exception, such as `ActiveRecord::DatabaseConnectionError`, arrives as a 500.
+**An outage that escapes a controller still gets the outage page.** The usual
+case is a Postgres outage on a page that writes the session. The controller
+finishes, and then the session store fails to save in middleware, outside any
+`rescue_from`.
+
+- **Mapping:** `config/initializers/outages.rb` maps the outage exceptions to 503, with their subclasses. `ExceptionWrapper` looks the status up by exact class name, and a failed connect raises `ActiveRecord::DatabaseConnectionError`, not the `ConnectionNotEstablished` that `Outage` names.
+- **Status check:** `ErrorsController#service_unavailable` and `#internal_server_error` both check `Outage.for` on the original exception, so an outage gets the outage page whichever status it arrives with.
+
+**Development shows the debug page here instead.** `consider_all_requests_local`
+skips the exceptions app, so a middleware failure in development renders Rails'
+debug page. An outage raised inside a controller still gets the outage page in
+development, because `rescue_from` runs there too.
 
 ## Atlas unreachable
 
