@@ -71,7 +71,7 @@ Atlas verifies both against Cerberus's published keyset.
 The rule that follows: **never bypass atlas_rb** for anything that is a
 repository object. No direct HTTP to Atlas, and no ActiveRecord standing in for
 something Atlas owns. Where a feature needs an endpoint that does not exist yet,
-the answer is a gap report rather than a cross-repo change — see `CLAUDE.md`.
+the answer is a gap report rather than a cross-repo change — see `AGENTS.md`.
 
 ## Cerberus's own database
 
@@ -137,7 +137,7 @@ details, including the run lock and the reset preflight, are in
 |---|---|
 | Setting up, running things, organising a change | [`docs/development.md`](docs/development.md) |
 | How one component works, while you edit it | [`docs/`](docs/README.md) |
-| The conventions a change has to satisfy | [`CLAUDE.md`](CLAUDE.md) |
+| The conventions a change has to satisfy | [`AGENTS.md`](AGENTS.md) |
 | The Atlas API contract | Atlas's `/docs`, and its `openapi/openapi.yaml` |
 | Using the repository as a depositor or reviewer | the user guide (`cerberus-guide`) |
 | Repository software, as a Rails developer new to it | the developer primer (`cerberus-primer`) |

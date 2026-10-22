@@ -7,7 +7,7 @@ and `lib/request_deadline.rb`.
 
 Everything here is procedure. The conventions a change has to satisfy — the
 comment standard, the Blacklight and atlas_rb layering rules, the cross-repo gap
-report — live in `CLAUDE.md`.
+report — live in `AGENTS.md`.
 
 ## Setup
 
@@ -361,7 +361,7 @@ CI does not run this lane, and a default rspec run skips the `:browser` tag. A
 green pipeline therefore says nothing about these specs.
 
 The lane includes the axe accessibility audit. [`accessibility.md`](accessibility.md)
-covers it, along with `bin/a11y-lint` and the Claude Code hook that runs it.
+covers it, along with `bin/a11y-lint` and the agent hook that runs it.
 
 ## Migrations are a pause point
 
@@ -380,7 +380,7 @@ chronically dirty `db/schema.rb` on develop.
 
 **Never edit `db/schema.rb` by hand.** `db:migrate` generates it, and the next
 migration run overwrites a manual edit. Express every schema change as a
-migration. A Claude Code `PreToolUse` hook, `.claude/hooks/schema-rb-guard.sh`,
+migration. A local agent hook, `.claude/hooks/schema-rb-guard.sh`,
 backstops this for agent edits. `.claude/` is gitignored, so the hook lives in
 the main checkout's local configuration, not in the repository.
 

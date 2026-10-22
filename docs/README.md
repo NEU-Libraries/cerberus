@@ -19,7 +19,7 @@ sense.
 
 [`design.md`](design.md) covers the look of every surface: container chrome, the
 palette, type, icons, tabs, buttons and hover. These are conventions every UI
-change has to satisfy, but they run long, so `CLAUDE.md` keeps a pointer and a
+change has to satisfy, but they run long, so `AGENTS.md` keeps a pointer and a
 local hook makes the page required reading before a UI edit.
 
 ## What belongs elsewhere
@@ -29,7 +29,7 @@ Other audiences and needs have homes outside the repository.
 
 | Audience or need | Home |
 |---|---|
-| A convention every change has to satisfy | `CLAUDE.md`, at the repository root |
+| A convention every change has to satisfy | `AGENTS.md`, at the repository root |
 | A repository user, or a UAT tester | the user guide (`cerberus-guide`) |
 | A Rails developer new to repository software | the developer primer (`cerberus-primer`) |
 | A rule that code can check | a spec, not prose |
@@ -75,7 +75,7 @@ Three Blacklight extension points are also exempt, at any size:
 `app/models/solr_document.rb`. Their comments document Blacklight's contract,
 which a page here could not carry any better than the file does.
 
-A Claude Code `PostToolUse` hook, `.claude/hooks/comment-density-lint.sh`,
+A local agent hook, `.claude/hooks/comment-density-lint.sh`,
 reports the number after every edit to Ruby under `app/`. It is advisory: it
 runs after the write, so it cannot block one. `.claude/` is gitignored, so the
 hook lives in the main checkout's local configuration, not in the repository.

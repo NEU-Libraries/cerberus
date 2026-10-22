@@ -3,11 +3,11 @@
 The DRS look in one phrase is *restrained, librarian/archival, institutional*.
 This page holds the rules that make it so: which container a surface gets, the
 palette and its coupled tokens, type, icons, tabs, buttons and hover. Read it
-before you change a view, a component or a stylesheet. A local Claude Code hook
+before you change a view, a component or a stylesheet. A local agent hook
 blocks UI edits until this page has been read in the session.
 
 For a new interface or an in-place redesign, also use the `/frontend-design`
-skill, as `CLAUDE.md` says, and land its output on the rules here.
+skill, as `AGENTS.md` says, and land its output on the rules here.
 
 Source files:
 

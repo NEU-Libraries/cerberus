@@ -64,16 +64,16 @@ rules stay out on purpose:
   fields that collect the user's own details, such as a name or an email.
 - `html-no-title-attribute`: a `title` is not a WCAG failure.
 
-## The Claude Code hook
+## The agent hook
 
-A local Claude Code `PostToolUse` hook, `.claude/hooks/a11y-lint.sh`, runs
-`bin/a11y-lint` on each template Claude writes. A finding goes back to Claude as
-tool feedback, so Claude fixes it in the same turn. The hook runs the edited
+A local agent hook, `.claude/hooks/a11y-lint.sh`, runs `bin/a11y-lint` on
+each template an agent writes. A finding goes back to the agent as tool
+feedback, so the agent fixes it in the same turn. The hook runs the edited
 checkout's own script, so a worktree is linted with its own rules. `.claude/`
 is gitignored, so the hook lives in the main checkout's local configuration,
 not in the repository.
 
-The hook sees only Claude's edits. Before you commit a template you edited by
+The hook sees only the agent's edits. Before you commit a template you edited by
 hand, run:
 
 ```bash

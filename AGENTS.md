@@ -1,9 +1,9 @@
-# CLAUDE.md
+# AGENTS.md
 
-Guidance for Claude Code when working on the DRS codebase.
+Guidance for coding agents working on the DRS codebase.
 
 This file holds the conventions a change has to satisfy and the rules that
-govern how Claude works here. The mechanics — setup, the spec wrappers,
+govern how an agent works here. The mechanics — setup, the spec wrappers,
 worktrees, verification, the migration pause — are in
 [`docs/development.md`](docs/development.md), which is written for a developer
 and is worth reading first.
@@ -64,7 +64,7 @@ Cerberus is responsible for:
 
 Setup, the spec wrappers, worktree mechanics and the migration pause are all in [`docs/development.md`](docs/development.md). Read that before running anything.
 
-Environment lifecycle and schema changes stay with the developer: Claude does not bring the stack up or down, run `db:migrate`, or open a Rails console. Within that boundary Claude does run a narrow, specific set of commands for verification — restarting Puma or the whole `web` container, running specs (including against a worktree), building Sass, and restoring the worktrees bind mount — exactly as that page documents. Nothing outside them.
+Environment lifecycle and schema changes stay with the developer: the agent does not bring the stack up or down, run `db:migrate`, or open a Rails console. Within that boundary the agent does run a narrow, specific set of commands for verification — restarting Puma or the whole `web` container, running specs (including against a worktree), building Sass, and restoring the worktrees bind mount — exactly as that page documents. Nothing outside them.
 ### Blacklight
 
 The search/discovery interface is powered by Blacklight, which queries Solr directly. Blacklight configuration — facets, search fields, sort fields — lives in `CatalogController` and associated search builder classes. Keep Blacklight configuration changes in those files, not scattered across the app.
@@ -113,7 +113,7 @@ This report gives the developer enough information to prioritize and implement t
 Each application (Cerberus, Atlas) has its own `.env`, copied from `.env.example`. Never commit a `.env`. The variables that matter are tabled in [`docs/development.md`](docs/development.md#environment-variables).
 ## Verification
 
-The mechanics live in [`docs/development.md`](docs/development.md) — the two spec wrappers, the test-Atlas lane, the worktree mount, and what to restart after which kind of change. What follows is what Claude owes the developer on top of them.
+The mechanics live in [`docs/development.md`](docs/development.md) — the two spec wrappers, the test-Atlas lane, the worktree mount, and what to restart after which kind of change. What follows is what the agent owes the developer on top of them.
 
 **Plan the verification before starting the work,** and say what you chose when you report. Naming the specs you judged sufficient is part of the report, so the developer can see the reasoning rather than just the result.
 
@@ -136,15 +136,15 @@ When capturing screenshots with `browser_take_screenshot`, always pass `filename
 
 When a change adds a file under `db/migrate/`, **stop and ask the developer to run `db:migrate` before continuing.** The flow:
 
-1. Claude writes the migration file(s) and commits them.
-2. Claude stops and tells the developer: *"Migration `<filename>` is committed. Please run `docker exec cerberus-web-1 bundle exec rails db:migrate` so `db/schema.rb` regenerates, then let me know — I'll continue."*
+1. The agent writes the migration file(s) and commits them.
+2. The agent stops and tells the developer: *"Migration `<filename>` is committed. Please run `docker exec cerberus-web-1 bundle exec rails db:migrate` so `db/schema.rb` regenerates, then let me know — I'll continue."*
 3. The developer runs it. The Rails toolchain regenerates `db/schema.rb`.
-4. Claude commits the regenerated `db/schema.rb` once the developer confirms, or the developer commits it themselves. Either is fine.
-5. Claude continues with the next planned work.
+4. The agent commits the regenerated `db/schema.rb` once the developer confirms, or the developer commits it themselves. Either is fine.
+5. The agent continues with the next planned work.
 
 The friction is the point. The trigger is "new migration file", not "worktree task", so it applies to in-place edits equally. [`docs/development.md`](docs/development.md#migrations-are-a-pause-point) explains what a missing `db/schema.rb` breaks for everyone who pulls the branch.
 
-**Never edit `db/schema.rb` directly.** It is generated — `db:migrate` writes it, and a manual edit is silently overwritten the next time migrations run. Express every schema change as a migration file. A `PreToolUse` hook at `.claude/hooks/schema-rb-guard.sh` enforces this for `Edit` / `Write` / `MultiEdit` as a backstop on top of this rule. To commit the *output* of a `db:migrate` the developer has just run, `git add db/schema.rb` via Bash is not gated.
+**Never edit `db/schema.rb` directly.** It is generated — `db:migrate` writes it, and a manual edit is silently overwritten the next time migrations run. Express every schema change as a migration file. A local agent hook at `.claude/hooks/schema-rb-guard.sh` enforces this for file edits as a backstop on top of this rule. To commit the *output* of a `db:migrate` the developer has just run, `git add db/schema.rb` via Bash is not gated.
 ## Code Conventions
 
 - Standard Ruby/Rails conventions: snake_case, RESTful controllers, thin controllers with logic in service objects or models.
