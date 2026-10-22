@@ -19,7 +19,9 @@
       Nagios polls. This page cannot open while Postgres is down, because
       signing in needs it; the public endpoint still reports it.
 
-  .table-responsive
+  -# position-relative: the visually-hidden caption is absolutely positioned,
+  -# and without a positioned parent it escapes the overflow clip and scrolls.
+  .table-responsive.position-relative
     %table.table.table-borderless.admin-registry-table
       %caption.visually-hidden Each service the repository depends on, and whether it answered
       %thead
@@ -32,7 +34,8 @@
       %tbody
         - @results.each_value do |result|
           %tr
-            %th{scope: 'row'}= result.capability.to_s.humanize
+            %td
+              .admin-registry-table__name= result.capability.to_s.humanize
             %td= result.service
             %td
               - if result.ok
