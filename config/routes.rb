@@ -16,6 +16,13 @@ Rails.application.routes.draw do
 
   mount Blacklight::Engine => '/catalog'
   root to: 'pages#home'
+
+  # Monitoring. /up is Swarm's liveness check and touches no dependency, so an
+  # outage elsewhere never restarts a container that can still serve the outage
+  # page. /health is for Nagios. See docs/outages.md.
+  get 'up',                  to: 'rails/health#show', as: :rails_health_check
+  get 'health',              to: 'health#index',      as: :health
+  get 'health/:capability',  to: 'health#show',       as: :health_capability
   get 'terms', to: 'pages#terms', as: :terms
   concern :searchable, Blacklight::Routes::Searchable.new
 
@@ -234,6 +241,8 @@ Rails.application.routes.draw do
     # deploy orchestrator are the other two, and all three write the same flag
     # in Atlas. Closing must stay reachable while the window is open — see
     # Admin::MaintenanceController.
+    get 'health', to: 'health#show', as: :health
+
     get    'maintenance',      to: 'maintenance#show',         as: :maintenance
     post   'maintenance/open', to: 'maintenance#open_window',  as: :open_maintenance
     delete 'maintenance',      to: 'maintenance#close_window', as: :close_maintenance

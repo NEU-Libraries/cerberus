@@ -1,0 +1,48 @@
+= render 'admin/breadcrumb_header'
+
+- down = @results.values.reject(&:ok)
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-heart-pulse{'aria-hidden' => 'true'}
+      System health
+      %span.admin-registry__count= down.empty? ? 'All services answering' : "#{pluralize(down.size, 'service')} down"
+    .admin-registry__head-actions
+      = link_to admin_health_path, class: 'btn btn-tonal-secondary btn-sm' do
+        %i.fa-solid.fa-rotate.me-1{'aria-hidden' => 'true'}
+        Check again
+
+  .p-3.pb-0
+    %p.text-body-secondary.small.mb-0
+      Checked #{l(@checked_at, format: :long)}. Readers see only the capability
+      names, on the outage page and at #{link_to '/health', health_path}, which
+      Nagios polls. This page cannot open while Postgres is down, because
+      signing in needs it; the public endpoint still reports it.
+
+  .table-responsive
+    %table.table.table-borderless.admin-registry-table
+      %caption.visually-hidden Each service the repository depends on, and whether it answered
+      %thead
+        %tr
+          %th{scope: 'col'} Capability
+          %th{scope: 'col'} Service
+          %th{scope: 'col'} State
+          %th.text-end{scope: 'col'} Response
+          %th{scope: 'col'} Detail
+      %tbody
+        - @results.each_value do |result|
+          %tr
+            %th{scope: 'row'}= result.capability.to_s.humanize
+            %td= result.service
+            %td
+              - if result.ok
+                %span.text-success
+                  %i.fa-solid.fa-circle-check.me-1{'aria-hidden' => 'true'}
+                  OK
+              - else
+                %span.text-danger.fw-semibold
+                  %i.fa-solid.fa-circle-xmark.me-1{'aria-hidden' => 'true'}
+                  Unavailable
+            %td.text-end
+              %span.admin-registry-table__id= "#{result.latency_ms} ms"
+            %td.small.text-break= result.detail

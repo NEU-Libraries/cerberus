@@ -92,6 +92,7 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     'the loaders'         => -> { '/admin/loaders' },
     'a new loader'        => -> { '/admin/loaders/new' },
     'maintenance'         => -> { '/admin/maintenance' },
+    'system health'       => -> { '/admin/health' },
     'impressions'         => -> { '/admin/impressions' },
     'reparent'            => -> { '/admin/reparent' },
     'tombstones'          => -> { '/admin/tombstones' },

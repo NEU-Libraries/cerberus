@@ -158,6 +158,17 @@
           %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
 
     - if current_user&.admin?
+      = link_to admin_health_path, class: 'admin-action-card admin-action-card--health', role: 'listitem' do
+        %span.admin-action-card__icon
+          %i.fa-solid.fa-heart-pulse{'aria-hidden' => 'true'}
+        %span.admin-action-card__title System health
+        %span.admin-action-card__desc
+          See which of the services behind the repository are answering, how fast, and the error from any that are not.
+        %span.admin-action-card__cta
+          Open
+          %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
+    - if current_user&.admin?
       = link_to '/jobs', class: 'admin-action-card admin-action-card--jobs', role: 'listitem' do
         %span.admin-action-card__icon
           %i.fa-solid.fa-gears{'aria-hidden' => 'true'}
