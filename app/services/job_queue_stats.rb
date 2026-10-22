@@ -32,8 +32,12 @@ class JobQueueStats
         }
       end
 
+      # Two heartbeats rather than Solid Queue's five-minute alive threshold: a
+      # worker killed without deregistering keeps its row until the supervisor
+      # prunes it, and would otherwise count as live for five minutes.
       def live_workers
-        SolidQueue::Process.where(kind: 'Worker', last_heartbeat_at: SolidQueue.process_alive_threshold.ago..).count
+        since = (SolidQueue.process_heartbeat_interval * 2).ago
+        SolidQueue::Process.where(kind: 'Worker', last_heartbeat_at: since..).count
       end
   end
 end

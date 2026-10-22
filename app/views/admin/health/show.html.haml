@@ -88,7 +88,8 @@
               .admin-registry-table__name Running
             %td
               %span.admin-registry-table__id= @jobs.running
-              %span.small.text-body-secondary.ms-2= "on #{pluralize(@jobs.workers, 'live worker')}"
+              %span.small.text-body-secondary.ms-2
+                = "on #{pluralize(@jobs.workers, 'live worker')}; a worker stopped in the last two minutes can still count"
           %tr
             %td
               .admin-registry-table__name Scheduled

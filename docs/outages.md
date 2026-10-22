@@ -170,6 +170,12 @@ than repeating it.
 is draining is normal. A waiting job that is twenty minutes old means the
 workers have stopped taking work.
 
+**The live-worker count can lag a restart.** A worker killed without
+deregistering keeps its row until the supervisor prunes it.
+`JobQueueStats` counts heartbeats from the last two intervals (two minutes), not
+Solid Queue's five-minute alive threshold, so a ghost lingers for at most two
+minutes. In development, every `web` restart leaves one.
+
 The test environment runs the `:test` job adapter, so the queue tables do not
 exist there. `spec/services/job_queue_stats_spec.rb` stubs `read_tables`, the
 one method that reads them.
