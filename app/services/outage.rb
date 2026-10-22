@@ -37,9 +37,10 @@ class Outage
     )
   }.freeze
 
-  # A proxy in front of Atlas answers these while Atlas is down or restarting. A
-  # bare 500 is left out: it is as likely to be a bug as an outage, and calling a
-  # bug an outage tells the reader to wait for something that will not change.
+  # A proxy in front of Atlas answers these while Atlas is down or restarting.
+  # Atlas reports its own dependency failures as BackendUnavailableError, so a
+  # bare 500 is a bug, and calling a bug an outage tells the reader to wait for
+  # something that will not change.
   GATEWAY_STATUSES = [502, 503, 504].freeze
 
   RETRY_AFTER = 60
@@ -86,8 +87,9 @@ class Outage
       end
 
       # The Cantaloupe clients rescue their own Faraday errors, so one that
-      # escapes to a controller came from atlas_rb.
-      def records_errors = [Faraday::ConnectionFailed, Faraday::TimeoutError]
+      # escapes to a controller came from atlas_rb. BackendUnavailableError is
+      # Atlas answering that its own database, index or storage is down.
+      def records_errors = [Faraday::ConnectionFailed, Faraday::TimeoutError, AtlasRb::BackendUnavailableError]
 
       # is_a?, never case/when: SystemCallError's === matches on errno alone, so
       # `when Blacklight::Exceptions::ECONNREFUSED` would claim a refusal from

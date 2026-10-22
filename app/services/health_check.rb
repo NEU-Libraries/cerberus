@@ -102,11 +102,18 @@ class HealthCheck
         [true, nil]
       end
 
-      # Atlas has no health endpoint of its own, so this is the cheapest
-      # authenticated read. A nil is an Atlas that answered without the endpoint.
+      # Atlas's own report, so a live Puma in front of a dead Postgres, Solr or
+      # storage reads as down. An Atlas older than the endpoint answers 404, and
+      # answering at all is then the best evidence there is.
       def probe_records
+        report = AtlasRb::Health.read(timeout: DEADLINE)
+        detail = report.to_h.except('status').map { |dependency, state| "#{dependency} #{state}" }.join(', ')
+        [report.status == 'ok', detail]
+      rescue AtlasRb::ResourceError => e
+        raise unless e.status == 404
+
         AtlasRb::Maintenance.read(nuid: Rails.application.config.x.cerberus.guest_nuid)
-        [true, nil]
+        [true, 'No health endpoint on this Atlas']
       end
 
       def probe_uploads

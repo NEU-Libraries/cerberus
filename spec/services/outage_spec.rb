@@ -21,6 +21,12 @@ RSpec.describe Outage do
     expect(described_class.for(Faraday::TimeoutError.new).key).to eq :records
   end
 
+  it 'names Atlas reporting its own dependency down as records' do
+    error = AtlasRb::BackendUnavailableError.new(code: 'backend_unavailable', dependency: 'storage')
+
+    expect(described_class.for(error).key).to eq :records
+  end
+
   it 'names a gateway status from in front of Atlas as records' do
     expect(described_class.for(atlas_error(503)).key).to eq :records
   end

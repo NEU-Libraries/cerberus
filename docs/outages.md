@@ -22,7 +22,7 @@ Source files:
 |---|---|---|---|
 | `repository` | Postgres | `ActiveRecord::ConnectionNotEstablished`, `ActiveRecord::ConnectionFailed` | the static 503 page; the whole site is down |
 | `search` | Solr | `Blacklight::Exceptions::ECONNREFUSED`, `Blacklight::Exceptions::RepositoryTimeout`, and the RSolr errors underneath them | the outage page for search |
-| `records` | Atlas | `Faraday::ConnectionFailed`, `Faraday::TimeoutError`, or `AtlasRb::ResourceError` with a 502, 503 or 504 | the outage page for records, or the outage banner |
+| `records` | Atlas | `Faraday::ConnectionFailed`, `Faraday::TimeoutError`, `AtlasRb::BackendUnavailableError`, or `AtlasRb::ResourceError` with a 502, 503 or 504 | the outage page for records, or the outage banner |
 | `uploads` | the uploads volume | `Outage::StorageUnavailable`, raised by `Outage.guard_storage` | the outage page for uploads |
 | `jobs` | Solid Queue | nothing a request raises | health endpoints only |
 | `images` | Cantaloupe | nothing a request raises | health endpoints only |
@@ -36,11 +36,16 @@ Atlas: no other client lets one escape to a controller.
 
 ### Two choices that look wrong
 
-**A bare Atlas 500 is not an outage.** A 500 is as likely to be a bug as a
-dependency failure. Calling a bug an outage tells the reader to wait for
-something that will not change. Only the gateway statuses that a proxy answers
-while Atlas is down count. Atlas does not yet answer its own dependency failures
-with a typed 503. That gap is reported separately.
+**A bare Atlas 500 is not an outage.** Atlas answers its own dependency
+failures with a typed 503, `error: "backend_unavailable"`, which atlas_rb raises
+as `AtlasRb::BackendUnavailableError`. A 500 is therefore a bug. Calling a bug an
+outage tells the reader to wait for something that will not change. The gateway
+statuses count too, because a proxy answers them while Atlas itself is down.
+
+`BackendUnavailableError` names the failed dependency, but the reader still
+sees "records". The reader lost records, whichever part of Atlas failed.
+`BackendUnavailableError` is deliberately not a `ResourceError`, so it never
+reaches `Authorizable`'s refusal handler.
 
 **`Outage.for` uses `is_a?`, never `case`/`when`.** `SystemCallError.===` matches
 on the errno alone. `Blacklight::Exceptions::ECONNREFUSED === Errno::ECONNREFUSED.new`
@@ -106,7 +111,8 @@ It marks that held window `unreachable`. Then:
 
 **`/up` must not check a dependency.** If it did, a Solr outage would make the
 orchestrator restart every `web` container, including the ones serving the
-outage page. The `web` healthcheck in `docker-compose.yml` uses it.
+outage page. The `web` and `atlas` healthchecks in `docker-compose.yml` use
+each app's own `/up`.
 
 **`/health` is public, so it names no service.** It shows no hostname, version
 or error text. `HealthController` inherits `ActionController::API`, so no
@@ -131,9 +137,11 @@ joined with a 5-second deadline. A probe that has not answered by then is
 reported down, and its thread is left to finish. One atlas_rb read can take more
 than 30 seconds with retries, which is longer than Nagios waits.
 
-`probe_records` uses `AtlasRb::Maintenance.read`, the cheapest authenticated
-read. It shows that Atlas answers, not that Atlas's own Postgres, Solr and
-storage are healthy. Atlas has no endpoint that reports those yet.
+`probe_records` reads Atlas's own report through `AtlasRb::Health.read`, so an
+Atlas whose Puma answers while its Postgres, Solr or storage is down reads as
+down. The admin page lists each Atlas dependency in the Detail column. An Atlas
+older than the endpoint answers 404. The probe then falls back to
+`AtlasRb::Maintenance.read`, so Cerberus can still deploy ahead of Atlas.
 
 **The admin page cannot report a database outage.** Signing in needs the DB
 session store. `/health/repository` and the log carry that case.

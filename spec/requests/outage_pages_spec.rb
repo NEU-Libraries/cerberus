@@ -54,6 +54,19 @@ RSpec.describe 'Outage pages', type: :request do
       expect(response.body).to include 'Records are temporarily unavailable.'
     end
 
+    # Atlas up, its storage not: the typed 503, which is not a ResourceError and
+    # so never reaches Authorizable's refusal handler.
+    it 'renders the records page when Atlas reports its own dependency down' do
+      allow(AtlasRb::Work).to receive(:find)
+        .and_raise(AtlasRb::BackendUnavailableError.new(code: 'backend_unavailable', dependency: 'storage'))
+
+      get "/works/#{SecureRandom.alphanumeric(9)}"
+
+      expect(response).to have_http_status(:service_unavailable)
+      expect(response.body).to include 'Records are temporarily unavailable.'
+      expect(response.body).not_to include 'storage'
+    end
+
     it 'renders the records page for a gateway status in front of Atlas' do
       gateway = instance_double(Faraday::Response, status: 502, body: '')
       allow(AtlasRb::Work).to receive(:find).and_raise(AtlasRb::ResourceError.new('Bad Gateway', response: gateway))

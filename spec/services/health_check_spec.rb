@@ -38,6 +38,43 @@ RSpec.describe HealthCheck do
     expect(records.detail).to start_with 'No answer within'
   end
 
+  describe 'the records probe' do
+    def report(**states)
+      AtlasRb::Mash.new({ 'database' => 'ok', 'index' => 'ok', 'storage' => 'ok', 'cache' => 'ok' }
+        .merge(states.transform_keys(&:to_s)))
+    end
+
+    # The case the probe exists for: Puma answers while what it stands on is
+    # down.
+    it 'reports Atlas down when Atlas reports a dependency down' do
+      allow(AtlasRb::Health).to receive(:read).and_return(report(status: 'degraded', storage: 'unavailable'))
+
+      records = described_class.check(:records, fresh: true)
+
+      expect(records.ok).to be false
+      expect(records.detail).to include 'storage unavailable'
+    end
+
+    it 'reports Atlas up when every dependency is' do
+      allow(AtlasRb::Health).to receive(:read).and_return(report(status: 'ok'))
+
+      expect(described_class.check(:records, fresh: true).ok).to be true
+    end
+
+    # Cerberus can deploy ahead of Atlas. An Atlas without the endpoint still
+    # answered, which is all the probe could tell before it existed.
+    it 'falls back to an authenticated read on an Atlas without the endpoint' do
+      not_found = instance_double(Faraday::Response, status: 404, body: '')
+      allow(AtlasRb::Health).to receive(:read).and_raise(AtlasRb::ResourceError.new('404', response: not_found))
+      allow(AtlasRb::Maintenance).to receive(:read).and_return(nil)
+
+      records = described_class.check(:records, fresh: true)
+
+      expect(records.ok).to be true
+      expect(records.detail).to eq 'No health endpoint on this Atlas'
+    end
+  end
+
   describe 'caching' do
     before do
       allow(Rails).to receive(:cache).and_return(ActiveSupport::Cache::MemoryStore.new)
@@ -63,10 +100,10 @@ RSpec.describe HealthCheck do
   # The probes that can run against the test stack without a worker or a
   # Cantaloupe behind them.
   describe 'against the test stack' do
-    it 'finds the database and the search index answering' do
+    it 'finds the database, the search index and Atlas answering' do
       results = described_class.call(fresh: true)
 
-      expect(results.values_at(:repository, :search).map(&:status)).to eq %w[ok ok]
+      expect(results.values_at(:repository, :search, :records).map(&:status)).to eq %w[ok ok ok]
     end
 
     it 'reports an uploads root that is not there' do
