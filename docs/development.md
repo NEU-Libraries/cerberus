@@ -361,7 +361,7 @@ CI does not run this lane, and a default rspec run skips the `:browser` tag. A
 green pipeline therefore says nothing about these specs.
 
 The lane includes the axe accessibility audit. [`accessibility.md`](accessibility.md)
-covers it, along with `bin/a11y-lint` and the agent hook that runs it.
+covers it, along with `bin/a11y-lint`.
 
 ## Migrations are a pause point
 
@@ -380,9 +380,7 @@ chronically dirty `db/schema.rb` on develop.
 
 **Never edit `db/schema.rb` by hand.** `db:migrate` generates it, and the next
 migration run overwrites a manual edit. Express every schema change as a
-migration. A local agent hook, `.claude/hooks/schema-rb-guard.sh`,
-backstops this for agent edits. `.claude/` is gitignored, so the hook lives in
-the main checkout's local configuration, not in the repository.
+migration.
 
 Rollback is per database: `rails db:rollback:primary STEP=n`. The other
 database is `queue`, with its migrations in `db/queue_migrate`.

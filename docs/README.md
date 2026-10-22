@@ -75,10 +75,16 @@ Three Blacklight extension points are also exempt, at any size:
 `app/models/solr_document.rb`. Their comments document Blacklight's contract,
 which a page here could not carry any better than the file does.
 
-A local agent hook, `.claude/hooks/comment-density-lint.sh`,
-reports the number after every edit to Ruby under `app/`. It is advisory: it
-runs after the write, so it cannot block one. `.claude/` is gitignored, so the
-hook lives in the main checkout's local configuration, not in the repository.
+`bin/comment-density` measures this, and holds the target and the exempt list:
+
+```bash
+bin/comment-density                 # every Ruby file under app/
+bin/comment-density --staged        # Ruby files under app/ staged for commit
+bin/comment-density <files>         # named files
+```
+
+It prints each file over the target, with the comment lines the target allows,
+and always exits 0. An editor or agent can run it on each file after a write.
 
 ## Adding a page
 
