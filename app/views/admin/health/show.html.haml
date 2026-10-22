@@ -13,7 +13,7 @@
         Check again
 
   .p-3.pb-0
-    %p.text-body-secondary.small.mb-0
+    %p.text-body-secondary.small.mb-2
       Checked #{l(@checked_at, format: :long)}. Readers see only the capability
       names, on the outage page and at #{link_to '/health', health_path}, which
       Nagios polls. This page cannot open while Postgres is down, because
