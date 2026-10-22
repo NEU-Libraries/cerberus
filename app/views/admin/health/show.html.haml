@@ -19,11 +19,10 @@
       Nagios polls. This page cannot open while Postgres is down, because
       signing in needs it; the public endpoint still reports it.
 
-  -# position-relative: the visually-hidden caption is absolutely positioned,
-  -# and without a positioned parent it escapes the overflow clip and scrolls.
-  .table-responsive.position-relative
-    %table.table.table-borderless.admin-registry-table
-      %caption.visually-hidden Each service the repository depends on, and whether it answered
+  -# A label rather than a visually-hidden caption: the caption overflows
+  -# .table-responsive by a pixel and puts a scrollbar on the table.
+  .table-responsive
+    %table.table.table-borderless.admin-registry-table{'aria-label' => 'Each service the repository depends on, and whether it answered'}
       %thead
         %tr
           %th{scope: 'col'} Capability
