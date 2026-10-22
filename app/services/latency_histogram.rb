@@ -14,7 +14,8 @@ class LatencyHistogram
   # call being timed, so a failure stops writes for this long.
   BACKOFF = 30.seconds
 
-  Summary = Data.define(:calls, :failed, :timeouts, :mean_ms, :p50_ms, :p95_ms, :p99_ms)
+  # extra_means holds the mean of each figure passed to record as `sums:`.
+  Summary = Data.define(:calls, :failed, :timeouts, :mean_ms, :p50_ms, :p95_ms, :p99_ms, :extra_means)
 
   class << self
     def redis
@@ -33,13 +34,16 @@ class LatencyHistogram
     @name = name
   end
 
-  def record(duration_ms, failed: false, timeout: false)
+  # `sums:` adds further figures to the same entry, such as the part of a page
+  # spent waiting on Atlas, reported back as means.
+  def record(duration_ms, failed: false, timeout: false, sums: {})
     return if self.class.suspended?
 
     key = minute_key(Time.current)
     self.class.redis.pipelined do |pipe|
       pipe.hincrby(key, bucket_for(duration_ms), 1)
       pipe.hincrbyfloat(key, 'sum_ms', duration_ms)
+      sums.each { |name, value| pipe.hincrbyfloat(key, "sum_#{name}", value) }
       pipe.hincrby(key, 'failed', 1) if failed
       pipe.hincrby(key, 'timeouts', 1) if timeout
       pipe.expire(key, RETENTION.to_i)
@@ -74,9 +78,19 @@ class LatencyHistogram
       calls  = counts.sum
       Summary.new(
         calls: calls, failed: totals['failed'].to_i, timeouts: totals['timeouts'].to_i,
-        mean_ms: calls.zero? ? nil : (totals['sum_ms'] / calls).round,
-        p50_ms: percentile(counts, 0.50), p95_ms: percentile(counts, 0.95), p99_ms: percentile(counts, 0.99)
+        mean_ms: mean(totals['sum_ms'], calls),
+        p50_ms: percentile(counts, 0.50), p95_ms: percentile(counts, 0.95), p99_ms: percentile(counts, 0.99),
+        extra_means: extra_means(totals, calls)
       )
+    end
+
+    def mean(sum, calls) = calls.zero? ? nil : (sum / calls).round
+
+    # sum_ms is the duration itself; every other sum_ field came from `sums:`.
+    def extra_means(totals, calls)
+      totals.filter_map do |field, sum|
+        [field.delete_prefix('sum_').to_sym, mean(sum, calls)] if field.start_with?('sum_') && field != 'sum_ms'
+      end.to_h
     end
 
     # Linear interpolation inside the bucket that holds the rank. The open top

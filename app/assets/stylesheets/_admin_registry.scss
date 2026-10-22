@@ -471,3 +471,26 @@
     font-variant-numeric: tabular-nums;
   }
 }
+
+// The health page's "where the time goes" bar: a page's average split into
+// waiting on Atlas and everything else, scaled to the slowest page listed. The
+// figures beside it carry the values, so the bar is decoration and hidden from
+// assistive technology.
+.latency-split {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-variant-numeric: tabular-nums;
+
+  &__bar {
+    display: flex;
+    flex: 0 0 10rem;
+    height: 0.6rem;
+    border-radius: 0.3rem;
+    overflow: hidden;
+    background-color: $gray-200;
+  }
+
+  &__atlas { background-color: $blue; }
+  &__page  { background-color: $gray-600; }
+}

@@ -15,6 +15,9 @@ class ApplicationController < ActionController::Base
     I18n.locale = :en
   end
 
+  # Prepended so it runs before any callback that reads Atlas.
+  prepend_before_action { Current.request_timing = RequestTiming.new }
+
   before_action :store_preferred_view
   before_action :set_current_nuid
 

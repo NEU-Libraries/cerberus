@@ -16,6 +16,7 @@ module AtlasLatency
     env = event.payload
     return if IGNORED_PATHS.include?(env.url&.path)
 
+    Current.request_timing&.add_atlas_call(event.time * 1000, event.end * 1000)
     error = event.payload[:exception_object]
     histogram.record(event.duration,
                      failed:  error.present? || env.status.to_i >= 500,

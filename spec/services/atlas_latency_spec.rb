@@ -13,7 +13,8 @@ RSpec.describe AtlasLatency do
       faraday_env.status = status
       faraday_env[:exception_object] = exception if exception
     end
-    instance_double(ActiveSupport::Notifications::Event, payload: env, duration: duration)
+    instance_double(ActiveSupport::Notifications::Event, payload: env, duration: duration,
+                                                         time: 10.0, end: 10.0 + (duration / 1000))
   end
 
   it 'records a call with its duration' do
@@ -32,6 +33,15 @@ RSpec.describe AtlasLatency do
     described_class.record(event(status: nil, exception: Faraday::TimeoutError.new))
 
     expect(histogram).to have_received(:record).with(42.0, failed: true, timeout: true)
+  end
+
+  it "adds the call to the request's own timing" do
+    Current.request_timing = RequestTiming.new
+    described_class.record(event)
+
+    expect(Current.request_timing.atlas_elapsed_ms).to be_within(0.001).of(42.0)
+  ensure
+    Current.reset
   end
 
   # The health probes run whoever is watching, so they are the monitor's

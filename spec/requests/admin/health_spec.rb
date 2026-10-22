@@ -24,6 +24,11 @@ RSpec.describe 'Admin system health', type: :request do
     allow(JobQueueStats).to receive(:call).and_return(jobs)
     allow(AtlasLatency).to receive(:summary).and_return(atlas)
     allow(AtlasLatency).to receive(:served).and_return(served)
+    allow(PageLatency).to receive(:rows).and_return(pages)
+  end
+
+  let(:pages) do
+    [PageLatency::Row.new(label: 'Work page', views: 412, usual_ms: 310, slow_ms: 520, mean_ms: 310, atlas_mean_ms: 220)]
   end
 
   let(:served) do
@@ -38,7 +43,8 @@ RSpec.describe 'Admin system health', type: :request do
   end
 
   let(:atlas) do
-    LatencyHistogram::Summary.new(calls: 1840, failed: 3, timeouts: 1, mean_ms: 48, p50_ms: 31, p95_ms: 212, p99_ms: 880)
+    LatencyHistogram::Summary.new(calls: 1840, failed: 3, timeouts: 1, mean_ms: 48, p50_ms: 31, p95_ms: 212, p99_ms: 880,
+                                  extra_means: {})
   end
 
   it 'shows an admin each service by name, with the error from the one that is down' do
@@ -118,6 +124,30 @@ RSpec.describe 'Admin system health', type: :request do
     get '/admin/health'
 
     expect(response.body).to include 'The job queue database did not answer.'
+  end
+
+  # The table a person can read as "how long did the Work page take".
+  it 'shows how long each page took, in words, with where the time went' do
+    sign_in admin
+    get '/admin/health'
+
+    expect(response.body).to include('Page response times', 'Work page', '1 in 20 slower than', '520 ms',
+                                     'Atlas 220 ms · page 90 ms')
+  end
+
+  it 'keeps the Atlas call figures in a closed section below' do
+    sign_in admin
+    get '/admin/health'
+
+    expect(response.body).to match(%r{<details[^>]*>\s*<summary[^>]*>Behind the pages: Atlas calls</summary>})
+  end
+
+  it 'says so when there are no page figures' do
+    allow(PageLatency).to receive(:rows).and_return(nil)
+    sign_in admin
+    get '/admin/health'
+
+    expect(response.body).to include 'Redis did not answer, so there are no figures to show.'
   end
 
   it 'refuses staff' do

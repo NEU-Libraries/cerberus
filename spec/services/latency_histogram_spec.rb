@@ -44,6 +44,15 @@ RSpec.describe LatencyHistogram do
     expect(histogram.summary.p99_ms).to eq described_class::BUCKETS_MS.last
   end
 
+  # Means add up where percentiles do not, which is what lets the page table
+  # split a page's average into waiting on Atlas and the rest.
+  it 'reports the mean of each extra figure recorded with a call' do
+    histogram.record(300, sums: { atlas_ms: 200 })
+    histogram.record(100, sums: { atlas_ms: 40 })
+
+    expect(histogram.summary.extra_means).to eq(atlas_ms: 120)
+  end
+
   it 'reports no percentiles for an empty window' do
     expect(histogram.summary.to_h).to include(calls: 0, mean_ms: nil, p95_ms: nil)
   end

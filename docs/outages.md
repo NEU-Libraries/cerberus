@@ -15,7 +15,7 @@ Source files:
 - `app/controllers/health_controller.rb` (`/health`, for Nagios)
 - `app/controllers/admin/health_controller.rb` (the admin health page)
 - `app/services/maintenance_mode.rb` (the unreachable state; see also [`maintenance.md`](maintenance.md))
-- `app/services/job_queue_stats.rb`, `app/services/latency_histogram.rb`, `app/services/atlas_latency.rb` and `config/initializers/latency_histograms.rb` (the usage figures on the admin health page)
+- `app/services/job_queue_stats.rb`, `app/services/latency_histogram.rb`, `app/services/atlas_latency.rb`, `app/services/page_latency.rb`, `app/services/request_timing.rb` and `config/initializers/latency_histograms.rb` (the usage figures on the admin health page)
 
 ## Capabilities
 
@@ -179,6 +179,36 @@ minutes. In development, every `web` restart leaves one.
 The test environment runs the `:test` job adapter, so the queue tables do not
 exist there. `spec/services/job_queue_stats_spec.rb` stubs `read_tables`, the
 one method that reads them.
+
+### Page response times
+
+The card answers "how long did people wait for this page?", for a fixed list of
+the pages readers wait on: Work, Collection and Community pages, search results
+and Home. A list ranked by traffic would fill up with admin pages and
+redirects. `PageLatency` records each successful GET of those routes into a
+`LatencyHistogram` named `page:<controller#action>`.
+
+- **In words.** "Usually" is the p50, and "1 in 20 slower than" is the p95.
+- **Where the time goes** splits each page's average into the time it waited on Atlas and the rest. **The bar uses means, never percentiles.** Means add up: an average of 220 ms on Atlas and 90 ms otherwise is a 310 ms average page. A p95 of the parts is not a part of the p95, so a bar built from percentiles would be wrong.
+- **Waiting on Atlas is elapsed time, not summed time.** It runs from the start of the page's first Atlas call to the end of its last, so the Work page's four parallel reads count once, as the reader experiences them.
+
+**How a page's Atlas time is collected.** `ApplicationController` sets
+`Current.request_timing` to a new `RequestTiming` before any other callback.
+`AtlasLatency.record` adds every call to it, including calls on the worker
+threads `ParallelAtlasReads` spawns. That works because the workers copy
+`Current.attributes`, and the copy shares the same `RequestTiming` object.
+`spec/services/request_timing_spec.rb` drives the real concern to pin this. Set
+the timing any later and calls made before it are lost; replace the object
+rather than mutate it and the workers' calls go to an orphan.
+
+`process_action.action_controller` fires on the request thread before
+`Current` is reset, so `PageLatency.record` can still read the timing there.
+The page time is the controller's: it leaves out middleware, such as the session
+store's save.
+
+The call-level figures below sit in a closed "Behind the pages: Atlas calls"
+section of the same card. They answer which Atlas call is slow, not how long a
+page takes.
 
 ### Atlas response times
 
