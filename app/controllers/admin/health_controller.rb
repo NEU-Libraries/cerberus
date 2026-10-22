@@ -11,6 +11,7 @@ module Admin
       @results = HealthCheck.call(fresh: true)
       @jobs = JobQueueStats.call
       @atlas = AtlasLatency.summary
+      @atlas_served = AtlasLatency.served(nuid: current_user.nuid)
       @checked_at = Time.current
     end
   end

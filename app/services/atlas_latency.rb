@@ -4,8 +4,9 @@
 # request.atlas_rb event. See docs/outages.md.
 module AtlasLatency
   # The health probes call this every few seconds whoever is watching, so
-  # counting them would report the monitor's traffic as the app's.
-  IGNORED_PATHS = %w[/health /up].freeze
+  # counting them would report the monitor's traffic as the app's. The admin
+  # page's own read of Atlas's figures is left out for the same reason.
+  IGNORED_PATHS = %w[/health /up /metrics/latency].freeze
 
   module_function
 
@@ -22,4 +23,14 @@ module AtlasLatency
   end
 
   def summary = histogram.summary
+
+  # Atlas's own figures, measured inside Atlas, so they leave out the time a
+  # call spends waiting in Cerberus. nil when Atlas cannot give them, which
+  # includes a Redis outage on its side.
+  def served(nuid:)
+    AtlasRb::Metrics.latency(minutes: LatencyHistogram::WINDOW_MINUTES, nuid: nuid)
+  rescue AtlasRb::Error, Faraday::Error, JSON::ParserError => e
+    Rails.logger.warn("[atlas latency] Atlas's own figures unavailable: #{e.class}: #{e.message}")
+    nil
+  end
 end

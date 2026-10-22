@@ -206,6 +206,18 @@ wait for the one-second connect timeout. After any Redis error,
 `LatencyHistogram` stops writing for 30 seconds, and the page says "Redis did
 not answer" rather than showing zeros.
 
-The health probes are left out, because a monitor polls them whoever is using
-the app. The recorder is also off in the test environment, so the suite neither
+**The card shows Atlas's own figures as a second row.** `AtlasLatency.served`
+reads `AtlasRb::Metrics.latency` as the signed-in admin, for the same 60-minute
+window. Atlas times each request from when it starts the action until it
+returns. Cerberus's row also includes the time a call waits inside Cerberus, so
+the gap between the two rows is that waiting.
+
+- **Why both rows:** under load the gap can be most of the figure. A dev load test with four clients at once measured a p95 of about 400 ms in Cerberus against 100 ms in Atlas.
+- **Timeouts:** Atlas's row shows "n/a", because Atlas never sees a call that timed out on the Cerberus side.
+- **Failures:** if Atlas can't give its figures, because its Redis is down, Atlas itself is down, or the reader isn't an admin, `served` returns `nil` and the row says so. Cerberus's row is unaffected.
+- **Slowest actions:** the card lists Atlas's five slowest `controller#action` routes by p95, from the same report.
+
+The health probes and the admin page's own `/metrics/latency` read are left
+out, because neither is the app's traffic: a monitor polls the probes, and the
+page reads the metrics on every load. The recorder is also off in the test environment, so the suite neither
 writes timing data nor depends on Redis.

@@ -23,6 +23,13 @@ RSpec.describe 'Admin system health', type: :request do
     allow(HealthCheck).to receive(:call).and_return(results)
     allow(JobQueueStats).to receive(:call).and_return(jobs)
     allow(AtlasLatency).to receive(:summary).and_return(atlas)
+    allow(AtlasLatency).to receive(:served).and_return(served)
+  end
+
+  let(:served) do
+    AtlasRb::Mash.new('window_minutes' => 60, 'calls' => 1790, 'server_errors' => 2, 'mean_ms' => 21,
+                      'p50_ms' => 14, 'p95_ms' => 97, 'p99_ms' => 205,
+                      'slowest_actions' => [{ 'action' => 'works#mods', 'calls' => 120, 'p95_ms' => 188 }])
   end
 
   let(:jobs) do
@@ -64,6 +71,37 @@ RSpec.describe 'Admin system health', type: :request do
     get '/admin/health'
 
     expect(response.body).to include('1840', '212 ms', '880 ms')
+  end
+
+  # The gap between the two rows is time spent inside Cerberus, which is the
+  # reason Atlas's own figures are shown at all.
+  it "shows Atlas's own figures beside Cerberus's" do
+    sign_in admin
+    get '/admin/health'
+
+    expect(response.body).to include('Atlas, serving', 'Cerberus, waiting', '97 ms', '212 ms')
+  end
+
+  it "lists Atlas's slowest actions" do
+    sign_in admin
+    get '/admin/health'
+
+    expect(response.body).to include('works#mods', '188 ms')
+  end
+
+  it "reads Atlas's figures as the signed-in admin" do
+    sign_in admin
+    get '/admin/health'
+
+    expect(AtlasLatency).to have_received(:served).with(nuid: '000000004')
+  end
+
+  it "keeps Cerberus's row when Atlas cannot give its figures" do
+    allow(AtlasLatency).to receive(:served).and_return(nil)
+    sign_in admin
+    get '/admin/health'
+
+    expect(response.body).to include('Atlas could not give its figures.', '212 ms')
   end
 
   it 'says so when Redis holds no figures, rather than showing zeros' do

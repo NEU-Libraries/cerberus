@@ -1,0 +1,13 @@
+%td.text-end
+  %span.admin-registry-table__id= calls
+%td.text-end
+  %span.admin-registry-table__id{class: ('text-danger' if failed.to_i.positive?)}= failed
+%td.text-end
+  - if timeouts.nil?
+    -# Atlas never sees a call that timed out on the Cerberus side.
+    %span.text-body-secondary n/a
+  - else
+    %span.admin-registry-table__id{class: ('text-danger' if timeouts.positive?)}= timeouts
+- [figures.mean_ms, figures.p50_ms, figures.p95_ms, figures.p99_ms].each do |ms|
+  %td.text-end
+    %span.admin-registry-table__id= "#{ms} ms"

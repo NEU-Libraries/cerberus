@@ -112,34 +112,63 @@
       %i.fa-solid.fa-gauge-high{'aria-hidden' => 'true'}
       Atlas response times
       %span.admin-registry__count Last #{LatencyHistogram::WINDOW_MINUTES} minutes
-  - if @atlas.nil?
-    %p.p-3.mb-0.text-body-secondary Redis did not answer, so there are no figures to show.
-  - elsif @atlas.calls.zero?
-    %p.p-3.mb-0.text-body-secondary No calls to Atlas in this window.
-  - else
+  .table-responsive
+    %table.table.table-borderless.admin-registry-table{'aria-label' => 'Atlas response times over the last hour, measured by each side'}
+      %thead
+        %tr
+          %th{scope: 'col'} Measured by
+          %th.text-end{scope: 'col'} Calls
+          %th.text-end{scope: 'col'} Failed
+          %th.text-end{scope: 'col'} Timeouts
+          %th.text-end{scope: 'col'} Mean
+          %th.text-end{scope: 'col'} p50
+          %th.text-end{scope: 'col'} p95
+          %th.text-end{scope: 'col'} p99
+      %tbody
+        %tr
+          %td
+            .admin-registry-table__name Atlas, serving
+          - if @atlas_served.nil?
+            %td.text-body-secondary{colspan: 7} Atlas could not give its figures.
+          - elsif @atlas_served.calls.to_i.zero?
+            %td.text-body-secondary{colspan: 7} Atlas served no requests in this window.
+          - else
+            = render 'admin/health/latency_cells', calls: @atlas_served.calls, failed: @atlas_served.server_errors,
+                                                   timeouts: nil, figures: @atlas_served
+        %tr
+          %td
+            .admin-registry-table__name Cerberus, waiting
+          - if @atlas.nil?
+            %td.text-body-secondary{colspan: 7} Redis did not answer, so there are no figures to show.
+          - elsif @atlas.calls.zero?
+            %td.text-body-secondary{colspan: 7} No calls to Atlas in this window.
+          - else
+            = render 'admin/health/latency_cells', calls: @atlas.calls, failed: @atlas.failed,
+                                                   timeouts: @atlas.timeouts, figures: @atlas
+  - slowest = Array(@atlas_served&.slowest_actions).first(5)
+  - if slowest.any?
+    .px-3.pt-2
+      %h2.h6.mb-1 Slowest Atlas actions
     .table-responsive
-      %table.table.table-borderless.admin-registry-table{'aria-label' => 'Atlas response times over the last hour'}
+      %table.table.table-borderless.admin-registry-table{'aria-label' => "Atlas's slowest actions by p95 over the last hour"}
         %thead
           %tr
+            %th{scope: 'col'} Action
             %th.text-end{scope: 'col'} Calls
-            %th.text-end{scope: 'col'} Failed
-            %th.text-end{scope: 'col'} Timeouts
-            %th.text-end{scope: 'col'} Mean
-            %th.text-end{scope: 'col'} p50
             %th.text-end{scope: 'col'} p95
-            %th.text-end{scope: 'col'} p99
         %tbody
-          %tr
-            %td.text-end
-              %span.admin-registry-table__id= @atlas.calls
-            %td.text-end
-              %span.admin-registry-table__id{class: ('text-danger' if @atlas.failed.positive?)}= @atlas.failed
-            %td.text-end
-              %span.admin-registry-table__id{class: ('text-danger' if @atlas.timeouts.positive?)}= @atlas.timeouts
-            - [@atlas.mean_ms, @atlas.p50_ms, @atlas.p95_ms, @atlas.p99_ms].each do |ms|
+          - slowest.each do |action|
+            %tr
+              %td
+                %span.admin-registry-table__id= action.action
               %td.text-end
-                %span.admin-registry-table__id= "#{ms} ms"
+                %span.admin-registry-table__id= action.calls
+              %td.text-end
+                %span.admin-registry-table__id= "#{action.p95_ms} ms"
   %p.px-3.pb-3.mb-0.small.text-body-secondary
-    Every worker and replica adds to the same figures through Redis. The
-    percentiles are approximate: they are interpolated from latency buckets.
-    A retried call counts once per attempt.
+    Atlas times each request from when it starts the action until it returns.
+    Cerberus times each call from sending it until it has read the answer, so
+    its figures also include time spent waiting inside Cerberus. The gap between
+    the two rows is that waiting. Both sets of percentiles are interpolated from
+    latency buckets, so they are approximate, and a retried call counts once per
+    attempt.

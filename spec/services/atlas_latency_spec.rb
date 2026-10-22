@@ -41,4 +41,34 @@ RSpec.describe AtlasLatency do
 
     expect(histogram).not_to have_received(:record)
   end
+
+  # The admin page reads it on every load, so counting it would report the
+  # page's own traffic.
+  it "leaves the read of Atlas's own figures out" do
+    described_class.record(event(path: '/metrics/latency'))
+
+    expect(histogram).not_to have_received(:record)
+  end
+
+  describe '.served' do
+    it "asks Atlas for the same window Cerberus's figures cover" do
+      allow(AtlasRb::Metrics).to receive(:latency).and_return(AtlasRb::Mash.new('calls' => 1))
+
+      described_class.served(nuid: '000000004')
+
+      expect(AtlasRb::Metrics).to have_received(:latency)
+        .with(minutes: LatencyHistogram::WINDOW_MINUTES, nuid: '000000004')
+    end
+
+    # Its Redis down, a non-admin refused, or Atlas gone: the page shows the
+    # row as unavailable rather than failing.
+    [AtlasRb::BackendUnavailableError.new(dependency: 'cache'),
+     AtlasRb::ResourceError.new('403'), Faraday::ConnectionFailed.new('refused')].each do |error|
+      it "answers nil when Atlas raises #{error.class}" do
+        allow(AtlasRb::Metrics).to receive(:latency).and_raise(error)
+
+        expect(described_class.served(nuid: '000000004')).to be_nil
+      end
+    end
+  end
 end
