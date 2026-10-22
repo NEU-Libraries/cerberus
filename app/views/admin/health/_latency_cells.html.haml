@@ -5,7 +5,7 @@
 %td.text-end
   - if timeouts.nil?
     -# Atlas never sees a call that timed out on the Cerberus side.
-    %span.text-body-secondary n/a
+    %span.admin-registry-table__id.text-body-secondary n/a
   - else
     %span.admin-registry-table__id{class: ('text-danger' if timeouts.positive?)}= timeouts
 - [figures.mean_ms, figures.p50_ms, figures.p95_ms, figures.p99_ms].each do |ms|

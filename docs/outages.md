@@ -213,6 +213,7 @@ returns. Cerberus's row also includes the time a call waits inside Cerberus, so
 the gap between the two rows is that waiting.
 
 - **Why both rows:** under load the gap can be most of the figure. A dev load test with four clients at once measured a p95 of about 400 ms in Cerberus against 100 ms in Atlas.
+- **Call counts differ.** atlas_rb counts a call that follows a redirect, such as the `/resources/<noid>` resolver, as one call. Atlas serves it as two requests, so its count runs higher.
 - **Timeouts:** Atlas's row shows "n/a", because Atlas never sees a call that timed out on the Cerberus side.
 - **Failures:** if Atlas can't give its figures, because its Redis is down, Atlas itself is down, or the reader isn't an admin, `served` returns `nil` and the row says so. Cerberus's row is unaffected.
 - **Slowest actions:** the card lists Atlas's five slowest `controller#action` routes by p95, from the same report.
