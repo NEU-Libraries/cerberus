@@ -20,6 +20,9 @@ $error-tone-warn:      #c46410;  // 500 — matches $audit-tone-restore
 // alarm, so it deliberately sits away from the warn/gone end of the
 // vocabulary while staying as desaturated as the rest.
 $error-tone-planned:   #3f7d86;
+// 503 for a service that stopped answering. A fault rather than a plan, so it
+// takes the brick red; $danger is already pinned to clear 4.5:1 against white.
+$error-tone-outage:    $danger;
 
 .error-page {
   --error-tone-color: #{$error-tone-missing};
@@ -38,6 +41,7 @@ $error-tone-planned:   #3f7d86;
   &--gone      { --error-tone-color: #{$error-tone-gone}; }
   &--error       { --error-tone-color: #{$error-tone-warn}; }
   &--maintenance { --error-tone-color: #{$error-tone-planned}; }
+  &--outage      { --error-tone-color: #{$error-tone-outage}; }
 
   // Header strip — soft off-white, status code + textual label rendered
   // as a single identifier-typography element with the FA glyph as the

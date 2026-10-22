@@ -46,6 +46,8 @@ module Authorizable
     # ResourceError, so registering this below would swallow every write-side
     # 404 and make the not-found page unreachable.
     rescue_from AtlasRb::ResourceError do |e|
+      # A gateway status is Atlas down behind its proxy, not a refusal.
+      next render_outage(Outage.for(e), e) if Outage.for(e)
       raise e unless e.status == 403
 
       render template: 'errors/forbidden', status: :forbidden

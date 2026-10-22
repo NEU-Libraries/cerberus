@@ -4,6 +4,7 @@
 # See docs/people-and-routing.md.
 class ApplicationController < ActionController::Base
   include Blacklight::Controller
+  include InfrastructureOutages
   include Authorizable
   include Tombstoning
   include UnfinishedDepositGate
