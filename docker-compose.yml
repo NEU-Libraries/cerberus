@@ -116,6 +116,14 @@ services:
       redis:
         condition: service_healthy
     entrypoint: /home/atlas/web/docker-entrypoint.sh
+    # Liveness only, as for web: /up checks no dependency. Atlas's /health is
+    # the readiness report, and Cerberus's own /health/records reads it.
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:3000/up"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
     environment:
       RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
       # Handle minting. Atlas owns the client and the admin credential; Cerberus
