@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+#
+# Report Ruby files under app/ whose comments exceed the density target.
+#
+#   bin/comment-density                 # every Ruby file under app/
+#   bin/comment-density --staged        # Ruby files under app/ staged for commit
+#   bin/comment-density app/models/x.rb app/jobs/y.rb
+#
+# Prints one line per file over the target and always exits 0: the target is
+# advice, and a comment that would cost someone a bug stays. docs/README.md
+# holds the rule, the counting and the reason for each exemption below.
+#
+# Plain bash and awk, so it runs on the host or in `web` without the bundle,
+# and an editor or agent can call it after every write.
+set -euo pipefail
+
+TARGET_PCT=35
+MIN_CODE_LINES=25
+
+# Blacklight extension points. Their comments document the gem's contract.
+EXEMPT=(
+  app/controllers/catalog_controller.rb
+  app/models/search_builder.rb
+  app/models/solr_document.rb
+)
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$REPO_ROOT"
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'
+  exit 0
+fi
+
+files=()
+if [[ "${1:-}" == "--staged" ]]; then
+  mapfile -t files < <(git diff --cached --name-only --diff-filter=ACMR -- 'app/*.rb')
+elif [[ $# -gt 0 ]]; then
+  files=("$@")
+else
+  mapfile -t files < <(git ls-files -- 'app/*.rb')
+fi
+
+for f in "${files[@]}"; do
+  rel="${f#"$REPO_ROOT"/}"
+  [[ "$rel" == app/*.rb && -f "$rel" ]] || continue
+  for exempt in "${EXEMPT[@]}"; do
+    [[ "$rel" == "$exempt" ]] && continue 2
+  done
+
+  # Directives count as code: they instruct a tool rather than explain.
+  awk -v rel="$rel" -v target="$TARGET_PCT" -v floor="$MIN_CODE_LINES" '
+    /^[[:space:]]*$/ { next }
+    /^[[:space:]]*#[[:space:]]*(frozen_string_literal|rubocop|encoding)[[:space:]]*:/ { code++; next }
+    /^[[:space:]]*#/ { comments++; next }
+    { code++ }
+    END {
+      if (code < floor) exit
+      pct = int(comments * 100 / (comments + code))
+      if (pct <= target) exit
+      budget = int(code * target / (100 - target))
+      printf "%s: %d%% (%d comment / %d code); the %d%% target is %d comment lines\n",
+        rel, pct, comments, code, target, budget
+    }
+  ' "$rel"
+done
