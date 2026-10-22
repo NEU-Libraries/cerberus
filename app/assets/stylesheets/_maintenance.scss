@@ -66,6 +66,12 @@ $maintenance-tone: #b8801f; // desaturated amber — caution, but read-only
     color: color-mix(in srgb, var(--maintenance-color) 88%, black);
   }
 
+  // An unreachable Atlas: a fault rather than a plan, so it takes the outage
+  // page's brick red. $danger clears 4.5:1 under the badge's white text.
+  &--outage {
+    --maintenance-color: #{$danger};
+  }
+
   &__manage {
     margin-left: auto;
     font-size: 0.82rem;
