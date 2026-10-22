@@ -41,7 +41,7 @@ A gap report has five parts:
 | Gap type | *Binding-only* if Atlas has the endpoint but atlas_rb lacks a wrapper; *new endpoint* if Atlas itself needs the capability |
 | Suggested implementation | A sketch of the atlas_rb method signature, the Atlas endpoint, or both |
 
-The same applies to a TODO, a missing capability, or behaviour that does not
+Write one, too, for a TODO, a missing capability, or behaviour that does not
 match expectations.
 
 ## Code
