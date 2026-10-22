@@ -15,6 +15,7 @@ Source files:
 - `app/controllers/health_controller.rb` (`/health`, for Nagios)
 - `app/controllers/admin/health_controller.rb` (the admin health page)
 - `app/services/maintenance_mode.rb` (the unreachable state; see also [`maintenance.md`](maintenance.md))
+- `app/services/job_queue_stats.rb`, `app/services/latency_histogram.rb`, `app/services/atlas_latency.rb` and `config/initializers/latency_histograms.rb` (the usage figures on the admin health page)
 
 ## Capabilities
 
@@ -151,3 +152,54 @@ older than the endpoint answers 404. The probe then falls back to
 
 **The admin page cannot report a database outage.** Signing in needs the DB
 session store. `/health/repository` and the log carry that case.
+
+## Usage figures
+
+The admin health page also shows how hard the app is working, in two cards
+below the service table.
+
+### Background jobs
+
+`JobQueueStats` reads the Solid Queue tables directly. It reports what is
+waiting per queue, the age of the oldest waiting job, and the counts of
+running, scheduled, blocked and failed jobs, with the live workers. Mission
+Control at `/jobs` holds the per-job detail, so the card links there rather
+than repeating it.
+
+**The age of the oldest waiting job is the figure to watch.** A deep queue that
+is draining is normal. A waiting job that is twenty minutes old means the
+workers have stopped taking work.
+
+The test environment runs the `:test` job adapter, so the queue tables do not
+exist there. `spec/services/job_queue_stats_spec.rb` stubs `read_tables`, the
+one method that reads them.
+
+### Atlas response times
+
+`config/initializers/latency_histograms.rb` subscribes to atlas_rb's
+`request.atlas_rb` event, which fires once per round trip. A retried call
+fires once per attempt. `AtlasLatency` adds each call to a `LatencyHistogram`,
+which keeps one Redis hash per minute:
+
+- **Fields:** a count per latency bucket (`le_5` … `le_10000`, then `le_inf`), the summed time, failures (an exception or a 5xx) and timeouts.
+- **Keys:** `cerberus:latency:<env>:atlas:<minute>`, expiring after two hours. The environment is in the key because development and the specs share one Redis.
+- **Reading:** the page sums the last 60 minute-keys, then interpolates p50, p95 and p99 inside the bucket that holds each rank.
+
+**Redis, not `Rails.cache` and not process memory.** Every Puma worker and
+every Swarm replica writes to the same keys, so the figures cover the whole
+app. Development's cache store is a memory store, which would split them per
+process. The histogram therefore connects to `REDIS_URL` itself.
+
+**The percentiles are approximate.** They are only as fine as the bucket edges,
+and a call slower than the last edge is reported at that edge. When history or
+per-route figures are wanted, the plan is the TimescaleDB design, which stores
+one row per request.
+
+**A Redis outage must not slow Atlas calls down.** Each write would otherwise
+wait for the one-second connect timeout. After any Redis error,
+`LatencyHistogram` stops writing for 30 seconds, and the page says "Redis did
+not answer" rather than showing zeros.
+
+The health probes are left out, because a monitor polls them whoever is using
+the app. The recorder is also off in the test environment, so the suite neither
+writes timing data nor depends on Redis.

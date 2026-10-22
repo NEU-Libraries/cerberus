@@ -48,3 +48,97 @@
             %td.text-end
               %span.admin-registry-table__id= "#{result.latency_ms} ms"
             %td.small.text-break= result.detail
+
+-# Readouts, not forms, so each is a bare card body under its header strip.
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-gears{'aria-hidden' => 'true'}
+      Background jobs
+      - if @jobs
+        %span.admin-registry__count= "#{@jobs.waiting} waiting · #{@jobs.running} running"
+    .admin-registry__head-actions
+      = link_to '/jobs', class: 'btn btn-tonal-secondary btn-sm' do
+        %i.fa-solid.fa-arrow-up-right-from-square.me-1{'aria-hidden' => 'true'}
+        Open Mission Control
+  - if @jobs.nil?
+    %p.p-3.mb-0.text-body-secondary The job queue database did not answer.
+  - else
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table{'aria-label' => 'The background job queue now'}
+        %tbody
+          %tr
+            %td
+              .admin-registry-table__name Waiting
+            %td
+              %span.admin-registry-table__id= @jobs.waiting
+              - if @jobs.waiting_by_queue.any?
+                %span.small.text-body-secondary.ms-2
+                  = @jobs.waiting_by_queue.map { |queue, count| "#{queue} #{count}" }.join(' · ')
+          %tr
+            %td
+              .admin-registry-table__name Oldest waiting
+            %td
+              - if @jobs.oldest_waiting_at
+                = distance_of_time_in_words_to_now(@jobs.oldest_waiting_at)
+              - else
+                %span.text-body-secondary Nothing waiting
+          %tr
+            %td
+              .admin-registry-table__name Running
+            %td
+              %span.admin-registry-table__id= @jobs.running
+              %span.small.text-body-secondary.ms-2= "on #{pluralize(@jobs.workers, 'live worker')}"
+          %tr
+            %td
+              .admin-registry-table__name Scheduled
+            %td
+              %span.admin-registry-table__id= @jobs.scheduled
+          %tr
+            %td
+              .admin-registry-table__name Blocked
+            %td
+              %span.admin-registry-table__id= @jobs.blocked
+          %tr
+            %td
+              .admin-registry-table__name Failed
+            %td
+              %span.admin-registry-table__id{class: ('text-danger' if @jobs.failed.positive?)}= @jobs.failed
+
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-gauge-high{'aria-hidden' => 'true'}
+      Atlas response times
+      %span.admin-registry__count Last #{LatencyHistogram::WINDOW_MINUTES} minutes
+  - if @atlas.nil?
+    %p.p-3.mb-0.text-body-secondary Redis did not answer, so there are no figures to show.
+  - elsif @atlas.calls.zero?
+    %p.p-3.mb-0.text-body-secondary No calls to Atlas in this window.
+  - else
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table{'aria-label' => 'Atlas response times over the last hour'}
+        %thead
+          %tr
+            %th.text-end{scope: 'col'} Calls
+            %th.text-end{scope: 'col'} Failed
+            %th.text-end{scope: 'col'} Timeouts
+            %th.text-end{scope: 'col'} Mean
+            %th.text-end{scope: 'col'} p50
+            %th.text-end{scope: 'col'} p95
+            %th.text-end{scope: 'col'} p99
+        %tbody
+          %tr
+            %td.text-end
+              %span.admin-registry-table__id= @atlas.calls
+            %td.text-end
+              %span.admin-registry-table__id{class: ('text-danger' if @atlas.failed.positive?)}= @atlas.failed
+            %td.text-end
+              %span.admin-registry-table__id{class: ('text-danger' if @atlas.timeouts.positive?)}= @atlas.timeouts
+            - [@atlas.mean_ms, @atlas.p50_ms, @atlas.p95_ms, @atlas.p99_ms].each do |ms|
+              %td.text-end
+                %span.admin-registry-table__id= "#{ms} ms"
+  %p.px-3.pb-3.mb-0.small.text-body-secondary
+    Every worker and replica adds to the same figures through Redis. The
+    percentiles are approximate: they are interpolated from latency buckets.
+    A retried call counts once per attempt.

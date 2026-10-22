@@ -21,6 +21,17 @@ RSpec.describe 'Admin system health', type: :request do
                               latency_ms: 5, detail: key == :records ? 'Faraday::ConnectionFailed: refused' : nil)
     end
     allow(HealthCheck).to receive(:call).and_return(results)
+    allow(JobQueueStats).to receive(:call).and_return(jobs)
+    allow(AtlasLatency).to receive(:summary).and_return(atlas)
+  end
+
+  let(:jobs) do
+    JobQueueStats::Snapshot.new(waiting_by_queue: { 'default' => 3, 'background' => 9 }, oldest_waiting_at: 25.minutes.ago,
+                                running: 2, scheduled: 1, blocked: 0, failed: 4, workers: 1)
+  end
+
+  let(:atlas) do
+    LatencyHistogram::Summary.new(calls: 1840, failed: 3, timeouts: 1, mean_ms: 48, p50_ms: 31, p95_ms: 212, p99_ms: 880)
   end
 
   it 'shows an admin each service by name, with the error from the one that is down' do
@@ -37,6 +48,38 @@ RSpec.describe 'Admin system health', type: :request do
     get '/admin/health'
 
     expect(HealthCheck).to have_received(:call).with(fresh: true)
+  end
+
+  # The oldest waiting job is the number that matters: a deep queue that is
+  # draining is fine, and an old one means the workers are stuck.
+  it 'shows queue depth, the oldest waiting job and failures' do
+    sign_in admin
+    get '/admin/health'
+
+    expect(response.body).to include('12 waiting · 2 running', 'default 3 · background 9', '25 minutes', 'on 1 live worker')
+  end
+
+  it 'shows Atlas percentiles for the last hour' do
+    sign_in admin
+    get '/admin/health'
+
+    expect(response.body).to include('1840', '212 ms', '880 ms')
+  end
+
+  it 'says so when Redis holds no figures, rather than showing zeros' do
+    allow(AtlasLatency).to receive(:summary).and_return(nil)
+    sign_in admin
+    get '/admin/health'
+
+    expect(response.body).to include 'Redis did not answer'
+  end
+
+  it 'says so when the queue database does not answer' do
+    allow(JobQueueStats).to receive(:call).and_return(nil)
+    sign_in admin
+    get '/admin/health'
+
+    expect(response.body).to include 'The job queue database did not answer.'
   end
 
   it 'refuses staff' do

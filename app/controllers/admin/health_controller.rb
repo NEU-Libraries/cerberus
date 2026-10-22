@@ -9,6 +9,8 @@ module Admin
 
     def show
       @results = HealthCheck.call(fresh: true)
+      @jobs = JobQueueStats.call
+      @atlas = AtlasLatency.summary
       @checked_at = Time.current
     end
   end
