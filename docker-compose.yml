@@ -1,3 +1,8 @@
+# Pinned rather than taken from the checkout's directory name: the docs and the
+# bin/ scripts address containers as cerberus-<service>-1, and bin/spec passes
+# -p cerberus, so a clone under another name would otherwise run two stacks.
+name: cerberus
+
 # Use postgres/example user/password credentials
 volumes:
   solr:
