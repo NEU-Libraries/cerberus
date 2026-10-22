@@ -7,7 +7,7 @@ and `lib/request_deadline.rb`.
 
 Everything here is procedure. The conventions a change has to satisfy — the
 comment standard, the Blacklight and atlas_rb layering rules, the cross-repo gap
-report — live in `AGENTS.md`.
+report — live in [`conventions.md`](conventions.md).
 
 ## Setup
 

@@ -6,9 +6,6 @@ palette and its coupled tokens, type, icons, tabs, buttons and hover. Read it
 before you change a view, a component or a stylesheet. A local agent hook
 blocks UI edits until this page has been read in the session.
 
-For a new interface or an in-place redesign, also use the `/frontend-design`
-skill, as `AGENTS.md` says, and land its output on the rules here.
-
 Source files:
 
 - `app/assets/stylesheets/_colors.scss` (the palette and the coupled tokens)

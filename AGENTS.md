@@ -2,11 +2,15 @@
 
 Guidance for coding agents working on the DRS codebase.
 
-This file holds the conventions a change has to satisfy and the rules that
-govern how an agent works here. The mechanics — setup, the spec wrappers,
-worktrees, verification, the migration pause — are in
-[`docs/development.md`](docs/development.md), which is written for a developer
-and is worth reading first.
+This file holds the rules that govern how an agent works here. Two pages
+written for developers hold the rest, and you must read both before your first
+change:
+
+- [`docs/conventions.md`](docs/conventions.md) — the rules every change has to
+  satisfy: layering, the cross-repo gap report format, code, comments and the
+  interface.
+- [`docs/development.md`](docs/development.md) — the mechanics: setup, the spec
+  wrappers, worktrees, verification and the migration pause.
 
 ## System Architecture Overview
 
@@ -98,15 +102,7 @@ The `atlas_rb` gem (`NEU-Libraries/atlas_rb`) is the interface contract between 
 
 ### Cross-Repo Gap Reporting
 
-When a Cerberus feature requires functionality that does not yet exist in atlas_rb or Atlas, do not make cross-repo changes. Instead, produce a structured gap report for the developer with the following format:
-
-- **Cerberus feature:** What you are building and why the gap blocks it.
-- **What is needed:** The specific method, endpoint, or capability that is missing.
-- **Atlas status:** Does the backend endpoint already exist? Check the Atlas OpenAPI spec at `https://raw.githubusercontent.com/NEU-Libraries/atlas/develop/openapi/openapi.yaml`.
-- **Gap type:** "binding-only" (Atlas endpoint exists but atlas_rb lacks a wrapper) or "new endpoint" (Atlas itself needs new functionality).
-- **Suggested implementation:** A brief sketch of the atlas_rb method signature and/or Atlas endpoint, if applicable.
-
-This report gives the developer enough information to prioritize and implement the change in the correct repository as a standalone effort.
+When a Cerberus feature requires functionality that does not yet exist in atlas_rb or Atlas, do not make cross-repo changes. Produce a gap report for the developer instead, in the five-part format in [`docs/conventions.md`](docs/conventions.md#cross-repository-gaps). It gives the developer enough to prioritize and implement the change in the correct repository as a standalone effort.
 
 ## Environment Variables
 
@@ -147,31 +143,7 @@ The friction is the point. The trigger is "new migration file", not "worktree ta
 **Never edit `db/schema.rb` directly.** It is generated — `db:migrate` writes it, and a manual edit is silently overwritten the next time migrations run. Express every schema change as a migration file. A local agent hook at `.claude/hooks/schema-rb-guard.sh` enforces this for file edits as a backstop on top of this rule. To commit the *output* of a `db:migrate` the developer has just run, `git add db/schema.rb` via Bash is not gated.
 ## Code Conventions
 
-- Standard Ruby/Rails conventions: snake_case, RESTful controllers, thin controllers with logic in service objects or models.
-- Do not add direct ActiveRecord queries or raw HTTP calls in Cerberus for anything that should go through atlas_rb.
-- Keep Blacklight configuration in `CatalogController` and search builder classes.
-
-### Comments explain the *why* of the code below them
-
-A comment earns its place only if it explains why the code immediately below it exists, and it must still make sense to a reader two years from now with **no access to git history or planning docs**. Keep them to ~2–3 sentences.
-
-Do **not** write temporal or working-artifact comments:
-
-- **No** dates, app-version stamps (`2.9.x`), or `(Hit/Fixed YYYY-MM-DD)` markers.
-- **No** workstream/planning shorthand: `piece N`, `Q<n>`, "gap report", "position paper", "carve-out" (as a planning label), named initiatives, or `~/projects/gap_reports` pointers.
-- **No** before/after narration — "used to", "no longer", "previously", "was X, now Y". Describe the *current* design and its reason; the old design lives in git.
-
-Do keep genuine non-obvious rationale, wire-contract / API constraints, and real gotchas — but **de-date them**: keep the lesson, drop the incident (e.g. "merging `:fq` drops the gated-discovery clause — use `with_filters`" is good; the date it bit us is not). This is a *why*-comment standard, not a no-comments rule.
-
-### Most of the *why* lives in `docs/`, not in the file
-
-Read **`docs/README.md`** before adding a file header. Cerberus keeps knowledge in three places — code, specs, and `docs/*.md` — and the third holds the per-component explanation that used to accumulate as long headers: routing tables, retry-safety arguments, Atlas wire contracts, and why a design rejected the obvious alternative.
-
-What that leaves in the source file is the **trap**. Ask: would someone editing *this line* break something without this comment? A wire-contract gotcha, an ordering constraint, a rule that looks redundant but is not, and every `rubocop:disable` justification stay inline. Everything else goes on a page, and the file keeps a one-line pointer to it.
-
-Target comments under ~35% of a file's non-blank lines, and know that it is a target rather than a gate — if a comment would cost someone a bug, keep it and go over. Files under 25 lines of code are exempt, having no denominator to earn a budget with. A `PostToolUse` hook reports the number after every edit under `app/`, and names the relevant page when the file already has one.
-
-Prefer a spec to a page whenever the claim is testable. A spec fails when someone breaks it; prose does not.
+The code, comment and layering rules are in [`docs/conventions.md`](docs/conventions.md). The comment standard is the one most often missed: a comment explains *why* the code below it exists, carries no dates, version stamps, planning shorthand or before/after narration, and keeps only the trap inline — the rest goes on a `docs/` page. A local agent hook reports comment density after every edit under `app/`, and names the relevant page when the file already has one.
 
 ## Code Intelligence
 
