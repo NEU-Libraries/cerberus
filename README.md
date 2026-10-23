@@ -1,6 +1,6 @@
 [![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/dgcliff/b2d04df150116448fb76929c8c570f9c/raw/cerberus-coverage.json)](https://github.com/NEU-Libraries/cerberus/actions/workflows/build_test.yml) [![Build and Test](https://github.com/NEU-Libraries/cerberus/actions/workflows/build_test.yml/badge.svg)](https://github.com/NEU-Libraries/cerberus/actions/workflows/build_test.yml)
 
-# Cerberus
+# Cerberus <picture><img src="docs/images/cerberus-logo.svg" alt="" width="40" height="40" align="top"></picture>
 
 Rails front end for **Cerberus** — the web application behind Northeastern
 University Library's Digital Repository Service (DRS).
