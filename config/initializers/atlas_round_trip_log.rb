@@ -43,6 +43,20 @@ if Rails.env.development?
            action: shown.call(call[:action_ms]))
   end
 
+  # Overlap is the summed duration of the calls minus the span they occupy end
+  # to end. Summed well above elapsed means they genuinely ran concurrently;
+  # roughly equal means they were serial, whoever serialised them.
+  summary_line = lambda do |event, calls|
+    elapsed = calls.map { |call| call[:start_ms] + call[:ms] }.max - calls.pluck(:start_ms).min
+    format('[atlas-trips] %<label>s — %<count>d calls, %<summed>.1f ms summed, %<elapsed>.1f ms elapsed, ' \
+           'page %<page>.1f ms',
+           label: "#{event.payload[:method]} #{event.payload[:path]}", count: calls.size,
+           summed: calls.sum { |call| call[:ms] }, elapsed: elapsed, page: event.duration)
+  end
+
+  # Both subscribers rescue their own errors. ActiveSupport re-raises a
+  # subscriber's error into the instrumented code, so a fault in a profiling aid
+  # would otherwise fail the Atlas call, or the page, it was watching.
   Rails.application.config.after_initialize do
     buffer = []
     lock = Mutex.new
@@ -55,6 +69,8 @@ if Rails.env.development?
         buffer << { method: event.payload.method.to_s.upcase, path: event.payload.url.path,
                     ms: event.duration, start_ms: event.time.to_f * 1000, **timings }
       end
+    rescue StandardError => e
+      Rails.logger.warn("[atlas-trips] #{e.class}: #{e.message}")
     end
 
     ActiveSupport::Notifications.subscribe('process_action.action_controller') do |*args|
@@ -62,19 +78,10 @@ if Rails.env.development?
       calls = lock.synchronize { buffer.slice!(0..) }
       next if calls.empty? || !flag.exist?
 
-      # Overlap is the summed duration of the calls minus the span they occupy end
-      # to end. Summed well above elapsed means they genuinely ran concurrently;
-      # roughly equal means they were serial, whoever serialised them.
-      elapsed = calls.map { |call| call[:start_ms] + call[:ms] }.max - calls.map { |call| call[:start_ms] }.min
-      summed = calls.sum { |call| call[:ms] }
-
-      Rails.logger.info(
-        format('[atlas-trips] %<label>s — %<count>d calls, %<summed>.1f ms summed, ' \
-               '%<elapsed>.1f ms elapsed, page %<page>.1f ms',
-               label: "#{event.payload[:method]} #{event.payload[:path]}", count: calls.size,
-               summed: summed, elapsed: elapsed, page: event.duration)
-      )
+      Rails.logger.info(summary_line.call(event, calls))
       calls.each { |call| Rails.logger.info(trip_line.call(call)) }
+    rescue StandardError => e
+      Rails.logger.warn("[atlas-trips] #{e.class}: #{e.message}")
     end
   end
 end
