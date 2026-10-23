@@ -75,6 +75,10 @@ if Rails.env.development?
 
     ActiveSupport::Notifications.subscribe('process_action.action_controller') do |*args|
       event = ActiveSupport::Notifications::Event.new(*args)
+      # The compose healthcheck polls /up every 30 seconds, and it makes no Atlas
+      # calls; flushing on it would hand it the page in flight's calls.
+      next if event.payload[:path] == '/up'
+
       calls = lock.synchronize { buffer.slice!(0..) }
       next if calls.empty? || !flag.exist?
 
