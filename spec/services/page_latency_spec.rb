@@ -58,7 +58,7 @@ RSpec.describe PageLatency do
       rows = described_class.rows
 
       expect(rows.map(&:label)).to eq ['Work page']
-      expect(rows.first.to_h).to include(views: 412, usual_ms: 290, slow_ms: 520, atlas_mean_ms: 220)
+      expect(rows.first.to_h).to include(views: 412, median_ms: 290, slow_ms: 520, atlas_mean_ms: 220)
       expect(rows.first.page_mean_ms).to eq 90
     end
 

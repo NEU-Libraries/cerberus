@@ -26,7 +26,7 @@ RSpec.describe 'Admin system health', type: :request do
   end
 
   let(:pages) do
-    [PageLatency::Row.new(label: 'Work page', views: 412, usual_ms: 310, slow_ms: 520, mean_ms: 310, atlas_mean_ms: 220)]
+    [PageLatency::Row.new(label: 'Work page', views: 412, median_ms: 310, slow_ms: 520, mean_ms: 310, atlas_mean_ms: 220)]
   end
 
   let(:jobs) do

@@ -13,7 +13,7 @@ module PageLatency
     'pages#home'       => 'Home'
   }.freeze
 
-  Row = Data.define(:label, :views, :usual_ms, :slow_ms, :mean_ms, :atlas_mean_ms) do
+  Row = Data.define(:label, :views, :median_ms, :slow_ms, :mean_ms, :atlas_mean_ms) do
     # The rest of the mean, after waiting on Atlas: building the page, searching
     # and everything else. Means add up, which percentiles do not.
     def page_mean_ms = [mean_ms - atlas_mean_ms.to_i, 0].max
@@ -42,7 +42,7 @@ module PageLatency
     summaries.filter_map do |label, summary|
       next if summary.calls.zero?
 
-      Row.new(label: label, views: summary.calls, usual_ms: summary.p50_ms, slow_ms: summary.p95_ms,
+      Row.new(label: label, views: summary.calls, median_ms: summary.p50_ms, slow_ms: summary.p95_ms,
               mean_ms: summary.mean_ms, atlas_mean_ms: summary.extra_means[:atlas_ms])
     end
   end

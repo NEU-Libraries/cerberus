@@ -124,7 +124,7 @@
           %tr
             %th{scope: 'col'} Page
             %th.text-end{scope: 'col'} Views
-            %th.text-end{scope: 'col'} Usually
+            %th.text-end{scope: 'col'} Median
             %th.text-end{scope: 'col'} 1 in 20 slower than
             %th{scope: 'col'}
               Where the time goes, on average
@@ -139,7 +139,7 @@
               %td.text-end
                 %span.admin-registry-table__id= row.views
               %td.text-end
-                %span.admin-registry-table__id= "#{row.usual_ms} ms"
+                %span.admin-registry-table__id= "#{row.median_ms} ms"
               %td.text-end
                 %span.admin-registry-table__id= "#{row.slow_ms} ms"
               %td
@@ -150,9 +150,3 @@
                     %span.latency-split__page{style: "width: #{(100 * row.page_mean_ms / widest).round(1)}%"}
                   %span.small.text-body-secondary
                     = "Atlas #{row.atlas_mean_ms.to_i} ms · page #{row.page_mean_ms} ms"
-  %p.px-3.pb-3.mb-0.small.text-body-secondary
-    "Usually" is the middle page load; "1 in 20 slower than" is the time that 5%
-    of loads took longer than. "Atlas" is how long the page waited on Atlas,
-    counting calls made at the same time once; "page" is everything else,
-    mostly Cerberus building the page and searching. The times are approximate,
-    because they are read from latency buckets.
