@@ -472,6 +472,11 @@
   }
 }
 
+// The audit history's "restore" and the 500 page's orange. It clears 3:1
+// against white and the bar's track, which a graphic that carries meaning needs;
+// Bootstrap's $orange does not.
+$latency-tone-page: #c46410;
+
 // The health page's "where the time goes" bar: a page's average split into
 // waiting on Atlas and everything else, scaled to the slowest page listed. The
 // figures beside it carry the values, so the bar is decoration and hidden from
@@ -492,5 +497,26 @@
   }
 
   &__atlas { background-color: $blue; }
-  &__page  { background-color: $gray-600; }
+  &__page  { background-color: $latency-tone-page; }
+}
+
+// The key in the bar's column header. Each dot sits beside its word, so the
+// key works without the colour.
+.latency-legend {
+  display: inline-flex;
+  gap: 0.75rem;
+  margin-left: 0.75rem;
+
+  &__key::before {
+    content: "";
+    display: inline-block;
+    width: 0.55rem;
+    height: 0.55rem;
+    margin-right: 0.3rem;
+    border-radius: 50%;
+    background-color: var(--latency-key-color);
+  }
+
+  &__key--atlas { --latency-key-color: #{$blue}; }
+  &__key--page  { --latency-key-color: #{$latency-tone-page}; }
 }

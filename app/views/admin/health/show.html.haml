@@ -126,7 +126,11 @@
             %th.text-end{scope: 'col'} Views
             %th.text-end{scope: 'col'} Usually
             %th.text-end{scope: 'col'} 1 in 20 slower than
-            %th{scope: 'col'} Where the time goes, on average
+            %th{scope: 'col'}
+              Where the time goes, on average
+              %span.latency-legend
+                %span.latency-legend__key.latency-legend__key--atlas Atlas
+                %span.latency-legend__key.latency-legend__key--page Page
         %tbody
           - @pages.each do |row|
             %tr
