@@ -15,7 +15,7 @@ Source files:
 - `app/controllers/health_controller.rb` (`/health`, for Nagios)
 - `app/controllers/admin/health_controller.rb` (the admin health page)
 - `app/services/maintenance_mode.rb` (the unreachable state; see also [`maintenance.md`](maintenance.md))
-- `app/services/job_queue_stats.rb`, `app/services/latency_histogram.rb`, `app/services/page_latency.rb`, `app/services/request_timing.rb` and `config/initializers/latency_histograms.rb` (the usage figures on the admin health page)
+- `app/services/job_queue_stats.rb`, `app/services/latency_histogram.rb`, `app/services/page_latency.rb`, `app/services/request_timing.rb`, `lib/safe_subscriber.rb` and `config/initializers/latency_histograms.rb` (the usage figures on the admin health page)
 
 ## Capabilities
 
@@ -200,6 +200,15 @@ threads `ParallelAtlasReads` spawns. That works because the workers copy
 `spec/services/request_timing_spec.rb` drives the real concern to pin this. Set
 the timing any later and calls made before it are lost; replace the object
 rather than mutate it and the workers' calls go to an orphan.
+
+**A recorder must never fail the request it times.** ActiveSupport re-raises a
+subscriber's error into the code being instrumented, so a broken recorder fails
+the Atlas call, and with it the page. That happened once in development: a
+server still running an older initializer kept calling a recorder that had
+been removed, and every Atlas call raised `NameError` until Puma restarted.
+Both subscriptions therefore go through `SafeSubscriber` (`lib/safe_subscriber.rb`),
+which logs the error and lets the request carry on. It lives in `lib/` because a
+reloadable guard could itself be renamed or removed, and fail the same way.
 
 `process_action.action_controller` fires on the request thread before
 `Current` is reset, so `PageLatency.record` can still read the timing there.
