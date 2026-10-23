@@ -79,12 +79,18 @@ which a page here could not carry any better than the file does.
 
 ```bash
 bin/comment-density                 # every Ruby file under app/
-bin/comment-density --staged        # Ruby files under app/ staged for commit
+bin/comment-density --staged        # Ruby files under app/ staged for commit (needs git)
 bin/comment-density <files>         # named files
 ```
 
 It prints each file over the target, with the comment lines the target allows,
-and always exits 0. An editor or agent can run it on each file after a write.
+and exits 0. An editor or agent can run it on each file after a write.
+
+**It works without git, except `--staged`.** Inside `web`, a worktree's `.git`
+points at the main checkout's path on the host, which the container doesn't
+mount, so git can't run there. The whole-tree mode then lists files with `find`
+instead. `--staged` has no such fallback, so it fails with exit 1 and says to run
+it on the host.
 
 ## Adding a page
 

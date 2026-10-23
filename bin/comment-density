@@ -3,7 +3,7 @@
 # Report Ruby files under app/ whose comments exceed the density target.
 #
 #   bin/comment-density                 # every Ruby file under app/
-#   bin/comment-density --staged        # Ruby files under app/ staged for commit
+#   bin/comment-density --staged        # Ruby files under app/ staged for commit (needs git)
 #   bin/comment-density app/models/x.rb app/jobs/y.rb
 #
 # Prints one line per file over the target and always exits 0: the target is
@@ -32,13 +32,21 @@ if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
   exit 0
 fi
 
+# A worktree seen from inside `web` has no reachable .git, and a git failure
+# inside the process substitution would otherwise read as "no files, all clean".
 files=()
 if [[ "${1:-}" == "--staged" ]]; then
+  if ! git rev-parse --git-dir >/dev/null 2>&1; then
+    echo "bin/comment-density: --staged needs git; run it on the host" >&2
+    exit 1
+  fi
   mapfile -t files < <(git diff --cached --name-only --diff-filter=ACMR -- 'app/*.rb')
 elif [[ $# -gt 0 ]]; then
   files=("$@")
-else
+elif git rev-parse --git-dir >/dev/null 2>&1; then
   mapfile -t files < <(git ls-files -- 'app/*.rb')
+else
+  mapfile -t files < <(find app -name '*.rb' -type f | sort)
 fi
 
 for f in "${files[@]}"; do
