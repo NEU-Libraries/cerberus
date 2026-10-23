@@ -1,6 +1,7 @@
 require File.expand_path('../boot', __FILE__)
 
 require 'rails/all'
+require File.expand_path('../../lib/lazy_mysql_client', __FILE__)
 
 if defined?(Bundler)
   # If you precompile assets before deploying to production, use this line
@@ -111,7 +112,7 @@ module Cerberus
     Kataba.configuration.mirror_list = File.join(Rails.root, 'config', 'mirror.yml')
 
     if !Rails.env.test? && !(!ENV['TRAVIS'].nil? && ENV['TRAVIS'] == 'true')
-      config.handles_connection = Mysql2::Client.new(:reconnect => true, :host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
+      config.handles_connection = LazyMysqlClient.new(:reconnect => true, :host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
     else
       config.handles_connection = nil
     end
