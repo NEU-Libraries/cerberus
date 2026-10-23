@@ -24,9 +24,9 @@ module AtlasLatency
 
   def summary = histogram.summary
 
-  # Atlas's own figures, which time only the controller action, so they leave
-  # out the time a request waits inside Atlas around it. nil when Atlas cannot
-  # give them, which includes a Redis outage on its side.
+  # Atlas's own figures, timed from the top of its Rack stack, so they leave out
+  # only what happens outside Atlas's Rails app. nil when Atlas cannot give
+  # them, which includes a Redis outage on its side.
   def served(nuid:)
     AtlasRb::Metrics.latency(minutes: LatencyHistogram::WINDOW_MINUTES, nuid: nuid)
   rescue AtlasRb::Error, Faraday::Error, JSON::ParserError => e

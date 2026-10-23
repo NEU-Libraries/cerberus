@@ -208,12 +208,13 @@ not answer" rather than showing zeros.
 
 **The card shows Atlas's own figures as a second row.** `AtlasLatency.served`
 reads `AtlasRb::Metrics.latency` as the signed-in admin, for the same 60-minute
-window. **Atlas times only the controller action** (`process_action`), so its row
-is labelled "action only". Cerberus's row covers the whole call, which includes
-the rest of Atlas's handling of the request.
+window. **Atlas times each request from the top of its Rack stack**, the same
+span as its `x-runtime` header, so its figures include a request's wait behind
+concurrent ones. The gap between the rows is what happens outside Atlas's Rails
+app: the network, a request queued for a free Puma thread, and Cerberus handling
+the answer.
 
-- **What the gap is.** Atlas's responses carry `x-runtime` (its whole Rails stack) and a `Server-Timing` `process_action` figure, and the development round-trip logger prints both beside each call. On the Work page, the four reads Cerberus sends at once each spend about 100 ms inside Atlas but outside the action, while requests that arrive alone spend about 3 ms there. That is Atlas taking concurrent requests in turn, not Cerberus: Cerberus's own share was 2–4 ms per call. It was measured in development, with Atlas in single mode.
-- **When it closes.** Atlas is to time requests from the start of its Rack stack instead. The row then becomes "serving", and the gap shrinks to Cerberus's own few milliseconds.
+- **Why Atlas does not time just the action.** Timing only `process_action` misses most of the wait. In development, with Atlas in single mode, the Work page's four parallel reads each spent about 100 ms inside Atlas but outside the action, taking turns behind each other, while requests that arrived alone spent about 3 ms there. Cerberus's own share was 2–4 ms per call. The development round-trip logger prints `x-runtime` and `Server-Timing`'s `process_action` beside each call, which is how this was found.
 - **Call counts differ.** atlas_rb counts a call that follows a redirect, such as the `/resources/<noid>` resolver, as one call. Atlas serves it as two requests, so its count runs higher.
 - **Timeouts:** Atlas's row shows "n/a", because Atlas never sees a call that timed out on the Cerberus side.
 - **Failures:** if Atlas can't give its figures, because its Redis is down, Atlas itself is down, or the reader isn't an admin, `served` returns `nil` and the row says so. Cerberus's row is unaffected.

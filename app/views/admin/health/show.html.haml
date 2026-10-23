@@ -127,7 +127,7 @@
       %tbody
         %tr
           %td
-            .admin-registry-table__name Atlas, action only
+            .admin-registry-table__name Atlas, serving
           - if @atlas_served.nil?
             %td.text-body-secondary{colspan: 7} Atlas could not give its figures.
           - elsif @atlas_served.calls.to_i.zero?
@@ -166,10 +166,10 @@
               %td.text-end
                 %span.admin-registry-table__id= "#{action.p95_ms} ms"
   %p.px-3.pb-3.mb-0.small.text-body-secondary
-    Atlas times only the controller action. Cerberus times each call from
-    sending it until it has read the answer, so its figures also include the
-    rest of Atlas's handling. Most of the gap between the two rows is a request
-    waiting inside Atlas for its turn when several arrive at once; Cerberus and
-    the network add a few milliseconds. Both sets of percentiles are
-    interpolated from latency buckets, so they are approximate, and a retried
-    call counts once per attempt.
+    Atlas times each request from when it enters its Rails app until the
+    response leaves, including any wait behind other requests. Cerberus times
+    each call from sending it until it has read the answer. The gap between the
+    two rows is what happens outside Atlas's app: the network, a request queued
+    for a free Atlas thread, and Cerberus handling the answer. Both sets of
+    percentiles are interpolated from latency buckets, so they are approximate,
+    and a retried call counts once per attempt.

@@ -73,13 +73,13 @@ RSpec.describe 'Admin system health', type: :request do
     expect(response.body).to include('1840', '212 ms', '880 ms')
   end
 
-  # Atlas times only the action, so the gap between the rows shows how much of a
-  # call Atlas spends around it.
+  # The gap between the rows is what happens outside Atlas's Rails app, which is
+  # the reason Atlas's own figures are shown at all.
   it "shows Atlas's own figures beside Cerberus's" do
     sign_in admin
     get '/admin/health'
 
-    expect(response.body).to include('Atlas, action only', 'Cerberus, waiting', '97 ms', '212 ms')
+    expect(response.body).to include('Atlas, serving', 'Cerberus, waiting', '97 ms', '212 ms')
   end
 
   it "lists Atlas's slowest actions" do
