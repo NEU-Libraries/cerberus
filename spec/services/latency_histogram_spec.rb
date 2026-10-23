@@ -14,14 +14,14 @@ RSpec.describe LatencyHistogram do
     described_class.redis.del(*histogram.keys)
   end
 
-  it 'counts calls, failures and timeouts across the window' do
+  it 'counts calls and their mean across the window' do
     histogram.record(12)
-    histogram.record(40, failed: true)
-    histogram.record(9000, failed: true, timeout: true)
+    histogram.record(40)
+    histogram.record(9000)
 
     summary = histogram.summary
 
-    expect(summary.to_h.slice(:calls, :failed, :timeouts)).to eq(calls: 3, failed: 2, timeouts: 1)
+    expect(summary.calls).to eq 3
     expect(summary.mean_ms).to eq 3017
   end
 

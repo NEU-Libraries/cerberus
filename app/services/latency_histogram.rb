@@ -15,7 +15,7 @@ class LatencyHistogram
   BACKOFF = 30.seconds
 
   # extra_means holds the mean of each figure passed to record as `sums:`.
-  Summary = Data.define(:calls, :failed, :timeouts, :mean_ms, :p50_ms, :p95_ms, :p99_ms, :extra_means)
+  Summary = Data.define(:calls, :mean_ms, :p50_ms, :p95_ms, :p99_ms, :extra_means)
 
   class << self
     def redis
@@ -36,7 +36,7 @@ class LatencyHistogram
 
   # `sums:` adds further figures to the same entry, such as the part of a page
   # spent waiting on Atlas, reported back as means.
-  def record(duration_ms, failed: false, timeout: false, sums: {})
+  def record(duration_ms, sums: {})
     return if self.class.suspended?
 
     key = minute_key(Time.current)
@@ -44,8 +44,6 @@ class LatencyHistogram
       pipe.hincrby(key, bucket_for(duration_ms), 1)
       pipe.hincrbyfloat(key, 'sum_ms', duration_ms)
       sums.each { |name, value| pipe.hincrbyfloat(key, "sum_#{name}", value) }
-      pipe.hincrby(key, 'failed', 1) if failed
-      pipe.hincrby(key, 'timeouts', 1) if timeout
       pipe.expire(key, RETENTION.to_i)
     end
   rescue Redis::BaseError => e
@@ -77,8 +75,7 @@ class LatencyHistogram
       counts = bucket_fields.map { |field| totals[field].to_i }
       calls  = counts.sum
       Summary.new(
-        calls: calls, failed: totals['failed'].to_i, timeouts: totals['timeouts'].to_i,
-        mean_ms: mean(totals['sum_ms'], calls),
+        calls: calls, mean_ms: mean(totals['sum_ms'], calls),
         p50_ms: percentile(counts, 0.50), p95_ms: percentile(counts, 0.95), p99_ms: percentile(counts, 0.99),
         extra_means: extra_means(totals, calls)
       )

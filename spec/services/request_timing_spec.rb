@@ -21,6 +21,26 @@ RSpec.describe RequestTiming do
     expect(timing.atlas_calls).to eq 4
   end
 
+  describe '.record' do
+    after { Current.reset }
+
+    def event(start_s, finish_s)
+      instance_double(ActiveSupport::Notifications::Event, time: start_s, end: finish_s)
+    end
+
+    it "adds an atlas_rb event to the request's timing" do
+      Current.request_timing = timing
+      described_class.record(event(10.0, 10.042))
+
+      expect(timing.atlas_elapsed_ms).to be_within(0.001).of(42.0)
+    end
+
+    # A job or a rake task calls Atlas with no request around it.
+    it 'ignores a call made outside a request' do
+      expect { described_class.record(event(10.0, 10.042)) }.not_to raise_error
+    end
+  end
+
   it 'reports no waiting for a request that made no calls' do
     expect(timing.atlas_elapsed_ms).to eq 0.0
   end

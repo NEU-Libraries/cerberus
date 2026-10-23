@@ -46,7 +46,7 @@ RSpec.describe PageLatency do
 
   describe '.rows' do
     def summary(calls:, mean: 310, atlas: 220)
-      LatencyHistogram::Summary.new(calls: calls, failed: 0, timeouts: 0, mean_ms: mean, p50_ms: 290, p95_ms: 520,
+      LatencyHistogram::Summary.new(calls: calls, mean_ms: mean, p50_ms: 290, p95_ms: 520,
                                     p99_ms: 700, extra_means: { atlas_ms: atlas })
     end
 

@@ -15,7 +15,7 @@ Source files:
 - `app/controllers/health_controller.rb` (`/health`, for Nagios)
 - `app/controllers/admin/health_controller.rb` (the admin health page)
 - `app/services/maintenance_mode.rb` (the unreachable state; see also [`maintenance.md`](maintenance.md))
-- `app/services/job_queue_stats.rb`, `app/services/latency_histogram.rb`, `app/services/atlas_latency.rb`, `app/services/page_latency.rb`, `app/services/request_timing.rb` and `config/initializers/latency_histograms.rb` (the usage figures on the admin health page)
+- `app/services/job_queue_stats.rb`, `app/services/latency_histogram.rb`, `app/services/page_latency.rb`, `app/services/request_timing.rb` and `config/initializers/latency_histograms.rb` (the usage figures on the admin health page)
 
 ## Capabilities
 
@@ -194,7 +194,7 @@ redirects. `PageLatency` records each successful GET of those routes into a
 
 **How a page's Atlas time is collected.** `ApplicationController` sets
 `Current.request_timing` to a new `RequestTiming` before any other callback.
-`AtlasLatency.record` adds every call to it, including calls on the worker
+`RequestTiming.record`, subscribed to atlas_rb's `request.atlas_rb` event, adds every call to it, including calls on the worker
 threads `ParallelAtlasReads` spawns. That works because the workers copy
 `Current.attributes`, and the copy shares the same `RequestTiming` object.
 `spec/services/request_timing_spec.rb` drives the real concern to pin this. Set
@@ -206,19 +206,19 @@ rather than mutate it and the workers' calls go to an orphan.
 The page time is the controller's: it leaves out middleware, such as the session
 store's save.
 
-The call-level figures below sit in a closed "Behind the pages: Atlas calls"
-section of the same card. They answer which Atlas call is slow, not how long a
-page takes.
+**Atlas's own view is not on the card.** Atlas reports its request times,
+measured from the top of its Rack stack, at the admin-gated `/metrics/latency`.
+The card shows page figures only, because per-call figures don't tell anyone
+how long a page took. To find which Atlas call is
+slow, read that endpoint, or switch on the development round-trip logger, which
+prints Atlas's `x-runtime` and `Server-Timing` `process_action` beside each call.
 
-### Atlas response times
+### The histogram store
 
-`config/initializers/latency_histograms.rb` subscribes to atlas_rb's
-`request.atlas_rb` event, which fires once per round trip. A retried call
-fires once per attempt. `AtlasLatency` adds each call to a `LatencyHistogram`,
-which keeps one Redis hash per minute:
+`LatencyHistogram` keeps one Redis hash per minute for each page:
 
-- **Fields:** a count per latency bucket (`le_5` … `le_10000`, then `le_inf`), the summed time, failures (an exception or a 5xx) and timeouts.
-- **Keys:** `cerberus:latency:<env>:atlas:<minute>`, expiring after two hours. The environment is in the key because development and the specs share one Redis.
+- **Fields:** a count per latency bucket (`le_5` … `le_10000`, then `le_inf`), the summed time, and a `sum_<name>` for each figure passed as `sums:`, which come back as `extra_means`.
+- **Keys:** `cerberus:latency:<env>:page:<controller#action>:<minute>`, expiring after two hours. The environment is in the key because development and the specs share one Redis.
 - **Reading:** the page sums the last 60 minute-keys, then interpolates p50, p95 and p99 inside the bucket that holds each rank.
 
 **Redis, not `Rails.cache` and not process memory.** Every Puma worker and
@@ -227,30 +227,14 @@ app. Development's cache store is a memory store, which would split them per
 process. The histogram therefore connects to `REDIS_URL` itself.
 
 **The percentiles are approximate.** They are only as fine as the bucket edges,
-and a call slower than the last edge is reported at that edge. When history or
-per-route figures are wanted, the plan is the TimescaleDB design, which stores
-one row per request.
+and a time slower than the last edge is reported at that edge. When history or
+per-route figures over longer periods are wanted, the plan is the TimescaleDB
+design, which stores one row per request.
 
-**A Redis outage must not slow Atlas calls down.** Each write would otherwise
-wait for the one-second connect timeout. After any Redis error,
-`LatencyHistogram` stops writing for 30 seconds, and the page says "Redis did
-not answer" rather than showing zeros.
+**A Redis outage must not slow pages down.** Each write would otherwise wait for
+the one-second connect timeout. After any Redis error, `LatencyHistogram` stops
+writing for 30 seconds, and the card says "Redis did not answer" rather than
+showing zeros.
 
-**The card shows Atlas's own figures as a second row.** `AtlasLatency.served`
-reads `AtlasRb::Metrics.latency` as the signed-in admin, for the same 60-minute
-window. **Atlas times each request from the top of its Rack stack**, the same
-span as its `x-runtime` header, so its figures include a request's wait behind
-concurrent ones. The gap between the rows is what happens outside Atlas's Rails
-app: the network, a request queued for a free Puma thread, and Cerberus handling
-the answer.
-
-- **Why Atlas does not time just the action.** Timing only `process_action` misses most of the wait. In development, with Atlas in single mode, the Work page's four parallel reads each spent about 100 ms inside Atlas but outside the action, taking turns behind each other, while requests that arrived alone spent about 3 ms there. Cerberus's own share was 2–4 ms per call. The development round-trip logger prints `x-runtime` and `Server-Timing`'s `process_action` beside each call, which is how this was found.
-- **Call counts differ.** atlas_rb counts a call that follows a redirect, such as the `/resources/<noid>` resolver, as one call. Atlas serves it as two requests, so its count runs higher.
-- **Timeouts:** Atlas's row shows "n/a", because Atlas never sees a call that timed out on the Cerberus side.
-- **Failures:** if Atlas can't give its figures, because its Redis is down, Atlas itself is down, or the reader isn't an admin, `served` returns `nil` and the row says so. Cerberus's row is unaffected.
-- **Slowest actions:** the card lists Atlas's five slowest `controller#action` routes by p95, from the same report.
-
-The health probes and the admin page's own `/metrics/latency` read are left
-out, because neither is the app's traffic: a monitor polls the probes, and the
-page reads the metrics on every load. The recorder is also off in the test environment, so the suite neither
-writes timing data nor depends on Redis.
+The recorders are off in the test environment, so the suite neither writes
+timing data nor depends on Redis.

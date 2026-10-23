@@ -3,6 +3,12 @@
 # One request's Atlas calls, collected from every thread the request uses, for
 # the page response times on the admin health page. See docs/outages.md.
 class RequestTiming
+  # Called for every request.atlas_rb event. A call outside a request, from a
+  # job or a rake task, has no timing and is ignored.
+  def self.record(event)
+    Current.request_timing&.add_atlas_call(event.time * 1000, event.end * 1000)
+  end
+
   def initialize
     @lock = Mutex.new
     @first_start_ms = nil

@@ -146,72 +146,9 @@
                     %span.latency-split__page{style: "width: #{(100 * row.page_mean_ms / widest).round(1)}%"}
                   %span.small.text-body-secondary
                     = "Atlas #{row.atlas_mean_ms.to_i} ms · page #{row.page_mean_ms} ms"
-  %p.px-3.mb-2.small.text-body-secondary
+  %p.px-3.pb-3.mb-0.small.text-body-secondary
     "Usually" is the middle page load; "1 in 20 slower than" is the time that 5%
     of loads took longer than. "Atlas" is how long the page waited on Atlas,
     counting calls made at the same time once; "page" is everything else,
     mostly Cerberus building the page and searching. The times are approximate,
     because they are read from latency buckets.
-  %details.px-3.pb-3
-    %summary.small.mb-2 Behind the pages: Atlas calls
-    .table-responsive
-      %table.table.table-borderless.admin-registry-table{'aria-label' => 'Atlas response times over the last hour, measured by each side'}
-        %thead
-          %tr
-            %th{scope: 'col'} Measured by
-            %th.text-end{scope: 'col'} Calls
-            %th.text-end{scope: 'col'} Failed
-            %th.text-end{scope: 'col'} Timeouts
-            %th.text-end{scope: 'col'} Mean
-            %th.text-end{scope: 'col'} p50
-            %th.text-end{scope: 'col'} p95
-            %th.text-end{scope: 'col'} p99
-        %tbody
-          %tr
-            %td
-              .admin-registry-table__name Atlas, serving
-            - if @atlas_served.nil?
-              %td.text-body-secondary{colspan: 7} Atlas could not give its figures.
-            - elsif @atlas_served.calls.to_i.zero?
-              %td.text-body-secondary{colspan: 7} Atlas served no requests in this window.
-            - else
-              = render 'admin/health/latency_cells', calls: @atlas_served.calls, failed: @atlas_served.server_errors,
-                                                     timeouts: nil, figures: @atlas_served
-          %tr
-            %td
-              .admin-registry-table__name Cerberus, waiting
-            - if @atlas.nil?
-              %td.text-body-secondary{colspan: 7} Redis did not answer, so there are no figures to show.
-            - elsif @atlas.calls.zero?
-              %td.text-body-secondary{colspan: 7} No calls to Atlas in this window.
-            - else
-              = render 'admin/health/latency_cells', calls: @atlas.calls, failed: @atlas.failed,
-                                                     timeouts: @atlas.timeouts, figures: @atlas
-    - slowest = Array(@atlas_served&.slowest_actions).first(5)
-    - if slowest.any?
-      .px-3.pt-2
-        %h2.h6.mb-1 Slowest Atlas actions
-      .table-responsive
-        %table.table.table-borderless.admin-registry-table{'aria-label' => "Atlas's slowest actions by p95 over the last hour"}
-          %thead
-            %tr
-              %th{scope: 'col'} Action
-              %th.text-end{scope: 'col'} Calls
-              %th.text-end{scope: 'col'} p95
-          %tbody
-            - slowest.each do |action|
-              %tr
-                %td
-                  %span.admin-registry-table__id= action.action
-                %td.text-end
-                  %span.admin-registry-table__id= action.calls
-                %td.text-end
-                  %span.admin-registry-table__id= "#{action.p95_ms} ms"
-    %p.px-3.pb-3.mb-0.small.text-body-secondary
-      Atlas times each request from when it enters its Rails app until the
-      response leaves, including any wait behind other requests. Cerberus times
-      each call from sending it until it has read the answer. The gap between the
-      two rows is what happens outside Atlas's app: the network, a request queued
-      for a free Atlas thread, and Cerberus handling the answer. Both sets of
-      percentiles are interpolated from latency buckets, so they are approximate,
-      and a retried call counts once per attempt.
