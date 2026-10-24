@@ -32,6 +32,12 @@
 -# on its show page, so the curator arrives here already looking for the cause.
 = render 'escape_advisory', advisory: @double_escapes
 
+-# The preservation XML is gone from storage while the access copy survives, so
+-# the preview renders beside an empty buffer that would otherwise read as a
+-# blank record.
+- if @raw_xml.nil? && @mods.present?
+  = render 'missing_xml_notice', resource: @resource, klass: @klass
+
 -# The slot a repair's stream replaces with the script that reseats the Ace
 -# buffer. It has to exist on the page for Turbo to find the target, and it stays
 -# empty until then.
@@ -53,7 +59,14 @@
         #editor<
           = @raw_xml
       .col#content{"data-controller" => "preview"}
-        = @mods.html_safe
+        -# Atlas answers 404 for the HTML when the Work has no access copy. The
+        -# placeholder keeps the #mods id, which Validate's stream replaces.
+        - if @mods
+          = @mods.html_safe
+        - else
+          #mods
+            %p.small.text-subtle
+              There is no access copy to preview. Saving a document here writes a new one.
     .row
       .well.p-3.my-3.rounded-3
         %input#validate_button.btn.btn-primary{:name => "commit", :type => "submit", :value => "Validate + Preview", remote: true}/
