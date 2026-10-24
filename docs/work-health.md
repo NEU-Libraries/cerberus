@@ -91,11 +91,11 @@ do. See `docs/outages.md`.
 
 ## The report
 
-The report has two parts, so the summary does not read as part of the table.
+The report has three parts, so the summary does not read as part of the table.
 
-**A readout first.** A bare label-and-value list sits under the pane heading,
-with Check again below it. `docs/design.md` keeps a read-only readout out of a
-well, so it has no container.
+**A readout first.** A bare label-and-value list sits under the pane heading.
+`docs/design.md` keeps a read-only readout out of a well, so it has no
+container.
 
 | Label | Shows |
 |---|---|
@@ -118,6 +118,9 @@ a repair, teal for viable, and grey for a state that is not damage.
   link (`work_health_repair_offered?`), so it never contradicts the rows above
   it. The readout carries no problem count: the table is the count, and a second
   count split by "repair here" read as a second meaning of "repairable".
+
+**Check again last,** in the pane's form footer: a `.well.p-3.my-3.rounded-3`
+holding one default-size `btn-primary`, as every other edit tab ends.
 
 ## Where each finding is repaired
 
