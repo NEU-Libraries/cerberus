@@ -84,7 +84,7 @@ GEM
     addressable (2.9.0)
       public_suffix (>= 2.0.2, < 8.0)
     ast (2.4.3)
-    atlas_rb (1.27.3)
+    atlas_rb (1.27.4)
       faraday (~> 2.7)
       faraday-follow_redirects (~> 0.3.0)
       faraday-multipart (~> 1)
@@ -208,7 +208,7 @@ GEM
       rainbow
       rubocop (>= 1.0)
       sysexits (~> 1.1)
-    hashie (5.1.0)
+    hashie (5.2.0)
       logger
     htmlentities (4.4.2)
     i18n (1.15.2)
