@@ -101,7 +101,6 @@ well, so it has no container.
 |---|---|
 | Grade | a chip with the `fa-heart-pulse` icon and the grade in words. Colour alone fails WCAG 1.4.1, so the words carry the meaning |
 | Fixity | always "Not checked", because Atlas never re-hashes bytes for this check |
-| Problems | the count, split by whether this page offers a repair (`work_health_problem_summary`). It counts only what Cerberus knows, and does not say who repairs the rest |
 
 **Then the findings card,** only when there are findings. It reuses the Audit
 History card shell and its chip and row rail. `_work_health.scss` maps each
@@ -114,6 +113,11 @@ a repair, teal for viable, and grey for a state that is not damage.
   in a collapsed `details`. They are states of the Work, not damage. A Work with
   advisory notes and no problems keeps the card, which says nothing is missing
   or broken.
+- **A closing note** says that an Atlas operator repairs any problem with
+  nothing in the Repair column. It appears only when some problem has no repair
+  link (`work_health_repair_offered?`), so it never contradicts the rows above
+  it. The readout carries no problem count: the table is the count, and a second
+  count split by "repair here" read as a second meaning of "repairable".
 
 ## Where each finding is repaired
 

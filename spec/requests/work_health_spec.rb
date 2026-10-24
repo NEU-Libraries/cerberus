@@ -54,7 +54,7 @@ RSpec.describe 'Work health', type: :request do
         get '/works/w1/health'
 
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include('turbo-frame id="work-health"', 'Green: viable', '<dd>None</dd>')
+        expect(response.body).to include('turbo-frame id="work-health"', 'Green: viable')
         expect(response.body).not_to include('audit-history__title')
       end
 
@@ -81,6 +81,17 @@ RSpec.describe 'Work health', type: :request do
 
         expect(response.body).to include('Yellow: repairable, nothing lost', 'untitled message',
                                          'Open the Metadata tab', admin_reindex_work_path('w1'))
+      end
+
+      # The note names who repairs a problem this page has no control for.
+      it 'says an Atlas operator repairs a problem with no repair link, and only then' do
+        stub_check(report('yellow', [finding('repairable', 'envelope_stale')]))
+        get '/works/w1/health'
+        expect(response.body).to include('An Atlas operator repairs any problem with nothing in the Repair column')
+
+        stub_check(report('yellow', [finding('repairable', 'untitled')]))
+        get '/works/w1/health'
+        expect(response.body).not_to include('An Atlas operator repairs')
       end
 
       it 'renders a red grade with the fatal finding before the repairable one' do

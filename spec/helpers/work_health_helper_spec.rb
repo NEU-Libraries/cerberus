@@ -52,14 +52,11 @@ RSpec.describe WorkHealthHelper do
     end
   end
 
-  describe '#work_health_problem_summary' do
-    it 'says how many problems this page can repair' do
-      expect(helper.work_health_problem_summary([])).to eq('None')
-      expect(helper.work_health_problem_summary([finding('untitled'), finding('not_indexed')]))
-        .to eq('2, each with a repair here')
-      expect(helper.work_health_problem_summary([finding('envelope_stale')])).to eq('1, none with a repair here')
-      expect(helper.work_health_problem_summary([finding('untitled'), finding('envelope_stale'), finding('novel')]))
-        .to eq('3: 1 with a repair here, 2 with none')
+  describe '#work_health_repair_offered?' do
+    it 'is true only for a code this page can repair' do
+      expect(helper.work_health_repair_offered?(finding('untitled'))).to be true
+      expect(helper.work_health_repair_offered?(finding('not_indexed'))).to be true
+      expect(helper.work_health_repair_offered?(finding('envelope_stale'))).to be false
     end
   end
 

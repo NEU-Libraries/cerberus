@@ -48,16 +48,9 @@ module WorkHealthHelper
     Array(findings).select { |f| f['severity'] == 'advisory' }
   end
 
-  # Counts only what Cerberus can say: whether this page offers a repair.
-  def work_health_problem_summary(problems)
-    return 'None' if problems.empty?
-
-    total = problems.size
-    repairable = problems.count { |f| f['code'].to_s.in?(REINDEX_CODES) || REPAIR_TABS.key?(f['code'].to_s) }
-    return "#{total}, none with a repair here" if repairable.zero?
-    return "#{total}, each with a repair here" if repairable == total
-
-    "#{total}: #{repairable} with a repair here, #{total - repairable} with none"
+  def work_health_repair_offered?(finding)
+    code = finding['code'].to_s
+    code.in?(REINDEX_CODES) || REPAIR_TABS.key?(code)
   end
 
   def work_health_severity_label(severity)

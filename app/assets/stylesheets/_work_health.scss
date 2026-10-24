@@ -43,8 +43,13 @@
     color: $text-subtle;
   }
 
-  &__clear {
+  &__clear,
+  &__note {
     padding: 1rem;
+  }
+
+  &__note {
+    border-top: 1px solid $gray-200;
   }
 
   &__advisories {
