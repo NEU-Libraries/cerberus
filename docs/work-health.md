@@ -113,11 +113,13 @@ a repair, teal for viable, and grey for a state that is not damage.
   in a collapsed `details`. They are states of the Work, not damage. A Work with
   advisory notes and no problems keeps the card, which says nothing is missing
   or broken.
-- **A closing note** says that an Atlas operator can rectify any finding
-  without an option in the Repair column. It appears only when some problem has no repair
-  link (`work_health_repair_offered?`), so it never contradicts the rows above
-  it. The readout carries no problem count: the table is the count, and a second
-  count split by "repair here" read as a second meaning of "repairable".
+
+**A note below the card,** outside it so it does not break up the rows, says
+that an Atlas operator can rectify any finding without an option in the Repair
+column. It appears only when some problem has no repair link
+(`work_health_repair_offered?`), so it never contradicts the rows above it. The
+readout carries no problem count: the table is the count, and a second count
+split by "repair here" read as a second meaning of "repairable".
 
 **Check again last,** in the pane's form footer: a `.well.p-3.my-3.rounded-3`
 holding one default-size `btn-primary`, as every other edit tab ends.
