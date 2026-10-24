@@ -21,6 +21,9 @@ class Ability
       # read on the resource too, so every history surface here starts from a
       # resource the user can open.
       can :read, :audit_event if user.admin_delegate?
+      # Atlas allows the Work health check for the same tier (:read_health), and
+      # refuses an editor. A rule of its own lets the two audiences diverge.
+      can :read, :work_health if user.admin_delegate?
 
       # Edit-equivalence has to grant read too. Without it a depositor who sets
       # their own collection Private with no group rows, and a group granted

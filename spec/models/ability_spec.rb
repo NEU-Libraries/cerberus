@@ -175,6 +175,10 @@ describe Ability do
       expect(admin_ability).to be_able_to(:read, :audit_event)
     end
 
+    it 'can :read :work_health' do
+      expect(admin_ability).to be_able_to(:read, :work_health)
+    end
+
     it 'can :read a private document the admin shares no read-group with' do
       doc = SolrDocument.new('read_access_group_ssim' => ['curators'])
       expect(admin_ability).to be_able_to(:read, doc)
@@ -207,6 +211,20 @@ describe Ability do
                            groups: ['editors', Permissions::STAFF_EDIT_GROUP],
                            role:   'privileged')
       expect(described_class.new(non_admin)).not_to be_able_to(:read, :audit_event)
+    end
+
+    # Atlas allows the health check for the delegate tier and refuses an editor,
+    # so edit rights alone must not reach it.
+    it 'can :read :work_health as a delegated admin, and not as staff or a depositor' do
+      delegate = User.new(nuid:   '000000002',
+                          groups: [Permissions::STAFF_EDIT_GROUP, Permissions::ADMIN_GROUP],
+                          role:   'privileged')
+      staff = User.new(nuid: '000000006', groups: [Permissions::STAFF_EDIT_GROUP], role: 'privileged')
+      depositor = User.new(nuid: '000000003', groups: [], role: 'standard')
+
+      expect(described_class.new(delegate)).to be_able_to(:read, :work_health)
+      expect(described_class.new(staff)).not_to be_able_to(:read, :work_health)
+      expect(described_class.new(depositor)).not_to be_able_to(:read, :work_health)
     end
   end
 end

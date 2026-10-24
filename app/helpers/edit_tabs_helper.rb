@@ -7,7 +7,7 @@ module EditTabsHelper
   # A key doubles as the pane's DOM id (`#<key>`) and its tab button's id
   # (`<key>-tab`), so it must match the `.tab-pane` id in the edit view.
   TABS = {
-    'Work'       => %w[metadata advanced darwin-core permissions move delete xml history],
+    'Work'       => %w[metadata advanced darwin-core permissions move delete xml history health],
     'Collection' => %w[metadata permissions xml derivative-access export history analytics],
     'Community'  => %w[metadata permissions xml history analytics]
   }.freeze
@@ -40,6 +40,7 @@ module EditTabsHelper
   def edit_tab_visible?(key)
     case key
     when 'history' then can?(:read, :audit_event)
+    when 'health'  then can?(:read, :work_health)
     when 'export'  then effective_user&.loader_tier?.present?
     else true
     end

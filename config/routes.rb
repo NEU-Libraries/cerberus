@@ -135,6 +135,9 @@ Rails.application.routes.draw do
       # DRS staff inbox (no direct mutation; staff fulfill it with the tombstone
       # / re-parent tools). Edit-gated via authorize_resource_writes!.
       post :request_change
+      # The Health tab's lazy frame. Admins and delegated admins only, matching
+      # Atlas's health check beneath it (WorkHealthController).
+      get :health, to: 'work_health#show'
     end
   end
   # People / profile pages. :id is the Person's NOID (opaque, public-safe — the
@@ -350,6 +353,9 @@ Rails.application.routes.draw do
     # endpoint behind them is system-gated and applies no per-user check.
     post 'reindex/work/:noid', to: 'reindex#work', as: :reindex_work
     post 'reindex/set/:noid',  to: 'reindex#set',  as: :reindex_set
+
+    # The Work health check by NOID, for a Work whose edit page will not open.
+    get 'work_health', to: 'work_health#show'
   end
 
   get '/downloads/:id', to: 'downloads#show', as: :download

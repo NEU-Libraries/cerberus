@@ -30,7 +30,7 @@ three edit views and the XML editor's mirror — had nothing coupling them, and
 the XML editor's row went stale silently each time a tab was added.
 
 Order and membership are data, so a class-specific tab needs no conditional.
-Advanced, Move and Delete are Work-only; Derivative access and Export are
+Advanced, Move, Delete and Health are Work-only; Derivative access and Export are
 Collection-only; Analytics is container-only. Each follows purely from which
 arrays list it.
 
@@ -77,8 +77,9 @@ than opening nothing.
 ### Who may see a tab
 
 `edit_tab_visible?(key)` holds only the *user*-dependent gates. `TABS` holds the
-class-dependent membership. History needs `can?(:read, :audit_event)`; Export
-needs a loader tier (`current_user.loader_tier?`).
+class-dependent membership. History needs `can?(:read, :audit_event)`; Health
+needs `can?(:read, :work_health)` (see `docs/work-health.md`); Export needs a
+loader tier (`current_user.loader_tier?`).
 
 The edit view's pane calls the same predicate instead of re-testing the
 ability, so each gate is declared exactly once.

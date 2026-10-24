@@ -1,0 +1,27 @@
+-# One table of health findings. See docs/work-health.md.
+-# @param findings [Array<AtlasRb::Mash>] each with severity, code, subject, message
+-# @param work_id [String] the Work's NOID
+-# @param standalone [Boolean] true on the admin lookup
+-# @param label [String] the table's accessible name
+-# A label rather than a visually-hidden caption: the caption overflows
+-# .table-responsive by a pixel and puts a scrollbar on the table.
+.table-responsive
+  %table.table.table-borderless.audit-event-table{'aria-label' => label}
+    %thead
+      %tr
+        %th{scope: 'col'} Severity
+        %th{scope: 'col'} Finding
+        %th{scope: 'col'} About
+        %th{scope: 'col'} Repair
+    %tbody
+      - findings.each do |finding|
+        %tr{class: work_health_tone(finding['severity'])}
+          %td
+            %span.audit-event__action
+              %span.audit-event__action-label= work_health_severity_label(finding['severity'])
+          %td.audit-event__detail-cell
+            = finding['message'].presence || finding['code']
+            - if finding['code'].present?
+              %span.work-health__code= finding['code']
+          %td= work_health_subject(finding['subject'], work_id)
+          %td= work_health_repair(finding, work_id, standalone:)

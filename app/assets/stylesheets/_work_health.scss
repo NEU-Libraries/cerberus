@@ -1,0 +1,51 @@
+// ---------------------------------------------------------------------
+// Work health (Work → Edit → Health tab, and /admin/work_health)
+//
+// Sits inside the audit-history card shell and reuses its chip and rail,
+// which colour themselves from --audit-action-color. Each grade and
+// severity borrows the ledger tone that already means the same thing:
+// red for lost content, amber for a repair, teal for viable, grey for a
+// state that is not damage. See docs/work-health.md.
+// ---------------------------------------------------------------------
+
+.work-health {
+  &--red,
+  &--fatal      { --audit-action-color: #{$audit-tone-tombstone}; }
+  &--yellow,
+  &--repairable { --audit-action-color: #{$audit-tone-restore}; }
+  &--green      { --audit-action-color: #{$audit-tone-create}; }
+  &--advisory,
+  &--unknown    { --audit-action-color: #{$audit-tone-generic}; }
+
+  &__summary {
+    padding: 1rem;
+    border-bottom: 1px solid $gray-200;
+  }
+
+  // The one emphasis on the surface: the audit chip at reading size.
+  &__grade {
+    font-size: 1rem;
+    padding: 0.35rem 0.8rem;
+  }
+
+  &__code {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.75rem;
+    color: $text-subtle;
+  }
+
+  &__clear {
+    padding: 1rem;
+  }
+
+  &__advisories {
+    border-top: 1px solid $gray-200;
+
+    > summary {
+      padding: 0.65rem 1rem;
+      cursor: pointer;
+      color: $gray-800;
+    }
+  }
+}
