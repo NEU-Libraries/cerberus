@@ -100,7 +100,8 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     'associations'        => -> { '/admin/associations' },
     'linked members'      => -> { '/admin/linked_members' },
     'impersonation'       => -> { '/admin/impersonation' },
-    'deposit triage'      => -> { '/admin/deposit_triage' }
+    'deposit triage'      => -> { '/admin/deposit_triage' },
+    'work health'         => -> { "/admin/work_health?noid=#{@work.id}" }
   }
 
   # axe skips what is not displayed, so each edit pane needs its own visit. The
@@ -115,4 +116,16 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     end
   end
   audits :admin_nuid, edit_tabs.to_h
+
+  # The Health pane's report arrives in a lazy frame after the visit, so the
+  # audit above sees only its placeholder. This one waits for the report.
+  context 'as admin_nuid, once the work health report has loaded' do
+    before { sign_in_as(admin_nuid) }
+
+    it 'the work health report passes axe' do
+      visit "/works/#{@work.id}/edit#health"
+      expect(page).to have_css('.work-health__grade')
+      expect_axe_clean
+    end
+  end
 end
