@@ -507,7 +507,10 @@ pinned to the system NUID.
 | `set` | enqueues `SetReindexJob` | a Set names collections whose subtrees can run to thousands of resources |
 
 `work` flashes success on a 204, "no resource found" on a 404, and a failure
-otherwise, then returns to the Work's show page.
+otherwise. It then returns to the `return_to` path it was sent, or to the Work's
+show page. `url_from` refuses a `return_to` off this site. The Work health
+report sends its own page, so the operator sees the new grade (see
+`work-health.md`).
 
 `set` reads the Compilation before it enqueues. So an unknown or unreadable id
 fails in front of the person who clicked, rather than inside a job nobody is
