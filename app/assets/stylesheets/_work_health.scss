@@ -17,9 +17,17 @@
   &--advisory,
   &--unknown    { --audit-action-color: #{$audit-tone-generic}; }
 
-  &__summary {
-    padding: 1rem;
-    border-bottom: 1px solid $gray-200;
+  // The summary above the findings card: a bare label-and-value readout, as
+  // design.md asks of a read-only readout in a pane.
+  &__readout {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 0.4rem 1.25rem;
+    align-items: center;
+    font-size: 0.875rem;
+
+    dt { font-weight: 600; color: $gray-800; }
+    dd { margin: 0; }
   }
 
   // The one emphasis on the surface: the audit chip at reading size.

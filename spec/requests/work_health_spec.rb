@@ -54,7 +54,16 @@ RSpec.describe 'Work health', type: :request do
         get '/works/w1/health'
 
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include('turbo-frame id="work-health"', 'Green: viable', 'Nothing is missing or broken')
+        expect(response.body).to include('turbo-frame id="work-health"', 'Green: viable', '<dd>None</dd>')
+        expect(response.body).not_to include('audit-history__title')
+      end
+
+      it 'keeps the findings card for advisory notes on a Work with no problems' do
+        stub_check(report('green', [finding('advisory', 'private')]))
+
+        get '/works/w1/health'
+
+        expect(response.body).to include('Nothing is missing or broken', '1 advisory note')
       end
 
       it 'always says the bytes were not re-hashed, so a green does not read as verified' do
@@ -62,7 +71,7 @@ RSpec.describe 'Work health', type: :request do
 
         get '/works/w1/health'
 
-        expect(response.body).to include('Bytes were not re-hashed')
+        expect(response.body).to include('Fixity', 'Not checked. Bytes are re-hashed only by the offline check.')
       end
 
       it 'renders a yellow grade with its findings and their repairs' do

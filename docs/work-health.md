@@ -42,7 +42,7 @@ is missing, not that the bytes were verified. The report always says so. A
 fixity check runs offline, through Atlas's `rake atlas:health:work` with
 `FIXITY=1` or its `bin/ocfl-health`.
 
-**Atlas does not cache the answer.** Reload shows the grade after a repair.
+**Atlas does not cache the answer.** Check again shows the grade after a repair.
 
 ## Who may see it
 
@@ -91,18 +91,29 @@ do. See `docs/outages.md`.
 
 ## The report
 
-The report sits in the Audit History card shell and reuses its chip and its
-row rail. `_work_health.scss` only maps each grade and severity to an existing
-ledger tone: red for lost content, amber for a repair, teal for viable, and
-grey for a state that is not damage.
+The report has two parts, so the summary does not read as part of the table.
 
-- **The grade** is a chip with the `fa-heart-pulse` icon and the grade in words.
-  Colour alone fails WCAG 1.4.1, so the words carry the meaning.
-- **The fixity note** is always shown.
+**A readout first.** A bare label-and-value list sits under the pane heading,
+with Check again below it. `docs/design.md` keeps a read-only readout out of a
+well, so it has no container.
+
+| Label | Shows |
+|---|---|
+| Grade | a chip with the `fa-heart-pulse` icon and the grade in words. Colour alone fails WCAG 1.4.1, so the words carry the meaning |
+| Fixity | always "Not checked", because Atlas never re-hashes bytes for this check |
+| Problems | the count, split by whether this page offers a repair (`work_health_problem_summary`). It counts only what Cerberus knows, and does not say who repairs the rest |
+
+**Then the findings card,** only when there are findings. It reuses the Audit
+History card shell and its chip and row rail. `_work_health.scss` maps each
+grade and severity to an existing ledger tone: red for lost content, amber for
+a repair, teal for viable, and grey for a state that is not damage.
+
 - **Problems** come first, fatal before repairable. A severity Atlas adds later
   sorts after them, as a problem.
 - **Advisory findings,** such as `in_progress`, `private` and `no_handle`, sit
-  in a collapsed `details`. They are states of the Work, not damage.
+  in a collapsed `details`. They are states of the Work, not damage. A Work with
+  advisory notes and no problems keeps the card, which says nothing is missing
+  or broken.
 
 ## Where each finding is repaired
 
@@ -147,7 +158,7 @@ with no Solr document is one of the cases the page exists for.
 
 The page renders the same report with `standalone: true`. No tabs sit beside
 it, so each repair link opens the edit page on its tab (`?tab=move`), and
-Reload and Reindex come back to the lookup.
+Check again and Reindex come back to the lookup.
 
 ## The XML editor on a damaged Work
 
