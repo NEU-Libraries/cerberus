@@ -28,9 +28,14 @@ module StylesheetsHelper
                '<!-- /layout-stylesheets -->'.html_safe])
   end
 
+  # The expect link holds the first paint until the layout's last element is
+  # parsed. Without it, a page arriving over a slow link paints half-parsed and
+  # shifts as later markup lands, such as the sidebar, which sits after the
+  # results in the source but displays before them.
   def deferred_stylesheet_tags(critical_css)
     nonce = content_security_policy_nonce
     safe_join([
+                tag.link(rel: 'expect', href: '#blacklight-modal', blocking: 'render'),
                 tag.style(critical_css.gsub('</', '<\/').html_safe, nonce: nonce), # rubocop:disable Rails/OutputSafety -- our own compiled CSS
                 stylesheet_link_tag(*CriticalCss::STYLESHEETS, media: 'print', preload_links_header: false,
                                                                data: { deferred_stylesheet: true }),
