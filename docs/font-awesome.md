@@ -1,9 +1,17 @@
 # Font Awesome
 
 The site serves a Font Awesome build that carries only the icons the source
-names. The full release's three fonts weigh 277 KiB; the build's weigh about
-16 KiB. Every page loads the solid and brands fonts, so that difference lands on
-every cold page load.
+names.
+
+| | Upstream | Build |
+|---|---|---|
+| The three fonts, `.woff2` | 277 KiB | 16 KiB |
+| `css/all.min.css`, gzip | 19.8 KiB | 3.3 KiB |
+
+Every page loads the solid and brands fonts and the full stylesheet, so the
+difference lands on every cold page load. The stylesheet does not block the
+first paint ([`critical-css.md`](critical-css.md)), but it still shares the
+connection with the fonts and the largest image.
 
 Source files:
 
@@ -34,7 +42,7 @@ pip install 'fonttools[woff]'
 If that `pyftsubset` is not on `PATH`, point `PYFTSUBSET` at it.
 
 Removing an icon without a rebuild does no harm. The build just carries a glyph
-nothing uses until the next run.
+and a rule that nothing uses until the next run.
 
 ## How the build works
 
@@ -46,7 +54,15 @@ nothing uses until the next run.
 3. `pyftsubset` cuts each upstream `.ttf` down to those codepoints, written as
    both `.woff2` and `.ttf`. Each font keeps only the codepoints it has, so the
    brands font ends up with only the few logos in use.
-4. The build writes the icon names to `vendor/fontawesome-icons.txt`.
+4. `FontAwesomeSubset.trim` writes the stylesheet without the icon rules the
+   source does not name. A rule with any selector that is not a plain
+   `.fa-x:before` stays whole. Every other rule is untouched.
+5. `trim` also drops the `@font-face` rules for the Font Awesome 4 and 5 family
+   names, which exist for markup written against those releases. The site uses
+   only the Font Awesome 6 families. The critical CSS inlines every `@font-face`
+   on every page, so the old ones cost bytes in each page's `<head>`. Nothing
+   else used `fa-v4compatibility`, so the build no longer carries it.
+6. The build writes the icon names to `vendor/fontawesome-icons.txt`.
 
 The build reads the `.ttf` files, not the `.woff2`. fonttools' brotli decoder
 rejects the upstream `.woff2`, although browsers load them.
@@ -65,9 +81,10 @@ full, as `document_type_icon` does.
 ## The spec
 
 `spec/lib/font_awesome_subset_spec.rb` compares the scan against
-`vendor/fontawesome-icons.txt`. A missing glyph renders as nothing, and neither
-the browser nor the log reports it, so the spec is the only check. It fails
-with the missing names and the command that fixes them.
+`vendor/fontawesome-icons.txt`, and against the rules in the served stylesheet.
+A missing glyph or rule renders as nothing, and neither the browser nor the log
+reports it, so the spec is the only check. It fails with the missing names and
+the command that fixes them.
 
 ## Why `font-display` stays `block`
 

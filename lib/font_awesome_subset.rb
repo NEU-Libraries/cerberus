@@ -4,9 +4,9 @@ require 'fileutils'
 require 'open3'
 
 # Builds the Font Awesome the site serves from the upstream release, keeping
-# only the glyphs the source names. bin/fontawesome-subset runs it, and
-# spec/lib/font_awesome_subset_spec.rb fails when an icon is missing from the
-# build. See docs/font-awesome.md.
+# only the glyphs and icon rules the source names. bin/fontawesome-subset runs
+# it, and spec/lib/font_awesome_subset_spec.rb fails when an icon is missing
+# from the build. See docs/font-awesome.md.
 #
 # Plain Ruby with no Rails, so the script runs on a host without the bundle.
 module FontAwesomeSubset
@@ -14,7 +14,12 @@ module FontAwesomeSubset
   TARGET   = 'vendor/fontawesome'
   MANIFEST = 'vendor/fontawesome-icons.txt'
   STYLESHEET = 'css/all.min.css'
-  FONTS = %w[fa-solid-900 fa-regular-400 fa-brands-400 fa-v4compatibility].freeze
+  FONTS = %w[fa-solid-900 fa-regular-400 fa-brands-400].freeze
+
+  # The upstream stylesheet also declares its Font Awesome 4 and 5 family names,
+  # for markup written against those releases. The site names only these, and
+  # the critical CSS inlines every @font-face on every page.
+  FAMILIES = ['Font Awesome 6 Free', 'Font Awesome 6 Brands'].freeze
 
   # app/assets/builds is compiled output and gitignored, so scanning it would
   # make the name list differ between checkouts.
@@ -23,6 +28,7 @@ module FontAwesomeSubset
 
   ICON_RULE = /([^{}]+)\{content:"\\([0-9a-f]+)"\}/
   ICON_SELECTOR = /\A\.(fa-[a-z0-9-]+)::?before\z/
+  FONT_FACE = /@font-face\{[^}]*\}/
 
   module_function
 
@@ -45,6 +51,22 @@ module FontAwesomeSubset
     end
   end
 
+  # The upstream stylesheet without the icon rules and @font-face families the
+  # source does not use. A rule with any selector that is not a plain icon is
+  # kept whole.
+  def trim(css, used)
+    trimmed = css.gsub(ICON_RULE) { |rule| trim_icon_rule(rule, *Regexp.last_match.captures, used) }
+    trimmed.gsub(FONT_FACE) { |rule| FAMILIES.any? { |family| rule.include?(%(font-family:"#{family}")) } ? rule : '' }
+  end
+
+  def trim_icon_rule(rule, selectors, codepoint, used)
+    names = selectors.split(',').map { |selector| selector.strip[ICON_SELECTOR, 1] }
+    return rule if names.include?(nil)
+
+    kept = names.select { |name| used.include?(name) }
+    kept.empty? ? '' : %(#{kept.map { |name| ".#{name}:before" }.join(',')}{content:"\\#{codepoint}"})
+  end
+
   def upstream_css(root) = File.read(File.join(root, UPSTREAM, STYLESHEET))
 
   def used_icons(root)
@@ -59,16 +81,18 @@ module FontAwesomeSubset
 
   def build(root, pyftsubset: 'pyftsubset')
     icons = used_icons(root)
-    unicodes = icons.values.uniq.sort.map { |cp| "U+#{cp}" }.join(',')
+    unicodes = unicodes(icons)
 
-    FileUtils.rm_rf(File.join(root, TARGET))
-    FileUtils.mkdir_p(File.join(root, TARGET, 'css'))
-    FileUtils.mkdir_p(File.join(root, TARGET, 'webfonts'))
-    File.write(File.join(root, TARGET, STYLESHEET), upstream_css(root))
+    target = File.join(root, TARGET)
+    FileUtils.rm_rf(target)
+    FileUtils.mkdir_p(%w[css webfonts].map { |dir| File.join(target, dir) })
+    File.write(File.join(target, STYLESHEET), trim(upstream_css(root), names(root)))
     FONTS.each { |font| subset(root, font, unicodes, pyftsubset) }
     File.write(File.join(root, MANIFEST), manifest_text(icons))
     icons
   end
+
+  def unicodes(icons) = icons.values.uniq.sort.map { |codepoint| "U+#{codepoint}" }.join(',')
 
   def subset(root, font, unicodes, pyftsubset)
     source = File.join(root, UPSTREAM, 'webfonts', "#{font}.ttf")
