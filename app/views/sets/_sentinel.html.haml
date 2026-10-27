@@ -4,17 +4,19 @@
 -# visibility, their group grants and their derivative access — and,
 -# separately, sweeps it across the Works the Set holds now. See docs/sets.md.
 -#
--# The three parts are one form, so they are bare sections split by dividers,
--# and only the footer and the Apply block are wells. Each part opens on "leave
--# as it is", so saving a policy that names one part changes only that part.
+-# The heading plate, the Save footer and the Apply button are wells, as on the
+-# Collection's Derivative access tab; the three parts of the form and the Apply
+-# explainer are bare sections split by dividers. Each part opens on "leave as
+-# it is", so saving a policy that names one part changes only that part.
 - access = sentinel&.work_access || {}
 - grants_mode = sentinel&.grants.nil? ? 'keep' : 'replace'
 - derivatives_mode = sentinel&.derivatives_enabled ? 'set' : 'keep'
 .py-2.px-1
-  %h5.pb-2 Sentinel
-  %p.small.text-muted.mb-3
-    Choose what every work in this set should allow, save it, then apply it. Each part you leave
-    as it is stays as each work has it. Nothing changes until you apply.
+  .well.p-3.my-3.rounded-3
+    %h5.mb-1 Sentinel
+    %p.small.text-muted.mb-0
+      Choose what every work in this set should allow, save it, then apply it. Each part you leave
+      as it is stays as each work has it. Nothing changes until you apply.
 
   = bootstrap_form_tag(url: sentinel_set_path(set_id), method: :patch) do |f|
     %fieldset
@@ -77,7 +79,9 @@
   -# The count is the lazily-loaded frame the My Sets index already uses, so the
   -# number of works is on the screen before Apply is pressed without the edit
   -# page paying a recipe resolution on every load.
-  .well.p-3.my-3.rounded-3
+  %hr.section-divider.my-3
+
+  %section
     %h5.mb-1 Apply to this set's works
     .d-flex.align-items-baseline.gap-2.mb-1
       %h6.mb-0 This set currently holds
@@ -111,10 +115,11 @@
               %strong.d-block This makes material public
               Anyone will be able to see these works. Check the set's contents before you apply. The
               admin ledger keeps each work's earlier access, so a developer can restore it.
-        = button_to apply_sentinel_set_path(set_id), form: { class: 'd-inline' },
-                    class: "btn #{sentinel_widens?(sentinel) ? 'btn-danger' : 'btn-primary'}",
-                    data: { turbo_confirm: "Apply this Sentinel to every work in this set? #{summary.join(' ')}",
-                            turbo_confirm_title: 'Confirm apply',
-                            turbo_confirm_button: 'Apply',
-                            turbo_confirm_variant: sentinel_widens?(sentinel) ? 'danger' : 'primary' } do
-          Apply to this set's works
+        .well.p-3.my-3.rounded-3
+          = button_to apply_sentinel_set_path(set_id), form: { class: 'd-inline' },
+                      class: "btn #{sentinel_widens?(sentinel) ? 'btn-danger' : 'btn-primary'}",
+                      data: { turbo_confirm: "Apply this Sentinel to every work in this set? #{summary.join(' ')}",
+                              turbo_confirm_title: 'Confirm apply',
+                              turbo_confirm_button: 'Apply',
+                              turbo_confirm_variant: sentinel_widens?(sentinel) ? 'danger' : 'primary' } do
+            Apply to this set's works
