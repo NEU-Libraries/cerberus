@@ -8,7 +8,7 @@ module EditTabsHelper
   # (`<key>-tab`), so it must match the `.tab-pane` id in the edit view.
   TABS = {
     'Work'       => %w[metadata advanced darwin-core permissions move delete xml history health],
-    'Collection' => %w[metadata permissions xml derivative-access export history analytics],
+    'Collection' => %w[metadata permissions xml sentinel export history analytics],
     'Community'  => %w[metadata permissions xml history analytics]
   }.freeze
 
@@ -47,7 +47,7 @@ module EditTabsHelper
   end
 
   # Hyphens are swapped first: String#humanize only turns *underscores* into
-  # spaces, so 'derivative-access' would label itself "Derivative-access".
+  # spaces, so 'darwin-core' would label itself "Darwin-core".
   def edit_tab_label(key)
     LABELS.fetch(key) { key.tr('-', ' ').humanize }
   end

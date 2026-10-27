@@ -76,7 +76,7 @@ class CollectionsController < CatalogController
 
     return render_rejected_sentinel(record) unless record.save
 
-    redirect_to collection_path(params[:id]), notice: 'Derivative access default saved.'
+    redirect_to collection_path(params[:id]), notice: 'Sentinel saved.'
   end
 
   private
@@ -125,7 +125,7 @@ class CollectionsController < CatalogController
     def render_rejected_sentinel(record)
       load_edit_state!
       @sentinel = record
-      @open_tab = 'derivative-access'
+      @open_tab = 'sentinel'
       flash.now[:alert] = record.errors.full_messages.to_sentence
       render :edit, status: :unprocessable_content
     end

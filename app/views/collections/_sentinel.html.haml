@@ -1,7 +1,7 @@
 -# locals: collection_id (String), sentinel (Sentinel|nil), groups (Array<[id, name]>),
 -#         public_collection (Boolean)
 -#
--# The Derivative access tab: authors this collection's Sentinel — the per-tier
+-# The Sentinel tab: authors this collection's Sentinel — the per-tier
 -# read-group default applied to Works added under it. Two groups, because the
 -# vocabulary has two shapes: the image renditions form a resolution ladder
 -# (widest audience at top, narrowest at the bottom) so the monotonicity rule
@@ -14,8 +14,8 @@
 .py-2.px-1
   = bootstrap_form_tag(url: sentinel_collection_path(collection_id), method: :patch) do |f|
     .well.p-3.my-3.rounded-3
-      %h5.mb-1 Update derivative access
-      %p.small.text-muted.mb-0
+      %h5.mb-0 Sentinel
+      %p.small.text-muted.mt-3.mb-0
         Every file uploaded to this collection will inherit the collection’s permissions. This
         collection is #{public_collection ? 'public' : 'restricted'}. Use the
         toggles below to change the default permissions for files uploaded to this collection.

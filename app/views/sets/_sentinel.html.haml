@@ -5,7 +5,7 @@
 -# separately, sweeps it across the Works the Set holds now. See docs/sets.md.
 -#
 -# The heading plate, the Save footer and the Apply button are wells, as on the
--# Collection's Derivative access tab; the three parts of the form and the Apply
+-# Collection's Sentinel tab; the three parts of the form and the Apply
 -# explainer are bare sections split by dividers. Each part opens on "leave as
 -# it is", so saving a policy that names one part changes only that part.
 - access = sentinel&.work_access || {}
@@ -13,8 +13,8 @@
 - derivatives_mode = sentinel&.derivatives_enabled ? 'set' : 'keep'
 .py-2.px-1
   .well.p-3.my-3.rounded-3
-    %h5.mb-1 Sentinel
-    %p.small.text-muted.mb-0
+    %h5.mb-0 Sentinel
+    %p.small.text-muted.mt-3.mb-0
       Choose what every work in this set should allow, save it, then apply it. Each part you leave
       as it is stays as each work has it. Nothing changes until you apply.
 
@@ -82,8 +82,8 @@
   %hr.section-divider.my-3
 
   %section
-    %h5.mb-1 Apply to this set's works
-    .d-flex.align-items-baseline.gap-2.mb-1
+    %h5.mb-3 Apply to this set's works
+    .d-flex.align-items-baseline.gap-2.mb-2
       %h6.mb-0 This set currently holds
       = turbo_frame_tag "set-works-count-#{set_id}", src: works_count_set_path(set_id), loading: :lazy do
         %span.text-muted Counting…
@@ -102,7 +102,7 @@
           %i.fa-solid.fa-circle-info.me-1{ 'aria-hidden' => 'true' }
           The saved Sentinel leaves every part as it is, so applying it would change nothing.
       - else
-        %h6.mb-1 Applying the saved Sentinel will change this:
+        %h6.mt-4.mb-2 Applying the saved Sentinel will change this:
         %ul.small.mb-3
           - summary.each do |line|
             %li= line

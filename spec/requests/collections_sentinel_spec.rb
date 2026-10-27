@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-# The Collection edit page's "Derivative access" tab writes a Sentinel — the
+# The Collection edit page's "Sentinel" tab writes a Sentinel — the
 # per-tier derivative-permission default applied to Works added under the
 # collection. Runs against the live Atlas test backend like the other
 # resource-controller specs: a real Collection is created and edit granted to the
@@ -76,7 +76,7 @@ RSpec.describe 'Collections sentinel', type: :request do
         'large' => [Permissions::STAFF_EDIT_GROUP], 'service' => [Permissions::STAFF_EDIT_GROUP]
       )
       expect(response).to redirect_to(collection_path(collection.id))
-      expect(flash[:notice]).to eq('Derivative access default saved.')
+      expect(flash[:notice]).to eq('Sentinel saved.')
     end
 
     it 'upserts an existing Sentinel rather than duplicating it' do
@@ -142,10 +142,10 @@ RSpec.describe 'Collections sentinel', type: :request do
       # Turbo follows a redirect with fetch, and the Fetch spec drops the
       # fragment from the resolved URL — so the tab has to be chosen on the
       # server, not carried in the Location header.
-      it 'opens the Derivative access pane, not the first one' do
+      it 'opens the Sentinel pane, not the first one' do
         patch sentinel_collection_path(collection.id), params: bad
 
-        expect(response.body).to match(/class="tab-pane active" id="derivative-access"/)
+        expect(response.body).to match(/class="tab-pane active" id="sentinel"/)
         expect(response.body).to match(/class="tab-pane" id="metadata"/)
       end
     end

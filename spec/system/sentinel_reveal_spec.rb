@@ -16,7 +16,7 @@ RSpec.describe 'Sentinel form sections', :browser, type: :system do
   before { sign_in_as(admin_nuid) }
 
   it 'opens the group editor for loaded works when replacing, past the visibility choice above it' do
-    visit "#{edit_collection_path(@collection.id)}#derivative-access"
+    visit "#{edit_collection_path(@collection.id)}#sentinel"
     editor = find('[data-reveal-target="section"]', visible: :all)
     expect(editor).not_to be_visible
 

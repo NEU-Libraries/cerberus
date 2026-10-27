@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # View helpers for the forms that author a Sentinel: the Collection edit page's
-# Derivative access tab and the Set edit page's Sentinel tab.
+# Sentinel tab and the Set edit page's Sentinel tab.
 module SentinelsHelper
   # Display metadata per tier. The image rungs run widest audience (small) to
   # narrowest (original, the full-res source), with qualitative resolution notes —

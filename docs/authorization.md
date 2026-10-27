@@ -406,7 +406,7 @@ after.
 
 Two things the list does not put back. The cascade also clamped each
 container's default (`Sentinel`), both its tiers and its work access, to the
-narrowed audience; widen those on the Derivative access tab. And an item whose parent has been
+narrowed audience; widen those on the Sentinel tab. And an item whose parent has been
 narrowed again since is refused by the guard above, with the refusal printed
 for that item.
 
