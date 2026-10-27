@@ -8,4 +8,4 @@ import Blacklight from "blacklight-frontend"
 // Bootstrap-modal confirm dialog in place of the native window.confirm().
 import "cerberus/turbo_confirm"
 
-Turbo.setProgressBarDelay(750)
+Turbo.config.drive.progressBarDelay = 750
