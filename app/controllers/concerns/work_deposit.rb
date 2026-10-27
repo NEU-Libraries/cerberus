@@ -121,9 +121,11 @@ module WorkDeposit
     # Never raise: the Work and its file already exist here, so a default Atlas
     # refuses must not abandon a half-made deposit on the error page. Never
     # silent either — skipping it leaves renditions WIDER than intended, which
-    # is why the flag rides back to the depositor. See docs/deposit.md.
+    # is why the flag rides back to the depositor. The Collection's work access
+    # is skipped: the depositor chose this Work's ACL on the form. See
+    # docs/deposit.md.
     def apply_derivative_default(collection_id)
-      Sentinel.apply_default(collection_id, @work.id)
+      Sentinel.apply_default(collection_id, @work.id, work_access: false)
     rescue AtlasRb::DerivativePermissionsError => e
       Rails.logger.error("[deposit] derivative default rejected for work #{@work.id} " \
                          "under collection #{collection_id}: #{e.message}")

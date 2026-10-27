@@ -588,6 +588,19 @@ describe WorksController do
         AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
+      # The depositor chose this Work's ACL on the form, so the collection's
+      # work access override is for the loaders only.
+      it 'applies the collection default without its work access' do
+        allow(Sentinel).to receive(:apply_default)
+
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
+                                collection_id: collection.id }
+
+        expect(Sentinel).to have_received(:apply_default).with(collection.id, assigns(:work).id, work_access: false)
+      ensure
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
       # Promotion is only on offer from the depositor's own root, so a forged
       # request from anywhere else deposits normally and promotes nothing —
       # that is what stops a Work being promoted out of a collection that
