@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-# The scaffolding both Set bulk sweeps share: resolve the Set, walk the Works it
-# denotes, apply a per-Work change, and report what happened. See docs/sets.md.
+# The scaffolding for a sweep over a Set's Works: resolve the Set, walk the
+# Works it denotes, apply a per-Work change, and report what happened. See
+# docs/sets.md.
 module SetSweep
   extend ActiveSupport::Concern
 

@@ -94,7 +94,7 @@ ledger tabs are: a filter on `kind`.
 | Family | Constant | What it holds |
 |---|---|---|
 | Requests | `REQUEST_KINDS` | what a depositor may ask staff to do but cannot do themselves: `request_withdraw`, `request_move`, `request_restrict` |
-| Activity | `ACTIVITY_KINDS` | what the repository did on its own account: `load_report`, `work_completion_mismatch`, `visibility_cascade`, `set_reindex`, `showcase_promotion`, `set_privatize`, `set_sentinel_apply` |
+| Activity | `ACTIVITY_KINDS` | what the repository did on its own account: `load_report`, `work_completion_mismatch`, `visibility_cascade`, `set_reindex`, `showcase_promotion`, `set_privatize` (nothing writes it; kept so existing rows render), `set_sentinel_apply` |
 | Digest | `DIGEST` | `daily_digest` — a whole day, summed up |
 
 The digest is its own family because it is a different size of thing. Every other

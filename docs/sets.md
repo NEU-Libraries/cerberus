@@ -3,7 +3,7 @@
 A Set is a saved recipe over the repository: included collections, plus
 individually added Works, minus set-aside exclusions. Atlas stores it as a
 Compilation. This page covers how Cerberus resolves that recipe for display and
-download, and how the two bulk actions sweep the Works it denotes.
+download, and how the Work permissions tab sweeps the Works it denotes.
 
 Source files:
 
@@ -167,19 +167,20 @@ built as the real admin, an admin checking what someone can reach would get a
 403 from a file and the same file inside the ZIP. That defeats the only thing
 View-as is for.
 
-## Bulk actions over a Set's Works
+## Work permissions over a Set's Works
 
-`SetBulkActions` holds the Set edit page's two bulk actions: make the Set's
-Works private, and apply the Set's derivative-access policy. It also holds the
-Sentinel authoring that feeds the second one.
+`SetBulkActions` holds the Set edit page's Work permissions tab. It authors the
+Set's Sentinel, and enqueues `SetSentinelApplyJob` to sweep it across the Works
+the Set denotes. This is v1's Sentinel: one form that can publicize, privatize
+and re-group any set of Works, and set their derivative access.
 
 ### Who may run one
 
-Both sweeps write the Set's *Works*, not the Set, so who may curate the recipe
-does not govern them. A grantee with edit on a Set can add a collection holding
-fifty thousand Works they have no say over. So both actions are operator-only:
-full admin or the devolved tier, through `bulk_operator?`. Atlas re-checks
-every per-Work write regardless; this gate decides who is offered the button.
+The sweep writes the Set's *Works*, not the Set, so who may curate the recipe
+does not govern it. A grantee with edit on a Set can add a collection holding
+fifty thousand Works they have no say over. So the tab is operator-only: full
+admin or the devolved tier, through `bulk_operator?`. Atlas re-checks every
+per-Work write regardless; this gate decides who is offered the button.
 
 `require_bulk_operator` is deliberately not gated on `@owned`, because owning a
 Set says nothing about the Works a recipe reaches.
@@ -189,31 +190,69 @@ not in the concern's `included` block. A concern's `included` callbacks run
 ahead of the before_actions the class declares below the include. Registering
 it there answered an anonymous POST with 403 instead of sending it to sign in.
 
-The edit view renders the Derivative access and Visibility tabs on the same
-`bulk_operator?` predicate that the write path gates on. So a tab and its pane
-cannot disagree about who may use it.
+The edit view renders the tab on the same `bulk_operator?` predicate that the
+write path gates on. So the tab and its pane cannot disagree about who may use
+it.
 
-### There is no bulk publicize
+Being operators also exempts the sweep from Atlas's grant-removal rule
+(`PermissionsWriteGuard`), so a replacement group list does remove groups the
+operator is not a member of.
 
-The two actions are deliberately asymmetric. Privatizing takes access away, and
-is safe to offer to the whole operator tier. There is no bulk publicize to
-match it, because a one-click widening across a whole Set is a disclosure risk
-with no comparable use case. The tab is named so it does not imply the inverse
-exists.
+### The three parts
+
+The form has three parts, and each opens on "leave as it is", as v1's per-slot
+*Enable* box did. A saved Sentinel changes only the parts it names.
+
+| Part | Stored as | Leave as it is |
+|---|---|---|
+| Visibility: public or private | `work_access['visibility']` | absent |
+| Group grants: replace with a list | `work_access['grants']`, `{ 'read' => [...], 'edit' => [...] }` | absent |
+| Derivative access: the tier ladder | `policy`, applied when `derivatives_enabled` | `derivatives_enabled` false |
+
+`work_access` is nil when neither of its parts is named.
+
+The grants are a **replacement**, not an addition, matching v1. An empty list
+removes every group grant from every Work. Atlas prepends the staff edit group
+to every edit it writes, so staff keep access either way.
+
+A visibility change without a replacement keeps each Work's groups, and a
+replacement without a visibility keeps each Work's `public` flag.
+`SentinelWorkAccess#work_envelope` builds the keys to send from those rules and
+the Work's current ACL.
+
+`derivatives_enabled` exists because an empty `policy` already has a meaning:
+clear every tier restriction. Without the flag, a Sentinel saved only to make a
+Set public would also wipe each Work's tier restrictions.
+
+### Bulk publicize, and its safeguards
+
+Making a whole Set public is a disclosure risk, so the tab adds four safeguards
+around it:
+
+1. The Apply block states, from the *saved* record, what applying will change
+   (`sentinel_apply_summary`). The same sentences go into the confirmation.
+2. A public visibility adds a warning before the button, turns the button and
+   confirmation red, and the pane shows the Set's work count.
+3. The ledger entry lists each Work whose ACL changed with its read and edit
+   groups before, so a developer can undo it (below).
+4. Atlas refuses a Work more visible than its parent. Those Works are named in
+   the report apart from the other failures, because the remedy is widening the
+   collection, and a retry would be refused the same way.
 
 ### Authoring the Sentinel
 
-`SetBulkActions#sentinel` creates or updates this Set's derivative-access
-policy, its Sentinel. Unlike the Collection tab, it hands the record no
-container ceiling (`resource_read_groups`). A Collection's ACL governs the Works
-inside it, so a tier more visible than the Collection is incoherent. A Set's ACL
-governs only who may see the *Set object*. Its Works keep whatever visibility
-they had before anyone curated them in.
+`SetBulkActions#sentinel` creates or updates this Set's Sentinel. Unlike the
+Collection tab, it hands the record no container ceiling
+(`resource_read_groups`). A Collection's ACL governs the Works inside it, so a
+tier more visible than the Collection is incoherent. A Set's ACL governs only
+who may see the *Set object*. Its Works keep whatever visibility they had before
+anyone curated them in.
 
-The ceiling that matters here is each Work's own. That is per-Work, so
-`SetSentinelApplyJob` clamps each tier at sweep time rather than at authoring
-time. The ladder's order still holds (see `docs/narrowing.md`), because it is a
-property of the ladder, not of any container.
+The ceiling that matters here is each Work's own parent. That is per-Work, so
+Atlas enforces it at sweep time, and `SetSentinelApplyJob` clamps each tier
+against the Work's new audience. The ladder's order still holds (see
+`docs/narrowing.md`), because it is a property of the ladder, not of any
+container.
 
 `sentinel_groups` offers every group (`Group.for_select`), not the acting user's
 own memberships. That looks like it diverges from
@@ -230,28 +269,33 @@ follows each Work's own visibility at apply time, so one policy can span a Set
 that mixes public and restricted Works. Atlas would refuse `['public']` on every
 private Work in the sweep.
 
+`SentinelForm#sentinel_work_access_from_params` builds `work_access`. The Set
+and Collection tabs share it. The grant rows submit whatever the mode, so a list
+hidden by "keep" survives a re-render; they are read only under "replace". The
+grant rows reuse `shared/_group_permissions` under the `work_access` param key.
+The Set page renders that partial twice, with Sharing, which is why the partial
+takes its rows and groups as locals and prefixes its row ids with the resource.
+
 A rejected policy re-renders the edit page holding the *submitted* policy, with
-the Derivative access pane open (`@open_tab`). A redirect would discard every
+the Work permissions pane open (`@open_tab`). A redirect would discard every
 selection the curator made.
 
 `apply_sentinel` refuses to enqueue until a policy has been saved, then enqueues
-`SetSentinelApplyJob`. `privatize` enqueues `SetPrivatizeJob`. Both redirect to
-the edit page with `tab:` naming the pane they ran from, since Turbo's fetch
-drops a URL fragment on a redirect. The notice says a message will arrive when
-the sweep finishes.
+`SetSentinelApplyJob`. It redirects to the edit page with `tab:` naming the
+pane, since Turbo's fetch drops a URL fragment on a redirect. The notice says a
+message will arrive when the sweep finishes.
 
 ## Sweeping the Works
 
-`SetSweep` is the scaffolding both Set bulk sweeps share: resolve the Set, walk
-the Works it denotes, apply a per-Work change, and tell whoever asked what
-happened.
+`SetSweep` is the scaffolding for a sweep over a Set's Works: resolve the Set,
+walk the Works it denotes, apply a per-Work change, and tell whoever asked what
+happened. `SetSentinelApplyJob` is its one user.
 
-The two sweeps differ only in the change they make to each Work and the words
-they report it in. Everything else is shared, and must stay shared: how a Set
+A sweep supplies only the change it makes to each Work and the words it reports
+it in. The rest belongs to the scaffold, and a new sweep must use it: how a Set
 is read at run time, which errors abort and which are collected, and how a
-truncated walk is disclosed. Both are operator actions over content someone
-else deposited, and both are judged by whether a partial run is obvious
-afterwards.
+truncated walk is disclosed. A sweep is an operator action over content someone
+else deposited, and is judged by whether a partial run is obvious afterwards.
 
 `sweep_set(set_noid:, nuid:, &step)` walks the Set's Works. It yields each NOID
 to the caller's per-Work step, which returns a symbol naming what it did. `nuid`
@@ -259,33 +303,38 @@ is the acting operator, and scopes the walk.
 
 `sweep_set` collects anything the step raises (`AtlasRb::Error` or
 `Faraday::Error`) against that Work, and the walk continues. The exception is
-`AtlasRb::StaleResourceError`. It escapes to the job's `retry_on`, because
-re-running an idempotent sweep only re-skips the Works already done.
-`SetSentinelApplyJob` relies on that. `SetPrivatizeJob` does not: its step
-retries a lock conflict in place, up to `LOCK_ATTEMPTS`, and then raises a plain
-`AtlasRb::Error`, so the Work is named as a failure. A re-run would skip the
-Works already private, and its ledger entry would leave them out.
+`AtlasRb::StaleResourceError`, which escapes so a job's `retry_on` can re-run
+an idempotent sweep. `SetSentinelApplyJob` does not use that: its step retries
+a lock conflict in place, up to `LOCK_ATTEMPTS`, and then raises a plain
+`AtlasRb::Error`, so the Work is named as a failure. A re-run would find the
+Works already changed matching, and its ledger entry would leave them out.
 
-### Undoing a Set privatize
+### Undoing a Set sweep
 
-The `set_privatize` entry's payload lists every Work the job made private under
-`changed`, as `{ "noid", "read_before" }`, beside the counts and the
-`failures`. Making the Set public again does not put a Work's audience back, so
-this list is how a developer undoes one at the console:
+The `set_sentinel_apply` entry's payload lists every Work whose ACL the job
+changed under `changed`, as `{ "noid", "read_before", "edit_before" }`, beside
+the counts, the `refused` Works and the `failures`. Nothing else holds a Work's
+earlier audience, so this list is how a developer undoes a sweep at the console:
 
 ```ruby
-notice = AdminNotice.where(kind: 'set_privatize', subject_noid: '<set noid>').last
+notice = AdminNotice.where(kind: 'set_sentinel_apply', subject_noid: '<set noid>').last
 notice.detail(:changed).each do |item|
-  AtlasRb::Resource.set_permissions(item['noid'], { 'read' => item['read_before'] }, nuid: '<admin nuid>')
+  AtlasRb::Resource.set_permissions(item['noid'], { 'read' => item['read_before'], 'edit' => item['edit_before'] },
+                                    nuid: '<admin nuid>')
 rescue AtlasRb::Error => e
   puts "Work #{item['noid']}: refused, #{e.message}"
 end
 ```
 
-A Work the Set already held privately is not on the list and is left alone. The
-Works' parents were not changed, so the order does not matter, unless a parent
-has been narrowed since: Atlas refuses a Work more visible than its parent, and
-that Work's write fails.
+`edit_before` leaves out the staff edit group, which Atlas adds back on every
+write. A Work the sweep found already matching is not on the list and is left
+alone. The tiers are not listed: re-apply an earlier policy to put them back.
+The Works' parents were not changed, so the order does not matter, unless a
+parent has been narrowed since: Atlas refuses a Work more visible than its
+parent, and that Work's write fails.
+
+Entries of the older `set_privatize` kind carry `changed` as `{ "noid",
+"read_before" }`. Restore those with the same loop, sending `read` alone.
 
 `Outcome` records what one sweep did: `counts`, `failures` and `truncated`.
 `counts` tallies outcomes by the symbol the step returned, so a sweep names its
@@ -301,7 +350,7 @@ back to the Set. `failures_lead` is how this sweep describes what a failure left
 behind, which is the only part that differs. The link is a path, not a URL,
 because a job has no request to take a host from.
 
-Failures are named rather than counted. In both sweeps a Work that did not
+Failures are named rather than counted. A Work that did not
 change still carries the access the operator meant to take away. That is the
 one outcome the operator must not have to discover for themselves.
 

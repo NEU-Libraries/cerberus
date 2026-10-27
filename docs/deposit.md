@@ -89,7 +89,9 @@ from.
 
 `WorkDeposit#apply_derivative_default` applies the collection's
 derivative-access default to the new Work, and is a no-op when the collection
-has no Sentinel. The gate is set before any derivative exists; Atlas stores
+has no Sentinel. It passes `work_access: false`: the Sentinel's work access is
+for the loaders, and here the depositor has just chosen the Work's ACL on the
+form. The gate is set before any derivative exists; Atlas stores
 the policy and applies it when the async renditions arrive.
 
 Atlas refuses a tier more visible than its Work, so a default naming an
