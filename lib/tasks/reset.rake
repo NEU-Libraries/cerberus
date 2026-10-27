@@ -268,7 +268,6 @@ namespace :reset do
       FileUtils.cp('/home/cerberus/web/spec/fixtures/files/example.docx', staged_doc)
       AtlasRb::Blob.create(doc_work['id'], staged_doc, 'example.docx')
       AtlasRb::Work.complete(doc_work['id'])
-      PdfRenditionJob.perform_later(doc_work['id'], staged_doc, SecureRandom.uuid)
 
       # The PowerPoint half of the same path. The document guide names Word
       # *and* PowerPoint, so seeding only the docx left half of it unwalkable.
@@ -281,7 +280,6 @@ namespace :reset do
       FileUtils.cp('/home/cerberus/web/spec/fixtures/files/example.pptx', staged_pres)
       AtlasRb::Blob.create(pres_work['id'], staged_pres, 'example.pptx')
       AtlasRb::Work.complete(pres_work['id'])
-      PdfRenditionJob.perform_later(pres_work['id'], staged_pres, SecureRandom.uuid)
 
       # An embargoed Work, so the withheld-content presentation has something to
       # show: the red pill in the result list, the release-date banner, and a
@@ -314,6 +312,11 @@ namespace :reset do
         target = showcases[label]
         AtlasRb::Work.add_linked_member(member['id'], target['id']) if target
       end
+
+      # Enqueued only after the last write to these Works above. The job writes
+      # the Work too, and a seed write that races it can 409.
+      PdfRenditionJob.perform_later(doc_work['id'], staged_doc, SecureRandom.uuid)
+      PdfRenditionJob.perform_later(pres_work['id'], staged_pres, SecureRandom.uuid)
 
       # A withdrawn (tombstoned) Work so the admin restore registry has an entry
       # to demonstrate the restore path. Tombstoning needs a completed Work, so
