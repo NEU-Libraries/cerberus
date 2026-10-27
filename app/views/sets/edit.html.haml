@@ -42,7 +42,8 @@
                              aside_docs: @resolver.aside_documents
     - if @owned
       #sharing.tab-pane{class: ('active' if open == 'sharing'), 'aria-labelledby' => 'sharing-tab', role: 'tabpanel'}
-        = render 'sharing'
+        .edit-pane
+          = render 'sharing'
     - if bulk_operator?
       #sentinel.tab-pane{class: ('active' if open == 'sentinel'), 'aria-labelledby' => 'sentinel-tab', role: 'tabpanel'}
         = render 'sentinel', set_id: @set['id'], sentinel: @sentinel, groups: sentinel_groups

@@ -26,7 +26,7 @@ bracketing.
 |---|---|---|
 | A form section (label and control) | `.well.p-3.my-3.rounded-3` | the Move and Delete tabs in `works/edit` |
 | A form footer (Save and Cancel) | `.well.p-3.my-3.rounded-3` | the end of every tab in `works/edit` |
-| A tab pane | bare `.py-2.px-1`, with an `%h5.pb-2` heading and a `%p.text-muted.small` explainer | the Permissions tab in `works/edit` |
+| A tab pane | `.edit-pane`, with an `%h5.pb-2` heading and a `%p.text-muted.small` explainer | the Permissions tab in `works/edit` |
 | A standalone form or action page | the `.admin-registry` card shell | `admin/groups/new` |
 | A page heading plate | `.container.p-4.my-3.well.rounded-3` on `:container_header` | the People and Communities indexes |
 | A ledger surface | the richer `.audit-history` card shell | the Audit History tab |
@@ -34,6 +34,17 @@ bracketing.
 
 `.admin-registry` is shared chrome despite its name: the impersonation form, My
 DRS and the Inbox all reuse it on surfaces that are not admin pages.
+
+### The edit pane insets plain content
+
+`.edit-pane` (`_layout.scss`) wraps every edit tab's content. It pads the pane
+by `0.5rem` and gives each `.well` and `.alert` inside a matching negative side
+margin. So the chrome runs to the pane's edge, and plain content — headings,
+explainers, radios, fields, dividers — sits `0.5rem` inside it, off the edge
+of the tab row. This is the inset the Set Details tab gets from its `.p-2`.
+
+Do not add `px-*` to an edit pane, or wrap its plain sections in a `.p-2` of
+their own: the pane already does both jobs, and a second inset doubles it.
 
 ### The well is a fill, and only for forms
 
