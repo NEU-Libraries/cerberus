@@ -10,6 +10,7 @@ class ApplicationController < ActionController::Base
   include UnfinishedDepositGate
   include ImpersonationSession
   include StructuralContainers
+  include CriticalCssInlining
 
   before_action do
     I18n.locale = :en
