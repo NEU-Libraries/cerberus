@@ -8,11 +8,30 @@ module StylesheetsHelper
 
   # Applies each deferred stylesheet once it has loaded. A script rather than an
   # onload attribute, so a nonce-based CSP can allow it.
+  #
+  # A Turbo visit made before they land would render the next page with only
+  # this page's inline rules, so the render waits for them. A failed load
+  # releases it too, rather than hang the visit.
   APPLY_DEFERRED = <<~JS.squish.freeze
-    document.querySelectorAll('link[data-deferred-stylesheet]').forEach(function (link) {
-      function apply() { link.media = 'all'; }
-      link.sheet ? apply() : link.addEventListener('load', apply);
-    });
+    (function () {
+      var links = document.querySelectorAll('link[data-deferred-stylesheet]');
+      var waiting = links.length;
+      var held = [];
+      function settle() {
+        if (--waiting === 0) held.splice(0).forEach(function (resume) { resume(); });
+      }
+      links.forEach(function (link) {
+        function apply() { link.media = 'all'; settle(); }
+        if (link.sheet) { apply(); return; }
+        link.addEventListener('load', apply);
+        link.addEventListener('error', settle);
+      });
+      document.addEventListener('turbo:before-render', function (event) {
+        if (waiting === 0) return;
+        event.preventDefault();
+        held.push(event.detail.resume);
+      });
+    })();
   JS
 
   # Turbo compares tracked <head> elements by their exact HTML. The deferred
