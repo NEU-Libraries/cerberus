@@ -1,0 +1,42 @@
+-# locals: sentinel (Sentinel|nil), groups (Array<[id, name]>), public_collection (Boolean)
+-#
+-# The Collection default's work access: what the XML, IPTC and multipage
+-# loaders give a new Work in place of the collection's own permissions. The
+-# deposit form does not use it, because a depositor chooses there. See
+-# docs/narrowing.md.
+-#
+-# Visibility is offered only on a public collection. A new Work inherits the
+-# collection's audience, and a Work cannot be more visible than its
+-# collection, so on a restricted one there is nothing narrower than inheriting
+-# that "private" could mean.
+- access = sentinel&.work_access || {}
+- grants_mode = sentinel&.grants.nil? ? 'keep' : 'replace'
+.well.p-3.my-3.rounded-3{ data: { controller: 'reveal', 'reveal-when-value': 'replace' } }
+  %h5.mb-1 Works added by a loader
+  %p.small.text-subtle.mb-3
+    Works added with the XML, IPTC or multipage loaders get the collection’s permissions unless you
+    change them here. Works deposited through the form keep what the depositor chooses. Changes
+    here do not affect existing works.
+  - if public_collection
+    %fieldset.mb-3
+      %legend.h6.mb-1 Visibility
+      .form-check
+        %input#loaded-visibility-keep.form-check-input{ type: 'radio', name: 'work_access[visibility]', value: '', checked: access['visibility'].blank? }
+        %label.form-check-label{ for: 'loaded-visibility-keep' } Inherit from collection (public)
+      .form-check
+        %input#loaded-visibility-private.form-check-input{ type: 'radio', name: 'work_access[visibility]', value: 'private', checked: access['visibility'] == 'private' }
+        %label.form-check-label{ for: 'loaded-visibility-private' } Make new works private
+  %fieldset
+    %legend.h6.mb-1 Groups
+    %p.small.text-subtle.mb-2
+      Replacing gives a new work only the groups below instead of the collection’s.
+      #{public_collection ? '' : 'Each group must be one this collection already grants.'}
+    .form-check
+      %input#loaded-grants-keep.form-check-input{ type: 'radio', name: 'work_access[grants_mode]', value: 'keep', checked: grants_mode == 'keep', data: { action: 'change->reveal#sync' } }
+      %label.form-check-label{ for: 'loaded-grants-keep' } Inherit the collection’s groups
+    .form-check
+      %input#loaded-grants-replace.form-check-input{ type: 'radio', name: 'work_access[grants_mode]', value: 'replace', checked: grants_mode == 'replace', data: { action: 'change->reveal#sync' } }
+      %label.form-check-label{ for: 'loaded-grants-replace' } Give new works these groups instead
+  .mt-3{ hidden: grants_mode != 'replace', data: { 'reveal-target': 'section', controller: 'group-permissions', 'group-permissions-resource-value': 'work_access' } }
+    = render 'shared/group_permissions', resource: 'work_access', noun: 'work', heading: 'Groups to give each new work',
+                                         grants: sentinel_grant_rows(sentinel, groups), groups: groups

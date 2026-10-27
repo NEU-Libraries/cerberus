@@ -181,6 +181,63 @@ RSpec.describe 'Collections sentinel', type: :request do
     end
   end
 
+  # The loaders' override for new Works. The ceiling is the collection, because
+  # Atlas refuses a Work more visible than its parent at ingest.
+  describe 'work access for loaded works' do
+    let(:staff) { Permissions::STAFF_EDIT_GROUP }
+
+    before { sign_in editor }
+
+    def saved
+      Sentinel.find_by(target_id: collection.id)
+    end
+
+    it 'saves a private visibility and replacement groups on a public collection' do
+      patch sentinel_collection_path(collection.id),
+            params: { work_access: { visibility: 'private', grants_mode: 'replace',
+                                     permissions: { '1' => { group_id: staff, ability: 'read' } } } }
+
+      expect(saved.work_access).to eq('visibility' => 'private',
+                                      'grants'     => { 'read' => [staff], 'edit' => [] })
+    end
+
+    it 'stores nothing when every part inherits' do
+      patch sentinel_collection_path(collection.id),
+            params: { work_access: { visibility: '', grants_mode: 'keep' } }
+
+      expect(saved.work_access).to be_nil
+    end
+
+    it 'refuses public works under a restricted collection' do
+      set_access!(read: [staff])
+
+      patch sentinel_collection_path(collection.id), params: { work_access: { visibility: 'public' } }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(saved).to be_nil
+    end
+
+    it 'refuses a group the restricted collection does not grant' do
+      set_access!(read: [staff])
+
+      patch sentinel_collection_path(collection.id),
+            params: { work_access: { grants_mode: 'replace',
+                                     permissions: { '1' => { group_id: 'g:elsewhere', ability: 'read' } } } }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(flash[:alert]).to include("doesn't grant")
+    end
+
+    it 'offers a visibility only on a public collection' do
+      get edit_collection_path(collection.id)
+      expect(response.parsed_body.at_css('#loaded-visibility-private')).to be_present
+
+      set_access!(read: [staff])
+      get edit_collection_path(collection.id)
+      expect(response.parsed_body.at_css('#loaded-visibility-private')).to be_nil
+    end
+  end
+
   # The visibility is a sentence in the summary, not a chip: a chip read as a
   # label for who may open the page.
   describe 'the open option + visibility sentence (rendered edit page)' do

@@ -30,6 +30,7 @@
       %ul.derivative-independent.list-unstyled.mb-0
         - Sentinel::INDEPENDENT.each do |tier|
           = render "shared/derivative_tier", tier: tier, sentinel: sentinel, groups: groups, open_label: "Inherit from collection"
+    = render "loaded_work_access", sentinel: sentinel, groups: groups, public_collection: public_collection
     .well.p-3.my-3.rounded-3
       = f.button "Save default", type: :submit, class: "btn btn-success"
       = link_to "Cancel", collection_path(collection_id), class: "btn btn-warning"

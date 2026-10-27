@@ -8,6 +8,7 @@ class CollectionsController < CatalogController
   include ContainerAnalytics
   include ContainerRestrictionRequest
   include CascadeTombstoning
+  include SentinelForm
 
   atlas_resource AtlasRb::Collection, key: :collection, route: :collection
   authorize_resource_writes!(extra_edit: %i[sentinel request_restriction])
@@ -62,13 +63,15 @@ class CollectionsController < CatalogController
     handle_metadata_update
   end
 
-  # Upsert this collection's derivative-access default (Sentinel). The container's
-  # read groups (loaded by the :edit gate) are handed to the record so the model
-  # can refuse a tier more visible than the collection; monotonicity is enforced
-  # too. An incoherent policy is refused and the tab re-renders holding it.
+  # Upsert this collection's default (Sentinel): the derivative tiers, and the
+  # work access the loaders give new Works. The container's read groups (loaded
+  # by the :edit gate) are handed to the record so the model can refuse either
+  # half more visible than the collection; monotonicity is enforced too. An
+  # incoherent policy is refused and the tab re-renders holding it.
   def sentinel
     record = Sentinel.find_or_initialize_by(target_id: params[:id])
     record.policy = sentinel_policy_from_params
+    record.work_access = sentinel_work_access_from_params
     record.resource_read_groups = collection_read_groups
 
     return render_rejected_sentinel(record) unless record.save
