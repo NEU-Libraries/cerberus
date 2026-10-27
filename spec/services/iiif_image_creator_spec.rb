@@ -20,9 +20,11 @@ describe IiifImageCreator do
   end
 
   describe 'call' do
+    before { allow(IiifImageCreator).to receive(:placeholder).and_return('PH') }
+
     it 'mints a capped open- TIFF and a full-res gated- TIFF on one host, prefix-named' do
       full = source_double('Vips::Image', width: 2000, height: 1000)
-      capped = double('Vips::Image capped', tiffsave: nil)
+      capped = double('Vips::Image capped', tiffsave: nil, width: 500, height: 250)
       allow(full).to receive(:resize).with(0.25).and_return(capped)
       allow(Vips::Image).to receive(:new_from_file).with(image_path).and_return(full)
 
@@ -34,9 +36,22 @@ describe IiifImageCreator do
       expect(full).to have_received(:tiffsave).with('/home/cerberus/images/gated-bbb.tif', **tiff)
     end
 
+    # The preview is the open copy at `full/max`, so its size is the open copy's.
+    it 'records the open copy size and its placeholder' do
+      full = source_double('Vips::Image', width: 2000, height: 1000)
+      capped = double('Vips::Image capped', tiffsave: nil, width: 500, height: 250)
+      allow(full).to receive(:resize).with(0.25).and_return(capped)
+      allow(Vips::Image).to receive(:new_from_file).with(image_path).and_return(full)
+
+      result = IiifImageCreator.call(path: image_path)
+
+      expect(result.to_h).to include(open_width: 500, open_height: 250, open_placeholder: 'PH')
+      expect(IiifImageCreator).to have_received(:placeholder).with(capped)
+    end
+
     it 'caps by width (matching the preview 500, request), not longest edge' do
       portrait = source_double('Vips::Image', width: 1000, height: 2000)
-      capped = double('Vips::Image capped', tiffsave: nil)
+      capped = double('Vips::Image capped', tiffsave: nil, width: 500, height: 1000)
       allow(portrait).to receive(:resize).and_return(capped)
       allow(Vips::Image).to receive(:new_from_file).with(image_path).and_return(portrait)
 
@@ -63,8 +78,9 @@ describe IiifImageCreator do
     let(:pdf_path) { Rails.root.join('spec/fixtures/files/example.pdf').to_s }
 
     it 'passes the poppler dpi option so page 1 rasterizes at 150 dpi' do
+      allow(IiifImageCreator).to receive(:placeholder).and_return('PH')
       full = source_double('Vips::Image', width: 1275, height: 1650)
-      capped = double('Vips::Image capped', tiffsave: nil)
+      capped = double('Vips::Image capped', tiffsave: nil, width: 500, height: 647)
       allow(full).to receive(:resize).and_return(capped)
       allow(Vips::Image).to receive(:new_from_file).with(pdf_path, dpi: 150).and_return(full)
 
@@ -145,6 +161,38 @@ describe IiifImageCreator do
         expect(fields).not_to include('exif-data', 'xmp-data', 'iptc-data')
         expect(fields).to include('icc-profile-data')
       end
+    end
+  end
+
+  describe '.placeholder' do
+    def decoded(encoded) = Vips::Image.new_from_buffer(Base64.strict_decode64(encoded), '')
+
+    it 'is a JPEG about 16 px wide, small enough for Atlas' do
+      img = Vips::Image.new_from_file(Rails.root.join('spec/fixtures/files/beach.jpg').to_s)
+      encoded = IiifImageCreator.placeholder(img.resize(500.0 / img.width))
+
+      expect(decoded(encoded).get('vips-loader')).to eq('jpegload_buffer')
+      expect(decoded(encoded).width).to eq(16)
+      expect(encoded.length).to be <= IiifImageCreator::PLACEHOLDER_LIMIT
+    end
+
+    # A width cap would make a tall image's placeholder hundreds of pixels tall.
+    it 'caps the longest edge, so a tall image stays small' do
+      placeholder = decoded(IiifImageCreator.placeholder(Vips::Image.black(500, 6000, bands: 3)))
+
+      expect(placeholder.height).to eq(16)
+      expect(placeholder.width).to be <= 2
+    end
+
+    it 'never upscales an image smaller than the placeholder' do
+      expect(decoded(IiifImageCreator.placeholder(Vips::Image.black(10, 8, bands: 3))).width).to eq(10)
+    end
+
+    # Atlas 422s the whole thumbnail write on an oversized value.
+    it 'is nil when it would not fit the limit' do
+      stub_const('IiifImageCreator::PLACEHOLDER_LIMIT', 10)
+
+      expect(IiifImageCreator.placeholder(Vips::Image.black(500, 300, bands: 3))).to be_nil
     end
   end
 

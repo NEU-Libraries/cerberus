@@ -18,7 +18,22 @@ class IiifImageCreator < ApplicationService
   # Kept: the ICC profile. Dropped: everything docs/derivatives.md lists.
   STRIPPED_METADATA = %w[exif-data xmp-data iptc-data].freeze
 
-  Result = Struct.new(:open_base, :gated_base, keyword_init: true)
+  # The preview's blurred stand-in on the Work page. Capping the longest edge,
+  # not the width, keeps a tall image under Atlas's 2048-character limit: an
+  # oversized value 422s the whole thumbnail write. See docs/derivatives.md.
+  PLACEHOLDER_EDGE = 16
+  PLACEHOLDER_LIMIT = 2048
+
+  # `open_width` and `open_height` are the open copy's own size, which is the
+  # preview's, since the preview asks for that copy at `full/max`.
+  Result = Struct.new(:open_base, :gated_base, :open_width, :open_height, :open_placeholder, keyword_init: true)
+
+  # Base64 of a tiny JPEG of `img`, or nil when it would not fit the limit.
+  def self.placeholder(img)
+    scale = [PLACEHOLDER_EDGE.to_f / [img.width, img.height].max, 1].min
+    encoded = Base64.strict_encode64(img.resize(scale).jpegsave_buffer(Q: 50, strip: true))
+    encoded if encoded.length <= PLACEHOLDER_LIMIT
+  end
 
   def initialize(path:)
     @path = path
@@ -34,9 +49,13 @@ class IiifImageCreator < ApplicationService
     img = img.colourspace(:srgb)
     img = img.flatten(background: [255, 255, 255]) if img.has_alpha?
     img = img.mutate { |m| STRIPPED_METADATA.each { |field| m.remove!(field) } }
+    open = capped(img)
     Result.new(
-      open_base:  mint(capped(img), 'open'),
-      gated_base: mint(img,         'gated')
+      open_base:        mint(open, 'open'),
+      gated_base:       mint(img,  'gated'),
+      open_width:       open.width,
+      open_height:      open.height,
+      open_placeholder: self.class.placeholder(open)
     )
   end
 

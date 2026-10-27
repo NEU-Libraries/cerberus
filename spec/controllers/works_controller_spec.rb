@@ -1235,22 +1235,24 @@ describe WorksController do
       sign_in user
     end
 
-    # The prior thumbnail path (ThumbnailCreator.call(path:) vs base:) was masked
-    # by a stub and never ran; drive the real update flow so a poster upload
-    # genuinely reaches set_thumbnails. Only IiifImageCreator's vips/TIFF minting is stubbed.
-    it 'mints the uploaded poster and persists it via set_thumbnails' do
-      allow(IiifImageCreator).to receive(:call).and_return(IiifImageCreator::Result.new(open_base: 'BASE', gated_base: 'G'))
-      urls = { thumbnail:    'http://example.com/t.jpg',
-               thumbnail_2x: 'http://example.com/t2.jpg',
-               preview:      'http://example.com/p.jpg' }
-      allow(ThumbnailCreator).to receive(:call).with(base: 'BASE').and_return(urls)
+    # Drives the real update flow, so a poster upload genuinely reaches
+    # set_thumbnails. Only IiifImageCreator's vips/TIFF minting is stubbed.
+    it 'mints the uploaded poster and persists it, with its size, via set_thumbnails' do
+      allow(IiifImageCreator).to receive(:call).and_return(
+        IiifImageCreator::Result.new(open_base: 'BASE', gated_base: 'G', open_width: 500, open_height: 333,
+                                     open_placeholder: 'PH')
+      )
       allow(AtlasRb::Resource).to receive(:set_thumbnails)
 
       patch :update, params: { id:        work.id,
                                work:      { title: work.title },
                                thumbnail: fixture_file_upload('image.png', 'image/png') }
 
-      expect(AtlasRb::Resource).to have_received(:set_thumbnails).with(work.id, **urls)
+      expect(AtlasRb::Resource).to have_received(:set_thumbnails).with(
+        work.id, thumbnail: 'BASE/full/!85,85/0/default.jpg', thumbnail_2x: 'BASE/full/!170,170/0/default.jpg',
+                 preview: 'BASE/full/max/0/default.jpg', preview_width: 500, preview_height: 333,
+                 preview_placeholder: 'PH'
+      )
     end
 
     it 'does not touch set_thumbnails when no poster file is attached' do

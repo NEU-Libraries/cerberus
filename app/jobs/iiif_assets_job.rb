@@ -29,7 +29,7 @@ class IiifAssetsJob < ApplicationJob
     # Serial, not parallel: these all PATCH Delegates that attach to the same
     # FileSet, and parallel execution races Atlas's optimistic-lock check on
     # the FileSet (StaleObjectError → 500 → Delegates not persisted).
-    ThumbnailCreationJob.perform_now(work_id, result.open_base)
+    ThumbnailCreationJob.perform_now(work_id, result)
     persist_service!(work_id, result.gated_base)
 
     IncompleteFlag.clear(work_id)

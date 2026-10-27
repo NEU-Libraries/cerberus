@@ -37,9 +37,9 @@ describe Thumbable do
 
     it 'mints the open TIFF from the upload and persists it via set_thumbnails' do
       obj = thumbable_class.new({ thumbnail: file })
-      allow(IiifImageCreator).to receive(:call).with(path: '/tmp/upload.png')
-                                               .and_return(IiifImageCreator::Result.new(open_base: 'BASE', gated_base: 'G'))
-      allow(ThumbnailCreator).to receive(:call).with(base: 'BASE').and_return(urls)
+      image = IiifImageCreator::Result.new(open_base: 'BASE', gated_base: 'G')
+      allow(IiifImageCreator).to receive(:call).with(path: '/tmp/upload.png').and_return(image)
+      allow(ThumbnailCreator).to receive(:call).with(image: image).and_return(urls)
 
       expect(AtlasRb::Resource).to receive(:set_thumbnails).with('w-1', **urls)
       obj.apply_thumbnail('w-1')

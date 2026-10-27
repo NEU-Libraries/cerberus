@@ -23,8 +23,8 @@ namespace :reset do
     # default_nuid resolve to the admin NUID for every call inside.
     Current.set(nuid: '000000004') do
       community = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', depositor: unowned)
-      river_base = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/river.jpg').open_base
-      AtlasRb::Resource.set_thumbnails(community['id'], **ThumbnailCreator.call(base: river_base))
+      river_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/river.jpg')
+      AtlasRb::Resource.set_thumbnails(community['id'], **ThumbnailCreator.call(image: river_image))
       AtlasRb::Resource.set_permissions(community['id'], { 'read' => ['public'] })
 
       # The Policies and Terms of Participation, where v1 kept them: University
@@ -32,16 +32,16 @@ namespace :reset do
       # The Work gets a new NOID on every reset, so its path is recorded as a
       # SiteSetting for /terms to link.
       library = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/library-mods.xml', depositor: unowned)
-      mountain_base = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/mountain.jpg').open_base
-      AtlasRb::Resource.set_thumbnails(library['id'], **ThumbnailCreator.call(base: mountain_base))
+      mountain_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/mountain.jpg')
+      AtlasRb::Resource.set_thumbnails(library['id'], **ThumbnailCreator.call(image: mountain_image))
       AtlasRb::Resource.set_permissions(library['id'], { 'read' => ['public'] })
       library_services = AtlasRb::Collection.create(library['id'], '/home/cerberus/web/spec/fixtures/files/library-resources-services-mods.xml', depositor: unowned)
       AtlasRb::Resource.set_permissions(library_services['id'], { 'read' => ['public'] })
       drs_service = AtlasRb::Collection.create(library_services['id'], '/home/cerberus/web/spec/fixtures/files/drs-service-collection-mods.xml', depositor: unowned)
       AtlasRb::Resource.set_permissions(drs_service['id'], { 'read' => ['public'] })
       terms_work = AtlasRb::Work.create(drs_service['id'], '/home/cerberus/web/spec/fixtures/files/drs-terms-of-participation-mods.xml')
-      terms_base = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/drs-terms-of-participation.pdf').open_base
-      AtlasRb::Resource.set_thumbnails(terms_work['id'], **ThumbnailCreator.call(base: terms_base))
+      terms_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/drs-terms-of-participation.pdf')
+      AtlasRb::Resource.set_thumbnails(terms_work['id'], **ThumbnailCreator.call(image: terms_image))
       AtlasRb::Resource.set_permissions(terms_work['id'], { 'read' => ['public'] })
       AtlasRb::Blob.create(terms_work['id'], '/home/cerberus/web/spec/fixtures/files/drs-terms-of-participation.pdf', 'drs-terms-of-participation.pdf')
       AtlasRb::Work.complete(terms_work['id'])
@@ -51,13 +51,13 @@ namespace :reset do
       end
 
       collection = AtlasRb::Collection.create(community['id'], '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', depositor: unowned)
-      field_base = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/field.jpg').open_base
-      AtlasRb::Resource.set_thumbnails(collection['id'], **ThumbnailCreator.call(base: field_base))
+      field_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/field.jpg')
+      AtlasRb::Resource.set_thumbnails(collection['id'], **ThumbnailCreator.call(image: field_image))
       AtlasRb::Resource.set_permissions(collection['id'], { 'read' => ['public'] })
 
       work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/work-mods.xml')
-      flower_base = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/flower.jpg').open_base
-      AtlasRb::Resource.set_thumbnails(work['id'], **ThumbnailCreator.call(base: flower_base))
+      flower_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/flower.jpg')
+      AtlasRb::Resource.set_thumbnails(work['id'], **ThumbnailCreator.call(image: flower_image))
       AtlasRb::Resource.set_permissions(work['id'], { 'read' => ['public'] })
       AtlasRb::Blob.create(work['id'], '/home/cerberus/web/spec/fixtures/files/flower.jpg', 'flower.jpg')
       AtlasRb::Work.complete(work['id'])
@@ -71,8 +71,8 @@ namespace :reset do
       # trunk by Elvis Deane, CC0 1.0 Public Domain Dedication, sourced from
       # Wikimedia Commons.)
       av_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-video-mods.xml')
-      av_poster_base = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/sample-video-poster.jpg').open_base
-      AtlasRb::Resource.set_thumbnails(av_work['id'], **ThumbnailCreator.call(base: av_poster_base))
+      av_poster_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/sample-video-poster.jpg')
+      AtlasRb::Resource.set_thumbnails(av_work['id'], **ThumbnailCreator.call(image: av_poster_image))
       AtlasRb::Resource.set_permissions(av_work['id'], { 'read' => ['public'] })
       AtlasRb::Blob.create(av_work['id'], '/home/cerberus/web/spec/fixtures/files/sample-video.mp4', 'sample-video.mp4')
       AtlasRb::Work.complete(av_work['id'])
@@ -82,8 +82,8 @@ namespace :reset do
       # a partial row. Reuses the lake.jpg fixture — visually distinct from the
       # other three recent Works (field / flower / video poster).
       lake_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/work-lake-mods.xml')
-      lake_work_base = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/lake.jpg').open_base
-      AtlasRb::Resource.set_thumbnails(lake_work['id'], **ThumbnailCreator.call(base: lake_work_base))
+      lake_work_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/lake.jpg')
+      AtlasRb::Resource.set_thumbnails(lake_work['id'], **ThumbnailCreator.call(image: lake_work_image))
       AtlasRb::Resource.set_permissions(lake_work['id'], { 'read' => ['public'] })
       AtlasRb::Blob.create(lake_work['id'], '/home/cerberus/web/spec/fixtures/files/lake.jpg', 'lake.jpg')
       AtlasRb::Work.complete(lake_work['id'])
@@ -107,20 +107,20 @@ namespace :reset do
       # prepended by Atlas's permissions= setter; we only add marcom here.
       marcom_group = 'northeastern:drs:repository:loaders:marcom'
 
-      canyon_base    = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/canyon.jpg').open_base
-      forest_base    = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/forest.jpg').open_base
-      waterfall_base = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/waterfall.jpg').open_base
+      canyon_image    = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/canyon.jpg')
+      forest_image    = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/forest.jpg')
+      waterfall_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/waterfall.jpg')
 
       communications = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/communications-mods.xml', depositor: unowned)
-      AtlasRb::Resource.set_thumbnails(communications['id'], **ThumbnailCreator.call(base: canyon_base))
+      AtlasRb::Resource.set_thumbnails(communications['id'], **ThumbnailCreator.call(image: canyon_image))
       AtlasRb::Resource.set_permissions(communications['id'], { 'read' => ['public'], 'edit' => [marcom_group] })
 
       photo_archive = AtlasRb::Collection.create(communications['id'], '/home/cerberus/web/spec/fixtures/files/communications-photo-archive-mods.xml', depositor: unowned)
-      AtlasRb::Resource.set_thumbnails(photo_archive['id'], **ThumbnailCreator.call(base: forest_base))
+      AtlasRb::Resource.set_thumbnails(photo_archive['id'], **ThumbnailCreator.call(image: forest_image))
       AtlasRb::Resource.set_permissions(photo_archive['id'], { 'read' => ['public'], 'edit' => [marcom_group] })
 
       campus_life = AtlasRb::Collection.create(photo_archive['id'], '/home/cerberus/web/spec/fixtures/files/campus-life-photographs-mods.xml', depositor: unowned)
-      AtlasRb::Resource.set_thumbnails(campus_life['id'], **ThumbnailCreator.call(base: waterfall_base))
+      AtlasRb::Resource.set_thumbnails(campus_life['id'], **ThumbnailCreator.call(image: waterfall_image))
       AtlasRb::Resource.set_permissions(campus_life['id'], { 'read' => ['public'], 'edit' => [marcom_group] })
 
       # Cerberus-side: the Loader row binding the marcom Grouper group to the
@@ -192,8 +192,8 @@ namespace :reset do
         jane_work = AtlasRb::Work.create(jane['personal_root_id'],
                                          '/home/cerberus/web/spec/fixtures/files/library-dataset-mods.xml',
                                          depositor: jane['nuid'])
-        coast_base = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/coast.jpg').open_base
-        AtlasRb::Resource.set_thumbnails(jane_work['id'], **ThumbnailCreator.call(base: coast_base))
+        coast_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/coast.jpg')
+        AtlasRb::Resource.set_thumbnails(jane_work['id'], **ThumbnailCreator.call(image: coast_image))
         AtlasRb::Resource.set_permissions(jane_work['id'], { 'read' => ['public'] })
         AtlasRb::Blob.create(jane_work['id'], '/home/cerberus/web/spec/fixtures/files/coast.jpg', 'coastal-survey.jpg')
         AtlasRb::Work.complete(jane_work['id'])
@@ -227,9 +227,7 @@ namespace :reset do
         page_original = IiifImageCreator.call(path: page_path)
         AtlasRb::FileSet.set_iiif_service(file_set['id'], page_original.gated_base)
         # Page 1's image seeds the Work-level thumbnail (the catalog/gallery tile).
-        if index.zero?
-          AtlasRb::Resource.set_thumbnails(paged_work['id'], **ThumbnailCreator.call(base: page_original.open_base))
-        end
+        AtlasRb::Resource.set_thumbnails(paged_work['id'], **ThumbnailCreator.call(image: page_original)) if index.zero?
       end
       AtlasRb::Resource.set_permissions(paged_work['id'], { 'read' => ['public'] })
       AtlasRb::Work.complete(paged_work['id'])
@@ -251,8 +249,8 @@ namespace :reset do
       # can be shown. mp3 is a browser-safe codec, so it streams through the
       # same Range media endpoint with no remux; audio carries no poster.
       audio_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-audio-mods.xml')
-      audio_base = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/all_star_trio.jpg').open_base
-      AtlasRb::Resource.set_thumbnails(audio_work['id'], **ThumbnailCreator.call(base: audio_base))
+      audio_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/all_star_trio.jpg')
+      AtlasRb::Resource.set_thumbnails(audio_work['id'], **ThumbnailCreator.call(image: audio_image))
       AtlasRb::Resource.set_permissions(audio_work['id'], { 'read' => ['public'] })
       AtlasRb::Blob.create(audio_work['id'], '/home/cerberus/web/spec/fixtures/files/sample-audio.mp3', 'sample-audio.mp3')
       AtlasRb::Work.complete(audio_work['id'])
@@ -299,8 +297,8 @@ namespace :reset do
       # thumbnail replaced by hand. IiifImageCreator rasterizes a PDF's first page,
       # so the source needs no conversion.
       embargoed_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-embargoed-mods.xml')
-      embargoed_base = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/example.pdf').open_base
-      AtlasRb::Resource.set_thumbnails(embargoed_work['id'], **ThumbnailCreator.call(base: embargoed_base))
+      embargoed_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/example.pdf')
+      AtlasRb::Resource.set_thumbnails(embargoed_work['id'], **ThumbnailCreator.call(image: embargoed_image))
       AtlasRb::Resource.set_permissions(embargoed_work['id'],
                                         { 'read'    => ['public'],
                                           'embargo' => 1.year.from_now.end_of_year.to_date.to_s })
@@ -321,8 +319,8 @@ namespace :reset do
       # to demonstrate the restore path. Tombstoning needs a completed Work, so
       # it is built normally and then withdrawn.
       withdrawn_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-withdrawn-mods.xml')
-      withdrawn_base = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/gorge.jpg').open_base
-      AtlasRb::Resource.set_thumbnails(withdrawn_work['id'], **ThumbnailCreator.call(base: withdrawn_base))
+      withdrawn_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/gorge.jpg')
+      AtlasRb::Resource.set_thumbnails(withdrawn_work['id'], **ThumbnailCreator.call(image: withdrawn_image))
       AtlasRb::Resource.set_permissions(withdrawn_work['id'], { 'read' => ['public'] })
       AtlasRb::Blob.create(withdrawn_work['id'], '/home/cerberus/web/spec/fixtures/files/gorge.jpg', 'gorge.jpg')
       AtlasRb::Work.complete(withdrawn_work['id'])
@@ -392,22 +390,22 @@ namespace :reset do
       # A: self-managed private space — read AND edit gated to archives staff,
       # the only fixture pair above with no public read at all.
       archives_community = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/archives-community-mods.xml', depositor: unowned)
-      archives_base = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/cliff.jpg').open_base
-      AtlasRb::Resource.set_thumbnails(archives_community['id'], **ThumbnailCreator.call(base: archives_base))
+      archives_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/cliff.jpg')
+      AtlasRb::Resource.set_thumbnails(archives_community['id'], **ThumbnailCreator.call(image: archives_image))
       AtlasRb::Resource.set_permissions(archives_community['id'], { 'read' => [archives_group], 'edit' => [archives_group] })
 
       reading_room = AtlasRb::Collection.create(archives_community['id'], '/home/cerberus/web/spec/fixtures/files/archives-reading-room-mods.xml', depositor: unowned)
-      AtlasRb::Resource.set_thumbnails(reading_room['id'], **ThumbnailCreator.call(base: archives_base))
+      AtlasRb::Resource.set_thumbnails(reading_room['id'], **ThumbnailCreator.call(image: archives_image))
       AtlasRb::Resource.set_permissions(reading_room['id'], { 'read' => [archives_group], 'edit' => [archives_group] })
 
       # B: edit-gate-only, a second unit beyond marcom — read stays public.
       public_safety = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/public-safety-community-mods.xml', depositor: unowned)
-      public_safety_base = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/marsh.jpg').open_base
-      AtlasRb::Resource.set_thumbnails(public_safety['id'], **ThumbnailCreator.call(base: public_safety_base))
+      public_safety_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/marsh.jpg')
+      AtlasRb::Resource.set_thumbnails(public_safety['id'], **ThumbnailCreator.call(image: public_safety_image))
       AtlasRb::Resource.set_permissions(public_safety['id'], { 'read' => ['public'], 'edit' => [nupd_media_group] })
 
       nupd_media = AtlasRb::Collection.create(public_safety['id'], '/home/cerberus/web/spec/fixtures/files/nupd-incident-media-mods.xml', depositor: unowned)
-      AtlasRb::Resource.set_thumbnails(nupd_media['id'], **ThumbnailCreator.call(base: public_safety_base))
+      AtlasRb::Resource.set_thumbnails(nupd_media['id'], **ThumbnailCreator.call(image: public_safety_image))
       AtlasRb::Resource.set_permissions(nupd_media['id'], { 'read' => ['public'], 'edit' => [nupd_media_group] })
 
       # A Work inside that collection, deposited as UNOWNED so 000000011 reaches
@@ -456,22 +454,22 @@ namespace :reset do
       # Collection, so removing one in the permissions UI strips only that
       # group's editors, not the other's.
       school_of_law = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/school-of-law-community-mods.xml', depositor: unowned)
-      law_base = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/valley.jpg').open_base
-      AtlasRb::Resource.set_thumbnails(school_of_law['id'], **ThumbnailCreator.call(base: law_base))
+      law_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/valley.jpg')
+      AtlasRb::Resource.set_thumbnails(school_of_law['id'], **ThumbnailCreator.call(image: law_image))
       AtlasRb::Resource.set_permissions(school_of_law['id'], { 'read' => ['public'], 'edit' => [law_library_group, crrj_group] })
 
       law_crrj_collection = AtlasRb::Collection.create(school_of_law['id'], '/home/cerberus/web/spec/fixtures/files/law-crrj-collection-mods.xml', depositor: unowned)
-      AtlasRb::Resource.set_thumbnails(law_crrj_collection['id'], **ThumbnailCreator.call(base: law_base))
+      AtlasRb::Resource.set_thumbnails(law_crrj_collection['id'], **ThumbnailCreator.call(image: law_image))
       AtlasRb::Resource.set_permissions(law_crrj_collection['id'], { 'read' => ['public'], 'edit' => [law_library_group, crrj_group] })
 
       # D: read-gate-only, the mirror of B — edit stays staff-only.
       licensed_resources = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/licensed-resources-community-mods.xml', depositor: unowned)
-      licensed_base = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/dunes.jpg').open_base
-      AtlasRb::Resource.set_thumbnails(licensed_resources['id'], **ThumbnailCreator.call(base: licensed_base))
+      licensed_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/dunes.jpg')
+      AtlasRb::Resource.set_thumbnails(licensed_resources['id'], **ThumbnailCreator.call(image: licensed_image))
       AtlasRb::Resource.set_permissions(licensed_resources['id'], { 'read' => [l2_group] })
 
       l2_archive = AtlasRb::Collection.create(licensed_resources['id'], '/home/cerberus/web/spec/fixtures/files/l2-dataset-archive-mods.xml', depositor: unowned)
-      AtlasRb::Resource.set_thumbnails(l2_archive['id'], **ThumbnailCreator.call(base: licensed_base))
+      AtlasRb::Resource.set_thumbnails(l2_archive['id'], **ThumbnailCreator.call(image: licensed_image))
       AtlasRb::Resource.set_permissions(l2_archive['id'], { 'read' => [l2_group] })
 
       # Every community gets its showcases, as one created through the UI does.
