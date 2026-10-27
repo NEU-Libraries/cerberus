@@ -11,7 +11,8 @@ class CriticalCss
   module Selector
     FUNCTIONAL_PSEUDO = /::?[\w-]+\(/
     ATTRIBUTE = /\[\s*([^\s~|^$*=\]]+)[^\]]*\]/
-    CLASS_OR_ID = /([.#])((?:[\w-]|\\.)+)/
+    # A hex escape swallows the one space that ends it: `.\31 0` is the class `10`.
+    CLASS_OR_ID = /([.#])((?:[\w-]|\\\h{1,6}\s?|\\.)+)/
     PSEUDO = /::?[\w-]+/
     TYPE = /(?:\A|[\s>+~])([a-zA-Z][\w-]*)/
 
