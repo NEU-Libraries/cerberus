@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe CriticalCss do
+RSpec.describe CriticalCss, :critical_css do
   def select(css, html)
     described_class.new(CriticalCss::Stylesheet.parse(css), CriticalCss::Markup.tokens(html)).css
   end

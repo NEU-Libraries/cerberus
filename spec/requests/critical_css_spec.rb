@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 # The three <head>s a layout page can carry. See docs/critical-css.md.
-RSpec.describe 'Layout stylesheets', type: :request do
+RSpec.describe 'Layout stylesheets', :critical_css, type: :request do
   let(:head) { response.body[%r{<head>.*</head>}m] }
   let(:application_css) { %r{/assets/application-\h+\.css} }
 
@@ -82,5 +82,17 @@ RSpec.describe 'Layout stylesheets', type: :request do
       expect(response).to have_http_status(:ok)
       expect(head).to match(%r{<link rel="stylesheet" href="#{application_css}" media="all" />})
     end
+  end
+end
+
+# Untagged, so it runs as every other request spec does: spec/support/critical_css.rb
+# keeps the inline CSS out of the bodies they match against.
+RSpec.describe 'Layout stylesheets outside the critical_css tag', type: :request do
+  it 'renders the blocking links, with no inline CSS' do
+    allow(Rails.application.config.x.cerberus).to receive(:terms_document_url).and_return(nil)
+    get terms_path
+
+    expect(response.body).to include('<!-- layout-stylesheets -->')
+    expect(response.body).not_to include('data-deferred-stylesheet')
   end
 end
