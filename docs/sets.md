@@ -3,7 +3,7 @@
 A Set is a saved recipe over the repository: included collections, plus
 individually added Works, minus set-aside exclusions. Atlas stores it as a
 Compilation. This page covers how Cerberus resolves that recipe for display and
-download, and how the Work permissions tab sweeps the Works it denotes.
+download, and how the Sentinel tab sweeps the Works it denotes.
 
 Source files:
 
@@ -167,9 +167,9 @@ built as the real admin, an admin checking what someone can reach would get a
 403 from a file and the same file inside the ZIP. That defeats the only thing
 View-as is for.
 
-## Work permissions over a Set's Works
+## The Sentinel tab over a Set's Works
 
-`SetBulkActions` holds the Set edit page's Work permissions tab. It authors the
+`SetBulkActions` holds the Set edit page's Sentinel tab. It authors the
 Set's Sentinel, and enqueues `SetSentinelApplyJob` to sweep it across the Works
 the Set denotes. This is v1's Sentinel: one form that can publicize, privatize
 and re-group any set of Works, and set their derivative access.
@@ -277,7 +277,7 @@ The Set page renders that partial twice, with Sharing, which is why the partial
 takes its rows and groups as locals and prefixes its row ids with the resource.
 
 A rejected policy re-renders the edit page holding the *submitted* policy, with
-the Work permissions pane open (`@open_tab`). A redirect would discard every
+the Sentinel pane open (`@open_tab`). A redirect would discard every
 selection the curator made.
 
 `apply_sentinel` refuses to enqueue until a policy has been saved, then enqueues

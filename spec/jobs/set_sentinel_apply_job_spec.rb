@@ -258,7 +258,7 @@ RSpec.describe SetSentinelApplyJob do
 
     run
 
-    expect(notice.subject).to eq('Set permissions sweep finished')
+    expect(notice.subject).to eq('Set Sentinel sweep finished')
     expect(notice.body).to include('applied to 1 work', 'Field Notes')
   end
 

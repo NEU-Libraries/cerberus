@@ -22,7 +22,7 @@ module Admin
       # reads as the same action the operator clicked. `set_privatize` has no
       # writer; it stays so the rows already in the ledger still render.
       'set_privatize'            => { label: 'Privatize',  icon: 'fa-user-lock' },
-      'set_sentinel_apply'       => { label: 'Work permissions', icon: 'fa-user-lock' },
+      'set_sentinel_apply'       => { label: 'Sentinel',   icon: 'fa-user-lock' },
       'showcase_promotion'       => { label: 'Showcase',   icon: 'fa-star' },
       'tombstone_cascade'        => { label: 'Deleted',    icon: 'fa-trash-can' },
       'tombstone_bulk'           => { label: 'Tombstones', icon: 'fa-trash-can-arrow-up' },

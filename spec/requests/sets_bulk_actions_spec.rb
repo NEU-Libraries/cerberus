@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-# The Set edit page's Work permissions tab. Runs against the real test Atlas like the
+# The Set edit page's Sentinel tab. Runs against the real test Atlas like the
 # other Set specs: a real Compilation is created, so the curator gate and the
 # Set load are exercised end to end. The sweeps themselves are specced at the job
 # level; this file covers the HTTP surface — who is offered the tab, who may
@@ -45,25 +45,25 @@ RSpec.describe 'Sets bulk actions', type: :request do
   end
 
   describe 'who is offered the tab' do
-    it 'shows the Work permissions tab to a full admin' do
+    it 'shows the Sentinel tab to a full admin' do
       sign_in admin
       get "/sets/#{set['id']}/edit"
 
-      expect(response.body).to include('work-permissions-tab')
+      expect(response.body).to include('sentinel-tab')
     end
 
     it 'shows it to the devolved tier' do
       sign_in devolved
       get "/sets/#{set['id']}/edit"
 
-      expect(response.body).to include('work-permissions-tab')
+      expect(response.body).to include('sentinel-tab')
     end
 
     it 'does not show it to a curator who merely owns the set' do
       sign_in owner
       get "/sets/#{set['id']}/edit"
 
-      expect(response.body).not_to include('work-permissions-tab')
+      expect(response.body).not_to include('sentinel-tab')
     end
   end
 
@@ -96,7 +96,7 @@ RSpec.describe 'Sets bulk actions', type: :request do
       post "/sets/#{set['id']}/apply_sentinel"
 
       expect(SetSentinelApplyJob).not_to have_received(:perform_later)
-      expect(flash[:alert]).to include('Save the work permissions')
+      expect(flash[:alert]).to include('Save the Sentinel')
     end
 
     it 'enqueues the sweep once a policy exists' do
@@ -105,7 +105,7 @@ RSpec.describe 'Sets bulk actions', type: :request do
       post "/sets/#{set['id']}/apply_sentinel"
 
       expect(SetSentinelApplyJob).to have_received(:perform_later).with(set_noid: set['id'])
-      expect(response).to redirect_to(edit_set_path(set['id'], tab: 'work-permissions'))
+      expect(response).to redirect_to(edit_set_path(set['id'], tab: 'sentinel'))
     end
   end
 
@@ -116,7 +116,7 @@ RSpec.describe 'Sets bulk actions', type: :request do
 
       expect(saved.policy).to eq({ 'original' => [staff] })
       expect(saved.work_access).to be_nil
-      expect(response).to redirect_to(edit_set_path(set['id'], tab: 'work-permissions'))
+      expect(response).to redirect_to(edit_set_path(set['id'], tab: 'sentinel'))
     end
 
     # A Set is not a container, so an unrestricted tier is omitted rather than
@@ -170,9 +170,9 @@ RSpec.describe 'Sets bulk actions', type: :request do
       Sentinel.create!(target_id: set['id'], policy: {}, derivatives_enabled: false,
                        work_access: { 'visibility' => 'public' })
       sign_in admin
-      get "/sets/#{set['id']}/edit", params: { tab: 'work-permissions' }
+      get "/sets/#{set['id']}/edit", params: { tab: 'sentinel' }
 
-      pane = response.parsed_body.at_css('#work-permissions')
+      pane = response.parsed_body.at_css('#sentinel')
       expect(pane.text).to include('Every work is made public', 'This makes material public')
       expect(pane.text).not_to include('derivative access is set to the policy')
     end
@@ -189,7 +189,7 @@ RSpec.describe 'Sets bulk actions', type: :request do
       expect(saved).to be_nil
     end
 
-    it 'comes back on the Work permissions tab after a refusal' do
+    it 'comes back on the Sentinel tab after a refusal' do
       sign_in admin
       patch "/sets/#{set['id']}/sentinel",
             params: { sentinel: { small:  { mode: 'restrict', groups: [] },
@@ -197,7 +197,7 @@ RSpec.describe 'Sets bulk actions', type: :request do
 
       # Parsed rather than string-matched: HAML orders attributes alphabetically,
       # so asserting on raw HTML couples the test to that ordering.
-      pane = response.parsed_body.at_css('#work-permissions')
+      pane = response.parsed_body.at_css('#sentinel')
       expect(pane['class']).to include('active')
     end
   end

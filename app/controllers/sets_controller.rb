@@ -92,7 +92,7 @@ class SetsController < CatalogController
   end
 
   # Details tab is open to any editor; the Sharing tab is owner/admin-only
-  # (gated in the view + on the sharing write path); the Work permissions tab
+  # (gated in the view + on the sharing write path); the Sentinel tab
   # is operator-only (SetBulkActions#require_bulk_operator, mirrored in the
   # view by #bulk_operator?).
   def edit

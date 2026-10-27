@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# The Set edit page's Work permissions tab: author the Set's Sentinel, then
+# The Set edit page's Sentinel tab: author the Set's Sentinel, then
 # sweep it across the Set's *Works*. The sweep writes the Works, not the Set, so
 # it gates on the operator tier and never on the Set's own ACL: a grantee with
 # edit on a Set can add a collection holding fifty thousand Works they have no
@@ -9,7 +9,7 @@ module SetBulkActions
   extend ActiveSupport::Concern
   include SentinelForm
 
-  SET_PERMISSIONS_TAB = 'work-permissions'
+  SENTINEL_TAB = 'sentinel'
 
   included do
     helper_method :bulk_operator?, :sentinel_groups
@@ -36,19 +36,19 @@ module SetBulkActions
 
     return render_rejected_set_sentinel(record) unless record.save
 
-    redirect_to edit_set_path(params[:id], tab: SET_PERMISSIONS_TAB),
-                notice: 'Work permissions saved. Apply them to change the works already in this set.'
+    redirect_to edit_set_path(params[:id], tab: SENTINEL_TAB),
+                notice: 'Sentinel saved. Apply it to change the works already in this set.'
   end
 
   def apply_sentinel
     if Sentinel.find_by(target_id: params[:id]).nil?
-      return redirect_to edit_set_path(params[:id], tab: SET_PERMISSIONS_TAB),
-                         alert: 'Save the work permissions before applying them.'
+      return redirect_to edit_set_path(params[:id], tab: SENTINEL_TAB),
+                         alert: 'Save the Sentinel before applying it.'
     end
 
     SetSentinelApplyJob.perform_later(set_noid: params[:id])
-    redirect_to edit_set_path(params[:id], tab: SET_PERMISSIONS_TAB),
-                notice: 'Applying permissions to this set’s works. You’ll get a message when it finishes.'
+    redirect_to edit_set_path(params[:id], tab: SENTINEL_TAB),
+                notice: 'Applying the Sentinel to this set’s works. You’ll get a message when it finishes.'
   end
 
   private
@@ -69,7 +69,7 @@ module SetBulkActions
       edit_breadcrumbs
       prepare_set_definition
       @sentinel = record
-      @open_tab = SET_PERMISSIONS_TAB
+      @open_tab = SENTINEL_TAB
       flash.now[:alert] = record.errors.full_messages.to_sentence
       render :edit, status: :unprocessable_content
     end

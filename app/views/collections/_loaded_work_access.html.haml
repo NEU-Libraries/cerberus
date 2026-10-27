@@ -11,7 +11,10 @@
 -# that "private" could mean.
 - access = sentinel&.work_access || {}
 - grants_mode = sentinel&.grants.nil? ? 'keep' : 'replace'
-.well.p-3.my-3.rounded-3{ data: { controller: 'reveal', 'reveal-when-value': 'replace' } }
+-# A bare section, not a well: it is part of the tab's one form, whose footer
+-# is the well.
+%hr.section-divider.my-3
+%section{ data: { controller: 'reveal', 'reveal-when-value': 'replace' } }
   %h5.mb-1 Works added by a loader
   %p.small.text-subtle.mb-3
     Works added with the XML, IPTC or multipage loaders get the collection’s permissions unless you

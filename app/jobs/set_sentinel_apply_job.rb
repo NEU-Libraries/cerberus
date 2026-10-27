@@ -59,7 +59,7 @@ class SetSentinelApplyJob < ApplicationJob
       CompletionNotice.deliver(
         kind:         'set_sentinel_apply',
         to_nuid:      actor,
-        subject:      "Set permissions sweep #{problems ? 'finished with problems' : 'finished'}",
+        subject:      "Set Sentinel sweep #{problems ? 'finished with problems' : 'finished'}",
         body:         body_for(set_noid, title, outcome),
         subject_noid: set_noid,
         payload:      { title: title, changed_count: outcome.counts[:changed], applied: outcome.counts[:applied],
@@ -71,7 +71,7 @@ class SetSentinelApplyJob < ApplicationJob
     def body_for(set_noid, title, outcome)
       counts = outcome.counts
       done = counts[:changed] + counts[:applied]
-      lines = ["“#{title}”: permissions applied to #{done} work#{'s' unless done == 1}."]
+      lines = ["“#{title}”: Sentinel applied to #{done} work#{'s' unless done == 1}."]
       lines << "#{counts[:changed]} had their visibility or groups changed." if counts[:changed].positive?
       lines << "#{counts[:skipped]} could not be read and were skipped." if counts[:skipped].positive?
       lines += refused_lines

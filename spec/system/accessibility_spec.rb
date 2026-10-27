@@ -103,7 +103,7 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     'impersonation'       => -> { '/admin/impersonation' },
     'deposit triage'      => -> { '/admin/deposit_triage' },
     'work health'         => -> { "/admin/work_health?noid=#{@work.id}" },
-    'set permissions'     => -> { "/sets/#{@set['id']}/edit?tab=work-permissions" }
+    'a set Sentinel'      => -> { "/sets/#{@set['id']}/edit?tab=sentinel" }
   }
 
   # axe skips what is not displayed, so each edit pane needs its own visit. The

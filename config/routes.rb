@@ -220,7 +220,7 @@ Rails.application.routes.draw do
       delete 'works/:work_id',             to: 'sets#remove_work',       as: :remove_work
       post   'aside',                      to: 'sets#set_aside',         as: :set_aside
       delete 'aside/:work_id',             to: 'sets#put_back',          as: :put_back
-      # The Work permissions tab. `sentinel` authors the Set's Sentinel (the same
+      # The Sentinel tab. `sentinel` authors the Set's Sentinel (the same
       # verb the Collection tab uses); `apply_sentinel` enqueues the sweep over
       # the Works the Set denotes. Both are operator-only — see
       # SetsController#require_bulk_operator.
