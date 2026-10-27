@@ -1,4 +1,5 @@
--# locals: src (String), alt (String)
+-# locals: src (String), alt (String), width, height and placeholder (optional,
+-# the preview's size and blurred stand-in from the Work read)
 -#
 -# The record's preview image. `alt` names the work rather than describing the
 -# picture, because nothing in the repository holds a description of what a
@@ -8,4 +9,7 @@
 -#
 -# Eager and high priority because this is usually the page's LCP element:
 -# `loading: lazy` holds the request until layout, which is the delay LCP counts.
-%img.mt-1{fetchpriority: "high", src: src, alt: alt, style: "max-width: 100%; padding: 4px; border: 1px solid rgba(0,0,0,0.2);"}/
+-#
+-# The stand-in is the <img>'s own background, so the picture paints over it in
+-# the same box with no swap. Do not add a transition (docs/design.md).
+%img.mt-1{fetchpriority: "high", src: src, alt: alt, **preview_image_attributes(local_assigns[:width], local_assigns[:height], local_assigns[:placeholder])}/

@@ -9,7 +9,9 @@ Source files:
 - `app/jobs/iiif_assets_job.rb`
 - `app/jobs/caption_job.rb`
 - `app/services/iiif_image_creator.rb`
+- `app/services/thumbnail_creator.rb`
 - `app/services/streaming_only.rb`
+- `app/views/works/_image.html.haml`
 
 ## Seeding a Work's IIIF assets
 
@@ -81,6 +83,45 @@ render whatever the index holds, so one malformed value would take the whole pag
 down instead of degrading its own tile. `ThumbnailsHelper#renderable_thumbnail`
 is the guard: it returns the value only when it looks like a URL, and every
 caller treats nil as "no thumbnail" and falls back to the type icon.
+
+### The preview's size and placeholder
+
+The Work page's preview `<img>` carries a width, a height and a blurred
+stand-in, so its frame is reserved and shows a soft copy of the picture before
+the image arrives.
+
+`IiifImageCreator` records all three from the open copy, the same image the
+preview serves at `full/max`. `ThumbnailCreator` turns the whole
+`IiifImageCreator::Result` into the `set_thumbnails` arguments, so the size and
+placeholder ride the same Atlas write as the preview URI. Every caller passes
+the whole result, never just `open_base`: a caller that sends only URIs makes
+Atlas clear the stored size. That includes each seed call in
+`lib/tasks/reset.rake`.
+
+- **The placeholder** is base64 of a JPEG at most 16 px on its longest edge,
+  quality 50, with no metadata: about 900 characters. Atlas refuses a value over
+  2,048 characters with a 422 that fails the whole thumbnail write, so
+  `IiifImageCreator.placeholder` returns nil rather than send one. Capping the
+  longest edge, not the width, is what keeps a tall image under the limit.
+- **The markup** is `ThumbnailsHelper#preview_image_attributes`. It wraps the
+  JPEG in an SVG with a 500-wide viewBox in the preview's proportion, a
+  `feGaussianBlur` of `stdDeviation` 18, and a `feComponentTransfer` alpha clamp
+  that keeps the blurred edges opaque. It sets that SVG as the `<img>`'s own
+  background, clipped to the content box so the frame's 4 px padding shows no
+  blurred ring.
+- **Nothing swaps the placeholder out.** The browser paints the decoded picture
+  over its own background, from the progressive JPEG's first pass on. The
+  preview is an opaque JPEG, so it hides the blur completely.
+  [`design.md`](design.md) rules out a fade.
+- **Every value is optional.** A Work without a size renders the bare frame, and
+  a size without a placeholder reserves the frame with no stand-in.
+- **Visibility follows `preview`.** The placeholder is a copy of the open
+  derivative, and Atlas returns it on the same read as the preview URI. The view
+  reads it only where it renders the preview.
+
+The blurred 16 px image was chosen over an average colour, a stretched image
+and ThumbHash. It paints with the first paint and needs no JavaScript, while
+ThumbHash appears only after a decoder script runs.
 
 `service_file` does double duty. It is the deep-zoom source, and it is the
 anchor from which `DepositDerivativesJob` later recovers the gated base for
