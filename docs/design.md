@@ -158,10 +158,10 @@ Publications). Because they are taken, a work is `fa-file`, not `fa-file-lines`.
    `app/` for the class before you settle on it.
 3. Make it singular or plural by what it shows: one person is `fa-user`, a group
    of people is a community or a Grouper group, each with its own icon.
-4. Confirm the class exists in the Font Awesome build the site loads. A missing
-   class renders nothing, and no spec or log reports it. In the browser, a real
-   class's `::before` content is a glyph code (`U+f007` for `fa-user`); a
-   missing one's is `none`.
+4. Run `bin/fontawesome-subset` once the class is in the source. The site
+   serves only the icons the source names, so a new one renders nothing until
+   the build includes it. `spec/lib/font_awesome_subset_spec.rb` fails until
+   then. [`font-awesome.md`](font-awesome.md) covers the build.
 
 Icons in context, such as `fa-user` and `fa-building` for personal and corporate
 creators, or `fa-user` and `fa-people-arrows` for self and proxy deposit, name a
