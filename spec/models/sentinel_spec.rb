@@ -281,7 +281,7 @@ RSpec.describe Sentinel do
     it 'drops a public visibility and narrows the grants under a restricted container' do
       record = Sentinel.create!(target_id: 'c', policy: { 'small' => ['public'] },
                                 work_access: { 'visibility' => 'public',
-                                               'grants' => { 'read' => [archives, media], 'edit' => [media] } })
+                                               'grants'     => { 'read' => [archives, media], 'edit' => [media] } })
 
       record.clamp_to!([archives])
 
