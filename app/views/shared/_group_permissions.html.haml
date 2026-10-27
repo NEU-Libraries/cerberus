@@ -3,7 +3,8 @@
 -#         grants (Array<Permissions::GrantRow>) — defaults to @permissions
 -#         groups (Array<[id, name]>) — defaults to @groups
 -#         noun (String) — what the sentences name; defaults to the resource
--#         heading (String) — defaults to "Group Permissions"
+-#         heading (String|nil) — defaults to "Group Permissions"; nil omits it,
+-#           for a host whose own legend already names the section
 -#
 -# The locals exist for a page that renders two grant editors, such as a Set's
 -# Sharing tab beside its Sentinel tab: one pair of ivars cannot serve
@@ -27,7 +28,9 @@
 - noun = local_assigns.fetch(:noun) { resource.to_s.humanize(capitalize: false) }
 - grants = local_assigns.fetch(:grants) { @permissions }
 - groups = local_assigns.fetch(:groups) { @groups }
-%h5.pb-2= local_assigns.fetch(:heading, 'Group Permissions')
+- heading = local_assigns.fetch(:heading, 'Group Permissions')
+- if heading
+  %h5.pb-2= heading
 %p.form-text.text-muted.mt-0
   Select the groups that should be able to view or manage this #{noun}. Add as many groups as needed.
 - grants.each.with_index(1) do |grant, index|

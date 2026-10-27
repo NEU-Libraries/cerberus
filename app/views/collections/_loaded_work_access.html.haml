@@ -41,5 +41,5 @@
       %input#loaded-grants-replace.form-check-input{ type: 'radio', name: 'work_access[grants_mode]', value: 'replace', checked: grants_mode == 'replace', data: { action: 'change->reveal#sync' } }
       %label.form-check-label{ for: 'loaded-grants-replace' } Give new works these groups instead
   .mt-3{ hidden: grants_mode != 'replace', data: { 'reveal-target': 'section', controller: 'group-permissions', 'group-permissions-resource-value': 'work_access' } }
-    = render 'shared/group_permissions', resource: 'work_access', noun: 'work', heading: 'Groups to give each new work',
+    = render 'shared/group_permissions', resource: 'work_access', noun: 'work', heading: nil,
                                          grants: sentinel_grant_rows(sentinel, groups), groups: groups
