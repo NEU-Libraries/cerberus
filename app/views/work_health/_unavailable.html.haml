@@ -1,0 +1,23 @@
+-# Why there is no report, said inline. In the tab's lazy frame an error page
+-# would show only Turbo's "Content missing". See docs/work-health.md.
+-# @param check [WorkHealthCheck::Result] a result with no report
+-# @param work_id [String] the NOID that was checked
+-# @param standalone [Boolean] true on the admin lookup
+.alert.alert-warning.py-2.px-3.small.d-flex.align-items-start.my-3{role: 'status'}
+  %i.fa-solid.fa-triangle-exclamation.me-2.mt-1{'aria-hidden' => 'true'}
+  %div
+    - case check.failure
+    - when :not_found
+      %strong.d-block No Work found for #{work_id}.
+      It may have been deleted, or the NOID may not be a Work's.
+    - when :forbidden
+      %strong.d-block The health check is not available to you.
+      It is open to administrators and delegated administrators only.
+    - when :outage
+      %strong.d-block= check.outage.title
+      The health check could not run.
+      = link_to 'Try again', work_health_reload_path(work_id, standalone:)
+    - else
+      %strong.d-block The health check could not run.
+      The error has been logged.
+      = link_to 'Try again', work_health_reload_path(work_id, standalone:)

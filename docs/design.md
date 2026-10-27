@@ -3,11 +3,7 @@
 The DRS look in one phrase is *restrained, librarian/archival, institutional*.
 This page holds the rules that make it so: which container a surface gets, the
 palette and its coupled tokens, type, icons, tabs, buttons and hover. Read it
-before you change a view, a component or a stylesheet. A local Claude Code hook
-blocks UI edits until this page has been read in the session.
-
-For a new interface or an in-place redesign, also use the `/frontend-design`
-skill, as `CLAUDE.md` says, and land its output on the rules here.
+before you change a view, a component or a stylesheet.
 
 Source files:
 
@@ -144,6 +140,7 @@ the page it opens show the same icon.
 | My DRS | `fa-folder-tree` | The My DRS page and its menu entry |
 | A loader | `fa-file-import` | Its dashboard card, the Loader registry, the loader chip on load pages |
 | Move (reparent) | `fa-sitemap` | Its dashboard card and pages, the audit "Reparented" row, the Requests "Move" row |
+| Health: of the system, or of one Work | `fa-heart-pulse` | The System health and Work health dashboard cards and pages, the grade chip on a Work's Health tab |
 | Why this result? | `fa-magnifying-glass-chart` | Each search result's action rail, for admins, and the dialog it opens. Not `fa-magnifying-glass`, which is search itself |
 | A genre | its `FeaturedContent::GENRES` icon | Its homepage gateway, its landing page heading and empty state |
 

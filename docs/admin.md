@@ -159,11 +159,12 @@ action between controllers.
 | Replace a file, roll back a version | `:admin` or the devolved-admin tier | Atlas grants Blob `:update` to every standard user, and its rollback checks `:update`. It grants `:read_versions` to the delegate tier |
 | Reindex a Work or a Set | `:admin` or the devolved-admin tier | Atlas applies no per-user check on this path at all |
 | The ledger | `:admin` or the devolved-admin tier | the same audience as deposit triage |
+| Work health lookup | `:admin` or the devolved-admin tier | Atlas allows its health check to both tiers, as `:read_health`. See `work-health.md` |
 | Linked members | `:admin` only | it edits placement, which the delegate tier does not manage |
 | Associated works | `:admin` or the devolved-admin tier | Atlas grants `:associate` to both. A delegate's reads stay group-gated, so a Work they cannot read gets the forbidden page, and an edge to one shows its bare NOID |
 | Communities registry | `:admin` or the devolved-admin tier | it only lists and links, through the gated search, so a delegate sees what they may discover. Its People link is `:admin` only, as the page it opens is |
 | A community's people (`Admin::CommunityPeopleController`) | `:admin` only | Atlas grants Person `:update` to admins and the system principal alone. It is a hub page rather than a tab on the community's Edit page, because people who may edit a community's details must not be offered its people |
-| The History tab, and the rights and MODS history pages | `:admin` or the devolved-admin tier, as `:read, :audit_event` | Atlas grants the delegate tier `:read_history` on Works and containers, and still checks `:read` on the resource, so a delegate reads the history of what they can open. The history of a resource that no longer resolves stays admin-only in Atlas |
+| The History tab, and the rights, MODS and Darwin Core history pages | `:admin` or the devolved-admin tier, as `:read, :audit_event` | Atlas grants the delegate tier `:read_history` on Works and containers, and still checks `:read` on the resource, so a delegate reads the history of what they can open. The history of a resource that no longer resolves stays admin-only in Atlas |
 
 `HistoriesController` is the odd one out. It sits outside `Admin::`, inherits
 `ApplicationController`, and asks CanCan directly rather than using
@@ -507,7 +508,10 @@ pinned to the system NUID.
 | `set` | enqueues `SetReindexJob` | a Set names collections whose subtrees can run to thousands of resources |
 
 `work` flashes success on a 204, "no resource found" on a 404, and a failure
-otherwise, then returns to the Work's show page.
+otherwise. It then returns to the `return_to` path it was sent, or to the Work's
+show page. `url_from` refuses a `return_to` off this site. The Work health
+report sends its own page, so the operator sees the new grade (see
+`work-health.md`).
 
 `set` reads the Compilation before it enqueues. So an unknown or unreadable id
 fails in front of the person who clicked, rather than inside a job nobody is
@@ -652,11 +656,11 @@ the field keeps it honest, and it still sorts the list usefully. The deposit
 nothing has touched in a month sinks to the top. A document with no stamp shows
 a dash.
 
-## The rights and MODS history pages
+## The rights, MODS and Darwin Core history pages
 
 `HistoriesController` renders the deep diffs reached from the Audit History
-tab's per-row "View" button, at `/resources/:id/rights_history` and
-`/resources/:id/mods_history`. They succeed DRS v1's per-object "Rights History"
+tab's per-row "View" button, at `/resources/:id/rights_history`,
+`/resources/:id/mods_history` and `/resources/:id/dwc_history`. They succeed DRS v1's per-object "Rights History"
 and "MODS History" pages, and they are read-only.
 
 Every data call hits Atlas's `/resources/:id/*` endpoints, so one controller
@@ -667,7 +671,7 @@ its audit log.
 ### Three types, not any type
 
 `load_resource!` also gates on the type. It raises `ResourceNotFound`, a 404,
-for an unknown id or for any type outside `ModsableTypes::TYPES`. "Type-agnostic" means one controller serves
+for an unknown id or for any type whose `resource_class.mods_editable?` is false. "Type-agnostic" means one controller serves
 the three, not that any Atlas id may address it.
 
 Nothing upstream refuses the others. Atlas answers `/resources/:id`,
@@ -714,3 +718,14 @@ nothing earlier to compare.
 
 Matching `?at` to a version is best-effort. The correlation is by timestamp
 against the version's `created`, so a miss falls back to the newest version.
+
+### The Darwin Core page
+
+`#dwc` is the MODS page over `dwc_versions` and `dwc_version`. The two actions
+share `compare_versions` and the `histories/_version_diff` partial, and differ
+only in their reads and their wording. `MODSDiff` is a line diff of
+pretty-printed XML with nothing MODS-specific in it, so it serves both.
+
+It also refuses any type but a Work, before reading. Only a Work holds a
+record, and Atlas answers an empty version list for anything else, so without
+the gate a Collection would show an empty history rather than a 404.

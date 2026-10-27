@@ -34,6 +34,7 @@ turned back.
 | `read_only?` | whether the repository is refusing writes |
 | `message` | the operator's note for the banner |
 | `retry_after` | seconds Atlas asks a refused caller to wait |
+| `unreachable?` | whether the window is held only because Atlas did not answer |
 
 `window` caches each read in `Rails.cache` for
 `config.x.cerberus.maintenance_ttl` (`CERBERUS_MAINTENANCE_TTL`, default 5
@@ -57,8 +58,13 @@ satisfies.
 
 | Failure | Answer | Why |
 |---|---|---|
-| **Transport** — `Faraday::ConnectionFailed`, `Faraday::TimeoutError`; nothing answered at all | hold the window (`read_only: true`, a 60-second `retry_after`, and a generic message) | this happens while Atlas is being replaced, which is exactly when a window is likely to be open and when Cerberus could not render a page anyway |
+| **Transport** — `Faraday::ConnectionFailed`, `Faraday::TimeoutError`; nothing answered at all | hold the window (`read_only: true`, `unreachable: true`, a 60-second `retry_after`, and a generic message) | this happens while Atlas is being replaced, which is exactly when a window is likely to be open and when Cerberus could not render a page anyway |
 | **An HTTP response we cannot read** — any other `StandardError`, or a `nil` read | assume no window | Atlas is up and talking but told us nothing about a window; most often it is a build older than the endpoint |
+
+A held window is not one anybody opened, so `unreachable?` marks it. The banner,
+the gate and the admin page then speak of an outage rather than maintenance;
+[`outages.md`](outages.md#atlas-unreachable) covers what each one shows. Writes
+stay refused either way.
 
 An Atlas build without the endpoint answers 404, which atlas_rb reads back as
 `nil` rather than raising. `fetch_window` therefore ends in `|| no_window`, or

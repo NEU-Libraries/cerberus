@@ -1,0 +1,8 @@
+-# Darwin Core history diff page, the deep view behind the audit log's "View"
+-# button on Darwin Core rows. See docs/metadata-records.md.
+= render 'histories/version_diff',
+         heading:      'Darwin Core history',
+         ledger_title: 'Darwin Core record versions',
+         empty_title:  'No Darwin Core versions recorded',
+         empty_hint:   "Uploads of this work's Darwin Core record will appear here.",
+         path:         dwc_history_path(@resource_id)

@@ -180,8 +180,12 @@ module ApplicationHelper
 
   # The read-only maintenance window, for the standing banner. Wrapped in
   # helpers rather than called on MaintenanceMode from the template so the
-  # cached Atlas read has one entry point from the view layer.
-  def maintenance_window? = MaintenanceMode.read_only?
+  # cached Atlas read has one entry point from the view layer. An unreachable
+  # Atlas also refuses writes, but nobody opened a window, so it gets the outage
+  # banner instead.
+  def maintenance_window? = MaintenanceMode.read_only? && !MaintenanceMode.unreachable?
+
+  def records_unavailable? = MaintenanceMode.unreachable?
 
   def maintenance_message = MaintenanceMode.message
 end

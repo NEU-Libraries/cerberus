@@ -25,3 +25,24 @@
     </div>
   </aside>
 <% end %>
+<%# Atlas stopped answering. The pages that still render are the ones that do %>
+<%# not need it, so the banner names only what the reader cannot do. %>
+<% if records_unavailable? %>
+  <aside class="maintenance-banner maintenance-banner--outage" role="status" aria-live="polite">
+    <div class="<%= container_classes %> maintenance-banner__inner">
+      <span class="maintenance-banner__badge">
+        <i class="fa-solid fa-plug-circle-xmark" aria-hidden="true"></i>
+        Unavailable
+      </span>
+
+      <span class="maintenance-banner__note">
+        Records cannot be opened or saved right now. Nothing you had saved before
+        now has been lost.
+      </span>
+
+      <% if effective_user&.admin? %>
+        <%= link_to 'Details', admin_health_path, class: 'maintenance-banner__manage' %>
+      <% end %>
+    </div>
+  </aside>
+<% end %>

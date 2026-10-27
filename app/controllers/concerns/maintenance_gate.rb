@@ -50,6 +50,8 @@ module MaintenanceGate
     end
 
     def render_maintenance_notice(_exception = nil)
+      return render_outage(Outage::CAPABILITIES.fetch(:records)) if MaintenanceMode.unreachable?
+
       response.headers['Retry-After'] = MaintenanceMode.retry_after.to_s if MaintenanceMode.retry_after
       render template: 'errors/service_unavailable',
              status:   :service_unavailable,

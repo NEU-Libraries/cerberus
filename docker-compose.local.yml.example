@@ -17,7 +17,9 @@
 #    so a worktree is invisible to it. Mounting the worktrees parent at the SAME
 #    path on both sides is what lets `docker exec -w <worktree>` resolve, and is
 #    what bin/spec relies on to run a branch's specs without copying files.
-#    Set WORKTREES_ROOT in .env; one variable serves both sides of the colon.
+#    It ships commented out, so the memory limits work without it. To use it,
+#    set WORKTREES_ROOT in .env and uncomment the two volumes lines under web;
+#    one variable serves both sides of the colon.
 #
 # 2. PER-SERVICE MEMORY LIMITS. THE NUMBERS BELOW ARE SIZED FOR ONE HOST AND
 #    ARE NOT A RECOMMENDATION — size them to your own machine before running the
@@ -37,8 +39,8 @@ services:
     # The largest share, because the batch jobs (zip packing, derivative
     # generation, document conversion) all run in this container.
     mem_limit: 2500m
-    volumes:
-      - ${WORKTREES_ROOT:?set WORKTREES_ROOT in .env}:${WORKTREES_ROOT}
+    # volumes:
+    #   - ${WORKTREES_ROOT:?set WORKTREES_ROOT in .env}:${WORKTREES_ROOT}
   atlas:
     mem_limit: 2g
   atlas-test:

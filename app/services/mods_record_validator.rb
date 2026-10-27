@@ -17,7 +17,7 @@ class MODSRecordValidator < ApplicationService
   end
 
   def call
-    errors = XmlValidator.call(xml: @xml)
+    errors = XmlValidator.call(xml: @xml, namespace: 'xmlns:mods')
     return errors if errors.any?
 
     required_field_errors

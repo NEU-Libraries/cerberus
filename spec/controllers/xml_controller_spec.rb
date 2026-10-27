@@ -127,6 +127,39 @@ describe XmlController do
     end
   end
 
+  # The editor is where most damaged Works get repaired, so it must open on one.
+  describe 'editor, on a damaged Work' do
+    render_views
+
+    before { allow(AtlasRb::Resource).to receive(:mods).and_call_original }
+
+    it 'opens without an access copy, keeping the #mods node Validate replaces' do
+      allow(AtlasRb::Resource).to receive(:mods).with(work.id, 'html').and_return(nil)
+
+      get :editor, params: { id: work.id }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('There is no access copy to preview', 'id="mods"')
+    end
+
+    it 'says the preservation XML is missing rather than opening a silent blank buffer' do
+      allow(AtlasRb::Resource).to receive(:mods).with(work.id, 'xml').and_return(nil)
+
+      get :editor, params: { id: work.id }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('The preservation XML for this Work is missing',
+                                       CGI.escapeHTML(edit_work_path(work.id, tab: 'health')))
+    end
+
+    it 'shows no notice on a whole Work' do
+      get :editor, params: { id: work.id }
+
+      expect(response.body).not_to include('preservation XML for this Work is missing')
+      expect(response.body).to include('id="mods"')
+    end
+  end
+
   describe 'validate' do
     let(:preview_result) { "<div class='mods-preview'><h1>Test Title</h1></div>" }
 

@@ -25,9 +25,13 @@ class IiifImageCreator < ApplicationService
   end
 
   def call
+    # Rotate the pixels upright before capping. Cantaloupe honours the TIFF
+    # orientation tag tiffsave copies from the source, so a rotated photo capped
+    # before rotation serves narrower than the cap.
+    img = Vips::Image.new_from_file(@path, **load_options).autorot
     # Normalise to three-band sRGB: JPEG compression takes neither CMYK nor an
     # alpha channel reliably, so transparency flattens onto white.
-    img = Vips::Image.new_from_file(@path, **load_options).colourspace(:srgb)
+    img = img.colourspace(:srgb)
     img = img.flatten(background: [255, 255, 255]) if img.has_alpha?
     img = img.mutate { |m| STRIPPED_METADATA.each { |field| m.remove!(field) } }
     Result.new(

@@ -135,6 +135,40 @@ describe WorksController do
       end
     end
 
+    # The tab bar appears to every reader once a record exists, not just to the
+    # editors who also get Analytics.
+    context 'the Darwin Core tab' do
+      it 'is absent, and so is the tab bar, for a guest when the work holds no record' do
+        get :show, params: { id: work.id }
+
+        expect(response.body).not_to include('darwin-core-tab')
+        expect(response.body).not_to include('nav-tabs')
+      end
+
+      context 'when the work holds a record' do
+        before do
+          AtlasRb::Resource.put_dwc(work.id, Rails.root.join('spec/fixtures/files/dwc-record.xml').to_s,
+                                    nuid: '000000004')
+        end
+
+        # The XML download lives on the edit pane only, as v1 offered none here.
+        it 'shows the record to a guest, with no download' do
+          get :show, params: { id: work.id }
+
+          expect(response.body).to include('id="darwin-core-tab"')
+          expect(response.body).to include('class="dwc-group"')
+          expect(response.body).to include('MVZ:Mamm:14523')
+          expect(response.body).not_to include(%(href="#{dwc_work_path(work.id)}"))
+        end
+
+        it 'keeps Metadata as the open pane' do
+          get :show, params: { id: work.id }
+
+          expect(response.body).to match(/id="metadata-tab"[^>]*class="nav-link active"|class="nav-link active"[^>]*id="metadata-tab"/)
+        end
+      end
+    end
+
     it 'does not show the embargo banner when there is no embargo' do
       get :show, params: { id: work.id }
       expect(response.body).not_to include('under embargo')

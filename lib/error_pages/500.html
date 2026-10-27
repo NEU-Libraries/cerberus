@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sorry, you encountered a system error. | Digital Repository Service</title>
+  <!-- Served when the routed error page cannot render, so it loads nothing:
+       no stylesheet, no script, no font. See docs/outages.md. -->
+  <style>
+    body { margin: 0; background-color: #f8f9fa; color: #212529;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    .site { background-color: #385775; color: #fff; padding: 0.9rem 1.25rem; font-weight: 600; }
+    .error-page { max-width: 640px; margin: 3rem auto; background-color: #fff;
+      border: 1px solid #dee2e6; border-top: 3px solid #c46410; border-radius: 0.5rem; overflow: hidden; }
+    .error-page__head { background-color: #f6f8fa; border-bottom: 1px solid #dee2e6; padding: 0.85rem 1.25rem;
+      display: flex; align-items: baseline; gap: 0.55rem; font-variant-numeric: tabular-nums; }
+    .error-page__status-code { font-weight: 700; font-family: SFMono-Regular, Menlo, Monaco, Consolas,
+      "Liberation Mono", "Courier New", monospace; }
+    .error-page__status-label { color: #495057; font-weight: 600; font-size: 0.72rem;
+      text-transform: uppercase; letter-spacing: 0.09em; }
+    .error-page__body { padding: 1.5rem 1.5rem 1.25rem; }
+    h1 { margin: 0 0 0.5rem 0; font-size: 1.18rem; font-weight: 600; line-height: 1.35; }
+    p { margin: 0; color: #495057; font-size: 0.95rem; line-height: 1.5; }
+    .error-page__actions { border-top: 1px solid #e9ecef; background-color: #fafbfc; padding: 0.7rem 1.25rem;
+      font-size: 0.82rem; color: #495057; }
+    a { color: #2666a6; }
+    @media (max-width: 575.98px) { .error-page { margin: 1.5rem 1rem; } }
+  </style>
+</head>
+<body>
+  <header class="site">Digital Repository Service</header>
+  <main class="error-page">
+    <div class="error-page__head">
+      <span class="error-page__status-code">500</span>
+      <span class="error-page__status-label">Server Error</span>
+    </div>
+    <div class="error-page__body">
+      <h1>Sorry, you encountered a system error.</h1>
+      <p>The DRS tried to process your request but encountered an error. We apologize for the inconvenience and will resolve the error soon.</p>
+    </div>
+    <div class="error-page__actions">
+      If this goes on, please <a href="mailto:Library-Repository-Team@neu.edu">contact DRS staff</a>.
+    </div>
+  </main>
+</body>
+</html>

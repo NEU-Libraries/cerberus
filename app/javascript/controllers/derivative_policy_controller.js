@@ -32,11 +32,13 @@ export default class extends Controller {
   search(event) {
     clearTimeout(this.timer)
     const entry = event.target.closest(".derivative-tier__entry")
-    // Typing invalidates an earlier pick — the hidden field carries a chosen
-    // identifier or nothing, never whatever was typed over it.
-    entry.querySelector(".js-group-id").value = ""
-
     const query = event.target.value.trim()
+    this.clearError(entry)
+    // Typing invalidates an earlier pick — the hidden field carries a chosen
+    // identifier or nothing, never whatever was typed over it. A group typed out
+    // in full counts as chosen, because the entry row's field submits with Save.
+    entry.querySelector(".js-group-id").value = this.exactMatch(entry, query)?.value ?? ""
+
     if (query.length < 2) { this.render(entry, []); return }
 
     this.timer = setTimeout(() => this.filter(entry, query), 200)
@@ -78,10 +80,10 @@ export default class extends Controller {
     const tier = entry.closest(".derivative-tier")
     const field = entry.querySelector(".js-group-id")
     const query = entry.querySelector(".js-group-query")
-    if (field.value === "") { query.focus(); return }
+    if (field.value === "") { this.refuse(entry, query); return }
 
     const row = tier.querySelector("template").content.cloneNode(true).firstElementChild
-    row.querySelector(".js-label").textContent = query.value
+    row.querySelector(".js-label").textContent = this.labelFor(field.value)
     row.querySelector(".js-field").value = field.value
     tier.querySelector(".derivative-tier__rows").appendChild(row)
 
@@ -93,6 +95,53 @@ export default class extends Controller {
 
   remove(event) {
     event.target.closest(".derivative-tier__row").remove()
+  }
+
+  // --- typed entry ---
+
+  // Matches the identifier or the name in full, ignoring case. A group already
+  // on the tier never matches, so it cannot be added twice.
+  exactMatch(entry, query) {
+    const needle = query.toLowerCase()
+    if (needle === "") return null
+
+    const taken = this.chosenIds(entry.closest(".derivative-tier"))
+    return this.groupsValue.find(({ value, label }) =>
+      !taken.includes(value) &&
+      (value.toLowerCase() === needle || label.toLowerCase() === needle))
+  }
+
+  labelFor(id) {
+    return this.groupsValue.find(({ value }) => value === id)?.label ?? id
+  }
+
+  // + with nothing chosen says why, rather than doing nothing. An empty field
+  // needs no message: there is nothing to explain.
+  refuse(entry, query) {
+    query.focus()
+    const typed = query.value.trim().toLowerCase()
+    if (typed === "") return
+
+    const tier = entry.closest(".derivative-tier")
+    const taken = this.chosenIds(tier).some((id) =>
+      id.toLowerCase() === typed || this.labelFor(id).toLowerCase() === typed)
+    this.showError(entry, taken ? "This tier already has that group." : "Pick a group from the list.")
+  }
+
+  // The message is written a frame after the field turns invalid, so a screen
+  // reader sees the live region become visible before its text changes.
+  showError(entry, message) {
+    const error = entry.querySelector(".js-group-error")
+    entry.querySelector(".js-group-query").classList.add("is-invalid")
+    entry.querySelector(".js-group-query").setAttribute("aria-invalid", "true")
+    requestAnimationFrame(() => { error.textContent = message })
+  }
+
+  clearError(entry) {
+    const query = entry.querySelector(".js-group-query")
+    query.classList.remove("is-invalid")
+    query.removeAttribute("aria-invalid")
+    entry.querySelector(".js-group-error").textContent = ""
   }
 
   // --- shared dropdown rendering ---

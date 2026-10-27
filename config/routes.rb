@@ -16,6 +16,13 @@ Rails.application.routes.draw do
 
   mount Blacklight::Engine => '/catalog'
   root to: 'pages#home'
+
+  # Monitoring. /up is Swarm's liveness check and touches no dependency, so an
+  # outage elsewhere never restarts a container that can still serve the outage
+  # page. /health is for Nagios. See docs/outages.md.
+  get 'up',                  to: 'rails/health#show', as: :rails_health_check
+  get 'health',              to: 'health#index',      as: :health
+  get 'health/:capability',  to: 'health#show',       as: :health_capability
   get 'terms', to: 'pages#terms', as: :terms
   concern :searchable, Blacklight::Routes::Searchable.new
 
@@ -118,11 +125,19 @@ Rails.application.routes.draw do
       # edit-gated via authorize_resource_writes!'s extra_edit list.
       get :upload
       post :upload, action: :add_file
+      # The stored Darwin Core XML, behind the show page's read gate; the edit
+      # page uploads a replacement or withdraws it.
+      get :dwc, to: 'darwin_core_records#show'
+      put :dwc, to: 'darwin_core_records#update'
+      delete :dwc, to: 'darwin_core_records#destroy'
       post :tombstone
       # An editor-submitted request to withdraw or move the work — notifies the
       # DRS staff inbox (no direct mutation; staff fulfill it with the tombstone
       # / re-parent tools). Edit-gated via authorize_resource_writes!.
       post :request_change
+      # The Health tab's lazy frame. Admins and delegated admins only, matching
+      # Atlas's health check beneath it (WorkHealthController).
+      get :health, to: 'work_health#show'
     end
   end
   # People / profile pages. :id is the Person's NOID (opaque, public-safe — the
@@ -229,6 +244,8 @@ Rails.application.routes.draw do
     # deploy orchestrator are the other two, and all three write the same flag
     # in Atlas. Closing must stay reachable while the window is open — see
     # Admin::MaintenanceController.
+    get 'health', to: 'health#show', as: :health
+
     get    'maintenance',      to: 'maintenance#show',         as: :maintenance
     post   'maintenance/open', to: 'maintenance#open_window',  as: :open_maintenance
     delete 'maintenance',      to: 'maintenance#close_window', as: :close_maintenance
@@ -336,6 +353,9 @@ Rails.application.routes.draw do
     # endpoint behind them is system-gated and applies no per-user check.
     post 'reindex/work/:noid', to: 'reindex#work', as: :reindex_work
     post 'reindex/set/:noid',  to: 'reindex#set',  as: :reindex_set
+
+    # The Work health check by NOID, for a Work whose edit page will not open.
+    get 'work_health', to: 'work_health#show'
   end
 
   get '/downloads/:id', to: 'downloads#show', as: :download
@@ -352,6 +372,7 @@ Rails.application.routes.draw do
   # a single flat route serves Work / Collection / Community alike.
   get '/resources/:id/rights_history', to: 'histories#rights', as: :rights_history
   get '/resources/:id/mods_history',   to: 'histories#mods',   as: :mods_history
+  get '/resources/:id/dwc_history',    to: 'histories#dwc',    as: :dwc_history
 
   # "Why this result?" on a search result, for admins: :id is the result's Solr
   # id, and q is the search it came from.

@@ -1,3 +1,8 @@
+# Pinned rather than taken from the checkout's directory name: the docs and the
+# bin/ scripts address containers as cerberus-<service>-1, and bin/spec passes
+# -p cerberus, so a clone under another name would otherwise run two stacks.
+name: cerberus
+
 # Use postgres/example user/password credentials
 volumes:
   solr:
@@ -93,6 +98,16 @@ services:
       TERMS_DOCUMENT_URL: ${TERMS_DOCUMENT_URL:-}
     ports:
       - 3000:3000
+    # /up answers once Puma is serving and checks no dependency, so an outage
+    # elsewhere marks this container healthy rather than restarting the one
+    # thing that can still serve the outage page. start_period covers the
+    # entrypoint's db:migrate.
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:3000/up"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
   atlas:
     image: nakatomi/atlas_web:${ATLAS:-latest}
     depends_on:
@@ -101,6 +116,14 @@ services:
       redis:
         condition: service_healthy
     entrypoint: /home/atlas/web/docker-entrypoint.sh
+    # Liveness only, as for web: /up checks no dependency. Atlas's /health is
+    # the readiness report, and Cerberus's own /health/records reads it.
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:3000/up"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
     environment:
       RAILS_MASTER_KEY: ${ATLAS_RAILS_MASTER_KEY}
       # Handle minting. Atlas owns the client and the admin credential; Cerberus

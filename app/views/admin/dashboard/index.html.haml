@@ -51,6 +51,16 @@
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
 
+    = link_to admin_work_health_path, class: 'admin-action-card admin-action-card--health', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-heart-pulse{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Work health
+      %span.admin-action-card__desc
+        Check a Work by its NOID for missing or broken parts, with the repair for each. For a Work too broken to open its edit page.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
     = link_to admin_associations_path, class: 'admin-action-card admin-action-card--link', role: 'listitem' do
       %span.admin-action-card__icon
         %i.fa-solid.fa-diagram-project{'aria-hidden' => 'true'}
@@ -153,6 +163,17 @@
         %span.admin-action-card__title Maintenance window
         %span.admin-action-card__desc
           Make the whole repository read-only while a migration or a risky deploy runs. Searching and downloading carry on; depositing and editing are refused until the window is closed.
+        %span.admin-action-card__cta
+          Open
+          %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
+    - if current_user&.admin?
+      = link_to admin_health_path, class: 'admin-action-card admin-action-card--health', role: 'listitem' do
+        %span.admin-action-card__icon
+          %i.fa-solid.fa-heart-pulse{'aria-hidden' => 'true'}
+        %span.admin-action-card__title System health
+        %span.admin-action-card__desc
+          See which of the services behind the repository are answering, how fast, and the error from any that are not.
         %span.admin-action-card__cta
           Open
           %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}

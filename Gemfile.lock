@@ -84,7 +84,7 @@ GEM
     addressable (2.9.0)
       public_suffix (>= 2.0.2, < 8.0)
     ast (2.4.3)
-    atlas_rb (1.25.0)
+    atlas_rb (1.27.4)
       faraday (~> 2.7)
       faraday-follow_redirects (~> 0.3.0)
       faraday-multipart (~> 1)
@@ -92,10 +92,10 @@ GEM
       faraday-retry (~> 2.4)
       hashie (~> 5.0)
       jwt (~> 2.7)
-    axe-core-api (4.13.0)
+    axe-core-api (4.14.0)
       dumb_delegator
-    axe-core-rspec (4.13.0)
-      axe-core-api (= 4.13.0)
+    axe-core-rspec (4.14.0)
+      axe-core-api (= 4.14.0)
     base64 (0.3.0)
     bcrypt (3.1.22)
     bigdecimal (4.1.3)
@@ -108,8 +108,8 @@ GEM
       rails (>= 7.0, < 9)
       view_component (>= 3.0, < 5.0)
       zeitwerk
-    blacklight-gallery (6.0.0)
-      blacklight (~> 9.0.0beta1)
+    blacklight-gallery (6.1.0)
+      blacklight (~> 9.0)
       rails (>= 7.1, < 9)
     bootsnap (1.26.0)
       msgpack (~> 1.5)
@@ -119,7 +119,7 @@ GEM
       actionpack (>= 7.2)
       activemodel (>= 7.2)
     builder (3.3.0)
-    cancancan (3.6.1)
+    cancancan (3.7.0)
     capybara (3.40.0)
       addressable
       matrix
@@ -138,12 +138,12 @@ GEM
     chartkick (5.2.1)
     concurrent-ruby (1.3.8)
     connection_pool (3.0.2)
-    crass (1.0.7)
+    crass (1.0.8)
     csv (3.3.6)
     dartsass-rails (0.5.1)
       railties (>= 6.0.0)
       sass-embedded (~> 1.63)
-    date (3.5.1)
+    date (3.6.0)
     debug (1.11.1)
       irb (~> 1.10)
       reline (>= 0.3.8)
@@ -171,15 +171,15 @@ GEM
       railties (>= 6.1.0)
     faker (3.8.0)
       i18n (>= 1.8.11, < 2)
-    faraday (2.14.4)
-      faraday-net_http (>= 2.0, < 3.5)
+    faraday (2.15.0)
+      faraday-net_http (>= 2.0, < 3.6)
       json
       logger
     faraday-follow_redirects (0.3.0)
       faraday (>= 1, < 3)
     faraday-multipart (1.2.0)
       multipart-post (~> 2.0)
-    faraday-net_http (3.4.4)
+    faraday-net_http (3.5.0)
       net-http (~> 0.5)
     faraday-net_http_persistent (2.3.1)
       faraday (~> 2.5)
@@ -208,7 +208,7 @@ GEM
       rainbow
       rubocop (>= 1.0)
       sysexits (~> 1.1)
-    hashie (5.1.0)
+    hashie (5.2.0)
       logger
     htmlentities (4.4.2)
     i18n (1.15.2)
@@ -229,19 +229,19 @@ GEM
     json (2.21.2)
     jwt (2.10.3)
       base64
-    kaminari (1.2.2)
+    kaminari (1.3.0)
       activesupport (>= 4.1.0)
-      kaminari-actionview (= 1.2.2)
-      kaminari-activerecord (= 1.2.2)
-      kaminari-core (= 1.2.2)
-    kaminari-actionview (1.2.2)
+      kaminari-actionview (= 1.3.0)
+      kaminari-activerecord (= 1.3.0)
+      kaminari-core (= 1.3.0)
+    kaminari-actionview (1.3.0)
       actionview
-      kaminari-core (= 1.2.2)
-    kaminari-activerecord (1.2.2)
+      kaminari-core (= 1.3.0)
+    kaminari-activerecord (1.3.0)
       activerecord
-      kaminari-core (= 1.2.2)
-    kaminari-core (1.2.2)
-    kataba (1.1.3)
+      kaminari-core (= 1.3.0)
+    kaminari-core (1.3.0)
+    kataba (1.1.4)
       nokogiri (>= 1.19)
     language_server-protocol (3.17.0.6)
     libreconv (0.9.5)
@@ -281,18 +281,19 @@ GEM
     multipart-post (2.4.1)
     namae (1.2.0)
       racc (~> 1.7)
-    net-http (0.9.1)
+    net-http (0.10.0)
+      net-protocol (>= 0.3.0)
       uri (>= 0.11.1)
     net-http-persistent (4.0.8)
       connection_pool (>= 2.2.4, < 4)
-    net-imap (0.6.7)
+    net-imap (0.6.8)
       date
       net-protocol
     net-pop (0.1.2)
       net-protocol
     net-protocol (0.4.0)
       timeout
-    net-smtp (0.5.1)
+    net-smtp (0.5.2)
       net-protocol
     neu-mods (0.14.1)
       nokogiri (>= 1.13)
@@ -308,11 +309,11 @@ GEM
     parser (3.3.12.0)
       ast (~> 2.4.1)
       racc
-    pg (1.6.3-x86_64-linux)
+    pg (1.7.0-x86_64-linux)
     popper_js (2.11.8)
     pp (0.6.4)
       prettyprint
-    prettyprint (0.2.0)
+    prettyprint (0.2.1)
     prism (1.9.0)
     propshaft (1.3.2)
       actionpack (>= 7.0.0)
@@ -328,7 +329,7 @@ GEM
     rack-session (2.1.2)
       base64 (>= 0.1.0)
       rack (>= 3.0.0)
-    rack-test (2.2.0)
+    rack-test (2.3.0)
       rack (>= 1.3)
     rack-timeout (0.7.0)
     rackup (2.3.1)
@@ -376,7 +377,7 @@ GEM
       logger
       prism (>= 1.6.0)
       tsort
-    rdoc (8.0.0)
+    rdoc (8.1.0)
       erb
       prism (>= 1.6.0)
       rbs (>= 4.0.0)
@@ -385,7 +386,7 @@ GEM
       redis-client (= 0.30.1)
     redis-client (0.30.1)
       connection_pool
-    regexp_parser (2.13.0)
+    regexp_parser (2.13.1)
     reline (0.7.0)
       io-console (~> 0.5)
     responders (3.2.1)
@@ -422,14 +423,14 @@ GEM
       rspec-mocks (>= 3.13.0, < 5.0.0)
       rspec-support (>= 3.13.0, < 5.0.0)
     rspec-support (3.13.7)
-    rubocop (1.91.0)
+    rubocop (1.92.0)
       json (>= 2.3)
       language_server-protocol (~> 3.17.0.2)
       lint_roller (~> 1.1.0)
       parallel (>= 1.10)
       parser (>= 3.3.0.2)
       rainbow (>= 2.2.2, < 4.0)
-      regexp_parser (>= 2.9.3, < 3.0)
+      regexp_parser (>= 2.11.3, < 3.0)
       rubocop-ast (>= 1.49.0, < 2.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 2.4.0, < 4.0)
@@ -447,7 +448,7 @@ GEM
       ffi (~> 1.12)
       logger
     rubyzip (3.7.0)
-    sass-embedded (1.105.0-x86_64-linux-gnu)
+    sass-embedded (1.106.1-x86_64-linux-gnu)
       google-protobuf (~> 4.31)
     securerandom (0.4.1)
     selenium-webdriver (4.44.0)
@@ -465,7 +466,7 @@ GEM
       fugit (~> 1.11)
       railties (>= 7.1)
       thor (>= 1.3.1)
-    sqlite3 (2.9.6-x86_64-linux-gnu)
+    sqlite3 (2.10.1-x86_64-linux-gnu)
     stimulus-rails (1.3.4)
       railties (>= 6.0.0)
     sysexits (1.2.0)
@@ -487,9 +488,9 @@ GEM
     unicode-display_width (3.3.0)
       unicode-emoji (~> 4.3)
     unicode-emoji (4.3.0)
-    uri (1.1.1)
+    uri (1.1.2)
     useragent (0.16.11)
-    view_component (4.15.0)
+    view_component (4.17.0)
       actionview (>= 7.1.0)
       activesupport (>= 7.1.0)
       concurrent-ruby (~> 1)
@@ -503,14 +504,14 @@ GEM
     xpath (3.2.0)
       nokogiri (~> 1.8)
     zeitwerk (2.8.3)
-    zip_kit (6.3.4)
+    zip_kit (6.4.1)
 
 PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
   activerecord-session_store
-  atlas_rb (>= 1.23.0)
+  atlas_rb (>= 1.27.0)
   axe-core-rspec
   blacklight (~> 9.0)
   blacklight-gallery (~> 6.0)
@@ -533,7 +534,7 @@ DEPENDENCIES
   haml_lint
   importmap-rails
   json (~> 2.21)
-  kataba (>= 1.1.3)
+  kataba (>= 1.1.4)
   libreconv
   loaf
   mini_exiftool

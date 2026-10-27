@@ -25,11 +25,11 @@ describe XmlValidator do
 
   describe '#call' do
     it 'returns an empty array for well-formed MODS that passes its schema' do
-      expect(XmlValidator.call(xml: valid_mods)).to eq([])
+      expect(XmlValidator.call(xml: valid_mods, namespace: 'xmlns:mods')).to eq([])
     end
 
     it 'returns a Nokogiri::XML::SyntaxError for unparseable XML and skips later phases' do
-      errors = XmlValidator.call(xml: '<mods:mods><titleInfo>unclosed')
+      errors = XmlValidator.call(xml: '<mods:mods><titleInfo>unclosed', namespace: 'xmlns:mods')
       expect(errors.size).to eq(1)
       expect(errors.first).to be_a(Nokogiri::XML::SyntaxError)
       expect(Kataba).not_to have_received(:fetch_schema)
@@ -42,7 +42,7 @@ describe XmlValidator do
       let(:with_line_break) { valid_mods.sub('Test', "Simple#{[0x000B].pack('U')}form") }
 
       it 'reports it in plain language instead of the libxml message' do
-        errors = XmlValidator.call(xml: with_line_break)
+        errors = XmlValidator.call(xml: with_line_break, namespace: 'xmlns:mods')
 
         expect(errors.size).to eq(1)
         expect(errors.first).to be_a(String)
@@ -51,7 +51,7 @@ describe XmlValidator do
       end
 
       it 'skips the parse and the schema fetch, which such a document never reaches anyway' do
-        XmlValidator.call(xml: with_line_break)
+        XmlValidator.call(xml: with_line_break, namespace: 'xmlns:mods')
 
         expect(Kataba).not_to have_received(:fetch_schema)
       end
@@ -65,8 +65,19 @@ describe XmlValidator do
           <child/>
         </root>
       XML
-      errors = XmlValidator.call(xml: xml)
+      errors = XmlValidator.call(xml: xml, namespace: 'xmlns:mods')
       expect(errors).to include(a_string_matching(/xmlns:mods/))
+    end
+
+    it 'skips the namespace rule when no namespace is required' do
+      xml = <<~XML
+        <?xml version="1.0" encoding="UTF-8"?>
+        <root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://example.com #{schema_uri}">
+          <child/>
+        </root>
+      XML
+      expect(XmlValidator.call(xml: xml, namespace: nil)).to eq([])
     end
 
     it 'flags documents whose root has no schemaLocation attribute' do
@@ -76,7 +87,7 @@ describe XmlValidator do
           <mods:titleInfo><mods:title>Test</mods:title></mods:titleInfo>
         </mods:mods>
       XML
-      errors = XmlValidator.call(xml: xml)
+      errors = XmlValidator.call(xml: xml, namespace: 'xmlns:mods')
       expect(errors).to include(a_string_matching(/schemaLocation/))
       expect(Kataba).not_to have_received(:fetch_schema)
     end
@@ -87,14 +98,14 @@ describe XmlValidator do
       failing_schema = instance_double(Nokogiri::XML::Schema, validate: [schema_error])
       allow(Kataba).to receive(:fetch_schema).with(schema_uri).and_return(failing_schema)
 
-      errors = XmlValidator.call(xml: valid_mods)
+      errors = XmlValidator.call(xml: valid_mods, namespace: 'xmlns:mods')
       expect(errors).to include(schema_error)
     end
 
     it 'surfaces a friendly error when the schema service returns an HTTP error' do
       allow(Kataba).to receive(:fetch_schema).with(schema_uri)
                                              .and_raise(Kataba::Fetcher::FetchError.new('503 Service Unavailable fetching x.xsd'))
-      errors = XmlValidator.call(xml: valid_mods)
+      errors = XmlValidator.call(xml: valid_mods, namespace: 'xmlns:mods')
       expect(errors).to include(a_string_matching(/Could not fetch schema.*503/))
     end
 
@@ -104,14 +115,14 @@ describe XmlValidator do
     it 'surfaces a friendly error when the schema host goes quiet' do
       allow(Kataba).to receive(:fetch_schema).with(schema_uri)
                                              .and_raise(Kataba::Fetcher::FetchTimeout.new('timed out fetching x.xsd'))
-      errors = XmlValidator.call(xml: valid_mods)
+      errors = XmlValidator.call(xml: valid_mods, namespace: 'xmlns:mods')
       expect(errors).to include(a_string_matching(/Could not fetch schema.*timed out/))
     end
 
     it 'surfaces a friendly error when the schema service is unreachable' do
       allow(Kataba).to receive(:fetch_schema).with(schema_uri)
                                              .and_raise(SocketError.new('getaddrinfo: Name or service not known'))
-      errors = XmlValidator.call(xml: valid_mods)
+      errors = XmlValidator.call(xml: valid_mods, namespace: 'xmlns:mods')
       expect(errors).to include(a_string_matching(/Could not fetch schema.*SocketError/))
     end
 
@@ -119,14 +130,24 @@ describe XmlValidator do
       allow(Kataba).to receive(:fetch_schema).with(schema_uri).and_raise(
         Kataba::Fetcher::FetchError.new('cross-origin HTTPS->HTTP redirect refused: https://a -> http://b')
       )
-      errors = XmlValidator.call(xml: valid_mods)
+      errors = XmlValidator.call(xml: valid_mods, namespace: 'xmlns:mods')
       expect(errors).to include(a_string_matching(/redirect refused/))
+    end
+
+    # Kataba fetched the schema chain, but libxml refused to compile it, as it
+    # does for TDWG's published Darwin Core schemas.
+    it 'surfaces a friendly error when the schema will not compile' do
+      allow(Kataba).to receive(:fetch_schema).with(schema_uri).and_raise(
+        Nokogiri::XML::SyntaxError.new("Multiple errors encountered:\nWARNING: skipping import\nERROR: does not resolve")
+      )
+      errors = XmlValidator.call(xml: valid_mods, namespace: 'xmlns:mods')
+      expect(errors).to eq(["Could not compile schema #{schema_uri} (ERROR: does not resolve)"])
     end
 
     it 're-raises a RuntimeError that is not a fetch failure' do
       allow(Kataba).to receive(:fetch_schema).with(schema_uri)
                                              .and_raise(RuntimeError.new('some unrelated bug'))
-      expect { XmlValidator.call(xml: valid_mods) }.to raise_error(RuntimeError, 'some unrelated bug')
+      expect { XmlValidator.call(xml: valid_mods, namespace: 'xmlns:mods') }.to raise_error(RuntimeError, 'some unrelated bug')
     end
 
     it 'continues fetching other schemas when one URI fails' do
@@ -143,7 +164,7 @@ describe XmlValidator do
                                              .and_raise(Kataba::Fetcher::FetchError.new('503 Service Unavailable'))
       allow(Kataba).to receive(:fetch_schema).with(other_uri).and_return(passing_schema)
 
-      errors = XmlValidator.call(xml: xml)
+      errors = XmlValidator.call(xml: xml, namespace: 'xmlns:mods')
       expect(errors).to include(a_string_matching(/Could not fetch schema #{Regexp.escape(schema_uri)}/))
       expect(Kataba).to have_received(:fetch_schema).with(other_uri)
     end
@@ -160,7 +181,7 @@ describe XmlValidator do
       XML
       allow(Kataba).to receive(:fetch_schema).with(other_uri).and_return(passing_schema)
 
-      XmlValidator.call(xml: xml)
+      XmlValidator.call(xml: xml, namespace: 'xmlns:mods')
       expect(Kataba).to have_received(:fetch_schema).with(schema_uri)
       expect(Kataba).to have_received(:fetch_schema).with(other_uri)
     end

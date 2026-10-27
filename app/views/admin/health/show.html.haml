@@ -1,0 +1,152 @@
+= render 'admin/breadcrumb_header'
+
+- down = @results.values.reject(&:ok)
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-heart-pulse{'aria-hidden' => 'true'}
+      System health
+      %span.admin-registry__count= down.empty? ? 'All services answering' : "#{pluralize(down.size, 'service')} down"
+    .admin-registry__head-actions
+      = link_to admin_health_path, class: 'btn btn-tonal-secondary btn-sm' do
+        %i.fa-solid.fa-rotate.me-1{'aria-hidden' => 'true'}
+        Check again
+
+  .p-3.pb-0
+    %p.text-body-secondary.small.mb-2
+      Checked #{l(@checked_at, format: :long)}. Readers see only the capability
+      names, on the outage page and at #{link_to '/health', health_path}, which
+      Nagios polls. This page cannot open while Postgres is down, because
+      signing in needs it; the public endpoint still reports it.
+
+  -# A label rather than a visually-hidden caption: the caption overflows
+  -# .table-responsive by a pixel and puts a scrollbar on the table.
+  .table-responsive
+    %table.table.table-borderless.admin-registry-table{'aria-label' => 'Each service the repository depends on, and whether it answered'}
+      %thead
+        %tr
+          %th{scope: 'col'} Capability
+          %th{scope: 'col'} Service
+          %th{scope: 'col'} State
+          %th.text-end{scope: 'col'} Response
+          %th{scope: 'col'} Detail
+      %tbody
+        - @results.each_value do |result|
+          %tr
+            %td
+              .admin-registry-table__name= result.capability.to_s.humanize
+            %td= result.service
+            %td
+              - if result.ok
+                %span.text-success
+                  %i.fa-solid.fa-circle-check.me-1{'aria-hidden' => 'true'}
+                  OK
+              - else
+                %span.text-danger.fw-semibold
+                  %i.fa-solid.fa-circle-xmark.me-1{'aria-hidden' => 'true'}
+                  Unavailable
+            %td.text-end
+              %span.admin-registry-table__id= "#{result.latency_ms} ms"
+            %td.small.text-break= result.detail
+
+-# Readouts, not forms, so each is a bare card body under its header strip.
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-gears{'aria-hidden' => 'true'}
+      Background jobs
+      - if @jobs
+        %span.admin-registry__count= "#{@jobs.waiting} waiting · #{@jobs.running} running"
+    .admin-registry__head-actions
+      = link_to '/jobs', class: 'btn btn-tonal-secondary btn-sm' do
+        %i.fa-solid.fa-arrow-up-right-from-square.me-1{'aria-hidden' => 'true'}
+        Open Mission Control
+  - if @jobs.nil?
+    %p.p-3.mb-0.text-body-secondary The job queue database did not answer.
+  - else
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table{'aria-label' => 'The background job queue now'}
+        %tbody
+          %tr
+            %td.w-25
+              .admin-registry-table__name Waiting
+            %td
+              %span.admin-registry-table__id= @jobs.waiting
+              - if @jobs.waiting_by_queue.any?
+                %span.small.text-body-secondary.ms-2
+                  = @jobs.waiting_by_queue.map { |queue, count| "#{queue} #{count}" }.join(' · ')
+          %tr
+            %td
+              .admin-registry-table__name Oldest waiting
+            %td
+              - if @jobs.oldest_waiting_at
+                = distance_of_time_in_words_to_now(@jobs.oldest_waiting_at)
+              - else
+                %span.text-body-secondary Nothing waiting
+          %tr
+            %td
+              .admin-registry-table__name Running
+            %td
+              %span.admin-registry-table__id= @jobs.running
+              %span.small.text-body-secondary.ms-2
+                = "on #{pluralize(@jobs.workers, 'live worker')}; a worker stopped in the last two minutes can still count"
+          %tr
+            %td
+              .admin-registry-table__name Scheduled
+            %td
+              %span.admin-registry-table__id= @jobs.scheduled
+          %tr
+            %td
+              .admin-registry-table__name Blocked
+            %td
+              %span.admin-registry-table__id= @jobs.blocked
+          %tr
+            %td
+              .admin-registry-table__name Failed
+            %td
+              %span.admin-registry-table__id{class: ('text-danger' if @jobs.failed.positive?)}= @jobs.failed
+
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-gauge-high{'aria-hidden' => 'true'}
+      Page response times
+      %span.admin-registry__count Last #{LatencyHistogram::WINDOW_MINUTES} minutes
+  - if @pages.nil?
+    %p.p-3.mb-0.text-body-secondary Redis did not answer, so there are no figures to show.
+  - elsif @pages.empty?
+    %p.p-3.mb-0.text-body-secondary Nobody has opened these pages in this window.
+  - else
+    - widest = @pages.map(&:mean_ms).max.to_f
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table{'aria-label' => 'How long people waited for each page over the last hour'}
+        %thead
+          %tr
+            %th{scope: 'col'} Page
+            %th.text-end{scope: 'col'} Views
+            %th.text-end{scope: 'col'} Median
+            %th.text-end{scope: 'col'} 1 in 20 slower than
+            %th{scope: 'col'}
+              Where the time goes, on average
+              %span.latency-legend
+                %span.latency-legend__key.latency-legend__key--atlas Atlas
+                %span.latency-legend__key.latency-legend__key--page Page
+        %tbody
+          - @pages.each do |row|
+            %tr
+              %td
+                .admin-registry-table__name= row.label
+              %td.text-end
+                %span.admin-registry-table__id= row.views
+              %td.text-end
+                %span.admin-registry-table__id= "#{row.median_ms} ms"
+              %td.text-end
+                %span.admin-registry-table__id= "#{row.slow_ms} ms"
+              %td
+                .latency-split
+                  -# The figures beside the bar carry the values; the bar only shows the proportion.
+                  .latency-split__bar{'aria-hidden' => 'true'}
+                    %span.latency-split__atlas{style: "width: #{(100 * row.atlas_mean_ms.to_i / widest).round(1)}%"}
+                    %span.latency-split__page{style: "width: #{(100 * row.page_mean_ms / widest).round(1)}%"}
+                  %span.small.text-body-secondary
+                    = "Atlas #{row.atlas_mean_ms.to_i} ms · page #{row.page_mean_ms} ms"

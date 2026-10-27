@@ -93,7 +93,7 @@ class XmlController < ApplicationController
     # dies in the breadcrumb builder, which has no route for those types.
     def require_modsable_resource!
       resource = require_resource!(resolved_resource)
-      raise ResourceNotFound unless ModsableTypes.include?(resource.klass)
+      raise ResourceNotFound unless resource.resource_class.mods_editable?
     end
 
     # One Resource.find per request. The type gate needs the payload before any
@@ -108,7 +108,7 @@ class XmlController < ApplicationController
     end
 
     def record_errors(item)
-      keywords = DescriptivePolicy.keywords_required?(AtlasRb::Resource.class_for(item.klass))
+      keywords = DescriptivePolicy.keywords_required?(item.resource_class)
       MODSRecordValidator.call(xml: params[:raw_xml], keywords:)
     end
 

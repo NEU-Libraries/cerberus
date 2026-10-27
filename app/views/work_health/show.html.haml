@@ -1,0 +1,5 @@
+= turbo_frame_tag WorkHealthHelper::FRAME_ID do
+  - if @check.ok?
+    = render 'work_health/report', report: @check.report, work_id: @work_id, standalone: false
+  - else
+    = render 'work_health/unavailable', check: @check, work_id: @work_id, standalone: false

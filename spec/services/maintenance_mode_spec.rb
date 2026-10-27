@@ -38,6 +38,18 @@ RSpec.describe MaintenanceMode do
       expect(described_class.message).to be_present
       expect(described_class.retry_after).to be_positive
     end
+
+    # Writes stay refused, but nobody opened a window, so the pages must say
+    # "unavailable" rather than "maintenance".
+    it 'marks the held window as unreachable' do
+      expect(described_class.unreachable?).to be true
+    end
+  end
+
+  it 'does not mark a window an operator opened as unreachable' do
+    allow(AtlasRb::Maintenance).to receive(:read).and_return(window(read_only: true))
+
+    expect(described_class.unreachable?).to be false
   end
 
   # Atlas answered, but not with a window — most often a build older than the

@@ -6,8 +6,9 @@ RSpec.describe EditTabsHelper do
   # Gates read off the view context's own can? / effective_user. The bare test
   # controller lacks ImpersonationSession's helper_method, so verifying partial
   # doubles rejects a stub of effective_user; define a real singleton instead.
-  def allow_gates(history:, loader:)
+  def allow_gates(history:, loader:, health: history)
     allow(helper).to receive(:can?).with(:read, :audit_event).and_return(history)
+    allow(helper).to receive(:can?).with(:read, :work_health).and_return(health)
     user = instance_double(User, loader_tier?: loader)
     helper.define_singleton_method(:effective_user) { user }
   end
@@ -17,7 +18,7 @@ RSpec.describe EditTabsHelper do
   describe '#edit_tab_keys' do
     it 'gives each class its own tab set, in display order' do
       expect(helper.edit_tab_keys('Work'))
-        .to eq(%w[metadata advanced permissions move delete xml history])
+        .to eq(%w[metadata advanced darwin-core permissions move delete xml history health])
       expect(helper.edit_tab_keys('Collection'))
         .to eq(%w[metadata permissions xml derivative-access export history analytics])
       expect(helper.edit_tab_keys('Community'))
@@ -37,6 +38,19 @@ RSpec.describe EditTabsHelper do
 
       expect(helper.edit_tab_keys('Collection')).not_to include('history')
       expect(helper.edit_tab_keys('Collection')).to include('metadata', 'analytics')
+    end
+
+    # Atlas grades Works only, so Health is in the Work row alone.
+    it 'keeps Health Work-only' do
+      expect(helper.edit_tab_keys('Collection')).not_to include('health')
+      expect(helper.edit_tab_keys('Community')).not_to include('health')
+    end
+
+    it 'drops Health for a viewer below the health-check tier' do
+      allow_gates(history: true, loader: true, health: false)
+
+      expect(helper.edit_tab_keys('Work')).not_to include('health')
+      expect(helper.edit_tab_keys('Work')).to include('history')
     end
 
     it 'drops Export for a non-loader' do

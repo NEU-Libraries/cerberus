@@ -24,7 +24,10 @@ body {
   flex-direction:column;
 }
 
-#mods {
+// #dwc is Atlas's Darwin Core block, which sits in the tab beside #mods and
+// reads as the same kind of record.
+#mods,
+#dwc {
   font-size: calc(0.8rem + 0.1vw);
   // URLs and identifiers have no break points and are wider than a phone, so
   // without this one value widens the whole page.
@@ -33,6 +36,19 @@ body {
     margin-bottom: 0.2rem;
   }
   dd p {
+    margin-bottom: 0.5rem;
+  }
+}
+
+// Atlas heads each TDWG class with an h3, the same level as the work's title,
+// so the size is brought down to a label's and the title stays the heading.
+#dwc .dwc-group {
+  margin-top: 1rem;
+
+  h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: $text-subtle;
     margin-bottom: 0.5rem;
   }
 }

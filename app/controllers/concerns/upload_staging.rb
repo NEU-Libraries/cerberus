@@ -11,10 +11,12 @@ module UploadStaging
   private
 
     def stage_upload(file, scope_id)
-      dir = File.join(Rails.application.config.x.cerberus.uploads_root, scope_id.to_s)
-      FileUtils.mkdir_p(dir)
-      dest = File.join(dir, file.original_filename)
-      FileUtils.cp(file.tempfile.path.presence || file.path, dest)
-      dest
+      Outage.guard_storage do
+        dir = File.join(Rails.application.config.x.cerberus.uploads_root, scope_id.to_s)
+        FileUtils.mkdir_p(dir)
+        dest = File.join(dir, file.original_filename)
+        FileUtils.cp(file.tempfile.path.presence || file.path, dest)
+        dest
+      end
     end
 end

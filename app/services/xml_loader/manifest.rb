@@ -20,7 +20,8 @@ module XmlLoader
     # `create?` encode v1's edit-vs-create determination: a row with an
     # identifier (NOID) updates an existing Work; a row with only a file name
     # creates a new one.
-    Row = Struct.new(:identifier, :xml_path, :file_name, :embargoed, :embargo_date, keyword_init: true) do
+    Row = Struct.new(:identifier, :xml_path, :file_name, :embargoed, :embargo_date, :dwc_path,
+                     keyword_init: true) do
       def update?
         identifier.present?
       end
@@ -38,14 +39,16 @@ module XmlLoader
     # what is now a v2 NOID; the noid aliases let v2-native manifests use the
     # clearer header. First matching column wins.
     COLUMN_LABELS = {
-      'pids'               => :identifier,
-      'pid'                => :identifier,
-      'noid'               => :identifier,
-      'noids'              => :identifier,
-      'mods xml file path' => :xml_path,
-      'file name'          => :file_name,
-      'embargoed?'         => :embargoed,
-      'embargo date'       => :embargo_date
+      'pids'                      => :identifier,
+      'pid'                       => :identifier,
+      'noid'                      => :identifier,
+      'noids'                     => :identifier,
+      'mods xml file path'        => :xml_path,
+      'file name'                 => :file_name,
+      'embargoed?'                => :embargoed,
+      'embargo date'              => :embargo_date,
+      # Optional: a blank cell means the row's Work gets no Darwin Core record.
+      'darwin core xml file path' => :dwc_path
     }.freeze
 
     def initialize(path)

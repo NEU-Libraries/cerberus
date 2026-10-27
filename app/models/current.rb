@@ -28,4 +28,9 @@ class Current < ActiveSupport::CurrentAttributes
   # `effective_user` reads the session, and gated reads pass `viewer_nuid`
   # explicitly. NEVER sent as a write header; view-as is read-only.
   attribute :view_as_nuid
+
+  # The request's RequestTiming. Set before any callback, so that the worker
+  # threads ParallelAtlasReads spawns copy the same object by reference and their
+  # Atlas calls count toward this request. Never sent to Atlas.
+  attribute :request_timing
 end

@@ -4,15 +4,20 @@
 # See docs/people-and-routing.md.
 class ApplicationController < ActionController::Base
   include Blacklight::Controller
+  include InfrastructureOutages
   include Authorizable
   include Tombstoning
   include UnfinishedDepositGate
   include ImpersonationSession
   include StructuralContainers
+  include CriticalCssInlining
 
   before_action do
     I18n.locale = :en
   end
+
+  # Prepended so it runs before any callback that reads Atlas.
+  prepend_before_action { Current.request_timing = RequestTiming.new }
 
   before_action :store_preferred_view
   before_action :set_current_nuid

@@ -175,13 +175,15 @@ class LoadsController < ApplicationController
     # never File.write(file.read) which would slurp the archive into
     # Ruby memory. Matches WorksController#stage_upload's shape.
     def save_archive(load_report, archive)
-      dir = File.join(
-        Rails.application.config.x.cerberus.uploads_root,
-        'load_reports',
-        load_report.id.to_s
-      )
-      FileUtils.mkdir_p(dir)
-      dest = File.join(dir, archive.original_filename)
-      FileUtils.cp(archive.tempfile&.path.presence || archive.path, dest)
+      Outage.guard_storage do
+        dir = File.join(
+          Rails.application.config.x.cerberus.uploads_root,
+          'load_reports',
+          load_report.id.to_s
+        )
+        FileUtils.mkdir_p(dir)
+        dest = File.join(dir, archive.original_filename)
+        FileUtils.cp(archive.tempfile&.path.presence || archive.path, dest)
+      end
     end
 end

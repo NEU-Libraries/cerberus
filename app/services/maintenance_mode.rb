@@ -12,6 +12,10 @@ class MaintenanceMode
     # @return [Boolean] whether the repository is refusing writes.
     def read_only? = window.read_only.present?
 
+    # @return [Boolean] whether Atlas stopped answering. Writes are still
+    #   refused, but nobody opened a window, so the pages say "unavailable".
+    def unreachable? = window.unreachable.present?
+
     # @return [String, nil] the operator's note for the banner.
     def message = window.message.presence
 
@@ -81,6 +85,7 @@ class MaintenanceMode
       def unreachable_window
         AtlasRb::Mash.new(
           'read_only'   => true,
+          'unreachable' => true,
           'source'      => nil,
           'since'       => nil,
           'message'     => 'The repository is temporarily unavailable.',

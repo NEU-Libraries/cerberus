@@ -72,7 +72,7 @@ gem 'bootsnap', require: false
 # binding would report every unparseable Atlas response as 404 again. It also
 # sets per-connection deadlines, without which a hung Atlas holds a Puma thread
 # for minutes.
-gem 'atlas_rb', '>= 1.23.0'
+gem 'atlas_rb', '>= 1.27.0'
 gem 'blacklight', '~> 9.0'
 # 6.x is the first line that allows Blacklight 9; its gemspec pins the 9.0.0
 # betas, which 9.0.0 final satisfies.
@@ -98,7 +98,7 @@ gem 'json', '~> 2.21'
 # on the alternate-scheme attempt — minutes, on a librarian's request thread.
 # It also wraps a timeout as Kataba::Fetcher::FetchTimeout, which is what lets
 # XmlValidator report it rather than 500.
-gem 'kataba', '>= 1.1.3'
+gem 'kataba', '>= 1.1.4'
 gem 'libreconv'
 gem 'loaf'
 gem 'mini_exiftool'

@@ -62,8 +62,11 @@ module AuditEventsHelper
     'advanced_form' => 'Advanced form',
     'xml_editor'    => 'XML editor',
     'xml_loader'    => 'XML loader',
+    'dwc_upload'    => 'Darwin Core upload',
     'deposit'       => 'Deposit'
   }.freeze
+
+  DARWIN_CORE_LABEL = 'Darwin Core record'
 
   # Prose for the download tiers. The vocabulary and its narrowing order come
   # from Sentinel::TIERS; naming the ladder twice would let the two drift.
@@ -183,6 +186,16 @@ module AuditEventsHelper
     when 'metadata'
       return unless event['action'] == 'update'
 
+      metadata_history_path(event, resource_id)
+    end
+  end
+
+  # A Darwin Core write is a metadata event too, told apart from a MODS write
+  # only by its source. Without the branch its View opens the MODS diff.
+  def metadata_history_path(event, resource_id)
+    if event.dig('payload', 'source') == DarwinCoreRecord::FORMAT
+      dwc_history_path(resource_id, at: event['occurred_at'])
+    else
       mods_history_path(resource_id, at: event['occurred_at'])
     end
   end
@@ -285,7 +298,7 @@ module AuditEventsHelper
       when 'reparent'      then targeted_summary('moved to', payload['to'])
       when 'link_member'   then targeted_summary('to', payload['collection'])
       when 'unlink_member' then targeted_summary('from', payload['collection'])
-      when 'tombstone'     then payload['reason']
+      when 'tombstone'     then tombstone_payload_summary(payload)
       end
     end
 
@@ -298,18 +311,27 @@ module AuditEventsHelper
     # as the MODS marker labelled a rendition-gate change "MODS document".
     def update_payload_summary(payload)
       return payload['fields'].join(', ') if payload['fields'].present?
-      return mods_summary(payload)        if payload['source'] == 'mods'
+      return record_summary('MODS document', payload) if payload['source'] == 'mods'
+      return record_summary(DARWIN_CORE_LABEL, payload) if payload['source'] == DarwinCoreRecord::FORMAT
       return if payload['before'].nil? && payload['after'].nil?
 
       permissions_diff_summary(payload)
     end
 
+    # Atlas records a Darwin Core withdrawal as a metadata tombstone. Without
+    # naming the record, the row reads as the Work itself being tombstoned.
+    def tombstone_payload_summary(payload)
+      return record_summary(DARWIN_CORE_LABEL, payload) if payload['source'] == DarwinCoreRecord::FORMAT
+
+      payload['reason']
+    end
+
     # The editing surface rides beside `source` in `origin`, and is absent on a
     # write no Cerberus surface made and on every event predating the field, so
     # the label has to read on its own without it.
-    def mods_summary(payload)
+    def record_summary(label, payload)
       surface = origin_label(payload['origin'])
-      surface.present? ? "MODS document · via #{surface}" : 'MODS document'
+      surface.present? ? "#{label} · via #{surface}" : label
     end
 
     def permissions_diff_summary(payload)

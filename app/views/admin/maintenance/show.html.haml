@@ -1,13 +1,18 @@
 = render 'admin/breadcrumb_header'
 
-- open_now = @window.read_only.present?
-- source   = @window.source.presence
+- unreachable = @window.unreachable.present?
+- open_now    = @window.read_only.present? && !unreachable
+- source      = @window.source.presence
 .admin-registry.my-3
   %header.admin-registry__head
     %span.admin-registry__title
       %i.fa-solid.fa-screwdriver-wrench{'aria-hidden' => 'true'}
       Maintenance window
-      %span.admin-registry__count= open_now ? 'Read-only' : 'Accepting writes'
+      %span.admin-registry__count
+        - if unreachable
+          Atlas not answering
+        - else
+          = open_now ? 'Read-only' : 'Accepting writes'
 
   .p-3
     %p.text-body-secondary
@@ -15,7 +20,16 @@
       downloading carry on; depositing, editing and every other write are
       refused until it is closed. Use one before a migration or a risky deploy.
 
-    - if open_now
+    - if unreachable
+      -# Nobody opened this, so there is no window to close and no form to open
+      -# one: either would be a write to the Atlas that is not answering.
+      .alert.alert-warning.py-2.px-3.small.d-flex.align-items-start{role: 'status'}
+        %i.fa-solid.fa-plug-circle-xmark.me-2.mt-1{'aria-hidden' => 'true'}
+        %span
+          Atlas is not answering, so Cerberus is refusing writes until it does.
+          This is not a maintenance window, and there is nothing to close here.
+          = link_to 'See system health', admin_health_path
+    - elsif open_now
       -# The open window's particulars are a read-out, not a form section, so they
       -# sit bare in the card body. The .well below is the form that opens one.
       %dl.my-3

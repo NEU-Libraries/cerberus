@@ -100,6 +100,29 @@ RSpec.describe 'Admin::Reindex', type: :request do
       expect(flash[:notice]).to be_nil
     end
 
+    # The Health tab passes its own page, so the operator sees the new grade.
+    it 'returns to a local path it is given' do
+      stub_reindex
+      back = edit_work_path('abc1234', tab: 'health')
+
+      post '/admin/reindex/work/abc1234', params: { return_to: back }
+
+      expect(response).to redirect_to(back)
+    end
+
+    it 'falls back to the show page for an off-site or absent return path' do
+      stub_reindex
+
+      post '/admin/reindex/work/abc1234', params: { return_to: 'https://evil.example/phish' }
+      expect(response).to redirect_to(work_path('abc1234'))
+
+      post '/admin/reindex/work/abc1234', params: { return_to: '//evil.example/phish' }
+      expect(response).to redirect_to(work_path('abc1234'))
+
+      post '/admin/reindex/work/abc1234'
+      expect(response).to redirect_to(work_path('abc1234'))
+    end
+
     it 'reports a transport failure instead of raising' do
       allow(AtlasRb::System).to receive(:reindex).and_raise(Faraday::ConnectionFailed, 'refused')
 

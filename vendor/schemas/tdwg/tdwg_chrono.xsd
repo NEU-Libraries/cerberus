@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://rs.tdwg.org/chrono/terms/"
+           elementFormDefault="qualified">
+    <!--
+      tdwg_dwcterms.xsd declares the Chronometric Age terms in the dwc:
+      namespace, but it and tdwg_dwc_extensions.xsd refer to them as chrono:
+      terms, which libxml cannot resolve. This declares each referenced term
+      in the chrono namespace as a plain string, a local workaround. Both
+      earliestChronometricReferenceSystem and
+      earliestChronometricAgeReferenceSystem are declared, because the two
+      TDWG files spell the term differently. See README.md beside this file.
+    -->
+    <xs:element name="chronometricAgeConversionProtocol" type="xs:string"/>
+    <xs:element name="chronometricAgeDeterminedBy" type="xs:string"/>
+    <xs:element name="chronometricAgeDeterminedDate" type="xs:string"/>
+    <xs:element name="chronometricAgeID" type="xs:string"/>
+    <xs:element name="chronometricAgeProtocol" type="xs:string"/>
+    <xs:element name="chronometricAgeReferences" type="xs:string"/>
+    <xs:element name="chronometricAgeRemarks" type="xs:string"/>
+    <xs:element name="chronometricAgeUncertaintyInYears" type="xs:string"/>
+    <xs:element name="chronometricAgeUncertaintyMethod" type="xs:string"/>
+    <xs:element name="earliestChronometricAge" type="xs:string"/>
+    <xs:element name="earliestChronometricAgeReferenceSystem" type="xs:string"/>
+    <xs:element name="earliestChronometricReferenceSystem" type="xs:string"/>
+    <xs:element name="latestChronometricAge" type="xs:string"/>
+    <xs:element name="latestChronometricAgeReferenceSystem" type="xs:string"/>
+    <xs:element name="materialDated" type="xs:string"/>
+    <xs:element name="materialDatedID" type="xs:string"/>
+    <xs:element name="materialDatedRelationship" type="xs:string"/>
+    <xs:element name="uncalibratedChronometricAge" type="xs:string"/>
+    <xs:element name="verbatimChronometricAge" type="xs:string"/>
+</xs:schema>

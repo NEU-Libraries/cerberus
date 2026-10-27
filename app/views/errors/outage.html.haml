@@ -1,0 +1,15 @@
+- content_for(:head) { tag.meta(name: "turbo-cache-control", content: "no-cache") }
+- staff_link = link_to "contact DRS staff", "mailto:Library-Repository-Team@neu.edu"
+.error-page.error-page--outage
+  %header.error-page__head
+    %i.fa-solid.fa-plug-circle-xmark.error-page__icon{'aria-hidden' => 'true'}
+    %span.error-page__status
+      %span.error-page__status-code 503
+      %span.error-page__status-label Unavailable
+  .error-page__body
+    %h1.error-page__title= outage.title
+    %p.error-page__lede= outage.lede
+  .error-page__actions
+    = link_to "Return to the catalogue", root_path
+    %span.sep ·
+    If this goes on, please #{staff_link}.

@@ -1,0 +1,26 @@
+= render 'admin/breadcrumb_header'
+
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-heart-pulse{'aria-hidden' => 'true'}
+      Work health
+
+  .p-3
+    %p.text-muted.small.mb-3
+      Grade a Work by its NOID, for a Work too broken to open its edit page. Every
+      Work's edit page has the same check on its Health tab.
+    = form_with url: admin_work_health_path, method: :get do
+      %label.form-label{for: 'noid'} Work NOID
+      .input-group
+        = text_field_tag :noid, @noid, class: 'form-control', required: true, autocomplete: 'off', spellcheck: false
+        = button_tag 'Check', class: 'btn btn-primary', name: nil
+
+- if @check
+  - if @check.ok?
+    .d-flex.flex-wrap.gap-3.small
+      = link_to 'Open the Work', work_path(@noid)
+      = link_to 'Open its edit page', edit_work_path(@noid, tab: 'health')
+    = render 'work_health/report', report: @check.report, work_id: @noid, standalone: true
+  - else
+    = render 'work_health/unavailable', check: @check, work_id: @noid, standalone: true

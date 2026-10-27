@@ -1,6 +1,6 @@
 [![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/dgcliff/b2d04df150116448fb76929c8c570f9c/raw/cerberus-coverage.json)](https://github.com/NEU-Libraries/cerberus/actions/workflows/build_test.yml) [![Build and Test](https://github.com/NEU-Libraries/cerberus/actions/workflows/build_test.yml/badge.svg)](https://github.com/NEU-Libraries/cerberus/actions/workflows/build_test.yml)
 
-# Cerberus
+# Cerberus <picture><img src="docs/images/cerberus-logo.svg" alt="" width="40" height="40" align="top"></picture>
 
 Rails front end for **Cerberus** — the web application behind Northeastern
 University Library's Digital Repository Service (DRS).
@@ -71,7 +71,7 @@ Atlas verifies both against Cerberus's published keyset.
 The rule that follows: **never bypass atlas_rb** for anything that is a
 repository object. No direct HTTP to Atlas, and no ActiveRecord standing in for
 something Atlas owns. Where a feature needs an endpoint that does not exist yet,
-the answer is a gap report rather than a cross-repo change — see `CLAUDE.md`.
+the answer is a gap report rather than a cross-repo change.
 
 ## Cerberus's own database
 
@@ -137,7 +137,6 @@ details, including the run lock and the reset preflight, are in
 |---|---|
 | Setting up, running things, organising a change | [`docs/development.md`](docs/development.md) |
 | How one component works, while you edit it | [`docs/`](docs/README.md) |
-| The conventions a change has to satisfy | [`CLAUDE.md`](CLAUDE.md) |
 | The Atlas API contract | Atlas's `/docs`, and its `openapi/openapi.yaml` |
 | Using the repository as a depositor or reviewer | the user guide (`cerberus-guide`) |
 | Repository software, as a Rails developer new to it | the developer primer (`cerberus-primer`) |

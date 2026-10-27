@@ -25,10 +25,10 @@ module Admin
       else          flash[:alert]  = "Reindex of #{noid} failed."
       end
 
-      redirect_to work_path(noid)
+      redirect_to return_path(noid)
     rescue Faraday::Error => e
       flash[:alert] = "Reindex of #{noid} failed: #{e.message}"
-      redirect_to work_path(noid)
+      redirect_to return_path(noid)
     end
 
     # Read the Set before enqueueing, so an unknown or unreadable id fails in
@@ -42,5 +42,14 @@ module Admin
                        'Your inbox will have the result when it finishes.'
       redirect_to set_path(noid)
     end
+
+    private
+
+      # The Health tab and the admin lookup pass their own page, so the
+      # operator sees the new grade. url_from refuses anything off this site,
+      # which would otherwise make this an open redirect.
+      def return_path(noid)
+        url_from(params[:return_to]) || work_path(noid)
+      end
   end
 end

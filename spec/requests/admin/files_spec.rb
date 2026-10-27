@@ -35,6 +35,12 @@ RSpec.describe 'Admin::Files', type: :request do
                      'title_tsim'              => [title])
   end
 
+  # The page's own content. The layout inlines CSS in <head>, and Font Awesome's
+  # fa-v4compatibility font would satisfy a bare check for an OCFL version id.
+  def main_content
+    response.body[%r{<main\b.*</main>}m]
+  end
+
   def fake_results(*docs)
     instance_double(Blacklight::Solr::Response, documents: docs)
   end
@@ -143,7 +149,7 @@ RSpec.describe 'Admin::Files', type: :request do
       it 'lists replaceable content Blobs with their version history and a replace form' do
         get '/admin/files/manage', params: { work_id: 'w1' }
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include('A Photograph', 'report.pdf', 'b1', 'Replace file', 'v4', 'v1')
+        expect(main_content).to include('A Photograph', 'report.pdf', 'b1', 'Replace file', 'v4', 'v1')
       end
 
       # Two numberings side by side read as a mistake, so the gappy OCFL label
@@ -189,7 +195,7 @@ RSpec.describe 'Admin::Files', type: :request do
 
         expect(response).to have_http_status(:ok)
         expect(response.body).to include('report.pdf', 'Replace file')
-        expect(response.body).not_to include('v4')
+        expect(main_content).not_to include('v4')
       end
 
       it 'makes no history call when the Work has no replaceable Blobs' do

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Deep diff pages reached from the Audit History tab's per-row "View" button:
-# rights and MODS. Read-only, gated by `:read, :audit_event` (admins and
+# rights, MODS and Darwin Core. Read-only, gated by `:read, :audit_event` (admins and
 # delegated admins).
 # Type-agnostic — one controller serves Work, Collection and Community.
 # See docs/admin.md.
@@ -19,14 +19,20 @@ class HistoriesController < ApplicationController
 
   def mods
     load_resource!
-    @versions = Array(AtlasRb::Resource.mods_versions(params[:id], nuid: Current.nuid)['versions'])
-    return if @versions.empty?
+    compare_versions(AtlasRb::Resource.mods_versions(params[:id], nuid: Current.nuid)) do |version_id|
+      AtlasRb::Resource.mods_version(params[:id], version_id, nuid: Current.nuid)
+    end
+  end
 
-    @to_id   = resolve_to
-    @from_id = resolve_from(@to_id)
-    return if @from_id.nil? # earliest version — nothing earlier to compare
+  # Only a Work holds a Darwin Core record. Atlas answers an empty list for any
+  # other id, so without the gate a Collection would show an empty history.
+  def dwc
+    load_resource!
+    raise ResourceNotFound unless @resource_klass == 'Work'
 
-    @diff = MODSDiff.call(from_xml: mods_xml(@from_id), to_xml: mods_xml(@to_id))
+    compare_versions(AtlasRb::Resource.dwc_versions(params[:id], nuid: Current.nuid)) do |version_id|
+      AtlasRb::Resource.dwc_version(params[:id], version_id, nuid: Current.nuid)
+    end
   end
 
   private
@@ -53,7 +59,7 @@ class HistoriesController < ApplicationController
     def load_resource!
       @resource_id    = params[:id]
       found           = require_resource!(AtlasRb::Resource.find(@resource_id))
-      raise ResourceNotFound unless ModsableTypes.include?(found.klass)
+      raise ResourceNotFound unless found.resource_class.mods_editable?
 
       @resource_klass = found.klass
       @resource_title = found.resource.title
@@ -98,7 +104,16 @@ class HistoriesController < ApplicationController
       match && match['version_id']
     end
 
-    def mods_xml(version_id)
-      AtlasRb::Resource.mods_version(params[:id], version_id, nuid: Current.nuid)
+    # The versions envelope, and a block that reads one version's XML. The diff
+    # is line-based over pretty-printed XML, so it serves any XML format.
+    def compare_versions(envelope)
+      @versions = Array(envelope&.[]('versions'))
+      return if @versions.empty?
+
+      @to_id   = resolve_to
+      @from_id = resolve_from(@to_id)
+      return if @from_id.nil? # earliest version — nothing earlier to compare
+
+      @diff = MODSDiff.call(from_xml: yield(@from_id), to_xml: yield(@to_id))
     end
 end

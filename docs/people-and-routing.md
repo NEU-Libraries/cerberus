@@ -324,9 +324,10 @@ carries, because `editor` carries `params[:id]` and `validate`, `repair` and
 ### Only three types may reach it
 
 `require_modsable_resource!` refuses a type that has no MODS editing surface,
-before anything reads or renders. `ModsableTypes::TYPES` is the set: Work,
-Collection and Community. Atlas names the same set with its own `Modsable`
-concern, and atlas_rb's `mods_versions` doc names the same three.
+before anything reads or renders. The gate asks the resource's class,
+`resource.resource_class.mods_editable?`, and atlas_rb answers true for Work,
+Collection and Community only. Atlas names the same set with its own `Modsable`
+concern.
 
 The `:edit` gate above it is not enough on its own, and neither is the read
 succeeding:
@@ -344,9 +345,8 @@ name. Nothing in the UI links to any of them, and nothing else refuses them.
 
 The set is stated rather than inferred. Only these three take a MODS write —
 theirs is the `update` that accepts `origin:` — and a curator sent back after
-saving needs a show route to land on. `ModsableTypes.include?` takes a type
-*name* rather than a class, so a caller hands over whatever Atlas or Solr gave
-it, and a type atlas_rb does not map answers false rather than raising.
+saving needs a show route to land on. atlas_rb states the set on each class,
+because Atlas does not expose it on the wire.
 
 `require_modsable_resource!` raises `ResourceNotFound`, a 404, for an unknown id
 or an unserved type.
@@ -356,12 +356,14 @@ gate needs the payload before any action runs, and every action needs it again.
 
 ### Resolving the type
 
-The sites that dispatch on the resolved type — `ModsableTypes.include?` and
-`XmlController#record_errors` — call `AtlasRb::Resource.class_for`, not
-`AtlasRb.const_get`. The gem owns that mapping over a stated closed set,
-`Resource::TYPE_MAP`. It accepts every spelling the stack produces: Atlas's wire
-key (`file_set`), Solr's `internal_resource` (`FileSet`), and the
-capitalized wire key (`File_set`). It raises `ArgumentError` on anything else.
+The sites that dispatch on the resolved type — the type gate and
+`XmlController#record_errors` — call `resource_class` on the atlas_rb result,
+not `AtlasRb.const_get` on its `klass`. The gem owns that mapping: each
+`Resource` subclass registers itself under its class name (`FileSet`) and its
+wire key (`file_set`), and `resource_class` raises `ArgumentError` on any other
+value. Both sites read a `Resource.find` result that `require_resource!` has
+already accepted, and `find` resolved the same type to build `klass`, so neither
+site rescues.
 
 Do not reach into the `AtlasRb` namespace by string. Capitalizing Atlas's wire
 key gives `"File_set"`, which is not a constant, so `const_get` raises

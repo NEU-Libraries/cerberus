@@ -30,7 +30,7 @@ three edit views and the XML editor's mirror — had nothing coupling them, and
 the XML editor's row went stale silently each time a tab was added.
 
 Order and membership are data, so a class-specific tab needs no conditional.
-Advanced, Move and Delete are Work-only; Derivative access and Export are
+Advanced, Move, Delete and Health are Work-only; Derivative access and Export are
 Collection-only; Analytics is container-only. Each follows purely from which
 arrays list it.
 
@@ -77,8 +77,9 @@ than opening nothing.
 ### Who may see a tab
 
 `edit_tab_visible?(key)` holds only the *user*-dependent gates. `TABS` holds the
-class-dependent membership. History needs `can?(:read, :audit_event)`; Export
-needs a loader tier (`current_user.loader_tier?`).
+class-dependent membership. History needs `can?(:read, :audit_event)`; Health
+needs `can?(:read, :work_health)` (see `docs/work-health.md`); Export needs a
+loader tier (`current_user.loader_tier?`).
 
 The edit view's pane calls the same predicate instead of re-testing the
 ability, so each gate is declared exactly once.
@@ -145,7 +146,8 @@ semantic and styling hook, notably for permissions.
 | change\_type | Action | Destination |
 |---|---|---|
 | `permissions` | `create` or `update` (`PERMISSION_VIEW_ACTIONS`) | The Rights-history diff page, `rights_history_path` |
-| `metadata` | `update` | The MODS-history diff page, `mods_history_path` |
+| `metadata` | `update`, with `source: 'dwc'` | The Darwin Core history diff page, `dwc_history_path` |
+| `metadata` | any other `update` | The MODS-history diff page, `mods_history_path` |
 | anything else | any | nil — the column renders an empty cell and stays aligned |
 
 Both permission actions carry a before/after snapshot. `create` is the initial
@@ -160,6 +162,12 @@ and a title or description field patch (`{ fields: }`) alike. Atlas's
 `plain_title=` and `plain_description=` edit the MODS document and call
 `mods_xml=` too, in `MODSAssignment`. The MODS document's `create` row has no
 earlier version to diff against, so the link is update-only.
+
+A Darwin Core write is a `metadata` update too, and only `payload.source`
+tells it apart, so `metadata_history_path` branches on it. Without the branch,
+the row's View opened the MODS diff. Atlas records a Darwin Core withdrawal as
+a `metadata` **tombstone**, which has no diff, and its summary names the record
+so that the row does not read as the Work itself being withdrawn.
 
 Both links pass the event's `occurred_at` as `at:`, and each page uses it to
 find the event:

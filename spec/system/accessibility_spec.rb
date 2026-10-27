@@ -27,6 +27,9 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     @community = create_community(public: true)
     @collection = create_collection(@community.id, public: true)
     @work = create_work(@collection.id, public: true)
+    @dwc_work = create_work(@collection.id, public: true)
+    AtlasRb::Resource.put_dwc(@dwc_work.id, Rails.root.join('spec/fixtures/files/dwc-record.xml').to_s,
+                              nuid: AtlasFixtures::ADMIN_NUID)
   end
 
   def expect_axe_clean
@@ -62,6 +65,7 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     'a community'      => -> { "/communities/#{@community.id}" },
     'a collection'     => -> { "/collections/#{@collection.id}" },
     'a work'           => -> { "/works/#{@work.id}" },
+    'Darwin Core tab'  => -> { "/works/#{@dwc_work.id}#darwin-core" },
     'the sign-in page' => -> { atlas_login_path }
   }
 
@@ -88,6 +92,7 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     'the loaders'         => -> { '/admin/loaders' },
     'a new loader'        => -> { '/admin/loaders/new' },
     'maintenance'         => -> { '/admin/maintenance' },
+    'system health'       => -> { '/admin/health' },
     'impressions'         => -> { '/admin/impressions' },
     'reparent'            => -> { '/admin/reparent' },
     'tombstones'          => -> { '/admin/tombstones' },
@@ -95,7 +100,8 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     'associations'        => -> { '/admin/associations' },
     'linked members'      => -> { '/admin/linked_members' },
     'impersonation'       => -> { '/admin/impersonation' },
-    'deposit triage'      => -> { '/admin/deposit_triage' }
+    'deposit triage'      => -> { '/admin/deposit_triage' },
+    'work health'         => -> { "/admin/work_health?noid=#{@work.id}" }
   }
 
   # axe skips what is not displayed, so each edit pane needs its own visit. The
@@ -110,4 +116,16 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     end
   end
   audits :admin_nuid, edit_tabs.to_h
+
+  # The Health pane's report arrives in a lazy frame after the visit, so the
+  # audit above sees only its placeholder. This one waits for the report.
+  context 'as admin_nuid, once the work health report has loaded' do
+    before { sign_in_as(admin_nuid) }
+
+    it 'the work health report passes axe' do
+      visit "/works/#{@work.id}/edit#health"
+      expect(page).to have_css('.work-health__grade')
+      expect_axe_clean
+    end
+  end
 end

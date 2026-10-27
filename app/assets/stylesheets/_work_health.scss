@@ -1,0 +1,59 @@
+// ---------------------------------------------------------------------
+// Work health (Work → Edit → Health tab, and /admin/work_health)
+//
+// Sits inside the audit-history card shell and reuses its chip and rail,
+// which colour themselves from --audit-action-color. Each grade and
+// severity borrows the ledger tone that already means the same thing:
+// red for lost content, amber for a repair, teal for viable, grey for a
+// state that is not damage. See docs/work-health.md.
+// ---------------------------------------------------------------------
+
+.work-health {
+  &--red,
+  &--fatal      { --audit-action-color: #{$audit-tone-tombstone}; }
+  &--yellow,
+  &--repairable { --audit-action-color: #{$audit-tone-restore}; }
+  &--green      { --audit-action-color: #{$audit-tone-create}; }
+  &--advisory,
+  &--unknown    { --audit-action-color: #{$audit-tone-generic}; }
+
+  // The summary above the findings card: a bare label-and-value readout, as
+  // design.md asks of a read-only readout in a pane.
+  &__readout {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 0.4rem 1.25rem;
+    align-items: center;
+    font-size: 0.875rem;
+
+    dt { font-weight: 600; color: $gray-800; }
+    dd { margin: 0; }
+  }
+
+  // The one emphasis on the surface: the audit chip at reading size.
+  &__grade {
+    font-size: 1rem;
+    padding: 0.35rem 0.8rem;
+  }
+
+  &__code {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.75rem;
+    color: $text-subtle;
+  }
+
+  &__clear {
+    padding: 1rem;
+  }
+
+  &__advisories {
+    border-top: 1px solid $gray-200;
+
+    > summary {
+      padding: 0.65rem 1rem;
+      cursor: pointer;
+      color: $gray-800;
+    }
+  }
+}
