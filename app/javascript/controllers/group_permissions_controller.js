@@ -20,7 +20,7 @@ export default class extends Controller {
 
     const i = this.nextIndex++
     const row = this.templateTarget.content.cloneNode(true).firstElementChild
-    row.id = `group-list_${i}`
+    row.id = `${this.resourceValue}-group-list_${i}`
     row.dataset.groupPermissionsTarget = "row"
 
     const groupSelect   = row.querySelector("select.groups")

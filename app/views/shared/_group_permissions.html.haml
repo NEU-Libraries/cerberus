@@ -1,4 +1,13 @@
--# locals: resource (String) — e.g. 'work', 'collection', 'community'
+-# locals: resource (String) — e.g. 'work', 'collection', 'community'; the
+-#           param key the rows submit under
+-#         grants (Array<Permissions::GrantRow>) — defaults to @permissions
+-#         groups (Array<[id, name]>) — defaults to @groups
+-#         noun (String) — what the sentences name; defaults to the resource
+-#         heading (String) — defaults to "Group Permissions"
+-#
+-# The locals exist for a page that renders two grant editors, such as a Set's
+-# Sharing tab beside its Work permissions tab: one pair of ivars cannot serve
+-# both.
 -#
 -# Host view sets the Stimulus scope on a wrapper:
 -#   data-controller="group-permissions" data-group-permissions-resource-value="<resource>"
@@ -15,23 +24,25 @@
 -# group is information the depositor needs, since it says who can reach their
 -# material. So the row stays visible and loses its controls, rather than
 -# vanishing.
-- noun = resource.to_s.humanize(capitalize: false)
-%h5.pb-2 Group Permissions
+- noun = local_assigns.fetch(:noun) { resource.to_s.humanize(capitalize: false) }
+- grants = local_assigns.fetch(:grants) { @permissions }
+- groups = local_assigns.fetch(:groups) { @groups }
+%h5.pb-2= local_assigns.fetch(:heading, 'Group Permissions')
 %p.form-text.text-muted.mt-0
   Select the groups that should be able to view or manage this #{noun}. Add as many groups as needed.
-- @permissions.each.with_index(1) do |grant, index|
+- grants.each.with_index(1) do |grant, index|
   -# Locked rows keep the "row" target even though nothing in them is
   -# interactive: the Stimulus controller seeds its next index from
   -# rowTargets.length, and these indices are positional over ALL rows, so
   -# dropping the target would let a JS-added row collide with an existing one.
   -# Nothing can fire #remove on them, as they render no button.
-  .row.py-1{ id: "group-list_#{index}", data: { "group-permissions-target": "row" } }
+  .row.py-1{ id: "#{resource}-group-list_#{index}", data: { "group-permissions-target": "row" } }
     - if grant.revocable?
       .col-sm-auto.form-text Members of
       .col-sm
         %select.form-select.form-select-sm.groups{ "aria-label" => "Group", name: "#{resource}[permissions][#{index}][group_id]" }
           %option{ value: grant.group_id, selected: "selected" } #{grant.label}
-          - @groups.each do |user_group|
+          - groups.each do |user_group|
             - unless user_group[0] == grant.group_id
               %option{ value: user_group[0] } #{user_group[1]}
       .col-sm-auto.form-text can
@@ -82,7 +93,7 @@
     .col-sm
       %select.form-select.form-select-sm.groups{ "aria-label" => "Group" }
         %option{ value: "" }
-        - @groups.each do |user_group|
+        - groups.each do |user_group|
           %option{ value: user_group[0] } #{user_group[1]}
     .col-sm-auto.form-text can
     .col-sm-2
@@ -99,7 +110,7 @@
   .col-sm
     %select.form-select.form-select-sm.groups{ "aria-label" => "Add group", name: "#{resource}[permissions][new][group_id]", data: { "group-permissions-target": "entryGroup" } }
       %option{ value: "" } Select a group…
-      - @groups.each do |user_group|
+      - groups.each do |user_group|
         %option{ value: user_group[0] } #{user_group[1]}
   .col-sm-auto.form-text can
   .col-sm-2
@@ -113,6 +124,6 @@
 .form-text.text-muted Press + to add a group permission.
 -# Grouped with the hint above rather than injected after the locked row, so the
 -# grant rows and the entry row stay one uninterrupted stack.
-- if @permissions.any? { |grant| !grant.revocable? }
+- if grants.any? { |grant| !grant.revocable? }
   .form-text.text-muted
     Some groups above were granted access by someone else. Only a member of that group — or an administrator — can remove it.

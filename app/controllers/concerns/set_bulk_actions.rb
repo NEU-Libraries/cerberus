@@ -1,11 +1,15 @@
 # frozen_string_literal: true
 
-# The Set edit page's two bulk actions. Both sweep the Set's *Works*, not the
-# Set, so they gate on the operator tier and never on the Set's own ACL: a
-# grantee with edit on a Set can add a collection holding fifty thousand Works
-# they have no say over. See docs/sets.md.
+# The Set edit page's Work permissions tab: author the Set's Sentinel, then
+# sweep it across the Set's *Works*. The sweep writes the Works, not the Set, so
+# it gates on the operator tier and never on the Set's own ACL: a grantee with
+# edit on a Set can add a collection holding fifty thousand Works they have no
+# say over. See docs/sets.md.
 module SetBulkActions
   extend ActiveSupport::Concern
+  include SentinelForm
+
+  SET_PERMISSIONS_TAB = 'work-permissions'
 
   included do
     helper_method :bulk_operator?, :sentinel_groups
@@ -27,28 +31,24 @@ module SetBulkActions
   def sentinel
     record = Sentinel.find_or_initialize_by(target_id: params[:id])
     record.policy = sentinel_policy_from_params
+    record.work_access = sentinel_work_access_from_params
+    record.derivatives_enabled = params.dig(:sentinel, :derivatives_mode) != 'keep'
 
     return render_rejected_set_sentinel(record) unless record.save
 
-    redirect_to edit_set_path(params[:id], tab: 'derivative-access'),
-                notice: 'Derivative access saved. Apply it to sweep the works already in this set.'
+    redirect_to edit_set_path(params[:id], tab: SET_PERMISSIONS_TAB),
+                notice: 'Work permissions saved. Apply them to change the works already in this set.'
   end
 
   def apply_sentinel
     if Sentinel.find_by(target_id: params[:id]).nil?
-      return redirect_to edit_set_path(params[:id], tab: 'derivative-access'),
-                         alert: 'Save a derivative access policy before applying it.'
+      return redirect_to edit_set_path(params[:id], tab: SET_PERMISSIONS_TAB),
+                         alert: 'Save the work permissions before applying them.'
     end
 
     SetSentinelApplyJob.perform_later(set_noid: params[:id])
-    redirect_to edit_set_path(params[:id], tab: 'derivative-access'),
-                notice: 'Applying derivative access to this set’s works. You’ll get a message when it finishes.'
-  end
-
-  def privatize
-    SetPrivatizeJob.perform_later(set_noid: params[:id])
-    redirect_to edit_set_path(params[:id], tab: 'visibility'),
-                notice: 'Making this set’s works private. You’ll get a message when it finishes.'
+    redirect_to edit_set_path(params[:id], tab: SET_PERMISSIONS_TAB),
+                notice: 'Applying permissions to this set’s works. You’ll get a message when it finishes.'
   end
 
   private
@@ -69,7 +69,7 @@ module SetBulkActions
       edit_breadcrumbs
       prepare_set_definition
       @sentinel = record
-      @open_tab = 'derivative-access'
+      @open_tab = SET_PERMISSIONS_TAB
       flash.now[:alert] = record.errors.full_messages.to_sentence
       render :edit, status: :unprocessable_content
     end

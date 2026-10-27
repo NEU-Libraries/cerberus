@@ -2,10 +2,10 @@
 
 require 'rails_helper'
 
-# The Set edit page's two bulk actions. Runs against the real test Atlas like the
+# The Set edit page's Work permissions tab. Runs against the real test Atlas like the
 # other Set specs: a real Compilation is created, so the curator gate and the
 # Set load are exercised end to end. The sweeps themselves are specced at the job
-# level; this file covers the HTTP surface — who is offered the tabs, who may
+# level; this file covers the HTTP surface — who is offered the tab, who may
 # POST, what gets enqueued, and how a rejected policy comes back.
 RSpec.describe 'Sets bulk actions', type: :request do
   include Devise::Test::IntegrationHelpers
@@ -37,43 +37,37 @@ RSpec.describe 'Sets bulk actions', type: :request do
   let(:set) { make_set }
 
   before do
-    allow(SetPrivatizeJob).to receive(:perform_later)
     allow(SetSentinelApplyJob).to receive(:perform_later)
   end
 
-  describe 'who is offered the tabs' do
-    it 'shows both bulk tabs to a full admin' do
+  def saved
+    Sentinel.find_by(target_id: set['id'])
+  end
+
+  describe 'who is offered the tab' do
+    it 'shows the Work permissions tab to a full admin' do
       sign_in admin
       get "/sets/#{set['id']}/edit"
 
-      expect(response.body).to include('derivative-access-tab', 'visibility-tab')
+      expect(response.body).to include('work-permissions-tab')
     end
 
-    it 'shows both bulk tabs to the devolved tier' do
+    it 'shows it to the devolved tier' do
       sign_in devolved
       get "/sets/#{set['id']}/edit"
 
-      expect(response.body).to include('derivative-access-tab', 'visibility-tab')
+      expect(response.body).to include('work-permissions-tab')
     end
 
-    it 'shows neither to a curator who merely owns the set' do
+    it 'does not show it to a curator who merely owns the set' do
       sign_in owner
       get "/sets/#{set['id']}/edit"
 
-      expect(response.body).not_to include('derivative-access-tab')
-      expect(response.body).not_to include('visibility-tab')
+      expect(response.body).not_to include('work-permissions-tab')
     end
   end
 
   describe 'the write gate' do
-    it 'refuses privatize to a non-operator' do
-      sign_in owner
-      post "/sets/#{set['id']}/privatize"
-
-      expect(response).to have_http_status(:forbidden)
-      expect(SetPrivatizeJob).not_to have_received(:perform_later)
-    end
-
     it 'refuses apply to a non-operator' do
       sign_in owner
       post "/sets/#{set['id']}/apply_sentinel"
@@ -84,26 +78,15 @@ RSpec.describe 'Sets bulk actions', type: :request do
 
     it 'refuses the policy write to a non-operator' do
       sign_in owner
-      patch "/sets/#{set['id']}/sentinel", params: { sentinel: { original: { mode: 'restrict', groups: [staff] } } }
+      patch "/sets/#{set['id']}/sentinel", params: { work_access: { visibility: 'public' } }
 
       expect(response).to have_http_status(:forbidden)
-      expect(Sentinel.find_by(target_id: set['id'])).to be_nil
+      expect(saved).to be_nil
     end
 
     it 'redirects an anonymous visitor to sign in' do
-      post "/sets/#{set['id']}/privatize"
+      post "/sets/#{set['id']}/apply_sentinel"
       expect(response).to redirect_to(new_user_session_path)
-    end
-  end
-
-  describe 'privatize' do
-    it 'enqueues the sweep and says so' do
-      sign_in admin
-      post "/sets/#{set['id']}/privatize"
-
-      expect(SetPrivatizeJob).to have_received(:perform_later).with(set_noid: set['id'])
-      expect(response).to redirect_to(edit_set_path(set['id'], tab: 'visibility'))
-      expect(flash[:notice]).to include('Making this set’s works private')
     end
   end
 
@@ -113,7 +96,7 @@ RSpec.describe 'Sets bulk actions', type: :request do
       post "/sets/#{set['id']}/apply_sentinel"
 
       expect(SetSentinelApplyJob).not_to have_received(:perform_later)
-      expect(flash[:alert]).to include('Save a derivative access policy')
+      expect(flash[:alert]).to include('Save the work permissions')
     end
 
     it 'enqueues the sweep once a policy exists' do
@@ -122,7 +105,7 @@ RSpec.describe 'Sets bulk actions', type: :request do
       post "/sets/#{set['id']}/apply_sentinel"
 
       expect(SetSentinelApplyJob).to have_received(:perform_later).with(set_noid: set['id'])
-      expect(response).to redirect_to(edit_set_path(set['id'], tab: 'derivative-access'))
+      expect(response).to redirect_to(edit_set_path(set['id'], tab: 'work-permissions'))
     end
   end
 
@@ -131,8 +114,9 @@ RSpec.describe 'Sets bulk actions', type: :request do
       sign_in admin
       patch "/sets/#{set['id']}/sentinel", params: { sentinel: { original: { mode: 'restrict', groups: [staff] } } }
 
-      expect(Sentinel.find_by(target_id: set['id']).policy).to eq({ 'original' => [staff] })
-      expect(response).to redirect_to(edit_set_path(set['id'], tab: 'derivative-access'))
+      expect(saved.policy).to eq({ 'original' => [staff] })
+      expect(saved.work_access).to be_nil
+      expect(response).to redirect_to(edit_set_path(set['id'], tab: 'work-permissions'))
     end
 
     # A Set is not a container, so an unrestricted tier is omitted rather than
@@ -143,7 +127,54 @@ RSpec.describe 'Sets bulk actions', type: :request do
       patch "/sets/#{set['id']}/sentinel",
             params: { sentinel: { small: { mode: 'public' }, original: { mode: 'restrict', groups: [staff] } } }
 
-      expect(Sentinel.find_by(target_id: set['id']).policy).to eq({ 'original' => [staff] })
+      expect(saved.policy).to eq({ 'original' => [staff] })
+    end
+
+    it 'saves a visibility, and leaves the groups alone under keep' do
+      sign_in admin
+      patch "/sets/#{set['id']}/sentinel",
+            params: { work_access: { visibility: 'public', grants_mode: 'keep',
+                                     permissions: { '1' => { group_id: admin_group, ability: 'read' } } } }
+
+      expect(saved.work_access).to eq('visibility' => 'public')
+    end
+
+    it 'saves replacement grants, skipping the blank entry row and repeats' do
+      sign_in admin
+      patch "/sets/#{set['id']}/sentinel",
+            params: { work_access: { visibility: '', grants_mode: 'replace',
+                                     permissions: { '1'   => { group_id: admin_group, ability: 'read' },
+                                                    '2'   => { group_id: admin_group, ability: 'read' },
+                                                    '3'   => { group_id: staff, ability: 'edit' },
+                                                    'new' => { group_id: '', ability: 'read' } } } }
+
+      expect(saved.work_access).to eq('grants' => { 'read' => [admin_group], 'edit' => [staff] })
+    end
+
+    it 'saves an empty replacement, which removes every group' do
+      sign_in admin
+      patch "/sets/#{set['id']}/sentinel", params: { work_access: { grants_mode: 'replace' } }
+
+      expect(saved.work_access).to eq('grants' => { 'read' => [], 'edit' => [] })
+    end
+
+    it 'records that derivative access is to be left alone' do
+      sign_in admin
+      patch "/sets/#{set['id']}/sentinel",
+            params: { sentinel: { derivatives_mode: 'keep' }, work_access: { visibility: 'private' } }
+
+      expect(saved.derivatives_enabled).to be(false)
+    end
+
+    it 'shows what Apply will do, and warns before a widening' do
+      Sentinel.create!(target_id: set['id'], policy: {}, derivatives_enabled: false,
+                       work_access: { 'visibility' => 'public' })
+      sign_in admin
+      get "/sets/#{set['id']}/edit", params: { tab: 'work-permissions' }
+
+      pane = response.parsed_body.at_css('#work-permissions')
+      expect(pane.text).to include('Every work is made public', 'This makes material public')
+      expect(pane.text).not_to include('derivative access is set to the policy')
     end
 
     it 'refuses a policy that widens as resolution grows, and re-renders the ladder' do
@@ -155,10 +186,10 @@ RSpec.describe 'Sets bulk actions', type: :request do
       # Monotonicity is a property of the ladder, so it still applies without a
       # container: original must not be more open than small.
       expect(response).to have_http_status(:unprocessable_content)
-      expect(Sentinel.find_by(target_id: set['id'])).to be_nil
+      expect(saved).to be_nil
     end
 
-    it 'comes back on the derivative-access tab after a refusal' do
+    it 'comes back on the Work permissions tab after a refusal' do
       sign_in admin
       patch "/sets/#{set['id']}/sentinel",
             params: { sentinel: { small:  { mode: 'restrict', groups: [] },
@@ -166,7 +197,7 @@ RSpec.describe 'Sets bulk actions', type: :request do
 
       # Parsed rather than string-matched: HAML orders attributes alphabetically,
       # so asserting on raw HTML couples the test to that ordering.
-      pane = response.parsed_body.at_css('#derivative-access')
+      pane = response.parsed_body.at_css('#work-permissions')
       expect(pane['class']).to include('active')
     end
   end

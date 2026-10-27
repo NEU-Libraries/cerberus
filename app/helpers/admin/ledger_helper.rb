@@ -18,10 +18,11 @@ module Admin
       'work_completion_mismatch' => { label: 'Incomplete', icon: 'fa-triangle-exclamation' },
       'visibility_cascade'       => { label: 'Visibility', icon: 'fa-eye-slash' },
       'set_reindex'              => { label: 'Reindex',    icon: 'fa-arrows-rotate' },
-      # Both Set sweeps keep the wording of the tab that starts them, so a row
-      # here reads as the same action the operator clicked.
+      # A Set sweep keeps the wording of the tab that starts it, so a row here
+      # reads as the same action the operator clicked. `set_privatize` has no
+      # writer; it stays so the rows already in the ledger still render.
       'set_privatize'            => { label: 'Privatize',  icon: 'fa-user-lock' },
-      'set_sentinel_apply'       => { label: 'Derivative access', icon: 'fa-images' },
+      'set_sentinel_apply'       => { label: 'Work permissions', icon: 'fa-user-lock' },
       'showcase_promotion'       => { label: 'Showcase',   icon: 'fa-star' },
       'tombstone_cascade'        => { label: 'Deleted',    icon: 'fa-trash-can' },
       'tombstone_bulk'           => { label: 'Tombstones', icon: 'fa-trash-can-arrow-up' },

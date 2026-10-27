@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# View helpers for the Collection edit page's Derivative access tab, which
-# authors a Sentinel — the per-tier read-group default applied to new Works.
+# View helpers for the forms that author a Sentinel: the Collection edit page's
+# Derivative access tab and the Set edit page's Work permissions tab.
 module SentinelsHelper
   # Display metadata per tier. The image rungs run widest audience (small) to
   # narrowest (original, the full-res source), with qualitative resolution notes —
@@ -40,4 +40,53 @@ module SentinelsHelper
   def derivative_group_registry(groups)
     groups.map { |raw, cosmetic| { value: raw, label: cosmetic } }.to_json
   end
+
+  # The Sentinel's replacement grants as the shared grant editor's rows. Every
+  # row is revocable: these are a policy being authored, not grants on a
+  # resource, so Atlas's removal rule does not reach them.
+  def sentinel_grant_rows(sentinel, groups)
+    labels = groups.to_h
+    Array(sentinel&.grants).flat_map do |ability, ids|
+      Array(ids).map do |id|
+        Permissions::GrantRow.new(group_id: id, label: labels.fetch(id, id), ability: ability, revocable: true)
+      end
+    end
+  end
+
+  # What applying this Sentinel to a Set will do, one sentence per part, for the
+  # pane and the confirmation. Read from the saved record, because Apply sweeps
+  # what was saved rather than what the form shows.
+  def sentinel_apply_summary(sentinel)
+    [visibility_summary(sentinel), grants_summary(sentinel), derivatives_summary(sentinel)].compact
+  end
+
+  # Only widening is called out: it is the one change that discloses material,
+  # so it is the one the confirmation must name.
+  def sentinel_widens?(sentinel)
+    sentinel&.visibility == 'public'
+  end
+
+  private
+
+    def visibility_summary(sentinel)
+      case sentinel.visibility
+      when 'public' then 'Every work is made public, where its collection allows it.'
+      when 'private' then 'Every work is made private.'
+      end
+    end
+
+    def grants_summary(sentinel)
+      return if sentinel.grants.nil?
+
+      count = sentinel.grants.values.sum(&:size)
+      return 'Every group grant is removed from every work.' if count.zero?
+
+      "Every work's group grants are replaced with the #{pluralize(count, 'grant')} saved here."
+    end
+
+    def derivatives_summary(sentinel)
+      return unless sentinel.derivatives_enabled
+
+      'Every work\'s derivative access is set to the policy saved here.'
+    end
 end
