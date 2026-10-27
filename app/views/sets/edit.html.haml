@@ -38,8 +38,9 @@
     #details.tab-pane{class: ('active' if open == 'details'), 'aria-labelledby' => 'details-tab', role: 'tabpanel'}
       = render 'form', url: set_path(@set['id']), method: :patch, submit_label: 'Save', cancel_path: set_path(@set['id'])
     #definition.tab-pane{class: ('active' if open == 'definition'), 'aria-labelledby' => 'definition-tab', role: 'tabpanel'}
-      = render 'definition', chips: @resolver.chips, added_noids: Array(@set['included_works']),
-                             aside_docs: @resolver.aside_documents
+      .edit-pane
+        = render 'definition', chips: @resolver.chips, added_noids: Array(@set['included_works']),
+                               aside_docs: @resolver.aside_documents
     - if @owned
       #sharing.tab-pane{class: ('active' if open == 'sharing'), 'aria-labelledby' => 'sharing-tab', role: 'tabpanel'}
         .edit-pane

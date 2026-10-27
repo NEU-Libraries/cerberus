@@ -67,7 +67,9 @@
                 data: { turbo_confirm: 'Remove the embargo? The file becomes available to everyone who can see this work.' }}
                 %i.fa-solid.fa-lock-open.me-1{'aria-hidden' => 'true'}
                 Remove embargo
+        %hr.section-divider.my-3
         = render 'shared/group_permissions', resource: 'work'
+        %hr.section-divider.my-3
         = render 'works/download_access', policy: @work&.dig('derivative_permissions')
         - if @streaming_only_offered
           = render 'works/streaming_only', enabled: @streaming_only, audio: @streaming_only_audio

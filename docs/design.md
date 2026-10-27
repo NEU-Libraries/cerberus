@@ -43,6 +43,10 @@ margin. So the chrome runs to the pane's edge, and plain content — headings,
 explainers, radios, fields, dividers — sits `0.5rem` inside it, off the edge
 of the tab row. This is the inset the Set Details tab gets from its `.p-2`.
 
+A pane whose first element is a well starts that well with `mb-3`, not `my-3`.
+The pane's padding is the top gap, and a top margin on the first well adds a
+second one that no other tab has.
+
 Do not add `px-*` to an edit pane, or wrap its plain sections in a `.p-2` of
 their own: the pane already does both jobs, and a second inset doubles it.
 
