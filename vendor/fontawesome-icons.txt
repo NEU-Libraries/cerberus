@@ -68,6 +68,7 @@ fa-file-word
 fa-file-zipper
 fa-film
 fa-filter
+fa-fingerprint
 fa-folder-open
 fa-folder-tree
 fa-gauge-high

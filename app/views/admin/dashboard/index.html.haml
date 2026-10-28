@@ -61,6 +61,17 @@
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
 
+    - if current_user&.admin?
+      = link_to admin_fixity_path, class: 'admin-action-card admin-action-card--fixity', role: 'listitem' do
+        %span.admin-action-card__icon
+          %i.fa-solid.fa-fingerprint{'aria-hidden' => 'true'}
+        %span.admin-action-card__title Fixity
+        %span.admin-action-card__desc
+          Find the Works whose stored files failed a fixity check, are not fully verified within 12 months, or were never checked.
+        %span.admin-action-card__cta
+          Open
+          %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
     = link_to admin_associations_path, class: 'admin-action-card admin-action-card--link', role: 'listitem' do
       %span.admin-action-card__icon
         %i.fa-solid.fa-diagram-project{'aria-hidden' => 'true'}

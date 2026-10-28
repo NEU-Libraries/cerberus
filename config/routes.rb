@@ -305,6 +305,10 @@ Rails.application.routes.draw do
     # points at is gated on its own surface.
     get 'deposit_triage', to: 'deposit_triage#index', as: :deposit_triage
 
+    # The fixity report — `?state=failed`, `?state=overdue` and `?state=never`,
+    # read from the per-Work rollup Atlas indexes. :admin only.
+    get 'fixity', to: 'fixity#index', as: :fixity
+
     # The ledger — `?tab=requests` (what depositors asked staff to do) and
     # `?tab=activity` (what the repository did). Two tabs on one surface, like
     # deposit triage, because they are read together; both are a filter on

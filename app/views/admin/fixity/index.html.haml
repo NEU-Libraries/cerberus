@@ -1,0 +1,80 @@
+= render 'admin/breadcrumb_header'
+
+- documents = @response.documents
+
+.admin-registry.my-3
+  -# No count in the head strip: each tab carries its own.
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-fingerprint{'aria-hidden' => 'true'}
+      Fixity
+
+  -# Plain links, not JS tabs: each list pages independently.
+  %nav.px-3.pt-3{'aria-label' => 'Fixity state'}
+    %ul.nav.nav-tabs
+      - Admin::FixityController::TABS.each do |state, label|
+        - active = state == @state
+        %li.nav-item
+          = link_to admin_fixity_path(state: state),
+            class: "nav-link#{' active' if active}", 'aria-current': ('page' if active) do
+            = label
+            %span.badge.text-bg-secondary.ms-1= @counts[state]
+
+  .p-3
+    %p.text-muted.small.mb-0
+      Each night the fixity checker re-hashes a share of the stored files and compares each with the digest recorded when it was written. A Work is only as verified as its least recently checked file.
+    %p.text-muted.small.mb-0.mt-2
+      - case @state
+      - when 'failed'
+        At least one stored file in each of these Works no longer matches its recorded digest. The Work's Health tab names the file. Restore it from a preserved copy, or re-deposit it.
+      - when 'overdue'
+        Each of these Works passed every check recorded, but at least one of its files has not been checked in the last 12 months, or not at all.
+      - else
+        No file in any of these Works has been checked yet.
+
+  - if documents.any?
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table
+        %thead
+          %tr
+            %th{scope: 'col'} Title
+            %th{scope: 'col'} PID
+            %th{scope: 'col'} Oldest check
+            %th{scope: 'col'} Files checked
+            %th{scope: 'col'}
+        %tbody
+          - documents.each do |doc|
+            %tr
+              %td
+                .admin-registry-table__name= finder_doc_heading(doc)
+              %td
+                %span.admin-registry-table__id= doc.to_param
+              %td.small.text-muted= fixity_checked_cell(doc)
+              %td.small.text-muted= fixity_coverage_cell(doc)
+              %td.text-end
+                = link_to edit_work_path(doc, tab: 'health'), class: 'admin-registry-table__edit' do
+                  %i.fa-solid.fa-heart-pulse{'aria-hidden' => 'true'}
+                  Open the Health tab
+
+    - if @response.respond_to?(:total_pages) && @response.total_pages > 1
+      .px-3.pt-2
+        = paginate @response
+  - else
+    .admin-registry__empty
+      %i.fa-solid.fa-fingerprint.admin-registry__empty-icon{'aria-hidden' => 'true'}
+      %p.mb-1.fw-semibold.text-body
+        - case @state
+        - when 'failed'
+          No check has failed
+        - when 'overdue'
+          Every checked Work is verified within 12 months
+        - else
+          Every Work has had a check
+      %p.mb-0.small.text-muted
+        - case @state
+        - when 'failed'
+          A Work appears here when a recorded check of one of its files fails.
+        - when 'overdue'
+          A Work appears here when one of its files goes 12 months without a check.
+        - else
+          A newly deposited Work appears here until the checker reaches it.

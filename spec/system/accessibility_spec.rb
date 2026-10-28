@@ -102,6 +102,7 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     'linked members'      => -> { '/admin/linked_members' },
     'impersonation'       => -> { '/admin/impersonation' },
     'deposit triage'      => -> { '/admin/deposit_triage' },
+    'fixity'              => -> { '/admin/fixity?state=never' },
     'work health'         => -> { "/admin/work_health?noid=#{@work.id}" },
     'a set Sentinel'      => -> { "/sets/#{@set['id']}/edit?tab=sentinel" }
   }
