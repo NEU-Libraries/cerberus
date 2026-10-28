@@ -33,6 +33,23 @@ module WorkHealthHelper
 
   REINDEX_CODES = %w[not_indexed].freeze
 
+  # Atlas's record of the nightly checks, not a re-hash: a Work is only as
+  # verified as its least recently checked object. A fail is the worst outcome
+  # among them, so it outranks every other state.
+  def work_health_fixity(fixity)
+    objects = fixity['objects'].to_i
+    never = fixity['never_checked'].to_i
+    if fixity['result'] == 'fail'
+      'Failed. A stored file no longer matches its recorded digest.'
+    elsif fixity['result'].present? && never.positive?
+      "Partly verified: #{never} of #{pluralize(objects, 'file')} not yet checked."
+    elsif fixity['result'] == 'pass' && fixity['last_checked_at'].present?
+      "Verified #{Time.iso8601(fixity['last_checked_at']).in_time_zone.strftime('%B %-d, %Y')}, passed."
+    else
+      'Not yet checked.'
+    end
+  end
+
   def work_health_grade_label(grade)
     GRADE_LABELS.fetch(grade.to_s) { grade.to_s.humanize.presence || 'Ungraded' }
   end

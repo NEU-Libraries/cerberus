@@ -7,6 +7,38 @@ RSpec.describe WorkHealthHelper do
     AtlasRb::Mash.new('code' => code, 'severity' => severity, 'subject' => 'w1', 'message' => 'm')
   end
 
+  describe '#work_health_fixity' do
+    def fixity(result: nil, last_checked_at: nil, objects: 3, never_checked: 0)
+      AtlasRb::Mash.new('result' => result, 'last_checked_at' => last_checked_at,
+                        'objects' => objects, 'never_checked' => never_checked)
+    end
+
+    it 'dates a Work whose every object passed' do
+      expect(helper.work_health_fixity(fixity(result: 'pass', last_checked_at: '2026-10-20T03:12:00Z')))
+        .to eq('Verified October 19, 2026, passed.')
+    end
+
+    # A fail outranks a partial sweep: the Work is already graded red for it.
+    it 'reports a fail even while some objects are unchecked' do
+      expect(helper.work_health_fixity(fixity(result: 'fail', never_checked: 1)))
+        .to start_with('Failed.')
+    end
+
+    it 'counts the objects a partial sweep has not reached' do
+      expect(helper.work_health_fixity(fixity(result: 'pass', never_checked: 2)))
+        .to eq('Partly verified: 2 of 3 files not yet checked.')
+    end
+
+    it 'says nothing is checked when nothing is recorded' do
+      expect(helper.work_health_fixity(fixity(never_checked: 3))).to eq('Not yet checked.')
+    end
+
+    # An Atlas that predates the checker sends no block at all.
+    it 'treats a missing block as never checked' do
+      expect(helper.work_health_fixity({})).to eq('Not yet checked.')
+    end
+  end
+
   describe '#work_health_repair' do
     # Atlas adds codes as it adds checks, ahead of Cerberus.
     it 'gives an unknown code no link and no error' do

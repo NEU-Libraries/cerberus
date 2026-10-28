@@ -17,9 +17,9 @@ Source files:
 ## What Atlas answers
 
 `AtlasRb::Work.health_check(id, nuid:)` wraps `GET /works/:id/health_check`.
-It returns the Work's `noid`, a `grade`, `fixity_checked` and a list of
-`findings`. Each finding has a `severity`, a `code`, a `subject` and a
-`message`.
+It returns the Work's `noid`, a `grade`, `fixity_checked`, a `fixity` block
+and a list of `findings`. Each finding has a `severity`, a `code`, a `subject`
+and a `message`.
 
 | Grade | Means | Worst severity |
 |---|---|---|
@@ -38,9 +38,23 @@ Work" when `subject` is the Work's own NOID, and the NOID otherwise.
 
 **`fixity_checked` is always `false`.** Atlas never re-hashes bytes over HTTP,
 because a large file would hold a worker for minutes. So a green means nothing
-is missing, not that the bytes were verified. The report always says so. A
-fixity check runs offline, through Atlas's `rake atlas:health:work` with
-`FIXITY=1` or its `bin/ocfl-health`.
+is missing, not that the bytes were verified.
+
+**The `fixity` block is the record of the nightly checks.** The `fixity`
+compose service re-hashes the stored bytes and posts each result to Atlas (see
+[Fixity checks](fixity.md)). The block summarises those results over the OCFL
+objects the Work owns:
+
+| Key | Meaning |
+|---|---|
+| `last_checked_at` | the oldest of the objects' latest checks; null while any object is unchecked |
+| `result` | `pass` or `fail`, the worst recorded; null when nothing is recorded |
+| `objects` | how many OCFL objects the Work owns |
+| `never_checked` | how many have no check yet |
+
+A recorded fail also arrives as a `fixity_failed` finding per object, which
+grades the Work red. An Atlas that predates the checker sends no block, and the
+report reads that as never checked.
 
 **Atlas does not cache the answer.** Check again shows the grade after a repair.
 
@@ -100,7 +114,7 @@ container.
 | Label | Shows |
 |---|---|
 | Grade | a chip with the `fa-heart-pulse` icon and the grade in words. Colour alone fails WCAG 1.4.1, so the words carry the meaning |
-| Fixity | always "Not checked", because Atlas never re-hashes bytes for this check |
+| Fixity | the `fixity` block in words, from `work_health_fixity`. A fail outranks a partial sweep, so it reads "Failed" while objects are still unchecked |
 
 **Then the findings card,** only when there are findings. It reuses the Audit
 History card shell and its chip and row rail. `_work_health.scss` maps each
