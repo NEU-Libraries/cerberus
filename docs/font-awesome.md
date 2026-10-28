@@ -62,7 +62,11 @@ and a rule that nothing uses until the next run.
    only the Font Awesome 6 families. The critical CSS inlines every `@font-face`
    on every page, so the old ones cost bytes in each page's `<head>`. Nothing
    else used `fa-v4compatibility`, so the build no longer carries it.
-6. The build writes the icon names to `vendor/fontawesome-icons.txt`.
+6. The build writes all of this to `vendor/fontawesome.build/`. Only once
+   every font is cut does it replace `vendor/fontawesome/` with that directory
+   and write the icon names to `vendor/fontawesome-icons.txt`. A failed
+   `pyftsubset`, such as one without brotli, leaves both as they were and
+   removes the staging directory.
 
 The build reads the `.ttf` files, not the `.woff2`. fonttools' brotli decoder
 rejects the upstream `.woff2`, although browsers load them.

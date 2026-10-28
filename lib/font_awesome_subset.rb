@@ -79,25 +79,35 @@ module FontAwesomeSubset
     File.exist?(path) ? File.readlines(path, chomp: true).grep_v(/\A#|\A\z/).to_set : Set.new
   end
 
+  # Builds beside the served copy and swaps it in only once every font is cut,
+  # so a failed pyftsubset leaves vendor/fontawesome as it was. The staging
+  # directory is a sibling so the swap is a rename on one filesystem.
   def build(root, pyftsubset: 'pyftsubset')
     icons = used_icons(root)
-    unicodes = unicodes(icons)
-
     target = File.join(root, TARGET)
+    staging = "#{target}.build"
+    FileUtils.rm_rf(staging)
+    write_build(root, staging, icons, pyftsubset)
     FileUtils.rm_rf(target)
-    FileUtils.mkdir_p(%w[css webfonts].map { |dir| File.join(target, dir) })
-    File.write(File.join(target, STYLESHEET), trim(upstream_css(root), names(root)))
-    FONTS.each { |font| subset(root, font, unicodes, pyftsubset) }
+    File.rename(staging, target)
     File.write(File.join(root, MANIFEST), manifest_text(icons))
     icons
+  ensure
+    FileUtils.rm_rf(staging) if staging
+  end
+
+  def write_build(root, dir, icons, pyftsubset)
+    FileUtils.mkdir_p(%w[css webfonts].map { |sub| File.join(dir, sub) })
+    File.write(File.join(dir, STYLESHEET), trim(upstream_css(root), names(root)))
+    FONTS.each { |font| subset(root, dir, font, unicodes(icons), pyftsubset) }
   end
 
   def unicodes(icons) = icons.values.uniq.sort.map { |codepoint| "U+#{codepoint}" }.join(',')
 
-  def subset(root, font, unicodes, pyftsubset)
+  def subset(root, dir, font, unicodes, pyftsubset)
     source = File.join(root, UPSTREAM, 'webfonts', "#{font}.ttf")
     { 'ttf' => [], 'woff2' => ['--flavor=woff2'] }.each do |ext, flags|
-      output = File.join(root, TARGET, 'webfonts', "#{font}.#{ext}")
+      output = File.join(dir, 'webfonts', "#{font}.#{ext}")
       _out, err, status = Open3.capture3(pyftsubset, source, "--unicodes=#{unicodes}",
                                          "--output-file=#{output}", *flags)
       raise "#{pyftsubset} failed on #{font}.#{ext}:\n#{err}" unless status.success?

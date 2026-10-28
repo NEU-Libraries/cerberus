@@ -58,6 +58,53 @@ RSpec.describe FontAwesomeSubset do
     end
   end
 
+  describe '.build' do
+    around do |example|
+      Dir.mktmpdir do |dir|
+        @root = dir
+        FileUtils.mkdir_p(["#{dir}/app/views", "#{dir}/#{described_class::UPSTREAM}/css",
+                           "#{dir}/#{described_class::TARGET}/css"])
+        File.write("#{dir}/app/views/a.haml", '%i.fa-solid.fa-user')
+        File.write("#{dir}/#{described_class::UPSTREAM}/#{described_class::STYLESHEET}",
+                   '.fa-user:before{content:"\f007"}')
+        File.write("#{dir}/#{described_class::TARGET}/#{described_class::STYLESHEET}", 'served')
+        File.write("#{dir}/#{described_class::MANIFEST}", "fa-house\n")
+        example.run
+      end
+    end
+
+    def stub_pyftsubset(body)
+      path = File.join(@root, 'pyftsubset')
+      File.write(path, "#!/bin/sh\n#{body}\n")
+      File.chmod(0o755, path)
+      path
+    end
+
+    def served_css = File.read(File.join(@root, described_class::TARGET, described_class::STYLESHEET))
+
+    # A pyftsubset without brotli fails on the first .woff2, after the CSS and
+    # the first .ttf are written.
+    it 'leaves the served build and the manifest alone when a font fails' do
+      failing = stub_pyftsubset('echo "no brotli" >&2; exit 1')
+
+      expect { described_class.build(@root, pyftsubset: failing) }.to raise_error(/no brotli/)
+      expect(served_css).to eq 'served'
+      expect(described_class.manifest(@root)).to eq Set['fa-house']
+      expect(File).not_to exist("#{@root}/#{described_class::TARGET}.build")
+    end
+
+    it 'replaces the served build once every font is cut' do
+      working = stub_pyftsubset('for a; do case $a in --output-file=*) : > "${a#--output-file=}";; esac; done')
+
+      described_class.build(@root, pyftsubset: working)
+
+      expect(served_css).to include('.fa-user:before')
+      expect(Dir.children("#{@root}/#{described_class::TARGET}/webfonts").size).to eq 6
+      expect(described_class.manifest(@root)).to eq Set['fa-user']
+      expect(File).not_to exist("#{@root}/#{described_class::TARGET}.build")
+    end
+  end
+
   describe '.names' do
     it 'skips compiled assets, which differ between checkouts' do
       Dir.mktmpdir do |dir|
