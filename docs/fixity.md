@@ -18,10 +18,25 @@ Source files:
 ## The checker runs as its own service
 
 The `fixity` service runs the Atlas image with `bin/fixity-entrypoint.sh` as
-its entrypoint. The entrypoint never exits. It wakes every 15 minutes, and
-inside the nightly window it sweeps the objects Atlas says are due. Each result
-goes to Atlas's `POST /fixity_checks`. Atlas appends the result to the object's
-OCFL log and re-indexes the owning Work.
+its entrypoint. The entrypoint never exits. It wakes every 15 minutes, and on
+the first wake inside the nightly window it sweeps the objects Atlas says are
+due. Each result goes to Atlas's `POST /fixity_checks`. Atlas appends the
+result to the object's OCFL log and re-indexes the owning Work.
+
+**Each object is checked once per cycle.** An object is due again
+`FIXITY_CYCLE` after its last check, 90 days by default. Never-checked objects
+come first, then the oldest checks. A night that cannot finish the due list
+leaves the rest for the next night.
+
+**One sweep a window.** A sweep that finishes, by the list, the window's end
+or the budget, closes the window, and later wakes that night do nothing. A
+sweep that Atlas refuses or cannot be reached is retried on the next wake. The
+checker remembers the window only inside its container, so a restart sweeps
+again at once. The cycle keeps that sweep from re-hashing what was just
+checked.
+
+In steady state a night reads about the repository's size divided by the cycle
+in days: 10 TB on a 90-day cycle is about 110 GB a night.
 
 - **Run exactly one replica.** Two checkers race over the same objects.
 - **Keep the storage mount `:ro`.** The checker only reads. The entrypoint logs
@@ -31,9 +46,14 @@ OCFL log and re-indexes the owning Work.
   a stale build.
 - **The window is whole UTC hours, end exclusive.** It defaults to 01:00 to
   07:00. Set `FIXITY_WINDOW_START` and `FIXITY_WINDOW_END` to change it.
+- **Keep the cycle well under 12 months.** The admin report counts a Work
+  unchecked for 12 months as overdue, so a longer cycle lists every Work there.
 
-To watch a sweep in dev, set the window to the current UTC hour in `.env`.
-Then read the log:
+To watch a sweep in dev, set the window to the current UTC hour in `.env`, and
+recreate the service with the full `up` chain. Recreating it also clears the
+window it remembers. A sweep re-hashes only what is due, so on a stack checked
+within the cycle, set `FIXITY_CYCLE=0` as well to force a full pass. Then read
+the log:
 
 ```bash
 docker compose logs -f fixity
@@ -68,6 +88,7 @@ by hand:
     environment:
       ATLAS_URL: 'http://atlas:3000/'
       FIXITY_TOKEN_FILE: /run/secrets/atlas_fixity_token
+      FIXITY_CYCLE: 90d
       OCFL_EXTRA_ROOTS: <the same value the atlas service has>
     secrets: [atlas_fixity_token]
     volumes:
@@ -85,8 +106,9 @@ by hand:
 - **Swarm ignores `restart:`.** `deploy.restart_policy` replaces it.
 - **Mount every extra storage root `:ro` as well.** An unmounted root's objects
   are never checked.
-- **Set `FIXITY_BUDGET`, such as `500GB`, if reads cost money.** Without a
-  budget, the window's end is the only bound on a night's sweep.
+- **Set `FIXITY_BUDGET`, such as `500GB`, if reads cost money.** It bounds a
+  whole night, not one wake. Without it, the cycle and the window's end bound
+  a night's reads.
 
 ## The Health tab line
 

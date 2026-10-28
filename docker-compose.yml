@@ -172,6 +172,9 @@ services:
       # hours Eastern, when nobody is depositing.
       FIXITY_WINDOW_START: ${FIXITY_WINDOW_START:-1}
       FIXITY_WINDOW_END: ${FIXITY_WINDOW_END:-7}
+      # How long an object rests after a check before it is due again. Empty
+      # takes the checker's own default, 90 days.
+      FIXITY_CYCLE: ${FIXITY_CYCLE:-}
     restart: unless-stopped
     cpus: 1
     mem_limit: 256m
