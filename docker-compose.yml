@@ -153,6 +153,28 @@ services:
       HANDLE_RESOLVER_BASE: ${HANDLE_RESOLVER_BASE:-http://localhost:8000}
     ports:
       - 3001:3000
+  # Re-hashes the stored bytes against their recorded digests, a slice each
+  # night, and posts each result to Atlas. Atlas's docs/fixity.md is the
+  # reference. Exactly one replica: two checkers race over the same objects.
+  # Same tag as atlas, so the checker and the endpoint it reports to move
+  # together. Harmless while ATLAS_FIXITY_TOKEN is unset: each sweep is
+  # refused with a 401 and the loop sleeps until the next one.
+  fixity:
+    image: nakatomi/atlas_web:${ATLAS:-latest}
+    entrypoint: ["/home/atlas/web/bin/fixity-entrypoint.sh"]
+    depends_on:
+      atlas:
+        condition: service_healthy
+    environment:
+      ATLAS_URL: 'http://atlas:3000/'
+      FIXITY_TOKEN: ${ATLAS_FIXITY_TOKEN:-}
+      # Whole UTC hours, end exclusive. 01:00-07:00 UTC is evening to small
+      # hours Eastern, when nobody is depositing.
+      FIXITY_WINDOW_START: ${FIXITY_WINDOW_START:-1}
+      FIXITY_WINDOW_END: ${FIXITY_WINDOW_END:-7}
+    restart: unless-stopped
+    cpus: 1
+    mem_limit: 256m
   # Behind a profile, so a plain `up` does not start it: nothing but the specs
   # talks to this instance, and an always-on container the specs need only
   # occasionally holds ~340 MB around the clock for nothing. bin/spec and
