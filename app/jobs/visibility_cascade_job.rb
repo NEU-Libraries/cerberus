@@ -74,20 +74,10 @@ class VisibilityCascadeJob < ApplicationJob
       @changed << { 'noid' => target.noid, 'type' => target.klass, 'read_before' => read_before }
     end
 
-    # The derivative-access default lives in Cerberus, not in the ACL Atlas
-    # holds, so it must be clamped here too: Atlas refuses a tier more visible
-    # than its Work, and a stale default makes the next deposit into that
-    # collection fail outright. See docs/authorization.md.
+    # The Sentinel lives in Cerberus, not in the ACL Atlas holds, so it must be
+    # clamped here too. See docs/authorization.md.
     def clamp_sentinel(noid, read_groups)
-      sentinel = Sentinel.find_by(target_id: noid)
-      return if sentinel.nil?
-
-      clamped = sentinel.policy.transform_values do |groups|
-        Permissions.audience_intersect(Array(groups), read_groups)
-      end
-      return if clamped == sentinel.policy
-
-      sentinel.update(policy: clamped)
+      Sentinel.find_by(target_id: noid)&.clamp_to!(read_groups)
     end
 
     # Anything that failed to narrow is still exposed, so failures are named

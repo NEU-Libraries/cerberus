@@ -1,7 +1,7 @@
 -# locals: collection_id (String), sentinel (Sentinel|nil), groups (Array<[id, name]>),
 -#         public_collection (Boolean)
 -#
--# The Derivative access tab: authors this collection's Sentinel — the per-tier
+-# The Sentinel tab: authors this collection's Sentinel — the per-tier
 -# read-group default applied to Works added under it. Two groups, because the
 -# vocabulary has two shapes: the image renditions form a resolution ladder
 -# (widest audience at top, narrowest at the bottom) so the monotonicity rule
@@ -11,11 +11,11 @@
 -# read uniformly as "Inherit from collection" — that sentence is where the
 -# author sees whether inheriting means public or restricted. It is prose, not a
 -# chip, because a chip here read as a label for who may open the page.
-.py-2.px-1
+.edit-pane
   = bootstrap_form_tag(url: sentinel_collection_path(collection_id), method: :patch) do |f|
-    .well.p-3.my-3.rounded-3
-      %h5.mb-1 Update derivative access
-      %p.small.text-muted.mb-0
+    .well.p-3.mb-3.rounded-3
+      %h5.mb-0 Sentinel
+      %p.small.text-muted.mt-3.mb-0
         Every file uploaded to this collection will inherit the collection’s permissions. This
         collection is #{public_collection ? 'public' : 'restricted'}. Use the
         toggles below to change the default permissions for files uploaded to this collection.
@@ -30,6 +30,7 @@
       %ul.derivative-independent.list-unstyled.mb-0
         - Sentinel::INDEPENDENT.each do |tier|
           = render "shared/derivative_tier", tier: tier, sentinel: sentinel, groups: groups, open_label: "Inherit from collection"
+    = render "loaded_work_access", sentinel: sentinel, groups: groups, public_collection: public_collection
     .well.p-3.my-3.rounded-3
       = f.button "Save default", type: :submit, class: "btn btn-success"
       = link_to "Cancel", collection_path(collection_id), class: "btn btn-warning"

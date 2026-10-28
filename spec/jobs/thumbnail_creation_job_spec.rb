@@ -4,27 +4,15 @@ require 'rails_helper'
 
 RSpec.describe ThumbnailCreationJob, type: :job do
   let(:work_id) { 'w-123' }
-  let(:base) { 'http://example.com/iiif/3/123456789.jp2' }
-  let(:urls) do
-    {
-      thumbnail:    "#{base}/full/!85,85/0/default.jpg",
-      thumbnail_2x: "#{base}/full/!170,170/0/default.jpg",
-      preview:      "#{base}/full/500,/0/default.jpg"
-    }
-  end
+  let(:image) { IiifImageCreator::Result.new(open_base: 'http://example.com/iiif/3/open-aaa.tif') }
+  let(:arguments) { { thumbnail: 'T', thumbnail_2x: 'T2', preview: 'P', preview_width: 500, preview_height: 333 } }
 
-  it 'PATCHes the sized IIIF URIs via set_thumbnails' do
-    allow(ThumbnailCreator).to receive(:call).with(base: base).and_return(urls)
+  it 'PATCHes the thumbnail URLs and preview size via set_thumbnails' do
+    allow(ThumbnailCreator).to receive(:call).with(image: image).and_return(arguments)
     allow(AtlasRb::Resource).to receive(:set_thumbnails)
 
-    described_class.new.perform(work_id, base)
+    described_class.new.perform(work_id, image)
 
-    expect(ThumbnailCreator).to have_received(:call).with(base: base)
-    expect(AtlasRb::Resource).to have_received(:set_thumbnails).with(
-      work_id,
-      thumbnail:    urls[:thumbnail],
-      thumbnail_2x: urls[:thumbnail_2x],
-      preview:      urls[:preview]
-    )
+    expect(AtlasRb::Resource).to have_received(:set_thumbnails).with(work_id, **arguments)
   end
 end

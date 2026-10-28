@@ -1,0 +1,125 @@
+-# locals: set_id (String), sentinel (Sentinel|nil), groups (Array<[id, name]>)
+-#
+-# The Set edit page's Sentinel tab: authors this Set's Sentinel — the Works'
+-# visibility, their group grants and their derivative access — and,
+-# separately, sweeps it across the Works the Set holds now. See docs/sets.md.
+-#
+-# The heading plate, the Save footer and the Apply button are wells, as on the
+-# Collection's Sentinel tab; the three parts of the form and the Apply
+-# explainer are bare sections split by dividers. Each part opens on "leave as
+-# it is", so saving a policy that names one part changes only that part.
+- access = sentinel&.work_access || {}
+- grants_mode = sentinel&.grants.nil? ? 'keep' : 'replace'
+- derivatives_mode = sentinel&.derivatives_enabled ? 'set' : 'keep'
+.edit-pane
+  .well.p-3.mb-3.rounded-3
+    %h5.mb-0 Sentinel
+    %p.small.text-muted.mt-3.mb-0
+      Choose what every work in this set should allow, save it, then apply it. Each part you leave
+      as it is stays as each work has it. Nothing changes until you apply.
+
+  = bootstrap_form_tag(url: sentinel_set_path(set_id), method: :patch) do |f|
+    %fieldset
+      %legend.h6.mb-1 Visibility
+      %p.small.text-subtle.mb-2
+        A work can only be public if the collection it is in is public. Works in a restricted
+        collection are listed in the report and keep their visibility.
+      - [['', 'Leave each work’s visibility as it is'], ['public', 'Make every work public'], ['private', 'Make every work private']].each do |value, label|
+        .form-check
+          %input.form-check-input{ type: 'radio', id: "work-visibility-#{value.presence || 'keep'}", name: 'work_access[visibility]', value: value, checked: access['visibility'].to_s == value }
+          %label.form-check-label{ for: "work-visibility-#{value.presence || 'keep'}" }= label
+
+    %hr.section-divider.my-3
+
+    %div{ data: { controller: 'reveal', 'reveal-when-value': 'replace' } }
+      %fieldset
+        %legend.h6.mb-1 Groups
+        %p.small.text-subtle.mb-2
+          Replacing removes every group grant a work has and gives it only the groups below. An empty
+          list removes them all. Repository staff keep their access either way.
+        .form-check
+          %input#work-grants-keep.form-check-input{ type: 'radio', name: 'work_access[grants_mode]', value: 'keep', checked: grants_mode == 'keep', data: { action: 'change->reveal#sync' } }
+          %label.form-check-label{ for: 'work-grants-keep' } Keep each work’s groups
+        .form-check
+          %input#work-grants-replace.form-check-input{ type: 'radio', name: 'work_access[grants_mode]', value: 'replace', checked: grants_mode == 'replace', data: { action: 'change->reveal#sync' } }
+          %label.form-check-label{ for: 'work-grants-replace' } Replace each work’s groups with these
+      .mt-3{ hidden: grants_mode != 'replace', data: { 'reveal-target': 'section', controller: 'group-permissions', 'group-permissions-resource-value': 'work_access' } }
+        = render 'shared/group_permissions', resource: 'work_access', noun: 'work', heading: nil,
+                                             grants: sentinel_grant_rows(sentinel, groups), groups: groups
+
+    %hr.section-divider.my-3
+
+    %div{ data: { controller: 'reveal', 'reveal-when-value': 'set' } }
+      %fieldset
+        %legend.h6.mb-1 Derivative access
+        %p.small.text-subtle.mb-2
+          Restrict which groups can download each type of file. A file you don't restrict keeps the
+          permissions of its work. For images, larger versions must be at least as restricted as
+          smaller ones.
+        .form-check
+          %input#derivatives-keep.form-check-input{ type: 'radio', name: 'sentinel[derivatives_mode]', value: 'keep', checked: derivatives_mode == 'keep', data: { action: 'change->reveal#sync' } }
+          %label.form-check-label{ for: 'derivatives-keep' } Leave each work’s derivative access as it is
+        .form-check
+          %input#derivatives-set.form-check-input{ type: 'radio', name: 'sentinel[derivatives_mode]', value: 'set', checked: derivatives_mode == 'set', data: { action: 'change->reveal#sync' } }
+          %label.form-check-label{ for: 'derivatives-set' } Set every work’s derivative access to this policy
+      %section.mt-3{ hidden: derivatives_mode != 'set', data: { 'reveal-target': 'section', controller: 'derivative-policy', 'derivative-policy-groups-value': derivative_group_registry(groups) } }
+        %h6.derivative-group-heading Images
+        %ol.derivative-ladder.list-unstyled.mb-4
+          - Sentinel::IMAGE_LADDER.each do |tier|
+            = render 'shared/derivative_tier', tier: tier, sentinel: sentinel, groups: groups, open_label: 'Inherit from the work'
+        %h6.derivative-group-heading Audio, video and PDF
+        %ul.derivative-independent.list-unstyled.mb-0
+          - Sentinel::INDEPENDENT.each do |tier|
+            = render 'shared/derivative_tier', tier: tier, sentinel: sentinel, groups: groups, open_label: 'Inherit from the work'
+
+    .well.p-3.my-3.rounded-3
+      = f.button 'Save', type: :submit, class: 'btn btn-success'
+      = link_to 'Cancel', set_path(set_id), class: 'btn btn-warning'
+
+  -# The count is the lazily-loaded frame the My Sets index already uses, so the
+  -# number of works is on the screen before Apply is pressed without the edit
+  -# page paying a recipe resolution on every load.
+  %hr.section-divider.my-3
+
+  %section
+    %h5.mb-3 Apply to this set's works
+    .d-flex.align-items-baseline.gap-2.mb-2
+      %h6.mb-0 This set currently holds
+      = turbo_frame_tag "set-works-count-#{set_id}", src: works_count_set_path(set_id), loading: :lazy do
+        %span.text-muted Counting…
+    %p.small.text-subtle.mb-3
+      Applying covers the works the set holds right now, including those it reaches through an
+      included collection. Works you have hidden are not touched. You'll get a message when it
+      finishes.
+    - if sentinel.nil?
+      %p.small.text-subtle.mb-0
+        %i.fa-solid.fa-circle-info.me-1{ 'aria-hidden' => 'true' }
+        Save the Sentinel first.
+    - else
+      - summary = sentinel_apply_summary(sentinel)
+      - if summary.empty?
+        %p.small.text-subtle.mb-0
+          %i.fa-solid.fa-circle-info.me-1{ 'aria-hidden' => 'true' }
+          The saved Sentinel leaves every part as it is, so applying it would change nothing.
+      - else
+        %h6.mt-4.mb-2 Applying the saved Sentinel will change this:
+        %ul.small.mb-3
+          - summary.each do |line|
+            %li= line
+        -# The warning sits before the control it applies to, and only for a
+        -# widening: that is the change that discloses material to the public.
+        - if sentinel_widens?(sentinel)
+          .alert.alert-warning.py-2.px-3.small.d-flex.align-items-start.mb-3{ role: 'alert' }
+            %i.fa-solid.fa-triangle-exclamation.me-2.mt-1{ 'aria-hidden' => 'true' }
+            %div
+              %strong.d-block This makes material public
+              Anyone will be able to see these works. Check the set's contents before you apply. The
+              admin ledger keeps each work's earlier access, so a developer can restore it.
+        .well.p-3.my-3.rounded-3
+          = button_to apply_sentinel_set_path(set_id), form: { class: 'd-inline' },
+                      class: "btn #{sentinel_widens?(sentinel) ? 'btn-danger' : 'btn-primary'}",
+                      data: { turbo_confirm: "Apply this Sentinel to every work in this set? #{summary.join(' ')}",
+                              turbo_confirm_title: 'Confirm apply',
+                              turbo_confirm_button: 'Apply',
+                              turbo_confirm_variant: sentinel_widens?(sentinel) ? 'danger' : 'primary' } do
+            Apply to this set's works

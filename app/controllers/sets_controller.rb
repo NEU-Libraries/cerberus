@@ -28,9 +28,9 @@ class SetsController < CatalogController
   before_action :require_set_editor, only: :edit
   # Declared here rather than in SetBulkActions so it lands after the two gates
   # above: an anonymous request has to reach authenticate_user! and be sent to
-  # sign in, not be told it is forbidden. The three actions it names live in that
+  # sign in, not be told it is forbidden. The two actions it names live in that
   # concern.
-  before_action :require_bulk_operator, only: %i[sentinel apply_sentinel privatize]
+  before_action :require_bulk_operator, only: %i[sentinel apply_sentinel]
 
   # A private Set read (or any write) the caller may not perform: Atlas says
   # 403, the user sees the standard forbidden page. Unknown ids surface as
@@ -92,8 +92,8 @@ class SetsController < CatalogController
   end
 
   # Details tab is open to any editor; the Sharing tab is owner/admin-only
-  # (gated in the view + on the sharing write path); the two bulk-action tabs
-  # are operator-only (SetBulkActions#require_bulk_operator, mirrored in the
+  # (gated in the view + on the sharing write path); the Sentinel tab
+  # is operator-only (SetBulkActions#require_bulk_operator, mirrored in the
   # view by #bulk_operator?).
   def edit
     edit_breadcrumbs

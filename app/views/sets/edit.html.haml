@@ -16,9 +16,9 @@
     %i.fa-solid.fa-layer-group.text-primary.me-2{'aria-hidden' => 'true'}
     Edit set
 
-  -# Details and Definition are open to any editor; Sharing (ACL) is owner/admin-only; the two
-  -# bulk-action tabs are operator-only, on the same predicate their write paths
-  -# gate on (SetBulkActions#bulk_operator?).
+  -# Details and Definition are open to any editor; Sharing (ACL) is owner/admin-only;
+  -# Sentinel is operator-only, on the same predicate its write paths gate on
+  -# (SetBulkActions#bulk_operator?).
   %ul.nav.nav-tabs{'data-controller' => 'tab-hash'}
     %li.nav-item
       %button#details-tab.nav-link{class: ('active' if open == 'details'), 'aria-controls' => 'details', 'aria-selected' => (open == 'details').to_s, 'data-bs-target' => '#details', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Details
@@ -29,9 +29,7 @@
         %button#sharing-tab.nav-link{class: ('active' if open == 'sharing'), 'aria-controls' => 'sharing', 'aria-selected' => (open == 'sharing').to_s, 'data-bs-target' => '#sharing', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Sharing
     - if bulk_operator?
       %li.nav-item
-        %button#derivative-access-tab.nav-link{class: ('active' if open == 'derivative-access'), 'aria-controls' => 'derivative-access', 'aria-selected' => (open == 'derivative-access').to_s, 'data-bs-target' => '#derivative-access', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Derivative access
-      %li.nav-item
-        %button#visibility-tab.nav-link{class: ('active' if open == 'visibility'), 'aria-controls' => 'visibility', 'aria-selected' => (open == 'visibility').to_s, 'data-bs-target' => '#visibility', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Visibility
+        %button#sentinel-tab.nav-link{class: ('active' if open == 'sentinel'), 'aria-controls' => 'sentinel', 'aria-selected' => (open == 'sentinel').to_s, 'data-bs-target' => '#sentinel', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Sentinel
     - if effective_user&.loader_tier?
       %li.nav-item
         %button#export-tab.nav-link{class: ('active' if open == 'export'), 'aria-controls' => 'export', 'aria-selected' => (open == 'export').to_s, 'data-bs-target' => '#export', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Export
@@ -40,16 +38,16 @@
     #details.tab-pane{class: ('active' if open == 'details'), 'aria-labelledby' => 'details-tab', role: 'tabpanel'}
       = render 'form', url: set_path(@set['id']), method: :patch, submit_label: 'Save', cancel_path: set_path(@set['id'])
     #definition.tab-pane{class: ('active' if open == 'definition'), 'aria-labelledby' => 'definition-tab', role: 'tabpanel'}
-      = render 'definition', chips: @resolver.chips, added_noids: Array(@set['included_works']),
-                             aside_docs: @resolver.aside_documents
+      .edit-pane
+        = render 'definition', chips: @resolver.chips, added_noids: Array(@set['included_works']),
+                               aside_docs: @resolver.aside_documents
     - if @owned
       #sharing.tab-pane{class: ('active' if open == 'sharing'), 'aria-labelledby' => 'sharing-tab', role: 'tabpanel'}
-        = render 'sharing'
+        .edit-pane
+          = render 'sharing'
     - if bulk_operator?
-      #derivative-access.tab-pane{class: ('active' if open == 'derivative-access'), 'aria-labelledby' => 'derivative-access-tab', role: 'tabpanel'}
-        = render 'derivative_access', set_id: @set['id'], sentinel: @sentinel, groups: sentinel_groups
-      #visibility.tab-pane{class: ('active' if open == 'visibility'), 'aria-labelledby' => 'visibility-tab', role: 'tabpanel'}
-        = render 'bulk_visibility', set_id: @set['id']
+      #sentinel.tab-pane{class: ('active' if open == 'sentinel'), 'aria-labelledby' => 'sentinel-tab', role: 'tabpanel'}
+        = render 'sentinel', set_id: @set['id'], sentinel: @sentinel, groups: sentinel_groups
     - if effective_user&.loader_tier?
       #export.tab-pane{class: ('active' if open == 'export'), 'aria-labelledby' => 'export-tab', role: 'tabpanel'}
         = render 'export', set_id: @set['id']

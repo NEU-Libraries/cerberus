@@ -17,7 +17,6 @@ Source files:
 - `app/controllers/concerns/structural_containers.rb`
 - `app/controllers/xml_controller.rb`
 - `app/jobs/set_sentinel_apply_job.rb`
-- `app/jobs/set_privatize_job.rb`
 - `app/jobs/set_reindex_job.rb`
 - `app/jobs/concerns/set_sweep.rb`
 - `app/jobs/multipage_item_job.rb`
@@ -413,40 +412,42 @@ personal root gets the same owner trail as its edit page.
 
 ## Sweeping and reindexing a Set
 
-Three background jobs act on the Works a Set denotes. `docs/sets.md` covers who
+Two background jobs act on the Works a Set denotes. `docs/sets.md` covers who
 may run a sweep, the `SetSweep` scaffolding they share, and how a partial run is
 reported.
 
 | Job | What it writes | Skips |
 |---|---|---|
-| `SetPrivatizeJob` | The Work's resource ACL: `public` removed from read | A Work that is already private, or whose permissions cannot be read (both counted as already private) |
-| `SetSentinelApplyJob` | The Work's derivative-access policy, clamped per Work | A Work whose permissions cannot be read |
+| `SetSentinelApplyJob` | The Work's resource ACL, as the Sentinel's work access says, then its derivative-access policy, clamped per Work | A Work whose permissions cannot be read |
 | `SetReindexJob` | Nothing in Atlas's store — Solr projections only | Nothing |
 
-All three re-read the Set at run time rather than carrying its title, recipe or
+Both re-read the Set at run time rather than carrying its title, recipe or
 policy through the queue. An edit made between the click and the run is the one
 that takes effect. Each reports to the actor's inbox through
 `CompletionNotice.deliver`, under its own `AdminNotice` kind.
 
-The two sweeps retry `AtlasRb::StaleResourceError`, which Atlas surfaces only
-once its own optimistic-lock retries are exhausted. Re-running is safe because
-each sweep is idempotent. `SetReindexJob` retries `Faraday::TimeoutError`,
+`SetSentinelApplyJob` retries `AtlasRb::StaleResourceError` on the one Work, up
+to `LOCK_ATTEMPTS`. Atlas surfaces it only once its own optimistic-lock retries
+are exhausted. The retry stays per Work, not a `retry_on`, because a re-run finds
+the Works it already changed matching, and its ledger entry would leave them
+out. `SetReindexJob` retries `Faraday::TimeoutError`,
 because atlas_rb sets no Faraday timeout on the system connection and a large
 included collection can hold the thread. Its `TimeoutError` re-raise has to stay
 above the `Faraday::Error` rescue, or `retry_on` never sees it.
 
-### Privatize writes the resource ACL, not the derivative gate
+### Visibility writes the resource ACL, not the derivative gate
 
-`SetPrivatizeJob` is the v1 "make these Core Files private" sweep. It writes the
-Work's own ACL, which is the outer gate. A Work's FileSets follow the Work — see
+The Sentinel's work access is v1's "core file" slot. It writes the Work's own
+ACL, which is the outer gate. A Work's FileSets follow the Work — see
 `NarrowingTargets` in `docs/narrowing.md`. And the download path authorizes
 `:read` on the resource before it consults the per-asset stamp.
 
-Privatizing the Work therefore closes its blobs too, and a derivative tier left
-naming `public` underneath is inert rather than a hole.
+Making the Work private therefore closes its blobs too, and a derivative tier
+left naming `public` underneath is inert rather than a hole.
 
-Group grants are kept. They grant nothing extra while an item is public, and they
-are what a later flip back to Private falls back to. That is the same reasoning
+A visibility change keeps the Work's group grants unless the Sentinel also
+replaces them. They grant nothing extra while an item is public, and they are
+what a later flip back to Private falls back to. That is the same reasoning
 `PermissionsForm#mass_permissions` applies to a single resource.
 
 ### Applying a Set's Sentinel
@@ -457,8 +458,10 @@ it. A Collection's Sentinel stamps *new* deposits at create and is deliberately
 not retroactive, so nothing else fixes the renditions of Works already in place.
 Authoring or editing a Collection Sentinel still triggers no sweep.
 
-Each tier is clamped against the Work it is written to, with
-`Permissions.audience_intersect`. Clamping is the honest reading of the policy
+The ACL is written first, through `Sentinel#apply_to`, and each tier is then
+clamped against the audience the Work has after that write, with
+`Permissions.audience_intersect`. A Sentinel saved with derivative access left
+alone (`derivatives_enabled` false) skips the tier write. Clamping is the honest reading of the policy
 as well as a wire requirement. Atlas refuses a tier naming a group the Work does
 not grant (`tier_exceeds_resource`), and on a private Work the only legal value
 is the empty list. A tier can never widen a Work, only narrow it. A tier sharing nobody with its Work clamps to `[]`,

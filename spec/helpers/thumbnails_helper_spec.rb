@@ -41,4 +41,47 @@ describe ThumbnailsHelper do
       expect(helper.av_poster_src('')).to match(/av-placeholder/)
     end
   end
+
+  describe '#preview_image_attributes' do
+    let(:frame) { ThumbnailsHelper::PREVIEW_FRAME }
+    let(:placeholder) { Base64.strict_encode64('jpeg bytes') }
+
+    # The SVG the placeholder sits in, decoded from the style's data URI.
+    def svg(style) = Base64.strict_decode64(style[%r{svg\+xml;base64,([A-Za-z0-9+/=]+)}, 1])
+
+    it 'renders the bare frame when the Work has no size' do
+      expect(helper.preview_image_attributes(nil, nil, placeholder)).to eq(style: frame)
+    end
+
+    # Width and height travel together; half a size cannot reserve a frame.
+    it 'renders the bare frame when either dimension is missing' do
+      expect(helper.preview_image_attributes(500, nil, nil)).to eq(style: frame)
+      expect(helper.preview_image_attributes(0, 333, nil)).to eq(style: frame)
+    end
+
+    it 'reserves the frame and scales it in proportion' do
+      expect(helper.preview_image_attributes(500, 333, nil)).to eq(width: 500, height: 333,
+                                                                   style: "#{frame} height: auto;")
+    end
+
+    it 'paints the blurred placeholder inside the padding' do
+      style = helper.preview_image_attributes(500, 333, placeholder)[:style]
+
+      expect(style).to include('background-size: cover', 'background-clip: content-box',
+                               'background-origin: content-box')
+      expect(svg(style)).to include("viewBox='0 0 500 333'", "stdDeviation='18'",
+                                    "href='data:image/jpeg;base64,#{placeholder}'")
+    end
+
+    it 'keeps the viewBox in the preview proportion' do
+      style = helper.preview_image_attributes(300, 600, placeholder)[:style]
+
+      expect(svg(style)).to include("viewBox='0 0 500 1000'")
+    end
+
+    # The value lands inside the SVG markup, so anything but base64 is dropped.
+    it 'ignores a placeholder that is not base64' do
+      expect(helper.preview_image_attributes(500, 333, "x' onload='y")[:style]).to eq("#{frame} height: auto;")
+    end
+  end
 end

@@ -102,10 +102,22 @@ RSpec.describe Sentinel do
     end
   end
 
+  def envelope(read:, edit: [Permissions::STAFF_EDIT_GROUP])
+    AtlasRb::Mash.new('read' => read, 'edit' => edit, 'edit_users' => [], 'embargo' => nil)
+  end
+
+  let(:archives) { 'northeastern:drs:library:archives' }
+  let(:media) { 'northeastern:drs:nupd:media' }
+
   describe '.apply_default' do
+    before do
+      allow(AtlasRb::Work).to receive(:set_derivative_permissions)
+      allow(AtlasRb::Resource).to receive(:set_permissions)
+      allow(AtlasRb::Resource).to receive(:permissions).with('w-1').and_return(envelope(read: ['public']))
+    end
+
     it 'applies the Collection Sentinel to a Work created under it' do
       Sentinel.create!(target_id: 'col-1', policy: { 'large' => ['g:arch'] })
-      allow(AtlasRb::Work).to receive(:set_derivative_permissions)
 
       described_class.apply_default('col-1', 'w-1')
 
@@ -114,23 +126,174 @@ RSpec.describe Sentinel do
     end
 
     it 'is a no-op when the Collection has no Sentinel' do
-      allow(AtlasRb::Work).to receive(:set_derivative_permissions)
-
       described_class.apply_default('unmanaged-col', 'w-1')
 
       expect(AtlasRb::Work).not_to have_received(:set_derivative_permissions)
     end
+
+    it 'leaves the ACL the depositor chose when told to skip work access' do
+      Sentinel.create!(target_id: 'col-1', policy: {}, work_access: { 'visibility' => 'private' })
+
+      described_class.apply_default('col-1', 'w-1', work_access: false)
+
+      expect(AtlasRb::Resource).not_to have_received(:set_permissions)
+      expect(AtlasRb::Work).to have_received(:set_derivative_permissions).with('w-1', policy: {}, nuid: nil)
+    end
   end
 
   describe '#apply_to' do
-    it 'pushes only the known tiers to Atlas per-tier gate' do
-      sentinel = Sentinel.new(target_id: 'c', policy: { 'large' => ['g:arch'], 'stray' => ['x'] })
+    before do
       allow(AtlasRb::Work).to receive(:set_derivative_permissions)
+      allow(AtlasRb::Resource).to receive(:set_permissions)
+    end
 
+    def apply(sentinel, read:, edit: [Permissions::STAFF_EDIT_GROUP])
+      allow(AtlasRb::Resource).to receive(:permissions).with('w-1').and_return(envelope(read: read, edit: edit))
       sentinel.apply_to('w-1', nuid: '000000004')
+    end
+
+    it 'pushes only the known tiers to Atlas per-tier gate' do
+      apply(Sentinel.new(target_id: 'c', policy: { 'large' => ['g:arch'], 'stray' => ['x'] }), read: ['public'])
 
       expect(AtlasRb::Work).to have_received(:set_derivative_permissions)
         .with('w-1', policy: { 'large' => ['g:arch'] }, nuid: '000000004')
+    end
+
+    it 'does nothing to a Work it cannot read' do
+      allow(AtlasRb::Resource).to receive(:permissions).with('w-1').and_return(nil)
+
+      expect(Sentinel.new(target_id: 'c', policy: {}).apply_to('w-1')).to be_nil
+      expect(AtlasRb::Work).not_to have_received(:set_derivative_permissions)
+    end
+
+    it 'leaves the ACL alone without a work access slot' do
+      result = apply(Sentinel.new(target_id: 'c', policy: {}), read: ['public', archives])
+
+      expect(AtlasRb::Resource).not_to have_received(:set_permissions)
+      expect(result.acl_changed).to be(false)
+    end
+
+    it 'makes a Work public and keeps its groups' do
+      sentinel = Sentinel.new(target_id: 'c', policy: {}, work_access: { 'visibility' => 'public' })
+      apply(sentinel, read: [archives])
+
+      expect(AtlasRb::Resource).to have_received(:set_permissions)
+        .with('w-1', { 'read' => ['public', archives] }, nuid: '000000004')
+    end
+
+    it 'makes a Work private and keeps its groups' do
+      sentinel = Sentinel.new(target_id: 'c', policy: {}, work_access: { 'visibility' => 'private' })
+      apply(sentinel, read: ['public', archives])
+
+      expect(AtlasRb::Resource).to have_received(:set_permissions)
+        .with('w-1', { 'read' => [archives] }, nuid: '000000004')
+    end
+
+    it 'replaces the groups and keeps the visibility it does not name' do
+      access = { 'grants' => { 'read' => [media], 'edit' => [archives] } }
+      apply(Sentinel.new(target_id: 'c', policy: {}, work_access: access), read: ['public', archives])
+
+      expect(AtlasRb::Resource).to have_received(:set_permissions)
+        .with('w-1', { 'read' => ['public', media], 'edit' => [archives] }, nuid: '000000004')
+    end
+
+    it 'skips the write when the Work already matches, ignoring the staff edit group' do
+      access = { 'visibility' => 'private', 'grants' => { 'read' => [archives], 'edit' => [] } }
+      result = apply(Sentinel.new(target_id: 'c', policy: {}, work_access: access), read: [archives])
+
+      expect(AtlasRb::Resource).not_to have_received(:set_permissions)
+      expect(result.acl_changed).to be(false)
+    end
+
+    it 'records the audience it replaced, without the staff group' do
+      sentinel = Sentinel.new(target_id: 'c', policy: {}, work_access: { 'visibility' => 'private' })
+      result = apply(sentinel, read: ['public'], edit: [Permissions::STAFF_EDIT_GROUP, archives])
+
+      expect(result.to_h).to eq(acl_changed: true, read_before: ['public'], edit_before: [archives])
+    end
+
+    # Atlas refuses a tier naming a group its Work does not grant.
+    it 'clamps the tiers against the audience the Work has after the write' do
+      sentinel = Sentinel.new(target_id: 'c', policy: { 'original' => ['public'], 'pdf' => [media] },
+                              work_access: { 'visibility' => 'private' })
+      apply(sentinel, read: ['public', archives])
+
+      expect(AtlasRb::Work).to have_received(:set_derivative_permissions)
+        .with('w-1', policy: { 'original' => [archives], 'pdf' => [] }, nuid: '000000004')
+    end
+
+    it 'leaves the tiers alone when derivatives are not enabled' do
+      sentinel = Sentinel.new(target_id: 'c', policy: {}, derivatives_enabled: false,
+                              work_access: { 'visibility' => 'public' })
+      apply(sentinel, read: [])
+
+      expect(AtlasRb::Resource).to have_received(:set_permissions)
+      expect(AtlasRb::Work).not_to have_received(:set_derivative_permissions)
+    end
+  end
+
+  describe 'work access shape' do
+    def sentinel(access)
+      Sentinel.new(target_id: 'c', policy: {}, work_access: access)
+    end
+
+    it 'accepts a visibility, grants, or both' do
+      expect(sentinel({ 'visibility' => 'public' })).to be_valid
+      expect(sentinel({ 'grants' => { 'read' => [archives], 'edit' => [] } })).to be_valid
+    end
+
+    it 'stores an empty slot as none' do
+      record = sentinel({})
+      record.valid?
+      expect(record.work_access).to be_nil
+    end
+
+    it 'rejects an unknown visibility, key or ability' do
+      expect(sentinel({ 'visibility' => 'open' })).not_to be_valid
+      expect(sentinel({ 'embargo' => '2030-01-01' })).not_to be_valid
+      expect(sentinel({ 'grants' => { 'own' => [archives] } })).not_to be_valid
+    end
+
+    it 'refuses public as a group grant' do
+      expect(sentinel({ 'grants' => { 'read' => ['public'] } })).not_to be_valid
+    end
+  end
+
+  describe 'work access ceiling (Work ⊆ resource_read_groups)' do
+    def sentinel(access, ceiling)
+      Sentinel.new(target_id: 'c', policy: {}, work_access: access).tap { |s| s.resource_read_groups = ceiling }
+    end
+
+    it 'refuses public Works in a restricted collection' do
+      expect(sentinel({ 'visibility' => 'public' }, [archives])).not_to be_valid
+    end
+
+    it 'refuses a read group the collection does not grant' do
+      expect(sentinel({ 'grants' => { 'read' => [media] } }, [archives])).not_to be_valid
+    end
+
+    it 'accepts anything under a public collection' do
+      expect(sentinel({ 'visibility' => 'public', 'grants' => { 'read' => [media] } }, ['public'])).to be_valid
+    end
+  end
+
+  describe '#clamp_to!' do
+    it 'drops a public visibility and narrows the grants under a restricted container' do
+      record = Sentinel.create!(target_id: 'c', policy: { 'small' => ['public'] },
+                                work_access: { 'visibility' => 'public',
+                                               'grants'     => { 'read' => [archives, media], 'edit' => [media] } })
+
+      record.clamp_to!([archives])
+
+      expect(record.reload.policy).to eq('small' => [archives])
+      expect(record.work_access).to eq('grants' => { 'read' => [archives], 'edit' => [media] })
+    end
+
+    it 'writes nothing when the Sentinel already fits' do
+      record = Sentinel.create!(target_id: 'c', policy: { 'small' => [archives] },
+                                work_access: { 'visibility' => 'private' })
+
+      expect { record.clamp_to!([archives]) }.not_to(change { record.reload.updated_at })
     end
   end
 end

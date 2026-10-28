@@ -66,12 +66,23 @@ RSpec.describe 'Work health', type: :request do
         expect(response.body).to include('Nothing is missing or broken', '1 advisory note')
       end
 
-      it 'always says the bytes were not re-hashed, so a green does not read as verified' do
+      it 'says a Work with no recorded check is not yet checked, so a green does not read as verified' do
         stub_check(report('green'))
 
         get '/works/w1/health'
 
-        expect(response.body).to include('Fixity', 'Not checked. Bytes are re-hashed only by the offline check.')
+        expect(response.body).to include('Fixity', 'Not yet checked.')
+      end
+
+      it 'explains a red grade from a recorded fixity failure' do
+        failed = report('red', [finding('fatal', 'fixity_failed')])
+        failed['fixity'] = AtlasRb::Mash.new('result' => 'fail', 'last_checked_at' => nil,
+                                             'objects' => 2, 'never_checked' => 0)
+        stub_check(failed)
+
+        get '/works/w1/health'
+
+        expect(response.body).to include('Failed. A stored file no longer matches its recorded digest.')
       end
 
       it 'renders a yellow grade with its findings and their repairs' do

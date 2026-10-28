@@ -16,7 +16,7 @@
 
 .tab-content
   #metadata.tab-pane{class: ('active' if open_tab == 'metadata'), "aria-labelledby" => "metadata-tab", role: "tabpanel"}
-    .py-2.px-1
+    .edit-pane
       = bootstrap_form_tag(url: work_path(params[:id]), method: :patch, multipart: true) do |f|
         = f.hidden_field :id, value: params[:id]
         %label.form-label{:for => "thumbnail"} Thumbnail
@@ -39,7 +39,7 @@
         - if @removed_captions.any?
           = form_tag(restore_caption_work_path(params[:id]), method: :post, id: 'restore-caption') {}
   #advanced.tab-pane{"aria-labelledby" => "advanced-tab", role: "tabpanel"}
-    .py-2.px-1
+    .edit-pane
       = bootstrap_form_tag(url: work_path(params[:id]), method: :patch, multipart: true) do |f|
         = f.hidden_field :id, value: params[:id]
         = bootstrap_fields_for :work do |c|
@@ -50,7 +50,7 @@
   #darwin-core.tab-pane{class: ('active' if open_tab == 'darwin-core'), "aria-labelledby" => "darwin-core-tab", role: "tabpanel"}
     = render 'works/darwin_core_edit', work: @work
   #permissions.tab-pane{"aria-labelledby" => "permissions-tab", role: "tabpanel"}
-    .py-2.px-1{ data: { controller: "group-permissions", "group-permissions-resource-value": "work" } }
+    .edit-pane{ data: { controller: "group-permissions", "group-permissions-resource-value": "work" } }
       = bootstrap_form_tag(url: work_path(params[:id]), method: :patch, multipart: true) do |f|
         .row
           .col-sm
@@ -67,7 +67,9 @@
                 data: { turbo_confirm: 'Remove the embargo? The file becomes available to everyone who can see this work.' }}
                 %i.fa-solid.fa-lock-open.me-1{'aria-hidden' => 'true'}
                 Remove embargo
+        %hr.section-divider.my-3
         = render 'shared/group_permissions', resource: 'work'
+        %hr.section-divider.my-3
         = render 'works/download_access', policy: @work&.dig('derivative_permissions')
         - if @streaming_only_offered
           = render 'works/streaming_only', enabled: @streaming_only, audio: @streaming_only_audio
@@ -78,7 +80,7 @@
       - if @embargo.present?
         = form_tag(work_path(params[:id]), method: :patch, id: 'remove-embargo') {}
   #move.tab-pane{"aria-labelledby" => "move-tab", role: "tabpanel"}
-    .py-2.px-1
+    .edit-pane
       %p.text-muted.small.mb-3
         Ask the DRS staff to move this work to a different collection. They will be in touch.
       = form_with url: request_change_work_path(params[:id]), method: :post do
@@ -92,7 +94,7 @@
               Request move
             = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"
   #delete.tab-pane{"aria-labelledby" => "delete-tab", role: "tabpanel"}
-    .py-2.px-1
+    .edit-pane
       %p.text-muted.small.mb-3
         Ask the DRS staff to delete (withdraw) this work. They will be in touch.
       = form_with url: request_change_work_path(params[:id]), method: :post do
@@ -110,7 +112,7 @@
       = render 'audit_events/history', resource_id: params[:id]
   - if edit_tab_visible?('health')
     #health.tab-pane{class: ('active' if open_tab == 'health'), "aria-labelledby" => "health-tab", role: "tabpanel"}
-      .py-2.px-1
+      .edit-pane
         %h5.pb-2 Health
         %p.text-muted.small
           Whether this Work is whole: what is missing or broken, and the tab that repairs each problem.

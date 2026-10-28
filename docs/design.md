@@ -26,7 +26,7 @@ bracketing.
 |---|---|---|
 | A form section (label and control) | `.well.p-3.my-3.rounded-3` | the Move and Delete tabs in `works/edit` |
 | A form footer (Save and Cancel) | `.well.p-3.my-3.rounded-3` | the end of every tab in `works/edit` |
-| A tab pane | bare `.py-2.px-1`, with an `%h5.pb-2` heading and a `%p.text-muted.small` explainer | the Permissions tab in `works/edit` |
+| A tab pane | `.edit-pane`, with an `%h5.pb-2` heading and a `%p.text-muted.small` explainer | the Permissions tab in `works/edit` |
 | A standalone form or action page | the `.admin-registry` card shell | `admin/groups/new` |
 | A page heading plate | `.container.p-4.my-3.well.rounded-3` on `:container_header` | the People and Communities indexes |
 | A ledger surface | the richer `.audit-history` card shell | the Audit History tab |
@@ -34,6 +34,21 @@ bracketing.
 
 `.admin-registry` is shared chrome despite its name: the impersonation form, My
 DRS and the Inbox all reuse it on surfaces that are not admin pages.
+
+### The edit pane insets plain content
+
+`.edit-pane` (`_layout.scss`) wraps every edit tab's content. It pads the pane
+by `0.5rem` and gives each `.well` and `.alert` inside a matching negative side
+margin. So the chrome runs to the pane's edge, and plain content — headings,
+explainers, radios, fields, dividers — sits `0.5rem` inside it, off the edge
+of the tab row. This is the inset the Set Details tab gets from its `.p-2`.
+
+A pane whose first element is a well starts that well with `mb-3`, not `my-3`.
+The pane's padding is the top gap, and a top margin on the first well adds a
+second one that no other tab has.
+
+Do not add `px-*` to an edit pane, or wrap its plain sections in a `.p-2` of
+their own: the pane already does both jobs, and a second inset doubles it.
 
 ### The well is a fill, and only for forms
 
@@ -141,6 +156,7 @@ the page it opens show the same icon.
 | A loader | `fa-file-import` | Its dashboard card, the Loader registry, the loader chip on load pages |
 | Move (reparent) | `fa-sitemap` | Its dashboard card and pages, the audit "Reparented" row, the Requests "Move" row |
 | Health: of the system, or of one Work | `fa-heart-pulse` | The System health and Work health dashboard cards and pages, the grade chip on a Work's Health tab |
+| Fixity | `fa-fingerprint` | The Fixity dashboard card and report |
 | Why this result? | `fa-magnifying-glass-chart` | Each search result's action rail, for admins, and the dialog it opens. Not `fa-magnifying-glass`, which is search itself |
 | A genre | its `FeaturedContent::GENRES` icon | Its homepage gateway, its landing page heading and empty state |
 
@@ -158,10 +174,10 @@ Publications). Because they are taken, a work is `fa-file`, not `fa-file-lines`.
    `app/` for the class before you settle on it.
 3. Make it singular or plural by what it shows: one person is `fa-user`, a group
    of people is a community or a Grouper group, each with its own icon.
-4. Confirm the class exists in the Font Awesome build the site loads. A missing
-   class renders nothing, and no spec or log reports it. In the browser, a real
-   class's `::before` content is a glyph code (`U+f007` for `fa-user`); a
-   missing one's is `none`.
+4. Run `bin/fontawesome-subset` once the class is in the source. The site
+   serves only the icons the source names, so a new one renders nothing until
+   the build includes it. `spec/lib/font_awesome_subset_spec.rb` fails until
+   then. [`font-awesome.md`](font-awesome.md) covers the build.
 
 Icons in context, such as `fa-user` and `fa-building` for personal and corporate
 creators, or `fa-user` and `fa-people-arrows` for self and proxy deposit, name a

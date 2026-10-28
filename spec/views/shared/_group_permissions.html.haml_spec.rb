@@ -29,8 +29,8 @@ describe 'shared/_group_permissions.html.haml' do
 
     # Each row reads as a sentence: "Members of [group] can [view] this work".
     it 'phrases the row as a sentence about the resource, under an explainer' do
-      expect(rendered).to have_css('#group-list_1 .form-text', text: 'Members of')
-      expect(rendered).to have_css('#group-list_1 .form-text', text: 'this work')
+      expect(rendered).to have_css('#work-group-list_1 .form-text', text: 'Members of')
+      expect(rendered).to have_css('#work-group-list_1 .form-text', text: 'this work')
       expect(rendered).to include('Select the groups that should be able to view or manage this work.')
     end
 
@@ -47,12 +47,12 @@ describe 'shared/_group_permissions.html.haml' do
     # Scoped to the row — the form's own "add a group" entry row keeps its
     # selects and the template keeps its button, which is correct.
     it 'renders no remove button on the row' do
-      expect(rendered).not_to have_css('#group-list_1 button[aria-label="Remove group"]', visible: :all)
+      expect(rendered).not_to have_css('#work-group-list_1 button[aria-label="Remove group"]', visible: :all)
     end
 
     it 'renders neither select, so the group and ability cannot be swapped' do
-      expect(rendered).not_to have_css('#group-list_1 select.groups', visible: :all)
-      expect(rendered).not_to have_css('#group-list_1 select.ability', visible: :all)
+      expect(rendered).not_to have_css('#work-group-list_1 select.groups', visible: :all)
+      expect(rendered).not_to have_css('#work-group-list_1 select.ability', visible: :all)
     end
 
     it 'never exposes the locked group as an option in any select' do
@@ -63,11 +63,11 @@ describe 'shared/_group_permissions.html.haml' do
     # than relying on Atlas to merge an omitted grant back in.
     it 'submits the grant as hidden fields under the row’s index' do
       expect(rendered).to have_css(
-        '#group-list_1 input[type=hidden][name="work[permissions][1][group_id]"][value="curators"]',
+        '#work-group-list_1 input[type=hidden][name="work[permissions][1][group_id]"][value="curators"]',
         visible: :all
       )
       expect(rendered).to have_css(
-        '#group-list_1 input[type=hidden][name="work[permissions][1][ability]"][value="edit"]',
+        '#work-group-list_1 input[type=hidden][name="work[permissions][1][ability]"][value="edit"]',
         visible: :all
       )
     end

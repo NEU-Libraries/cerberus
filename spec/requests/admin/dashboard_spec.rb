@@ -39,7 +39,8 @@ RSpec.describe 'Admin::Dashboard', type: :request do
     '/admin/work_health'  => 'Grade a Work by its NOID'
   }
   admin_only_paths = {
-    '/admin/linked_members' => 'Linked members'
+    '/admin/linked_members' => 'Linked members',
+    '/admin/fixity'         => 'Not fully verified in 12 months'
   }
   all_paths = devolved_paths.merge(admin_only_paths)
 
@@ -102,7 +103,8 @@ RSpec.describe 'Admin::Dashboard', type: :request do
       get '/admin'
       expect(response.body).to include(admin_reparent_path, admin_linked_members_path,
                                        admin_associations_path, admin_impersonation_path, admin_files_path,
-                                       admin_groups_path, admin_impressions_path, admin_work_health_path)
+                                       admin_groups_path, admin_impressions_path, admin_work_health_path,
+                                       admin_fixity_path)
     end
 
     it 'shows a delegate only the devolved cards, not admin-only ones' do
@@ -112,7 +114,7 @@ RSpec.describe 'Admin::Dashboard', type: :request do
       expect(response.body).to include(admin_reparent_path, admin_associations_path,
                                        admin_communities_path, admin_impersonation_path,
                                        admin_files_path, admin_impressions_path, admin_work_health_path)
-      expect(response.body).not_to include(admin_linked_members_path, admin_groups_path)
+      expect(response.body).not_to include(admin_linked_members_path, admin_groups_path, admin_fixity_path)
       # The admin pages carry no access-tier label for either tier.
       expect(response.body).not_to include('Delegated admin access', 'Admin-only')
     end

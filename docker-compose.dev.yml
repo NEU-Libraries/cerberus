@@ -3,6 +3,11 @@ services:
   atlas:
     volumes:
     - storage:/home/atlas/storage
+  fixity:
+    volumes:
+    # Read-only: the checker only hashes. Atlas writes the log line when the
+    # result is posted, and the entrypoint warns if this root is writable.
+    - storage:/home/atlas/storage:ro
   iiif:
     environment:
       # Gated-derivative enforcement. The delegate serves open-* identifiers

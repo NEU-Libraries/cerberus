@@ -2,10 +2,10 @@
 
 require 'rails_helper'
 
-# The Derivative access tab's group picker. + adds a group only once one is
+# A Sentinel tab's group picker. + adds a group only once one is
 # chosen, and the choice lives in a hidden field that only the browser fills, so
 # a request spec cannot see whether + added a row, refused, or did nothing.
-RSpec.describe 'Derivative access group picker', :browser, type: :system do
+RSpec.describe 'Sentinel group picker', :browser, type: :system do
   let(:staff) { 'northeastern:drs:repository:staff' }
 
   before(:all) do
@@ -17,7 +17,7 @@ RSpec.describe 'Derivative access group picker', :browser, type: :system do
     Group.create!(raw: staff, cosmetic: 'DRS Staff')
     Group.create!(raw: 'northeastern:drs:library:archives', cosmetic: 'Archives')
     sign_in_as(admin_nuid)
-    visit "#{edit_collection_path(@collection.id)}#derivative-access"
+    visit "#{edit_collection_path(@collection.id)}#sentinel"
     find('#small-restrict').choose
   end
 

@@ -94,7 +94,7 @@ ledger tabs are: a filter on `kind`.
 | Family | Constant | What it holds |
 |---|---|---|
 | Requests | `REQUEST_KINDS` | what a depositor may ask staff to do but cannot do themselves: `request_withdraw`, `request_move`, `request_restrict` |
-| Activity | `ACTIVITY_KINDS` | what the repository did on its own account: `load_report`, `work_completion_mismatch`, `visibility_cascade`, `set_reindex`, `showcase_promotion`, `set_privatize`, `set_sentinel_apply` |
+| Activity | `ACTIVITY_KINDS` | what the repository did on its own account: `load_report`, `work_completion_mismatch`, `visibility_cascade`, `set_reindex`, `showcase_promotion`, `set_privatize` (nothing writes it; kept so existing rows render), `set_sentinel_apply` |
 | Digest | `DIGEST` | `daily_digest` — a whole day, summed up |
 
 The digest is its own family because it is a different size of thing. Every other
@@ -160,6 +160,7 @@ action between controllers.
 | Reindex a Work or a Set | `:admin` or the devolved-admin tier | Atlas applies no per-user check on this path at all |
 | The ledger | `:admin` or the devolved-admin tier | the same audience as deposit triage |
 | Work health lookup | `:admin` or the devolved-admin tier | Atlas allows its health check to both tiers, as `:read_health`. See `work-health.md` |
+| Fixity report | `:admin` only | it lists through the gated search, so a delegate would see a partial list that reads as healthy. See `fixity.md` |
 | Linked members | `:admin` only | it edits placement, which the delegate tier does not manage |
 | Associated works | `:admin` or the devolved-admin tier | Atlas grants `:associate` to both. A delegate's reads stay group-gated, so a Work they cannot read gets the forbidden page, and an edge to one shows its bare NOID |
 | Communities registry | `:admin` or the devolved-admin tier | it only lists and links, through the gated search, so a delegate sees what they may discover. Its People link is `:admin` only, as the page it opens is |

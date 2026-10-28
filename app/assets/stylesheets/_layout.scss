@@ -148,6 +148,19 @@ a:not(.btn, .dropdown-item, .navbar-brand, .nav-link) {
   }
 }
 
+// An edit tab pane. Plain content sits 0.5rem inside the edge its wells and
+// alerts run to, the inset the Set Details tab gets from its .p-2; the
+// negative margin keeps that chrome at the pane's full width. See
+// docs/design.md.
+.edit-pane {
+  padding: 0.5rem;
+
+  .well,
+  .alert {
+    margin-inline: -0.5rem;
+  }
+}
+
 // Hairline divider between content sections — a quiet 1px rule on an <hr>,
 // used across form sections and show pages (works edit, set sharing, …).
 // Generic chrome; pair with Bootstrap margin utilities (e.g. .my-3).

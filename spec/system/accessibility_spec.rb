@@ -30,6 +30,7 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     @dwc_work = create_work(@collection.id, public: true)
     AtlasRb::Resource.put_dwc(@dwc_work.id, Rails.root.join('spec/fixtures/files/dwc-record.xml').to_s,
                               nuid: AtlasFixtures::ADMIN_NUID)
+    @set = AtlasRb::Compilation.create('Axe audit set', nuid: AtlasFixtures::ADMIN_NUID)
   end
 
   def expect_axe_clean
@@ -101,7 +102,9 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     'linked members'      => -> { '/admin/linked_members' },
     'impersonation'       => -> { '/admin/impersonation' },
     'deposit triage'      => -> { '/admin/deposit_triage' },
-    'work health'         => -> { "/admin/work_health?noid=#{@work.id}" }
+    'fixity'              => -> { '/admin/fixity?state=never' },
+    'work health'         => -> { "/admin/work_health?noid=#{@work.id}" },
+    'a set Sentinel'      => -> { "/sets/#{@set['id']}/edit?tab=sentinel" }
   }
 
   # axe skips what is not displayed, so each edit pane needs its own visit. The

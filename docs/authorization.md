@@ -405,8 +405,8 @@ Atlas records each write as a permissions change there, with the before and
 after.
 
 Two things the list does not put back. The cascade also clamped each
-container's derivative-access default (`Sentinel`) to the narrowed audience;
-widen those on the Derivative access tab. And an item whose parent has been
+container's default (`Sentinel`), both its tiers and its work access, to the
+narrowed audience; widen those on the Sentinel tab. And an item whose parent has been
 narrowed again since is refused by the guard above, with the refusal printed
 for that item.
 
@@ -425,20 +425,26 @@ what else changed: how many items were narrowed, and how many already were. The
 person already knows they restricted the container, because they just asked for
 it.
 
-### Clamping the derivative-access default
+### Clamping the container's default
 
-A container's derivative-access default (its `Sentinel`) lives in Cerberus, not
-in the ACL Atlas holds. So narrowing the container would leave that default
-pointing at an audience the container no longer has. `Sentinel` refuses that
-combination when someone authors it, in `policy_within_resource`.
-`clamp_sentinel` keeps the rule true when the container narrows underneath a
-default that was valid when written. The job clamps the container's `Sentinel`
-and each descendant's.
+A container's default (its `Sentinel`) lives in Cerberus, not in the ACL Atlas
+holds. So narrowing the container would leave that default pointing at an
+audience the container no longer has. `Sentinel` refuses that combination when
+someone authors it, in `policy_within_resource` and
+`work_access_within_resource`. `clamp_sentinel` calls `Sentinel#clamp_to!`,
+which keeps the rule true when the container narrows underneath a default that
+was valid when written. The job clamps the container's `Sentinel` and each
+descendant's.
+
+`clamp_to!` clamps each tier and the work access's read grants with
+`audience_intersect`. It drops a `public` visibility when the container is no
+longer public, so new Works inherit the container instead. Edit grants are left
+alone, because Atlas checks only read against the parent.
 
 The rule must hold; a stale default is not merely untidy. Atlas refuses a tier
-more visible than its Work, and `Sentinel.apply_default` applies the default to
-every new deposit. So a stale default makes the next deposit into that
-collection fail outright.
+or a Work more visible than its parent, and `Sentinel.apply_default` applies the
+default to every new deposit. So a stale default makes the next deposit into
+that collection fail outright.
 
 A tier whose audience shares nobody with the container's new one clamps to the
 empty list. It is withheld from everyone, rather than re-pointed at whoever is

@@ -30,7 +30,7 @@ three edit views and the XML editor's mirror — had nothing coupling them, and
 the XML editor's row went stale silently each time a tab was added.
 
 Order and membership are data, so a class-specific tab needs no conditional.
-Advanced, Move, Delete and Health are Work-only; Derivative access and Export are
+Advanced, Move, Delete and Health are Work-only; Sentinel and Export are
 Collection-only; Analytics is container-only. Each follows purely from which
 arrays list it.
 
@@ -49,7 +49,7 @@ A key doubles as the pane's DOM id (`#<key>`) and its tab button's id
 | `STANDALONE` | Tabs that navigate to their own page instead of switching an in-page pane |
 
 `edit_tab_label` swaps hyphens for spaces before humanizing, so a hyphenated key
-such as `derivative-access` needs no `LABELS` entry. `String#humanize` alone
+such as `darwin-core` would need no `LABELS` entry for its spacing. `String#humanize` alone
 turns only underscores into spaces.
 
 `edit_tab_keys(klass)` returns the keys this viewer may see, in display order.

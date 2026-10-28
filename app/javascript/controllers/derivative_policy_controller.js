@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 
-// The Derivative access tab: the per-tier open/Restrict toggle, and the stacked
+// The Sentinel tabs' derivative ladder: the per-tier open/Restrict toggle, and the stacked
 // group rows revealed under "Restrict to groups". The rows follow the
 // Permissions tab's idiom — a committed grant per row with a red "−", an entry
 // row whose green "+" promotes a pick — but the group is chosen by typeahead

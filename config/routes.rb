@@ -220,13 +220,12 @@ Rails.application.routes.draw do
       delete 'works/:work_id',             to: 'sets#remove_work',       as: :remove_work
       post   'aside',                      to: 'sets#set_aside',         as: :set_aside
       delete 'aside/:work_id',             to: 'sets#put_back',          as: :put_back
-      # The bulk actions. `sentinel` authors the Set's derivative-access policy
-      # (the same verb the Collection tab uses); the two POSTs enqueue a sweep
-      # over the Works the Set denotes. Both sweeps are operator-only — see
+      # The Sentinel tab. `sentinel` authors the Set's Sentinel (the same
+      # verb the Collection tab uses); `apply_sentinel` enqueues the sweep over
+      # the Works the Set denotes. Both are operator-only — see
       # SetsController#require_bulk_operator.
       patch  'sentinel',                   to: 'sets#sentinel',          as: :sentinel
       post   'apply_sentinel',             to: 'sets#apply_sentinel',    as: :apply_sentinel
-      post   'privatize',                  to: 'sets#privatize',         as: :privatize
     end
   end
 
@@ -305,6 +304,10 @@ Rails.application.routes.draw do
     # `?state=incomplete` (an enrichment job gave up). Read-only; every repair it
     # points at is gated on its own surface.
     get 'deposit_triage', to: 'deposit_triage#index', as: :deposit_triage
+
+    # The fixity report — `?state=failed`, `?state=overdue` and `?state=never`,
+    # read from the per-Work rollup Atlas indexes. :admin only.
+    get 'fixity', to: 'fixity#index', as: :fixity
 
     # The ledger — `?tab=requests` (what depositors asked staff to do) and
     # `?tab=activity` (what the repository did). Two tabs on one surface, like

@@ -1,20 +1,17 @@
 # frozen_string_literal: true
 
-# Applies a Set's Sentinel — its per-tier derivative-access policy — to every
-# Work the Set denotes. See docs/people-and-routing.md and docs/sets.md.
-#
-# Each tier is clamped against the Work it is written to: Atlas refuses a tier
-# naming a group the Work does not grant (`tier_exceeds_resource`), and on a
-# private Work the only legal value is the empty list.
-#
-# Re-running is safe. The per-Work write is an idempotent PATCH, so a retry
-# after a partial run rewrites what it already wrote and finishes the rest.
+# Applies a Set's Sentinel to every Work the Set denotes: the Work's own
+# visibility and groups first, then its derivative tiers. See docs/sets.md for
+# the refused Works and for undoing a sweep from its ledger entry.
 class SetSentinelApplyJob < ApplicationJob
   include SetSweep
 
   queue_as :default
 
-  retry_on AtlasRb::StaleResourceError, wait: :polynomially_longer, attempts: 5
+  # A lock conflict is retried on the one Work, not through retry_on: a re-run
+  # finds the changed Works already matching, and its ledger entry would leave
+  # them out.
+  LOCK_ATTEMPTS = 3
 
   def perform(set_noid:)
     actor = Current.nuid
@@ -26,6 +23,8 @@ class SetSentinelApplyJob < ApplicationJob
     sentinel = Sentinel.find_by(target_id: set_noid)
     return if sentinel.nil?
 
+    @changed = []
+    @refused = []
     outcome = sweep_set(set_noid: set_noid, nuid: actor) { |noid| apply_to(sentinel, noid, actor) }
 
     report(actor: actor, set_noid: set_noid, title: compilation['title'], outcome: outcome)
@@ -33,43 +32,57 @@ class SetSentinelApplyJob < ApplicationJob
 
   private
 
-    def apply_to(sentinel, noid, actor)
-      current = AtlasRb::Resource.permissions(noid)
-      return :skipped if current.nil?
+    def apply_to(sentinel, noid, actor, attempt: 1)
+      applied = sentinel.apply_to(noid, nuid: actor)
+      return :skipped if applied.nil?
+      return :applied unless applied.acl_changed
 
-      # A whole-object replace is the intent, not an oversight: Atlas reads an absent
-      # tier as riding the Work's own visibility, which is what a Sentinel that does
-      # not name the tier means.
-      AtlasRb::Work.set_derivative_permissions(
-        noid, policy: clamped_policy(sentinel, Array(current.read)), nuid: actor
-      )
-      :applied
-    end
+      @changed << { 'noid' => noid, 'read_before' => applied.read_before, 'edit_before' => applied.edit_before }
+      :changed
+    # Named apart from other failures: the remedy is widening the collection,
+    # and a retry would be refused the same way.
+    rescue AtlasRb::PermissionsError => e
+      raise unless e.code == 'visibility_exceeds_parent'
 
-    def clamped_policy(sentinel, work_read)
-      sentinel.tier_policy.transform_values do |groups|
-        Permissions.audience_intersect(Array(groups), work_read)
-      end
+      @refused << noid
+      :refused
+    rescue AtlasRb::StaleResourceError => e
+      return apply_to(sentinel, noid, actor, attempt: attempt + 1) if attempt < LOCK_ATTEMPTS
+
+      # A plain error, so SetSweep names it as this Work's failure rather than
+      # handing it on as a lock conflict to retry the whole job.
+      raise AtlasRb::Error, e.message
     end
 
     def report(actor:, set_noid:, title:, outcome:)
-      state = outcome.problems? ? 'finished with problems' : 'finished'
+      problems = outcome.problems? || @refused.any?
       CompletionNotice.deliver(
         kind:         'set_sentinel_apply',
         to_nuid:      actor,
-        subject:      "Derivative access sweep #{state}",
+        subject:      "Set Sentinel sweep #{problems ? 'finished with problems' : 'finished'}",
         body:         body_for(set_noid, title, outcome),
         subject_noid: set_noid,
-        payload:      { title: title, applied: outcome.counts[:applied], skipped: outcome.counts[:skipped],
-                        truncated: outcome.truncated, failures: outcome.failures }
+        payload:      { title: title, changed_count: outcome.counts[:changed], applied: outcome.counts[:applied],
+                        skipped: outcome.counts[:skipped], refused: @refused, truncated: outcome.truncated,
+                        failures: outcome.failures, changed: @changed }
       )
     end
 
     def body_for(set_noid, title, outcome)
-      count = outcome.counts[:applied]
-      lines = ["“#{title}”: derivative access applied to #{count} work#{'s' unless count == 1}."]
-      lines << "#{outcome.counts[:skipped]} could not be read and were skipped." if outcome.counts[:skipped].positive?
+      counts = outcome.counts
+      done = counts[:changed] + counts[:applied]
+      lines = ["“#{title}”: Sentinel applied to #{done} work#{'s' unless done == 1}."]
+      lines << "#{counts[:changed]} had their visibility or groups changed." if counts[:changed].positive?
+      lines << "#{counts[:skipped]} could not be read and were skipped." if counts[:skipped].positive?
+      lines += refused_lines
       tail = sweep_report_tail(set_noid, outcome, 'These were not changed and keep their previous access:')
       (lines + tail).join("\n")
+    end
+
+    def refused_lines
+      return [] if @refused.empty?
+
+      ['', "#{@refused.size} could not be made more visible than the collection they are in. " \
+           'Open each collection to widen it first:', *@refused.map { |noid| "Work #{noid}" }]
     end
 end

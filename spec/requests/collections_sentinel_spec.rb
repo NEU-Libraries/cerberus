@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-# The Collection edit page's "Derivative access" tab writes a Sentinel — the
+# The Collection edit page's "Sentinel" tab writes a Sentinel — the
 # per-tier derivative-permission default applied to Works added under the
 # collection. Runs against the live Atlas test backend like the other
 # resource-controller specs: a real Collection is created and edit granted to the
@@ -76,7 +76,7 @@ RSpec.describe 'Collections sentinel', type: :request do
         'large' => [Permissions::STAFF_EDIT_GROUP], 'service' => [Permissions::STAFF_EDIT_GROUP]
       )
       expect(response).to redirect_to(collection_path(collection.id))
-      expect(flash[:notice]).to eq('Derivative access default saved.')
+      expect(flash[:notice]).to eq('Sentinel saved.')
     end
 
     it 'upserts an existing Sentinel rather than duplicating it' do
@@ -142,10 +142,10 @@ RSpec.describe 'Collections sentinel', type: :request do
       # Turbo follows a redirect with fetch, and the Fetch spec drops the
       # fragment from the resolved URL — so the tab has to be chosen on the
       # server, not carried in the Location header.
-      it 'opens the Derivative access pane, not the first one' do
+      it 'opens the Sentinel pane, not the first one' do
         patch sentinel_collection_path(collection.id), params: bad
 
-        expect(response.body).to match(/class="tab-pane active" id="derivative-access"/)
+        expect(response.body).to match(/class="tab-pane active" id="sentinel"/)
         expect(response.body).to match(/class="tab-pane" id="metadata"/)
       end
     end
@@ -178,6 +178,63 @@ RSpec.describe 'Collections sentinel', type: :request do
       expect { patch sentinel_collection_path(collection.id), params: params }
         .not_to change(Sentinel, :count)
       expect(flash[:alert]).to be_present
+    end
+  end
+
+  # The loaders' override for new Works. The ceiling is the collection, because
+  # Atlas refuses a Work more visible than its parent at ingest.
+  describe 'work access for loaded works' do
+    let(:staff) { Permissions::STAFF_EDIT_GROUP }
+
+    before { sign_in editor }
+
+    def saved
+      Sentinel.find_by(target_id: collection.id)
+    end
+
+    it 'saves a private visibility and replacement groups on a public collection' do
+      patch sentinel_collection_path(collection.id),
+            params: { work_access: { visibility: 'private', grants_mode: 'replace',
+                                     permissions: { '1' => { group_id: staff, ability: 'read' } } } }
+
+      expect(saved.work_access).to eq('visibility' => 'private',
+                                      'grants'     => { 'read' => [staff], 'edit' => [] })
+    end
+
+    it 'stores nothing when every part inherits' do
+      patch sentinel_collection_path(collection.id),
+            params: { work_access: { visibility: '', grants_mode: 'keep' } }
+
+      expect(saved.work_access).to be_nil
+    end
+
+    it 'refuses public works under a restricted collection' do
+      set_access!(read: [staff])
+
+      patch sentinel_collection_path(collection.id), params: { work_access: { visibility: 'public' } }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(saved).to be_nil
+    end
+
+    it 'refuses a group the restricted collection does not grant' do
+      set_access!(read: [staff])
+
+      patch sentinel_collection_path(collection.id),
+            params: { work_access: { grants_mode: 'replace',
+                                     permissions: { '1' => { group_id: 'g:elsewhere', ability: 'read' } } } }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(flash[:alert]).to include("doesn't grant")
+    end
+
+    it 'offers a visibility only on a public collection' do
+      get edit_collection_path(collection.id)
+      expect(response.parsed_body.at_css('#loaded-visibility-private')).to be_present
+
+      set_access!(read: [staff])
+      get edit_collection_path(collection.id)
+      expect(response.parsed_body.at_css('#loaded-visibility-private')).to be_nil
     end
   end
 

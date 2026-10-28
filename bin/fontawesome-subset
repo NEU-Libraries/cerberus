@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Rebuild vendor/fontawesome from vendor/fontawesome-upstream, keeping only the
+# icons the source names. Run it after adding or removing an icon.
+#
+#   bin/fontawesome-subset
+#
+# Needs fonttools with brotli on the host: pip install 'fonttools[woff]'.
+# Set PYFTSUBSET to use a pyftsubset that is not on PATH. docs/font-awesome.md
+# covers the design.
+require_relative '../lib/font_awesome_subset'
+
+if %w[-h --help].include?(ARGV.first)
+  puts File.readlines(__FILE__)[3..10].map { |line| line.sub(/^# ?/, '') }
+  exit
+end
+
+root = File.expand_path('..', __dir__)
+icons = FontAwesomeSubset.build(root, pyftsubset: ENV.fetch('PYFTSUBSET', 'pyftsubset'))
+puts "Built #{FontAwesomeSubset::TARGET} with #{icons.size} icons."

@@ -12,6 +12,8 @@ Source files:
 - `app/queries/narrowing_targets.rb`
 - `app/queries/container_descendants_query.rb`
 - `app/models/sentinel.rb`
+- `app/models/concerns/sentinel_work_access.rb`
+- `app/controllers/concerns/sentinel_form.rb`
 - `app/services/visibility_audit.rb`
 
 The ACL vocabulary these files share with Atlas — `audience_subset?`,
@@ -199,12 +201,25 @@ changes attribution.
 could exceed it needs its own bound. See `NarrowingTargets` above, and the
 paging in `VisibilityAudit` below.
 
-## Narrowing across the derivative tiers
+## The Sentinel: derivative tiers and work access
 
-`Sentinel` is a per-tier derivative-permission policy, bound by noid
-(`target_id`) to a Collection or a Compilation (Set). Its `policy` maps each
-gated tier to the read groups that may fetch it. `apply_to` pushes it to Atlas's
-per-tier gate through `AtlasRb::Work.set_derivative_permissions`.
+`Sentinel` is a permission policy, bound by noid (`target_id`) to a Collection
+or a Compilation (Set). It has two halves:
+
+- `policy` maps each gated derivative tier to the read groups that may fetch
+  it. It is written when `derivatives_enabled` is true.
+- `work_access` optionally changes the Work's own ACL: a `visibility` (`public`
+  or `private`) and a replacement `grants` list. It is v1's "core file" slot,
+  and `SentinelWorkAccess` holds it. Nil leaves the Work's ACL alone.
+
+`apply_to(work_id)` reads the Work's ACL, writes the work access if it changes
+anything, and then writes the tiers through
+`AtlasRb::Work.set_derivative_permissions`. **The order is load-bearing.** Atlas
+refuses a tier naming a group its Work does not grant, so each tier is clamped
+with `audience_intersect` against the audience the Work has *after* the ACL
+write. It returns an `Application` recording whether the ACL changed and the
+read and edit groups it had, for a sweep's ledger. It returns nil when the Work
+cannot be read.
 
 Both uses are Cerberus orchestration. A Collection's Sentinel is the default
 applied to Works created under it, through `Sentinel.apply_default`. The deposit,
@@ -216,6 +231,24 @@ Sentinel is applied in bulk across the Set's Works — see `docs/sets.md`.
 
 `tier_policy` slices the policy down to known tiers, so stray keys never reach
 the API call.
+
+### The Collection default's work access is for the loaders
+
+The deposit form calls `apply_default` with `work_access: false`, because the
+depositor has just chosen the Work's ACL on that form. The three loaders apply
+both halves. That matches v1, whose Collection Sentinel named its loaders as
+what it was for. A new Work inherits its Collection's ACL in `WorkCreator`, so
+the work access is an optional override: absent means inherit.
+
+The Collection tab offers a visibility only on a public collection. On a
+restricted one a Work already inherits a restricted audience, and it cannot be
+more visible than its collection, so "private" would change nothing.
+
+**A loader user who is not an admin cannot fully replace inherited groups.**
+Atlas's `PermissionsWriteGuard` silently keeps any group the actor is not a
+member of. The Work still holds no more than its Collection grants, because
+those kept groups came from the Collection. An admin or devolved admin is exempt
+from the rule.
 
 ### The tiers
 
@@ -233,7 +266,7 @@ independent media reach non-image or original binaries, which Atlas maps onto
 the matching assets. Thumbnails are never gateable: they are the open display
 pipe, public by construction.
 
-### The three validations
+### The validations
 
 `policy_well_formed` requires a Hash in which every present tier is a known tier
 mapping to an Array. It does not check the Array's elements.
@@ -250,14 +283,25 @@ the container's read groups. A tier cannot be more visible than the container
 it is the default for. This keeps the authored default coherent. Atlas still
 enforces "tier ⊆ the actual Work" at apply time.
 
-That last check reads `resource_read_groups`, and skips itself when it is nil.
-Only `CollectionsController#sentinel` sets it. The Set tab
+`work_access_well_formed` requires a Hash holding only `visibility` and
+`grants`, a known visibility, and grants of `read` and `edit` lists that do not
+name `public`. `public` is a visibility, and a replacement list carrying it
+would undo the visibility choice beside it. An empty slot is stored as nil.
+
+`work_access_within_resource` is the same ceiling for the work access: no
+`public` visibility under a restricted container, and no read grant the
+container does not hold. Atlas checks only read against the parent, so the
+edit grants are not compared.
+
+These last two checks read `resource_read_groups`, and skip themselves when it
+is nil. Only `CollectionsController#sentinel` sets it. The Set tab
 (`SetBulkActions#sentinel`) leaves it nil on purpose, because a Set's ACL does
 not govern its Works. Leaving it unset anywhere else silently drops the
 ceiling.
 
 When a container narrows underneath a default that was coherent when written,
-`VisibilityCascadeJob#clamp_sentinel` keeps the same rule true. See
+`VisibilityCascadeJob#clamp_sentinel` keeps the same rule true, through
+`Sentinel#clamp_to!`. See
 `docs/authorization.md`.
 
 The private `audience_subset?` treats `public` as the universal audience,

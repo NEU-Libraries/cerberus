@@ -12,7 +12,7 @@
 
 .tab-content
   #metadata.tab-pane.active{"aria-labelledby" => "metadata-tab", role: "tabpanel"}
-    .py-2.px-1
+    .edit-pane
       = bootstrap_form_tag(url: community_path(params[:id]), method: :patch, multipart: true) do |f|
         = f.hidden_field :id, value: params[:id]
         %label.form-label{:for => "thumbnail"} Thumbnail
@@ -23,11 +23,12 @@
           = f.button :submit, class: "btn btn-success"
           = link_to "Cancel", community_path(params[:id]), class: "btn btn-warning"
   #permissions.tab-pane{"aria-labelledby" => "permissions-tab", role: "tabpanel"}
-    .py-2.px-1{ data: { controller: "group-permissions", "group-permissions-resource-value": "community" } }
+    .edit-pane{ data: { controller: "group-permissions", "group-permissions-resource-value": "community" } }
       = bootstrap_form_tag(url: community_path(params[:id]), method: :patch, multipart: true) do |f|
         .row
           .col-sm
             = render 'shared/visibility_control', resource: 'community'
+        %hr.section-divider.my-3
         = render 'shared/group_permissions', resource: 'community'
         %div
           .well.p-3.my-3.rounded-3

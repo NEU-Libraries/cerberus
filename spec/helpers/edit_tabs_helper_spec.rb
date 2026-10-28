@@ -20,7 +20,7 @@ RSpec.describe EditTabsHelper do
       expect(helper.edit_tab_keys('Work'))
         .to eq(%w[metadata advanced darwin-core permissions move delete xml history health])
       expect(helper.edit_tab_keys('Collection'))
-        .to eq(%w[metadata permissions xml derivative-access export history analytics])
+        .to eq(%w[metadata permissions xml sentinel export history analytics])
       expect(helper.edit_tab_keys('Community'))
         .to eq(%w[metadata permissions xml history analytics])
     end
@@ -30,7 +30,7 @@ RSpec.describe EditTabsHelper do
     it 'keeps Analytics container-only and Advanced/Move/Delete Work-only' do
       expect(helper.edit_tab_keys('Work')).not_to include('analytics')
       expect(helper.edit_tab_keys('Collection')).not_to include('advanced', 'move', 'delete')
-      expect(helper.edit_tab_keys('Community')).not_to include('derivative-access', 'export')
+      expect(helper.edit_tab_keys('Community')).not_to include('sentinel', 'export')
     end
 
     it 'drops History for a viewer who cannot read audit events' do
@@ -66,7 +66,7 @@ RSpec.describe EditTabsHelper do
 
   describe '#edit_tab_label' do
     it 'humanizes a key by default and special-cases the acronym' do
-      expect(helper.edit_tab_label('derivative-access')).to eq('Derivative access')
+      expect(helper.edit_tab_label('darwin-core')).to eq('Darwin Core')
       expect(helper.edit_tab_label('metadata')).to eq('Metadata')
       expect(helper.edit_tab_label('xml')).to eq('XML')
     end
@@ -92,11 +92,11 @@ RSpec.describe EditTabsHelper do
     end
 
     it 'opens the pane a caller names' do
-      expect(helper.edit_tab_open_key('Collection', open: 'derivative-access')).to eq('derivative-access')
+      expect(helper.edit_tab_open_key('Collection', open: 'sentinel')).to eq('sentinel')
     end
 
     it 'falls back to the default for a key this class does not have' do
-      expect(helper.edit_tab_open_key('Community', open: 'derivative-access')).to eq('metadata')
+      expect(helper.edit_tab_open_key('Community', open: 'sentinel')).to eq('metadata')
       expect(helper.edit_tab_open_key('Collection', open: 'nonsense')).to eq('metadata')
     end
 

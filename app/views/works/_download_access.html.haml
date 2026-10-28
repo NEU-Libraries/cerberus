@@ -1,7 +1,7 @@
 -# locals: policy (Hash tier => read groups, or nil)
 -#
 -# Read-only. A Work's per-file download limits are written from a collection's
--# or a set's Derivative access tab, so this shows them without offering an edit
+-# or a set's Sentinel tab, so this shows them without offering an edit
 -# that would be overwritten the next time that policy is applied.
 - policy = (policy || {}).to_h.transform_keys(&:to_s)
 - tiers = Sentinel::TIERS.select { |tier| policy.key?(tier) }
@@ -10,7 +10,7 @@
 .my-3
   %h5.pb-2 Download access by file
   %p.small.text-muted.mb-2
-    Set from a collection's or a set's Derivative access tab, and changed there. A file not listed here
+    Set from a collection's or a set's Sentinel tab, and changed there. A file not listed here
     follows this work's general permissions.
   - if tiers.empty?
     %p.small.mb-0 Every file follows this work's general permissions.
