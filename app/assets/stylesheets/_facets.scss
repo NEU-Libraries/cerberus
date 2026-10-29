@@ -113,3 +113,10 @@
     }
   }
 }
+
+// The facet modal stacks Blacklight's value search box and its A–Z row with
+// no gap between them. The gap goes on the row only when the box is above it,
+// so a modal with the row alone keeps Blacklight's spacing.
+.facet-filters > * + .alpha-filter {
+  margin-top: $spacer;
+}
