@@ -112,7 +112,14 @@ Atlas clear the stored size. That includes each seed call in
 - **Nothing swaps the placeholder out.** The browser paints the decoded picture
   over its own background, from the progressive JPEG's first pass on. The
   preview is an opaque JPEG, so it hides the blur completely.
-  [`design.md`](design.md) rules out a fade.
+- **A blur-up softens the scans.** While the picture is still arriving, an
+  overlay on the frame blurs it, and it fades out once the picture lands. A
+  picture already loaded is never blurred, and one that lands within 100 ms
+  sharpens with no fade. An inline script in `works/_image` sets the state
+  before the first paint. The state is the `data-blur-up` attribute, rendered
+  as `idle`, so a page without JavaScript never blurs, and the inline critical
+  CSS keeps the rules. [`design.md`](design.md) records it as the one load
+  transition the site allows.
 - **Every value is optional.** A Work without a size renders the bare frame, and
   a size without a placeholder reserves the frame with no stand-in.
 - **Visibility follows `preview`.** The placeholder is a copy of the open
