@@ -125,10 +125,7 @@ Atlas clear the stored size. That includes each seed call in
   the same script swaps the source for an empty SVG in the preview's stored
   proportions, so the reserved box stays put. The `fa-image` icon that
   `works/_icon` shows then sits in it, in place of a broken image. A Work with
-  no stored size gets `works/_icon`'s 4:3 box. The catalog thumbnails do the
-  same with their type icon, through the `onerror` swap in
-  `CatalogController#thumbnail_media`. `spec/system/thumbnail_load_failure_spec.rb`
-  covers both.
+  no stored size gets `works/_icon`'s 4:3 box.
 - **Every value is optional.** A Work without a size renders the bare frame, and
   a size without a placeholder reserves the frame with no stand-in.
 - **Visibility follows `preview`.** The placeholder is a copy of the open
@@ -143,6 +140,26 @@ ThumbHash appears only after a decoder script runs.
 anchor from which `DepositDerivativesJob` later recovers the gated base for
 opt-in S/M/L. `persist_service!` writes it onto the Work's first FileSet, and
 skips when no FileSet is listed yet.
+
+### Thumbnails that fail to load
+
+Every other thumbnail swaps itself for an icon when it fails to load, through
+`ThumbnailsHelper#thumbnail_with_fallback`. The helper renders the `<img>` with
+an `onerror` attribute and the fallback hidden right after it. The handler
+hides the image and shows the element after it, so the fallback must stay the
+next sibling. Because the handler is an attribute, it is in place before the
+request can fail, and it needs no JavaScript file.
+
+| Surface | Fallback |
+|---|---|
+| Search results, the gallery view and the home page | The type icon, as with no thumbnail (`CatalogController#thumbnail_media`) |
+| The Collection and Community header (`shared/_thumbnail`) | The type icon, from the `type` local the show page passes |
+| Associated-works rows (`works/_associations`) | `fa-image`, as with no thumbnail |
+| Set rows (`sets/show`) | `fa-image`, as with no thumbnail |
+
+`spec/system/thumbnail_load_failure_spec.rb` covers each surface and the Work
+preview. It runs in the browser lane, with a closed local port standing in for
+the image server.
 
 ### Who passes widths, and who does not
 
