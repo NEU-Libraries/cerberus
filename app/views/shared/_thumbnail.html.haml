@@ -1,9 +1,14 @@
 - src_2x ||= nil
+- type ||= nil
 -# The thumbnail sits beside the title it depicts, so it is decorative: an
--# empty alt keeps screen readers from announcing the file name.
+-# empty alt keeps screen readers from announcing the file name. A thumbnail
+-# that fails to load shows the type icon, as a search result does.
 .col-md-auto
   .document-thumbnail
-    - if src_2x.present?
-      %img{alt: "", loading: "lazy", src: src, srcset: "#{src} 1x, #{src_2x} 2x"}/
+    - icon = content_tag(:i, '', class: "fa-solid #{document_type_icon(type)} fa-2xl text-black-50")
+    - if (thumb = renderable_thumbnail(src))
+      - thumb_2x = renderable_thumbnail(src_2x)
+      = thumbnail_with_fallback(thumb, icon, fallback_class: 'thumbnail-fallback', alt: '', loading: 'lazy',
+        srcset: thumb_2x && "#{thumb} 1x, #{thumb_2x} 2x")
     - else
-      %img{alt: "", loading: "lazy", src: src}/
+      %span.thumbnail-fallback= icon

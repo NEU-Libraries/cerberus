@@ -6,7 +6,7 @@
 
   .container.p-4.my-3.well.rounded-3
     .row
-      = render partial: "shared/thumbnail", locals: {src: @collection.thumbnail, src_2x: @collection.thumbnail_2x} if !@collection.thumbnail.blank?
+      = render partial: "shared/thumbnail", locals: {src: @collection.thumbnail, src_2x: @collection.thumbnail_2x, type: "Collection"} if !@collection.thumbnail.blank?
       .col
         - if @response.documents.present? || params[:q].present?
           .scoped-search-wrap.float-md-end.ms-md-3.mb-3.mb-md-0

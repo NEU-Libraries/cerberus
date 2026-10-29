@@ -78,7 +78,8 @@
       .result-row
         .thumb
           - if (thumb = renderable_thumbnail(doc.thumbnail_ssi))
-            = image_tag thumb, alt: '', loading: 'lazy'
+            = thumbnail_with_fallback(thumb, tag.i(class: 'fa-regular fa-image', 'aria-hidden': 'true'),
+              alt: '', loading: 'lazy')
           - else
             %i.fa-regular.fa-image{'aria-hidden' => 'true'}
         .flex-grow-1
