@@ -1,0 +1,45 @@
+// The Work preview's blur-up: an overlay blurs the picture while it is still
+// arriving, and fades out once it has. It is the one load transition the site
+// allows (docs/design.md), because it softens the progressive scans instead
+// of adding a flash. works/_image explains the states.
+//
+// The state lives in an attribute the server renders, not a class the script
+// adds, so these rules land in the inline critical CSS: the attribute name is
+// in the markup, and the selector scan ignores its value (docs/critical-css.md).
+.preview-blur-up {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: top;
+
+  > img {
+    display: block;
+  }
+
+  // Inset by the frame's padding and border, so the frame itself stays crisp.
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 5px;
+    backdrop-filter: blur(12px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-out;
+  }
+
+  &[data-blur-up="loading"]::after {
+    opacity: 1;
+    transition: none;
+  }
+
+  // A picture that arrived almost at once sharpens with no fade.
+  &[data-blur-up="instant"]::after {
+    transition: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      transition: none;
+    }
+  }
+}

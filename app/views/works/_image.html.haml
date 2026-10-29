@@ -11,5 +11,24 @@
 -# `loading: lazy` holds the request until layout, which is the delay LCP counts.
 -#
 -# The stand-in is the <img>'s own background, so the picture paints over it in
--# the same box with no swap. Do not add a transition (docs/design.md).
-%img.mt-1{fetchpriority: "high", src: src, alt: alt, **preview_image_attributes(local_assigns[:width], local_assigns[:height], local_assigns[:placeholder])}/
+-# the same box with no swap.
+-#
+-# The blur-up must start before the first paint, or sharp scans would blur
+-# afterwards, so it is an inline script rather than a Stimulus controller,
+-# which connects too late. It blurs only a picture still arriving: one already
+-# complete is never blurred, and one that lands within 100 ms (a cache hit)
+-# sharpens with no fade. Without JS the frame stays "idle" and shows the
+-# picture as it paints.
+.preview-blur-up.mt-1{data: { blur_up: "idle" }}
+  %img{fetchpriority: "high", src: src, alt: alt, **preview_image_attributes(local_assigns[:width], local_assigns[:height], local_assigns[:placeholder])}/
+  :javascript
+    (function (frame) {
+      var img = frame.querySelector('img');
+      if (img.complete) return;
+      var start = performance.now();
+      frame.dataset.blurUp = 'loading';
+      img.addEventListener('load', function () {
+        frame.dataset.blurUp = performance.now() - start < 100 ? 'instant' : 'idle';
+      }, { once: true });
+      img.addEventListener('error', function () { frame.dataset.blurUp = 'instant'; }, { once: true });
+    })(document.currentScript.parentElement);
