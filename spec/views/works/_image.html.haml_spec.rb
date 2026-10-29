@@ -34,4 +34,14 @@ RSpec.describe 'works/_image', type: :view do
     expect(img[:fetchpriority]).to eq('high')
     expect(img[:src]).to eq(src)
   end
+
+  # The state ships as "idle" so a page without JS never blurs, and as an
+  # attribute so the critical CSS selector scan keeps its rules.
+  it 'renders the blur-up frame idle, with its script, around the image' do
+    render partial: 'works/image', locals: { src: src, alt: 'Preview of A Work', width: 500, height: 333 }
+    page = Capybara.string(rendered)
+
+    expect(page).to have_css('.preview-blur-up[data-blur-up="idle"] > img[fetchpriority="high"]')
+    expect(page).to have_css('.preview-blur-up > script', visible: :all)
+  end
 end
