@@ -120,6 +120,15 @@ Atlas clear the stored size. That includes each seed call in
   as `idle`, so a page without JavaScript never blurs, and the inline critical
   CSS keeps the rules. [`design.md`](design.md) records it as the one load
   transition the site allows.
+- **A failed load keeps the frame.** The browser fetches the preview from
+  Cantaloupe directly, so no Rails code sees an outage. When the image fails,
+  the same script swaps the source for an empty SVG in the preview's stored
+  proportions, so the reserved box stays put. The `fa-image` icon that
+  `works/_icon` shows then sits in it, in place of a broken image. A Work with
+  no stored size gets `works/_icon`'s 4:3 box. The catalog thumbnails do the
+  same with their type icon, through the `onerror` swap in
+  `CatalogController#thumbnail_media`. `spec/system/thumbnail_load_failure_spec.rb`
+  covers both.
 - **Every value is optional.** A Work without a size renders the bare frame, and
   a size without a placeholder reserves the frame with no stand-in.
 - **Visibility follows `preview`.** The placeholder is a copy of the open
