@@ -44,4 +44,11 @@ RSpec.describe 'works/_image', type: :view do
     expect(page).to have_css('.preview-blur-up[data-blur-up="idle"] > img[fetchpriority="high"]')
     expect(page).to have_css('.preview-blur-up > script', visible: :all)
   end
+
+  # The icon a failed load shows is decoration; the heading names the Work.
+  it 'carries the failed-load icon, hidden from screen readers' do
+    render partial: 'works/image', locals: { src: src, alt: 'Preview of A Work', width: 500, height: 333 }
+
+    expect(Capybara.string(rendered)).to have_css('.preview-blur-up__icon[aria-hidden="true"] .fa-image', visible: :all)
+  end
 end
