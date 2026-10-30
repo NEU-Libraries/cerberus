@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 # Guards the one thing a stored thumbnail can do to a page that renders it,
-# supplies the poster an audio or video Work's player shows without one, and
-# reserves the Work preview's frame with a blurred stand-in.
+# swaps a thumbnail that fails to load for an icon, supplies the poster an
+# audio or video Work's player shows without one, and reserves the Work
+# preview's frame with a blurred stand-in.
 # See docs/derivatives.md.
 module ThumbnailsHelper
   AV_PLACEHOLDER = 'av-placeholder.svg'
@@ -22,6 +23,15 @@ module ThumbnailsHelper
     value = src.to_s
     value.start_with?('http://', 'https://', '//') ? value : nil
   end
+
+  # A thumbnail <img> that swaps itself for `fallback` if it fails to load. The
+  # handler is an attribute so it is in place before the request can fail.
+  def thumbnail_with_fallback(src, fallback, fallback_class: nil, **img_options)
+    img = image_tag(src, onerror: THUMBNAIL_ONERROR, **img_options)
+    safe_join([img, content_tag(:span, fallback, class: [fallback_class, 'd-none'].compact.join(' '))])
+  end
+
+  THUMBNAIL_ONERROR = "this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none');"
 
   # The player's poster: the Work's own, else the placeholder mark. Only the
   # show page's player uses the mark; a list or gallery tile without a

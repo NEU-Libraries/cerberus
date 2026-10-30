@@ -11,5 +11,39 @@
 -# `loading: lazy` holds the request until layout, which is the delay LCP counts.
 -#
 -# The stand-in is the <img>'s own background, so the picture paints over it in
--# the same box with no swap. Do not add a transition (docs/design.md).
-%img.mt-1{fetchpriority: "high", src: src, alt: alt, **preview_image_attributes(local_assigns[:width], local_assigns[:height], local_assigns[:placeholder])}/
+-# the same box with no swap.
+-#
+-# The blur-up must start before the first paint, or sharp scans would blur
+-# afterwards, so it is an inline script rather than a Stimulus controller,
+-# which connects too late. It blurs only a picture still arriving: one already
+-# complete is never blurred, and one that lands within 100 ms (a cache hit)
+-# sharpens with no fade. Without JS the frame stays "idle" and shows the
+-# picture as it paints.
+-#
+-# A picture that fails (the image server is down) keeps its frame: the source
+-# becomes an empty SVG in the preview's proportions, so the box the size
+-# reserved stays put, and the icon works/_icon shows sits in it instead of a
+-# broken image. A Work with no stored size gets works/_icon's 4:3.
+.preview-blur-up.mt-1{data: { blur_up: "idle" }}
+  %img{fetchpriority: "high", src: src, alt: alt, **preview_image_attributes(local_assigns[:width], local_assigns[:height], local_assigns[:placeholder])}/
+  %span.preview-blur-up__icon{'aria-hidden' => 'true'}
+    %span.fa-regular.fa-image.fa-3x.text-muted
+  :javascript
+    (function (frame) {
+      var img = frame.querySelector('img');
+      function fail() {
+        var w = img.getAttribute('width') || 500, h = img.getAttribute('height') || 375;
+        frame.dataset.blurUp = 'failed';
+        img.alt = '';
+        img.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='" + w +
+          "' height='" + h + "' viewBox='0 0 " + w + " " + h + "'/%3E";
+      }
+      if (img.complete) { if (!img.naturalWidth) fail(); return; }
+      var start = performance.now();
+      frame.dataset.blurUp = 'loading';
+      img.addEventListener('load', function () {
+        if (frame.dataset.blurUp === 'failed') return;
+        frame.dataset.blurUp = performance.now() - start < 100 ? 'instant' : 'idle';
+      }, { once: true });
+      img.addEventListener('error', fail, { once: true });
+    })(document.currentScript.parentElement);

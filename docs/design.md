@@ -244,6 +244,18 @@ dark one passes through a point where the label vanishes. `_layout.scss` turns
 off Bootstrap's fade on every `.btn`, so do not add a `transition` to a hover
 that changes colour, on a button or anywhere else.
 
+### The one load transition: the Work preview's blur-up
+
+The Work show preview is the exception. While the picture is still arriving, an
+overlay blurs it, and it fades out over 0.2 s once the picture lands. This
+softens the progressive JPEG scans instead of adding a flash, which is why it
+is allowed where a hover fade is not. A picture already loaded, or one that
+lands within 100 ms, shows at once with no fade, and reduced motion turns the
+fade off. `works/_image` and `_preview_blur_up.scss` hold the mechanism.
+
+Do not copy it onto other images or surfaces without the same reason: a
+picture that arrives slowly, in scans, at the size of the page's main content.
+
 ## What not to add
 
 - Tailwind, another CSS framework, or another design system.

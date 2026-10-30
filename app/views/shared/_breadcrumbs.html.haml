@@ -10,9 +10,15 @@
     -# Suppressed on edit pages via `show_add: false`: you don't add
     -# siblings/children mid-edit.
     - if local_assigns.fetch(:show_add, true) && user_signed_in? && @can_edit
+      -# Where the side has no room, the menu drops below rather than flipping
+      -# left over the trail. This config replaces Bootstrap's modifiers
+      -# wholesale, so the offset (the arrow's gap) has to live here too.
+      - add_popper = { modifiers: [{ name: "preventOverflow", options: { boundary: "clippingParents", padding: 16 } },
+                                   { name: "offset", options: { offset: [-8, 16] } },
+                                   { name: "flip", options: { fallbackPlacements: ["bottom-start"] } }] }
       %li.breadcrumb-item
-        .dropdown.breadcrumb-add
-          %button#breadcrumb-add-toggle.breadcrumb-add__toggle{"aria-expanded" => "false", "data-bs-toggle" => "dropdown", :type => "button"}
+        .dropend.breadcrumb-add
+          %button#breadcrumb-add-toggle.breadcrumb-add__toggle{"aria-expanded" => "false", "data-bs-toggle" => "dropdown", "data-bs-popper-config" => add_popper.to_json, :type => "button"}
             %i.fa-regular.fa-square-plus{'aria-hidden' => 'true'}
             %span.ms-1 Add
           %ul.dropdown-menu{"aria-labelledby" => "breadcrumb-add-toggle"}

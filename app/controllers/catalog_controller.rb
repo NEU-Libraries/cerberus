@@ -484,11 +484,8 @@ class CatalogController < ApplicationController
     src = helpers.renderable_thumbnail(document.thumbnail_2x_ssi.presence || document.thumbnail_ssi)
     return view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback') if src.blank?
 
-    fallback = view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback d-none')
-    img = view_context.image_tag(src,
-                                 onerror: "this.classList.add('d-none'); \
-                                           this.nextElementSibling.classList.remove('d-none');")
-    view_context.content_tag(:span, img + fallback, class: 'thumbnail-wrapper')
+    media = view_context.thumbnail_with_fallback(src, icon_html, fallback_class: 'thumbnail-fallback')
+    view_context.content_tag(:span, media, class: 'thumbnail-wrapper')
   end
 
   helper_method :iiif_thumbnail if respond_to? :helper_method

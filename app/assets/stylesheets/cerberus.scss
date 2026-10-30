@@ -25,6 +25,7 @@
 //   _search_controls     — sort/per-page/view controls relocated into sidebar
 //   _scoped_search       — "Search this collection/community" header box
 //   _work_associations   — Associated works box (Work show) + admin manage rows
+//   _preview_blur_up     — Work show preview's blur-up while the image loads
 @import 'layout';
 @import 'tonal_buttons';
 @import 'featured_content';
@@ -58,3 +59,4 @@
 @import 'full_text_match';
 @import 'work_associations';
 @import 'caption_tracks';
+@import 'preview_blur_up';

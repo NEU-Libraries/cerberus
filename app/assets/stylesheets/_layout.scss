@@ -251,6 +251,32 @@ a:not(.btn, .dropdown-item, .navbar-brand, .nav-link) {
       border-radius: 0.2rem;
     }
   }
+
+  // Opened to the side, the menu points an arrow back at the toggle, as a
+  // Bootstrap right popover does. The toggle's popper offset leaves the gap
+  // the arrow sits in and centres it on the toggle's line. Dropped below on a
+  // narrow screen, the menu takes no arrow.
+  .dropdown-menu[data-popper-placement^="right"] {
+    $arrow: 0.5rem;
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      top: calc(1.25rem - #{$arrow});
+      border: $arrow solid transparent;
+    }
+
+    &::before {
+      left: -2 * $arrow;
+      border-right-color: var(--bs-dropdown-border-color);
+    }
+
+    &::after {
+      left: calc(-2 * #{$arrow} + 1px);
+      border-right-color: $light;
+    }
+  }
 }
 
 .dropdown-menu.show{

@@ -84,4 +84,24 @@ describe ThumbnailsHelper do
       expect(helper.preview_image_attributes(500, 333, "x' onload='y")[:style]).to eq("#{frame} height: auto;")
     end
   end
+
+  describe '#thumbnail_with_fallback' do
+    let(:html) do
+      Capybara.string(helper.thumbnail_with_fallback('https://iiif.example/t.jpg', helper.tag.i(class: 'fa-image'),
+                                                     fallback_class: 'thumbnail-fallback', alt: '', loading: 'lazy'))
+    end
+
+    it 'renders the image with its own error handler' do
+      img = html.find('img')
+
+      expect(img[:onerror]).to eq(ThumbnailsHelper::THUMBNAIL_ONERROR)
+      expect(img[:alt]).to eq('')
+      expect(img[:loading]).to eq('lazy')
+    end
+
+    # The handler reveals the element straight after the image, so the order matters.
+    it 'renders the fallback hidden, directly after the image' do
+      expect(html).to have_css('img + span.thumbnail-fallback.d-none > i.fa-image', visible: :all)
+    end
+  end
 end
