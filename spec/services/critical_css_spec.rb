@@ -35,7 +35,7 @@ RSpec.describe CriticalCss, :critical_css do
       css = described_class.for('<html><body><a class="btn btn-primary"><i class="fa-solid fa-user"></i></a></body></html>')
 
       expect(css).to include('.btn{', '.btn-primary{', '.fa-user', '@font-face')
-      expect(css).not_to include('.offcanvas{', '.fa-twitter')
+      expect(css).not_to include('.offcanvas{', '.fa-youtube')
     end
 
     it 'gives nil when a layout stylesheet is missing, so the caller keeps the blocking links' do
