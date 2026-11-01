@@ -33,7 +33,7 @@ class CollectionsController < CatalogController
     @response = find_children(@collection.valkyrie_id, params[:id])
     assign_show_abilities!
     offer_cascade_delete
-    breadcrumbs(params[:id])
+    breadcrumbs_for(@collection)
   end
 
   # cascade is the confirmation's flag for a container that is not empty.
@@ -110,7 +110,7 @@ class CollectionsController < CatalogController
       load_descriptive!
       @sentinel = Sentinel.find_by(target_id: params[:id])
       load_container_analytics(@collection, 'Collection')
-      breadcrumbs(params[:id], editing: true)
+      breadcrumbs_for(@collection, editing: true)
     end
 
     # Re-render the tab holding the policy that was SUBMITTED, not the stored

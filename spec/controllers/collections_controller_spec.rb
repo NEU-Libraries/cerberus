@@ -169,6 +169,16 @@ describe CollectionsController do
       expect(CGI.unescapeHTML(response.body)).to include(collection.title)
     end
 
+    it 'builds the trail from the Collection it already read, without a second find' do
+      allow(AtlasRb::Resource).to receive(:find).and_call_original
+      get :show, params: { id: collection.id }
+
+      trail = response.parsed_body.css('ol.breadcrumb li.breadcrumb-item')
+      expect(trail.css("a[href='#{community_path(community.id)}']")).to be_present
+      expect(trail.last.text).to include(collection.title)
+      expect(AtlasRb::Resource).not_to have_received(:find)
+    end
+
     context 'Edit affordance is gated on the :edit ability' do
       it 'is hidden from a signed-in user who cannot edit' do
         sign_in User.new(email: 'viewer@example.com', nuid: '000000005', role: 'standard', groups: [])

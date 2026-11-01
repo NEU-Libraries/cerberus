@@ -38,6 +38,13 @@ module AtlasResourceType
 
   private
 
+    # Hands #breadcrumbs the typed read in hand. Its own Resource.find is
+    # redirected to the typed show, re-reading the record over two round trips.
+    def breadcrumbs_for(record, editing: false)
+      result = record && AtlasRb::Mash.new('klass' => solr_type, 'resource' => record)
+      breadcrumbs(params[:id], editing:, result:)
+    end
+
     # Where to land once the resource is gone. Read it BEFORE a tombstone: the
     # withdrawn resource's own read is gated. A failed read or a top-level
     # resource falls back to the homepage rather than blocking the caller.

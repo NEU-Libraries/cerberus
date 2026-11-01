@@ -110,7 +110,7 @@ class WorksController < ApplicationController
     load_streaming_only!(tiers: StreamingOnly.tiers_for(assets))
     load_caption!(offered: CaptionTrack.applicable?(assets), files: assets)
     load_showcase_category!(@work)
-    breadcrumbs(params[:id], editing: true)
+    breadcrumbs_for(@work, editing: true)
   end
 
   def create
