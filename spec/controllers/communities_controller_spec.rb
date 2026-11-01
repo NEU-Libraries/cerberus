@@ -228,6 +228,15 @@ describe CommunitiesController do
       expect(CGI.unescapeHTML(response.body)).to include(community.title)
     end
 
+    it 'builds the trail from the Community it already read, without a second find' do
+      allow(AtlasRb::Resource).to receive(:find).and_call_original
+      get :show, params: { id: community.id }
+
+      trail = response.parsed_body.css('ol.breadcrumb li.breadcrumb-item')
+      expect(trail.last.text).to include(community.title)
+      expect(AtlasRb::Resource).not_to have_received(:find)
+    end
+
     context 'with affiliated people (synthetic Faculty & Staff row)' do
       before { allow(controller).to receive(:affiliated_people_count).and_return(1) }
 

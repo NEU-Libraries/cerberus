@@ -33,7 +33,7 @@ class CommunitiesController < CatalogController
     prepend_faculty_staff_entry(params[:id])
     assign_show_abilities!
     offer_cascade_delete
-    breadcrumbs(params[:id])
+    breadcrumbs_for(@community)
   end
 
   # cascade is the confirmation's flag for a container that is not empty.
@@ -58,7 +58,7 @@ class CommunitiesController < CatalogController
     form_preparation(@permissions, resource: @community)
     load_descriptive!
     load_container_analytics(@community, 'Community')
-    breadcrumbs(params[:id], editing: true)
+    breadcrumbs_for(@community, editing: true)
   end
 
   # Provision showcases only after the community exists and is titled, so a
