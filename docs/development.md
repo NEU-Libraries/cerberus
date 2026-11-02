@@ -279,6 +279,71 @@ full `up` chain. It recreates only `web`, and the mount is additive, so it is
 non-destructive. Afterwards the `web` session is fresh, so any browser login is
 gone, and the worktree may need `dartsass:build` again.
 
+## Working a GitHub issue
+
+Most changes start from an issue. An issue stays open until the librarians who
+asked for it have checked the change on staging. So nothing in the workflow may
+close an issue automatically.
+
+### Before you start
+
+Read the issue's **Open questions** section, if it has one, and settle each
+question with whoever owns the issue before you write code. A guess made in the
+code is easy to miss in review.
+
+### Branch and commits
+
+Name the branch after the issue: `<issue number>-<slug>`, for example
+`1430-derivative-of-pid`.
+
+Link the commit to the issue with a `Refs:` trailer at the end of its message:
+
+```
+Name the source work on a queued derivative's row
+
+A queued derivative size has no identifier of its own, ...
+
+Refs: #1430
+```
+
+Once the commit is pushed, GitHub lists it on the issue's timeline. Put the
+trailer on the substantive commit only, not on the version bump.
+
+**Never put a closing keyword next to an issue number.** GitHub closes the issue
+when a commit saying `close`, `closes`, `closed`, `fix`, `fixes`, `fixed`,
+`resolve`, `resolves` or `resolved` before `#N` lands on `develop`. For the same
+reason, do not link a pull request to the issue through its Development sidebar,
+and do not create the branch with `gh issue develop`. A pull request linked that
+way closes the issue when it merges. Mention the issue in the pull request's
+description as `Refs #N` instead.
+
+Each pushed copy of a referencing commit adds its own entry to the timeline. So
+avoid amending or rebasing one after it is pushed.
+
+### Labels
+
+Every issue carries one type label. The label descriptions on GitHub are the
+definitions:
+
+| Label | Meaning |
+|---|---|
+| `cosmetic` | Wording, order or layout only; behaviour is unchanged |
+| `bug` | Something breaks, raises an error, or refuses valid input |
+| `feature` | A capability that doesn't exist yet |
+| `enhancement` | An existing capability works better or reaches further |
+
+### Ready, then closed
+
+1. Merge the branch into `develop` and push. The issue stays open.
+2. Staging deploys only when `main` is pushed (`.github/workflows/deploy.yml`).
+   After the deploy that carries the change, add the `ready` label to the
+   issue.
+3. The librarians check the change on staging and close the issue. If it needs
+   more work, they say so on the issue, and it goes round again.
+
+Add `ready` only once the change is on staging. A `ready` label on a change
+that has not deployed sends someone to check something that is not there yet.
+
 ## Restarting after a change
 
 | What changed | What to run |

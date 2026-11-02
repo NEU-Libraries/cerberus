@@ -128,6 +128,13 @@ When capturing screenshots with `browser_take_screenshot`, always pass `filename
 - Run a worktree's specs with `bin/spec` from inside the worktree. Never copy worktree files into the main checkout, and don't invent other ad-hoc verification steps.
 - Before declaring a worktree complete, run rubocop, `rake smoke`, and the specs covering the patch. The version-bump gate re-runs rubocop and `rake smoke` for itself; CI owns the full suite.
 - Bump the version exactly once per worktree, as the last commit. If more than one bump lands, soft-reset and consolidate.
+
+## Working a GitHub issue
+
+Follow [`docs/development.md`](docs/development.md#working-a-github-issue) for branch names, the `Refs:` trailer, closing keywords and labels. Two rules apply to agents on top of it:
+
+- Raise an issue's open questions with the developer before writing code. Do not settle one by choosing in the code.
+- Do not add or remove labels, comment on, or otherwise edit an issue without the developer's go-ahead for that change. Issue edits show as the developer's own on GitHub.
 ## Migrations are an architectural pause point
 
 When a change adds a file under `db/migrate/`, **stop and ask the developer to run `db:migrate` before continuing.** The flow:
