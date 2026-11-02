@@ -86,6 +86,14 @@ a:not(.btn, .dropdown-item, .navbar-brand, .nav-link) {
   }
 }
 
+// Bootstrap's reboot limits textareas to vertical resizing. Both directions are
+// allowed here, but max-width holds a dragged box inside its column; without it
+// the box can push past the form and scroll the page sideways on a phone.
+textarea {
+  resize: both;
+  max-width: 100%;
+}
+
 // A POST action that has to sit in a row of plain links and read as one of
 // them -- Reindex beside Edit and Delete. `button_to` can only emit a <button>,
 // and two rules pull that button away from its neighbours: `.btn` sets its own
