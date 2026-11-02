@@ -55,11 +55,13 @@ RSpec.describe 'Download queue', type: :request do
   end
 
   # The work has no Large rendition here, so the label falls back to the
-  # titleized role token.
+  # titleized role token. A derivative has no identifier of its own, so the
+  # Identifier cell names the work it derives from.
   it 'adds and removes an IIIF derivative rendition by role' do
     post download_queue_items_path, params: { work_noid: work.id, role: 'large_image' }
     get download_queue_path
     expect(response.body).to include('1 file').and include('Large Image')
+    expect(response.body).to match(%r{derivative of\s*</span>\s*<span class="admin-registry-table__id">#{work.id}</span>})
 
     delete download_queue_item_path, params: { work_noid: work.id, role: 'large_image' }
     follow_redirect!

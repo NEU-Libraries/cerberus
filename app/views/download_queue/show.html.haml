@@ -34,9 +34,10 @@
           - @queue.items.group_by { |item| item['w'] }.each do |work_noid, entries|
             - entries.each_with_index do |entry, index|
               -# Two kinds of queued item: a content Blob (identified by its noid)
-              -# or an IIIF derivative rendition (identified by its role token, since
-              -# renditions carry no persistent identifier). Both take their label
-              -# from the work's assets; a role falls back to its titleized token.
+              -# or a derivative (identified by its role token, since derivatives
+              -# carry no persistent identifier, so its Identifier cell names the work
+              -# it derives from). Both take their label from the work's assets; a
+              -# role falls back to its titleized token.
               - derivative = entry['d'].present?
               - file_label = derivative ? (@labels.dig(work_noid, entry['d']).presence || entry['d'].titleize) : (@labels.dig(work_noid, entry['b']).presence || 'File')
               - remove_params = derivative ? { work_noid: work_noid, role: entry['d'] } : { work_noid: work_noid, blob_noid: entry['b'] }
@@ -48,7 +49,8 @@
                 %td.admin-registry-table__name= file_label
                 %td
                   - if derivative
-                    %span.text-muted.small IIIF rendition
+                    %span.text-muted.small derivative of
+                    %span.admin-registry-table__id= work_noid
                   - else
                     %span.admin-registry-table__id= entry['b']
                 %td.text-end
