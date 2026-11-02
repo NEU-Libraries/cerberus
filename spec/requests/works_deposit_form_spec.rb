@@ -92,6 +92,8 @@ RSpec.describe 'Works deposit form', type: :request do
       promote = html.at_css('fieldset.deposit-form__promote[data-deposit-promotion-target="promote"]')
       expect(promote['class']).to include('d-none')
       expect(promote.text).to include('Also promote to Jane Doe’s community showcase')
+      expect(promote.text).to include('Works promoted to Jane Doe’s community showcase can be discovered by users')
+        .and include('Jane Doe is the depositor of record')
 
       fields = html.css('.deposit-form__body > fieldset.deposit-form__field, .deposit-form__body > .deposit-form__field')
       legends = fields.map { |f| f.at_css('legend')&.text&.strip }

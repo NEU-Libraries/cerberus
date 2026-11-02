@@ -773,6 +773,8 @@ describe WorksController do
         get :new, params: { collection_id: collection.id }
 
         expect(response.body).to include('Also promote to a community showcase')
+        expect(response.body).to include('Works promoted to a community’s showcase can be discovered by users ' \
+                                         'from the community’s work page and from the DRS homepage.')
         expect(response.body).to include('My Community') # community picker (size > 1)
         expect(response.body).to include('Other Community')
         expect(response.body).to include('Datasets') # showcase genre option

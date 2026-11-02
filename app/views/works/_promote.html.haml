@@ -15,9 +15,9 @@
         = name ? "Also promote to #{name}’s community showcase" : 'Also promote to a community showcase'
       .deposit-form__radio-desc
         - if name
-          Surfaces this work in a featured showcase of #{name}’s community for a category, on #{name}’s behalf. #{name} is the depositor of record, and the work still lives in #{name}’s workspace.
+          Works promoted to #{name}’s community showcase can be discovered by users from the community’s work page and from the DRS homepage. #{name} is the depositor of record, and the work still lives in #{name}’s workspace.
         - else
-          Surfaces this work in your community's featured showcase for a category — a deliberate, public act. It still lives here.
+          Works promoted to a community’s showcase can be discovered by users from the community’s work page and from the DRS homepage.
   .deposit-form__promote-fields.d-none{data: { 'deposit-promotion-target' => 'fields' }}
     - if targets.size > 1
       %label.deposit-form__field-label{for: 'publish_community_id'} Community
