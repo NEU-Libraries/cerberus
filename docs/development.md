@@ -335,14 +335,13 @@ definitions:
 ### Ready, then closed
 
 1. Merge the branch into `develop` and push. The issue stays open.
-2. Staging deploys only when `main` is pushed (`.github/workflows/deploy.yml`).
-   After the deploy that carries the change, add the `ready` label to the
-   issue.
-3. The librarians check the change on staging and close the issue. If it needs
+2. Add the `ready` label to the issue. It marks the issue as done on the
+   development side, which sets it apart from the ones still to do.
+3. The change reaches staging with the next deploy. Staging deploys only when
+   `main` is pushed (`.github/workflows/deploy.yml`), so there can be a lag
+   between `ready` and the change being there to check.
+4. The librarians check the change on staging and close the issue. If it needs
    more work, they say so on the issue, and it goes round again.
-
-Add `ready` only once the change is on staging. A `ready` label on a change
-that has not deployed sends someone to check something that is not there yet.
 
 ## Restarting after a change
 
