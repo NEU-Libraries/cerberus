@@ -266,7 +266,10 @@ $sets-via-soft: #e6eef6;
     }
   }
 
-  button.picker-row.is-add {
+  // The page picker's rows are links to its confirmation, not add buttons, but
+  // must read as the same rows: body text, no underline, the same hover.
+  button.picker-row.is-add,
+  a.picker-row.is-add {
     cursor: pointer;
 
     &:hover,
@@ -274,6 +277,11 @@ $sets-via-soft: #e6eef6;
       border-color: $blue;
       background: $sets-via-soft;
     }
+  }
+
+  a.picker-row.is-add {
+    color: inherit;
+    text-decoration: none;
   }
 
   form.button_to {
