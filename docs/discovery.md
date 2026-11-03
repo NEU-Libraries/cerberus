@@ -22,6 +22,8 @@ Source files:
 - `app/controllers/my_drs_controller.rb`
 - `app/controllers/concerns/show_scoped_search.rb`
 - `app/controllers/concerns/title_browse_sort.rb`
+- `app/controllers/concerns/whole_tree_search.rb`
+- `app/components/cerberus/constraints_component.rb`
 - `app/controllers/concerns/without_facet_modal.rb`
 
 Three neighbouring pages carry the machinery these files reuse:
@@ -235,6 +237,46 @@ params, the next request with a `q` falls back to relevance.
 
 Blacklight's Sort dropdown marks the field that matches the sort Solr actually
 ran, so it shows "title" on a plain browse with no extra work.
+
+### An empty search covers the whole tree
+
+A collection or community page lists its contents in one of two ways:
+
+| Request | Lists |
+|---|---|
+| The page opened, or narrowed by a facet alone | Direct members: one level of the tree |
+| Any search, an empty one included | The whole subtree: every descendant container, and every Work in or linked into any of them |
+
+`WholeTreeSearch#subtree_search?` makes the switch, and it tests for a `q` in
+the URL, not a present one. Submitting the box empty sends `q=`, and v1's
+community page treated that the same way (`!params[:q].nil?`).
+
+A blank `q` survives into the page's links because Blacklight drops only nil
+params. So a facet, sort or page link from an empty search keeps `q=`, and page
+2 stays on the whole tree. The scoped facet modal reads the same
+`child_membership_filters`, so its counts follow too.
+
+A facet without a search narrows the current level only, as v1's did. Clicking a
+facet does not widen the page.
+
+The whole-tree listing includes linked members, as a keyword search already
+does. v1 had no linked members: its genre rows were canned queries over the
+community's employees' files.
+
+Blacklight treats a blank `q` as no constraint, so on its own the page would
+list the whole tree with nothing to say so. `Cerberus::ConstraintsComponent`
+adds an "Everything in this collection" (or community) chip, labelled by
+`whole_tree_label`, and the "Search results" heading shows as for any search.
+The chip's remove link is the keyword chip's: the state without `q`, which keeps
+any facet and returns to the one-level view.
+
+Two other rules read a present `q`, not a blank one, and so treat an empty search
+as a browse:
+
+- The title sort default (see "Browsing by title" above). There is no keyword to
+  rank by relevance.
+- The Faculty & Staff row stays at the top. v1 showed its row on page 1 with no
+  rendered constraints, and rendered none for a blank `q`.
 
 ### Hiding empty showcases
 
