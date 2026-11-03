@@ -3,9 +3,11 @@
 require 'rails_helper'
 
 # A collection or community page searched with an empty box lists everything
-# beneath it; opening the page, or narrowing it with a facet, lists one level.
-# Over the real test Atlas.
+# beneath it, for a signed-in user; opening the page, or narrowing it with a
+# facet, lists one level. Over the real test Atlas.
 RSpec.describe 'Whole-tree search', type: :request do
+  include Devise::Test::IntegrationHelpers
+
   def nuid = '000000004'
   def mods(kind) = Rails.root.join("spec/fixtures/files/#{kind}-mods.xml").to_s
   def read_public = { 'read' => ['public'] }
@@ -40,7 +42,15 @@ RSpec.describe 'Whole-tree search', type: :request do
     response.parsed_body.at_css('#appliedParams .whole-tree')
   end
 
-  describe 'a collection page' do
+  let(:staff) do
+    User.new(email: 'dps@example.com', password: 'password',
+             nuid: '000000002', role: 'privileged',
+             groups: ['northeastern:drs:repository:staff'])
+  end
+
+  describe 'a collection page, signed in' do
+    before { sign_in staff }
+
     it 'lists one level when opened' do
       get collection_path(@collection.id)
 
@@ -104,7 +114,28 @@ RSpec.describe 'Whole-tree search', type: :request do
     end
   end
 
+  # From the root community a match-all search lists the whole repository, so
+  # anonymous visitors keep the one-level list; a real keyword still searches
+  # the tree, as it always has.
+  describe 'a collection page, anonymous' do
+    %w[_blank * *:*].each do |q|
+      it "lists one level for q=#{q}, with no chip" do
+        get collection_path(@collection.id, q: q == '_blank' ? '' : q)
+
+        expect(listed_ids).to contain_exactly(@shallow.valkyrie_id, @sub.valkyrie_id)
+        expect(chip).to be_nil
+      end
+    end
+
+    it 'searches the whole tree for a keyword' do
+      get collection_path(@collection.id, q: 'video')
+
+      expect(listed_ids).to include(@deep.valkyrie_id)
+    end
+  end
+
   it 'lists the whole tree for an empty search on a community' do
+    sign_in staff
     get community_path(@community.id, q: '')
 
     expect(listed_ids).to include(@deep.valkyrie_id)
