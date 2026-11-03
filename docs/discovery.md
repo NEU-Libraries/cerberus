@@ -237,7 +237,35 @@ would get the search sorted by title, as if they had picked it. Left out of
 params, the next request with a `q` falls back to relevance.
 
 Blacklight's Sort dropdown marks the field that matches the sort Solr actually
-ran, so it shows "title" on a plain browse with no extra work.
+ran, so it shows "title" on a plain browse with no extra work. A community page
+is the exception; see "Showcases first on a community page" below.
+
+### Showcases first on a community page
+
+A community page with no keyword, no facet and no picked sort lists, in order:
+
+1. The community's own showcases, in `FeaturedContent::GENRES` order: the
+   homepage gateways' order.
+2. The Faculty & Staff row, when the community has affiliated people.
+3. Everything else, by title.
+
+This applies to a plain browse and to an empty search alike, as v1's genre rows
+did. A keyword, a facet or a picked sort turns it off, and the page sorts as it
+otherwise would. Only the page's own showcases float. A descendant community's
+showcases share the same genre titles, so on an empty search they sort by title
+with everything else.
+
+`CommunityShowcases#showcases_first_sort` builds a Solr function sort: a weight
+for each showcase id, highest first, then `title_ssi asc`. It goes to
+`find_children` as `sort:`, which replaces the sort in that Solr request alone.
+The search state keeps naming title, so no link carries the function sort.
+
+That leaves Blacklight's dropdown with nothing to match, because no sort field
+declares the function sort, and it would mark "relevance". So
+`CommunitiesController` answers `current_sort_field` from the search state.
+
+The showcases are at most seven rows, so they always land on page 1. The empty
+showcases an admin sees float with the rest, in the same order.
 
 ### An empty search covers the whole tree
 
@@ -363,9 +391,10 @@ have no showcases.
 
 ### The Faculty & Staff row
 
-A community with affiliated People gets a synthetic "Faculty & Staff" row at
-the top of its browse (`prepend_faculty_staff_entry`). It is rendered through the normal Blacklight pipeline, so
-it matches the list and gallery rows exactly.
+A community with affiliated People gets a synthetic "Faculty & Staff" row near
+the top of its browse (`prepend_faculty_staff_entry`): after any floated
+showcases, where v1 put it, or first when none float. It is rendered through the
+normal Blacklight pipeline, so it matches the list and gallery rows exactly.
 
 It appears only on the unfiltered first page, mirroring v1's `current_page == 1
 && no constraints`. It drops out as soon as the visitor searches within the
