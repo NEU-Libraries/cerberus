@@ -242,17 +242,21 @@ fields below live in `MODSRecordValidator` instead.
 
 ### Required fields
 
-Every record needs a primary title, and every Work needs at least one keyword.
+Every record needs a primary title, and every Work needs at least one subject.
 `MODSRecordValidator` runs `XmlValidator` first, then checks both. The XML
 editor, and the XML and multipage loaders' previews and ingest jobs, all call
 it rather than `XmlValidator`.
 
 - **Title** means a non-blank `<mods:title>` in the primary `<mods:titleInfo>`.
-- **Keyword** means any non-blank `<mods:subject><mods:topic>`. An
-  authority-bearing subject counts, exactly as it does on the metadata form.
-- **Keywords are required where `DescriptivePolicy` says so**, which is Works
-  only. The loaders create Works, so they always require one. The XML editor
-  asks the policy with the resource's own type.
+- **Subject** means any top-level `<mods:subject>` with heading text: a topic,
+  place, period, name, occupation, genre, title or hierarchical place. It is
+  whatever `NEU::MODS` `subject_headings` returns. A subject holding only a
+  `<mods:geographicCode>` or `<mods:cartographics>` has no heading text, so it
+  does not count. An authority-bearing subject counts, exactly as it does on
+  the metadata form.
+- **A subject is required where `DescriptivePolicy` requires keywords**, which
+  is Works only. The loaders create Works, so they always require one. The XML
+  editor asks the policy with the resource's own type.
 
 The field checks run only after the floor passes. They need a parsed document,
 and a schema error is the one to fix first.

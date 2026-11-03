@@ -330,10 +330,12 @@ when a Work is saved with no keywords.
 requires that the resource carry at least one subject. The Keywords box is how
 a depositor supplies one.
 
-A record whose subjects are all authority-controlled already satisfies that
-requirement, and those subjects are curated. `MODSFields` keeps them out of
-the box on purpose, and `MODSMerge` never writes over them. So the server
-counts them. Without that, a curator fixing a title on such a record would have
+The box manages only attribute-free, topic-only subjects. Every other subject —
+authority-controlled, or a name, place, genre or other kind — already satisfies
+that requirement, and is curated. `MODSFields` keeps those subjects out of the
+box on purpose, and `MODSMerge` never writes over them. So the server counts
+them, by the same `subject_headings` rule as
+[`MODSRecordValidator`](ingest.md#required-fields). Without that, a curator fixing a title on such a record would have
 to invent a redundant keyword to save. The form mirrors the same exemption
 client-side, from the `keyword-list` controller's `optional` value.
 

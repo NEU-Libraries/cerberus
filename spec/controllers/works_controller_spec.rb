@@ -1042,7 +1042,7 @@ describe WorksController do
     end
 
     it 'rejects a save with no keywords when the stored record has no subjects' do
-      bare = AtlasRb::Work.create(collection.id, Rails.root.join('spec/fixtures/files/work-lake-mods.xml').to_s,
+      bare = AtlasRb::Work.create(collection.id, Rails.root.join('spec/fixtures/files/sample-document-mods.xml').to_s,
                                   nuid: '000000004')
       patch :update_metadata, params: { id: bare.id, work: { title: 'NewTitle', description: 'NewAbstract' } }
 
@@ -1051,11 +1051,21 @@ describe WorksController do
     end
 
     it 'rejects a forged curated_subjects flag on a record with no subjects' do
-      bare = AtlasRb::Work.create(collection.id, Rails.root.join('spec/fixtures/files/work-lake-mods.xml').to_s,
+      bare = AtlasRb::Work.create(collection.id, Rails.root.join('spec/fixtures/files/sample-document-mods.xml').to_s,
                                   nuid: '000000004')
       patch :update_metadata, params: { id: bare.id, work: { title: 'NewTitle', curated_subjects: 'true' } }
 
       expect(flash[:alert]).to be_present
+    end
+
+    # Its only subject is a place, which the Keywords box never shows.
+    it 'saves with no keywords when the stored record has only a place subject' do
+      place = AtlasRb::Work.create(collection.id, Rails.root.join('spec/fixtures/files/work-lake-mods.xml').to_s,
+                                   nuid: '000000004')
+      patch :update_metadata, params: { id: place.id, work: { title: 'NewTitle', description: 'NewAbstract' } }
+
+      expect(flash[:alert]).to be_blank
+      expect(AtlasRb::Work.find(place.id, nuid: '000000004').title).to start_with('NewTitle')
     end
 
     it 'saves with no keywords when the stored record carries curated subjects' do

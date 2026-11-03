@@ -37,23 +37,46 @@ describe MODSRecordValidator do
     expect(described_class.call(xml: mods(blank + keyword), keywords: true)).to eq([described_class::NO_TITLE])
   end
 
-  it 'refuses a record with no keywords when keywords are required' do
-    expect(described_class.call(xml: mods(title), keywords: true)).to eq([described_class::NO_KEYWORDS])
+  it 'refuses a record with no subjects when keywords are required' do
+    expect(described_class.call(xml: mods(title), keywords: true)).to eq([described_class::NO_SUBJECTS])
   end
 
   it 'refuses an empty topic' do
     empty = '<mods:subject><mods:topic/></mods:subject>'
-    expect(described_class.call(xml: mods(title + empty), keywords: true)).to eq([described_class::NO_KEYWORDS])
+    expect(described_class.call(xml: mods(title + empty), keywords: true)).to eq([described_class::NO_SUBJECTS])
   end
 
-  it 'counts an authority subject as a keyword' do
+  it 'counts an authority subject' do
     curated = '<mods:subject authority="lcsh"><mods:topic>Boston</mods:topic></mods:subject>'
     expect(described_class.call(xml: mods(title + curated), keywords: true)).to eq([])
   end
 
+  {
+    'a personal name' => '<mods:name type="personal"><mods:namePart>Smith, Jane</mods:namePart></mods:name>',
+    'a place' => '<mods:geographic>Boston (Mass.)</mods:geographic>',
+    'a period' => '<mods:temporal>1900-1950</mods:temporal>',
+    'an occupation' => '<mods:occupation>Librarians</mods:occupation>',
+    'a genre' => '<mods:genre>Photographs</mods:genre>',
+    'a title' => '<mods:titleInfo><mods:title>Hamlet</mods:title></mods:titleInfo>',
+    'a hierarchical place' =>
+      '<mods:hierarchicalGeographic><mods:city>Boston</mods:city></mods:hierarchicalGeographic>'
+  }.each do |kind, child|
+    it "counts a subject that is only #{kind}" do
+      subject_xml = "<mods:subject>#{child}</mods:subject>"
+      expect(described_class.call(xml: mods(title + subject_xml), keywords: true)).to eq([])
+    end
+  end
+
+  # A code or a coordinate is not heading text, so it shows nowhere a reader
+  # would see a subject.
+  it 'refuses a subject that is only a geographic code' do
+    code = '<mods:subject><mods:geographicCode authority="marcgac">n-us-ma</mods:geographicCode></mods:subject>'
+    expect(described_class.call(xml: mods(title + code), keywords: true)).to eq([described_class::NO_SUBJECTS])
+  end
+
   it 'reports both missing fields at once' do
     expect(described_class.call(xml: mods(''), keywords: true))
-      .to eq([described_class::NO_TITLE, described_class::NO_KEYWORDS])
+      .to eq([described_class::NO_TITLE, described_class::NO_SUBJECTS])
   end
 
   it 'skips the keyword rule where keywords are not required' do
