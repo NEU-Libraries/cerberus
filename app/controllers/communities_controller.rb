@@ -96,7 +96,8 @@ class CommunitiesController < CatalogController
     def load_children_and_deletability
       showcases = featured_showcase_uuids(@community.valkyrie_id)
       empty = empty_showcase_uuids(showcases)
-      @response = find_children(@community.valkyrie_id, params[:id], exclude_uuids: hidden_showcase_uuids(empty))
+      @response = find_children(@community.valkyrie_id, params[:id], exclude_uuids: hidden_showcase_uuids(empty),
+                                                                     sort: showcases_first_sort(showcases))
       mark_empty_showcases(empty)
       @deletable = deletable?(showcases)
     end
@@ -126,13 +127,14 @@ class CommunitiesController < CatalogController
     end
 
     # The synthetic row is not in Solr, so raise the response total by one or
-    # "Displaying N entries" undercounts the rows on screen.
+    # "Displaying N entries" undercounts the rows on screen. It follows any
+    # floated showcases, where v1 listed it.
     def prepend_faculty_staff_entry(community_noid)
       return if params[:page].present? && params[:page].to_i > 1
       return if params[:q].present? || params[:f].present?
       return unless affiliated_people_count(community_noid).positive?
 
-      @response.documents.unshift(faculty_staff_stub(community_noid))
+      @response.documents.insert(floated_showcase_count, faculty_staff_stub(community_noid))
       @response.response['numFound'] = @response.total + 1
     end
 

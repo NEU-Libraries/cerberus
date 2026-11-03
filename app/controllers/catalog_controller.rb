@@ -396,11 +396,14 @@ class CatalogController < ApplicationController
   # Used to hide empty Featured showcases from a community browse without leaving
   # the Type facet counting them (a Ruby post-filter on the documents would not
   # touch Solr's facets).
-  def find_children(uuid, noid, exclude_uuids: [])
+  # +sort+, when given, replaces the search state's sort in the Solr request
+  # alone; the state, and so every link the page builds, keeps its own.
+  def find_children(uuid, noid, exclude_uuids: [], sort: nil)
     return Blacklight::Solr::Response.new({}, {}) if uuid.blank?
 
     filters = child_membership_filters(uuid, noid, exclude_uuids: exclude_uuids)
     builder = search_service.search_builder.with(search_state).with_filters(*filters)
+    builder = builder.merge(sort: sort) if sort
     Blacklight.default_index.search(params: builder)
   end
 
