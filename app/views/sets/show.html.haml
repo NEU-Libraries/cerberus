@@ -27,7 +27,8 @@
     - if @set['description'].present?
       %p.mb-0.mt-3= @set['description']
     %p.recipe-line.small.mb-0{class: (@set['description'].present? ? 'mt-2' : 'mt-3')}
-      = set_recipe_sentence(chips_count: chips.size, added_count: added_noids.size, aside_count: aside_docs.size)
+      = set_recipe_sentence(chips_count: chips.size, added_count: added_noids.size, aside_count: aside_docs.size,
+                            can_manage: @can_edit)
     -# An admin or devolved admin gets the Reindex action on any set they can
     -# reach, including one they neither own nor may edit — so it opens this row
     -# on its own, not only alongside the owner's controls.

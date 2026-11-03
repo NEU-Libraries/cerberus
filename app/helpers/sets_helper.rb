@@ -24,8 +24,9 @@ module SetsHelper
   end
 
   # The hero's one-line recipe summary, composed from whichever recipe parts
-  # are present. Mirrors the mockup's phrasing.
-  def set_recipe_sentence(chips_count:, added_count:, aside_count:)
+  # are present. Mirrors the mockup's phrasing. `can_manage` adds the pointer to
+  # the Manage page, so pass it only for a viewer who is shown that link.
+  def set_recipe_sentence(chips_count:, added_count:, aside_count:, can_manage: false)
     if chips_count.zero? && added_count.zero?
       return 'This set is empty — search the repository, then use “Add to set” on a result.'
     end
@@ -33,6 +34,7 @@ module SetsHelper
     clauses = set_recipe_clauses(chips_count, added_count, aside_count)
     sentence = "This set contains #{[set_recipe_head(chips_count, added_count), *clauses].join(', ')}."
     sentence += ' It updates automatically as those collections change.' if chips_count.positive?
+    sentence += ' Manage the Set to remove items or restore hidden items.' if can_manage
     sentence
   end
 
