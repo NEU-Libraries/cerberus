@@ -3,6 +3,7 @@
 class CatalogController < ApplicationController
   include Blacklight::Catalog
   include PageSetAddable
+  include WholeTreeSearch
 
   self.search_state_class = SearchState
 
@@ -407,8 +408,9 @@ class CatalogController < ApplicationController
   # ShowScopedSearch#facet). A modal built on a different filter would report
   # counts the page beneath it cannot reproduce.
   def child_membership_filters(uuid, noid, exclude_uuids: [])
-    # Direct members (browse), or the whole subtree when a keyword query is active.
-    membership = if params[:q].present?
+    # Direct members (browse, facets included), or the whole subtree for any
+    # search, an empty one too.
+    membership = if subtree_search?
                    subtree_membership_fq(uuid, noid)
                  else
                    MembershipQuery.members_fq([uuid], include_linked: true)
