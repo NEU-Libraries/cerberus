@@ -3,6 +3,7 @@
 class CatalogController < ApplicationController
   include Blacklight::Catalog
   include PageSetAddable
+  include AnonymousMatchAll
   include WholeTreeSearch
 
   self.search_state_class = SearchState

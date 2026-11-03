@@ -9,8 +9,6 @@ module WholeTreeSearch
   # The chip naming the whole-tree listing, by the controller serving the page.
   WHOLE_TREE_KINDS = { 'collections' => 'collection', 'communities' => 'community' }.freeze
 
-  MATCH_ALL_QUERY = /\A[\s*:]*\z/
-
   included do
     helper_method :whole_tree_label
   end
@@ -22,14 +20,9 @@ module WholeTreeSearch
     # state; testing present? here would send page 2 back to direct members.
     # A query that matches everything is for signed-in users only: from the root
     # community it lists the whole repository, an enumeration path for scrapers.
+    # match_all_query? is AnonymousMatchAll's.
     def subtree_search?
       params.key?(:q) && (user_signed_in? || !match_all_query?)
-    end
-
-    # Blank, or only stars and colons: edismax answers "*" and "*:*" with
-    # every document, so they enumerate as a blank box does.
-    def match_all_query?
-      params[:q].to_s.match?(MATCH_ALL_QUERY)
     end
 
     # Only for a blank q: a keyword already shows as its own chip.

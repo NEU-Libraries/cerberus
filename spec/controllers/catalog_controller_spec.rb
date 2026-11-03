@@ -16,6 +16,11 @@ describe CatalogController do
 
   describe 'index' do
     render_views
+
+    # An anonymous match-all listing is refused (AnonymousMatchAll). A
+    # signed-in user with no groups sees exactly the public records an
+    # anonymous visitor would, so these still test the public index.
+    before { sign_in User.new(email: 'viewer@example.com', nuid: '000000005', role: 'standard', groups: []) }
     it 'renders the index partial' do
       AtlasRb::Resource.set_permissions(community.id, { 'read' => ['public'] }, nuid: '000000004')
       expect(community.title).to eq('Northeastern University')
