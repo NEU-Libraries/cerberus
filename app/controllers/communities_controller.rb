@@ -13,11 +13,13 @@ class CommunitiesController < CatalogController
   include ContainerAnalytics
   include ContainerRestrictionRequest
   include CommunitiesIndex
+  include TitleBrowseSort
   include CommunityShowcases
   include CascadeTombstoning
 
   atlas_resource AtlasRb::Community, key: :community, route: :community
   authorize_resource_writes!(extra_edit: %i[request_restriction])
+  title_browse_on :index, :show
   after_action :record_view_impression, only: :show
 
   # Before the find: Atlas refuses the People Community to everyone but full
