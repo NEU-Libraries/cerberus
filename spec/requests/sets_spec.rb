@@ -511,6 +511,22 @@ RSpec.describe 'Sets', type: :request do
       patch "/sets/#{set['id']}", params: { set: { form: 'sharing', edit_users: [] } }
       expect(response).to have_http_status(:forbidden)
     end
+
+    # The tab names people without their NUIDs; the NUID rides only the hidden
+    # field that is saved.
+    it 'shows a granted person by name, without their NUID' do
+      sign_in curator
+      set = make_set('Named Grant Set')
+      AtlasRb::Compilation.update(set['id'],
+                                  permissions: { read: [], edit: [], edit_users: ['000000003'] },
+                                  nuid:        nuid)
+      get "/sets/#{set['id']}/edit"
+      chip = response.parsed_body.at_css('.set-grant-chip')
+      expect(chip.text.strip).to eq(NuidResolver.name_for('000000003'))
+      expect(chip.text).not_to include('000000003')
+      expect(chip.at_css('input[type=hidden]')['value']).to eq('000000003')
+      expect(response.parsed_body.at_css('template .inbox-typeahead__nuid')).to be_nil
+    end
   end
 
   describe 'discovery scopes' do
@@ -558,6 +574,15 @@ RSpec.describe 'Sets', type: :request do
       get '/sets/recipients', params: { q: 'ps' }
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body).to be_an(Array)
+    end
+
+    # The Sharing tab never shows a NUID, so it must not find people by one.
+    # The directory itself still matches NUIDs, for the pickers that need it.
+    it 'finds no one by a NUID' do
+      expect(AtlasRb::User.search('000000003', nuid: nuid).pluck('nuid')).to include('000000003')
+      get '/sets/recipients', params: { q: '000000003' }
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body).to eq([])
     end
   end
 

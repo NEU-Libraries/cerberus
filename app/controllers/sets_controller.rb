@@ -129,9 +129,11 @@ class SetsController < CatalogController
     render :edit, status: :unprocessable_content
   end
 
-  # Typeahead JSON for the edit_users picker on the Sharing tab
-  # (see UserDirectorySearchable).
+  # The Sharing tab's typeahead. It hides NUIDs, so it refuses a NUID query here:
+  # Atlas's NUID matching serves the other pickers, impersonation among them.
   def recipients
+    return render(json: []) if params[:q].to_s.strip.match?(/\A\d+\z/)
+
     render json: user_directory_results
   end
 
