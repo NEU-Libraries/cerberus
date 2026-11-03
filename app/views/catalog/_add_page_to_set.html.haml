@@ -1,0 +1,34 @@
+-# "Add page to set" (a results collection tool, gated by add_page_to_set?): the
+-# works on this results page, into one of the viewer's sets. The modal reuses
+-# the Add-to-set picker; choosing a set opens a confirmation in the same frame.
+-# See docs/sets.md ("Adding a page of results").
+- work_ids = page_work_noids
+- collections = page_collection_count
+%div
+  %button.btn.btn-tonal-primary.btn-sm.w-100{type: 'button', data: { 'bs-toggle': 'modal', 'bs-target': '#add-page-to-set' }}
+    %i.fa-solid.fa-briefcase.me-1{'aria-hidden' => 'true'}
+    Add page to set
+
+  .modal.fade#add-page-to-set{tabindex: '-1', 'aria-labelledby' => 'add-page-to-set-label', 'aria-hidden' => 'true'}
+    .modal-dialog.modal-dialog-centered.modal-dialog-scrollable
+      .modal-content.text-start.set-picker
+        .modal-header
+          %h5.modal-title#add-page-to-set-label Add page to set
+          %button.btn-close{type: 'button', 'aria-label': 'Close', data: { 'bs-dismiss': 'modal' }}
+        .modal-body
+          %p.small.text-muted.mb-2
+            Choose a set for the #{pluralize(work_ids.size, 'work')} on this page.
+            - if collections.positive?
+              #{collections == 1 ? 'The collection' : 'Collections'} on this page #{collections == 1 ? 'is' : 'are'} not added; use a collection's own Add to set to include it.
+          -# The filter form sits outside the frame and targets it, so typing
+          -# never re-renders the input; the frame is lazy, as on result rows.
+          %form.mb-2{action: picker_sets_path, method: 'get', data: { controller: 'picker-search', turbo_frame: 'set-picker-page' }}
+            - work_ids.each do |noid|
+              %input{type: 'hidden', name: 'work_ids[]', value: noid}
+            %input.form-control{type: 'search', name: 'q', placeholder: 'Filter your sets by title…',
+                                'aria-label' => 'Filter your sets by title', autocomplete: 'off',
+                                data: { action: 'input->picker-search#search' }}
+          = turbo_frame_tag 'set-picker-page', src: picker_sets_path(work_ids: work_ids), loading: :lazy do
+            .py-2.small.text-muted Loading your sets…
+        .modal-footer
+          %button.btn.btn-tonal-secondary.btn-sm{type: 'button', data: { 'bs-dismiss': 'modal' }} Done

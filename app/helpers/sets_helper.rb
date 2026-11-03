@@ -72,10 +72,11 @@ module SetsHelper
     end
   end
 
-  # Query params for a picker pagination link — keeps the item noid and any
-  # active filter alongside the requested page.
-  def set_picker_page_params(kind, noid, query, page)
-    { "#{kind}_id": noid, q: query.presence, page: page }.compact
+  # Query params for a picker pagination link — keeps the item noid (or a whole
+  # page's work noids) and any active filter alongside the requested page.
+  def set_picker_page_params(kind, noid, query, page, work_ids: nil)
+    item = kind == 'page' ? { work_ids: work_ids } : { "#{kind}_id": noid }
+    item.merge(q: query.presence, page: page).compact
   end
 
   # Title off a contents/aside Solr document.

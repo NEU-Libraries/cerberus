@@ -218,6 +218,10 @@ Rails.application.routes.draw do
       delete 'collections/:collection_id', to: 'sets#remove_collection', as: :remove_collection
       post   'works',                      to: 'sets#add_work',          as: :add_work
       delete 'works/:work_id',             to: 'sets#remove_work',       as: :remove_work
+      # "Add page to set": the confirmation that counts what is already in the
+      # Set, then the add itself. See SetPageAdd.
+      get    'page_works',                 to: 'sets#confirm_page_works', as: :confirm_page_works
+      post   'page_works',                 to: 'sets#add_page_works',     as: :add_page_works
       post   'aside',                      to: 'sets#set_aside',         as: :set_aside
       delete 'aside/:work_id',             to: 'sets#put_back',          as: :put_back
       # The Sentinel tab. `sentinel` authors the Set's Sentinel (the same

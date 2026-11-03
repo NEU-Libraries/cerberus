@@ -18,15 +18,17 @@ class SetsController < CatalogController
   include SetSharing
   include SetBulkActions
   include SetBreadcrumbs
+  include SetPageAdd
 
   # :facet is the show page's facet modal, so it is as public as the show page
   # itself — load_set below is what gates a private Set, for both.
   before_action :authenticate_user!, except: %i[show facet facet_suggest]
   before_action :require_curator,    except: %i[show facet facet_suggest]
   before_action :load_set,           except: [:index, :new, :create, :picker, :recipients]
-  # The edit page is a form, so one the caller could never save is refused up
-  # front rather than left for Atlas to refuse on Save. Atlas stays the boundary.
-  before_action :require_set_editor, only: :edit
+  # The edit page and the page-add confirmation are forms, so one the caller
+  # could never submit is refused up front rather than left for Atlas to refuse.
+  # Atlas stays the boundary.
+  before_action :require_set_editor, only: %i[edit confirm_page_works add_page_works]
   # Declared here rather than in SetBulkActions so it lands after the two gates
   # above: an anonymous request has to reach authenticate_user! and be sent to
   # sign in, not be told it is forbidden. The two actions it names live in that
@@ -78,6 +80,8 @@ class SetsController < CatalogController
   # item's state in that set (addable / already included / covered-by-a-
   # collection / set aside).
   def picker
+    return page_picker if params[:work_ids].present?
+
     @kind = params[:collection_id].present? ? 'collection' : 'work'
     @noid = params[:collection_id].presence || params[:work_id]
     return head :bad_request if @noid.blank?

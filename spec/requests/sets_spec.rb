@@ -369,6 +369,97 @@ RSpec.describe 'Sets', type: :request do
       end
     end
 
+    # v1's "Save files for later": the works on a results page, into a set,
+    # confirmed with counts first.
+    describe 'Add page to set' do
+      def confirm(set, works)
+        get "/sets/#{set['id']}/page_works", params: { work_ids: works.map(&:id) }
+      end
+
+      it 'offers the button on a results page that holds works' do
+        get "/collections/#{collection.id}"
+        expect(response.body).to include('Add page to set')
+        expect(response.parsed_body.css('#add-page-to-set input[name="work_ids[]"]').pluck('value')).to include(work_one.id)
+      end
+
+      it 'leaves the button off a page with no works on it' do
+        get "/communities/#{community.id}"
+        expect(response.body).not_to include('Add page to set')
+      end
+
+      # A set's own page would offer its works to a set: a set fed into itself.
+      it 'leaves the button off a set page' do
+        set = make_set('Self-Feeding Set')
+        post "/sets/#{set['id']}/collections", params: { collection_id: collection.id }
+        get "/sets/#{set['id']}"
+        expect(response.body).to include(work_one.id)
+        expect(response.body).not_to include('Add page to set')
+      end
+
+      it 'keeps the button from anyone who does not curate sets' do
+        sign_out curator
+        get "/collections/#{collection.id}"
+        expect(response.body).not_to include('Add page to set')
+      end
+
+      it 'lists sets as links to the confirmation, not as adds' do
+        set = make_set('Page Pick Set')
+        get '/sets/picker', params: { work_ids: [work_one.id, lone_work.id], q: 'Page Pick Set' }
+        hrefs = response.parsed_body.css('a.picker-row').pluck('href')
+        expect(hrefs).to include(confirm_page_works_set_path(set['id'], work_ids: [work_one.id, lone_work.id]))
+        expect(response.body).not_to include(add_work_set_path(set['id']))
+      end
+
+      it 'counts the works already in the set, directly, through a collection, or hidden' do
+        set = make_set('Counting Set')
+        post "/sets/#{set['id']}/collections", params: { collection_id: collection.id }
+        post "/sets/#{set['id']}/aside",       params: { work_id: work_two.id, title: 'Work Two' }
+
+        confirm(set, [work_one, work_two, lone_work])
+        expect(response.body).to include('Add 1 work from this page to “Counting Set”?')
+          .and include('1 work is already in it, and will be skipped.')
+          .and include('1 work is hidden in it, and will stay hidden.')
+          .and include('Add 1 work')
+      end
+
+      it 'offers no add when every work is already in the set' do
+        set = make_set('Full Set')
+        post "/sets/#{set['id']}/works", params: { work_id: lone_work.id }
+
+        confirm(set, [lone_work])
+        expect(response.body).to include('Every work on this page is already in “Full Set”.')
+        expect(response.body).not_to include(add_page_works_set_path(set['id']))
+      end
+
+      # Counted again on the POST, so only what is still missing is queued.
+      it 'queues only the works not yet in the set' do
+        set = make_set('Queued Set')
+        post "/sets/#{set['id']}/collections", params: { collection_id: collection.id }
+
+        expect do
+          post "/sets/#{set['id']}/page_works", params: { work_ids: [work_one.id, lone_work.id] }
+        end.to have_enqueued_job(SetBulkAddJob).with(set_noid: set['id'], work_ids: [lone_work.id])
+        expect(flash[:notice]).to include('Adding 1 work to “Queued Set”.')
+      end
+
+      it 'queues nothing when every work is already in the set' do
+        set = make_set('Nothing Left Set')
+        post "/sets/#{set['id']}/works", params: { work_id: lone_work.id }
+
+        expect do
+          post "/sets/#{set['id']}/page_works", params: { work_ids: [lone_work.id] }
+        end.not_to have_enqueued_job(SetBulkAddJob)
+        expect(flash[:notice]).to include('Nothing to add')
+      end
+
+      it 'refuses the confirmation to someone who cannot edit the set' do
+        set = make_set('Not Yours Set')
+        sign_in other_user
+        confirm(set, [lone_work])
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
     describe 'the works-count tally' do
       def tally_text = response.body.gsub(/<[^>]+>/, ' ').squish
 

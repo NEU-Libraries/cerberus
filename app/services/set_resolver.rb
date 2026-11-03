@@ -41,6 +41,19 @@ class SetResolver
     search(*fqs, rows: 0).total
   end
 
+  # Which of these Work noids the Set already resolves into its contents,
+  # directly or through an included collection, so a bulk add can skip them.
+  def contained_noids(noids)
+    fqs = contents_fqs
+    return Set.new if fqs.nil? || noids.empty?
+
+    terms = noids.map { |noid| "id-#{noid}" }.join(',')
+    # to_param reads the noid from alternate_ids_tesim; without it in fl, every
+    # document falls back to its uuid and nothing matches.
+    search(*fqs, "{!terms f=alternate_ids_ssim}#{terms}", rows: noids.size, fl: 'id,alternate_ids_tesim')
+      .documents.to_set(&:to_param)
+  end
+
   # The *same* gated contents search the show page runs, so a viewer exports
   # only what they can discover. Discovery is not the whole rule: an embargoed
   # Work is discoverable, and the packer withholds it using PACKER_FIELDS.
