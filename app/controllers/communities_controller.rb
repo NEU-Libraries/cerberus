@@ -96,8 +96,8 @@ class CommunitiesController < CatalogController
     def load_children_and_deletability
       showcases = featured_showcase_uuids(@community.valkyrie_id)
       empty = empty_showcase_uuids(showcases)
-      @response = find_children(@community.valkyrie_id, params[:id], exclude_uuids: hidden_showcase_uuids(empty),
-                                                                     sort: showcases_first_sort(showcases))
+      @response = find_children(@community.valkyrie_id, params[:id],
+                                exclude_uuids: hidden_showcase_uuids(empty), sort: showcases_first_sort(showcases))
       mark_empty_showcases(empty)
       @deletable = deletable?(showcases)
     end
@@ -130,12 +130,18 @@ class CommunitiesController < CatalogController
     # "Displaying N entries" undercounts the rows on screen. It follows any
     # floated showcases, where v1 listed it.
     def prepend_faculty_staff_entry(community_noid)
-      return if params[:page].present? && params[:page].to_i > 1
-      return if params[:q].present? || params[:f].present?
-      return unless affiliated_people_count(community_noid).positive?
+      return unless faculty_staff_row?(community_noid)
 
       @response.documents.insert(floated_showcase_count, faculty_staff_stub(community_noid))
       @response.response['numFound'] = @response.total + 1
+    end
+
+    # Page 1 of an unconstrained browse, and only when someone is affiliated.
+    def faculty_staff_row?(community_noid)
+      return false if params[:page].present? && params[:page].to_i > 1
+      return false if params[:q].present? || params[:f].present?
+
+      affiliated_people_count(community_noid).positive?
     end
 
     def faculty_staff_stub(community_noid)

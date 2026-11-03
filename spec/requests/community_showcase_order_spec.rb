@@ -28,7 +28,7 @@ RSpec.describe 'Community showcase order', type: :request do
   before do
     sign_in admin
     # The Faculty & Staff row needs affiliated people; its placement is the point.
-    allow_any_instance_of(CommunitiesController).to receive(:affiliated_people_count).and_return(1) # rubocop:disable RSpec/AnyInstance
+    allow_any_instance_of(CommunitiesController).to receive(:affiliated_people_count).and_return(1)
   end
 
   def titles
