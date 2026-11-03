@@ -44,6 +44,12 @@
     font-weight: 500;
   }
 
+  // A solid near-black icon made the label read larger than Sort's; the view
+  // toggle's gray keeps the icon quiet.
+  .add-page-to-set-btn i {
+    color: $gray-600;
+  }
+
   // View-type (list / gallery): a quiet segmented toggle. The btn-group defaults
   // to inline-flex, so force a block-level flex that fills and splits evenly.
   // Replace the stark dark "active" slab with a soft gray fill + dark icon (and
