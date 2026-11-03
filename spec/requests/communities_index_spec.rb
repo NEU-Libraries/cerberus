@@ -33,16 +33,6 @@ RSpec.describe 'Communities index', type: :request do
     expect(controller.send(:search_state).sort_field.key).to eq('relevance')
   end
 
-  # A facet clicked on the browse would otherwise carry sort=title into the
-  # next search typed into the box.
-  it 'leaves the title default out of the facet links' do
-    get communities_path
-
-    hrefs = response.parsed_body.css('#facets a[href]').pluck('href')
-    expect(hrefs).not_to be_empty
-    expect(hrefs).to all(satisfy { |href| !href.include?('sort=') })
-  end
-
   it 'keeps a sort the visitor chose' do
     get communities_path, params: { sort: 'date-added' }
     expect(controller.send(:search_state).sort_field.key).to eq('date-added')

@@ -69,7 +69,7 @@ RSpec.describe 'Container browse sort', type: :request do
 
       hrefs = response.parsed_body.css('#facets a[href]').pluck('href')
       expect(hrefs).not_to be_empty
-      expect(hrefs).to all(satisfy { |href| !href.include?('sort=') })
+      expect(hrefs).to all(satisfy { |href| href.exclude?('sort=') })
     end
   end
 
@@ -81,6 +81,16 @@ RSpec.describe 'Container browse sort', type: :request do
       get community_path(@community.id, q: 'sample')
       expect(controller.send(:search_state).sort_field.key).to eq('relevance')
     end
+  end
+
+  # The index shares the rule. Here rather than in communities_index_spec,
+  # because the community made above is what gives the index facets to link.
+  it 'leaves sort out of the /communities facet links too' do
+    get communities_path
+
+    hrefs = response.parsed_body.css('#facets a[href]').pluck('href')
+    expect(hrefs).not_to be_empty
+    expect(hrefs).to all(satisfy { |href| href.exclude?('sort=') })
   end
 
   it 'leaves the catalog on relevance' do
