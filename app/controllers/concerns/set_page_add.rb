@@ -6,6 +6,19 @@
 module SetPageAdd
   extend ActiveSupport::Concern
 
+  # The picker's rows for a whole page rather than one item; each row leads to
+  # the confirmation instead of adding at once.
+  def page_picker
+    @kind = 'page'
+    @noid = 'page'
+    @work_ids = Array(params[:work_ids]).first(SetPageAddition::MAX_WORKS)
+    return head :bad_request if @work_ids.empty?
+
+    @q = params[:q].to_s.strip
+    @sets, @pagination = SetPicker.call(query: @q, page: params[:page], owner: impersonated_owner)
+    render :picker, layout: false
+  end
+
   def confirm_page_works
     @addition = page_addition
     render layout: false
@@ -24,17 +37,6 @@ module SetPageAdd
   end
 
   private
-
-    # The picker's rows for a whole page rather than one item; each row leads
-    # to the confirmation instead of adding at once.
-    def page_picker
-      @kind = 'page'
-      @noid = 'page'
-      @work_ids = Array(params[:work_ids]).first(SetPageAddition::MAX_WORKS)
-      @q = params[:q].to_s.strip
-      @sets, @pagination = SetPicker.call(query: @q, page: params[:page], owner: impersonated_owner)
-      render :picker, layout: false
-    end
 
     def page_addition
       SetPageAddition.new(compilation: @set, noids: params[:work_ids], search_service: search_service)

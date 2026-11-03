@@ -22,13 +22,13 @@
               #{collections == 1 ? 'The collection' : 'Collections'} on this page #{collections == 1 ? 'is' : 'are'} not added; use a collection's own Add to set to include it.
           -# The filter form sits outside the frame and targets it, so typing
           -# never re-renders the input; the frame is lazy, as on result rows.
-          %form.mb-2{action: picker_sets_path, method: 'get', data: { controller: 'picker-search', turbo_frame: 'set-picker-page' }}
+          %form.mb-2{action: page_picker_sets_path, method: 'get', data: { controller: 'picker-search', turbo_frame: 'set-picker-page' }}
             - work_ids.each do |noid|
               %input{type: 'hidden', name: 'work_ids[]', value: noid}
             %input.form-control{type: 'search', name: 'q', placeholder: 'Filter your sets by title…',
                                 'aria-label' => 'Filter your sets by title', autocomplete: 'off',
                                 data: { action: 'input->picker-search#search' }}
-          = turbo_frame_tag 'set-picker-page', src: picker_sets_path(work_ids: work_ids), loading: :lazy do
+          = turbo_frame_tag 'set-picker-page', src: page_picker_sets_path(work_ids: work_ids), loading: :lazy do
             .py-2.small.text-muted Loading your sets…
         .modal-footer
           %button.btn.btn-tonal-secondary.btn-sm{type: 'button', data: { 'bs-dismiss': 'modal' }} Done

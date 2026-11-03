@@ -85,4 +85,16 @@ RSpec.describe SetsHelper do
       expect(helper.set_picker_state(set, 'work', 'wrk2222', ['col1234'])).to eq(:aside)
     end
   end
+
+  describe '#set_picker_page_path' do
+    it 'keeps the one item and the filter for a row picker' do
+      expect(helper.set_picker_page_path('work', 'wrk1111', 'notes', 2))
+        .to eq(picker_sets_path(work_id: 'wrk1111', q: 'notes', page: 2))
+    end
+
+    it 'keeps every work on the page for the page picker, and drops a blank filter' do
+      expect(helper.set_picker_page_path('page', 'page', '', 2, work_ids: %w[wrk1111 wrk2222]))
+        .to eq(page_picker_sets_path(work_ids: %w[wrk1111 wrk2222], page: 2))
+    end
+  end
 end

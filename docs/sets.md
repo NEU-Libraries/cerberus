@@ -3,7 +3,8 @@
 A Set is a saved recipe over the repository: included collections, plus
 individually added Works, minus set-aside exclusions. Atlas stores it as a
 Compilation. This page covers how Cerberus resolves that recipe for display and
-download, and how the Sentinel tab sweeps the Works it denotes.
+download, how a page of search results is added to a Set, and how the Sentinel
+tab sweeps the Works it denotes.
 
 Source files:
 
@@ -12,6 +13,10 @@ Source files:
 - `app/controllers/concerns/set_bulk_actions.rb`
 - `app/jobs/concerns/set_sweep.rb`
 - `app/services/set_work_enumerator.rb`
+- `app/controllers/concerns/page_set_addable.rb`
+- `app/controllers/concerns/set_page_add.rb`
+- `app/services/set_page_addition.rb`
+- `app/jobs/set_bulk_add_job.rb`
 
 ## Resolving the recipe
 
@@ -102,6 +107,68 @@ documents for the aside zone. It returns only exclusions the recipe still
 reaches. Atlas keeps an exclusion row when its collection is removed from the
 Set, so without the positive clause a Work set aside from a departed collection
 would linger there.
+
+## Adding a page of results
+
+"Add page to set" puts the Works on one page of results into a Set. It is v2's
+form of v1's "Save files for later", and keeps its limits: the current page
+only, and Works only.
+
+### Where it shows
+
+`CatalogController` registers it as a results collection tool, so it sits
+under the sort and per-page controls in the sidebar. Search, collection,
+community and genre pages all inherit that configuration.
+`PageSetAddable#add_page_to_set?` shows it only when all three hold:
+
+- The viewer curates sets, the same gate as the per-row "Add to set" icon.
+- The page holds at least one Work.
+- The page is not a Set's own page. There, it would offer a Set's Works to a
+  Set, and one Set could be fed into another, or into itself.
+
+### What it takes
+
+Only the Works on the page. A Collection on the page is left out, because
+adding a collection makes the Set follow it from then on, and a bulk add
+should never do that by accident. The modal says so, and points to the
+collection's own "Add to set". The page is at most 100 results, Blacklight's
+largest page, and `SetPageAddition::MAX_WORKS` caps the list at that.
+
+### The confirmation
+
+The modal reuses the Add-to-set picker's view. `SetPageAdd#page_picker` takes
+`work_ids[]` in place of a single item, and renders each Set as a link to the
+confirmation, in the same frame, rather than as an add.
+
+`SetPageAddition` sorts the page's Works three ways:
+
+| Group | Test | Outcome |
+|---|---|---|
+| Already in it | In `included_works`, or reached by the Set's recipe | Skipped, and counted |
+| Hidden in it | In `excluded_works` | Skipped, and counted. Adding a set-aside Work again would not bring it back; the Set's page puts it back. |
+| To add | Everything else | Added |
+
+"Reached by the Set's recipe" is one gated query: `SetResolver#contents_fqs`
+plus a terms filter on the page's noids. So a Work covered by an included collection counts
+as already in the Set, as it does in the per-row picker. The query must return
+`alternate_ids_tesim`, because `SolrDocument#to_param` reads the noid from it.
+
+When nothing is left to add, the confirmation says so and offers no button.
+
+### The add
+
+The confirmation posts every noid on the page, not the "to add" list.
+`SetPageAdd#add_page_works` counts again, because the Set may have changed in
+between, and queues `SetBulkAddJob` with only the Works still missing.
+
+It is a job because a full page is 100 calls to `add_included_work`, which
+could outrun the request deadline. The job carries on past a refused Work, and
+reports to the curator's Inbox with the count and any failures. It sends the
+message with `SystemMessage` alone, not `CompletionNotice`: a bulk add to
+someone's own Set is not repository activity for the admin ledger.
+
+The picker lists the Sets the viewer owns, as the per-row picker does. v1 also
+listed Sets shared with the viewer for editing.
 
 ## Exporting a Set
 

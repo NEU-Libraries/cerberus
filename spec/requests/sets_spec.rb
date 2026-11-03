@@ -404,10 +404,15 @@ RSpec.describe 'Sets', type: :request do
 
       it 'lists sets as links to the confirmation, not as adds' do
         set = make_set('Page Pick Set')
-        get '/sets/picker', params: { work_ids: [work_one.id, lone_work.id], q: 'Page Pick Set' }
+        get '/sets/page_picker', params: { work_ids: [work_one.id, lone_work.id], q: 'Page Pick Set' }
         hrefs = response.parsed_body.css('a.picker-row').pluck('href')
         expect(hrefs).to include(confirm_page_works_set_path(set['id'], work_ids: [work_one.id, lone_work.id]))
         expect(response.body).not_to include(add_work_set_path(set['id']))
+      end
+
+      it 'refuses a page picker request with no works' do
+        get '/sets/page_picker'
+        expect(response).to have_http_status(:bad_request)
       end
 
       it 'counts the works already in the set, directly, through a collection, or hidden' do

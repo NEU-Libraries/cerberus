@@ -44,11 +44,11 @@
       %nav.mt-2{'aria-label' => 'Sets pages'}
         %ul.pagination.pagination-sm.justify-content-center.mb-0
           %li.page-item{class: ('disabled' if page <= 1)}
-            = link_to 'Previous', picker_sets_path(set_picker_page_params(@kind, @noid, @q, page - 1, work_ids: @work_ids)), class: 'page-link'
+            = link_to 'Previous', set_picker_page_path(@kind, @noid, @q, page - 1, work_ids: @work_ids), class: 'page-link'
           %li.page-item.disabled
             %span.page-link.tnum #{page} of #{@pagination['pages']}
           %li.page-item{class: ('disabled' if page >= @pagination['pages'].to_i)}
-            = link_to 'Next', picker_sets_path(set_picker_page_params(@kind, @noid, @q, page + 1, work_ids: @work_ids)), class: 'page-link'
+            = link_to 'Next', set_picker_page_path(@kind, @noid, @q, page + 1, work_ids: @work_ids), class: 'page-link'
   - elsif @q.present?
     .py-2.small.text-muted No sets match “#{@q}”.
   - else

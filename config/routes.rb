@@ -205,6 +205,7 @@ Rails.application.routes.draw do
     # pages). recipients: typeahead JSON for the Sharing tab's edit_users picker.
     collection do
       get :picker
+      get :page_picker
       get :recipients
     end
     member do

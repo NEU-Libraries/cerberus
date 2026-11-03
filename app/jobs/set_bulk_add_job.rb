@@ -25,7 +25,8 @@ class SetBulkAddJob < ApplicationJob
     def report(set_noid, title, asked, failures)
       added = asked - failures.size
       works = ->(n) { "#{n} work#{'s' unless n == 1}" }
-      subject = failures.empty? ? "Added #{works.call(added)} to “#{title}”" : "Added #{added} of #{works.call(asked)} to “#{title}”"
+      counted = failures.empty? ? works.call(added) : "#{added} of #{works.call(asked)}"
+      subject = "Added #{counted} to “#{title}”"
       lines = ["#{works.call(added)} from a page of search results #{added == 1 ? 'is' : 'are'} now in “#{title}”."]
       lines += ['', 'These could not be added:', *failures] if failures.any?
       # A path, not a _url: a job has no request to take a host from, and the

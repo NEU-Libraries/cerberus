@@ -23,4 +23,4 @@
         = button_to add_page_works_set_path(@set['id']), params: { work_ids: addition.noids },
                     class: 'btn btn-primary btn-sm', form: { data: { turbo_frame: '_top' } } do
           Add #{pluralize(addition.to_add.size, 'work')}
-      = link_to 'Back to your sets', picker_sets_path(work_ids: addition.noids), class: 'btn btn-tonal-secondary btn-sm'
+      = link_to 'Back to your sets', page_picker_sets_path(work_ids: addition.noids), class: 'btn btn-tonal-secondary btn-sm'

@@ -24,7 +24,7 @@ class SetsController < CatalogController
   # itself — load_set below is what gates a private Set, for both.
   before_action :authenticate_user!, except: %i[show facet facet_suggest]
   before_action :require_curator,    except: %i[show facet facet_suggest]
-  before_action :load_set,           except: [:index, :new, :create, :picker, :recipients]
+  before_action :load_set,           except: [:index, :new, :create, :picker, :page_picker, :recipients]
   # The edit page and the page-add confirmation are forms, so one the caller
   # could never submit is refused up front rather than left for Atlas to refuse.
   # Atlas stays the boundary.
@@ -80,8 +80,6 @@ class SetsController < CatalogController
   # item's state in that set (addable / already included / covered-by-a-
   # collection / set aside).
   def picker
-    return page_picker if params[:work_ids].present?
-
     @kind = params[:collection_id].present? ? 'collection' : 'work'
     @noid = params[:collection_id].presence || params[:work_id]
     return head :bad_request if @noid.blank?
