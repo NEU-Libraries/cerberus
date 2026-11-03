@@ -126,6 +126,28 @@ RSpec.describe 'Sets', type: :request do
       expect(crumbs[0].at_css('a')['href']).to eq(sets_path)
       expect(crumbs[1].at_css('a')['href']).to eq(set_path(set['id']))
       expect(crumbs[2]['class']).to include('active')
+      expect(crumbs[2]['aria-current']).to eq('page')
+      expect(crumbs[0..1].pluck('aria-current')).to all(be_nil)
+    end
+
+    # A rejected save re-renders the form, not a redirect, so the trail has to
+    # be built again there.
+    it 'keeps the edit trail when a save is rejected' do
+      set = make_set('Rejected Save Set')
+      allow(AtlasRb::Compilation).to receive(:update).and_raise(AtlasRb::CompilationError, 'refused')
+      patch "/sets/#{set['id']}", params: { set: { title: 'Renamed', description: '' } }
+      expect(response).to have_http_status(:unprocessable_content)
+      crumbs = response.parsed_body.css('nav[aria-label="breadcrumb"] .breadcrumb-item')
+      expect(crumbs.map { |c| c.text.strip }).to eq(['My Sets', 'Rejected Save Set', 'Edit set'])
+    end
+
+    it 'keeps the edit trail when a sharing save is rejected' do
+      set = make_set('Rejected Share Set')
+      allow(AtlasRb::Compilation).to receive(:update).and_raise(AtlasRb::CompilationError, 'refused')
+      patch "/sets/#{set['id']}", params: { set: { form: 'sharing', edit_users: [] } }
+      expect(response).to have_http_status(:unprocessable_content)
+      crumbs = response.parsed_body.css('nav[aria-label="breadcrumb"] .breadcrumb-item')
+      expect(crumbs.map { |c| c.text.strip }).to eq(['My Sets', 'Rejected Share Set', 'Edit set'])
     end
 
     it 'breadcrumbs the set page from My Sets, with the set as the current crumb' do
@@ -135,6 +157,7 @@ RSpec.describe 'Sets', type: :request do
       expect(crumbs.map { |c| c.text.strip }).to eq(['My Sets', 'Trail Set'])
       expect(crumbs[0].at_css('a')['href']).to eq(sets_path)
       expect(crumbs[1]['class']).to include('active')
+      expect(crumbs[1]['aria-current']).to eq('page')
       expect(crumbs[1].at_css('a')).to be_nil
     end
 

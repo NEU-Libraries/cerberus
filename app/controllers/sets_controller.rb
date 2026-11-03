@@ -97,12 +97,7 @@ class SetsController < CatalogController
   # (gated in the view + on the sharing write path); the Sentinel tab
   # is operator-only (SetBulkActions#require_bulk_operator, mirrored in the
   # view by #bulk_operator?).
-  def edit
-    edit_breadcrumbs
-    prepare_set_definition
-    prepare_sharing_form if @owned
-    @sentinel = Sentinel.find_by(target_id: params[:id]) if bulk_operator?
-  end
+  def edit = prepare_edit_page
 
   def create
     @pending = pending_item
@@ -125,7 +120,7 @@ class SetsController < CatalogController
     redirect_to set_path(@set['id']), notice: 'Set updated.'
   rescue AtlasRb::CompilationError => e
     flash.now[:alert] = e.message
-    prepare_set_definition
+    prepare_edit_page
     render :edit, status: :unprocessable_content
   end
 
@@ -197,6 +192,14 @@ class SetsController < CatalogController
 
     def set_params
       params.expect(set: [:title, :description])
+    end
+
+    # A rejected save re-renders the Edit page, so it needs all of this too.
+    def prepare_edit_page
+      edit_breadcrumbs
+      prepare_set_definition
+      prepare_sharing_form if @owned
+      @sentinel = Sentinel.find_by(target_id: params[:id]) if bulk_operator?
     end
 
     # A Work already resolved into a set via an included collection should read
