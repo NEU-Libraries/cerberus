@@ -64,6 +64,9 @@ module DepositorContext
         genres = ShowcaseFinder.call(scope: self, community_noid: noid).except(*FeaturedContent::STAFF_ONLY)
         next if genres.blank?
 
+        # The hash order is the option order, both in the no-JS fallback and in
+        # the list the Stimulus controller rebuilds, so the sort happens here.
+        genres = genres.slice(*FeaturedContent.picker_order(genres.keys))
         targets[noid.to_s] = { name: community_name(noid), genres: genres }
       end
     end

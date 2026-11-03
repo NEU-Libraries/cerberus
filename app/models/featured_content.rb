@@ -22,10 +22,20 @@ class FeaturedContent
   # dissertations are loaded by staff, so the deposit fork does not offer it.
   STAFF_ONLY = ['Theses & Dissertations'].freeze
 
+  # The catch-all category, which pickers list last rather than in A to Z order.
+  CATCH_ALL = 'Other Publications'
+
   # Just the showcase titles / publish categories (no icons) — what
   # provisioning and showcase discovery match on.
   def self.genre_labels
     GENRES.map(&:first)
+  end
+
+  # The order a category picker lists labels in: A to Z, ignoring case, with the
+  # catch-all last. GENRES keeps its own order, because the homepage gateways and
+  # showcase provisioning follow it.
+  def self.picker_order(labels)
+    labels.sort_by { |label| [label == CATCH_ALL ? 1 : 0, label.downcase] }
   end
 
   # The Font Awesome icon paired with a genre label, or nil if the label isn't a

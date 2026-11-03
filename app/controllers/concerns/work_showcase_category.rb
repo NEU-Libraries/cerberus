@@ -57,7 +57,7 @@ module WorkShowcaseCategory
 
     # Staff load theses, so a depositor is never offered that genre, as at deposit.
     def offered_genres(placement)
-      FeaturedContent.genre_labels.select do |genre|
+      FeaturedContent.picker_order(FeaturedContent.genre_labels).select do |genre|
         next false unless placement.options.key?(genre)
 
         genre == placement.genre || effective_user&.admin? || FeaturedContent::STAFF_ONLY.exclude?(genre)
