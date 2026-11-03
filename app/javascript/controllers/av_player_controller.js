@@ -19,6 +19,9 @@ export default class extends Controller {
     // Picture-in-picture is not a supported feature. disablePictureInPicture
     // alone only greys the toggle out, so the control-bar component is dropped
     // as well.
+    // audioPosterMode hides the <video>, and Safari (and iOS) draw captions
+    // natively on that element, so they would be hidden with it. For audio,
+    // video.js's own caption layer draws them over the poster instead.
     this.player = window.videojs(this.mediaTarget, {
       controls: true,
       preload: "metadata",
@@ -26,7 +29,8 @@ export default class extends Controller {
       liveui: false,
       controlBar: { liveDisplay: false, seekToLive: false, pictureInPictureToggle: false },
       audioPosterMode: this.audioPosterValue,
-      disablePictureInPicture: true
+      disablePictureInPicture: true,
+      ...(this.audioPosterValue && { html5: { nativeTextTracks: false } })
     })
     // audioPosterMode mounts a sound recording on a <video> element (to show the
     // still), which leaves video.js's "Video Player" / "Play Video" labels on
