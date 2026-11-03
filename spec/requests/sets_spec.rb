@@ -103,7 +103,7 @@ RSpec.describe 'Sets', type: :request do
     it 'breadcrumbs the edit page from My Sets, through the set' do
       set = make_set('Crumbed Set')
       get "/sets/#{set['id']}/edit"
-      crumbs = Nokogiri::HTML(response.body).css('nav[aria-label="breadcrumb"] .breadcrumb-item')
+      crumbs = response.parsed_body.css('nav[aria-label="breadcrumb"] .breadcrumb-item')
       expect(crumbs.map { |c| c.text.strip }).to eq(['My Sets', 'Crumbed Set', 'Edit set'])
       expect(crumbs[0].at_css('a')['href']).to eq(sets_path)
       expect(crumbs[1].at_css('a')['href']).to eq(set_path(set['id']))
@@ -113,7 +113,7 @@ RSpec.describe 'Sets', type: :request do
     it 'breadcrumbs the set page from My Sets, with the set as the current crumb' do
       set = make_set('Trail Set')
       get "/sets/#{set['id']}"
-      crumbs = Nokogiri::HTML(response.body).css('nav[aria-label="breadcrumb"] .breadcrumb-item')
+      crumbs = response.parsed_body.css('nav[aria-label="breadcrumb"] .breadcrumb-item')
       expect(crumbs.map { |c| c.text.strip }).to eq(['My Sets', 'Trail Set'])
       expect(crumbs[0].at_css('a')['href']).to eq(sets_path)
       expect(crumbs[1]['class']).to include('active')
@@ -125,7 +125,7 @@ RSpec.describe 'Sets', type: :request do
     it 'keeps the set as the current crumb under a search' do
       set = make_set('Searched Set')
       get "/sets/#{set['id']}", params: { q: 'lake' }
-      current = Nokogiri::HTML(response.body).at_css('nav[aria-label="breadcrumb"] .breadcrumb-item.active')
+      current = response.parsed_body.at_css('nav[aria-label="breadcrumb"] .breadcrumb-item.active')
       expect(current&.text&.strip).to eq('Searched Set')
     end
   end
