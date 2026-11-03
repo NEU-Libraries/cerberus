@@ -33,6 +33,13 @@ RSpec.describe 'Sets', type: :request do
     AtlasRb::Compilation.create(title, nuid: nuid)
   end
 
+  # My Sets has no title filter, and Atlas pages it A to Z. A set an example
+  # must find there needs a title that sorts ahead of every other set this run
+  # has made.
+  def make_first_page_set(title)
+    make_set("Aa #{title}")
+  end
+
   describe 'access gates' do
     it 'redirects anonymous visitors to sign in for the index' do
       get '/sets'
@@ -61,14 +68,25 @@ RSpec.describe 'Sets', type: :request do
     before { sign_in curator }
 
     it 'lists my sets on the index' do
-      set = make_set('Index Fixture Set')
+      set = make_first_page_set('Index Fixture Set')
       get '/sets'
-      expect(response.body).to include('Index Fixture Set')
+      expect(response.body).to include(set['title'])
       expect(response.body).to include(set_path(set['id']))
     end
 
+    # Atlas orders the listing by title, ignoring case, before it paginates.
+    # The "aa" prefix keeps these on the first page, ahead of every other set
+    # this run has made. They are created in A-to-Z order, so newest first
+    # would reverse them, and a case-sensitive sort would put AAB first.
+    it 'lists my sets by title, ignoring case' do
+      ['aaa Title Order', 'AAB Title Order', 'aac Title Order'].each { |title| make_set(title) }
+      get '/sets'
+      titles = response.parsed_body.css('.sets-table tbody tr td:first-child a').map { |a| a.text.strip }
+      expect(titles.grep(/Title Order/)).to eq(['aaa Title Order', 'AAB Title Order', 'aac Title Order'])
+    end
+
     it 'mounts a lazy works-count frame per index row' do
-      set = make_set('Counted Set')
+      set = make_first_page_set('Counted Set')
       get '/sets'
       expect(response.body).to include(works_count_set_path(set['id']))
     end
@@ -169,14 +187,15 @@ RSpec.describe 'Sets', type: :request do
 
         expect(response).to redirect_to(results_page)
         expect(flash[:notice]).to include('Picked Set', 'work added')
-        created = AtlasRb::Compilation.list(nuid: nuid)['compilations'].find { |c| c['title'] == 'Picked Set' }
+        created = AtlasRb::Compilation.list(q: 'Picked Set', nuid: nuid)['compilations'].find { |c| c['title'] == 'Picked Set' }
         expect(AtlasRb::Compilation.find(created['id'])['included_works']).to include(lone_work.id)
       end
 
       it 'includes a chosen collection' do
         post '/sets', params: { set: { title: 'Collection Set' }, collection_id: collection.id }
 
-        created = AtlasRb::Compilation.list(nuid: nuid)['compilations'].find { |c| c['title'] == 'Collection Set' }
+        created = AtlasRb::Compilation.list(q: 'Collection Set', nuid: nuid)['compilations']
+                                      .find { |c| c['title'] == 'Collection Set' }
         expect(AtlasRb::Compilation.find(created['id'])['included_collections']).to include(collection.id)
       end
 
@@ -250,13 +269,13 @@ RSpec.describe 'Sets', type: :request do
         post "/sets/#{set['id']}/collections", params: { collection_id: collection.id }
         post "/sets/#{set['id']}/aside",       params: { work_id: work_one.id, title: 'Work One' }
 
-        get '/sets/picker', params: { collection_id: collection.id }
+        get '/sets/picker', params: { collection_id: collection.id, q: 'Picker Set' }
         expect(response.body).to include('Already in this set')
 
-        get '/sets/picker', params: { work_id: work_one.id }
+        get '/sets/picker', params: { work_id: work_one.id, q: 'Picker Set' }
         expect(response.body).to include('Hidden in this set')
 
-        get '/sets/picker', params: { work_id: lone_work.id }
+        get '/sets/picker', params: { work_id: lone_work.id, q: 'Picker Set' }
         expect(response.body).to include("/sets/#{set['id']}/works")
       end
 
@@ -266,7 +285,7 @@ RSpec.describe 'Sets', type: :request do
 
         # work_two lives under `collection` (now in the set) but was never added
         # individually — it should read as already-included, with no add button.
-        get '/sets/picker', params: { work_id: work_two.id }
+        get '/sets/picker', params: { work_id: work_two.id, q: 'Coverage Set' }
         expect(response.body).to include('via a collection it contains')
         expect(response.body).not_to include("/sets/#{set['id']}/works")
       end
@@ -281,6 +300,15 @@ RSpec.describe 'Sets', type: :request do
 
         get '/sets/picker', params: { work_id: lone_work.id, q: 'zzz-nope' }
         expect(response.body).to include('No sets match')
+      end
+
+      # Created in A-to-Z order, so newest first would reverse them, and a
+      # case-sensitive sort would put Banana first.
+      it 'lists sets by title, ignoring case' do
+        ['apple Picker Order', 'Banana Picker Order', 'cherry Picker Order'].each { |title| make_set(title) }
+        get '/sets/picker', params: { work_id: lone_work.id, q: 'Picker Order' }
+        titles = response.parsed_body.css('.picker-row .nm').map { |nm| nm.text.strip }
+        expect(titles).to eq(['apple Picker Order', 'Banana Picker Order', 'cherry Picker Order'])
       end
 
       it 'paginates past one page of sets' do
@@ -503,11 +531,11 @@ RSpec.describe 'Sets', type: :request do
 
     it 'excludes my own sets from the grant-scoped tabs' do
       sign_in curator
-      make_set('My Own Set')
+      set = make_first_page_set('My Own Set')
       get '/sets', params: { scope: 'editable' }
-      expect(response.body).not_to include('My Own Set')
+      expect(response.body).not_to include(set['title'])
       get '/sets'
-      expect(response.body).to include('My Own Set')
+      expect(response.body).to include(set['title'])
     end
 
     it 'treats an unknown scope as My Sets' do
