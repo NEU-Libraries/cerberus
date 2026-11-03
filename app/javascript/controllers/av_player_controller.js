@@ -16,13 +16,16 @@ export default class extends Controller {
     // here. Dropping the live-only controls means the badge can never render.
     // audioPosterMode keeps the poster on screen for a sound recording, which
     // always mounts on a <video>, so audio renders like video.
+    // Picture-in-picture is not a supported feature, so its toggle is hidden
+    // rather than offered.
     this.player = window.videojs(this.mediaTarget, {
       controls: true,
       preload: "metadata",
       fluid: true,
       liveui: false,
       controlBar: { liveDisplay: false, seekToLive: false },
-      audioPosterMode: this.audioPosterValue
+      audioPosterMode: this.audioPosterValue,
+      disablePictureInPicture: true
     })
     // audioPosterMode mounts a sound recording on a <video> element (to show the
     // still), which leaves video.js's "Video Player" / "Play Video" labels on

@@ -56,6 +56,20 @@ RSpec.describe 'works/_av_player', type: :view do
     end
   end
 
+  # Picture-in-picture is not supported, so neither the player nor the
+  # browser's own menu may offer it, for audio or video.
+  describe 'picture-in-picture' do
+    it 'is disabled on a video' do
+      render_player(mime: 'video/mp4', preview: nil)
+      expect(rendered).to have_css('video.av-player__media[disablepictureinpicture]')
+    end
+
+    it 'is disabled on audio, which mounts on a <video>' do
+      render_player(mime: 'audio/mpeg', preview: nil)
+      expect(rendered).to have_css('video.av-player__media[disablepictureinpicture]')
+    end
+  end
+
   # An empty <video> is a black box, which is what testers reported.
   describe 'without a supplied poster' do
     it 'gives a video the placeholder mark' do

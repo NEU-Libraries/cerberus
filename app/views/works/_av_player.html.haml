@@ -18,7 +18,9 @@
 - audio = file.mime_type.to_s.start_with?('audio/')
 - poster = av_poster_src(@work.preview)
 .av-player{data: { controller: 'av-player', 'av-player-audio-poster-value': audio.to_s }}
-  %video.video-js.vjs-default-skin.av-player__media{controls: true, preload: 'metadata', playsinline: true, poster: poster, 'data-av-player-target': 'media'}
+  -# disablepictureinpicture keeps the browser's own menu from offering what
+  -# the player's control bar hides; picture-in-picture is not supported.
+  %video.video-js.vjs-default-skin.av-player__media{controls: true, preload: 'metadata', playsinline: true, disablepictureinpicture: true, poster: poster, 'data-av-player-target': 'media'}
     %source{src: media_path(file.noid), type: file.mime_type}
     = render 'works/caption_source', captions: captions
   -# `downloadable` comes from the same per-asset gate the downloads card and
