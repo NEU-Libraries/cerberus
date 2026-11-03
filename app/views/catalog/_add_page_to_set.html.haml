@@ -5,8 +5,8 @@
 - work_ids = page_work_noids
 - collections = page_collection_count
 %div
-  %button.btn.btn-tonal-primary.btn-sm.w-100{type: 'button', data: { 'bs-toggle': 'modal', 'bs-target': '#add-page-to-set' }}
-    %i.fa-solid.fa-briefcase.me-1{'aria-hidden' => 'true'}
+  %button.btn.add-page-to-set-btn{type: 'button', data: { 'bs-toggle': 'modal', 'bs-target': '#add-page-to-set' }}
+    %i.fa-solid.fa-layer-group.me-1{'aria-hidden' => 'true'}
     Add page to set
 
   .modal.fade#add-page-to-set{tabindex: '-1', 'aria-labelledby' => 'add-page-to-set-label', 'aria-hidden' => 'true'}

@@ -31,8 +31,10 @@
   // the "Type" header's near-black, medium-weight label and the card's light
   // translucent border, with a faint gray hover. Keep the default centered
   // label (its content is multi-part: "Sort" + " by relevance" + caret, which a
-  // flex/space-between layout would scatter).
-  .btn-group .dropdown-toggle {
+  // flex/space-between layout would scatter). Add page to set shares the
+  // chrome, so the pane reads as one set of controls.
+  .btn-group .dropdown-toggle,
+  .add-page-to-set-btn {
     --bs-btn-color: #{$gray-900};
     --bs-btn-border-color: var(--bs-border-color-translucent);
     --bs-btn-hover-color: #{$gray-900};
