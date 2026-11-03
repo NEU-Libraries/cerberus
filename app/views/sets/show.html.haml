@@ -12,6 +12,8 @@
 -# lands beside the facet sidebar in the narrow results column once the set has
 -# contents.
 - content_for(:container_header) do
+  - if set_trail?
+    = render 'shared/breadcrumbs', show_add: false
   -# ===== Set hero =====
   .container.p-4.my-3.well.rounded-3
     - public_set = Array(@set['read_groups']).include?('public')

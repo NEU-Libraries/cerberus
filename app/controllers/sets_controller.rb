@@ -57,6 +57,7 @@ class SetsController < CatalogController
   end
 
   def show
+    set_breadcrumbs if set_trail?
     @resolver = SetResolver.new(compilation: @set, search_service: search_service)
     @response = contents_response
     @recipe_titles = recipe_titles
@@ -204,12 +205,25 @@ class SetsController < CatalogController
       SetItemCoverage.call(noid: @noid, search_service: search_service)
     end
 
-    # Edit-page trail, mirroring ApplicationController#edit_breadcrumb_tail: the
-    # Set links back to its show page (`match: :exact` so loaf doesn't mark it
-    # current on the `/edit` sub-path), then a non-link "Edit set" you-are-here.
-    # A Set has no Atlas ancestry, so there's no tree to walk — just the tail.
+    # My Sets needs a set curator, so only a curator gets a trail that starts
+    # there. Anyone else reaching a public set sees no trail.
+    def set_trail?
+      effective_user&.curates_sets?
+    end
+    helper_method :set_trail?
+
+    # A Set has no Atlas ancestry, so the trail is always My Sets, then the Set.
+    # `match: :exclusive` lets a crumb stay current under a search query string,
+    # which `:exact` would not, but not on a sub-path such as `/edit`.
+    def set_breadcrumbs
+      breadcrumb('My Sets', sets_path, match: :exclusive)
+      breadcrumb(@set['title'], set_path(@set['id']), match: :exclusive)
+    end
+
+    # Mirrors ApplicationController#edit_breadcrumb_tail: a non-link "Edit set"
+    # you-are-here after the Set's own trail.
     def edit_breadcrumbs
-      breadcrumb(@set['title'], set_path(@set['id']), match: :exact)
+      set_breadcrumbs
       breadcrumb('Edit set', edit_set_path(@set['id']))
     end
 

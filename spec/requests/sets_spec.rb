@@ -100,12 +100,33 @@ RSpec.describe 'Sets', type: :request do
       expect(response).to have_http_status(:not_found)
     end
 
-    it 'breadcrumbs the edit page back to the set' do
+    it 'breadcrumbs the edit page from My Sets, through the set' do
       set = make_set('Crumbed Set')
       get "/sets/#{set['id']}/edit"
-      expect(response.body).to include('breadcrumb')
-        .and include(set_path(set['id']))
-        .and include('Edit set')
+      crumbs = Nokogiri::HTML(response.body).css('nav[aria-label="breadcrumb"] .breadcrumb-item')
+      expect(crumbs.map { |c| c.text.strip }).to eq(['My Sets', 'Crumbed Set', 'Edit set'])
+      expect(crumbs[0].at_css('a')['href']).to eq(sets_path)
+      expect(crumbs[1].at_css('a')['href']).to eq(set_path(set['id']))
+      expect(crumbs[2]['class']).to include('active')
+    end
+
+    it 'breadcrumbs the set page from My Sets, with the set as the current crumb' do
+      set = make_set('Trail Set')
+      get "/sets/#{set['id']}"
+      crumbs = Nokogiri::HTML(response.body).css('nav[aria-label="breadcrumb"] .breadcrumb-item')
+      expect(crumbs.map { |c| c.text.strip }).to eq(['My Sets', 'Trail Set'])
+      expect(crumbs[0].at_css('a')['href']).to eq(sets_path)
+      expect(crumbs[1]['class']).to include('active')
+      expect(crumbs[1].at_css('a')).to be_nil
+    end
+
+    # A search on the set page adds a query string, which must not turn the
+    # current crumb back into a link.
+    it 'keeps the set as the current crumb under a search' do
+      set = make_set('Searched Set')
+      get "/sets/#{set['id']}", params: { q: 'lake' }
+      current = Nokogiri::HTML(response.body).at_css('nav[aria-label="breadcrumb"] .breadcrumb-item.active')
+      expect(current&.text&.strip).to eq('Searched Set')
     end
   end
 
@@ -396,6 +417,18 @@ RSpec.describe 'Sets', type: :request do
       get "/sets/#{set['id']}"
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('Public Set')
+    end
+
+    # My Sets needs a set curator, so a trail starting there would lead an
+    # anonymous visitor to a sign-in page.
+    it 'gives an anonymous visitor on a public set no breadcrumb trail' do
+      set = make_set('Trail-free Public Set')
+      AtlasRb::Compilation.update(set['id'],
+                                  permissions: { read: ['public'], edit: [], edit_users: [] },
+                                  nuid:        nuid)
+      get "/sets/#{set['id']}"
+      expect(response).to have_http_status(:ok)
+      expect(response.body).not_to include('aria-label="breadcrumb"')
     end
 
     it '403s an anonymous visitor on a private set' do
