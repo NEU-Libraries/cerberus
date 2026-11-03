@@ -236,7 +236,9 @@ textarea {
   }
 }
 
-.search-widgets div:last-child {
+// Direct children only: a descendant match also caught a modal's
+// .modal-dialog (Add page to set) and pinned it to the viewport's right edge.
+.search-widgets > div:last-child {
   margin-right: 0 !important;
 }
 
