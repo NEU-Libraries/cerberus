@@ -21,6 +21,7 @@ Source files:
 - `app/controllers/concerns/community_showcases.rb`
 - `app/controllers/my_drs_controller.rb`
 - `app/controllers/concerns/show_scoped_search.rb`
+- `app/controllers/concerns/title_browse_sort.rb`
 - `app/controllers/concerns/without_facet_modal.rb`
 
 Three neighbouring pages carry the machinery these files reuse:
@@ -207,9 +208,33 @@ Communities, and only the index action. Two things depend on that split:
 
 The index is the homepage's Communities gateway, so it has its own view,
 `communities/index`, with the People index's heading well and a search scoped to
-communities. With no query it sorts by title, as v1's did, because relevance has
-nothing to rank and would list communities in the order they were made. A query
-keeps relevance.
+communities. With no query it lists by title; see "Browsing by title" below.
+
+### Browsing by title
+
+The `/communities` index and every collection and community page list by title
+when there is no query and no chosen sort, as v1's did. A query keeps relevance,
+and a sort the visitor picks always wins. The global catalog keeps relevance as
+its default.
+
+Relevance is the first sort field, so it is Blacklight's default everywhere.
+With no query every item scores the same, and relevance's `created_at_dtsi desc`
+tie-break lists the newest items first.
+
+`TitleBrowseSort` holds the rule. An includer names its actions with
+`title_browse_on`: `CommunitiesController` names `:index` and `:show`, and
+`CollectionsController` names `:show`. `SearchState#sort_field` asks the
+controller for its `browse_sort_key` only when the request has no `sort` param.
+
+The default is chosen in `sort_field` and is never written into params. That
+matters because every link Blacklight builds comes from the search state: facet,
+sort, per-page and pagination links. A default written into params rides those
+links as `sort=title`. A visitor who then clicks a facet and types a search
+would get the search sorted by title, as if they had picked it. Left out of
+params, the next request with a `q` falls back to relevance.
+
+Blacklight's Sort dropdown marks the field that matches the sort Solr actually
+ran, so it shows "title" on a plain browse with no extra work.
 
 ### Hiding empty showcases
 
