@@ -23,6 +23,7 @@ Source files:
 - `app/controllers/concerns/show_scoped_search.rb`
 - `app/controllers/concerns/title_browse_sort.rb`
 - `app/controllers/concerns/whole_tree_search.rb`
+- `app/controllers/concerns/anonymous_match_all.rb`
 - `app/components/cerberus/constraints_component.rb`
 - `app/controllers/concerns/without_facet_modal.rb`
 
@@ -251,6 +252,12 @@ A collection or community page lists its contents in one of two ways:
 the URL, not a present one. Submitting the box empty sends `q=`, and v1's
 community page treated that the same way (`!params[:q].nil?`).
 
+The empty search widens only for a signed-in user. An anonymous visitor who
+submits the box empty, or types `*` or `*:*`, gets the one-level list. From the
+root community, a match-all search lists the whole repository; see "Match-all
+queries are for signed-in users" below. A real keyword searches the whole tree
+for everyone, as it always has.
+
 A blank `q` survives into the page's links because Blacklight drops only nil
 params. So a facet, sort or page link from an empty search keeps `q=`, and page
 2 stays on the whole tree. The scoped facet modal reads the same
@@ -277,6 +284,33 @@ as a browse:
   rank by relevance.
 - The Faculty & Staff row stays at the top. v1 showed its row on page 1 with no
   rendered constraints, and rendered none for a blank `q`.
+
+### Match-all queries are for signed-in users
+
+A query that matches everything lists the whole repository, which makes it an
+easy path for a scraper to enumerate every record. `AnonymousMatchAll` keeps
+those queries for signed-in users. A match-all query is a missing or blank `q`,
+or one made only of stars and colons. edismax answers `*` and `*:*` with every
+document, so they list everything just as a blank box does.
+
+| Surface | Anonymous match-all query |
+|---|---|
+| `/catalog`, with no facet | Refused with the 403 page, which offers sign-in |
+| `/catalog`, with a facet | Listed. A Work's metadata links browse this way (`ModsBrowseLinks`) |
+| A collection or community page | The one-level list, not the whole tree |
+
+v1 had the same idea: `catalog#index` refused an anonymous `q=*` outright, and
+showed a recent-items page rather than a full listing when there was no search.
+
+Only the catalog's own index is refused. Its subclasses inherit `#index` for
+public listings, `/communities` among them, and those stay open. The refusal
+also catches the header search box submitted empty, the Start over button, and
+removing the last chip on a catalog search. Each of those lands on a
+match-all `/catalog`.
+
+A facet listing can still be paged through to the end of its slice. Limiting
+that is left to traffic rules, as v1's `rack_attack` bans did, rather than to
+the app.
 
 ### Hiding empty showcases
 
