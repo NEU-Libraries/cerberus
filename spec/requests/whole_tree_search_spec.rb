@@ -87,6 +87,21 @@ RSpec.describe 'Whole-tree search', type: :request do
 
       expect(listed_ids).to contain_exactly(@shallow.valkyrie_id, @deep.valkyrie_id)
     end
+
+    # The modal shares child_membership_filters, so its counts follow the page.
+    it 'counts the whole tree in the facet modal for an empty search' do
+      work_count = lambda do
+        rows = response.parsed_body.css('.facet-values li')
+        row = rows.find { |li| li.at_css('.facet-label').text.strip == 'Work' }
+        row.at_css('.facet-count').text.strip
+      end
+
+      get facet_collection_path(id: @collection.id, facet_field: 'type_ssim')
+      expect(work_count.call).to eq('1')
+
+      get facet_collection_path(id: @collection.id, facet_field: 'type_ssim', q: '')
+      expect(work_count.call).to eq('2')
+    end
   end
 
   it 'lists the whole tree for an empty search on a community' do
