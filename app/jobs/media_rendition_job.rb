@@ -59,9 +59,9 @@ class MediaRenditionJob < ApplicationJob
       IncompleteFlag.clear(work_id)
     end
 
-    # A replace or revert updates the Work's one MP4 rather than adding another,
-    # as PdfRenditionJob does for its PDF. A Blob delete is admin-only in Atlas,
-    # and this job runs as whoever replaced the file.
+    # A replace or revert updates the Work's one MP4 rather than adding another.
+    # A Blob delete is admin-only in Atlas, and this job runs as whoever replaced
+    # the file.
     def attach_mp4(work_id, mp4_path, rendition_key, refresh:)
       existing = RenditionAsset.for(AtlasRb::Work.file_sets(work_id), mime_types: RenditionAsset::MP4) if refresh
       if existing

@@ -26,7 +26,7 @@ too, to re-derive a Work's assets.
 |---|---|
 | `image/*` | `IiifAssetsJob` — IIIF TIFF and thumbnail Delegates |
 | `application/pdf` | `IiifAssetsJob` — `IiifImageCreator` rasterizes page 1 via vips and poppler |
-| Word, PowerPoint | `PdfRenditionJob` — LibreOffice writes a PDF rendition Blob, and thumbnails come from that rendition's first page |
+| Word, PowerPoint | `PdfRenditionJob` — LibreOffice writes a PDF rendition Blob on the first upload only, and thumbnails come from the converted PDF's first page. See `docs/downloads.md` |
 | `video/*`, `audio/*` | `MediaRenditionJob` — an MP4 remux when the container needs one. No poster frame: see `docs/derivatives.md` |
 | everything | `ContentCreationJob` — the primary Blob, unless `include_primary: false`. Enrichment never gates or blocks it |
 

@@ -1,15 +1,14 @@
 # frozen_string_literal: true
 
-# Finds a Work's existing rendition, a PDF of a Word file or an MP4 of a video,
-# so a replace or revert can update it in place. The rendition is recognized by
-# name, not by any Atlas marker; see docs/downloads.md.
+# Finds a Work's existing MP4 rendition of a video or audio original, so a
+# replace or revert can update it in place. The rendition is recognized by name,
+# not by any Atlas marker; see docs/downloads.md.
 class RenditionAsset
   PRIMARY_ROLE = 'original_file'
-  PDF = %w[application/pdf].freeze
   MP4 = %w[video/mp4 audio/mp4].freeze
 
   # @param file_sets [Array<Hash>] AtlasRb::Work.file_sets for the Work.
-  # @param mime_types [Array<String>] the rendition's types, PDF or MP4.
+  # @param mime_types [Array<String>] the rendition's types, such as MP4.
   # @return [Hash, nil] the rendition's asset, or nil when the Work has none.
   def self.for(file_sets, mime_types:)
     originals = Array(file_sets).flat_map { |file_set| Array(file_set['assets']) }

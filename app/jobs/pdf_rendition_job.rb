@@ -27,7 +27,8 @@ class PdfRenditionJob < ApplicationJob
     IncompleteFlag.set(job.arguments.first, nuid: job.current_nuid, reason: IncompleteReasons::PDF_RENDITION)
   end
 
-  # refresh: a replace or revert, whose Work already has a now-stale thumbnail.
+  # refresh: a replace or revert, whose Work already has a now-stale thumbnail
+  # and full text.
   def perform(work_id, staged_path, rendition_key, refresh: false)
     return unless File.exist?(staged_path)
     unless WordToPdf.available?
@@ -35,12 +36,16 @@ class PdfRenditionJob < ApplicationJob
     end
 
     pdf_path = rendition_path(staged_path)
-    # Retry-safe: an attempt that already converted skips to the attach.
-    WordToPdf.call(source_path: staged_path, target_path: pdf_path) unless File.exist?(pdf_path)
+    # A deposit attempt that already converted skips to the attach. A refresh
+    # always converts: the staged directory is never cleaned, so a PDF already
+    # there can be the first upload's.
+    WordToPdf.call(source_path: staged_path, target_path: pdf_path) if refresh || !File.exist?(pdf_path)
 
     raise PrimaryFileMissing, "work #{work_id} has no primary file yet" unless primary_file?(work_id)
 
-    attach_rendition(work_id, pdf_path, rendition_key, refresh: refresh)
+    # The Work keeps the PDF of its first upload. A replace or revert converts
+    # only to refresh the thumbnail and full text; see docs/downloads.md.
+    AtlasRb::Blob.create(work_id, pdf_path, File.basename(pdf_path), idempotency_key: rendition_key) unless refresh
     # perform_now so the ambient acting NUID carries through (see ApplicationJob).
     IiifAssetsJob.perform_now(work_id, pdf_path, refresh: refresh)
     FullTextExtractionJob.perform_later(work_id, pdf_path)
@@ -48,18 +53,6 @@ class PdfRenditionJob < ApplicationJob
   end
 
   private
-
-    # A replace or revert updates the Work's one PDF rather than adding another.
-    # Deleting the stale PDF is not an option: a Blob delete is admin-only in
-    # Atlas, and this job runs as whoever replaced the file.
-    def attach_rendition(work_id, pdf_path, rendition_key, refresh:)
-      existing = RenditionAsset.for(AtlasRb::Work.file_sets(work_id), mime_types: RenditionAsset::PDF) if refresh
-      if existing
-        AtlasRb::Blob.update(existing['noid'], pdf_path, idempotency_key: rendition_key)
-      else
-        AtlasRb::Blob.create(work_id, pdf_path, File.basename(pdf_path), idempotency_key: rendition_key)
-      end
-    end
 
     def rendition_path(staged_path)
       File.join(File.dirname(staged_path), "#{File.basename(staged_path, '.*')}.pdf")

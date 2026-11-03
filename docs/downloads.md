@@ -566,35 +566,47 @@ LibreOffice returns after initialising a fresh profile, and libreconv starts
 every run with one. A missing `soffice` binary (`WordToPdf.available?` false)
 skips the rendition outright.
 
-### One PDF across replaces and reverts
+### The PDF keeps the first upload
 
-A replace or revert re-runs this job with `refresh: true`. The job then updates
-the Work's existing PDF with `Blob.update` rather than creating another one, so
-the Work keeps a single PDF that matches its current file. Each earlier PDF
-stays as a revision of that Blob.
+The job attaches the PDF on the first upload only. A replace or revert re-runs
+the job with `refresh: true`, and the job then converts the new file without
+attaching the result. It uses that PDF for two things: the Work's thumbnail,
+through `IiifAssetsJob` with `refresh: true`, and the Work's full text. The
+Work's PDF Blob is left as it is.
 
-Deleting the stale PDF and creating a new one was the obvious alternative. It
-does not work, because Atlas lets only an admin delete a Blob. This job runs as
+So after a replace, the downloadable PDF shows the first upload's content. The
+thumbnail, the full-text search and the Word file itself show the new version.
+
+A refresh always converts, even when a PDF of the same name is already on disk.
+Nothing cleans the staged directory, `uploads_root/<work_id>/`, so a replace
+under the original filename finds the first upload's PDF there. A deposit retry
+still skips the conversion when its own PDF is on disk.
+
+### One MP4 across replaces and reverts
+
+`MediaRenditionJob` remuxes a video or audio original into an MP4 when the
+container needs it, such as `talk.mov` to `talk.mp4`. A replace or revert
+updates the Work's existing MP4 with `Blob.update` rather than creating another
+one, so the Work keeps a single MP4 that matches its current file. Each earlier
+MP4 stays as a revision of that Blob.
+
+Deleting the stale MP4 and creating a new one was the obvious alternative. It
+does not work, because Atlas lets only an admin delete a Blob. The job runs as
 whoever replaced the file, and atlas_rb has no system-principal delete.
 
-`RenditionAsset.for` finds the existing PDF from `Work.file_sets`. Atlas
-stores a rendition as an ordinary `original_file` in a FileSet of its own, so
-nothing on the wire marks it as derived. The name does: the job writes
-`thesis.docx` as `thesis.pdf`, and a primary's `original_filename` survives
-every `Blob.update`. So the rendition
-is the `original_file` PDF whose name stem matches another `original_file` on
-the Work. It reads `original_filename` for that match only, and never renders
-it.
+`RenditionAsset.for` finds the existing MP4 from `Work.file_sets`. Atlas stores
+a rendition as an ordinary `original_file` in a FileSet of its own, so nothing
+on the wire marks it as derived. The name does: the job writes `talk.mov` as
+`talk.mp4`, and a primary's `original_filename` survives every `Blob.update`.
+So the rendition is the `original_file` MP4 whose name stem matches another
+`original_file` on the Work. It reads `original_filename` for that match only,
+and never renders it.
 
-Two consequences follow:
+Three consequences follow:
 
-- A PDF that the depositor attached under the same stem counts as the
+- An MP4 that the depositor attached under the same stem counts as the
   rendition. Updating it appends a revision, so its bytes stay recoverable.
-- A Work that already holds several PDFs keeps them. Every replace updates the
+- A Work that already holds several MP4s keeps them. Every replace updates the
   same one, the lowest NOID, and an admin can remove the others.
-
-`MediaRenditionJob` does the same for the MP4 it remuxes from a video or audio
-original, such as `talk.mov` to `talk.mp4`, asking `RenditionAsset` with
-`mime_types: RenditionAsset::MP4`. An original that is already an MP4 is never
-remuxed, and has no other original under its stem, so it is never mistaken for
-its own rendition.
+- An original that is already an MP4 is never remuxed, and has no other
+  original under its stem, so it is never mistaken for its own rendition.
