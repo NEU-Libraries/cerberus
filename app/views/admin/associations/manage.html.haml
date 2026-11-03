@@ -13,38 +13,7 @@
       %span.reparent-node-summary__title= enhanced_text(@work.resource.title)
       %span.admin-registry-table__id= params[:work_id]
 
-    -# Both directions, both retractable. The edge is stored once, on the Work
-    -# that asserts it, so an inbound row's remove acts on the other Work — which
-    -# an admin may do, holding rights on both ends. Each row carries its holder.
-    - { outbound: @outbound, inbound: @inbound }.each do |direction, groups|
-      %h2.linked-members__subhead{class: direction == :inbound ? 'mt-4' : nil}
-        = association_direction_caption(direction)
-        %span.admin-registry__count= pluralize(groups.values.sum(&:size), 'association')
-      - if groups.any?
-        - groups.each do |type, rows|
-          .work-association-group.mb-2
-            .work-association-group__label
-              %i.fa-solid{class: association_icon(type), 'aria-hidden' => 'true'}
-              %span.ms-1= association_label(type, direction)
-            - rows.each do |row|
-              .work-association
-                .work-association__body
-                  = link_to enhanced_text(row.title), work_path(row.noid), class: 'work-association__title'
-                  %span.work-association__id= row.noid
-                .work-association__action
-                  - holder = direction == :inbound ? row.noid : params[:work_id]
-                  - target = direction == :inbound ? params[:work_id] : row.noid
-                  = button_to admin_associations_remove_path(work_id: params[:work_id], holder_id: holder, target_id: target, type: type), method: :delete, class: 'linked-members__btn linked-members__btn--remove', form: { class: 'linked-members__btn-form', data: { turbo_confirm: "Remove “#{association_label(type, direction)}: #{plain_text(row.title)}”? The relationship is dropped from both works' pages. Neither work is changed otherwise." } } do
-                    - concat content_tag(:i, '', class: 'fa-solid fa-xmark me-1', 'aria-hidden' => 'true')
-                    Remove
-      - else
-        %p.text-muted.small.mb-0
-          - if direction == :inbound
-            No other work claims a relationship to this one.
-          - else
-            This work claims no relationship to another. Search below to add one.
-
-    %h2.linked-members__subhead.mt-4 Assert a relationship
+    %h2.linked-members__subhead Assert a relationship
     %p.text-muted.small.mb-3
       Pick the work that supports this one: its codebook, figure or transcription.
     = render 'admin/finder/search_form', url: admin_associations_manage_path, q: params[:q], hidden: { work_id: params[:work_id] }, placeholder: 'Search works to associate…'
@@ -77,6 +46,39 @@
                   = form.select :type, association_type_options, {}, class: 'form-select form-select-sm work-association-add__select', id: "type_#{doc.to_param}"
                   %span.work-association-add__label this work
                   = form.submit 'Add', class: 'linked-members__btn linked-members__btn--add'
+
+  .px-3.pb-3
+    %h2.linked-members__subhead.mt-4 Current relationships
+    -# Both directions, both retractable. The edge is stored once, on the Work
+    -# that asserts it, so an inbound row's remove acts on the other Work — which
+    -# an admin may do, holding rights on both ends. Each row carries its holder.
+    - { outbound: @outbound, inbound: @inbound }.each do |direction, groups|
+      %h3.linked-members__subhead.linked-members__subhead--minor{class: direction == :inbound ? 'mt-4' : nil}
+        = association_direction_caption(direction)
+        %span.admin-registry__count= pluralize(groups.values.sum(&:size), 'association')
+      - if groups.any?
+        - groups.each do |type, rows|
+          .work-association-group.mb-2
+            .work-association-group__label
+              %i.fa-solid{class: association_icon(type), 'aria-hidden' => 'true'}
+              %span.ms-1= association_label(type, direction)
+            - rows.each do |row|
+              .work-association
+                .work-association__body
+                  = link_to enhanced_text(row.title), work_path(row.noid), class: 'work-association__title'
+                  %span.work-association__id= row.noid
+                .work-association__action
+                  - holder = direction == :inbound ? row.noid : params[:work_id]
+                  - target = direction == :inbound ? params[:work_id] : row.noid
+                  = button_to admin_associations_remove_path(work_id: params[:work_id], holder_id: holder, target_id: target, type: type), method: :delete, class: 'linked-members__btn linked-members__btn--remove', form: { class: 'linked-members__btn-form', data: { turbo_confirm: "Remove “#{association_label(type, direction)}: #{plain_text(row.title)}”? The relationship is dropped from both works' pages. Neither work is changed otherwise." } } do
+                    - concat content_tag(:i, '', class: 'fa-solid fa-xmark me-1', 'aria-hidden' => 'true')
+                    Remove
+      - else
+        %p.text-muted.small.mb-0
+          - if direction == :inbound
+            No other work claims a relationship to this one.
+          - else
+            This work claims no relationship to another. Use the search above to add one.
 
   .px-3.pb-3
     = link_to admin_associations_path, class: 'reparent-back' do

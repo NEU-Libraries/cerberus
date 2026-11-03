@@ -127,6 +127,21 @@ RSpec.describe 'Admin::Associations', type: :request do
                                          'No other work claims a relationship to this one')
       end
 
+      it 'puts the search above the current relationships, which nest under one heading' do
+        stub_manage('outbound' => {}, 'inbound' => {})
+
+        get '/admin/associations/manage', params: { work_id: 'codebook' }
+
+        headings = response.parsed_body.css('h2, h3').map { |h| [h.name, h.text.squish] }
+        expect(headings.map(&:first)).to eq(%w[h2 h2 h3 h3])
+        expect(headings.map(&:last)).to match(
+          ['Assert a relationship', 'Current relationships',
+           a_string_starting_with('What this work says about others'),
+           a_string_starting_with('What other works say about this one')]
+        )
+        expect(response.body).to include('Use the search above to add one.')
+      end
+
       # Pre-empts Atlas's self_association rejection at the point of choice
       # rather than after the write.
       it 'keeps the managed Work out of its own candidate list' do
