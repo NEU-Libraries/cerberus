@@ -61,7 +61,8 @@
   .row.g-2{ data: { controller: 'caption-language' } }
     .col-md-7
       %label.form-label{ for: 'caption' } Caption file
-      %input#caption.form-control{ name: 'caption', type: 'file', accept: CaptionTrack::EXTENSION }/
+      = render layout: 'shared/file_field' do
+        %input#caption.file-field__input{ name: 'caption', type: 'file', accept: CaptionTrack::EXTENSION }/
     .col-md-5
       %label.form-label{ for: 'caption_language' } Language
       %select#caption_language.form-select{ name: 'caption_language',

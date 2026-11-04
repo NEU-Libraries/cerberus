@@ -41,7 +41,8 @@
             %label.admin-registry-form__label{for: "binary-#{asset.noid}"}
               %i.fa-solid.fa-arrow-up-from-bracket{'aria-hidden' => 'true'}
               Upload a replacement
-            %input.form-control.form-control-sm{id: "binary-#{asset.noid}", name: 'binary', type: 'file', required: true}
+            = render layout: 'shared/file_field', locals: { small: true } do
+              %input.file-field__input{id: "binary-#{asset.noid}", name: 'binary', type: 'file', required: true}
           .col-sm-auto
             %button.btn.btn-primary.btn-sm{type: 'submit'}
               %i.fa-solid.fa-arrows-rotate.me-1{'aria-hidden' => 'true'}

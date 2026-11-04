@@ -19,7 +19,8 @@
     .edit-pane
       = bootstrap_form_tag(url: collection_path(params[:id]), method: :patch, multipart: true) do |f|
         %label.form-label{:for => "thumbnail"} Thumbnail
-        %input#thumbnail.form-control.mb-3{:name => "thumbnail", :type => "file"}/
+        = render layout: 'shared/file_field', locals: { extra_class: 'mb-3' } do
+          %input#thumbnail.file-field__input{name: 'thumbnail', type: 'file'}/
         = bootstrap_fields_for :collection do |c|
           = render 'shared/descriptive_fields', f: c, descriptive: @descriptive, keywords: false
         .well.p-3.my-3.rounded-3

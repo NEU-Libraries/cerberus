@@ -1,0 +1,8 @@
+-# A file input that reads "Choose file" in every browser. Render it as a layout
+-# around the page's own input, which takes the class `file-field__input`. The
+-# input lies transparent over the whole field, so clicks, focus, drag and drop,
+-# and the required message stay native. See docs/design.md.
+.file-field{class: [('file-field--sm' if local_assigns[:small]), local_assigns[:extra_class]], data: { controller: 'file-field' }}
+  %span.file-field__button{'aria-hidden' => 'true'} Choose file
+  %span.file-field__name{'aria-hidden' => 'true', data: { file_field_target: 'name' }} No file chosen
+  = yield

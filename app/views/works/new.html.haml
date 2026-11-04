@@ -30,7 +30,8 @@
 
       .deposit-form__field
         %label.deposit-form__field-label{for: 'binary'} File
-        = file_field_tag 'binary', class: 'deposit-form__file', required: true
+        = render layout: 'shared/file_field' do
+          = file_field_tag 'binary', class: 'file-field__input', required: true
         %p.deposit-form__field-hint
           One file per deposit.
 
