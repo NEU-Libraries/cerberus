@@ -47,8 +47,8 @@ RSpec.describe TombstoneCascadeJob do
     expect(notice.subject).to eq('Collection “Working Papers” deleted')
     expect(notice.subject_noid).to eq('top')
     expect(notice.actor_nuid).to eq(actor)
-    expect(notice.detail(:withdrawn)).to eq([{ 'noid' => 'w1', 'type' => 'Work' },
-                                             { 'noid' => 'top', 'type' => 'Collection' }])
+    expect(notice.detail(:tombstoned)).to eq([{ 'noid' => 'w1', 'type' => 'Work' },
+                                              { 'noid' => 'top', 'type' => 'Collection' }])
     expect(notice.detail(:reason)).to eq('curator')
     expect(notice.body).to include('2 items deleted', 'ask the development team')
   end
@@ -62,7 +62,7 @@ RSpec.describe TombstoneCascadeJob do
     run
 
     expect(notice.subject).to eq('Collection “Working Papers” was not fully deleted')
-    expect(notice.detail(:withdrawn)).to eq([])
+    expect(notice.detail(:tombstoned)).to eq([])
     expect(notice.detail(:failures)).to eq(['Work w1: Atlas answered 500',
                                             'Collection top: still holds a live member'])
   end
@@ -76,6 +76,6 @@ RSpec.describe TombstoneCascadeJob do
     run
 
     expect(AtlasRb::Resource).to have_received(:tombstone).twice
-    expect(notice.detail(:withdrawn)).to eq([{ 'noid' => 'w1', 'type' => 'Work' }])
+    expect(notice.detail(:tombstoned)).to eq([{ 'noid' => 'w1', 'type' => 'Work' }])
   end
 end

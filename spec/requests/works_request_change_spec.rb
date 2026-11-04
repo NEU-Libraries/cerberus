@@ -47,7 +47,7 @@ RSpec.describe 'Works request_change', type: :request do
     # unauthenticated caller is a clean 403 — same as PATCH #update.
     it 'forbids the unauthenticated and records nothing' do
       expect do
-        post request_change_work_path(work.id), params: { request_action: 'withdraw' }
+        post request_change_work_path(work.id), params: { request_action: 'delete' }
       end.not_to change(AdminNotice, :count)
       expect(response).to have_http_status(:forbidden)
     end
@@ -55,7 +55,7 @@ RSpec.describe 'Works request_change', type: :request do
     it 'forbids an authenticated non-editor and records nothing' do
       sign_in outsider
       expect do
-        post request_change_work_path(work.id), params: { request_action: 'withdraw' }
+        post request_change_work_path(work.id), params: { request_action: 'delete' }
       end.not_to change(AdminNotice, :count)
       expect(response).to have_http_status(:forbidden)
     end
@@ -66,11 +66,11 @@ RSpec.describe 'Works request_change', type: :request do
 
     it 'records a deletion request, snapshotting the title' do
       expect do
-        post request_change_work_path(work.id), params: { request_action: 'withdraw', request_note: 'No longer authoritative.' }
+        post request_change_work_path(work.id), params: { request_action: 'delete', request_note: 'No longer authoritative.' }
       end.to change(AdminNotice, :count).by(1)
 
       notice = AdminNotice.last
-      expect(notice.kind).to eq('request_withdraw')
+      expect(notice.kind).to eq('request_delete')
       expect(notice).to be_request
       expect(notice.subject_noid).to eq(work.id)
       expect(notice.actor_nuid).to eq('000000002')
@@ -85,7 +85,7 @@ RSpec.describe 'Works request_change', type: :request do
     # depositor off-site.
     it 'sends no inbox message' do
       expect do
-        post request_change_work_path(work.id), params: { request_action: 'withdraw' }
+        post request_change_work_path(work.id), params: { request_action: 'delete' }
       end.not_to change(Message, :count)
     end
 

@@ -99,7 +99,7 @@
       %p.text-muted.small.mb-3
         Ask the DRS staff to delete this work. They will be in touch.
       = form_with url: request_change_work_path(params[:id]), method: :post do
-        = hidden_field_tag :request_action, "withdraw"
+        = hidden_field_tag :request_action, "delete"
         .well.p-3.my-3.rounded-3
           %label.form-label{for: "delete_note"} Reason (optional)
           %textarea.form-control#delete_note{name: "request_note", rows: 3, placeholder: "Optionally, tell the staff why this work should be deleted."}

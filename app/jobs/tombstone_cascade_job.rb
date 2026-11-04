@@ -16,20 +16,20 @@ class TombstoneCascadeJob < ApplicationJob
   LOCK_ATTEMPTS = 3
 
   def perform(noid:, uuid:, klass:, title:, reason:)
-    withdrawn = []
+    tombstoned = []
     failures = []
 
     TombstoneTargets.new(noid: noid, uuid: uuid).each do |target|
       response = tombstone(target.noid, reason)
       if response.success?
-        withdrawn << { 'noid' => target.noid, 'type' => target.klass }
+        tombstoned << { 'noid' => target.noid, 'type' => target.klass }
       else
         failures << "#{target.klass} #{target.noid}: #{failure_text(response)}"
       end
     end
 
     report(container: { noid: noid, klass: klass, title: title }, reason: reason,
-           withdrawn: withdrawn, failures: failures)
+           tombstoned: tombstoned, failures: failures)
   end
 
   private
@@ -51,15 +51,15 @@ class TombstoneCascadeJob < ApplicationJob
       "Atlas answered #{response.status}"
     end
 
-    def report(container:, reason:, withdrawn:, failures:)
+    def report(container:, reason:, tombstoned:, failures:)
       CompletionNotice.deliver(
         kind:         'tombstone_cascade',
         to_nuid:      Current.nuid,
         subject:      subject_for(container, failures),
-        body:         body_for(container, withdrawn, failures),
+        body:         body_for(container, tombstoned, failures),
         subject_noid: container[:noid],
         payload:      { subject_type: container[:klass], subject_title: container[:title], reason: reason,
-                        withdrawn: withdrawn, failures: failures }
+                        tombstoned: tombstoned, failures: failures }
       )
     end
 
@@ -68,8 +68,8 @@ class TombstoneCascadeJob < ApplicationJob
       %(#{container[:klass]} “#{container[:title]}” #{verb})
     end
 
-    def body_for(container, withdrawn, failures)
-      lines = ["#{withdrawn.size} item#{'s' unless withdrawn.size == 1} deleted, " \
+    def body_for(container, tombstoned, failures)
+      lines = ["#{tombstoned.size} item#{'s' unless tombstoned.size == 1} deleted, " \
                "#{container[:klass].downcase} included."]
       lines += ['', 'These could not be deleted and are still live:', *failures] if failures.any?
       lines += ['', 'There is no one-step restore. To bring these back, ask the development team: ' \

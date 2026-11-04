@@ -8,7 +8,7 @@ module Admin
   # here and one CSS line.
   module LedgerHelper
     KINDS = {
-      'request_withdraw'         => { label: 'Delete',     icon: 'fa-trash-can' },
+      'request_delete'           => { label: 'Delete',     icon: 'fa-trash-can' },
       'request_move'             => { label: 'Move',       icon: 'fa-sitemap' },
       'request_restrict'         => { label: 'Restrict',   icon: 'fa-lock' },
       'load_report'              => { label: 'Load',       icon: 'fa-file-import' },
@@ -76,7 +76,7 @@ module Admin
     # is gated where it lives, which is why the ledger only points at them.
     def ledger_remedy(notice)
       case notice.kind
-      when 'request_withdraw' then [resource_path_for('Work', notice.subject_noid), 'Open the work to delete it']
+      when 'request_delete' then [resource_path_for('Work', notice.subject_noid), 'Open the work to delete it']
       when 'request_move'     then [admin_reparent_path, 'Open Move']
       when 'request_restrict' then [edit_path_for(notice.detail(:subject_type), notice.subject_noid),
                                     'Open its permissions']

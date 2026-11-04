@@ -14,7 +14,7 @@ $ledger-rail-width: 4px;
 // tombstone brick, because it is the same act asked for rather than
 // done; move takes the ochre the triage card uses for "waiting on
 // somebody"; restrict the violet that already means a permission.
-$ledger-tone-withdraw: #a73a31;
+$ledger-tone-delete: #a73a31;
 $ledger-tone-move:     #8a6a1f;
 $ledger-tone-restrict: #7a5c84;
 
@@ -75,7 +75,7 @@ $ledger-tone-digest:   #54687a;
 }
 
 .ledger-row {
-  &--request_withdraw { --ledger-tone: #{$ledger-tone-withdraw}; }
+  &--request_delete { --ledger-tone: #{$ledger-tone-delete}; }
   &--request_move     { --ledger-tone: #{$ledger-tone-move}; }
   &--request_restrict { --ledger-tone: #{$ledger-tone-restrict}; }
 

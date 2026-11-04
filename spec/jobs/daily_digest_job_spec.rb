@@ -24,7 +24,7 @@ RSpec.describe DailyDigestJob do
 
   describe 'the counts' do
     it 'counts the requests made on the day, and not those made on another' do
-      notice_on(day, kind: 'request_withdraw', actor: '000000010')
+      notice_on(day, kind: 'request_delete', actor: '000000010')
       notice_on(day, kind: 'request_move', actor: '000000010')
       notice_on(day - 1, kind: 'request_restrict', actor: '000000010')
 

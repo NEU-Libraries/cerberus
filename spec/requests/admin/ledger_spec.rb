@@ -21,8 +21,8 @@ RSpec.describe 'Admin ledger', type: :request do
              groups: [Permissions::STAFF_EDIT_GROUP])
   end
 
-  let!(:withdrawal) do
-    AdminNotice.create!(kind: 'request_withdraw', subject: 'Request to withdraw “thesis.pdf”',
+  let!(:deletion) do
+    AdminNotice.create!(kind: 'request_delete', subject: 'Request to delete “thesis.pdf”',
                         actor_nuid: '000000010', subject_noid: 'w1',
                         payload: { subject_type: 'Work', subject_title: 'thesis.pdf',
                                    note: 'No longer authoritative.' })

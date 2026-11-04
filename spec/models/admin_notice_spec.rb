@@ -15,8 +15,8 @@ RSpec.describe AdminNotice, type: :model do
     # One table means these cannot be NOT NULL columns, so a request kind
     # carries the constraint in the model instead.
     it 'requires an actor and a subject noid on a request kind only' do
-      expect(described_class.new(kind: 'request_withdraw', subject: 'x')).not_to be_valid
-      expect(described_class.new(kind: 'request_withdraw', subject: 'x',
+      expect(described_class.new(kind: 'request_delete', subject: 'x')).not_to be_valid
+      expect(described_class.new(kind: 'request_delete', subject: 'x',
                                  actor_nuid: '000000010', subject_noid: 'w1')).to be_valid
       expect(described_class.new(kind: 'set_reindex', subject: 'x')).to be_valid
     end
@@ -35,7 +35,7 @@ RSpec.describe AdminNotice, type: :model do
     end
 
     it 'reads the verb out of a request kind' do
-      expect(described_class.new(kind: 'request_withdraw').request_action).to eq('withdraw')
+      expect(described_class.new(kind: 'request_delete').request_action).to eq('delete')
     end
   end
 

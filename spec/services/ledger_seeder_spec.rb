@@ -28,7 +28,7 @@ RSpec.describe LedgerSeeder do
 
     it 'seeds one request of every kind the ledger explains' do
       expect(AdminNotice.requests.pluck(:kind))
-        .to contain_exactly('request_withdraw', 'request_move', 'request_restrict', 'request_restrict')
+        .to contain_exactly('request_delete', 'request_move', 'request_restrict', 'request_restrict')
     end
 
     it 'gives a community restriction the subject type that earns the remedy note' do

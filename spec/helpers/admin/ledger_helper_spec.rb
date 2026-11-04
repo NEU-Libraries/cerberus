@@ -50,7 +50,7 @@ RSpec.describe Admin::LedgerHelper do
     end
 
     it 'is nil for a request kind, which is linked through its subject instead' do
-      expect(helper.ledger_notice_link(notice('request_withdraw', noid: 'wk777'))).to be_nil
+      expect(helper.ledger_notice_link(notice('request_delete', noid: 'wk777'))).to be_nil
     end
   end
 end

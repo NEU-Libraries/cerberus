@@ -12,7 +12,7 @@ module WorkChangeRequest
   extend ActiveSupport::Concern
 
   # The actions an editor may *request* (not perform) on their own work.
-  REQUEST_ACTIONS = %w[withdraw move].freeze
+  REQUEST_ACTIONS = %w[delete move].freeze
 
   def request_change
     action = params[:request_action].to_s

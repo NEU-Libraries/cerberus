@@ -93,7 +93,7 @@ ledger tabs are: a filter on `kind`.
 
 | Family | Constant | What it holds |
 |---|---|---|
-| Requests | `REQUEST_KINDS` | what a depositor may ask staff to do but cannot do themselves: `request_withdraw`, `request_move`, `request_restrict` |
+| Requests | `REQUEST_KINDS` | what a depositor may ask staff to do but cannot do themselves: `request_delete`, `request_move`, `request_restrict` |
 | Activity | `ACTIVITY_KINDS` | what the repository did on its own account: `load_report`, `work_completion_mismatch`, `visibility_cascade`, `set_reindex`, `showcase_promotion`, `set_privatize` (nothing writes it; kept so existing rows render), `set_sentinel_apply` |
 | Digest | `DIGEST` | `daily_digest` — a whole day, summed up |
 
@@ -102,7 +102,7 @@ row is one event, and a page-sized summary among them buries them and reads badl
 itself.
 
 `request_action` strips the prefix off a request kind, giving the verb inside it:
-`withdraw`, `move`, `restrict`.
+`delete`, `move`, `restrict`.
 
 ### The payload
 
@@ -255,7 +255,7 @@ container's PID, select everything, and restore. See "Bulk restore and bulk
 delete" below.
 
 The Requests & activity row shows only the summary. The list is in the
-`AdminNotice` payload, under `withdrawn`, as `{ "noid", "type" }` pairs, with
+`AdminNotice` payload, under `tombstoned`, as `{ "noid", "type" }` pairs, with
 `failures`, `reason`, `subject_type` and `subject_title` beside it.
 
 #### Restoring a cascade at the console
@@ -267,7 +267,7 @@ records who restored each item:
 
 ```ruby
 notice = AdminNotice.where(kind: 'tombstone_cascade', subject_noid: '<container noid>').last
-notice.detail(:withdrawn).reverse_each do |item|
+notice.detail(:tombstoned).reverse_each do |item|
   response = AtlasRb::Admin::Resource.restore(item['noid'], nuid: '<admin nuid>')
   puts "#{item['type']} #{item['noid']}: #{response.status}"
 end
@@ -275,7 +275,7 @@ end
 
 Restore only what the list names. An item tombstoned before the cascade is
 absent from it on purpose, and its own tombstone still stands. A container that
-had live members the job could not tombstone is on `failures`, not `withdrawn`,
+had live members the job could not tombstone is on `failures`, not `tombstoned`,
 and was never tombstoned. Each restore clears that item's removal reason and
 records a restore on its History tab.
 
@@ -301,8 +301,8 @@ gets one word for the reversible removal, chosen with the librarians:
 
 "Withdraw" appears on no screen: librarians read "withdrawn" as deaccessioned,
 which is the opposite of reversible. "Tombstone" names only the gone page, and
-only among staff. Routes, classes, notice kinds such as `request_withdraw`, and
-Solr fields keep their names.
+only among staff. The code says "tombstone" too: routes, classes and Solr fields
+such as `tombstoned_bsi`. Atlas's API names follow Atlas.
 
 The two gates mirror Atlas's `Ability` exactly. Restore is an operator verb, so
 Atlas grants it alongside `:reparent` in `apply_admin_delegate_abilities`, not
