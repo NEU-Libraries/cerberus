@@ -210,7 +210,9 @@ whatever they sit on and read as text in a box.
 **The results controls are the one exception.** The sidebar's Sort, Per page and
 Add page to set, and the Add control under a container's results, share a
 transparent chrome: near-black label, light translucent border, grey icon and a
-faint grey hover. They always sit on the page ground, so the rule's reason does
+faint grey hover. Their menus, and the breadcrumb Add's, open white like the
+facet cards beside them, and mark the current choice by weight alone, with no
+grey fill. A hovered row turns `$link-blue`. They always sit on the page ground, so the rule's reason does
 not apply. The chrome is the `results-control-chrome` mixin in
 `_search_controls.scss`, and `.results-control` applies it; use those rather
 than a copy, and do not use the chrome anywhere else.

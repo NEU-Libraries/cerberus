@@ -284,7 +284,7 @@ textarea {
 
     &::after {
       left: calc(-2 * #{$arrow} + 1px);
-      border-right-color: $light;
+      border-right-color: $white;
     }
   }
 }
@@ -308,6 +308,29 @@ textarea {
   background-color: $light;
   color: $dark;
   font-weight: bold;
+}
+
+// The Add menus and the results controls' menus open white, like the facet
+// cards beside them, and mark a row by weight and colour alone: no grey fill
+// for the current choice or under the pointer. With colour the only hover cue,
+// it is $link-blue, which clears 4.5:1 on white; $cyan does not. Declared after
+// the two rules above, at a specificity that beats both.
+.breadcrumb-add,
+.add-control,
+.sidebar-display-controls {
+  .dropdown-menu.show {
+    background-color: $white;
+
+    .dropdown-item.active,
+    .dropdown-item:active {
+      background-color: $white;
+    }
+
+    a:hover:not(.active) {
+      background-color: $white;
+      color: $link-blue;
+    }
+  }
 }
 
 .document-counter {
