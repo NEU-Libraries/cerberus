@@ -114,6 +114,7 @@ RSpec.describe 'Accessibility', :browser, type: :system do
   }
 
   audits :admin_nuid, {
+    'a collection, admin' => -> { "/collections/#{@collection.id}" },
     'the deposit form'    => -> { "/collections/#{@collection.id}/works/new" },
     'a new collection'    => -> { "/collections/#{@collection.id}/collections/new" },
     'the work upload'     => -> { "/works/#{@work.id}/upload" },

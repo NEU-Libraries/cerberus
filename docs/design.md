@@ -11,6 +11,7 @@ Source files:
 - `app/assets/stylesheets/_layout.scss` (the `.well`, and hover without fades)
 - `app/assets/stylesheets/_tonal_buttons.scss` (the tonal button variants)
 - `app/assets/stylesheets/_admin_registry.scss` (the card shell and identifier chip)
+- `app/assets/stylesheets/_search_controls.scss` (the results-controls chrome)
 - `app/helpers/application_helper.rb` (`document_type_icon`, the catalog's type icon)
 - `app/helpers/admin_finder_helper.rb` (`RESOURCE_ICONS`, the admin finder's type chip)
 - `app/helpers/pages_helper.rb` (`featured_gateways`, the homepage buttons)
@@ -205,6 +206,14 @@ tab by extending that pattern. Do not introduce another navigation idiom.
 **Never use `btn-outline-*` or `btn-light`.** An outline button is transparent,
 and `btn-light` is the body's own `$gray-100`, so both take the colour of
 whatever they sit on and read as text in a box.
+
+**The results controls are the one exception.** The sidebar's Sort, Per page and
+Add page to set, and the Add control under a container's results, share a
+transparent chrome: near-black label, light translucent border, grey icon and a
+faint grey hover. They always sit on the page ground, so the rule's reason does
+not apply. The chrome is the `results-control-chrome` mixin in
+`_search_controls.scss`, and `.results-control` applies it; use those rather
+than a copy, and do not use the chrome anywhere else.
 
 Give each surface one solid button for its main action: `btn-primary`, or
 `btn-success` for Save. Every other button takes a variant from

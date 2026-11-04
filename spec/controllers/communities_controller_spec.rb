@@ -290,6 +290,26 @@ describe CommunitiesController do
       end
     end
 
+    context 'Add control under the results' do
+      def add_control = response.parsed_body.at_css('.add-control')
+
+      it 'is hidden from anonymous users' do
+        get :show, params: { id: community.id }
+        expect(add_control).to be_nil
+      end
+
+      it 'offers an editor the breadcrumb menu\'s choices for a community' do
+        AtlasRb::Resource.set_permissions(community.id,
+                                          { 'read' => ['public'], 'edit' => ['editors'] },
+                                          nuid: '000000004')
+        sign_in User.new(email: 'ed@example.com', nuid: '000000002', groups: ['editors'])
+        get :show, params: { id: community.id }
+        expect(add_control.css('.dropdown-item').map(&:text)).to eq(['New Collection', 'New Community'])
+        expect(response.parsed_body.css('.breadcrumb-add .dropdown-item').map(&:text))
+          .to eq(['New Collection', 'New Community'])
+      end
+    end
+
     context 'Edit affordance is gated on the :edit ability' do
       it 'is hidden from a signed-in user who cannot edit' do
         sign_in User.new(email: 'viewer@example.com', nuid: '000000005', role: 'standard', groups: [])

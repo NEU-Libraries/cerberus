@@ -1,0 +1,16 @@
+-# The choices behind every Add control: the breadcrumb's and the one under a
+-# container's results. One list, so the two menus cannot drift apart.
+- if controller_name == "communities"
+  %li
+    %a.dropdown-item{:href => new_community_collection_path(params[:id])} New Collection
+  %li
+    %a.dropdown-item{:href => new_community_community_path(params[:id])} New Community
+- elsif controller_name == "collections" || local_assigns[:add_to_collection]
+  - collection_id = local_assigns[:add_to_collection] || params[:id]
+  %li
+    %a.dropdown-item{:href => new_collection_collection_path(collection_id)} New Collection
+  %li
+    %a.dropdown-item{:href => new_collection_work_path(collection_id)} New Work
+- else
+  %li
+    %a.dropdown-item{:href => upload_work_path(params[:id])} Upload File
