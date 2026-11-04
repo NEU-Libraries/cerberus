@@ -174,7 +174,7 @@ action between controllers.
 
 ## The removal reason
 
-The library's withdrawal policy requires a note on every tombstoned item, and it
+The library's removal policy requires a note on every tombstoned item, and it
 fixes the wording: five notes, held in `TombstoneReasons::ALL`. Atlas keeps the
 same list and answers `422 invalid_reason` for any other value. So a change to
 the wording needs an Atlas release as well.

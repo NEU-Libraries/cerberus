@@ -83,9 +83,9 @@ RSpec.describe TombstonedItems do
 
     # v1 holds 8,000+ tombstoned items, so the registry has to be searchable.
     it 'searches by the query, ranked by relevance, when nothing it matched holds members' do
-      builder = searched_builder(query: '  Withdrawn thesis ', matches: [doc('uuid-w1')])
+      builder = searched_builder(query: '  Removed thesis ', matches: [doc('uuid-w1')])
 
-      expect(builder.blacklight_params[:q]).to eq('Withdrawn thesis')
+      expect(builder.blacklight_params[:q]).to eq('Removed thesis')
       expect(builder.to_hash['sort']).not_to eq('tombstoned_at_dtsi desc')
       expect(@walked).to be_nil
     end

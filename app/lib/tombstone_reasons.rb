@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# The removal notes the library's withdrawal policy allows, in its wording.
+# The removal notes the library's removal policy allows, in its wording.
 #
 # Atlas holds the same list and answers 422 `invalid_reason` for anything else,
 # so a change here must ship with the matching Atlas change. The notes carry no

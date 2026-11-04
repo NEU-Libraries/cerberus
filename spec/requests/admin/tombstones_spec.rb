@@ -89,26 +89,26 @@ RSpec.describe 'Admin::Tombstones', type: :request do
     describe 'GET index' do
       it 'lists each tombstoned item with its title, PID and a restore action' do
         allow(TombstonedItems).to receive(:call)
-          .and_return(fake_results(tombstoned_doc(noid: 'abc', title: 'Withdrawn Thesis'),
+          .and_return(fake_results(tombstoned_doc(noid: 'abc', title: 'Removed Thesis'),
                                    tombstoned_doc(noid: 'xyz', title: 'Old Community', klass: 'Community')))
 
         get '/admin/tombstones'
 
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include('Withdrawn Thesis', 'abc', 'Old Community', 'Restore')
+        expect(response.body).to include('Removed Thesis', 'abc', 'Old Community', 'Restore')
       end
 
       # A tombstoned parent is named but not linked: its page is the gone page,
       # and it has to be restored before its child can be.
       it "names each row's parent, links a live one, and marks a tombstoned one" do
-        work = tombstoned_doc(noid: 'abc', title: 'Withdrawn Thesis', parent: 'id-uuid-live')
+        work = tombstoned_doc(noid: 'abc', title: 'Removed Thesis', parent: 'id-uuid-live')
         orphan = tombstoned_doc(noid: 'def', title: 'Orphaned Work', parent: 'id-uuid-gone')
         root = tombstoned_doc(noid: 'xyz', title: 'Old Community', klass: 'Community')
         allow(TombstonedItems).to receive(:call).and_return(fake_results(work, orphan, root))
         allow(StructuralParents).to receive(:call).and_return(
           'uuid-live' => tombstoned_doc(noid: 'live1', title: 'Theses Collection', klass: 'Collection',
                                         tombstoned: false),
-          'uuid-gone' => tombstoned_doc(noid: 'gone1', title: 'Withdrawn Collection', klass: 'Collection')
+          'uuid-gone' => tombstoned_doc(noid: 'gone1', title: 'Removed Collection', klass: 'Collection')
         )
 
         get '/admin/tombstones'
@@ -116,7 +116,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
         page = response.parsed_body
         expect(page.css('th').map(&:text)).to include('Parent')
         expect(page.at_css('a[href="/collections/live1"]')&.text).to eq('Theses Collection')
-        expect(response.body).to include('Withdrawn Collection', '· retracted')
+        expect(response.body).to include('Removed Collection', '· retracted')
         expect(page.css('a[href="/collections/gone1"]')).to be_empty
         rows = page.css('tbody tr').map { |row| row.css('td')[2].text.squish }
         expect(rows.last).to eq('—')
@@ -124,7 +124,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
 
       it 'counts every tombstoned item, not just the page on screen' do
         allow(TombstonedItems).to receive(:call)
-          .and_return(fake_results(tombstoned_doc(noid: 'abc', title: 'Withdrawn Thesis'), total: 8000))
+          .and_return(fake_results(tombstoned_doc(noid: 'abc', title: 'Removed Thesis'), total: 8000))
 
         get '/admin/tombstones'
 
@@ -132,7 +132,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
       end
 
       it 'passes the search to the registry and offers the search form' do
-        allow(TombstonedItems).to receive(:call).and_return(fake_results(tombstoned_doc(noid: 'abc', title: 'Withdrawn Thesis')))
+        allow(TombstonedItems).to receive(:call).and_return(fake_results(tombstoned_doc(noid: 'abc', title: 'Removed Thesis')))
 
         get '/admin/tombstones', params: { q: 'thesis' }
 
@@ -162,14 +162,14 @@ RSpec.describe 'Admin::Tombstones', type: :request do
       # its own Restore and Delete forms, so they join it by the form attribute.
       it 'offers a checkbox per row, a select-all, and a hidden bulk well with both actions' do
         allow(TombstonedItems).to receive(:call)
-          .and_return(fake_results(tombstoned_doc(noid: 'abc', title: 'Withdrawn Thesis')))
+          .and_return(fake_results(tombstoned_doc(noid: 'abc', title: 'Removed Thesis')))
 
         get '/admin/tombstones'
 
         page = response.parsed_body
         box = page.at_css('input[type="checkbox"][name="ids[]"][value="abc"]')
         expect(box['form']).to eq('tombstone-bulk')
-        expect(box['aria-label']).to eq('Select Withdrawn Thesis')
+        expect(box['aria-label']).to eq('Select Removed Thesis')
         expect(page.at_css('#select_all')['aria-label']).to eq('Select every item on this page')
         well = page.at_css('form#tombstone-bulk')
         expect(well['hidden']).not_to be_nil
@@ -196,7 +196,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
       # tombstoned ones, while a Work purge cascades into its own FileSets.
       it 'offers the permanent delete on a Work row, with no container caveat' do
         allow(TombstonedItems).to receive(:call)
-          .and_return(fake_results(tombstoned_doc(noid: 'abc', title: 'Withdrawn Thesis')))
+          .and_return(fake_results(tombstoned_doc(noid: 'abc', title: 'Removed Thesis')))
 
         get '/admin/tombstones'
 
@@ -377,7 +377,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
 
     it 'offers Restore but not the permanent delete' do
       allow(TombstonedItems).to receive(:call)
-        .and_return(fake_results(tombstoned_doc(noid: 'abc', title: 'Withdrawn Thesis')))
+        .and_return(fake_results(tombstoned_doc(noid: 'abc', title: 'Removed Thesis')))
 
       get '/admin/tombstones'
 

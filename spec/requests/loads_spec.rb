@@ -176,7 +176,7 @@ RSpec.describe 'Loads', type: :request do
         [OpenStruct.new(noid: 'neu:c1', id: 'neu:c1', klass: 'Collection', title: 'Campus Life (Photographs)'),
          OpenStruct.new(noid: 'neu:c2', id: 'neu:c2', klass: 'Collection', title: 'Athletics (Photographs)'),
          OpenStruct.new(noid: 'neu:w1', id: 'neu:w1', klass: 'Work', title: 'A Stray Work'),
-         OpenStruct.new(noid: 'neu:c3', id: 'neu:c3', klass: 'Collection', title: 'Withdrawn', tombstoned: true)]
+         OpenStruct.new(noid: 'neu:c3', id: 'neu:c3', klass: 'Collection', title: 'Removed (Photographs)', tombstoned: true)]
       )
     end
 
@@ -193,7 +193,7 @@ RSpec.describe 'Loads', type: :request do
     # A Work destination would parent every ingested Work under it.
     it 'offers only live Collections' do
       get '/loaders/marcom/loads/new'
-      expect(response.body).not_to include('A Stray Work', 'Withdrawn')
+      expect(response.body).not_to include('A Stray Work', 'Removed (Photographs)')
     end
   end
 
