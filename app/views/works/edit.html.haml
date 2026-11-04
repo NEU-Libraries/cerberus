@@ -97,7 +97,7 @@
   #delete.tab-pane{"aria-labelledby" => "delete-tab", role: "tabpanel"}
     .edit-pane
       %p.text-muted.small.mb-3
-        Ask the DRS staff to delete (withdraw) this work. They will be in touch.
+        Ask the DRS staff to delete this work. They will be in touch.
       = form_with url: request_change_work_path(params[:id]), method: :post do
         = hidden_field_tag :request_action, "withdraw"
         .well.p-3.my-3.rounded-3

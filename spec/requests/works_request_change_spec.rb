@@ -110,7 +110,7 @@ RSpec.describe 'Works request_change', type: :request do
       expect do
         post request_change_work_path(work.id), params: { request_action: 'destroy_everything' }
       end.not_to change(AdminNotice, :count)
-      expect(flash[:alert]).to include('withdrawal or a move')
+      expect(flash[:alert]).to include('deletion or a move')
     end
   end
 

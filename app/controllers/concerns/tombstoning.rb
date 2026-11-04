@@ -54,7 +54,7 @@ module Tombstoning
       when 'top_level_community'
         TOP_LEVEL_REFUSED
       else
-        "#{solr_type} can't be deleted while it still contains live members. Withdraw or move them first."
+        "#{solr_type} can't be deleted while it still contains live members. Delete or move them first."
       end
     end
 

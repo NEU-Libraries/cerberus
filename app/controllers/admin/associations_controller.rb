@@ -27,8 +27,8 @@ module Admin
       'target_not_found'    => 'No Work with that PID — nothing was linked.',
       'invalid_target_type' => 'An association joins two Works. That PID names something else.',
       'self_association'    => 'A Work cannot be associated with itself.',
-      'tombstoned_work'     => 'That Work is withdrawn. Restore it before you associate it.',
-      'tombstoned_target'   => 'This Work is withdrawn. Restore it before you associate it.'
+      'tombstoned_work'     => 'That Work is retracted. Restore it before you associate it.',
+      'tombstoned_target'   => 'This Work is retracted. Restore it before you associate it.'
     }.freeze
 
     GENERIC_REFUSAL = 'Atlas refused the change — nothing was written.'

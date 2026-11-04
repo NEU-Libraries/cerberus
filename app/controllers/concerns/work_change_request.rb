@@ -31,7 +31,7 @@ module WorkChangeRequest
 
     # nil when the request is well-formed, else the user-facing reason it isn't.
     def change_request_problem(action, note)
-      return 'Choose whether to request a withdrawal or a move.' unless REQUEST_ACTIONS.include?(action)
+      return 'Choose whether to request a deletion or a move.' unless REQUEST_ACTIONS.include?(action)
 
       'Tell the staff where this work should move to.' if action == 'move' && note.blank?
     end

@@ -12,7 +12,7 @@ module Admin
     skip_before_action :require_admin, except: [:destroy]
     before_action :require_admin_or_delegate, except: [:destroy]
 
-    breadcrumb_for 'Tombstoned items', :admin_tombstones_path
+    breadcrumb_for 'Retracted items', :admin_tombstones_path
 
     include Blacklight::Configurable
 
@@ -24,7 +24,7 @@ module Admin
     # a Blob, which have no business being restored from here.
     RESTORABLE_TYPES = %w[Work Collection Community].freeze
 
-    RESTORE_PARENT_TOMBSTONED = 'Restore refused — this item’s parent is still tombstoned. ' \
+    RESTORE_PARENT_TOMBSTONED = 'Restore refused — this item’s parent is still retracted. ' \
                                 'Restore the parent first, then try again.'
 
     RESTORE_FAILED = 'Restore could not be completed.'
@@ -35,7 +35,7 @@ module Admin
     PURGE_FAILED = 'Permanent deletion could not be completed.'
 
     PURGE_HAS_CHILDREN = 'Permanent deletion refused — this container still has members, ' \
-                         'and tombstoned members count. Permanently delete each one first.'
+                         'and retracted members count. Permanently delete each one first.'
 
     # One page at the largest page size; a form posting more is not this page.
     BULK_LIMIT = TombstonedItems::PER_PAGE_OPTIONS.max

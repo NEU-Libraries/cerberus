@@ -50,7 +50,7 @@ RSpec.describe TombstoneCascadeJob do
     expect(notice.detail(:withdrawn)).to eq([{ 'noid' => 'w1', 'type' => 'Work' },
                                              { 'noid' => 'top', 'type' => 'Collection' }])
     expect(notice.detail(:reason)).to eq('curator')
-    expect(notice.body).to include('2 items withdrawn', 'ask the development team')
+    expect(notice.body).to include('2 items deleted', 'ask the development team')
   end
 
   it 'names what failed, leaves it off the withdrawn list, and says the delete is incomplete' do

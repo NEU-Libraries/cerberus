@@ -25,11 +25,11 @@ RSpec.describe 'shared/_tombstone_modal.html.haml', type: :view do
   end
 
   context 'with a cascade' do
-    it 'counts what it withdraws, warns there is no one-step restore, and asks for the title' do
+    it 'counts what it removes, warns there is no one-step restore, and asks for the title' do
       render_modal(cascade: targets, title: 'Working <sup>2</sup>  Papers')
 
       expect(rendered).to include('<li>412 works</li>', '<li>3 collections</li>', 'modal-lg',
-                                  'There is no one-step restore',
+                                  'This removes', 'There is no one-step restore for this collection',
                                   'name="confirm_title"', 'name="cascade"',
                                   'Delete this collection and everything in it')
       # The title to type is plain text: nobody types the markup.

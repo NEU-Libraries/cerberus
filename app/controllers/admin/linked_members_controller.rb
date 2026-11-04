@@ -16,8 +16,8 @@ module Admin
     REFUSALS = {
       'already_structural_member' => 'The work already lives in that collection, so it cannot also be linked there.',
       'invalid_target_type'       => 'Only a collection can be linked to.',
-      'tombstoned_target'         => 'That collection is tombstoned, so nothing can be linked into it.',
-      'tombstoned_work'           => 'This work is tombstoned, so it cannot be linked anywhere.'
+      'tombstoned_target'         => 'That collection is retracted, so nothing can be linked into it.',
+      'tombstoned_work'           => 'This work is retracted, so it cannot be linked anywhere.'
     }.freeze
 
     include Blacklight::Configurable

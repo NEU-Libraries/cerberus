@@ -61,7 +61,7 @@ RSpec.describe 'Admin ledger', type: :request do
 
       expect(response.body).to include('thesis.pdf')
       expect(response.body).to include('No longer authoritative.')
-      expect(response.body).to include('Open the work to withdraw it')
+      expect(response.body).to include('Open the work to delete it')
     end
 
     # Narrowing a community does not cascade, so whoever fulfils it has to be

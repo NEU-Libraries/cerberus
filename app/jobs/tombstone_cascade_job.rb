@@ -69,11 +69,11 @@ class TombstoneCascadeJob < ApplicationJob
     end
 
     def body_for(container, withdrawn, failures)
-      lines = ["#{withdrawn.size} item#{'s' unless withdrawn.size == 1} withdrawn, " \
+      lines = ["#{withdrawn.size} item#{'s' unless withdrawn.size == 1} deleted, " \
                "#{container[:klass].downcase} included."]
-      lines += ['', 'These could not be withdrawn and are still live:', *failures] if failures.any?
+      lines += ['', 'These could not be deleted and are still live:', *failures] if failures.any?
       lines += ['', 'There is no one-step restore. To bring these back, ask the development team: ' \
-                    'this entry lists every item withdrawn.']
+                    'this entry lists every item deleted.']
       lines.join("\n")
     end
 end

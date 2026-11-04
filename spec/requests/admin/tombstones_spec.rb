@@ -116,7 +116,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
         page = response.parsed_body
         expect(page.css('th').map(&:text)).to include('Parent')
         expect(page.at_css('a[href="/collections/live1"]')&.text).to eq('Theses Collection')
-        expect(response.body).to include('Withdrawn Collection', '· tombstoned')
+        expect(response.body).to include('Withdrawn Collection', '· retracted')
         expect(page.css('a[href="/collections/gone1"]')).to be_empty
         rows = page.css('tbody tr').map { |row| row.css('td')[2].text.squish }
         expect(rows.last).to eq('—')
@@ -181,14 +181,14 @@ RSpec.describe 'Admin::Tombstones', type: :request do
 
         get '/admin/tombstones', params: { q: 'nomatch' }
 
-        expect(response.body).to include('No tombstoned items match these filters').and include('Show all tombstoned items')
-        expect(response.body).not_to include('Nothing is tombstoned')
+        expect(response.body).to include('No retracted items match these filters').and include('Show all retracted items')
+        expect(response.body).not_to include('Nothing is retracted')
       end
 
       it 'shows the empty state when nothing is tombstoned' do
         allow(TombstonedItems).to receive(:call).and_return(fake_results)
         get '/admin/tombstones'
-        expect(response.body).to include('Nothing is tombstoned')
+        expect(response.body).to include('Nothing is retracted')
       end
 
       # The caveat is row-typed because it is only true of a container: Atlas
@@ -201,7 +201,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
         get '/admin/tombstones'
 
         expect(response.body).to include('Delete permanently')
-        expect(response.body).not_to include('still holds a member')
+        expect(response.body).not_to include('must be empty first')
       end
 
       it 'warns about members on a container row' do
@@ -210,7 +210,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
 
         get '/admin/tombstones'
 
-        expect(response.body).to include('still holds a member')
+        expect(response.body).to include('must be empty first, and retracted members count')
       end
     end
 
@@ -346,7 +346,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
 
         delete '/admin/tombstones/abc', params: { type: 'Collection' }
 
-        expect(flash[:alert]).to include('still has members', 'tombstoned members count')
+        expect(flash[:alert]).to include('still has members', 'retracted members count')
       end
 
       it 'falls back to the generic alert on a refusal it cannot read' do

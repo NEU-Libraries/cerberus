@@ -287,6 +287,23 @@ Collection and Community, and offers the two ways out. Restore reverses the
 withdrawal; permanent delete finishes it. Only a full admin sees the delete
 button.
 
+### What the interface calls it
+
+The code says "tombstone" throughout, and the screens do not. Each audience
+gets one word for the reversible removal, chosen with the librarians:
+
+| Audience | Wording |
+|---|---|
+| Anyone who removes or asks to remove something: the show-page link, its dialog and flash, the depositor's request, cancelling a deposit | **Delete**. To the person doing it, an item they can no longer find is gone. |
+| Staff in the admin tools: the registry, its dashboard card and breadcrumb, History, refusals, the ledger | **Retracted**, and **Restore** to undo it. The registry is "Retracted items". |
+| The irreversible purge | **Permanently delete**, the only "delete" that cannot be restored |
+| Visitors, on the gone page | **Removed**, with the reason |
+
+"Withdraw" appears on no screen: librarians read "withdrawn" as deaccessioned,
+which is the opposite of reversible. "Tombstone" names only the gone page, and
+only among staff. Routes, classes, notice kinds such as `request_withdraw`, and
+Solr fields keep their names.
+
 The two gates mirror Atlas's `Ability` exactly. Restore is an operator verb, so
 Atlas grants it alongside `:reparent` in `apply_admin_delegate_abilities`, not
 through edit rights. Atlas keeps it out of `UPDATE_ALIASES`, so group-ACL
