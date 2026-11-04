@@ -28,7 +28,16 @@ RSpec.describe 'Container browse sort', type: :request do
     @community  = public_container(AtlasRb::Community, nil)
     @collection = public_container(AtlasRb::Collection, @community.id)
     @audio = public_work(@collection.id, 'sample-audio')
+    wait_for_next_second
     @video = public_work(@collection.id, 'sample-video')
+  end
+
+  # Atlas indexes created_at_dtsi to the whole second. Two Works made in the same
+  # second tie, and the title tie-break then lists audio first, so every
+  # newest-first assertion here would pass or fail on the clock.
+  def wait_for_next_second
+    started = Time.now.to_i
+    sleep 0.05 while Time.now.to_i == started
   end
 
   def listed_ids
