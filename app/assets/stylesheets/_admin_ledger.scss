@@ -10,7 +10,7 @@
 
 $ledger-rail-width: 4px;
 
-// Requests, toned by what they ask for. Withdraw borrows the audit log's
+// Requests, toned by what they ask for. A delete request borrows the audit log's
 // tombstone brick, because it is the same act asked for rather than
 // done; move takes the ochre the triage card uses for "waiting on
 // somebody"; restrict the violet that already means a permission.

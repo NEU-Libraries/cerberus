@@ -413,7 +413,7 @@ namespace :reset do
 
       # A Work inside that collection, deposited as UNOWNED so 000000011 reaches
       # it purely through the group's edit grant and is not its depositor. That
-      # distinction is the whole fixture: a depositor withdraws their own work
+      # distinction is the whole fixture: a depositor tombstones their own work
       # directly from its show page, so only a non-depositor editor ever sees
       # the request-a-change controls on the Move and Delete tabs. Seeding this
       # under the persona's own name would silently break the flow it exists to

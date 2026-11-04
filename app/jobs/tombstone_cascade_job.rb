@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
-# Withdraws a container and everything live beneath it, deepest first, with one
+# Tombstones a container and everything live beneath it, deepest first, with one
 # removal reason, then records every NOID it withdrew in one ledger entry. See
 # docs/admin.md ("Deleting a container that is not empty").
 #
 # There is no cascading restore. The ledger entry is the list a developer
 # restores from, parents first, so it must name every item this run withdrew
-# and nothing withdrawn before it.
+# and nothing tombstoned before it.
 class TombstoneCascadeJob < ApplicationJob
   queue_as :default
 
   # Atlas answers a lock conflict with a 409 on the raw response. Retried in
   # place rather than through retry_on: a re-run rebuilds the walk without the
-  # items already withdrawn, and its ledger entry would leave them out.
+  # items already tombstoned, and its ledger entry would leave them out.
   LOCK_ATTEMPTS = 3
 
   def perform(noid:, uuid:, klass:, title:, reason:)

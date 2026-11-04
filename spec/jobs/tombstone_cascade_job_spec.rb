@@ -26,7 +26,7 @@ RSpec.describe TombstoneCascadeJob do
 
   def notice = AdminNotice.where(kind: 'tombstone_cascade').last
 
-  it 'withdraws each target in the walk order, with the one reason' do
+  it 'tombstones each target in the walk order, with the one reason' do
     stub_targets(target('w1'), target('child', 'Collection'), target('top', 'Collection'))
     allow(AtlasRb::Resource).to receive(:tombstone).and_return(response(200))
 
@@ -53,7 +53,7 @@ RSpec.describe TombstoneCascadeJob do
     expect(notice.body).to include('2 items deleted', 'ask the development team')
   end
 
-  it 'names what failed, leaves it off the withdrawn list, and says the delete is incomplete' do
+  it 'names what failed, leaves it off the tombstoned list, and says the delete is incomplete' do
     stub_targets(target('w1'), target('top', 'Collection'))
     allow(AtlasRb::Resource).to receive(:tombstone).with('w1', reason: 'curator').and_return(response(500))
     allow(AtlasRb::Resource).to receive(:tombstone).with('top', reason: 'curator')
@@ -68,7 +68,7 @@ RSpec.describe TombstoneCascadeJob do
   end
 
   # A lock conflict is transient, and a job-level retry would rebuild the walk
-  # without what it had already withdrawn.
+  # without what it had already tombstoned.
   it 'retries one item through a lock conflict without restarting the walk' do
     stub_targets(target('w1'))
     allow(AtlasRb::Resource).to receive(:tombstone).and_return(response(409), response(200))

@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-# The editor-facing "Request withdraw / move" action on the Work edit page.
+# The editor-facing "Request deletion / move" action on the Work edit page.
 # Runs against the live Atlas test backend like the resource controller specs:
 # a real Work is created and a real edit ACL granted to the staff group, so the
 # authorize_resource_writes! gate (which reads Atlas permissions) is exercised
@@ -64,7 +64,7 @@ RSpec.describe 'Works request_change', type: :request do
   describe 'as an in-group editor' do
     before { sign_in editor }
 
-    it 'records a withdraw request, snapshotting the title' do
+    it 'records a deletion request, snapshotting the title' do
       expect do
         post request_change_work_path(work.id), params: { request_action: 'withdraw', request_note: 'No longer authoritative.' }
       end.to change(AdminNotice, :count).by(1)

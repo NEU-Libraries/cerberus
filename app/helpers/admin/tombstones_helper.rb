@@ -19,7 +19,7 @@ module Admin
     #
     # The container caveat is not decoration. Atlas counts tombstoned members
     # when it refuses a container purge, where the tombstone refusal counts only
-    # live ones — so a Collection whose children are all withdrawn looks empty to
+    # live ones — so a Collection whose children are all tombstoned looks empty to
     # the admin and is not. Saying it up front saves a round trip through a flash.
     def tombstone_purge_confirm(doc)
       blocks = ["Permanently delete “#{finder_doc_title(doc)}”?", PURGE_CONSEQUENCE]

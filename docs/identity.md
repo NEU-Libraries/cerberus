@@ -163,7 +163,7 @@ there.
 `depositor?` is not Work-scoped, because a depositor owns their Collections too.
 The whole workspace subtree inherits their NUID: Atlas's creators copy
 `parent.permissions`, which carries `depositor`. A Collection they own is theirs
-to edit and, once empty, to withdraw. Emptiness needs no check here, because
+to edit and, once empty, to tombstone. Emptiness needs no check here, because
 Atlas refuses the tombstone while live children remain.
 
 `proxy_uploader?` applies to Works only (`internal_resource_tesim` is `Work`). A

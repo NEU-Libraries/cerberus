@@ -380,7 +380,7 @@ any live member remains. A showcase Collection is a live member even when it is
 empty and therefore hidden from the listing.
 
 A test of the listing alone would offer Delete on a community reading "This
-community is empty". The delete would then fail and tell the reader to withdraw
+community is empty". The delete would then fail and tell the reader to delete
 contents they could not see. So `deletable?` requires both an empty listing and
 no showcases.
 

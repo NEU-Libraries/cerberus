@@ -165,9 +165,9 @@ earlier version to diff against, so the link is update-only.
 
 A Darwin Core write is a `metadata` update too, and only `payload.source`
 tells it apart, so `metadata_history_path` branches on it. Without the branch,
-the row's View opened the MODS diff. Atlas records a Darwin Core withdrawal as
+the row's View opened the MODS diff. Atlas records a Darwin Core removal as
 a `metadata` **tombstone**, which has no diff, and its summary names the record
-so that the row does not read as the Work itself being withdrawn.
+so that the row does not read as the Work itself being tombstoned.
 
 Both links pass the event's `occurred_at` as `at:`, and each page uses it to
 find the event:
@@ -335,7 +335,7 @@ and for the show page's Edit and Delete links (`assign_show_abilities!`).
 names it.
 
 The private `parent_path(id)` says where to land once the resource is gone.
-Read it *before* a tombstone, because the withdrawn resource's own read is
+Read it *before* a tombstone, because the tombstoned resource's own read is
 gated. A failed read or a top-level resource falls back to the home page.
 
 ### Why all three arguments are stated

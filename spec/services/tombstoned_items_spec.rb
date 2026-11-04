@@ -74,7 +74,7 @@ RSpec.describe TombstonedItems do
       captured
     end
 
-    it 'lists everything, most recently withdrawn first, with no query' do
+    it 'lists everything, most recently tombstoned first, with no query' do
       builder = searched_builder
 
       expect(builder.blacklight_params[:q]).to eq('*:*')
@@ -113,7 +113,7 @@ RSpec.describe TombstonedItems do
 
     # Whole UTC days, with the end date made inclusive by stopping before the
     # next day.
-    it 'filters by withdrawal date, inclusive at both ends' do
+    it 'filters by tombstone date, inclusive at both ends' do
       builder = searched_builder(from: Date.new(2026, 10, 1), to: Date.new(2026, 10, 7))
 
       expect(builder.to_hash['fq'])

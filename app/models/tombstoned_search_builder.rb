@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 # The inverse of the catalog's default tombstone filter, for the admin
-# "restore a withdrawal" registry.
+# Retracted items registry.
 #
 # Every SearchBuilder inherits CatalogController.default_solr_params, whose fq
-# carries `-tombstoned_bsi:true` (so withdrawn objects never surface in normal
+# carries `-tombstoned_bsi:true` (so tombstoned objects never surface in normal
 # discovery). A listing of *tombstoned* items therefore can't just AND
 # `tombstoned_bsi:true` onto the query — it would contradict the inherited
 # exclusion and return nothing. This builder appends one final processor step
@@ -15,7 +15,7 @@
 #
 # Gated discovery still runs (inherited from SearchBuilder), but short-circuits
 # for admins, and this builder is only ever driven from the admin-gated
-# TombstonedItems service — so an admin sees every withdrawn resource.
+# TombstonedItems service — so an admin sees every tombstoned resource.
 # See docs/admin.md.
 class TombstonedSearchBuilder < SearchBuilder
   self.default_processor_chain += [:only_tombstoned]

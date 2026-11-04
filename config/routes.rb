@@ -115,7 +115,7 @@ Rails.application.routes.draw do
       get :manifest
       get :metadata
       patch :metadata, action: :update_metadata
-      # Withdraw one of the Work's caption files, or restore a withdrawn one.
+      # Tombstone one of the Work's caption files, or restore a tombstoned one.
       # Admins and delegated admins only, like the Atlas FileSet tombstone and
       # restore beneath them (WorkCaptions).
       delete :caption, action: :remove_caption
@@ -126,12 +126,12 @@ Rails.application.routes.draw do
       get :upload
       post :upload, action: :add_file
       # The stored Darwin Core XML, behind the show page's read gate; the edit
-      # page uploads a replacement or withdraws it.
+      # page uploads a replacement or tombstones it.
       get :dwc, to: 'darwin_core_records#show'
       put :dwc, to: 'darwin_core_records#update'
       delete :dwc, to: 'darwin_core_records#destroy'
       post :tombstone
-      # An editor-submitted request to withdraw or move the work — notifies the
+      # An editor-submitted request to delete or move the work — notifies the
       # DRS staff inbox (no direct mutation; staff fulfill it with the tombstone
       # / re-parent tools). Edit-gated via authorize_resource_writes!.
       post :request_change
@@ -322,7 +322,7 @@ Rails.application.routes.draw do
     get 'ledger', to: 'ledger#index'
 
     # The tombstone registry — every tombstoned Work / Collection / Community,
-    # with the two ways out of a withdrawal: Restore reverses the show-page
+    # with the two ways out of a tombstone: Restore reverses the show-page
     # tombstone, and DELETE purges the item for good (both via atlas_rb's
     # operator-only Admin namespace). :id is the resource NOID; the `type` body
     # param selects the right Admin class. The two verbs are gated differently

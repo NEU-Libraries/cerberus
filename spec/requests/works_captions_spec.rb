@@ -7,7 +7,7 @@ require 'rails_helper'
 # granted to the staff group — so the :edit gate the field rides is exercised
 # end-to-end. The attach itself is deferred to CaptionJob (asserted enqueued via
 # the test adapter). Only the removal examples write a caption Blob, to watch
-# Atlas withdraw and restore it.
+# Atlas tombstone and restore it.
 RSpec.describe 'Works captions', type: :request do
   include Devise::Test::IntegrationHelpers
   include ActiveJob::TestHelper
@@ -54,7 +54,7 @@ RSpec.describe 'Works captions', type: :request do
                                       nuid: '000000004')
   end
 
-  # Removal withdraws the caption's FileSet, so it is reversible, and Atlas
+  # Removal tombstones the caption's FileSet, so it is reversible, and Atlas
   # allows it to admins and delegated admins only.
   describe 'removing and restoring a caption file' do
     let(:admin) do
@@ -83,7 +83,7 @@ RSpec.describe 'Works captions', type: :request do
                              language: 'es', track_label: 'Español', nuid: '000000004')
       end
 
-      it 'withdraws the caption for a delegated admin, then restores it' do
+      it 'tombstones the caption for a delegated admin, then restores it' do
         sign_in delegate
         caption = live_captions.sole
 
@@ -129,7 +129,7 @@ RSpec.describe 'Works captions', type: :request do
       end
 
       # The id arrives from the form, so it must name one of this Work's captions.
-      it 'refuses an id that is not one of the work\'s captions, and withdraws nothing' do
+      it 'refuses an id that is not one of the work\'s captions, and tombstones nothing' do
         sign_in admin
         delete caption_work_path(work.id), params: { caption_id: 'vid-1' }
 
@@ -137,7 +137,7 @@ RSpec.describe 'Works captions', type: :request do
         expect(AtlasRb::Resource).not_to have_received(:tombstone)
       end
 
-      it 'refuses an editor below the delegate tier, and withdraws or restores nothing' do
+      it 'refuses an editor below the delegate tier, and tombstones or restores nothing' do
         sign_in editor
         delete caption_work_path(work.id), params: { caption_id: 'cap-1' }
         expect(response).to have_http_status(:forbidden)
@@ -169,7 +169,7 @@ RSpec.describe 'Works captions', type: :request do
         expect(AtlasRb::Admin::Resource).not_to have_received(:restore)
       end
 
-      it 'says so when Atlas refuses the withdrawal' do
+      it 'says so when Atlas refuses the tombstone' do
         allow(AtlasRb::Resource).to receive(:tombstone).and_return(instance_double(Faraday::Response, success?: false))
         sign_in admin
         delete caption_work_path(work.id), params: { caption_id: 'cap-1' }

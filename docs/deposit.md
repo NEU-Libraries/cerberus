@@ -295,7 +295,7 @@ deposit. It is a lock, not housekeeping. An unfinished deposit is probably
 open on its depositor's screen at the metadata page, and this stops a second
 person editing underneath them. The metadata page itself stays reachable to
 anyone with edit rights, because it rides `extra_edit`, so an abandoned
-deposit can always be finished or withdrawn.
+deposit can always be finished or tombstoned.
 
 `WorksController#requested_work` memoises that read. `#edit` needs the same
 payload the in-progress gate already fetched, and the gate runs as a

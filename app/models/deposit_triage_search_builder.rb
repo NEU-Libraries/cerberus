@@ -10,7 +10,7 @@
 # by somebody it never applied to — but relying on that would make the builder
 # correct by luck. Dropping the clause outright keeps it correct whoever drives it.
 #
-# `-tombstoned_bsi:true` is deliberately left in place: a withdrawn deposit needs
+# `-tombstoned_bsi:true` is deliberately left in place: a tombstoned deposit needs
 # no triage, and the tombstone registry is where it belongs.
 class DepositTriageSearchBuilder < SearchBuilder
   # in_progress: nobody has confirmed the deposit — it is waiting on a person.

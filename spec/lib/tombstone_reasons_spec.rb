@@ -6,7 +6,7 @@ describe TombstoneReasons do
   describe '.sentence' do
     let(:reason) { "Removed from view at Northeastern University Library's discretion" }
 
-    it 'joins the reason and the withdrawal date into one sentence' do
+    it 'joins the reason and the tombstone date into one sentence' do
       expect(described_class.sentence('Sample Report', reason, '2026-09-30T14:05:00Z'))
         .to eq("\"Sample Report\" was removed from view at Northeastern University Library's " \
                'discretion on September 30, 2026.')
@@ -28,7 +28,7 @@ describe TombstoneReasons do
     end
   end
 
-  it 'records the curator note for a non-admin withdrawal' do
+  it 'records the curator note for a non-admin tombstone' do
     expect(described_class::CURATOR).to eq("Removed from view at contributor or content curator's discretion")
   end
 end

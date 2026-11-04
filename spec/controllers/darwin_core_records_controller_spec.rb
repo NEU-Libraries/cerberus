@@ -135,7 +135,7 @@ describe DarwinCoreRecordsController do
         sign_in admin
       end
 
-      it 'withdraws the record and returns to the Darwin Core pane' do
+      it 'removes the record and returns to the Darwin Core pane' do
         delete :destroy, params: { id: work.id }
 
         expect(response).to redirect_to(edit_tab)

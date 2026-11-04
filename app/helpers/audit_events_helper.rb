@@ -318,7 +318,7 @@ module AuditEventsHelper
       permissions_diff_summary(payload)
     end
 
-    # Atlas records a Darwin Core withdrawal as a metadata tombstone. Without
+    # Atlas records a Darwin Core removal as a metadata tombstone. Without
     # naming the record, the row reads as the Work itself being tombstoned.
     def tombstone_payload_summary(payload)
       return record_summary(DARWIN_CORE_LABEL, payload) if payload['source'] == DarwinCoreRecord::FORMAT

@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 # The tombstone registry. Lists tombstoned resources and offers the two ways
-# out of a withdrawal — reverse it, or finish it permanently — via atlas_rb's
+# out of a tombstone — reverse it, or finish it permanently — via atlas_rb's
 # operator-only Admin namespace. TombstonedItems and atlas_rb are stubbed so
 # these exercise the Cerberus controller/view wiring + the type dispatch, not
 # Atlas or the live Solr inverse query (covered in tombstoned_items_spec).
@@ -87,7 +87,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
     before { sign_in admin_user }
 
     describe 'GET index' do
-      it 'lists each withdrawn item with its title, PID and a restore action' do
+      it 'lists each tombstoned item with its title, PID and a restore action' do
         allow(TombstonedItems).to receive(:call)
           .and_return(fake_results(tombstoned_doc(noid: 'abc', title: 'Withdrawn Thesis'),
                                    tombstoned_doc(noid: 'xyz', title: 'Old Community', klass: 'Community')))
@@ -122,7 +122,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
         expect(rows.last).to eq('—')
       end
 
-      it 'counts every withdrawn item, not just the page on screen' do
+      it 'counts every tombstoned item, not just the page on screen' do
         allow(TombstonedItems).to receive(:call)
           .and_return(fake_results(tombstoned_doc(noid: 'abc', title: 'Withdrawn Thesis'), total: 8000))
 
@@ -140,7 +140,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
         expect(response.parsed_body.at_css('label[for="tombstone_q"]').text).to eq('Title or PID')
       end
 
-      it 'passes the page size and the withdrawal dates to the registry' do
+      it 'passes the page size and the tombstone dates to the registry' do
         allow(TombstonedItems).to receive(:call).and_return(fake_results)
 
         get '/admin/tombstones', params: { per_page: '20', from: '2026-10-01', to: '2026-10-07' }

@@ -66,7 +66,7 @@ class NarrowingTargets
       ).documents
     end
 
-    # TombstoneTargets widens the types and drops what is already withdrawn.
+    # TombstoneTargets widens the types and drops what is already tombstoned.
     def filters
       [subtree_fq, AFFECTED_TYPES]
     end

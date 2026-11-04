@@ -45,7 +45,7 @@ class DarwinCoreRecordsController < ApplicationController
     refused([e.message])
   end
 
-  # A withdrawal, not a purge: Atlas keeps the record's history, and the next
+  # A removal, not a purge: Atlas keeps the record's history, and the next
   # upload restores it.
   def destroy
     AtlasRb::Resource.delete_dwc(params[:id])

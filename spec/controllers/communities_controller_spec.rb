@@ -416,7 +416,7 @@ describe CommunitiesController do
     end
   end
 
-  # A community under the top-level one: Atlas refuses to withdraw a Community
+  # A community under the top-level one: Atlas refuses to tombstone a Community
   # with no parent, so only a child can be deleted.
   let(:child) do
     AtlasRb::Community.create(community.id, '/home/cerberus/web/spec/fixtures/files/community-mods.xml',
@@ -424,7 +424,7 @@ describe CommunitiesController do
   end
   let(:admin) { User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin') }
 
-  # Only an admin may withdraw a community whole: it holds other people's
+  # Only an admin may tombstone a community whole: it holds other people's
   # collections and showcases.
   describe 'tombstone with cascade' do
     before do
@@ -451,7 +451,7 @@ describe CommunitiesController do
       expect(response).to have_http_status(:forbidden)
     end
 
-    # The job withdraws the root last, so Atlas's own refusal would arrive only
+    # The job tombstones the root last, so Atlas's own refusal would arrive only
     # after everything beneath it was gone.
     it 'refuses a top-level community before enqueueing anything' do
       sign_in admin
@@ -596,7 +596,7 @@ describe CommunitiesController do
   # Atlas refuses a tombstone while any live member remains, and a showcase is a
   # live member even when it is empty and hidden from the listing. Offering Delete
   # off the listing alone promised a deletion that always failed, and told the
-  # reader to withdraw contents they could not see.
+  # reader to delete contents they could not see.
   describe '#deletable? (private)' do
     def deletable_with(documents:, showcases:)
       controller.instance_variable_set(:@response, instance_double(Blacklight::Solr::Response,

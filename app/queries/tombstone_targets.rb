@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-# The resources a cascading delete withdraws, deepest first and the container
+# The resources a cascading delete tombstones, deepest first and the container
 # last, because Atlas refuses to tombstone a container with live members. See
 # docs/admin.md ("Deleting a container that is not empty").
 #
 # The narrowing walk with two differences: a community can hold communities, so
-# they are included, and anything already withdrawn is left out. That keeps an
-# item withdrawn earlier off this cascade's list, so a restore from the list
+# they are included, and anything already tombstoned is left out. That keeps an
+# item tombstoned earlier off this cascade's list, so a restore from the list
 # never brings it back.
 class TombstoneTargets < NarrowingTargets
   TYPES = 'internal_resource_tesim:(Work OR Collection OR Community)'

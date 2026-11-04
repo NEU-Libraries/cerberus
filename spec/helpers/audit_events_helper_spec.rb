@@ -84,9 +84,9 @@ RSpec.describe AuditEventsHelper, type: :helper do
       expect(summary).to include('Darwin Core record · via Darwin Core upload')
     end
 
-    # Atlas records the withdrawal as a metadata tombstone, which would
-    # otherwise read as the Work itself being withdrawn.
-    it 'names the Darwin Core record on its withdrawal' do
+    # Atlas records the removal as a metadata tombstone, which would
+    # otherwise read as the Work itself being tombstoned.
+    it 'names the Darwin Core record on its removal' do
       summary = helper.audit_event_payload_summary(
         event(action: 'tombstone', change_type: 'metadata', payload: { 'source' => 'dwc' })
       )

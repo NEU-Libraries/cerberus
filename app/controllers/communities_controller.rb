@@ -40,7 +40,7 @@ class CommunitiesController < CatalogController
 
   # cascade is the confirmation's flag for a container that is not empty.
   # The top-level refusal must come first: Atlas refuses the root itself, but
-  # only after the cascade has withdrawn everything beneath it.
+  # only after the cascade has tombstoned everything beneath it.
   def tombstone
     return refuse_top_level_tombstone if top_level?(require_resource!(AtlasRb::Community.find(params[:id])))
 

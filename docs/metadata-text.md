@@ -254,7 +254,7 @@ nothing about what the file is for, and two captions need telling apart.
 
 ### Removing and restoring a caption
 
-Remove withdraws the caption's FileSet with `Resource.tombstone`, rather than
+Remove tombstones the caption's FileSet with `Resource.tombstone`, rather than
 deleting its Blob. The caption leaves `Work.assets`, so the player and the
 downloads drop it, but Atlas keeps the file and every revision of it.
 `Work.withdrawn_assets` still lists it, with the `file_set` id that

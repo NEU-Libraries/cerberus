@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# The editor-facing "Request withdraw / move" action on the Work edit page.
+# The editor-facing "Request deletion / move" action on the Work edit page.
 #
 # Cerberus has no approval model and no request lifecycle: a request is one
 # write-once row on the admin ledger, which staff read and then fulfil with the

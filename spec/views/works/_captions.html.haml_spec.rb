@@ -97,7 +97,7 @@ RSpec.describe 'works/_captions', type: :view do
                                    '[data-turbo-confirm^="Remove the Español caption file?"]')
     end
 
-    # Removal withdraws the file rather than deleting it, and says so.
+    # Removal tombstones the file rather than deleting it, and says so.
     it 'says a removed file can be restored' do
       expect(rendered).to have_css('[data-turbo-confirm*="can be restored from this page"]')
     end

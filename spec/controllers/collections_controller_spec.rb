@@ -460,7 +460,7 @@ describe CollectionsController do
   end
 
   # A collection that still holds items: CascadeTombstoning, then
-  # TombstoneCascadeJob. The job is enqueued, never run, so nothing is withdrawn.
+  # TombstoneCascadeJob. The job is enqueued, never run, so nothing is tombstoned.
   describe 'tombstone with cascade' do
     let(:admin) { User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin') }
     let(:delegate) do

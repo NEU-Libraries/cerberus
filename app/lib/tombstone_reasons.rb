@@ -14,11 +14,11 @@ module TombstoneReasons
     "Removed from view at contributor or content curator's discretion"
   ].freeze
 
-  # Recorded for a depositor or proxy uploader withdrawing their own item. Only
+  # Recorded for a depositor or proxy uploader tombstoning their own item. Only
   # the admin tier may choose another note.
   CURATOR = ALL.last
 
-  # The gone page's headline. A withdrawal recorded without a note still reads
+  # The gone page's headline. A tombstone recorded without a note still reads
   # as a sentence, and an unparseable date drops out rather than guessing.
   def self.sentence(title, reason, tombstoned_at)
     return "\"#{title}\" has been removed." if reason.blank?
