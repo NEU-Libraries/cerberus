@@ -1,10 +1,12 @@
-- rows = LoadReportRows.call(relation: report_ingests(load_report, loader).order(*report_ingest_order(loader)),
-                            multipage: loader.multipage?, page: params[:page])
+- filter = report_status_filter(params[:status])
+- relation = report_ingests(load_report, loader).order(*report_ingest_order(loader))
+- relation = relation.where(status: filter) if filter
+- rows = LoadReportRows.call(relation: relation, multipage: loader.multipage?, page: params[:page])
 - ingests = rows.rows
--# The poll URL carries the page, so a reload mid-load keeps the reader where
--# they are rather than sending them back to page 1.
+-# The poll URL carries the page and the filter, so a reload mid-load keeps the
+-# reader where they are rather than sending them back to every row on page 1.
 - poll_page = rows.pager.current_page if rows.pager.current_page > 1
-.admin-registry.my-3{data: { controller: 'load-poll', 'load-poll-terminal-value' => load_report.terminal?.to_s, 'load-poll-url-value' => loader_load_path(loader, load_report, page: poll_page) }}
+.admin-registry.my-3{data: { controller: 'load-poll', 'load-poll-terminal-value' => load_report.terminal?.to_s, 'load-poll-url-value' => loader_load_path(loader, load_report, page: poll_page, status: filter) }}
   %header.admin-registry__head
     %span.admin-registry__title
       %i.fa-solid.fa-file-import{'aria-hidden' => 'true'}
@@ -41,15 +43,31 @@
             .load-report-progress__track{role: 'progressbar', 'aria-valuenow' => load_report.processed_ingests, 'aria-valuemin' => 0, 'aria-valuemax' => load_report.total_ingests}
               .load-report-progress__fill{style: "width: #{load_report.progress_percent}%"}
 
-      .ingest-summary
-        .ingest-summary__tile.ingest-summary__tile--total
-          %span.ingest-summary__count= load_report.total_ingests
-          %span.ingest-summary__label Total
-        - %i[completed pending processing completed_with_warnings failed].each do |status|
-          - count = load_report.status_tally[status.to_s]
-          .ingest-summary__tile{class: "ingest-summary__tile--#{status}"}
-            %span.ingest-summary__count= count
-            %span.ingest-summary__label= status.to_s.humanize
+      -# Each tile is a toggle in one GET form. The active tile and Total submit no
+      -# status, which is what clears the filter, and no page, which returns to
+      -# page 1. See docs/ingest.md.
+      %form{action: loader_load_path(loader, load_report), method: 'get', data: { turbo_frame: '_top' }}
+        .ingest-summary{role: 'group', 'aria-label' => 'Show rows by status'}
+          %button.ingest-summary__tile.ingest-summary__tile--total{type: 'submit', 'aria-pressed' => filter.nil?.to_s}
+            %span.ingest-summary__count= load_report.total_ingests
+            %span.ingest-summary__label Total
+          - %w[completed pending processing completed_with_warnings failed].each do |status|
+            - count = load_report.status_tally[status]
+            - active = filter == status
+            - submits = active ? {} : { name: 'status', value: status }
+            %button.ingest-summary__tile{**submits, class: "ingest-summary__tile--#{status}", type: 'submit', 'aria-pressed' => active.to_s, disabled: (count.zero? && !active)}
+              - if active
+                %i.fa-solid.fa-circle-check.ingest-summary__check{'aria-hidden' => 'true'}
+              %span.ingest-summary__count= count
+              %span.ingest-summary__label= status.humanize
+
+  - if filter
+    .ingest-filter-status
+      %span
+        Showing
+        %strong= "#{number_with_delimiter(load_report.status_tally[filter])} of #{number_with_delimiter(load_report.total_ingests)}"
+        = "rows: #{filter.humanize}"
+      = link_to 'Show all rows', loader_load_path(loader, load_report), class: 'btn btn-tonal-secondary btn-sm', data: { turbo_frame: '_top' }
 
   - if ingests.any?
     .table-responsive
@@ -67,6 +85,13 @@
     - if rows.pager.total_pages > 1
       %nav.paginate-section{'aria-label' => 'Report pages'}
         = paginate rows.pager, theme: 'blacklight'
+  - elsif filter
+    -# Only mid-load: a status's last row moved on between the tile click and
+    -# this render. A finished load never offers an empty tile.
+    .admin-registry__empty
+      %i.fa-solid.fa-circle-question.admin-registry__empty-icon{'aria-hidden' => 'true'}
+      %p.mb-1.fw-semibold.text-body= "No rows are #{filter.humanize.downcase} now"
+      %p.mb-0.small.text-muted Rows change status while the load runs.
   - elsif load_report.in_progress?
     .admin-registry__empty
       %i.fa-solid.fa-arrows-rotate.fa-spin.admin-registry__empty-icon.admin-registry__empty-icon--processing{'aria-hidden' => 'true'}

@@ -495,6 +495,81 @@ RSpec.describe 'Loads', type: :request do
     end
   end
 
+  describe 'GET /loaders/marcom/loads/:id — filtering by status' do
+    before { sign_in marcom_user }
+
+    let!(:report) do
+      LoadReport.create!(loader: marcom_loader, source_filename: 'jpgs.zip',
+                         parent_collection_id: 'neu:c1', status: :completed_with_warnings).tap do |r|
+        2.times { |n| create(:iptc_ingest, load_report: r, status: :failed, source_filename: "bad_#{n}.jpg") }
+        (LoadReportRows::PER_PAGE + 1).times do |n|
+          create(:iptc_ingest, load_report: r, status: :completed, source_filename: format('ok_%04d.jpg', n))
+        end
+      end
+    end
+
+    def html = response.parsed_body
+    def table_rows = html.css('tbody tr.ingest-row')
+    def tile(status) = html.at_css(".ingest-summary__tile--#{status}")
+
+    it 'shows only the rows with the chosen status, and says how many' do
+      get loader_load_path(marcom_loader, report, status: 'failed')
+
+      expect(table_rows.size).to eq(2)
+      expect(table_rows.map(&:text).join).not_to include('ok_')
+      expect(html.at_css('.ingest-filter-status').text.squish).to include('Showing 2 of 53 rows: Failed')
+    end
+
+    it 'presses the active tile, which then submits no status, so it clears the filter' do
+      get loader_load_path(marcom_loader, report, status: 'failed')
+
+      expect(tile(:failed)['aria-pressed']).to eq('true')
+      expect(tile(:failed)['name']).to be_nil
+      expect(tile(:total)['aria-pressed']).to eq('false')
+      expect(%w[name value].map { |attr| tile(:completed)[attr] }).to eq(%w[status completed])
+    end
+
+    it 'presses Total and shows every row when nothing is filtered' do
+      get loader_load_path(marcom_loader, report)
+
+      expect(tile(:total)['aria-pressed']).to eq('true')
+      expect(html.at_css('.ingest-filter-status')).to be_nil
+    end
+
+    it 'disables a tile with nothing to show' do
+      get loader_load_path(marcom_loader, report)
+
+      expect(tile(:pending)).to have_attribute('disabled')
+      expect(tile(:failed)).not_to have_attribute('disabled')
+    end
+
+    it 'ignores a status that is not one' do
+      get loader_load_path(marcom_loader, report, status: 'bogus')
+
+      expect(table_rows.size).to eq(LoadReportRows::PER_PAGE)
+      expect(html.at_css('.ingest-filter-status')).to be_nil
+    end
+
+    it 'keeps the filter on the pager and in the poll URL' do
+      report.update!(status: :processing)
+
+      get loader_load_path(marcom_loader, report, status: 'completed', page: 2)
+
+      expect(table_rows.size).to eq(1)
+      expect(html.css('nav.paginate-section a').pluck('href')).to all(include('status=completed'))
+      expect(html.at_css('[data-controller="load-poll"]')['data-load-poll-url-value'])
+        .to eq(loader_load_path(marcom_loader, report, page: 2, status: 'completed'))
+    end
+
+    # Mid-load, a status's last row can move on between the click and the render.
+    it 'says so when no rows have the status any more, instead of the empty-load copy' do
+      get loader_load_path(marcom_loader, report, status: 'processing')
+
+      expect(response.body).to include('No rows are processing now')
+      expect(response.body).not_to include('No images ingested')
+    end
+  end
+
   describe 'XML loader dispatch (kind: :xml)' do
     let!(:xml_loader) do
       Loader.create!(slug: 'xml', display_name: 'XML Metadata Loader',

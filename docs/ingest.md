@@ -193,6 +193,34 @@ Two details keep the page stable:
 - **A page past the end shows the last page.** Otherwise a load that has rows
   could render its "No images ingested" empty state.
 
+## Filtering the load report by status
+
+The status tiles above the table are toggle buttons. Pressing one shows only the
+rows with that status. Pressing it again, or pressing Total, shows every row. A
+tile with a count of 0 is disabled. Above a filtered table, a line says how many
+rows show, such as "Showing 3 of 60 rows: Failed", with a "Show all rows"
+button.
+
+The filter runs on the server, as `?status=` on the same query that pages the
+rows. A browser-side filter would see only the current page. So:
+
+- **The tiles are one GET form.** Each tile submits `status` with its own value.
+  The active tile and Total submit no `status`, which is what clears the filter,
+  and no tile submits `page`, so a new filter starts at page 1.
+- **The filter rides along everywhere the page does.** Kaminari's pager links
+  keep `status`, and so does the poll URL, so a reload mid-load keeps both.
+- **Only a real status counts.** `report_status_filter` checks the parameter
+  against `Ingest.statuses`, and anything else shows every row.
+- **Multipage filtering still pages by Work,** over the filtered rows.
+- **The tiles count the whole load,** whatever the filter.
+
+A filtered table can come up empty only while a load runs, when a status's last
+row moves on between the click and the render. The page then says so ("No rows
+are processing now") instead of showing the empty-load copy.
+
+A pressed tile takes a 10% tint of its tone and a tone label darkened with 20%
+black. A stronger tint puts the grey labels under 4.5:1.
+
 ## The XML preview
 
 An XML load stops on a preview of the first manifest row before anything is

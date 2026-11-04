@@ -139,7 +139,8 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     'fixity'              => -> { '/admin/fixity?state=never' },
     'work health'         => -> { "/admin/work_health?noid=#{@work.id}" },
     'a set Sentinel'      => -> { "/sets/#{@set['id']}/edit?tab=sentinel" },
-    'a paged load report' => -> { "/loaders/axe-audit/loads/#{@load_report.id}" }
+    'a paged load report' => -> { "/loaders/axe-audit/loads/#{@load_report.id}" },
+    'a filtered report'   => -> { "/loaders/axe-audit/loads/#{@load_report.id}?status=completed" }
   }
 
   # axe skips what is not displayed, so each edit pane needs its own visit. The

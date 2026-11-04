@@ -38,6 +38,16 @@ RSpec.describe LoadsHelper do
     end
   end
 
+  describe '#report_status_filter' do
+    it 'accepts a real status' do
+      expect(helper.report_status_filter('completed_with_warnings')).to eq('completed_with_warnings')
+    end
+
+    it 'ignores a blank or unknown one' do
+      expect([nil, '', 'bogus'].map { |param| helper.report_status_filter(param) }).to all(be_nil)
+    end
+  end
+
   describe '#loader_intake_description' do
     it 'describes an archive of tagged images for an IPTC loader' do
       expect(helper.loader_intake_description(Loader.new(kind: :iptc)))
