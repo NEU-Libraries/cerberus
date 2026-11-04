@@ -39,7 +39,10 @@ $ingest-tone-failed:     #a73a31;
   border-radius: 0.3rem;
   background-color: color-mix(in srgb, var(--ingest-tone, #{$ingest-tone-pending}) 12%, white);
   border: 1px solid color-mix(in srgb, var(--ingest-tone, #{$ingest-tone-pending}) 28%, white);
-  color: var(--ingest-tone, #{$ingest-tone-pending});
+  // The label is the tone darkened, not the tone itself: three of the five
+  // tones fall under 4.5:1 on their own tint. 20% black clears all five with
+  // margin; 15% leaves warnings on a hairline.
+  color: color-mix(in srgb, var(--ingest-tone, #{$ingest-tone-pending}) 80%, black);
   font-weight: 600;
   font-size: 0.78rem;
   line-height: 1.2;
@@ -93,7 +96,8 @@ $ingest-tone-failed:     #a73a31;
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: $gray-600;
+    // $gray-600 reads under 4.5:1 on every tile's tint.
+    color: $text-subtle;
     font-weight: 600;
     margin-top: 0.15rem;
   }
