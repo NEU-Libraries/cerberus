@@ -71,6 +71,29 @@ RSpec.describe 'Load report polling', :browser, type: :system do
     end
   end
 
+  # The poller reloads the URL it was handed, so that URL has to carry the page.
+  describe 'on page 2 of a long load' do
+    let(:before_visit) do
+      (LoadReportRows::PER_PAGE + 3).times do |n|
+        report.xml_ingests.create!(source_filename: format('row_%04d.xml', n), status: :completed,
+                                   idempotency_key: SecureRandom.uuid)
+      end
+    end
+
+    it 'stays on page 2 when a poll swaps the frame' do
+      click_link '2'
+      expect(page).to have_content('row_0052.xml')
+      mark_page
+
+      report.update!(status: :completed, finished_at: Time.current)
+
+      expect(page).to have_content('Completed', wait: 15)
+      expect(page_marked?).to be(true)
+      expect(page).to have_content('row_0052.xml')
+      expect(page).to have_no_content('row_0000.xml')
+    end
+  end
+
   # --- helpers ---------------------------------------------------------------
 
   def poll_flag

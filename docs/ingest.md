@@ -12,6 +12,8 @@ Source files:
 - `app/services/mods_record_validator.rb`
 - `app/services/xml_preview_file.rb`
 - `app/views/loads/_preview.html.haml`
+- `app/services/load_report_rows.rb`
+- `app/views/loads/_report.html.haml`
 - `app/javascript/preview_controllers/xml_viewer_controller.js`
 
 ## Routing a staged upload
@@ -164,6 +166,32 @@ self-guards on an existing thumbnail.
 
 `ContentCreationJob` is never enqueued here. It calls `Work.complete`, which is
 `CompleteWorkJob`'s responsibility, exactly once, after every page has landed.
+
+## Paging the load report
+
+A load's Processing page shows its rows 50 at a time
+(`LoadReportRows::PER_PAGE`). A load can run past a thousand rows, and the
+poller re-renders the whole report every few seconds while it runs. The status
+tiles above the table count the whole load, not the page.
+
+**IPTC and XML pages are 50 rows,** in the report's own order: failures, then
+warnings, then the rest by filename.
+
+**Multipage pages are whole Works.** A page takes Works in item order until the
+next Work would take it past 50 rows. A Work longer than 50 pages gets a page of
+its own. So a Work's pages never split across a page break, which is the reason
+the table groups multipage rows by item. A structural-failure row has no item,
+so it counts as a Work of its own and comes first. `LoadReportRows` counts each
+item's rows, packs the items, and gives Kaminari the packs as an array, one pack
+per page.
+
+Two details keep the page stable:
+
+- **The poll URL carries the page.** The poller reloads the URL that
+  `_report` hands it, so without the page a reload mid-load would send the reader
+  back to page 1.
+- **A page past the end shows the last page.** Otherwise a load that has rows
+  could render its "No images ingested" empty state.
 
 ## The XML preview
 

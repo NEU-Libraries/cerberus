@@ -1,5 +1,10 @@
-- ingests = report_ingests(load_report, loader).order(*report_ingest_order(loader)).to_a
-.admin-registry.my-3{data: { controller: 'load-poll', 'load-poll-terminal-value' => load_report.terminal?.to_s, 'load-poll-url-value' => loader_load_path(loader, load_report) }}
+- rows = LoadReportRows.call(relation: report_ingests(load_report, loader).order(*report_ingest_order(loader)),
+                            multipage: loader.multipage?, page: params[:page])
+- ingests = rows.rows
+-# The poll URL carries the page, so a reload mid-load keeps the reader where
+-# they are rather than sending them back to page 1.
+- poll_page = rows.pager.current_page if rows.pager.current_page > 1
+.admin-registry.my-3{data: { controller: 'load-poll', 'load-poll-terminal-value' => load_report.terminal?.to_s, 'load-poll-url-value' => loader_load_path(loader, load_report, page: poll_page) }}
   %header.admin-registry__head
     %span.admin-registry__title
       %i.fa-solid.fa-file-import{'aria-hidden' => 'true'}
@@ -59,6 +64,9 @@
           = render partial: 'ingest_row',
                    collection: ingests,
                    as: :ingest
+    - if rows.pager.total_pages > 1
+      %nav.paginate-section{'aria-label' => 'Report pages'}
+        = paginate rows.pager, theme: 'blacklight'
   - elsif load_report.in_progress?
     .admin-registry__empty
       %i.fa-solid.fa-arrows-rotate.fa-spin.admin-registry__empty-icon.admin-registry__empty-icon--processing{'aria-hidden' => 'true'}

@@ -32,6 +32,27 @@ RSpec.describe 'Accessibility', :browser, type: :system do
                               nuid: AtlasFixtures::ADMIN_NUID)
     @set = AtlasRb::Compilation.create('Axe audit set', nuid: AtlasFixtures::ADMIN_NUID)
     @replaced_work = create_work_with_replaced_file(@collection.id)
+    @load_report = create_paged_load_report
+  end
+
+  # Local records, not Atlas ones, so the rollback that clears each example
+  # does not reach them.
+  after(:all) do
+    @load_report&.iptc_ingests&.delete_all
+    @load_report&.destroy
+    Loader.find_by(slug: 'axe-audit')&.destroy
+  end
+
+  # One row past a page, so the report renders its pager.
+  def create_paged_load_report
+    loader = Loader.create!(slug: 'axe-audit', display_name: 'Axe Audit Loader',
+                            group: 'northeastern:drs:repository:loaders:axe-audit', root_collection: 'neu:root')
+    LoadReport.create!(loader: loader, source_filename: 'batch.zip', status: :completed).tap do |report|
+      (LoadReportRows::PER_PAGE + 1).times do |n|
+        report.iptc_ingests.create!(source_filename: format('img_%04d.jpg', n), status: :completed,
+                                    idempotency_key: SecureRandom.uuid)
+      end
+    end
   end
 
   # Public before the Blob lands, so a guest can read the Blob, and its row
@@ -117,7 +138,8 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     'deposit triage'      => -> { '/admin/deposit_triage' },
     'fixity'              => -> { '/admin/fixity?state=never' },
     'work health'         => -> { "/admin/work_health?noid=#{@work.id}" },
-    'a set Sentinel'      => -> { "/sets/#{@set['id']}/edit?tab=sentinel" }
+    'a set Sentinel'      => -> { "/sets/#{@set['id']}/edit?tab=sentinel" },
+    'a paged load report' => -> { "/loaders/axe-audit/loads/#{@load_report.id}" }
   }
 
   # axe skips what is not displayed, so each edit pane needs its own visit. The

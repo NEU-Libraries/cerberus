@@ -446,6 +446,55 @@ RSpec.describe 'Loads', type: :request do
     end
   end
 
+  describe 'GET /loaders/marcom/loads/:id — paging the rows' do
+    before { sign_in marcom_user }
+
+    def report_with(rows, status: :completed)
+      LoadReport.create!(loader: marcom_loader, source_filename: 'jpgs.zip',
+                         parent_collection_id: 'neu:c1', status: status).tap do |report|
+        rows.times { |n| create(:iptc_ingest, load_report: report, status: :completed, source_filename: format('img_%04d.jpg', n)) }
+      end
+    end
+
+    def table_rows = response.parsed_body.css('tbody tr.ingest-row')
+
+    it 'shows the first 50 rows and a pager' do
+      report = report_with(LoadReportRows::PER_PAGE + 3)
+
+      get loader_load_path(marcom_loader, report)
+
+      expect(table_rows.size).to eq(LoadReportRows::PER_PAGE)
+      expect(response.parsed_body.at_css('nav.paginate-section')).to be_present
+    end
+
+    it 'shows the rest on page 2' do
+      report = report_with(LoadReportRows::PER_PAGE + 3)
+
+      get loader_load_path(marcom_loader, report, page: 2)
+
+      expect(table_rows.map(&:text).join).to include('img_0052.jpg')
+      expect(table_rows.size).to eq(3)
+    end
+
+    it 'shows no pager when every row fits on one page' do
+      report = report_with(3)
+
+      get loader_load_path(marcom_loader, report)
+
+      expect(response.parsed_body.at_css('nav.paginate-section')).to be_nil
+    end
+
+    # Without the page in the poll URL, every reload mid-load would send the
+    # reader back to page 1.
+    it 'hands the poller the page being read' do
+      report = report_with(LoadReportRows::PER_PAGE + 3, status: :processing)
+
+      get loader_load_path(marcom_loader, report, page: 2)
+
+      expect(response.body).to include(%(data-load-poll-url-value="#{loader_load_path(marcom_loader, report, page: 2)}"))
+    end
+  end
+
   describe 'XML loader dispatch (kind: :xml)' do
     let!(:xml_loader) do
       Loader.create!(slug: 'xml', display_name: 'XML Metadata Loader',
