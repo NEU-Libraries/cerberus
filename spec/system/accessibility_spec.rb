@@ -31,6 +31,18 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     AtlasRb::Resource.put_dwc(@dwc_work.id, Rails.root.join('spec/fixtures/files/dwc-record.xml').to_s,
                               nuid: AtlasFixtures::ADMIN_NUID)
     @set = AtlasRb::Compilation.create('Axe audit set', nuid: AtlasFixtures::ADMIN_NUID)
+    @replaced_work = create_work_with_replaced_file(@collection.id)
+  end
+
+  # Public before the Blob lands, so a guest can read the Blob and the File
+  # history card renders.
+  def create_work_with_replaced_file(parent_id)
+    image = Rails.root.join('spec/fixtures/files/image.png').to_s
+    work = create_work(parent_id, public: true)
+    AtlasRb::Blob.create(work.id, image, 'image.png', nuid: AtlasFixtures::ADMIN_NUID)
+    noid = AtlasRb::Work.assets(work.id, nuid: AtlasFixtures::ADMIN_NUID).first.noid
+    AtlasRb::Blob.update(noid, image, nuid: AtlasFixtures::ADMIN_NUID)
+    work
   end
 
   def expect_axe_clean
@@ -66,6 +78,7 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     'a community'      => -> { "/communities/#{@community.id}" },
     'a collection'     => -> { "/collections/#{@collection.id}" },
     'a work'           => -> { "/works/#{@work.id}" },
+    'a replaced file'  => -> { "/works/#{@replaced_work.id}" },
     'Darwin Core tab'  => -> { "/works/#{@dwc_work.id}#darwin-core" },
     'the sign-in page' => -> { atlas_login_path }
   }

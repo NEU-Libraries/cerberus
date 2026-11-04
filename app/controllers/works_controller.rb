@@ -210,6 +210,7 @@ class WorksController < ApplicationController
       @scholar = GoogleScholarMetadata.for(work: @work, permissions: @permissions, files: @files)
       @av_file = MediaRemux.playable_file(@files)
       @captions = CaptionTrack.all(@files)
+      @file_revisions = reads[:file_revisions]
       # On the request thread, never in a worker: the gate is the search
       # service, and a worker holds no database connection.
       @associations = WorkAssociations.call(associations:   reads[:associations],
@@ -245,13 +246,15 @@ class WorksController < ApplicationController
     end
 
     def parallel_show_reads
+      id = params[:id]
       nuid = viewer_nuid
       parallel_atlas_reads(
         {
-          mods:         -> { AtlasRb::Work.mods(params[:id], 'html') },
-          files:        -> { AtlasRb::Work.assets(params[:id], nuid: nuid) },
-          file_sets:    -> { AtlasRb::Work.file_sets(params[:id], nuid: nuid) },
-          associations: -> { associations_or_none(params[:id]) }
+          mods:           -> { AtlasRb::Work.mods(id, 'html') },
+          files:          -> { AtlasRb::Work.assets(id, nuid: nuid) },
+          file_sets:      -> { AtlasRb::Work.file_sets(id, nuid: nuid) },
+          associations:   -> { associations_or_none(id) },
+          file_revisions: -> { file_revisions_or_none(id, nuid) }
         }.merge(darwin_core_read)
       )
     end
@@ -276,6 +279,15 @@ class WorksController < ApplicationController
       AtlasRb::Work.associations(id)
     rescue StandardError => e
       Rails.logger.error("WorksController: associations read failed for #{id}: #{e.class} #{e.message}")
+      nil
+    end
+
+    # Rescued inside the task for the same reason as associations_or_none: the
+    # history card is supplementary, and nil renders no card.
+    def file_revisions_or_none(id, nuid)
+      AtlasRb::Work.file_revisions(id, nuid: nuid)
+    rescue StandardError => e
+      Rails.logger.error("WorksController: file_revisions read failed for #{id}: #{e.class} #{e.message}")
       nil
     end
 

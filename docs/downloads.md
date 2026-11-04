@@ -20,6 +20,8 @@ Source files:
 - `app/jobs/pdf_rendition_job.rb`
 - `app/services/rendition_asset.rb`
 - `bin/soffice-timeout`
+- `app/helpers/downloads_helper.rb`
+- `app/views/works/_file_history.html.haml`
 
 `IiifAssetsJob`, `CaptionJob` and `StreamingOnly` are covered in
 `docs/derivatives.md`. `SetDownloadsController` and the resolvers that feed the
@@ -610,3 +612,29 @@ Three consequences follow:
   same one, the lowest NOID, and an admin can remove the others.
 - An original that is already an MP4 is never remuxed, and has no other
   original under its stem, so it is never mistaken for its own rendition.
+
+## Showing a file's replacement history
+
+The File history card sits under the Downloads card on the work page. It lists
+each replaced file's versions, newest first: the file ID, the version number
+and the date that version was uploaded. A work whose files were never replaced
+shows no card.
+
+The data comes from `AtlasRb::Work.file_revisions`, a fifth read in
+`WorksController#parallel_show_reads`. Atlas authorizes it with `:read` on the
+Work, so everyone who can see the work sees the history. Each entry carries
+only `revision` and `created`. The attributed history, with the actor, digest
+and filename of each version, stays on the admin Replace a file page, behind
+`:read_versions`.
+
+Two rules decide which files appear:
+
+- **Only files the Downloads card shows.** `file_history_entries` pairs the
+  revisions with the card's own list, so a file withheld from the viewer, by an
+  embargo or a gated tier, has no history on the page either.
+- **A failed read drops the card, not the page.** The read is rescued inside its
+  task, as the associations read is, and `nil` renders nothing.
+
+The version number is the contiguous revision ordinal, the same number the
+admin page shows. The raw OCFL version can skip numbers, so the page never
+shows it.
