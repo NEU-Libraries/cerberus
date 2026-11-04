@@ -1,0 +1,18 @@
+-# The version chip on a replaced file's download row. A dropdown, not a
+-# popover, so the menu is in the DOM for screen readers, and Escape closes it
+-# and returns focus to the chip. See docs/downloads.md.
+- current = revisions.first
+- toggle_id = "file-versions-#{file.noid}"
+.dropdown.file-versions
+  %button.btn.btn-tonal-secondary.btn-sm.dropdown-toggle{id: toggle_id, type: 'button', 'aria-expanded' => 'false', 'aria-label' => "Version #{current['revision']}, version history of #{label}", data: { bs_toggle: 'dropdown', bs_offset: '0,10' }}
+    = "Version #{current['revision']}"
+  .dropdown-menu.file-versions__menu{'aria-labelledby' => toggle_id}
+    %h3.dropdown-header= label
+    %ol.list-unstyled.mb-0
+      - revisions.each_with_index do |revision, i|
+        %li.dropdown-item-text.file-versions__row
+          %span
+            = "Version #{revision['revision']}"
+            - if i.zero?
+              %span.text-subtle (current)
+          %span.text-subtle= file_revision_date(revision['created'])

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-# The work page's Downloads card and the File history card under it.
+# The work page's Downloads card, and the version chip on a replaced file's row.
+# See docs/downloads.md.
 module DownloadsHelper
   # What a download row calls its file. A caption track's label names its
   # language, and other assets fall back from the label to their use.
@@ -10,17 +11,18 @@ module DownloadsHelper
     file.label.presence || file[:use]
   end
 
-  # Pairs each Blob in `files` with its revisions, newest first. Only the files
-  # the Downloads card shows get a history, so a file withheld from the viewer
-  # stays out of both cards. Renditions carry a `uri` and no revisions.
-  def file_history_entries(files, file_revisions)
-    by_blob = Array(file_revisions).to_h { |entry| [entry['blob_id'], Array(entry['revisions'])] }
+  # Each replaced Blob's revisions, newest first, keyed by its noid. A failed
+  # read arrives as nil and gives no chips.
+  def file_revisions_by_blob(file_revisions)
+    Array(file_revisions).to_h { |entry| [entry['blob_id'], Array(entry['revisions'])] }
+  end
 
-    Array(files).filter_map do |file|
-      next if file[:uri].present?
-
-      revisions = by_blob[file[:noid]]
-      [file, revisions] if revisions.present?
-    end
+  # A reader cares which day a file changed, not the minute, so the chip's menu
+  # shows the date alone, in the app's time zone.
+  def file_revision_date(created)
+    time = Time.iso8601(created.to_s).in_time_zone
+    tag.time(time.strftime('%-d %B %Y'), datetime: time.iso8601)
+  rescue ArgumentError
+    tag.span('date unknown', class: 'text-subtle')
   end
 end

@@ -3,51 +3,38 @@
 require 'rails_helper'
 
 RSpec.describe DownloadsHelper, type: :helper do
-  let(:pdf) { AtlasRb::Mash.new(noid: 'b1', label: 'PDF', use: 'original_file') }
-  let(:image) { AtlasRb::Mash.new(noid: 'b2', label: '', use: 'Image File') }
-  let(:rendition) { AtlasRb::Mash.new(role: 'large_image', uri: 'https://g/x.jp2/full/pct:75/0/default.jpg') }
-
-  def revisions_for(blob_id, *ordinals)
-    { 'blob_id'   => blob_id,
-      'revisions' => ordinals.map { |n| { 'revision' => n, 'created' => "2026-10-0#{n}T12:00:00Z" } } }
-  end
-
   describe '#download_label' do
     it 'uses the label when there is one' do
-      expect(helper.download_label(pdf)).to eq('PDF')
+      expect(helper.download_label(AtlasRb::Mash.new(label: 'PDF', use: 'original_file'))).to eq('PDF')
     end
 
     it 'falls back to the use when the label is blank' do
-      expect(helper.download_label(image)).to eq('Image File')
+      expect(helper.download_label(AtlasRb::Mash.new(label: '', use: 'Image File'))).to eq('Image File')
     end
   end
 
-  describe '#file_history_entries' do
-    it 'pairs each listed file with its revisions, in the order of the files' do
-      revisions = [revisions_for('b2', 2, 1), revisions_for('b1', 3, 2, 1)]
+  describe '#file_revisions_by_blob' do
+    it 'keys each Blob\'s revisions by its noid, keeping their order' do
+      revisions = [{ 'blob_id' => 'b1', 'revisions' => [{ 'revision' => 2 }, { 'revision' => 1 }] }]
 
-      entries = helper.file_history_entries([pdf, image], revisions)
-
-      expect(entries.map { |file, _| file.noid }).to eq(%w[b1 b2])
-      expect(entries.first.last.pluck('revision')).to eq([3, 2, 1])
+      expect(helper.file_revisions_by_blob(revisions)['b1'].pluck('revision')).to eq([2, 1])
     end
 
-    # A Blob the Downloads card withholds is absent from `files`, so its
-    # history stays off the page too.
-    it 'leaves out a revised Blob that is not among the files' do
-      entries = helper.file_history_entries([pdf], [revisions_for('b9', 2, 1)])
+    it 'treats a failed read (nil) as no revisions' do
+      expect(helper.file_revisions_by_blob(nil)).to eq({})
+    end
+  end
 
-      expect(entries).to be_empty
+  describe '#file_revision_date' do
+    it 'shows the day alone, with the full timestamp on the time element' do
+      html = Nokogiri::HTML.fragment(helper.file_revision_date('2026-11-04T16:48:11Z')).at_css('time')
+
+      expect(html.text).to eq('4 November 2026')
+      expect(html['datetime']).to start_with('2026-11-04T11:48:11')
     end
 
-    it 'leaves out renditions and files that were never replaced' do
-      entries = helper.file_history_entries([rendition, image], [revisions_for('b1', 2, 1)])
-
-      expect(entries).to be_empty
-    end
-
-    it 'treats a failed read (nil) as no history' do
-      expect(helper.file_history_entries([pdf], nil)).to be_empty
+    it 'says so when the date cannot be read' do
+      expect(helper.file_revision_date('not a date')).to include('date unknown')
     end
   end
 end

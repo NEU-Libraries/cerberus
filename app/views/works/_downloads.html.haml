@@ -3,6 +3,7 @@
 #downloads.card.mb-4
   .card-header
     %h2.h5.mb-0 Downloads
+  - revisions = file_revisions_by_blob(local_assigns[:file_revisions])
   %ul.list-group.list-group-flush
     - files.each do |file|
-      = render 'works/download_row', file: file, work_noid: @work.id
+      = render 'works/download_row', file: file, work_noid: @work.id, revisions: (revisions[file.noid] if file[:uri].blank?)

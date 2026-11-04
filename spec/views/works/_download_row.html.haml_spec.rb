@@ -74,4 +74,32 @@ RSpec.describe 'works/_download_row', type: :view do
     expect(rendered).to include('Add to queue')
     expect(rendered).to include('queue-control-w-1-large_image')
   end
+
+  describe 'the version chip' do
+    let(:file) do
+      AtlasRb::Mash.new(noid: 'b-1', mime_type: 'image/jpeg', label: 'Original Image',
+                        filename: 'original_b-1.jpg', size: 1000)
+    end
+    let(:revisions) do
+      [{ 'revision' => 2, 'created' => '2026-11-04T16:48:11Z' },
+       { 'revision' => 1, 'created' => '2026-10-28T01:13:00Z' }]
+    end
+
+    it 'names the current version, and lists every version newest first in its menu' do
+      render partial: 'works/download_row', locals: { file: file, work_noid: 'w-1', revisions: revisions }
+
+      html = Nokogiri::HTML.fragment(rendered)
+      chip = html.at_css('#file-versions-b-1')
+      expect(chip.text.strip).to eq('Version 2')
+      expect(chip['aria-label']).to eq('Version 2, version history of Original Image')
+      rows = html.css('.file-versions__row').map { |row| row.text.squish }
+      expect(rows).to eq(['Version 2 (current) 4 November 2026', 'Version 1 27 October 2026'])
+    end
+
+    it 'is absent from a file that was never replaced' do
+      render partial: 'works/download_row', locals: { file: file, work_noid: 'w-1' }
+
+      expect(rendered).not_to include('file-versions')
+    end
+  end
 end

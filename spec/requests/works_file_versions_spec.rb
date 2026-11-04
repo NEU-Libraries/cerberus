@@ -2,21 +2,21 @@
 
 require 'rails_helper'
 
-# End-to-end over the real test Atlas, as a guest: the history reaches readers
-# under the Work's own read gate, not only the admin tiers that can read the
-# attributed Blob.versions.
-RSpec.describe 'Work file history', type: :request do
+# End-to-end over the real test Atlas, as a guest: the version chip reaches
+# readers under the Work's own read gate, not only the admin tiers that can read
+# the attributed Blob.versions.
+RSpec.describe 'Work file version chip', type: :request do
   let(:fixtures) { Rails.root.join('spec/fixtures/files') }
   let!(:community)  { public_container(AtlasRb::Community, nil) }
   let!(:collection) { public_container(AtlasRb::Collection, community.id) }
   let!(:work)       { public_work(collection.id) }
 
-  it 'renders no File history card for a Work whose file was never replaced' do
+  it 'shows no version chip on a file that was never replaced' do
     get work_path(work.id)
 
     expect(response).to have_http_status(:ok)
     expect(response.body).to include('id="downloads"')
-    expect(response.body).not_to include('id="file-history"')
+    expect(response.body).not_to include('file-versions')
   end
 
   context 'when a file was replaced' do
@@ -26,18 +26,18 @@ RSpec.describe 'Work file history', type: :request do
       noid
     end
 
-    it 'lists each version newest first, with the file ID, to a guest' do
+    it 'puts a version chip on its download row, listing each version newest first, for a guest' do
       get work_path(work.id)
 
       expect(response).to have_http_status(:ok)
-      card = response.parsed_body.at_css('#file-history')
-      expect(card).to be_present
-      expect(card.text).to include('File ID', blob_noid)
-      expect(card.css('tbody tr td:first-child .admin-registry-table__id').map(&:text)).to eq(%w[2 1])
-      expect(card.css('tbody tr').first.text).to include('current')
+      chip = response.parsed_body.at_css("#file-versions-#{blob_noid}")
+      expect(chip.text.strip).to eq('Version 2')
+      rows = chip.ancestors('.file-versions').first.css('.file-versions__row')
+      expect(rows.map { |row| row.text.squish[/\AVersion \d+/] }).to eq(['Version 2', 'Version 1'])
+      expect(rows.first.text).to include('(current)')
     end
 
-    # The read is supplementary: a failure drops the card, not the page.
+    # The read is supplementary: a failure drops the chip, not the page.
     it 'still renders the page when the read fails' do
       allow(AtlasRb::Work).to receive(:file_revisions).and_raise(AtlasRb::ResourceError.new('boom'))
 
@@ -45,7 +45,7 @@ RSpec.describe 'Work file history', type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('id="downloads"')
-      expect(response.body).not_to include('id="file-history"')
+      expect(response.body).not_to include('file-versions')
     end
   end
 

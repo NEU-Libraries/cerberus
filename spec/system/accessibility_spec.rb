@@ -34,8 +34,8 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     @replaced_work = create_work_with_replaced_file(@collection.id)
   end
 
-  # Public before the Blob lands, so a guest can read the Blob and the File
-  # history card renders.
+  # Public before the Blob lands, so a guest can read the Blob and its row
+  # carries the version chip.
   def create_work_with_replaced_file(parent_id)
     image = Rails.root.join('spec/fixtures/files/image.png').to_s
     work = create_work(parent_id, public: true)
@@ -141,6 +141,16 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     it 'the work health report passes axe' do
       visit "/works/#{@work.id}/edit#health"
       expect(page).to have_css('.work-health__grade')
+      expect_axe_clean
+    end
+  end
+
+  # axe skips hidden content, so the version menu is audited open.
+  context 'as a guest, with a version menu open' do
+    it 'the version menu passes axe' do
+      visit "/works/#{@replaced_work.id}"
+      find('.file-versions .dropdown-toggle').click
+      expect(page).to have_css('.file-versions__menu.show')
       expect_axe_clean
     end
   end
