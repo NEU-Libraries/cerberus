@@ -30,8 +30,9 @@
       -# Read aloud as "about 59 KB"; the tilde alone would be read as "tilde".
       %small.text-muted.text-nowrap{title: 'Estimated size'}
         = safe_join([tag.span('~', 'aria-hidden': 'true'), tag.span('about ', class: 'visually-hidden'), number_to_human_size(estimate, precision: 2)])
+    -# A signal only. The versions themselves are in the File history card.
     - if local_assigns[:revisions].present?
-      = render 'works/file_versions', file: file, revisions: revisions, label: display_label
+      %span.file-version-chip= "Version #{revisions.first['revision']}"
   - if file[:uri].present?
     = link_to derivative_download_path(work_noid, file[:role]), class: 'btn btn-tonal-primary btn-sm ms-3', 'aria-label' => "Download #{display_label}", target: '_blank', rel: 'noopener' do
       %span.fa-solid.fa-download{'aria-hidden' => true}

@@ -21,7 +21,7 @@ Source files:
 - `app/services/rendition_asset.rb`
 - `bin/soffice-timeout`
 - `app/helpers/downloads_helper.rb`
-- `app/views/works/_file_versions.html.haml`
+- `app/views/works/_file_history.html.haml`
 
 `IiifAssetsJob`, `CaptionJob` and `StreamingOnly` are covered in
 `docs/derivatives.md`. `SetDownloadsController` and the resolvers that feed the
@@ -615,34 +615,40 @@ Three consequences follow:
 
 ## Showing a file's replacement history
 
-A replaced file's row in the Downloads card carries a version chip, such as
-"Version 2", beside its size. The chip opens a menu that lists every version,
-newest first, with the day each was uploaded, and marks the current one. A
-file that was never replaced has no chip, so the row stays as it was.
+The work page shows a replaced file's history in two places that work as a
+pair:
+
+- **A version chip on the file's Downloads row**, such as "Version 2", beside
+  its size. It only signals that the file has changed. It is plain text, not a
+  control, so it takes the identifier chip's shape at the filename's size rather
+  than a button size.
+- **A File history card under the Downloads card.** It names each replaced file
+  exactly as its row does, label and filename, so the chip and the entry read as
+  one. It lists every version, newest first, with the day each was uploaded, and
+  marks the current one.
+
+A file that was never replaced has no chip and no entry. A work with no replaced
+files has no card.
 
 The data comes from `AtlasRb::Work.file_revisions`, a fifth read in
 `WorksController#parallel_show_reads`. Atlas authorizes it with `:read` on the
-Work, so everyone who can see the work sees the versions. Each entry carries
-only `revision` and `created`. The attributed history, with the actor, digest
-and filename of each version, stays on the admin Replace a file page, behind
+Work, so everyone who can see the work sees the history. Each entry carries only
+`revision` and `created`. The attributed history, with the actor, digest and
+filename of each version, stays on the admin Replace a file page, behind
 `:read_versions`.
 
 Some rules follow from the design:
 
-- **The chip lives on the row, so it follows the row.** A file the Downloads
-  card withholds from the viewer, by an embargo or a gated tier, has no row and
-  so no chip. The Downloads modal renders the same row, but it makes no
-  revisions read, so it shows no chip.
-- **A failed read drops the chips, not the page.** The read is rescued inside its
-  task, as the associations read is, and `nil` gives no chips.
-- **The menu is a Bootstrap dropdown, not a popover.** The menu is in the DOM,
-  so a screen reader reaches it, and Escape closes it and returns focus to the
-  chip. It opens from the chip's left edge with its arrow a fixed distance in.
-  A centred menu gets shifted on a phone, which would leave a centred arrow
-  pointing past the chip.
-- **The menu shows the day, not the time.** A reader cares which day a file
+- **Only files the Downloads card shows.** `file_history_entries` pairs the
+  revisions with the card's own list. A file withheld from the viewer, by an
+  embargo or a gated tier, has no row, so it gets no chip and no entry. The
+  Downloads modal renders the same row but makes no revisions read, so it shows
+  no chip.
+- **A failed read drops the chip and the card, not the page.** The read is
+  rescued inside its task, as the associations read is, and `nil` renders
+  nothing.
+- **The history shows the day, not the time.** A reader cares which day a file
   changed. The `<time>` element keeps the full timestamp.
 
-The version number is the contiguous revision ordinal, the same number the
-admin page shows. The raw OCFL version can skip numbers, so the page never
-shows it.
+The version number is the contiguous revision ordinal, the same number the admin
+page shows. The raw OCFL version can skip numbers, so the page never shows it.

@@ -1,0 +1,26 @@
+-# Each replaced file's versions, newest first. A file is named as its Downloads
+-# row names it, so the row's version chip and this entry read as one.
+-# See docs/downloads.md.
+- entries = file_history_entries(files, file_revisions_by_blob(file_revisions))
+- return if entries.empty?
+
+#file-history.card.mb-4
+  .card-header
+    %h2.h5.mb-0 File history
+  %ul.list-group.list-group-flush
+    - entries.each do |file, revisions|
+      %li.list-group-item
+        .d-flex.align-items-baseline.flex-wrap.gap-2.mb-2
+          %span.fw-semibold= download_label(file)
+          - if file[:filename].present?
+            %small.text-muted.text-break= file[:filename]
+        %ol.list-unstyled.mb-0.small.file-history__versions
+          - revisions.each_with_index do |revision, i|
+            %li.file-history__version
+              %span
+                = "Version #{revision['revision']}"
+                - if i.zero?
+                  %span.text-subtle (current)
+              %span.text-subtle
+                Uploaded
+                = file_revision_date(revision['created'])

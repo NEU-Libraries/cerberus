@@ -2,42 +2,47 @@
 
 require 'rails_helper'
 
-# End-to-end over the real test Atlas, as a guest: the version chip reaches
-# readers under the Work's own read gate, not only the admin tiers that can read
-# the attributed Blob.versions.
-RSpec.describe 'Work file version chip', type: :request do
+# End-to-end over the real test Atlas, as a guest: the version chip and the File
+# history card reach readers under the Work's own read gate, not only the admin
+# tiers that can read the attributed Blob.versions.
+RSpec.describe 'Work file history', type: :request do
   let(:fixtures) { Rails.root.join('spec/fixtures/files') }
   let!(:community)  { public_container(AtlasRb::Community, nil) }
   let!(:collection) { public_container(AtlasRb::Collection, community.id) }
   let!(:work)       { public_work(collection.id) }
 
-  it 'shows no version chip on a file that was never replaced' do
+  it 'shows no chip and no card for a file that was never replaced' do
     get work_path(work.id)
 
     expect(response).to have_http_status(:ok)
     expect(response.body).to include('id="downloads"')
-    expect(response.body).not_to include('file-versions')
+    expect(response.body).not_to include('file-version-chip')
+    expect(response.body).not_to include('id="file-history"')
   end
 
   context 'when a file was replaced' do
-    let!(:blob_noid) do
+    before do
       noid = AtlasRb::Work.assets(work.id, nuid: '000000004').first.noid
       AtlasRb::Blob.update(noid, fixtures.join('image.png').to_s, nuid: '000000004')
-      noid
     end
 
-    it 'puts a version chip on its download row, listing each version newest first, for a guest' do
+    it 'marks its download row with the current version, for a guest' do
       get work_path(work.id)
 
       expect(response).to have_http_status(:ok)
-      chip = response.parsed_body.at_css("#file-versions-#{blob_noid}")
-      expect(chip.text.strip).to eq('Version 2')
-      rows = chip.ancestors('.file-versions').first.css('.file-versions__row')
-      expect(rows.map { |row| row.text.squish[/\AVersion \d+/] }).to eq(['Version 2', 'Version 1'])
-      expect(rows.first.text).to include('(current)')
+      expect(response.parsed_body.at_css('#downloads .file-version-chip').text.strip).to eq('Version 2')
     end
 
-    # The read is supplementary: a failure drops the chip, not the page.
+    it 'lists each version newest first in the File history card, for a guest' do
+      get work_path(work.id)
+
+      versions = response.parsed_body.css('#file-history .file-history__version').map { |row| row.text.squish }
+      expect(versions.map { |text| text[/\AVersion \d+/] }).to eq(['Version 2', 'Version 1'])
+      expect(versions.first).to include('(current)', 'Uploaded')
+    end
+
+    # The read is supplementary: a failure drops the chip and the card, not the
+    # page.
     it 'still renders the page when the read fails' do
       allow(AtlasRb::Work).to receive(:file_revisions).and_raise(AtlasRb::ResourceError.new('boom'))
 
@@ -45,7 +50,8 @@ RSpec.describe 'Work file version chip', type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('id="downloads"')
-      expect(response.body).not_to include('file-versions')
+      expect(response.body).not_to include('file-version-chip')
+      expect(response.body).not_to include('id="file-history"')
     end
   end
 
