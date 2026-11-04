@@ -56,6 +56,19 @@ RSpec.describe 'Admin ledger', type: :request do
   describe 'the requests tab' do
     before { sign_in admin }
 
+    # One page renders no pager: an empty nav is a blank band under the table,
+    # and an empty landmark to a screen reader.
+    it 'renders the pager only when there is a second page' do
+      get admin_ledger_path
+      expect(response.parsed_body.at_css('nav.paginate-section')).to be_nil
+
+      stub_const('Admin::LedgerController::PER_PAGE', 1)
+      AdminNotice.create!(kind: 'request_move', subject: 'Request to move “map.tif”', actor_nuid: '000000010',
+                          subject_noid: 'w2', payload: { subject_type: 'Work', subject_title: 'map.tif' })
+      get admin_ledger_path
+      expect(response.parsed_body.at_css('nav.paginate-section[aria-label="Request pages"] a')).to be_present
+    end
+
     it 'is the default tab, and lists the request with its note and remedy' do
       get admin_ledger_path
 

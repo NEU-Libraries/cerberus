@@ -8,8 +8,9 @@
 - if @notices.any?
   - @notices.each do |notice|
     = render 'admin/ledger/digest_day', notice: notice
-  %nav.paginate-section{ 'aria-label' => 'Digest pages' }
-    = paginate @notices, theme: 'blacklight'
+  - if @notices.total_pages > 1
+    %nav.paginate-section{ 'aria-label' => 'Digest pages' }
+      = paginate @notices, theme: 'blacklight'
 - else
   .admin-registry__empty
     %i.fa-solid.fa-book.admin-registry__empty-icon{'aria-hidden' => 'true'}

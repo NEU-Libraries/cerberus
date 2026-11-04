@@ -46,8 +46,9 @@
                               form: { class: 'd-inline', data: { turbo_confirm: "Remove the display name for #{group.raw}? It will fall back to the raw group string." } } do
                     %i.fa-solid.fa-trash-can{'aria-hidden' => 'true'}
                     Delete
-    %nav.paginate-section{ 'aria-label' => 'Group names pages' }
-      = paginate @groups, theme: 'blacklight'
+    - if @groups.total_pages > 1
+      %nav.paginate-section{ 'aria-label' => 'Group names pages' }
+        = paginate @groups, theme: 'blacklight'
   - elsif @query.present?
     .admin-registry__empty
       %i.fa-solid.fa-magnifying-glass.admin-registry__empty-icon{'aria-hidden' => 'true'}
