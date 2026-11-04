@@ -2,6 +2,35 @@
 // global structural styles that aren't tied to a specific Blacklight or
 // audit surface.
 
+// A menu opened to the side of its toggle points an arrow back at it, as a
+// Bootstrap side popover does. `$edge` is the menu's side nearest the toggle,
+// and `$top` the toggle's centre line from the menu's top. The toggle's popper
+// offset leaves the gap the arrow sits in. Used by the breadcrumb Add, the Add
+// control and the sidebar's Sort and Per-page menus.
+@mixin menu-side-arrow($edge, $top) {
+  $arrow: 0.5rem;
+  $toward: left;
+  @if $edge == left { $toward: right; }
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    top: calc(#{$top} - #{$arrow});
+    border: $arrow solid transparent;
+  }
+
+  &::before {
+    #{$edge}: -2 * $arrow;
+    border-#{$toward}-color: var(--bs-dropdown-border-color);
+  }
+
+  &::after {
+    #{$edge}: calc(-2 * #{$arrow} + 1px);
+    border-#{$toward}-color: $white;
+  }
+}
+
 // Hover switches instantly, never fades. A hover that swaps dark text on a pale
 // fill for white on a dark one passes, mid-fade, through text and fill of
 // nearly the same colour (about 1.3:1), so the label blinks out on every
@@ -262,30 +291,9 @@ textarea {
     }
   }
 
-  // Opened to the side, the menu points an arrow back at the toggle, as a
-  // Bootstrap right popover does. The toggle's popper offset leaves the gap
-  // the arrow sits in and centres it on the toggle's line. Dropped below on a
-  // narrow screen, the menu takes no arrow.
+  // Dropped below on a narrow screen, the menu takes no arrow.
   .dropdown-menu[data-popper-placement^="right"] {
-    $arrow: 0.5rem;
-
-    &::before,
-    &::after {
-      content: "";
-      position: absolute;
-      top: calc(1.25rem - #{$arrow});
-      border: $arrow solid transparent;
-    }
-
-    &::before {
-      left: -2 * $arrow;
-      border-right-color: var(--bs-dropdown-border-color);
-    }
-
-    &::after {
-      left: calc(-2 * #{$arrow} + 1px);
-      border-right-color: $white;
-    }
+    @include menu-side-arrow(left, 1.25rem);
   }
 }
 

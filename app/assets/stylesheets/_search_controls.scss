@@ -61,6 +61,13 @@
     width: 100%;
   }
 
+  // Sort and Per-page open to the right, over the results
+  // (Cerberus::ResultsDropdownComponent). Dropped below on a narrow screen,
+  // the menu takes no arrow.
+  .dropdown-menu[data-popper-placement^="right"] {
+    @include menu-side-arrow(left, 1.2rem);
+  }
+
   // View-type (list / gallery): a quiet segmented toggle. The btn-group defaults
   // to inline-flex, so force a block-level flex that fills and splits evenly.
   // Replace the stark dark "active" slab with a soft gray fill + dark icon (and
@@ -101,28 +108,8 @@
   &--end { justify-content: flex-end; }
   &--centered { justify-content: center; }
 
-  // Opened to the side, the menu points an arrow back at the toggle, as the
-  // breadcrumb Add's does on the other side. Dropped below on a narrow screen,
-  // the menu takes no arrow.
+  // Dropped below on a narrow screen, the menu takes no arrow.
   .dropdown-menu[data-popper-placement^="left"] {
-    $arrow: 0.5rem;
-
-    &::before,
-    &::after {
-      content: "";
-      position: absolute;
-      top: calc(1.2rem - #{$arrow});
-      border: $arrow solid transparent;
-    }
-
-    &::before {
-      right: -2 * $arrow;
-      border-left-color: var(--bs-dropdown-border-color);
-    }
-
-    &::after {
-      right: calc(-2 * #{$arrow} + 1px);
-      border-left-color: $white;
-    }
+    @include menu-side-arrow(right, 1.2rem);
   }
 }

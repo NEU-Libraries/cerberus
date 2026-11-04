@@ -103,6 +103,11 @@ class CatalogController < ApplicationController
     config.index.document_title_component = Cerberus::DocumentTitleComponent
     config.show.document_title_component = Cerberus::DocumentTitleComponent
 
+    # Sort and Per-page open to the side of the sidebar; see
+    # Cerberus::ResultsDropdownComponent. Blacklight reads this through
+    # view_config(:show), which falls through to index.
+    config.index.dropdown_component = Cerberus::ResultsDropdownComponent
+
     # config.add_results_document_tool(:bookmark, partial: 'bookmark_control', if: :render_bookmarks_control?)
     config.index.document_actions.delete(:bookmark)
     config.show.document_actions.delete(:bookmark)
