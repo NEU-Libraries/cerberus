@@ -452,14 +452,15 @@
 }
 
 // The checkbox column stays as narrow as its box.
-.admin-registry-table .tombstone-select {
+.admin-registry-table .bulk-select-cell {
   width: 1%;
   padding-right: 0;
 }
 
-// Bulk actions for the checked rows, laid out as a form footer: the buttons
-// first, then how many rows they act on.
-.tombstone-bulk {
+// Bulk actions for the checked rows (bulk_select_controller.js), laid out as a
+// form footer: the buttons first, then how many rows they act on. Shared by the
+// Retracted items registry and the inbox.
+.bulk-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;

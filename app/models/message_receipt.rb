@@ -19,6 +19,24 @@ class MessageReceipt < ApplicationRecord
     touch_state!(message, nuid, :deleted_at)
   end
 
+  # Marks many messages read in one write, and returns how many were unread. A
+  # group message has no receipt until someone acts on it, so this inserts the
+  # missing rows. COALESCE keeps first-touch-wins for a receipt that gained a
+  # read_at between the read and the write.
+  def self.mark_many_read!(message_ids, nuid)
+    unread = message_ids - read.where(nuid: nuid, message_id: message_ids).pluck(:message_id)
+    return 0 if unread.empty?
+
+    now = Time.current
+    rows = unread.map { |id| { message_id: id, nuid: nuid, read_at: now } }
+    # The only validations are a present nuid, which the caller always passes,
+    # and the (message_id, nuid) uniqueness that the unique index enforces here.
+    upsert_all(rows, # rubocop:disable Rails/SkipsModelValidations
+               unique_by:    %i[message_id nuid],
+               on_duplicate: Arel.sql('read_at = COALESCE(message_receipts.read_at, EXCLUDED.read_at)'))
+    unread.size
+  end
+
   # First touch wins: a timestamp is only ever set once, so re-opening a
   # message keeps the original read_at. Tolerates the concurrent
   # first-receipt race via the (message_id, nuid) unique index.

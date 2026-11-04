@@ -48,12 +48,31 @@ class MessagesController < ApplicationController
     redirect_to messages_path, notice: 'Message dismissed.'
   end
 
+  # Marks the checked messages read, or with `all`, every message in the inbox,
+  # on every page. Scoping the ids through inbox_for is the authorization.
+  def mark_read
+    return redirect_to(messages_path, alert: 'Messages cannot be marked read while impersonating.') if impersonating?
+
+    count = MessageReceipt.mark_many_read!(markable_ids, effective_user.nuid)
+    redirect_to messages_path(page: params[:page].presence), notice: mark_read_notice(count)
+  end
+
   # Typeahead JSON for the compose form (see UserDirectorySearchable).
   def recipients
     render json: user_directory_results
   end
 
   private
+
+    def markable_ids
+      inbox = Message.inbox_for(effective_user).reorder(nil)
+      inbox = inbox.where(id: Array(params[:ids])) if params[:all].blank?
+      inbox.pluck(:id)
+    end
+
+    def mark_read_notice(count)
+      count.zero? ? 'Nothing was unread.' : "Marked #{helpers.pluralize(count, 'message')} as read."
+    end
 
     def set_message
       @message = Message.inbox_for(effective_user).find_by(id: params[:id])

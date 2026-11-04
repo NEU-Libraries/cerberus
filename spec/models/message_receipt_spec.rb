@@ -42,4 +42,32 @@ RSpec.describe MessageReceipt, type: :model do
         .not_to change(described_class, :count)
     end
   end
+
+  describe '.mark_many_read!' do
+    let(:other) { Message.create!(subject: 'Group', recipient_group: 'some:group') }
+
+    it 'creates the missing receipts, stamps them read, and counts them' do
+      expect(described_class.mark_many_read!([message.id, other.id], '000000005')).to eq(2)
+      expect(described_class.where(nuid: '000000005').pluck(:read_at)).to all(be_present)
+    end
+
+    it 'leaves an existing read_at alone and counts only the unread' do
+      original = described_class.mark_read!(message, '000000005').read_at
+      travel 1.hour do
+        expect(described_class.mark_many_read!([message.id, other.id], '000000005')).to eq(1)
+      end
+      expect(described_class.find_by(message: message, nuid: '000000005').read_at).to eq(original)
+    end
+
+    it 'reads an unread receipt that already exists, such as a dismissed one' do
+      described_class.dismiss!(message, '000000005')
+      expect { described_class.mark_many_read!([message.id], '000000005') }
+        .not_to change(described_class, :count)
+      expect(described_class.find_by(message: message, nuid: '000000005').read_at).to be_present
+    end
+
+    it 'does nothing for an empty list' do
+      expect(described_class.mark_many_read!([], '000000005')).to eq(0)
+    end
+  end
 end

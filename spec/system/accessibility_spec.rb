@@ -33,6 +33,8 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     @set = AtlasRb::Compilation.create('Axe audit set', nuid: AtlasFixtures::ADMIN_NUID)
     @replaced_work = create_work_with_replaced_file(@collection.id)
     @load_report = create_paged_load_report
+    # Unread, so the inbox renders its row checkboxes and Mark all as read.
+    @message = Message.create!(subject: 'Axe audit message', recipient_nuid: AxeAudit::STAFF_NUID)
   end
 
   # Local records, not Atlas ones, so the rollback that clears each example
@@ -41,6 +43,8 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     @load_report&.iptc_ingests&.delete_all
     @load_report&.destroy
     Loader.find_by(slug: 'axe-audit')&.destroy
+    MessageReceipt.where(message: @message).delete_all
+    @message&.destroy
   end
 
   # One row past a page, so the report renders its pager.

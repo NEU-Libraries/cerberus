@@ -211,7 +211,14 @@ needs it to end the session. Its menu link hides, since the target has none.
 Three things that act on the real person hide while impersonating: the API
 token card and the account switch controls on My DRS, and the Inbox's Dismiss
 button. The Inbox also skips `mark_read!` while impersonating, so reading the
-target's messages does not change what the target sees next.
+target's messages does not change what the target sees next. For the same
+reason it hides "Mark all as read" and the row checkboxes, and
+`MessagesController#mark_read` refuses the request.
+
+Both of those controls go through `MessageReceipt.mark_many_read!`, in one
+write. A group message has no receipt until someone acts on it, so the method
+inserts the missing rows. "Mark all as read" covers every message in the inbox,
+not only the page on screen, because the unread badge counts the whole inbox.
 
 My Sets and the Add-to-set picker list the target's Sets by passing `owner:`
 to `Compilation.list`. Atlas allows a cross-owner listing for a full admin

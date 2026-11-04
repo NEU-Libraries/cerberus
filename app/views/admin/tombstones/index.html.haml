@@ -44,7 +44,7 @@
         %table.table.table-borderless.admin-registry-table
           %thead
             %tr
-              %th.tombstone-select{scope: 'col'}
+              %th.bulk-select-cell{scope: 'col'}
                 = check_box_tag 'select_all', '1', false, id: 'select_all', class: 'form-check-input', 'aria-label' => 'Select every item on this page', data: { bulk_select_target: 'all', action: 'bulk-select#toggleAll' }
               %th{scope: 'col'} Title
               %th{scope: 'col'} Parent
@@ -54,7 +54,7 @@
           %tbody
             - documents.each do |doc|
               %tr
-                %td.tombstone-select
+                %td.bulk-select-cell
                   = check_box_tag 'ids[]', doc.to_param, false, id: "select_#{doc.to_param}", form: 'tombstone-bulk', class: 'form-check-input', 'aria-label' => "Select #{finder_doc_title(doc)}", data: { bulk_select_target: 'item', action: 'bulk-select#update' }
                 %td
                   .admin-registry-table__name= finder_doc_heading(doc)
@@ -87,7 +87,7 @@
           When a Work, Collection or Community is deleted, it appears here so it can be restored.
 
   - if documents.any?
-    = form_with url: bulk_admin_tombstones_path, id: 'tombstone-bulk', class: 'well p-3 my-3 rounded-3 tombstone-bulk', data: { bulk_select_target: 'well' }, html: { hidden: true } do
+    = form_with url: bulk_admin_tombstones_path, id: 'tombstone-bulk', class: 'well p-3 my-3 rounded-3 bulk-actions', data: { bulk_select_target: 'well' }, html: { hidden: true } do
       .d-inline-flex.gap-2
         = button_tag type: 'submit', name: 'bulk_action', value: 'restore', class: 'btn btn-tonal-primary', data: { bulk_select_target: 'confirm', confirm_template: 'Restore {items}? Each will be discoverable again once its retracted parent, if any, is restored. The result arrives in your inbox.', turbo_confirm_title: 'Confirm bulk restore', turbo_confirm_button: 'Restore', turbo_confirm_variant: 'primary' } do
           %i.fa-solid.fa-rotate-left.me-1{'aria-hidden' => 'true'}
@@ -96,4 +96,4 @@
           = button_tag type: 'submit', name: 'bulk_action', value: 'delete', class: 'btn btn-tonal-danger', data: { bulk_select_target: 'confirm', confirm_template: 'Permanently delete {items}? Nothing reverses this: each item and every preserved copy of its files is removed. Members are deleted before their containers. The result arrives in your inbox.', turbo_confirm_title: 'Confirm bulk permanent deletion', turbo_confirm_button: 'Delete permanently' } do
             %i.fa-solid.fa-trash-can.me-1{'aria-hidden' => 'true'}
             Bulk delete
-      %span.tombstone-bulk__count{role: 'status', data: { bulk_select_target: 'count' }}
+      %span.bulk-actions__count{role: 'status', data: { bulk_select_target: 'count' }}

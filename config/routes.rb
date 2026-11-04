@@ -184,7 +184,10 @@ Rails.application.routes.draw do
   # User Inbox — in-app messaging. destroy is a per-recipient soft-dismiss,
   # not a row delete; recipients is the compose typeahead's JSON source.
   resources :messages, path: 'inbox', only: [:index, :show, :new, :create, :destroy] do
-    collection { get :recipients }
+    collection do
+      get :recipients
+      patch :mark_read
+    end
   end
 
   # Download Queue — a per-session basket of individual files, downloaded later
