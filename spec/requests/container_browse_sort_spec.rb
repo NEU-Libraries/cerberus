@@ -71,6 +71,19 @@ RSpec.describe 'Container browse sort', type: :request do
       expect(listed_ids).to eq([@video.valkyrie_id, @audio.valkyrie_id])
     end
 
+    # The sidebar's Sort and Per-page menus open to the right, and drop below
+    # where the right has no room. See Cerberus::ResultsDropdownComponent.
+    it 'opens the Sort and Per-page menus to the side' do
+      get collection_path(@collection.id)
+
+      %w[#sort-dropdown #per_page-dropdown].each do |menu|
+        expect(response.parsed_body.at_css("#{menu}.dropend")).to be_present
+        config = JSON.parse(response.parsed_body.at_css("#{menu} .dropdown-toggle")['data-bs-popper-config'])
+        flip = config['modifiers'].find { |modifier| modifier['name'] == 'flip' }
+        expect(flip.dig('options', 'fallbackPlacements')).to eq(['bottom-start'])
+      end
+    end
+
     # The default must not ride the page's links: a facet clicked on a browse,
     # then a search typed into the box, would otherwise sort that search by title.
     it 'leaves sort out of the links the page builds' do

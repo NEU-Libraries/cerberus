@@ -218,6 +218,14 @@ not apply. The chrome is the `results-control-chrome` mixin in
 `_search_controls.scss`, and `.results-control` applies it; use those rather
 than a copy, and do not use the chrome anywhere else.
 
+**These menus open to the side, away from the edge they sit on.** The breadcrumb
+Add and the sidebar's Sort and Per page open to the right, and the Add control
+under the results opens to the left. Each points an arrow back at its toggle,
+drawn by the `menu-side-arrow` mixin in `_layout.scss`. Where the side has no
+room, as on a phone, the menu drops below and loses the arrow. Sort and Per page
+take this from `Cerberus::ResultsDropdownComponent`, which CatalogController
+sets as Blacklight's `dropdown_component`.
+
 Give each surface one solid button for its main action: `btn-primary`, or
 `btn-success` for Save. Every other button takes a variant from
 `_tonal_buttons.scss`:
