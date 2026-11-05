@@ -178,6 +178,24 @@
     font-variant-numeric: tabular-nums;
   }
 
+  // A row's parent named again after the row that links it. Plain text, not a
+  // second link: a grey link would have to keep its underline. The ellipsis
+  // clips only the display; the full title stays in the DOM for readers.
+  &__repeat {
+    display: inline-block;
+    max-width: 14rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+    font-size: 0.85rem;
+    color: $text-subtle;
+
+    @include media-breakpoint-down(sm) {
+      max-width: 8rem;
+    }
+  }
+
   // Raw OCFL version label sitting under the revision ordinal — a borderless,
   // muted footnote to the primary chip. Kept for debugging (the OCFL vN can
   // skip when preservation-envelope bumps consume versions); the revision

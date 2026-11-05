@@ -47,6 +47,22 @@ RSpec.describe 'Download queue', type: :request do
     expect(response.body).to include('2 files')
   end
 
+  # Only the first row links the work; every later row names it again, so no
+  # Work cell is left blank.
+  it 'names the work on every row, linking it once' do
+    post download_queue_items_path, params: { work_noid: work.id, blob_noid: 'blob1' }
+    post download_queue_items_path, params: { work_noid: work.id, blob_noid: 'blob2' }
+
+    get download_queue_path
+    page = response.parsed_body
+    work_cells = page.css('.admin-registry-table tbody tr').map { |row| row.at_css('td') }
+
+    expect(work_cells.size).to eq(2)
+    expect(work_cells.map { |cell| cell.text.strip }).to all(be_present)
+    expect(page.css(".admin-registry-table tbody a[href='#{work_path(work.id)}']").size).to eq(1)
+    expect(work_cells.last.at_css('.admin-registry-table__repeat')).to be_present
+  end
+
   it 'removes a file' do
     post download_queue_items_path, params: { work_noid: work.id, blob_noid: 'blob1' }
     delete download_queue_item_path, params: { work_noid: work.id, blob_noid: 'blob1' }
