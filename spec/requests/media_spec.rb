@@ -85,4 +85,38 @@ RSpec.describe 'Media', type: :request do
 
     expect(RecordImpressionJob).to have_been_enqueued.with(hash_including(action: 'download', blob_id: 'b1'))
   end
+
+  # The 206 and Content-Range are set on the first chunk, so a refusal that
+  # arrives before one still renders a page. See docs/downloads.md.
+  context 'when Atlas withholds the file under a tombstone' do
+    def tombstoned(type, id)
+      AtlasRb::TombstonedError.new('error' => 'tombstoned', 'tombstoned_resource_type' => type,
+                                   'tombstoned_resource_id' => id)
+    end
+
+    it 'answers a removed file as not found, even for a ranged request' do
+      allow(AtlasRb::Blob).to receive(:content).and_raise(tombstoned('FileSet', 'fs-1'))
+
+      get '/media/b1', headers: { 'Range' => 'bytes=0-499' }
+
+      expect(response).to have_http_status(:not_found)
+      expect(response.headers['Content-Range']).to be_nil
+    end
+
+    it "answers a retracted work's file with the Removed page" do
+      allow(AtlasRb::Blob).to receive(:content).and_raise(tombstoned('Work', 'w1'))
+
+      get '/media/b1'
+
+      expect(response).to have_http_status(:gone)
+    end
+
+    it 'answers any other refused stream with its page, not an empty 200' do
+      allow(AtlasRb::Blob).to receive(:content).and_return({ status: 403, headers: {} })
+
+      get '/media/b1'
+
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
 end

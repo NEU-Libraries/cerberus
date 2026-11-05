@@ -151,6 +151,47 @@ RSpec.describe SetZipPacker do
     expect(errors.body).to include('blob1')
   end
 
+  context 'when Atlas withholds a file under a tombstone' do
+    def tombstoned(type, id)
+      AtlasRb::TombstonedError.new('error' => 'tombstoned', 'tombstoned_resource_type' => type,
+                                   'tombstoned_resource_id' => id)
+    end
+
+    def errors_body = zip.entries.find { |e| e.name == 'ERRORS.txt' }&.body
+
+    it 'names a retracted member as withheld and completes the archive' do
+      allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000002').and_raise(tombstoned('Work', 'bc1234'))
+
+      packer.pack(zip)
+
+      expect(errors_body).to eq('bc1234: withheld — removed from view')
+      expect(names).to include('inventory.csv')
+    end
+
+    it 'names a withheld file and packs no entry for it' do
+      allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000002')
+                                              .and_return([blob(noid: 'blob1', filename: 'pdf_blob1.pdf')])
+      allow(AtlasRb::Blob).to receive(:content).with('blob1').and_raise(tombstoned('FileSet', 'fs1'))
+
+      packer.pack(zip)
+
+      expect(names).not_to include('bc1234/pdf_blob1.pdf')
+      expect(errors_body).to eq('bc1234: withheld — removed from view')
+    end
+
+    it 'leaves a refused stream out of the archive and the inventory, and names it' do
+      allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000002')
+                                              .and_return([blob(noid: 'blob1', filename: 'pdf_blob1.pdf')])
+      allow(AtlasRb::Blob).to receive(:content).with('blob1').and_return({ status: 403, headers: {} })
+
+      packer.pack(zip)
+
+      expect(names).not_to include('bc1234/pdf_blob1.pdf')
+      expect(errors_body).to include('blob1', 'Atlas answered 403')
+      expect(zip.entries.find { |e| e.name == 'inventory.csv' }.body).not_to include('pdf_blob1.pdf')
+    end
+  end
+
   # Atlas re-authorizes a member at the WORK level only; the per-asset gate rides
   # its assets as advisory metadata, so a Streaming Only video reaches the packer
   # looking ordinary and must be refused here or the archive leaks it.

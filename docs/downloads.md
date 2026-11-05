@@ -8,6 +8,7 @@ Source files:
 
 - `app/controllers/downloads_controller.rb`
 - `app/controllers/derivative_downloads_controller.rb`
+- `app/controllers/concerns/streams_blob.rb`
 - `app/services/zip_entry_writer.rb`
 - `app/services/blob_zip_packer.rb`
 - `app/services/set_zip_packer.rb`
@@ -79,7 +80,43 @@ branch zip-versus-raw off its classification without a second assets fetch, and
 **It fails open when the asset cannot be resolved.** That covers a Blob with no
 containing Work and a Blob absent from the Work's assets list. The work-level
 gate has already passed at that point, so this is an edge case rather than a
-gate to bypass. A nil asset also serves raw.
+gate to bypass. A nil asset also serves raw. A Blob under a removed FileSet is
+absent from the list too, and the tombstone refusal below stops it.
+
+### A tombstone withholds the bytes
+
+Atlas refuses the bytes of a Blob whose Blob, FileSet or Work is tombstoned,
+for anyone below the operator tiers. Admins and delegated admins are still
+served, so they can review a file before they restore it. Cerberus signs each
+call as the viewer, so Atlas makes the tier decision and Cerberus makes none.
+
+atlas_rb raises the refusal as `AtlasRb::TombstonedError`, from `Work.assets`
+for a retracted Work and from `Blob.content` for any withheld Blob. Both raise
+before a byte moves. `Authorizable#render_withheld` answers it:
+
+| Tombstoned resource | Page |
+|---|---|
+| a FileSet (one file removed) | the not-found page, for a file |
+| the Work (retracted) | the Work's Removed page (`errors/gone`) |
+
+`DownloadsController` and `MediaController` stream through
+`StreamsBlob#stream_blob`, which sets the file's headers only when the first
+chunk arrives. Two traps make that necessary:
+
+- **The error page would download as the file.** With an attachment
+  `Content-Disposition` already set, the browser saves the page under the
+  file's name.
+- **Closing the stream commits the response.** Under `ActionController::Live`,
+  a `response.stream.close` in an `ensure` sends an empty 200 before
+  `rescue_from` can render. So the stream is closed only once a chunk was
+  written.
+
+atlas_rb yields no chunk for any other non-2xx status either, and returns the
+status. `stream_blob` renders a 403 as the forbidden page, a 404 or 410 as
+not found, and anything else as a bare status.
+
+The download counts the attempt before the refusal: `record_download_impression`
+runs before `show`, and only `Blob.content` knows the file is withheld.
 
 ## Downloading a gated image tier
 
@@ -178,6 +215,12 @@ drifting apart.
 - **Record a failure, do not raise it.** Once the response headers are out the
   archive cannot be un-sent, so a mid-stream fetch failure becomes an
   `ERRORS.txt` line.
+- **A tombstone is withheld access, not a failure.** A retracted Work's
+  `Work.assets`, or a withheld Blob's `Blob.content`, raises
+  `AtlasRb::TombstonedError`. The packers record it as
+  `<noid>: withheld — removed from view`, worded like an embargo. Any other
+  refused stream raises `ZipEntryWriter::RefusedStream` inside the entry's
+  block, so zip_kit rolls the empty entry back before the failure is recorded.
 - **Write the inventory last.** `write_manifest` writes `inventory.csv`, then
   `ERRORS.txt` when there are errors, after every file. A truncated or partial
   archive is therefore still self-describing.

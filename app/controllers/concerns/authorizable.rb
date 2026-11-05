@@ -65,6 +65,11 @@ module Authorizable
              status:   :not_found,
              locals:   { obj_type: not_found_label }
     end
+
+    # Atlas withholds the files beneath a tombstone. MUST stay below the
+    # ResourceError handler, which this subclasses: registered above it, the
+    # refusal would land there and re-raise. See docs/downloads.md.
+    rescue_from AtlasRb::TombstonedError, with: :render_withheld
   end
 
   private
@@ -88,6 +93,15 @@ module Authorizable
 
     def render_gone(record)
       render template: 'errors/gone', status: :gone, locals: { record: record }
+    end
+
+    # A removed file reads as absent; a retracted Work gets its Removed page.
+    def render_withheld(error)
+      if error.work_retracted?
+        render_gone(AtlasRb::Work.find(error.tombstoned_resource_id))
+      else
+        render template: 'errors/not_found', status: :not_found, locals: { obj_type: 'file' }
+      end
     end
 
     def authorize_show!

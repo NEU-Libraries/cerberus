@@ -528,6 +528,8 @@ whole Work. The caption flow on the Work Edit page uses the same two calls.
 
 Atlas's `/assets` drops a tombstoned FileSet, so the file leaves the work page,
 the downloads modal, the download queue and the zip downloads at once. Atlas
+also refuses the removed file's bytes below the operator tiers, so a link
+someone kept answers "not found". `docs/downloads.md` covers that refusal. Atlas
 records the tombstone and the restore as file events on the Work, which the
 History tab shows. Removed files are listed at the bottom of the page, with who
 removed them and when.
