@@ -389,7 +389,10 @@ means no workspace, and an empty list.
 
 `publish_targets` keys publish destinations by community NOID:
 `{ noid => { name:, genres: { label => showcase_noid } } }`. An empty hash hides
-the publish branch entirely, so the `personal_root_id` check gates publishing.
+the publish branch entirely, so the workspace check (`workspace_owner`) gates
+publishing. It passes for a personal root and for any collection inside one;
+[`deposit.md`](deposit.md#promoting-a-work-into-a-community-showcase) has the
+rule.
 Only the depositor's affiliated communities that have showcases appear, and
 staff-only genres (`FeaturedContent::STAFF_ONLY`) are left out.
 `community_name` falls back to the NOID when the lookup fails, so a stale
@@ -402,6 +405,6 @@ affiliated with, a staff-only genre, or no showcase for that genre there.
 `ShowcaseFinder` runs through the gated `SearchBuilder`, so a showcase the
 depositor cannot see also reads `nil`.
 
-`publish_showcase_id` does **not** check where the Work is going. The caller
-must confirm separately that the destination is the depositor's own root before
-offering promotion.
+`publish_showcase_id` checks only that the destination is in someone's
+workspace. It does **not** check that the Work's depositor is that workspace's
+owner, so the caller must confirm that separately before promoting.

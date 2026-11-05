@@ -17,12 +17,19 @@
         .well.p-3.rounded-3
           .deposit-form__radio-title
             %i.fa-solid.fa-folder-open{'aria-hidden' => 'true'}
-            = @publishing_for ? "#{@publishing_for['display_name']}’s workspace" : enhanced_text(@parent.title)
+            -# A root's stored title, "Personal Root", says nothing about whose it
+            -# is, so it is named by its owner. A collection inside keeps its title.
+            - if @publishing_for && @parent['personal_root']
+              = "#{@publishing_for['display_name']}’s workspace"
+            - else
+              = enhanced_text(@parent.title)
           .deposit-form__radio-desc.mt-1
             The new work will be added to this collection.
+            - if @publishing_for && !@parent['personal_root']
+              = "It is in #{@publishing_for['display_name']}’s workspace."
 
-      -# Promotion — an optional extra act, not a destination. Offered only into
-      -# a person's personal root (WorksController#publish_offered?), which keeps a
+      -# Promotion — an optional extra act, not a destination. Offered only inside
+      -# a person's workspace (WorksController#publish_offered?), which keeps a
       -# promoted Work in their own space. In someone else's workspace it waits
       -# under Ownership for a proxy deposit instead; see below.
       - if @publish_targets.present? && @publishing_for.nil?

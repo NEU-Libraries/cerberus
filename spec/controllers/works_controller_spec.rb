@@ -404,7 +404,8 @@ describe WorksController do
     # never relocates it, and a promotion that can't be honoured leaves the
     # deposit standing.
     context 'promotion to a community showcase' do
-      # publish_offered? requires the destination to BE the depositor's own root.
+      # publish_offered? requires the destination to be in the depositor's own
+      # workspace: the root itself, or a collection inside it.
       # Resolves whoever is asked for, as Atlas does, so an acting-as target
       # resolves as themselves rather than as the signed-in admin.
       def stub_person_rooted_at(collection_id)
@@ -430,6 +431,25 @@ describe WorksController do
         expect(response).to redirect_to(metadata_work_path(assigns(:work).id))
       ensure
         AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
+      # A collection inside the workspace is as much the owner's space as the
+      # root, so promotion is offered there too. Its ancestors name the root.
+      it 'links a deposit into a collection inside the depositor’s workspace' do
+        inside = AtlasRb::Collection.create(collection.id, nuid: '000000004')
+        stub_person_rooted_at(collection.id)
+        allow(ShowcaseFinder).to receive(:call).and_return('showcasenoid')
+        allow(AtlasRb::System::Work).to receive(:add_linked_member)
+
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
+                                collection_id: inside.id, publish: '1',
+                                publish_community_id: 'comm1', publish_genre: 'Datasets' }
+
+        expect(AtlasRb::System::Work).to have_received(:add_linked_member)
+          .with(assigns(:work).id, 'showcasenoid', on_behalf_of: user.nuid)
+      ensure
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
+        AtlasRb::Resource.tombstone(inside.id) if inside
       end
 
       # Atlas links only on the Work's depositor's behalf. Acting as someone, the
@@ -569,6 +589,56 @@ describe WorksController do
         ensure
           AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
         end
+
+        # The owner is read off the flagged root among the ancestors, never off
+        # the collection itself, which staff may have made.
+        context 'in a collection inside that workspace' do
+          render_views
+
+          let!(:inside) { AtlasRb::Collection.create(collection.id, nuid: '000000004') }
+
+          before do
+            allow(AtlasRb::Collection).to receive(:find).and_wrap_original do |original, id, *rest, **kw|
+              found = original.call(id, *rest, **kw)
+              case id.to_s
+              when collection.id.to_s then found.merge('personal_root' => true, 'depositor' => owner_nuid)
+              # Made by the owner in My DRS, so a proxy deposit names them.
+              when inside.id.to_s
+                found.merge('depositor' => owner_nuid, 'ancestors' => Array(found['ancestors']).map do |node|
+                  node['noid'].to_s == collection.id.to_s ? node.merge('personal_root' => true) : node
+                end)
+              else found
+              end
+            end
+            sign_in admin
+          end
+
+          after { AtlasRb::Resource.tombstone(inside.id) }
+
+          it 'offers the owner’s showcases and keeps the collection’s own title' do
+            allow(ShowcaseFinder).to receive(:call).and_return('Datasets' => 'ds1')
+
+            get :new, params: { collection_id: inside.id }
+
+            expect(assigns(:publishing_for)['nuid']).to eq(owner_nuid)
+            expect(assigns(:publish_targets).keys).to eq(['comm1'])
+            expect(CGI.unescapeHTML(response.body)).to include('It is in Jane Doe’s workspace.')
+          end
+
+          it 'links a proxy deposit there on the owner’s behalf' do
+            allow(ShowcaseFinder).to receive(:call).and_return('showcasenoid')
+            allow(AtlasRb::System::Work).to receive(:add_linked_member)
+
+            post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
+                                    collection_id: inside.id, upload_as: 'proxy', publish: '1',
+                                    publish_community_id: 'comm1', publish_genre: 'Datasets' }
+
+            expect(AtlasRb::System::Work).to have_received(:add_linked_member)
+              .with(assigns(:work).id, 'showcasenoid', on_behalf_of: owner_nuid)
+          ensure
+            AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
+          end
+        end
       end
 
       # Atlas refuses a derivative tier more visible than its Work. The collection
@@ -601,10 +671,10 @@ describe WorksController do
         AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
 
-      # Promotion is only on offer from the depositor's own root, so a forged
-      # request from anywhere else deposits normally and promotes nothing —
-      # that is what stops a Work being promoted out of a collection that
-      # isn't the depositor's.
+      # Promotion is only on offer inside the depositor's own workspace, so a
+      # forged request from anywhere else deposits normally and promotes
+      # nothing — that is what stops a Work being promoted out of a collection
+      # that isn't the depositor's.
       it 'deposits but does not promote when the destination is not the depositor’s root' do
         stub_person_rooted_at('some-other-root')
         allow(AtlasRb::System::Work).to receive(:add_linked_member)
@@ -780,7 +850,18 @@ describe WorksController do
         expect(response.body).to include('Datasets') # showcase genre option
       end
 
-      # Anywhere but the depositor's own root, promotion isn't on the table —
+      it 'offers promotion from a collection inside the depositor’s own workspace' do
+        inside = AtlasRb::Collection.create(collection.id, nuid: '000000004')
+        stub_person_rooted_at(collection.id)
+
+        get :new, params: { collection_id: inside.id }
+
+        expect(response.body).to include('Also promote to a community showcase')
+      ensure
+        AtlasRb::Resource.tombstone(inside.id) if inside
+      end
+
+      # Outside the depositor's own workspace, promotion isn't on the table —
       # that restriction is what keeps a promoted Work in their own space.
       it 'does not offer promotion from a collection that is not the depositor’s root' do
         stub_person_rooted_at('some-other-root')

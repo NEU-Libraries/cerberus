@@ -29,7 +29,7 @@ module WorkDeposit
       finalize_new_work(file, parent.id)
     end
 
-    # Keys on the DESTINATION being a person's personal root, not on which button
+    # Keys on the DESTINATION being in a person's workspace, not on which button
     # you arrived by, so it can't be sidestepped by typing a URL. See docs/deposit.md.
     def publish_offered?
       workspace_owner.present?
