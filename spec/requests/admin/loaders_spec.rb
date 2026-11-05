@@ -147,6 +147,41 @@ RSpec.describe 'Admin::Loaders', type: :request do
         get "/admin/loaders/#{loader.slug}/edit"
         expect(response).to have_http_status(:ok)
       end
+
+      it 'offers Delete, outside the edit form, for a loader that has never run' do
+        get "/admin/loaders/#{loader.slug}/edit"
+        page = response.parsed_body
+        delete_form = page.at_css("form[action='#{admin_loader_path(loader)}'] input[name='_method'][value='delete']")&.parent
+
+        expect(delete_form).to be_present
+        expect(delete_form.ancestors('form')).to be_empty
+        expect(delete_form['data-turbo-confirm'])
+          .to eq('Delete the Marketing and Communications loader? This action cannot be undone.')
+      end
+
+      it 'says why, and offers no Delete, for a loader that has run' do
+        LoadReport.create!(loader: loader, source_filename: 'batch.zip')
+        get "/admin/loaders/#{loader.slug}/edit"
+        page = response.parsed_body
+
+        expect(page.at_css(".admin-registry input[name='_method'][value='delete']")).to be_nil
+        expect(page.text).to include('This loader has 1 load on record and cannot be deleted.')
+      end
+    end
+
+    describe 'GET /admin/loaders/new' do
+      it 'offers no Delete' do
+        get '/admin/loaders/new'
+        expect(response.parsed_body.at_css(".admin-registry input[name='_method'][value='delete']")).to be_nil
+      end
+    end
+
+    describe 'GET /admin/loaders' do
+      it 'lists loaders with no Delete on the rows' do
+        Loader.create!(valid_params[:loader])
+        get '/admin/loaders'
+        expect(response.parsed_body.at_css(".admin-registry input[name='_method'][value='delete']")).to be_nil
+      end
     end
 
     describe 'PATCH /admin/loaders/:slug' do

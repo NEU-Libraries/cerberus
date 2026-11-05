@@ -36,4 +36,14 @@ class Loader < ApplicationRecord
   def to_param
     slug
   end
+
+  def deletable?
+    load_reports.none?
+  end
+
+  def undeletable_reason
+    count = load_reports.count
+    "has #{count} #{'load'.pluralize(count)} on record and cannot be deleted. " \
+      'Its load history is the audit trail for what it deposited.'
+  end
 end

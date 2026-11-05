@@ -8,3 +8,18 @@
       %span.admin-registry-table__id.ms-2= @loader.slug
   .admin-registry__body
     = render 'form'
+
+    -# Outside the edit form, which cannot nest the delete's own form. A loader
+    -# that has run is never offered the button; the destroy action still
+    -# refuses it on the server.
+    %section.admin-registry-form.border-top.mt-4.pt-4{'aria-labelledby' => 'loader-delete-heading'}
+      %h3.admin-registry-form__section-title#loader-delete-heading
+        %i.fa-solid.fa-trash-can{'aria-hidden' => 'true'}
+        Delete loader
+      - if @loader.deletable?
+        = button_to admin_loader_path(@loader), method: :delete, class: 'btn btn-tonal-danger',
+                    form: { data: { turbo_confirm: "Delete the #{@loader.display_name} loader? This action cannot be undone." } } do
+          %i.fa-solid.fa-trash-can.me-1{'aria-hidden' => 'true'}
+          Delete loader
+      - else
+        %p.small.text-subtle.mb-0= "This loader #{@loader.undeletable_reason}"

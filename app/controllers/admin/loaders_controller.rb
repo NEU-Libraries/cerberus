@@ -52,7 +52,7 @@ module Admin
       if @loader.destroy
         redirect_to admin_loaders_path, notice: "Loader '#{slug}' deleted."
       else
-        redirect_to admin_loaders_path, alert: undeletable_message(slug)
+        redirect_to admin_loaders_path, alert: "Loader '#{slug}' #{@loader.undeletable_reason}"
       end
     end
 
@@ -60,14 +60,6 @@ module Admin
 
       def set_loader
         @loader = Loader.find_by!(slug: params[:slug])
-      end
-
-      # Say what is holding the loader and why, rather than passing on the
-      # association's own "dependent load reports exist" wording.
-      def undeletable_message(slug)
-        loads = helpers.pluralize(@loader.load_reports.count, 'load')
-        "Loader '#{slug}' has #{loads} on record and cannot be deleted. Its load " \
-          'history is the audit trail for what it deposited.'
       end
 
       def loader_params
