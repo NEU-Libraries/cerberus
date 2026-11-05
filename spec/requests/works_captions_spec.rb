@@ -72,11 +72,11 @@ RSpec.describe 'Works captions', type: :request do
     end
 
     def removed_captions
-      CaptionTrack.all(AtlasRb::Work.withdrawn_assets(work.id, nuid: '000000004'))
+      CaptionTrack.all(AtlasRb::Work.tombstoned_assets(work.id, nuid: '000000004'))
     end
 
     # Against the test Atlas, not stubs: the whole point is that Atlas keeps
-    # the file and names it in withdrawn_assets, which a stub would only assert.
+    # the file and names it in tombstoned_assets, which a stub would only assert.
     context 'against Atlas' do
       before do
         AtlasRb::Blob.create(work.id, Rails.root.join('spec/fixtures/files/captions.vtt').to_s, 'es.vtt',
@@ -123,7 +123,7 @@ RSpec.describe 'Works captions', type: :request do
       before do
         allow(AtlasRb::Work).to receive(:assets).and_call_original
         allow(AtlasRb::Work).to receive(:assets).with(work.id, anything).and_return([other_blob, caption])
-        allow(AtlasRb::Work).to receive(:withdrawn_assets).and_return([])
+        allow(AtlasRb::Work).to receive(:tombstoned_assets).and_return([])
         allow(AtlasRb::Resource).to receive(:tombstone).and_return(ok)
         allow(AtlasRb::Admin::Resource).to receive(:restore).and_return(ok)
       end
@@ -161,7 +161,7 @@ RSpec.describe 'Works captions', type: :request do
       it 'refuses to restore a caption whose language already has a live one' do
         removed = AtlasRb::Mash.new(noid: 'cap-0', file_set: 'fs-0', mime_type: 'text/vtt', language: 'es',
                                     track_label: 'Español')
-        allow(AtlasRb::Work).to receive(:withdrawn_assets).and_return([removed])
+        allow(AtlasRb::Work).to receive(:tombstoned_assets).and_return([removed])
         sign_in admin
         post restore_caption_work_path(work.id), params: { file_set_id: 'fs-0' }
 

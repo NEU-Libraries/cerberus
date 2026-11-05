@@ -54,7 +54,7 @@ module WorkCaptions
 
     # Atlas refuses the listing below the delegate tier, so only a steward asks.
     def removed_captions
-      CaptionTrack.all(AtlasRb::Work.withdrawn_assets(params[:id], nuid: current_user.nuid))
+      CaptionTrack.all(AtlasRb::Work.tombstoned_assets(params[:id], nuid: current_user.nuid))
     end
 
     # The tiers Atlas allows to tombstone and restore a FileSet. The edit gate
