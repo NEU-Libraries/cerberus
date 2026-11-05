@@ -50,6 +50,8 @@ class CommunitiesController < CatalogController
   def new
     @community = OpenStruct.new
     @create_path = child_create_path('communities')
+    @narrowing_allowed = current_user&.admin? || false
+    new_form_permissions!(@destination_id)
   end
 
   def edit
@@ -64,11 +66,14 @@ class CommunitiesController < CatalogController
   end
 
   # Provision showcases only after the community exists and is titled, so a
-  # missing title never leaves orphaned showcases behind.
+  # missing title never leaves orphaned showcases behind. The permissions go
+  # first: a showcase takes its parent's access when it is minted, so writing
+  # them after would leave the showcases with the destination's access.
   def create
     c = mint_titled!
     return redirect_to(new_child_path('community')) if c.nil?
 
+    apply_new_permissions(c.id)
     ShowcaseProvisioner.call(community_id: c.id)
     redirect_to community_path(c.id)
   end

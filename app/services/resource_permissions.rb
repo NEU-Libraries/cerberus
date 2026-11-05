@@ -19,6 +19,10 @@ class ResourcePermissions
   COMMUNITY_NARROWING_REFUSED = 'Restricting a community needs DRS administrators — it does not reach the ' \
                                 'collections inside it. Nothing has been changed.'
 
+  MINTED_COMMUNITY_NARROWING_REFUSED = 'The community was created with the same access as the community ' \
+                                       'it sits in. Restricting a community needs DRS administrators — it ' \
+                                       'does not reach the collections inside it.'
+
   # A nil level means the write went through and there is nothing to report.
   Result = Struct.new(:level, :message, keyword_init: true) do
     def self.silent = new(level: nil, message: nil)
@@ -59,14 +63,15 @@ class ResourcePermissions
   end
 
   # The create path. Deliberately not #apply!: there is no cascade one line
-  # after a create, and current_read still describes the DESTINATION.
-  # See docs/permissions.md.
-  # The submitted grants alone. A minted child already carries the ACL Atlas
-  # gave it from its parent, and an omitted key keeps its stored value, so
+  # after a create. current_read is the DESTINATION's read, which is also what
+  # the new child carries, because Atlas copies the parent's ACL onto it. Only
+  # the community check reads it. See docs/permissions.md.
+  # The submitted grants alone. An omitted key keeps its stored value, so
   # reading the envelope back to merge onto would only re-send what is there.
   def apply_minted!
     submitted = @envelope[:permissions]
     return Result.silent if submitted.blank?
+    return Result.refused(MINTED_COMMUNITY_NARROWING_REFUSED) if minted_community_narrowing?
 
     guarded_write(submitted.symbolize_keys)
   end
@@ -115,5 +120,9 @@ class ResourcePermissions
       return nil if @actor&.admin?
 
       Result.refused(COMMUNITY_NARROWING_REFUSED)
+    end
+
+    def minted_community_narrowing?
+      @solr_type == 'Community' && community_narrowing_refusal.present?
     end
 end

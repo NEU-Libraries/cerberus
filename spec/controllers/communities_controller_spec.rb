@@ -751,4 +751,80 @@ describe CommunitiesController do
       end
     end
   end
+
+  # The create form carries the Permissions tab's controls, under the Edit
+  # page's rule: only an administrator may start a community narrower than the
+  # one it sits in.
+  describe 'new and create, with permissions' do
+    render_views
+
+    let(:admin_user) { User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin') }
+    # Atlas mints only for a NUID it may create under, so the editor carries the
+    # stock admin's NUID. Cerberus decides narrowing from the role, which is unset.
+    let(:editor) { User.new(email: 'editor@example.com', nuid: '000000004', groups: ['editors']) }
+
+    def created_id = response.location.split('/').last
+
+    def read_acl(id) = Array(AtlasRb::Resource.permissions(id, nuid: '000000004')&.read)
+
+    before do
+      AtlasRb::Resource.set_permissions(community.id, { 'edit' => ['editors'] }, nuid: '000000004')
+      publicize_ancestry!(community: community)
+      allow(ShowcaseProvisioner).to receive(:call)
+    end
+
+    it 'renders the group grant editor on the create form' do
+      sign_in editor
+      get :new, params: { community_id: community.id }
+
+      expect(response.body).to include('community[permissions][new][group_id]')
+    end
+
+    it 'offers Private to an administrator' do
+      sign_in admin_user
+      get :new, params: { community_id: community.id }
+
+      expect(response.body).to match(/<option[^>]*value="private"/)
+    end
+
+    it 'withholds Private from a non-admin' do
+      sign_in editor
+      get :new, params: { community_id: community.id }
+
+      expect(response.body).not_to match(/<option[^>]*value="private"/)
+    end
+
+    # Each showcase takes its parent's access when minted, so the community's
+    # own access has to be written first.
+    it 'writes the permissions before provisioning the showcases' do
+      sign_in admin_user
+      expect(controller).to receive(:apply_new_permissions).ordered.and_call_original
+      expect(ShowcaseProvisioner).to receive(:call).ordered
+
+      post :create, params: { community_id: community.id, mass: 'public', community: { title: 'Ordered', description: 'D' } }
+    ensure
+      AtlasRb::Resource.tombstone(created_id) if response&.location
+    end
+
+    it 'lets an administrator create it private' do
+      sign_in admin_user
+      post :create, params: { community_id: community.id, mass: 'private',
+                              community: { title: 'PrivateCommunity', description: 'D' } }
+
+      expect(read_acl(created_id)).not_to include('public')
+    ensure
+      AtlasRb::Resource.tombstone(created_id) if response&.location
+    end
+
+    it "refuses a non-admin's narrowing and keeps the inherited access" do
+      sign_in editor
+      post :create, params: { community_id: community.id, mass: 'private',
+                              community: { title: 'NarrowedCommunity', description: 'D' } }
+
+      expect(flash[:alert]).to eq(ResourcePermissions::MINTED_COMMUNITY_NARROWING_REFUSED)
+      expect(read_acl(created_id)).to include('public')
+    ensure
+      AtlasRb::Resource.tombstone(created_id) if response&.location
+    end
+  end
 end

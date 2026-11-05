@@ -2,8 +2,23 @@
 
 -# The destination is the nested route's parent segment (@create_path), not a
 -# form field — you say where a Community goes by navigating there.
-= bootstrap_form_tag url: @create_path do |f|
-  = bootstrap_fields_for :community do |c|
-    = c.text_field :title, required: true
-    = c.text_area :description, rows: 10
-  = f.button :submit, class: "btn btn-primary my-3"
+-#
+-# group-permissions scopes the whole form, as on the Collection form: its entry
+-# row and row template live inside the partial, and the resource value
+-# supplies the `community[...]` field-name prefix.
+.metadata-form{ data: { controller: "group-permissions", "group-permissions-resource-value": "community" } }
+  = bootstrap_form_tag url: @create_path do |f|
+    = bootstrap_fields_for :community do |c|
+      = c.text_field :title, required: true
+      = c.text_area :description, rows: 10
+
+    -# Opens holding the access this Community would inherit. Private is offered
+    -# to administrators only, as on the Edit page; see docs/permissions.md.
+    %h4.pt-4.pb-2 Permissions
+    .row
+      .col-sm
+        = render 'shared/visibility_control', resource: 'community'
+    = render 'shared/group_permissions', resource: 'community'
+
+    .well.p-3.my-3.rounded-3
+      = f.button :submit, class: "btn btn-primary"
