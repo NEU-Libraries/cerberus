@@ -18,14 +18,14 @@
         Slug
       = f.text_field :slug, class: 'form-control admin-registry-form__input--id', placeholder: 'marcom', autocomplete: 'off'
       .admin-registry-form__hint
-        Lowercase identifier — letters, digits, dashes, underscores. Used in URLs (e.g. <code class="admin-registry-table__id">/loaders/marcom/loads</code>).
+        The text used in the loader URL. Use only lowercase letters, digits, dashes, and underscores.
     .mb-3
       = f.label :display_name, class: 'admin-registry-form__label' do
         %i.fa-solid.fa-id-card{'aria-hidden' => 'true'}
         Display name
       = f.text_field :display_name, class: 'form-control', placeholder: 'Marketing and Communications'
       .admin-registry-form__hint
-        Human-readable team or program name as it should appear in the loader UI.
+        The loader name will appear in the loader UI. Use a team or program name to differentiate it from other similar loaders.
     .mb-0
       = f.label :kind, class: 'admin-registry-form__label' do
         %i.fa-solid.fa-diagram-project{'aria-hidden' => 'true'}
@@ -41,7 +41,7 @@
       Access
     .admin-registry-form__section-note
       %i.fa-solid.fa-circle-info{'aria-hidden' => 'true'}
-      The two fields below grant access. Members of the Grouper group see this loader. For IPTC, they can deposit into the root collection's children; for XML and MULTIPAGE, they pick any destination collection at upload time. Editing these on an existing loader changes who can see it and where they deposit.
+      The two fields below control access. Members of the Grouper group can see this loader. The root collection PID determines where files are deposited and the access permissions for those files. Changing the Grouper group or root collection PID for an existing loader will change who can see it and where it deposits files. To remove access for a loader that cannot be deleted, change the Grouper group to “northeastern:drs:repository:admin”.
 
     .mb-3
       = f.label :group, 'Grouper group', class: 'admin-registry-form__label' do
@@ -49,7 +49,7 @@
         Grouper group
       = f.text_field :group, class: 'form-control admin-registry-form__input--id', placeholder: 'northeastern:drs:repository:loaders:marcom', autocomplete: 'off'
       .admin-registry-form__hint
-        Full Grouper group name. Members of this group will see this loader's deposit surface.
+        The full Grouper group path, starting with “northeastern:drs” (e.g., northeastern:drs:marketing_and_communications:staff). Members of this group will see this loader on their “My Loaders” page.
 
     .mb-0
       = f.label :root_collection, 'Root collection PID', class: 'admin-registry-form__label' do
@@ -60,7 +60,7 @@
       -# that could never resolve.
       = f.text_field :root_collection, class: 'form-control admin-registry-form__input--id', placeholder: 'e.g. 7h44jrj', autocomplete: 'off'
       .admin-registry-form__hint
-        Atlas Collection PID. <strong>Required for IPTC</strong>, where the deposit-destination picker is boxed to this collection's children (the safety rail for non-librarian operators). <strong>Optional for XML and MULTIPAGE</strong> — those librarian-operated loaders let the operator pick any destination collection at upload time, so this can be left blank.
+        For IPTC loaders, enter the root collection PID that contains the collections the loader can deposit files into. A root collection PID is not required for XML and MULTIPAGE loaders.
 
   .d-flex.gap-2.align-items-center.mt-4
     = f.submit class: 'btn btn-primary'
