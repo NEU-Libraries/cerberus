@@ -9,7 +9,7 @@
   .p-3
     %p.text-muted.small.mb-3
       Search for the work with the file you want to replace. Replacing a file adds a new version but keeps the same identifier. Previous versions can be managed from the Administration page.
-    = render 'admin/finder/search_form', url: admin_files_path, q: params[:q], hidden: {}, placeholder: 'Search works by title…'
+    = render 'admin/finder/search_form', url: admin_files_path, q: params[:q], hidden: {}, placeholder: 'Search by title or ID…'
 
   - if @results
     = render 'admin/finder/results', results: @results, select_label: 'Manage files', select_url: ->(doc) { admin_files_manage_path(work_id: doc.to_param) }
