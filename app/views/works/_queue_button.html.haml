@@ -1,8 +1,9 @@
--# "Add to queue" control for one downloadable asset, in a stable
--# #queue-control-<id> wrapper so the add action's turbo_stream can swap it to
--# the in-queue state. Polymorphic: a content Blob passes `blob_noid:`, an IIIF
--# derivative rendition passes `role:` (its identity has no blob). Add-only here;
--# removal lives on the queue page.
+-# The queue control for one downloadable asset: "Add to queue", or once added
+-# "Remove from queue". It sits in a stable #queue-control-<id> wrapper so the
+-# add and remove turbo_streams can swap one for the other. Polymorphic: a
+-# content Blob passes `blob_noid:`, an IIIF derivative rendition passes `role:`
+-# (its identity has no blob). Both buttons carry `label` so the swapped-in
+-# control still names its file.
 -#
 -# Each aria-label opens with the control's own visible text and appends the
 -# file it acts on. WCAG's Label in Name asks that the accessible name contain
@@ -12,14 +13,19 @@
 - role = local_assigns[:role]
 - label = local_assigns[:label].presence || 'this file'
 - queued = blob_noid.present? ? download_queue_includes?(work_noid, blob_noid) : download_queue_includes_derivative?(work_noid, role)
-- add_params = blob_noid.present? ? { work_noid: work_noid, blob_noid: blob_noid } : { work_noid: work_noid, role: role }
+- item_params = (blob_noid.present? ? { work_noid: work_noid, blob_noid: blob_noid } : { work_noid: work_noid, role: role }).merge(label: local_assigns[:label])
 %span.ms-2{id: queue_control_id(work_noid, blob_noid: blob_noid, role: role)}
   - if queued
-    %span.btn.btn-tonal-success.btn-sm.disabled{'aria-label' => "In queue: #{label}"}
-      %i.fa-solid.fa-check.me-1{'aria-hidden' => true}
-      In queue
+    -# The .turbo_stream path is what asks for the stream: Turbo's Accept header
+    -# asks for one on every form, including the queue page's Remove, which must
+    -# keep its redirect.
+    = button_to download_queue_item_path(item_params.merge(format: :turbo_stream)), method: :delete,
+        class: 'btn btn-tonal-danger btn-sm', form: { class: 'd-inline' },
+        'aria-label' => "Remove from queue: #{label}" do
+      %i.fa-solid.fa-xmark.me-1{'aria-hidden' => true}
+      Remove from queue
   - else
-    = button_to download_queue_items_path(add_params),
+    = button_to download_queue_items_path(item_params),
         class: 'btn btn-tonal-secondary btn-sm', form: { class: 'd-inline' },
         'aria-label' => "Add to queue: #{label}" do
       %i.fa-solid.fa-cart-arrow-down.me-1{'aria-hidden' => true}

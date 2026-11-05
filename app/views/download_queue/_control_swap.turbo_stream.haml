@@ -1,0 +1,4 @@
+= turbo_stream.update 'download-queue-nav' do
+  = render 'shared/download_queue_badge'
+= turbo_stream.replace queue_control_id(@work_noid, blob_noid: @blob_noid, role: @role) do
+  = render 'works/queue_button', work_noid: @work_noid, blob_noid: @blob_noid, role: @role, label: @label

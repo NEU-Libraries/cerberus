@@ -29,6 +29,52 @@ RSpec.describe 'Download queue', type: :request do
     expect(response.body).to include('download-queue-nav').and include('queue-control-blob1')
   end
 
+  describe 'undoing an add from the downloads modal' do
+    let(:turbo) { { 'Accept' => 'text/vnd.turbo-stream.html, text/html' } }
+
+    it 'swaps the added control to Remove from queue, naming the file' do
+      post download_queue_items_path,
+           params:  { work_noid: work.id, blob_noid: 'blob1', label: 'Field notebook' },
+           headers: turbo
+
+      button = Nokogiri::HTML(response.body.gsub(%r{</?template>}, '')).at_css('#queue-control-blob1 button')
+      expect(button.text).to include('Remove from queue')
+      expect(button['aria-label']).to eq('Remove from queue: Field notebook')
+    end
+
+    it 'removes the file and swaps the control back to Add to queue' do
+      post download_queue_items_path, params: { work_noid: work.id, blob_noid: 'blob1' }
+      delete download_queue_item_path(format: :turbo_stream),
+             params:  { work_noid: work.id, blob_noid: 'blob1', label: 'Field notebook' },
+             headers: turbo
+
+      expect(response.media_type).to eq('text/vnd.turbo-stream.html')
+      expect(response.body).to include('download-queue-nav').and include('Add to queue: Field notebook')
+      get download_queue_path
+      expect(response.body).to include('Your download queue is empty')
+    end
+
+    it 'removes a derivative by role the same way' do
+      post download_queue_items_path, params: { work_noid: work.id, role: 'large_image' }
+      delete download_queue_item_path(format: :turbo_stream),
+             params:  { work_noid: work.id, role: 'large_image' },
+             headers: turbo
+
+      expect(response.body).to include("queue-control-#{work.id}-large_image").and include('Add to queue: Large Image')
+      get download_queue_path
+      expect(response.body).to include('Your download queue is empty')
+    end
+
+    # Turbo sends this Accept header on the queue page's own Remove too, and
+    # that page must still redirect back to itself.
+    it 'still redirects a remove that asks for a stream only by its Accept header' do
+      post download_queue_items_path, params: { work_noid: work.id, blob_noid: 'blob1' }
+      delete download_queue_item_path, params: { work_noid: work.id, blob_noid: 'blob1' }, headers: turbo
+
+      expect(response).to redirect_to(download_queue_path)
+    end
+  end
+
   it 'does not double-add the same file' do
     2.times { post download_queue_items_path, params: { work_noid: work.id, blob_noid: 'blob1' } }
     get download_queue_path
