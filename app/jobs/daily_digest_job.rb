@@ -83,7 +83,8 @@ class DailyDigestJob < ApplicationJob
       notices = AdminNotice.of_kind('showcase_promotion').on_day(day).order(created_at: :asc)
       outcomes = notices.map { |n| n.detail(:outcome) }
 
-      { promoted:  outcomes.count { |o| o != 'refused' },
+      # A removal takes a work off a showcase, so it is not a publication.
+      { promoted:  outcomes.count { |o| %w[refused removed].exclude?(o) },
         refused:   outcomes.count('refused'),
         entries:   notices.first(ENTRY_CAP).map { |n| entry_for(n) },
         truncated: [notices.size - ENTRY_CAP, 0].max }

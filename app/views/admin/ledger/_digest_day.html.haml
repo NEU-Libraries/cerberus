@@ -7,7 +7,8 @@
 - counts = notice.detail(:counts) || {}
 - showcases = notice.detail(:showcases) || {}
 - entries = Array(showcases['entries'])
-- promoted = entries.reject { |entry| entry['outcome'] == 'refused' }
+- promoted = entries.reject { |entry| %w[refused removed].include?(entry['outcome']) }
+- removals = entries.select { |entry| entry['outcome'] == 'removed' }
 - refusals = entries.select { |entry| entry['outcome'] == 'refused' }
 %section.ledger-digest{'aria-label' => "Digest for #{notice.occurred_on.strftime('%B %-d, %Y')}"}
   %header.ledger-digest__rule
@@ -21,6 +22,18 @@
     .ledger-digest__section
       %h4.ledger-digest__heading Published to showcases
       - promoted.group_by { |entry| [entry['community'], entry['genre']] }.each do |(community, genre), group|
+        .ledger-digest__group
+          %span.ledger-digest__group-label= [community.presence || 'Unknown community', genre.presence || 'No genre'].join(' · ')
+          %ul.ledger-digest__items
+            - group.each do |entry|
+              %li
+                %span.ledger-digest__item-title= entry['title'].presence || entry['work_noid']
+                = audit_event_nuid(entry['nuid'])
+
+  - if removals.any?
+    .ledger-digest__section
+      %h4.ledger-digest__heading Removed from showcases
+      - removals.group_by { |entry| [entry['community'], entry['genre']] }.each do |(community, genre), group|
         .ledger-digest__group
           %span.ledger-digest__group-label= [community.presence || 'Unknown community', genre.presence || 'No genre'].join(' · ')
           %ul.ledger-digest__items

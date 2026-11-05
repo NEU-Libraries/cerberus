@@ -19,6 +19,8 @@
       - if refused
         %span.ledger-refused Refused
         = ledger_promotion_reason(notice.detail(:reason))
+      - elsif notice.detail(:outcome) == 'removed'
+        = "Removed from: #{[notice.detail(:community_name), notice.detail(:genre)].compact_blank.join(' · ')}"
       - else
         = [notice.detail(:community_name), notice.detail(:genre)].compact_blank.join(' · ')
     - if refused && notice.detail(:genre).present?

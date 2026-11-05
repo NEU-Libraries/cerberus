@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# The genre showcase a Work is published in, and the other showcases of the same
-# community it could move to. Backs the Work Edit page's Showcase category
-# choice. See docs/discovery.md.
+# The genre showcases a Work is published in, one per community, and for each
+# the other showcases of that community it could move to. Backs the Work Edit
+# page's Showcase section. See docs/discovery.md.
 #
 # Atlas's find_many digest carries neither `featured` nor a parent, so both come
 # from Solr, through the gated SearchBuilder chain like ShowcaseFinder.
@@ -15,38 +15,46 @@ class WorkShowcase < ApplicationService
     super()
   end
 
-  # @return [Placement, nil] nil when the Work is in no genre showcase.
+  # @return [Array<Placement>] empty when the Work is in no genre showcase.
   def call
     linked = Array(AtlasRb::Work.linked_members(@work_noid))
-    return nil if linked.empty?
+    return [] if linked.empty?
 
-    showcase = current_showcase(linked)
-    return nil if showcase.nil?
+    showcases = genre_showcases(linked)
+    return [] if showcases.empty?
 
-    community = parent(showcase)
-    return nil if community.nil?
-
-    Placement.new(showcase_noid: showcase.to_param, genre: Array(showcase['title_tsim']).first,
-                  community_noid: community.to_param, community_title: Array(community['title_tsim']).first,
-                  options: ShowcaseFinder.call(scope: @scope, community_noid: community.to_param))
+    communities = parents(showcases)
+    showcases.filter_map do |showcase|
+      community = communities[parent_uuid(showcase)]
+      placement(showcase, community) if community
+    end
   end
 
   private
 
-    # Publishing links a Work into one showcase. A Work an admin has also linked
-    # into a second one reports the first Solr returns.
-    def current_showcase(linked_noids)
+    def placement(showcase, community)
+      Placement.new(showcase_noid: showcase.to_param, genre: Array(showcase['title_tsim']).first,
+                    community_noid: community.to_param, community_title: Array(community['title_tsim']).first,
+                    options: ShowcaseFinder.call(scope: @scope, community_noid: community.to_param))
+    end
+
+    def genre_showcases(linked_noids)
       labels = FeaturedContent.genre_labels.to_set
       ids = linked_noids.map { |noid| "id-#{noid}" }.join(',')
       search('internal_resource_tesim:Collection', 'featured_bsi:true', "{!terms f=alternate_ids_ssim}#{ids}")
-        .documents.find { |doc| labels.include?(Array(doc['title_tsim']).first) }
+        .documents.select { |doc| labels.include?(Array(doc['title_tsim']).first) }
     end
 
-    def parent(showcase)
-      uuid = showcase[MembershipQuery::STRUCTURAL_FIELD].to_s.delete_prefix('id-')
-      return nil if uuid.blank?
+    # One query for every placement's community, keyed by Solr id.
+    def parents(showcases)
+      uuids = showcases.map { |showcase| parent_uuid(showcase) }.compact_blank.uniq
+      return {} if uuids.empty?
 
-      search(MembershipQuery.identity_fq([uuid])).documents.first
+      search(MembershipQuery.identity_fq(uuids)).documents.index_by(&:id)
+    end
+
+    def parent_uuid(showcase)
+      showcase[MembershipQuery::STRUCTURAL_FIELD].to_s.delete_prefix('id-')
     end
 
     def search(*filter_queries)

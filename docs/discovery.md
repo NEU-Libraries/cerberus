@@ -171,27 +171,46 @@ title, which provisioning does not produce, resolves last-writer-wins.
 The finder first resolves the community's noid to its uuid through
 `alternate_ids_ssim`, because the structural parent edge holds the uuid.
 
-### Changing a Work's showcase category
+### Changing a Work's showcases
 
-The Work Edit page offers a Showcase category choice when the Work is already
-in a genre showcase. The Work's depositor and admins see it. Nobody else does,
+A Work can appear in the showcases of several communities, for example when its
+depositor teaches in two departments. It always has **one** category: a
+dissertation is not also a dataset. So it sits in the same genre's showcase in
+each community.
+
+The Work Edit page has a Showcase section when the Work is already in at least
+one genre showcase. The Work's depositor and admins see it. Nobody else does,
 because Atlas links a Work into a showcase only on its depositor's behalf.
 `WorkShowcaseCategory` makes every change, a depositor's own included, through
 `AtlasRb::System::Work` with `on_behalf_of` set to the depositor.
 
-`WorkShowcase` reads where the Work is now. Atlas's `find_many` digest carries
-neither `featured` nor a parent. So `WorkShowcase` takes the Work's linked
-collections from `AtlasRb::Work.linked_members`, then asks Solr which one is a
-featured genre showcase and which community holds it. A Work an admin has
-linked into two showcases reports the first one Solr returns. `ShowcaseFinder`
-then lists the community's other showcases. A depositor is never offered a
-staff-only genre (`FeaturedContent::STAFF_ONLY`), as at deposit.
+`WorkShowcase` reads where the Work is now, as one `Placement` per community.
+Atlas's `find_many` digest carries neither `featured` nor a parent. So
+`WorkShowcase` takes the Work's linked collections from
+`AtlasRb::Work.linked_members`, asks Solr which of them are featured genre
+showcases, and resolves all their communities in one more query.
+`ShowcaseFinder` then lists each community's showcases.
 
-The swap adds the new link before it removes the old one. If the second call
-fails, the Work sits in both showcases, which an admin can see and fix. Removing
-first could leave it in neither. Every change reaches the admin ledger as a
-`showcase_promotion` `AdminNotice`, like a publish at deposit. An Atlas refusal
-is recorded too, with the outcome `refused`.
+The section offers two changes:
+
+- **A new category.** The select offers only the genres that every one of the
+  Work's communities has a showcase for, so a move can land in all of them. A
+  depositor is never offered a staff-only genre (`FeaturedContent::STAFF_ONLY`),
+  as at deposit. The move applies in every community. Each swap adds the new
+  link before it removes the old one: if the second call fails, the Work sits in
+  both showcases, which an admin can see and fix, and never in neither. If a
+  move fails in some communities, the alert names them.
+- **Remove from one community.** Each community has a Remove button, which
+  posts to `remove_showcase` (`DELETE /works/:id/showcase`) through the empty
+  `remove-showcase` form outside the metadata form. The id must name one of the
+  Work's own showcases. The Work stays in the repository and in its other
+  communities' showcases.
+
+Every change reaches the admin ledger as a `showcase_promotion` `AdminNotice`,
+like a publish at deposit, with the outcome `promoted` for a move, `removed` for
+a removal and `refused` for an Atlas refusal. The ledger row and the daily
+digest list a removal under its own wording, and the digest does not count it
+as a publication.
 
 ## The community landing page
 

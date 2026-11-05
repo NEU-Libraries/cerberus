@@ -120,6 +120,9 @@ Rails.application.routes.draw do
       # restore beneath them (WorkCaptions).
       delete :caption, action: :remove_caption
       post :restore_caption
+      # Take the Work out of one community's genre showcase. Edit-gated, and
+      # further limited to the depositor and admins (WorkShowcaseCategory).
+      delete :showcase, action: :remove_showcase
       # Add an arbitrary binary to an existing Work: GET renders the upload
       # form, POST stages the file and queues the attach (AddFileJob). Both are
       # edit-gated via authorize_resource_writes!'s extra_edit list.

@@ -1,16 +1,37 @@
--# locals: showcase (WorkShowcase::Placement) — where the Work is published now.
--# genres (Array<String>) — the categories this reader may choose, current one included.
+-# locals: showcases (Array<WorkShowcase::Placement>) — where the Work is
+-# published now, one per community. genres (Array<String>) — the categories
+-# this reader may choose, current one included.
 -#
--# Rides the metadata form: an unchanged selection submits the current genre,
--# which the controller treats as "leave it alone".
+-# The category select rides the metadata form: an unchanged selection submits
+-# the current genre, which the controller treats as "leave it alone". Each
+-# Remove submits the empty remove-showcase form outside the metadata form.
+- genre = showcases.first.genre
+- communities = showcases.map { |placement| plain_text(placement.community_title) }
 %hr.section-divider.my-3
 
 .my-3.rounded-3
   %h4.pb-2
     %i.fa-solid.fa-star.me-2{ 'aria-hidden' => 'true' }
     Showcase
+  %ul.showcase-placements.list-unstyled.mb-3{ 'aria-label' => 'Communities this work is showcased in' }
+    - showcases.each do |placement|
+      - community = plain_text(placement.community_title)
+      %li.showcase-placements__row
+        %span.showcase-placements__label= enhanced_text(placement.community_title)
+        %span.showcase-placements__meta= placement.genre
+        %span.showcase-placements__actions
+          %button.btn.btn-tonal-danger.btn-sm{ type: 'submit', form: 'remove-showcase', name: 'showcase_id', value: placement.showcase_noid,
+            'aria-label' => "Remove from #{community}’s showcase",
+            data: { turbo_confirm: "Remove this work from #{community}’s “#{placement.genre}” showcase? It stays in the repository, and in any other community’s showcase.",
+                    turbo_confirm_title: 'Remove from showcase', turbo_confirm_button: 'Remove',
+                    turbo_confirm_variant: 'danger' } }
+            %i.fa-solid.fa-xmark.me-1{ 'aria-hidden' => 'true' }
+            Remove
   %label.form-label{ for: 'work_showcase_genre' } Showcase category
-  = select_tag 'work[showcase_genre]', options_for_select(genres, showcase.genre),
+  = select_tag 'work[showcase_genre]', options_for_select(genres, genre),
                id: 'work_showcase_genre', class: 'form-select', 'aria-describedby' => 'work_showcase_genre_help'
   %p.text-muted.small.mt-2.mb-0#work_showcase_genre_help
-    This work is published in the “#{showcase.genre}” showcase. Choose another category to move it there.
+    - if communities.size > 1
+      This work is published in the “#{genre}” showcase of #{communities.to_sentence}. Choose another category to move it there in every community.
+    - else
+      This work is published in the “#{genre}” showcase. Choose another category to move it there.

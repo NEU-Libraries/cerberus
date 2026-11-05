@@ -27,13 +27,16 @@
         - if @caption_offered
           = render 'works/captions', captions: @captions, removed: @removed_captions,
                                      removable: caption_steward?(effective_user)
-        - if @showcase
-          = render 'works/showcase_category', showcase: @showcase, genres: @showcase_genres
+        - if @showcases.any?
+          = render 'works/showcase_category', showcases: @showcases, genres: @showcase_genres
         .well.p-3.my-3.rounded-3
           = f.button :submit, class: "btn btn-success"
           = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"
-      -# Outside the metadata form, which cannot nest one; the Remove button in
-      -# the Captions section submits it through its form attribute.
+      -# Outside the metadata form, which cannot nest one; the Remove buttons in
+      -# the Captions and Showcase sections submit these through their form
+      -# attribute.
+      - if @showcases.any?
+        = form_tag(showcase_work_path(params[:id]), method: :delete, id: 'remove-showcase') {}
       - if caption_steward?(effective_user)
         - if @captions.any?
           = form_tag(caption_work_path(params[:id]), method: :delete, id: 'remove-caption') {}

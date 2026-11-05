@@ -95,4 +95,60 @@ RSpec.describe 'Works showcase category', type: :request do
     expect(flash[:alert]).to eq('The showcase category was not changed.')
     expect(linked).to include(showcases['Datasets'].id)
   end
+
+  # Faculty in two departments: the Work sits in both communities' showcases,
+  # always under the one category it has.
+  context 'when the Work is in two communities' do
+    let(:art) { AtlasRb::Community.create(nil, "#{fixtures}/community-mods.xml", nuid: '000000004') }
+    let(:art_showcases) { Current.set(nuid: '000000004') { ShowcaseProvisioner.call(community_id: art.id) } }
+
+    before do
+      publicize_ancestry!(community: art)
+      AtlasRb::System::Work.add_linked_member(work.id, art_showcases['Datasets'].id, on_behalf_of: depositor.nuid)
+    end
+
+    it 'lists both communities, each with its own Remove' do
+      sign_in depositor
+      get edit_work_path(work.id)
+
+      rows = response.parsed_body.css('.showcase-placements__row')
+      expect(rows.size).to eq(2)
+      expect(rows.map { |row| row.at_css('button')['value'] })
+        .to contain_exactly(showcases['Datasets'].id, art_showcases['Datasets'].id)
+      expect(response.body).to include('Choose another category to move it there in every community.')
+    end
+
+    it 'moves the Work to the new category in both communities' do
+      sign_in depositor
+      submit('Presentations')
+
+      expect(flash[:notice]).to eq('Moved to the “Presentations” showcase.')
+      expect(linked).to include(showcases['Presentations'].id, art_showcases['Presentations'].id)
+      expect(linked).not_to include(showcases['Datasets'].id, art_showcases['Datasets'].id)
+    end
+
+    it 'removes the Work from one community and leaves it in the other' do
+      sign_in depositor
+
+      expect { delete showcase_work_path(work.id), params: { showcase_id: art_showcases['Datasets'].id } }
+        .to change(AdminNotice, :count).by(1)
+
+      expect(response).to redirect_to(edit_work_path(work.id))
+      expect(linked).not_to include(art_showcases['Datasets'].id)
+      expect(linked).to include(showcases['Datasets'].id)
+      expect(AdminNotice.last.detail(:outcome)).to eq('removed')
+    end
+  end
+
+  # Only the depositor or an admin may act on the Work's showcases.
+  it 'refuses a removal from someone who is neither depositor nor admin' do
+    other = User.new(email: 'other@example.com', password: 'password', nuid: '000000006',
+                     name: 'Williams, Susan', role: 'privileged', groups: [Permissions::STAFF_EDIT_GROUP])
+    sign_in other
+
+    delete showcase_work_path(work.id), params: { showcase_id: showcases['Datasets'].id }
+
+    expect(flash[:alert]).to eq(WorkShowcaseCategory::SHOWCASE_REMOVE_REFUSED)
+    expect(linked).to include(showcases['Datasets'].id)
+  end
 end
