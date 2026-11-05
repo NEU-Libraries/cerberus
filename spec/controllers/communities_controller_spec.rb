@@ -787,11 +787,16 @@ describe CommunitiesController do
       expect(response.body).to match(/<option[^>]*value="private"/)
     end
 
-    it 'withholds Private from a non-admin' do
+    # The request form lives on the Edit page, which does not exist until the
+    # community does, so the copy must not point "below".
+    it 'withholds Private from a non-admin and points to the Edit page for a request' do
       sign_in editor
       get :new, params: { community_id: community.id }
 
       expect(response.body).not_to match(/<option[^>]*value="private"/)
+      body = CGI.unescapeHTML(response.body)
+      expect(body).to include('on its Edit page')
+      expect(body).not_to include('” below.')
     end
 
     # Each showcase takes its parent's access when minted, so the community's

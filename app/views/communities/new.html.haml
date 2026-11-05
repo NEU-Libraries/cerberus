@@ -17,7 +17,7 @@
     %h4.pt-4.pb-2 Permissions
     .row
       .col-sm
-        = render 'shared/visibility_control', resource: 'community'
+        = render 'shared/visibility_control', resource: 'community', creating: true
     = render 'shared/group_permissions', resource: 'community'
 
     .well.p-3.my-3.rounded-3
