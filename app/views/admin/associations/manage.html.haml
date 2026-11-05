@@ -16,7 +16,7 @@
     %h2.linked-members__subhead Assert a relationship
     %p.text-muted.small.mb-3
       Pick the work that supports this one: its codebook, figure or transcription.
-    = render 'admin/finder/search_form', url: admin_associations_manage_path, q: params[:q], hidden: { work_id: params[:work_id] }, placeholder: 'Search works to associate…'
+    = render 'admin/finder/search_form', url: admin_associations_manage_path, q: params[:q], hidden: { work_id: params[:work_id] }, placeholder: 'Search by title or ID…'
 
   - if @results
     .table-responsive
