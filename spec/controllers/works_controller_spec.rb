@@ -423,12 +423,56 @@ describe WorksController do
 
         post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id, publish: '1',
-                                publish_community_id: 'comm1', publish_genre: 'Datasets' }
+                                publish_community_ids: ['comm1'], publish_genre: 'Datasets' }
 
         expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
         expect(AtlasRb::System::Work).to have_received(:add_linked_member)
           .with(assigns(:work).id, 'showcasenoid', on_behalf_of: user.nuid)
         expect(response).to redirect_to(metadata_work_path(assigns(:work).id))
+      ensure
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
+      # Faculty in two departments: one category, linked into each community.
+      it 'links the work into each chosen community’s showcase, under one category' do
+        allow(AtlasRb::Person).to receive(:resolve) do |nuids|
+          [AtlasRb::Mash.new('nuid' => nuids.first, 'personal_root_id' => collection.id,
+                             'affiliated_community_ids' => %w[comm1 comm2])]
+        end
+        allow(ShowcaseFinder).to receive(:call) { |community_noid:, **| "sc-#{community_noid}" }
+        allow(AtlasRb::System::Work).to receive(:add_linked_member)
+
+        expect do
+          post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
+                                  collection_id: collection.id, publish: '1',
+                                  publish_community_ids: %w[comm1 comm2], publish_genre: 'Datasets' }
+        end.to change { AdminNotice.where(kind: 'showcase_promotion').count }.by(2)
+
+        expect(AtlasRb::System::Work).to have_received(:add_linked_member)
+          .with(assigns(:work).id, 'sc-comm1', on_behalf_of: user.nuid)
+        expect(AtlasRb::System::Work).to have_received(:add_linked_member)
+          .with(assigns(:work).id, 'sc-comm2', on_behalf_of: user.nuid)
+        expect(flash[:notice]).to be_nil
+      ensure
+        AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
+      it 'keeps promoting into the other communities when one is refused' do
+        stub_person_rooted_at(collection.id)
+        allow(ShowcaseFinder).to receive(:call) { |community_noid:, **| "sc-#{community_noid}" }
+        allow(AtlasRb::System::Work).to receive(:add_linked_member)
+
+        post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
+                                collection_id: collection.id, publish: '1',
+                                publish_community_ids: %w[comm1 not-mine], publish_genre: 'Datasets' }
+
+        expect(AtlasRb::System::Work).to have_received(:add_linked_member)
+          .once.with(assigns(:work).id, 'sc-comm1', on_behalf_of: user.nuid)
+        outcomes = AdminNotice.where(kind: 'showcase_promotion').last(2).to_h do |notice|
+          [notice.detail(:community_noid), notice.detail(:outcome)]
+        end
+        expect(outcomes).to eq('comm1' => 'promoted', 'not-mine' => 'refused')
+        expect(flash[:notice]).to eq(described_class::PUBLISH_LINK_FAILED)
       ensure
         AtlasRb::Resource.tombstone(assigns(:work).id) if assigns(:work)
       end
@@ -443,7 +487,7 @@ describe WorksController do
 
         post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: inside.id, publish: '1',
-                                publish_community_id: 'comm1', publish_genre: 'Datasets' }
+                                publish_community_ids: ['comm1'], publish_genre: 'Datasets' }
 
         expect(AtlasRb::System::Work).to have_received(:add_linked_member)
           .with(assigns(:work).id, 'showcasenoid', on_behalf_of: user.nuid)
@@ -462,7 +506,7 @@ describe WorksController do
 
         post :create, params:  { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                  collection_id: collection.id, publish: '1',
-                                 publish_community_id: 'comm1', publish_genre: 'Datasets' },
+                                 publish_community_ids: ['comm1'], publish_genre: 'Datasets' },
                       session: { acting_as_nuid: '000000002' }
 
         expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: '000000002')
@@ -490,7 +534,7 @@ describe WorksController do
 
         post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id, publish: '1',
-                                publish_community_id: 'comm1', publish_genre: 'Theses & Dissertations' }
+                                publish_community_ids: ['comm1'], publish_genre: 'Theses & Dissertations' }
 
         expect(AtlasRb::System::Work).not_to have_received(:add_linked_member)
         expect(flash[:notice]).to eq(described_class::PUBLISH_LINK_FAILED)
@@ -506,7 +550,7 @@ describe WorksController do
 
         post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id, publish: '1',
-                                publish_community_id: 'comm1', publish_genre: 'Datasets' }
+                                publish_community_ids: ['comm1'], publish_genre: 'Datasets' }
 
         expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
         expect(response).to redirect_to(metadata_work_path(assigns(:work).id))
@@ -563,7 +607,7 @@ describe WorksController do
 
           post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                   collection_id: collection.id, upload_as: 'proxy', publish: '1',
-                                  publish_community_id: 'comm1', publish_genre: 'Datasets' }
+                                  publish_community_ids: ['comm1'], publish_genre: 'Datasets' }
 
           expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: owner_nuid)
           expect(AtlasRb::System::Work).to have_received(:add_linked_member)
@@ -581,7 +625,7 @@ describe WorksController do
 
           post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                   collection_id: collection.id, upload_as: 'myself', publish: '1',
-                                  publish_community_id: 'comm1', publish_genre: 'Datasets' }
+                                  publish_community_ids: ['comm1'], publish_genre: 'Datasets' }
 
           expect(AtlasRb::System::Work).not_to have_received(:add_linked_member)
           expect(flash[:notice]).to eq(described_class::PUBLISH_LINK_FAILED)
@@ -631,7 +675,7 @@ describe WorksController do
 
             post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                     collection_id: inside.id, upload_as: 'proxy', publish: '1',
-                                    publish_community_id: 'comm1', publish_genre: 'Datasets' }
+                                    publish_community_ids: ['comm1'], publish_genre: 'Datasets' }
 
             expect(AtlasRb::System::Work).to have_received(:add_linked_member)
               .with(assigns(:work).id, 'showcasenoid', on_behalf_of: owner_nuid)
@@ -682,7 +726,7 @@ describe WorksController do
 
         post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id, publish: '1',
-                                publish_community_id: 'comm1', publish_genre: 'Datasets' }
+                                publish_community_ids: ['comm1'], publish_genre: 'Datasets' }
 
         expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
         expect(AtlasRb::System::Work).not_to have_received(:add_linked_member)
@@ -731,7 +775,7 @@ describe WorksController do
       def deposit(**overrides)
         post :create, params: { terms_accepted: '1', binary: fixture_file_upload('image.png', 'image/png'),
                                 collection_id: collection.id, publish: '1',
-                                publish_community_id: 'comm1', publish_genre: 'Datasets' }.merge(overrides)
+                                publish_community_ids: ['comm1'], publish_genre: 'Datasets' }.merge(overrides)
       end
 
       it 'records a promotion with the community, the genre and the uploaded filename' do
@@ -845,7 +889,8 @@ describe WorksController do
         expect(response.body).to include('Also promote to a community showcase')
         expect(response.body).to include('Works promoted to a community’s showcase can be discovered by users ' \
                                          'from the community’s work page and from the DRS homepage.')
-        expect(response.body).to include('My Community') # community picker (size > 1)
+        expect(response.body).to include('My Community') # one checkbox per community (size > 1)
+        expect(response.body).to include('name="publish_community_ids[]"')
         expect(response.body).to include('Other Community')
         expect(response.body).to include('Datasets') # showcase genre option
       end

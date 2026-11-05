@@ -127,9 +127,25 @@ are opt-in download renditions chosen on the metadata page and applied later by
 
 ## Promoting a Work into a community showcase
 
-Promotion surfaces the new Work in a community genre showcase via a
-linked-member edge. It is orthogonal to placement: the Work's structural home
-is wherever it was just deposited, and promotion does not touch it.
+Promotion surfaces the new Work in community genre showcases via linked-member
+edges. It is orthogonal to placement: the Work's structural home is wherever it
+was just deposited, and promotion does not touch it.
+
+A depositor affiliated with several communities, for example faculty in two
+departments, may promote one Work into several of them. The Work has **one**
+category, so the form asks for one Category and offers a checkbox per community
+(`publish_community_ids[]`). A depositor with one community gets that community
+as a hidden field. The Category select offers only the genres every checked
+community has a showcase for; `deposit_promotion_controller.js` recomputes it as
+boxes are ticked, and the server renders the genres all communities share as
+the fallback.
+
+`WorkDeposit#promote_if_requested` makes one attempt per chosen community. Each
+attempt gets its own ledger row, and a refusal in one community does not stop
+the others. If any attempt fails, the depositor sees `PUBLISH_LINK_FAILED`. A
+refusal that applies to the whole deposit, `not_personal_root` or
+`not_workspace_owner`, is recorded once per chosen community, so each row still
+names the community that was asked for.
 
 `WorkDeposit#publish_offered?` offers promotion only when the destination is in
 a person's workspace: their personal root, or any collection inside it.

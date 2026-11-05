@@ -398,8 +398,9 @@ staff-only genres (`FeaturedContent::STAFF_ONLY`) are left out.
 `community_name` falls back to the NOID when the lookup fails, so a stale
 affiliation cannot break the deposit form.
 
-`publish_showcase_id` resolves the showcase to promote into from the submitted
-`publish_community_id` and `publish_genre`. It returns `nil` when the request
+`publish_showcase_id(community_noid)` resolves the showcase to promote into
+from one of the submitted `publish_community_ids` and the `publish_genre`.
+`WorkDeposit` calls it once per chosen community. It returns `nil` when the request
 cannot be honoured: no curated Person, a community the depositor is not
 affiliated with, a staff-only genre, or no showcase for that genre there.
 `ShowcaseFinder` runs through the gated `SearchBuilder`, so a showcase the

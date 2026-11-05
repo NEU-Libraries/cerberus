@@ -19,16 +19,21 @@
         - else
           Works promoted to a community’s showcase can be discovered by users from the community’s work page and from the DRS homepage.
   .deposit-form__promote-fields.d-none{data: { 'deposit-promotion-target' => 'fields' }}
-    - if targets.size > 1
-      %label.deposit-form__field-label{for: 'publish_community_id'} Community
-      %select.form-select#publish_community_id{name: 'publish_community_id', data: { 'deposit-promotion-target' => 'community', action: 'deposit-promotion#communityChanged' }}
-        - targets.each do |noid, target|
-          %option{value: noid}= target[:name]
-    - else
-      = hidden_field_tag 'publish_community_id', targets.keys.first
-    %label.deposit-form__field-label.mt-3{for: 'publish_genre'} Category
+    -# One category for the Work in every community it is promoted to.
+    -# Repopulated by Stimulus as communities are ticked; the genres every
+    -# community shares are rendered here as the no-JS fallback.
+    - shared = targets.values.map { |target| target[:genres].keys }.reduce(:&)
+    %label.deposit-form__field-label{for: 'publish_genre'} Category
     %select.form-select#publish_genre{name: 'publish_genre', data: { 'deposit-promotion-target' => 'genre' }}
-      -# Populated by Stimulus from the genres value; the first community's
-      -# genres are rendered here as a no-JS fallback.
-      - targets.values.first[:genres].each_key do |label|
+      - shared.each do |label|
         %option{value: label}= label
+    - if targets.size > 1
+      %fieldset.mt-3
+        %legend.deposit-form__field-label Communities
+        - targets.each_with_index do |(noid, target), index|
+          .form-check
+            = check_box_tag 'publish_community_ids[]', noid, index.zero?, id: "publish_community_#{noid}", class: 'form-check-input',
+                            data: { 'deposit-promotion-target' => 'community', action: 'deposit-promotion#communityChanged' }
+            %label.form-check-label{for: "publish_community_#{noid}"}= target[:name]
+    - else
+      = hidden_field_tag 'publish_community_ids[]', targets.keys.first, id: 'publish_community_only'

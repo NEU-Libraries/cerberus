@@ -37,45 +37,63 @@ module WorkDeposit
 
     # A promotion that can't be honoured leaves the deposit standing and flags
     # the flash: the Work is already placed, so there is nothing to roll back.
+    # One attempt per chosen community, each with its own ledger row, so a
+    # refusal in one community never stops the others.
     def promote_if_requested
       return unless ActiveModel::Type::Boolean.new.cast(params[:publish])
-      return refuse_promotion('not_personal_root') unless publish_offered?
-      # A showcase entry is the depositor's own, so in someone else's workspace
-      # the deposit must be a proxy for them. The form hides the option until
-      # Proxy is chosen; this is the rule, not a courtesy.
-      return refuse_promotion('not_workspace_owner') unless @depositor_nuid.to_s == workspace_owner['nuid'].to_s
 
-      showcase_id = publish_showcase_id
-      return refuse_promotion('no_showcase') if showcase_id.blank?
+      communities = requested_communities.presence || [nil]
+      reason = promotion_refusal
+      return communities.each { |noid| refuse_promotion(reason, noid) } if reason
 
-      promote_to_showcase(showcase_id)
+      communities.each { |noid| promote_into(noid) }
     end
 
-    def refuse_promotion(reason)
+    def requested_communities
+      Array(params[:publish_community_ids]).map(&:to_s).compact_blank.uniq
+    end
+
+    # A showcase entry is the depositor's own, so in someone else's workspace
+    # the deposit must be a proxy for them. The form hides the option until
+    # Proxy is chosen; this is the rule, not a courtesy.
+    def promotion_refusal
+      return 'not_personal_root' unless publish_offered?
+
+      'not_workspace_owner' unless @depositor_nuid.to_s == workspace_owner['nuid'].to_s
+    end
+
+    def promote_into(community_noid)
+      showcase_id = community_noid && publish_showcase_id(community_noid)
+      return refuse_promotion('no_showcase', community_noid) if showcase_id.blank?
+
+      promote_to_showcase(showcase_id, community_noid)
+    end
+
+    def refuse_promotion(reason, community_noid)
       @publish_link_failed = true
-      record_promotion(outcome: 'refused', reason: reason)
+      record_promotion(outcome: 'refused', reason: reason, community_noid: community_noid)
     end
 
     # The rescue is a safety net for Atlas's :system scoping, not the expected
     # path: the Work is deposited and intact by the time it can fire, so only
     # the promotion failed and @publish_link_failed must say exactly that —
     # never a 403 page hiding a Work the depositor can already see.
-    def promote_to_showcase(showcase_id)
+    def promote_to_showcase(showcase_id, community_noid)
       # The Work's depositor, not the signed-in user: Atlas links only on the
       # depositor's behalf, and an acting-as or proxy deposit names someone else.
       AtlasRb::System::Work.add_linked_member(@work.id, showcase_id, on_behalf_of: @depositor_nuid)
-      record_promotion(outcome: 'promoted', showcase_id: showcase_id)
+      record_promotion(outcome: 'promoted', showcase_id: showcase_id, community_noid: community_noid)
     rescue AtlasRb::ForbiddenError => e
       Rails.logger.warn("[publish] add_linked_member forbidden for work #{@work.id} " \
                         "-> #{showcase_id}: #{e.message}")
       @publish_link_failed = true
-      record_promotion(outcome: 'refused', reason: 'atlas_forbidden', showcase_id: showcase_id)
+      record_promotion(outcome: 'refused', reason: 'atlas_forbidden', showcase_id: showcase_id,
+                       community_noid: community_noid)
     end
 
     # EVERY promotion attempt reaches the admin ledger, refusals included — a
     # refusal is otherwise invisible to everyone but the depositor's one flash.
-    def record_promotion(outcome:, reason: nil, showcase_id: nil)
-      community_noid = params[:publish_community_id].presence
+    def record_promotion(outcome:, community_noid:, reason: nil, showcase_id: nil)
       AdminNotice.create!(
         kind:         'showcase_promotion',
         subject:      promotion_subject(outcome),

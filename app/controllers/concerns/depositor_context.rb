@@ -95,11 +95,11 @@ module DepositorContext
 
     # Resolves a showcase in one of the workspace owner's communities only. The
     # caller must confirm separately that the Work's depositor is that owner.
-    def publish_showcase_id
+    def publish_showcase_id(community_noid)
       person = workspace_owner
       return nil if person.blank?
 
-      community_noid = params[:publish_community_id].to_s
+      community_noid = community_noid.to_s
       return nil unless Array(person['affiliated_community_ids']).map(&:to_s).include?(community_noid)
       return nil if FeaturedContent::STAFF_ONLY.include?(params[:publish_genre])
 
