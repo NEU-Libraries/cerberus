@@ -308,6 +308,18 @@ RSpec.describe 'Admin::People', type: :request do
         expect(page.at_css('.admin-registry__count').text).to eq('1')
       end
 
+      # Save ends the page, where people look for it.
+      it 'puts the affiliations card first and Save details last' do
+        allow(AtlasRb::Person).to receive(:find).and_return(person)
+        allow(AtlasRb::Resource).to receive(:find_many).and_return([])
+
+        get edit_admin_person_path('cz8wbpk')
+
+        cards = response.parsed_body.css('.admin-registry')
+        expect(cards.first.at_css('.admin-registry__title').text).to include('Community affiliations')
+        expect(cards.last.css('input[type=submit]').last['value']).to eq('Save details')
+      end
+
       it 'runs the community picker when a query is present' do
         allow(AtlasRb::Person).to receive(:find).and_return(person)
         allow(AtlasRb::Resource).to receive(:find_many)
