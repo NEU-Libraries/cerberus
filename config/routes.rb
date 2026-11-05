@@ -357,6 +357,10 @@ Rails.application.routes.draw do
     get  'files/manage',   to: 'files#manage',   as: :files_manage
     post 'files/replace',  to: 'files#replace',  as: :files_replace
     post 'files/rollback', to: 'files#rollback', as: :files_rollback
+    # Tombstone one file's FileSet, or restore it. Reversible; the Work and its
+    # other files stay up.
+    post 'files/remove',   to: 'files#remove',   as: :files_remove
+    post 'files/restore',  to: 'files#restore',  as: :files_restore
     get  'files/:id/versions/:version_id/content', to: 'file_versions#content',
                                                    as: :file_version_content
 

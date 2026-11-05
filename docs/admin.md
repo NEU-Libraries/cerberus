@@ -157,6 +157,7 @@ action between controllers.
 | Tombstone list, restore and bulk restore | `:admin` or the devolved-admin tier | Atlas grants `:restore` to both, in `apply_admin_delegate_abilities` |
 | Permanent delete and bulk delete | `:admin` only | Atlas omits `:destroy` from the delegate abilities, so a wider gate here only buys a 403 from Atlas |
 | Replace a file, roll back a version | `:admin` or the devolved-admin tier | Atlas grants Blob `:update` to every standard user, and its rollback checks `:update`. It grants `:read_versions` to the delegate tier |
+| Remove one file, restore a removed file | `:admin` or the devolved-admin tier | Atlas grants FileSet `:tombstone` and `:restore`, and the `tombstoned_assets` listing, to both. It sits on the Replace a file page, which already carries this gate |
 | Reindex a Work or a Set | `:admin` or the devolved-admin tier | Atlas applies no per-user check on this path at all |
 | The ledger | `:admin` or the devolved-admin tier | the same audience as deposit triage |
 | Work health lookup | `:admin` or the devolved-admin tier | Atlas allows its health check to both tiers, as `:read_health`. See `work-health.md` |
@@ -506,6 +507,30 @@ filename.
 
 The acting user's NUID flows ambiently through `Current.nuid` and propagates
 into the enqueued jobs.
+
+## Removing one file from a Work
+
+The same page removes one file while the Work and its other files stay up, for
+example a transcript beside a video. Removal is reversible: `remove` tombstones
+the file's FileSet (`AtlasRb::Resource.tombstone`), and `restore` brings it back
+(`AtlasRb::Admin::Resource.restore`). It is a separate act from retracting the
+whole Work. The caption flow on the Work Edit page uses the same two calls.
+
+- **The FileSet goes as a whole.** A FileSet can hold more than one Blob, such as
+  an original and a rendition, so the confirm names everything stored with the
+  file.
+- **The last file is refused.** Removing a Work's only FileSet would leave an
+  empty Work, which is taking the whole Work down. `ONLY_FILE_REFUSED` points
+  to deleting the Work instead.
+- **Both ids are checked against the Work.** `remove` takes a Blob from the
+  Work's current assets, and `restore` takes a FileSet from its
+  `tombstoned_assets`, so neither can be pointed at another Work's file.
+
+Atlas's `/assets` drops a tombstoned FileSet, so the file leaves the work page,
+the downloads modal, the download queue and the zip downloads at once. Atlas
+records the tombstone and the restore as file events on the Work, which the
+History tab shows. Removed files are listed at the bottom of the page, with who
+removed them and when.
 
 ## Reindexing a Work or a Set
 

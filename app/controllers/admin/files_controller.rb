@@ -18,6 +18,10 @@ module Admin
 
     breadcrumb_for 'Replace a file', :admin_files_path
 
+    # Removing a work's last file would leave an empty work, which is taking the
+    # whole work down, a separate act with its own route.
+    ONLY_FILE_REFUSED = "This is the work's only file. To take the whole work down, delete the work instead."
+
     def index
       @results = ResourceSearch.call(scope: self, query: params[:q], types: %w[Work]) if params[:q].present?
     end
@@ -28,9 +32,35 @@ module Admin
       breadcrumb 'Manage files', admin_files_manage_path(work_id: params[:work_id])
       @work = require_resource!(AtlasRb::Work.find(params[:work_id]))
 
-      assets  = AtlasRb::Work.assets(params[:work_id]).reject { |asset| asset[:uri].present? }
+      assets  = content_assets
       history = version_history(assets.map(&:noid))
       @blobs  = assets.map { |asset| { asset: asset, versions: history.fetch(asset.noid, []) } }
+      @removed = removed_assets
+    end
+
+    # Tombstones the file's FileSet, so everything stored in that FileSet leaves
+    # the work page, downloads and zips together. Restore brings it all back.
+    def remove
+      asset = content_assets.find { |candidate| candidate.noid == params[:blob_noid] }
+      return back_to_manage(alert: 'This work has no such file.') if asset.nil?
+      return back_to_manage(alert: ONLY_FILE_REFUSED) if content_assets.map(&:file_set).uniq == [asset.file_set]
+
+      if AtlasRb::Resource.tombstone(asset.file_set, nuid: current_user.nuid).success?
+        back_to_manage(notice: "#{asset_name(asset)} removed. It can be restored below.")
+      else
+        back_to_manage(alert: 'The file could not be removed.')
+      end
+    end
+
+    def restore
+      asset = removed_assets.find { |candidate| candidate.file_set == params[:file_set_id] }
+      return back_to_manage(alert: 'This work has no such removed file.') if asset.nil?
+
+      if AtlasRb::Admin::Resource.restore(asset.file_set, nuid: current_user.nuid).success?
+        back_to_manage(notice: "#{asset_name(asset)} restored.")
+      else
+        back_to_manage(alert: 'The file could not be restored.')
+      end
     end
 
     def replace
@@ -52,6 +82,19 @@ module Admin
     end
 
     private
+
+      def content_assets
+        @content_assets ||= AtlasRb::Work.assets(params[:work_id]).reject { |asset| asset[:uri].present? }
+      end
+
+      def removed_assets
+        @removed_assets ||= AtlasRb::Work.tombstoned_assets(params[:work_id], nuid: current_user.nuid)
+                                         .reject { |asset| asset[:uri].present? }
+      end
+
+      def asset_name(asset)
+        asset.label.presence || asset[:original_filename].presence || 'The file'
+      end
 
       # A replacement of another type would leave the old type's derivatives
       # behind (a Word file's PDF rendition, an image's size tiers), and no job

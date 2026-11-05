@@ -47,6 +47,9 @@ RSpec.describe 'Admin::Files', type: :request do
 
   let(:upload) { Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/image.png'), 'image/png') }
 
+  # No removed files unless an example says otherwise.
+  before { allow(AtlasRb::Work).to receive(:tombstoned_assets).and_return([]) }
+
   describe 'admin gate' do
     context 'as :privileged staff' do
       before { sign_in staff_user }
@@ -59,6 +62,10 @@ RSpec.describe 'Admin::Files', type: :request do
         post '/admin/files/replace', params: { work_id: 'w', blob_noid: 'b' }
         expect(response).to have_http_status(:forbidden)
         post '/admin/files/rollback', params: { work_id: 'w', blob_noid: 'b', version_id: 'v1' }
+        expect(response).to have_http_status(:forbidden)
+        post '/admin/files/remove', params: { work_id: 'w', blob_noid: 'b' }
+        expect(response).to have_http_status(:forbidden)
+        post '/admin/files/restore', params: { work_id: 'w', file_set_id: 'fs' }
         expect(response).to have_http_status(:forbidden)
       end
     end
@@ -95,6 +102,19 @@ RSpec.describe 'Admin::Files', type: :request do
       get '/admin/files/manage', params: { work_id: 'w1' }
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('A Photograph', 'report.pdf', 'v1')
+    end
+
+    # Atlas lets the delegate tier tombstone and restore a FileSet.
+    it 'removes a file, same as an admin' do
+      allow(AtlasRb::Work).to receive(:assets).with('w1').and_return(
+        [AtlasRb::Mash.new('noid' => 'b1', 'label' => 'transcript.pdf', 'file_set' => 'fs1'),
+         AtlasRb::Mash.new('noid' => 'b2', 'label' => 'video.mp4', 'file_set' => 'fs2')]
+      )
+      allow(AtlasRb::Resource).to receive(:tombstone).and_return(OpenStruct.new(success?: true))
+
+      post '/admin/files/remove', params: { work_id: 'w1', blob_noid: 'b1' }
+
+      expect(AtlasRb::Resource).to have_received(:tombstone).with('fs1', nuid: '000000002')
     end
 
     it 'replaces a file end-to-end, same as an admin' do
@@ -267,6 +287,105 @@ RSpec.describe 'Admin::Files', type: :request do
         end.not_to have_enqueued_job(FileReplacementJob)
         expect(response).to redirect_to(admin_files_manage_path(work_id: 'w1'))
         expect(flash[:alert]).to be_present
+      end
+    end
+
+    # One file leaves the work; the work and its other files stay up.
+    describe 'POST remove' do
+      before do
+        allow(AtlasRb::Work).to receive(:assets).with('w1').and_return(
+          [AtlasRb::Mash.new('noid' => 'b1', 'label' => 'transcript.pdf', 'file_set' => 'fs1'),
+           AtlasRb::Mash.new('noid' => 'b2', 'label' => 'video.mp4', 'file_set' => 'fs2')]
+        )
+        allow(AtlasRb::Resource).to receive(:tombstone).and_return(OpenStruct.new(success?: true))
+      end
+
+      it "tombstones the file's FileSet and says it can be restored" do
+        post '/admin/files/remove', params: { work_id: 'w1', blob_noid: 'b1' }
+
+        expect(AtlasRb::Resource).to have_received(:tombstone).with('fs1', nuid: '000000004')
+        expect(response).to redirect_to(admin_files_manage_path(work_id: 'w1'))
+        expect(flash[:notice]).to eq('transcript.pdf removed. It can be restored below.')
+      end
+
+      it 'refuses a file that is not on this work' do
+        post '/admin/files/remove', params: { work_id: 'w1', blob_noid: 'elsewhere' }
+
+        expect(AtlasRb::Resource).not_to have_received(:tombstone)
+        expect(flash[:alert]).to eq('This work has no such file.')
+      end
+
+      # An empty work is the whole work taken down, which has its own route.
+      it "refuses to remove the work's only file" do
+        allow(AtlasRb::Work).to receive(:assets).with('w1').and_return(
+          [AtlasRb::Mash.new('noid' => 'b1', 'label' => 'report.pdf', 'file_set' => 'fs1'),
+           AtlasRb::Mash.new('noid' => 'b1-pdf', 'label' => 'report rendition', 'file_set' => 'fs1')]
+        )
+
+        post '/admin/files/remove', params: { work_id: 'w1', blob_noid: 'b1' }
+
+        expect(AtlasRb::Resource).not_to have_received(:tombstone)
+        expect(flash[:alert]).to eq(Admin::FilesController::ONLY_FILE_REFUSED)
+      end
+
+      it 'says so when Atlas refuses' do
+        allow(AtlasRb::Resource).to receive(:tombstone).and_return(OpenStruct.new(success?: false))
+
+        post '/admin/files/remove', params: { work_id: 'w1', blob_noid: 'b1' }
+
+        expect(flash[:alert]).to eq('The file could not be removed.')
+      end
+    end
+
+    describe 'POST restore' do
+      before do
+        allow(AtlasRb::Work).to receive(:tombstoned_assets).with('w1', nuid: '000000004').and_return(
+          [AtlasRb::Mash.new('noid' => 'b1', 'label' => 'transcript.pdf', 'file_set' => 'fs1')]
+        )
+        allow(AtlasRb::Admin::Resource).to receive(:restore).and_return(OpenStruct.new(success?: true))
+      end
+
+      it 'restores a removed FileSet of this work' do
+        post '/admin/files/restore', params: { work_id: 'w1', file_set_id: 'fs1' }
+
+        expect(AtlasRb::Admin::Resource).to have_received(:restore).with('fs1', nuid: '000000004')
+        expect(flash[:notice]).to eq('transcript.pdf restored.')
+      end
+
+      it 'refuses a FileSet that is not among this work\'s removed files' do
+        post '/admin/files/restore', params: { work_id: 'w1', file_set_id: 'fs-elsewhere' }
+
+        expect(AtlasRb::Admin::Resource).not_to have_received(:restore)
+        expect(flash[:alert]).to eq('This work has no such removed file.')
+      end
+    end
+
+    describe 'GET manage, with removed files' do
+      before do
+        allow(AtlasRb::Work).to receive(:find).with('w1').and_return(OpenStruct.new(title: 'A Lecture'))
+        allow(AtlasRb::Work).to receive(:assets).with('w1').and_return(
+          [AtlasRb::Mash.new('noid' => 'b2', 'label' => 'video.mp4', 'file_set' => 'fs2', 'mime_type' => 'video/mp4')]
+        )
+        allow(AtlasRb::Blob).to receive(:find_many_versions).and_return([])
+        allow(AtlasRb::Work).to receive(:tombstoned_assets).with('w1', nuid: '000000004').and_return(
+          [AtlasRb::Mash.new('noid' => 'b1', 'label' => 'transcript.pdf', 'file_set' => 'fs1',
+                             'tombstoned_at' => '2026-11-01T10:00:00Z', 'tombstoned_by' => '000000004')]
+        )
+      end
+
+      it 'lists each removed file with a Restore button' do
+        get '/admin/files/manage', params: { work_id: 'w1' }
+
+        removed = response.parsed_body.css('.admin-registry').find { |card| card.text.include?('Removed files') }
+        expect(removed.text).to include('transcript.pdf')
+        expect(removed.at_css("input[name='file_set_id'][value='fs1']")).to be_present
+      end
+
+      it 'offers Remove on each current file, confirmed first' do
+        get '/admin/files/manage', params: { work_id: 'w1' }
+
+        form = response.parsed_body.at_css("form[action='#{admin_files_remove_path}']")
+        expect(form['data-turbo-confirm']).to include('Remove video.mp4 from this work?')
       end
     end
 
