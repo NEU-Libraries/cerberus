@@ -320,6 +320,21 @@ RSpec.describe 'Admin::People', type: :request do
         expect(cards.last.css('input[type=submit]').last['value']).to eq('Save details')
       end
 
+      # With the details card no longer first, the top of the page still has to
+      # say whose record it is.
+      it 'names the person in the first card and in the breadcrumb' do
+        allow(AtlasRb::Person).to receive(:find).and_return(person)
+        allow(AtlasRb::Resource).to receive(:find_many).and_return([])
+
+        get edit_admin_person_path('cz8wbpk')
+
+        page = response.parsed_body
+        expect(page.at_css('.admin-registry .admin-registry__who').text).to eq('David Cliff')
+        crumbs = page.css('nav[aria-label="breadcrumb"] .breadcrumb-item')
+        expect(crumbs.map { |li| li.text.strip }.last(3)).to eq(['Manage people', 'David Cliff', 'Edit'])
+        expect(crumbs[-2].at_css('a')['href']).to eq(person_path('cz8wbpk'))
+      end
+
       it 'runs the community picker when a query is present' do
         allow(AtlasRb::Person).to receive(:find).and_return(person)
         allow(AtlasRb::Resource).to receive(:find_many)

@@ -7,6 +7,7 @@
     %span.admin-registry__title
       %i.fa-solid.fa-users{'aria-hidden' => 'true'}
       Community affiliations
+      %span.admin-registry__who= @person['display_name']
       %span.admin-registry__count= @affiliations.size
 
   .admin-registry__body

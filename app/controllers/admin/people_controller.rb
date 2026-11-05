@@ -48,7 +48,7 @@ module Admin
     end
 
     def edit
-      breadcrumb 'Edit', edit_admin_person_path(@noid)
+      edit_breadcrumbs
       load_affiliations
       @accounts = sign_in_accounts
       @results = community_search if params[:q].present?
@@ -71,6 +71,7 @@ module Admin
       redirect_to edit_admin_person_path(@noid), notice: 'Person details saved.'
     rescue Faraday::Error, JSON::ParserError => e
       @person = AtlasRb::Person.find(@noid, nuid: Current.nuid)
+      edit_breadcrumbs
       load_affiliations
       @accounts = sign_in_accounts
       flash.now[:alert] = "Couldn't save those details: #{e.message}"
@@ -94,6 +95,12 @@ module Admin
         @person = AtlasRb::Person.find(@noid, nuid: Current.nuid)
       rescue JSON::ParserError
         render template: 'errors/not_found', status: :not_found, locals: { obj_type: 'person' }
+      end
+
+      # Manage people / <name> / Edit, as a Work's trail names it before Edit.
+      def edit_breadcrumbs
+        breadcrumb @person['display_name'].presence || @noid, person_path(@noid)
+        breadcrumb 'Edit', edit_admin_person_path(@noid)
       end
 
       # The person's sign-in accounts, each with its own name and group set. A
