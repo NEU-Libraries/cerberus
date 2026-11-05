@@ -47,6 +47,8 @@ RSpec.describe SetZipPacker do
         .and_yield([work_doc('work1', embargo: (Date.current + 30).to_s)])
       allow(AtlasRb::Work).to receive(:assets)
         .and_return([blob(noid: 'blobA', filename: 'a.jpg', mime_type: 'image/jpeg')])
+
+      allow(AtlasRb::Blob).to receive(:content).with('blobA').and_yield('bytes')
     end
 
     it 'packs none of its bytes for a caller who cannot bypass' do
@@ -153,8 +155,8 @@ RSpec.describe SetZipPacker do
 
   context 'when Atlas withholds a file under a tombstone' do
     def tombstoned(type, id)
-      AtlasRb::TombstonedError.new('error' => 'tombstoned', 'tombstoned_resource_type' => type,
-                                   'tombstoned_resource_id' => id)
+      AtlasRb::TombstonedError.new({ 'error' => 'tombstoned', 'tombstoned_resource_type' => type,
+                                     'tombstoned_resource_id' => id })
     end
 
     def errors_body = zip.entries.find { |e| e.name == 'ERRORS.txt' }&.body

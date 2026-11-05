@@ -238,8 +238,8 @@ RSpec.describe 'Blob downloads', type: :request do
   # chunk, so the page renders in place of the file. See docs/downloads.md.
   context 'when Atlas withholds the file under a tombstone' do
     def tombstoned(type, id)
-      AtlasRb::TombstonedError.new('error' => 'tombstoned', 'tombstoned_resource_type' => type,
-                                   'tombstoned_resource_id' => id)
+      AtlasRb::TombstonedError.new({ 'error' => 'tombstoned', 'tombstoned_resource_type' => type,
+                                     'tombstoned_resource_id' => id })
     end
 
     before do

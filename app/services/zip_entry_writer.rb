@@ -18,7 +18,8 @@ module ZipEntryWriter
     def write_asset(zip, folder, asset, manifest, errors)
       name = entry_filename(asset)
       zip.write_stored_file([folder, name].compact.join('/')) do |sink|
-        status = AtlasRb::Blob.content(asset.noid) { |chunk| sink << chunk }&.dig(:status)
+        result = AtlasRb::Blob.content(asset.noid) { |chunk| sink << chunk }
+        status = result[:status] if result.is_a?(Hash)
         raise RefusedStream, "Atlas answered #{status}" if status && !(200..299).cover?(status)
       end
       manifest << { identifier: folder, filename: name }
