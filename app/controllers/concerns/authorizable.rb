@@ -11,6 +11,12 @@ module Authorizable
   # See docs/authorization.md.
   class ResourceNotFound < StandardError; end
 
+  # The tombstoned types that get a Removed page naming them. Below the operator
+  # tiers, `find` returns Atlas's tombstone stub: the title and permanent URL.
+  GONE_PAGE_TYPES = {
+    'Work' => AtlasRb::Work, 'Collection' => AtlasRb::Collection, 'Community' => AtlasRb::Community
+  }.freeze
+
   class_methods do
     # Deny-by-default write gating for works / collections / communities: the
     # :edit ability on the DESTINATION for new/create, on the resource for both
@@ -95,13 +101,13 @@ module Authorizable
       render template: 'errors/gone', status: :gone, locals: { record: record }
     end
 
-    # A removed file reads as absent; a retracted Work gets its Removed page.
+    # A removed file reads as absent; a tombstoned Work or container gets its
+    # Removed page. See docs/authorization.md.
     def render_withheld(error)
-      if error.work_retracted?
-        render_gone(AtlasRb::Work.find(error.tombstoned_resource_id))
-      else
-        render template: 'errors/not_found', status: :not_found, locals: { obj_type: 'file' }
-      end
+      klass = GONE_PAGE_TYPES[error.tombstoned_resource_type]
+      return render_gone(klass.find(error.tombstoned_resource_id)) if klass
+
+      render template: 'errors/not_found', status: :not_found, locals: { obj_type: 'file' }
     end
 
     def authorize_show!

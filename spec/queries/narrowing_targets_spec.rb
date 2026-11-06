@@ -68,4 +68,16 @@ RSpec.describe NarrowingTargets do
       hash_including(fq: array_including(described_class::AFFECTED_TYPES))
     )
   end
+
+  # A cascade runs as the editor, and Atlas withholds a tombstoned item's
+  # permissions from an editor. See docs/narrowing.md.
+  it 'leaves tombstoned items out of the cascade' do
+    stub_solr
+
+    targets.to_a
+
+    expect(Blacklight.default_index).to have_received(:search).with(
+      hash_including(fq: array_including('-tombstoned_bsi:true'))
+    )
+  end
 end

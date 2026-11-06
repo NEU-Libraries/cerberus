@@ -86,6 +86,18 @@ rather than standing alone. Counting them would overstate the impact. It would
 also break the ownership test, because the metadata FileSet carries no
 depositor.
 
+### Tombstoned items are left out
+
+The filter also drops tombstoned items (`LIVE`, `-tombstoned_bsi:true`). Atlas
+withholds a tombstoned item's permissions from everyone below the operator
+tiers. A cascade runs as the editor who narrowed, so it could not read or
+narrow one. An editor is also not told about an item they cannot see, so the
+confirmation does not count it, and the ownership test ignores it.
+
+The item keeps the audience it had when it was removed. That leaks nothing
+while it stays tombstoned. A restore can bring it back wider than its
+container, which is for Atlas to clamp on restore.
+
 Solr returns facet fields as a flat `[value, hits, value, hits, ...]` array.
 `facet_pairs` reshapes it into a hash.
 
@@ -153,8 +165,8 @@ a finite depth would only invite an off-by-one against the deepest collection.
 refuses a cascade above `NarrowingImpact::CASCADE_LIMIT`, well under that row
 ceiling. So the ceiling cannot silently truncate a set that reaches a job.
 
-`NarrowingTargets` restricts to the same `AFFECTED_TYPES` as `NarrowingImpact`,
-for the same reason. It also queries Solr directly, ungated.
+`NarrowingTargets` restricts to the same `AFFECTED_TYPES` and `LIVE` filter as
+`NarrowingImpact`, for the same reasons. It also queries Solr directly, ungated.
 
 ## Resolving a subtree
 

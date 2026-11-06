@@ -99,6 +99,9 @@ before a byte moves. `Authorizable#render_withheld` answers it:
 | a FileSet (one file removed) | the not-found page, for a file |
 | the Work (retracted) | the Work's Removed page (`errors/gone`) |
 
+The same handler answers a tombstone on any other read, such as a Collection's
+or a Work's record. `docs/authorization.md` covers that.
+
 `DownloadsController` and `MediaController` stream through
 `StreamsBlob#stream_blob`, which sets the file's headers only when the first
 chunk arrives. Two traps make that necessary:
@@ -375,7 +378,9 @@ The manifest is a small text grid even at the export cap
 and writes it once every item has been visited, followed by `ERRORS.txt` when
 there are errors. Only the MODS payloads stream. The `.xlsx` is itself a zip, so
 it too is STOREd. A failed MODS fetch leaves the row's MODS path blank and adds
-an `ERRORS.txt` line.
+an `ERRORS.txt` line. A Work that Atlas withholds under a tombstone gets no row,
+only the line `<noid>: withheld — removed from view`, because the tombstone
+withholds its record as well as its files.
 
 ### The manifest columns
 

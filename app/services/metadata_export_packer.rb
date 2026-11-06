@@ -37,13 +37,7 @@ class MetadataExportPacker
     errors = []
 
     @docs.each_content_batch do |docs|
-      docs.each do |doc|
-        noid = noid_of(doc)
-        next if noid.blank?
-
-        xml_path = write_mods(zip, noid, errors) if @include_mods
-        rows << manifest_row(doc, noid, xml_path, file_name(noid, errors))
-      end
+      docs.each { |doc| pack_doc(zip, doc, rows, errors) }
     end
 
     write_manifest(zip, rows)
@@ -51,6 +45,18 @@ class MetadataExportPacker
   end
 
   private
+
+    # A tombstone withholds the Work's record as well as its files, so it gets
+    # an ERRORS.txt line, worded like the content zips, and no row.
+    def pack_doc(zip, doc, rows, errors)
+      noid = noid_of(doc)
+      return if noid.blank?
+
+      xml_path = write_mods(zip, noid, errors) if @include_mods
+      rows << manifest_row(doc, noid, xml_path, file_name(noid, errors))
+    rescue AtlasRb::TombstonedError
+      errors << "#{noid}: withheld — removed from view"
+    end
 
     # Solr stores the noid in `alternate_ids_ssim` as `id-<noid>`.
     def noid_of(doc)
@@ -87,6 +93,8 @@ class MetadataExportPacker
         asset['uri'].blank? && asset['role'].to_s == 'original_file'
       end
       original && (original['original_filename'].presence || original['filename'])
+    rescue AtlasRb::TombstonedError
+      raise
     rescue Faraday::Error, JSON::ParserError, AtlasRb::ResourceError => e
       errors << "#{noid}: file list fetch failed — #{e.class}: #{e.message}"
       nil

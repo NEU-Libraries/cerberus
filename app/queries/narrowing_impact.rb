@@ -11,6 +11,10 @@ class NarrowingImpact
   # overstate the impact and poison the ownership test below — the metadata
   # FileSet carries no depositor.
   AFFECTED_TYPES  = 'internal_resource_tesim:(Work OR Collection)'
+  # A tombstoned item is withheld from everyone below the operator tiers, so a
+  # cascade run by an editor could not read it. It is neither counted nor
+  # narrowed. See docs/narrowing.md.
+  LIVE            = '-tombstoned_bsi:true'
   DEPOSITOR_FIELD = 'depositor_ssi'
 
   # Above this the cascade stops and asks for staff instead of running. Raising
@@ -66,7 +70,7 @@ class NarrowingImpact
     end
 
     def filters
-      [subtree_fq, AFFECTED_TYPES,
+      [subtree_fq, AFFECTED_TYPES, LIVE,
        MembershipQuery.excluding_fq(MembershipQuery.identity_fq([@uuid]))]
     end
 

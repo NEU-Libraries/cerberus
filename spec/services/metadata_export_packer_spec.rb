@@ -243,4 +243,30 @@ RSpec.describe MetadataExportPacker do
       expect(failed.xml_path).to be_nil
     end
   end
+
+  # A tombstone withholds the record as well as the files, so the Work gets no
+  # row and no MODS entry. See docs/downloads.md.
+  context 'when Atlas withholds a Work under a tombstone' do
+    let(:withheld) do
+      AtlasRb::TombstonedError.new({ 'error' => 'tombstoned', 'tombstoned_resource_type' => 'Work',
+                                     'tombstoned_resource_id' => 'aaa111' })
+    end
+
+    it 'names it in ERRORS.txt and leaves it out of the bundle' do
+      allow(AtlasRb::Work).to receive(:mods).with('aaa111', anything).and_raise(withheld)
+      entries = pack_to_entries(include_mods: true)
+
+      expect(entries['ERRORS.txt'].dup.force_encoding('UTF-8')).to eq('aaa111: withheld — removed from view')
+      expect(entries).not_to have_key('mods/aaa111.xml')
+      expect(manifest_rows(entries.fetch('manifest.xlsx')).map(&:identifier)).to eq(['bbb222'])
+    end
+
+    it 'leaves it out of a manifest-only bundle too' do
+      allow(AtlasRb::Work).to receive(:assets).with('aaa111').and_raise(withheld)
+      entries = pack_to_entries(include_mods: false)
+
+      expect(entries['ERRORS.txt'].dup.force_encoding('UTF-8')).to eq('aaa111: withheld — removed from view')
+      expect(manifest_rows(entries.fetch('manifest.xlsx')).map(&:identifier)).to eq(['bbb222'])
+    end
+  end
 end

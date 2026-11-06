@@ -123,6 +123,32 @@ the body. A binding that parsed first would unwrap a 403 envelope to the same
 `nil` a missing id gives, and the page would 404. Cerberus cannot recover a
 status the binding discarded.
 
+### A tombstone withholds the record
+
+Below the operator tiers, Atlas withholds a tombstoned resource, and everything
+under it, from every read except its own `find`. The `find` answers 410 with a
+stub that holds only the title, the permanent URL and the tombstone's reason and
+date. Every other read, including `Resource.permissions`, the MODS and the
+associations, refuses with `410 tombstoned`. atlas_rb raises that as
+`AtlasRb::TombstonedError`, which names the tombstoned resource and its type.
+
+`Authorizable#render_withheld` answers the refusal on every page:
+
+| `tombstoned_resource_type` | Page |
+|---|---|
+| `Work`, `Collection` or `Community` | the Removed page (`errors/gone`), built from that type's `find` stub |
+| `FileSet`, or anything else | the not-found page, for a file |
+
+So an editor who opens the edit form of a tombstoned Work gets the Removed page
+from `authorize_edit!`, because edit rights do not reach a tombstoned record.
+The show pages read the record first and render the Removed page from the stub,
+for every tier, admins included. Admins review a tombstoned item in the
+Tombstones registry instead.
+
+The handler is registered **below** the `ResourceError` handler, because
+`TombstonedError` subclasses it. Registered above, the refusal would land in the
+`ResourceError` handler and re-raise.
+
 **An unknown id still answers 404, but not for the obvious reason.** Atlas's
 `ResourcesController#permissions` authorizes before its nil check, against
 `resource || Resource`. For an unknown id CanCan gets the bare class. A class
