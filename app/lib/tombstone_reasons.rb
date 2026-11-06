@@ -28,6 +28,18 @@ module TombstoneReasons
     "\"#{title}\" was #{note}#{" on #{date.strftime('%B %-d, %Y')}" if date}."
   end
 
+  # A purge keeps no title or note, only the date.
+  def self.headline(record, title)
+    return purged_sentence(record.try(:purged_at)) if record.try(:purged)
+
+    sentence(title, record.try(:tombstone_reason), record.try(:tombstoned_at))
+  end
+
+  def self.purged_sentence(purged_at)
+    date = removal_date(purged_at)
+    "This item was removed#{" on #{date.strftime('%B %-d, %Y')}" if date}."
+  end
+
   def self.removal_date(tombstoned_at)
     return if tombstoned_at.blank?
 

@@ -11,6 +11,17 @@ module Authorizable
   # See docs/authorization.md.
   class ResourceNotFound < StandardError; end
 
+  # Raised by require_resource! for Atlas's stub of a permanently deleted
+  # Work, Collection or Community, which carries only the id and purge date.
+  class ResourcePurged < StandardError
+    attr_reader :record
+
+    def initialize(record)
+      @record = record
+      super("#{record.id} was purged")
+    end
+  end
+
   # The tombstoned types that get a Removed page naming them. Below the operator
   # tiers, `find` returns Atlas's tombstone stub: the title and permanent URL.
   GONE_PAGE_TYPES = {
@@ -76,6 +87,8 @@ module Authorizable
     # ResourceError handler, which this subclasses: registered above it, the
     # refusal would land there and re-raise. See docs/downloads.md.
     rescue_from AtlasRb::TombstonedError, with: :render_withheld
+
+    rescue_from(ResourcePurged) { |e| render_gone(e.record) }
   end
 
   private
@@ -88,11 +101,12 @@ module Authorizable
     end
 
     # The one place where "an atlas_rb read returned nil" becomes a Rails 404.
-    # It converts nil and nothing else: a tombstoned resource is often a 410
-    # instead, and only the caller knows which it wants. See
-    # docs/authorization.md.
+    # A tombstoned resource is often a 410 instead, and only the caller knows
+    # which it wants. A purged one has no record left to render, so every
+    # caller gets the Removed page. See docs/authorization.md.
     def require_resource!(resource)
       raise ResourceNotFound if resource.nil?
+      raise ResourcePurged, resource if resource.try(:purged)
 
       resource
     end

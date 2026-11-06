@@ -28,6 +28,23 @@ describe TombstoneReasons do
     end
   end
 
+  describe '.headline' do
+    it 'gives a purged item its purge date and no title' do
+      record = AtlasRb::Mash.new('id' => 'p1', 'purged' => true, 'purged_at' => '2026-11-06T18:30:00Z')
+      expect(described_class.headline(record, 'p1')).to eq('This item was removed on November 6, 2026.')
+    end
+
+    it 'drops a purge date that does not parse' do
+      record = AtlasRb::Mash.new('id' => 'p1', 'purged' => true, 'purged_at' => 'not-a-date')
+      expect(described_class.headline(record, 'p1')).to eq('This item was removed.')
+    end
+
+    it 'names a tombstoned item by its title' do
+      record = AtlasRb::Mash.new('title' => 'Sample Report', 'tombstoned' => true)
+      expect(described_class.headline(record, 'Sample Report')).to eq('"Sample Report" has been removed.')
+    end
+  end
+
   it 'records the curator note for a non-admin tombstone' do
     expect(described_class::CURATOR).to eq("Removed from view at contributor or content curator's discretion")
   end

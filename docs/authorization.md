@@ -197,7 +197,14 @@ above is deliberate: a write raises and a read returns nil. Keeping the
 conversion in one method puts the gem's contract in one place, so a change to
 what nil means is one edit.
 
-It converts nil and nothing else. Do not let it absorb the tombstone checks.
+It also turns Atlas's stub for a purged Work, Collection or Community into
+`ResourcePurged`, which renders the Removed page. A purge deletes the record, so
+Atlas answers the read with 410 and only the ID and `purged_at`, and an ID that
+never existed keeps its 404. Every caller wants the same page for a purge, so
+the check lives here. A surface that reads `Resource.permissions` first, such as
+the IIIF manifest, still answers 404, because a purged ID has no permissions.
+
+Do not let it absorb the tombstone checks.
 `CollectionsController#show` renders 410 Gone for a tombstoned Collection, via
 `render_gone`. `#facet_scope_filters` raises the same 404 for a tombstoned one,
 because a tombstoned container has no browsable contents to count. That
