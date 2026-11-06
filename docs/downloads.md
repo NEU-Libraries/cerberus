@@ -386,10 +386,19 @@ withholds its record as well as its files.
 
 The first five `HEADERS` match `XmlLoader::Manifest::COLUMN_LABELS`, or the
 bundle no longer loads back. `PIDs` is v1's column name for what is a NOID in
-DRS 2, and the loader accepts `PIDs`, `PID`, `NOID` or `NOIDs`. A sixth column,
-Date Ingested, is for the reader: the Work's creation date (`created_at_dtsi`)
-in the app's Eastern time zone. The loader ignores columns it does not know, so
-the bundle still re-ingests.
+DRS 2, and the loader accepts `PIDs`, `PID`, `NOID` or `NOIDs`. Two more columns
+are for the reader, both as dates in the app's Eastern time zone:
+
+| Column | Source | Meaning |
+|---|---|---|
+| Date Ingested | `created_at_dtsi` | the day the Work was created |
+| Date MODS Last Edited | `mods_updated_at_dtsi` | the day the Work's MODS last changed |
+
+Atlas indexes `mods_updated_at_dtsi` from the MODS version history. It moves
+only when the XML changes, so a permissions, embargo or full-text save leaves
+it alone, unlike the Work's `updated_at`. A Work never edited after deposit
+shows its deposit day, because that is when its MODS was last written. The
+loader ignores both labels, so the bundle still re-ingests.
 
 File Name carries the name the Work's `original_file` was deposited under,
 falling back to its stored name. Solr holds no filename, so it costs one
