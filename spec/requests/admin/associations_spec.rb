@@ -49,6 +49,7 @@ RSpec.describe 'Admin::Associations', type: :request do
     allow(AtlasRb::Work).to receive(:associations).and_return(edges)
     allow(AtlasRb::Resource).to receive(:find_many)
       .and_return([OpenStruct.new('noid' => 'dataset', :title => 'Ocean survey data')])
+    allow(WorkAbstracts).to receive(:call).and_return({})
   end
 
   describe 'admin gate' do
@@ -108,6 +109,27 @@ RSpec.describe 'Admin::Associations', type: :request do
         get '/admin/associations/manage', params: { work_id: 'codebook' }
 
         expect(response.body).to include('Is codebook for', 'Ocean survey data', 'dataset')
+      end
+
+      it 'shows the abstract under the title, with the PID in a chip' do
+        stub_manage('outbound' => { 'is_codebook_for' => ['dataset'] }, 'inbound' => {})
+        allow(WorkAbstracts).to receive(:call).and_return('dataset' => "Field measurements #{'and more ' * 30}")
+
+        get '/admin/associations/manage', params: { work_id: 'codebook' }
+
+        row = response.parsed_body.at_css('.work-association')
+        expect(row.at_css('.work-association__heading .admin-registry-table__id').text).to eq('dataset')
+        expect(row.at_css('.work-association__abstract').text).to start_with('Field measurements').and end_with('...')
+      end
+
+      it 'keeps the row and its chip when Solr has no abstract' do
+        stub_manage('outbound' => { 'is_codebook_for' => ['dataset'] }, 'inbound' => {})
+
+        get '/admin/associations/manage', params: { work_id: 'codebook' }
+
+        row = response.parsed_body.at_css('.work-association')
+        expect(row.at_css('.admin-registry-table__id').text).to eq('dataset')
+        expect(row.at_css('.work-association__abstract')).to be_nil
       end
 
       it 'lists an inbound edge under its own phrasing' do

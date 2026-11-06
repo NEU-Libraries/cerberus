@@ -65,8 +65,12 @@
             - rows.each do |row|
               .work-association
                 .work-association__body
-                  = link_to enhanced_text(row.title), work_path(row.noid), class: 'work-association__title'
-                  %span.work-association__id= row.noid
+                  -# The PID is a chip, not a line, so it never reads as part of the abstract.
+                  .work-association__heading
+                    = link_to enhanced_text(row.title), work_path(row.noid), class: 'work-association__title'
+                    %span.admin-registry-table__id= row.noid
+                  - if row.abstract
+                    %span.work-association__abstract= truncate(row.abstract, length: 160, separator: ' ')
                 .work-association__action
                   - holder = direction == :inbound ? row.noid : params[:work_id]
                   - target = direction == :inbound ? params[:work_id] : row.noid

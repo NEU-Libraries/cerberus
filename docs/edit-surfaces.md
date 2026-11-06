@@ -464,6 +464,12 @@ Atlas gates a delegated admin's reads by group, so on the admin panel
 `find_many` can drop a Work that admin cannot read. `titles_for` then shows the
 bare NOID, and the edge stays removable.
 
+Each admin row also shows the first 160 characters of the Work's abstract, as
+the public box does, with the PID in a chip beside the title. `find_many`'s
+digest carries no abstract, so `WorkAbstracts` reads it from Solr in one gated
+query for the whole page. That query only adds text. A Work it does not return
+keeps its row, with the title and the chip and no abstract.
+
 ### The public box
 
 `WorkAssociations` resolves Atlas's edges to the Solr documents the viewer may
