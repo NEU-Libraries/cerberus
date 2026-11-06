@@ -43,6 +43,20 @@ module DerivativesHelper
     Embargo.active?(embargo_date) && !effective_user&.can_bypass_embargo?
   end
 
+  # From the row's own Solr doc only: no Atlas read. See docs/downloads.md.
+  def offer_downloads?(document)
+    return false unless document.klass == Work
+    return false if embargo_withholds?(document.try(:embargo_release_date))
+
+    has_downloads = document['has_downloads_bsi']
+    return true if has_downloads.nil? # indexed before Atlas rolled the fields up
+    return false unless has_downloads
+
+    gate = SolrDocument.new('read_access_group_ssim'  => Array(document['download_read_groups_ssim']),
+                            'internal_resource_tesim' => 'Work')
+    current_ability.can?(:read, gate)
+  end
+
   # Controller-side raise for the two download-serving endpoints (Blob stream,
   # derivative-tier redirect): a second Atlas permissions read (the Work's own,
   # not the Blob's/tier's) is unavoidable here since neither's own gate carries

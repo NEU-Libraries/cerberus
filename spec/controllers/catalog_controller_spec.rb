@@ -119,6 +119,23 @@ describe CatalogController do
       expect(html).to include('thumbnail-fallback')
       expect(html).not_to include('av-placeholder')
     end
+
+    # Atlas indexes has_downloads_bsi on the Work's doc, so the row decides
+    # without asking Atlas for the Work's files. See docs/downloads.md.
+    it 'offers no Downloads button on a Work with no files, and asks Atlas for none' do
+      publicize_ancestry!(community: community)
+      collection = AtlasRb::Collection.create(community.id, fixture_mods('collection'), nuid: '000000004')
+      AtlasRb::Resource.set_permissions(collection.id, { 'read' => ['public'] }, nuid: '000000004')
+      work = public_work(collection.id, 'work')
+      allow(AtlasRb::Work).to receive(:assets).and_call_original
+
+      get :index, params: { q: "What's New" }
+
+      row = response.parsed_body.css('.document').find { |doc| doc.to_html.include?(work.id) }
+      expect(row).to be_present
+      expect(row.at_css('[data-bs-target="#downloadsModal"]')).to be_nil
+      expect(AtlasRb::Work).not_to have_received(:assets)
+    end
   end
 
   # Every field the config names has to be one Atlas actually writes. Blacklight

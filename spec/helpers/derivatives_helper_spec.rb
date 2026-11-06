@@ -138,4 +138,94 @@ RSpec.describe DerivativesHelper, type: :helper do
       end
     end
   end
+
+  # The results row's Downloads button, decided from the row's Solr doc alone.
+  # See docs/downloads.md.
+  describe '#offer_downloads?' do
+    def work_doc(**fields)
+      SolrDocument.new({ 'id' => 'w1', 'internal_resource_tesim' => ['Work'] }.merge(fields.transform_keys(&:to_s)))
+    end
+
+    let(:user) { nil }
+    let(:staff) { User.new(nuid: '000000006', groups: [Permissions::STAFF_EDIT_GROUP]) }
+    let(:admin) { User.new(nuid: '000000004', groups: [], role: 'admin') }
+
+    def as(user)
+      allow(helper).to receive(:current_ability).and_return(Ability.new(user))
+      stub_effective_user(user)
+    end
+
+    context 'as a guest' do
+      it 'offers a Work with a public file' do
+        expect(helper.offer_downloads?(work_doc(has_downloads_bsi:         true,
+                                                download_read_groups_ssim: %w[public]))).to be(true)
+      end
+
+      it 'does not offer a Work with no downloadable file' do
+        expect(helper.offer_downloads?(work_doc(has_downloads_bsi: false))).to be(false)
+      end
+
+      it 'does not offer a Work whose files are all gated to groups the guest is not in' do
+        expect(helper.offer_downloads?(work_doc(has_downloads_bsi:         true,
+                                                download_read_groups_ssim: %w[northeastern:drs:staff]))).to be(false)
+      end
+
+      it 'does not offer a Work whose files resolve to no audience at all' do
+        expect(helper.offer_downloads?(work_doc(has_downloads_bsi: true, download_read_groups_ssim: []))).to be(false)
+      end
+
+      it 'does not offer an embargoed Work, whatever its files' do
+        doc = work_doc(has_downloads_bsi: true, download_read_groups_ssim: %w[public],
+                       embargo_release_date_dtsi: future_embargo)
+        expect(helper.offer_downloads?(doc)).to be(false)
+      end
+
+      it 'keeps the button on a doc indexed before Atlas rolled the fields up' do
+        expect(helper.offer_downloads?(work_doc)).to be(true)
+      end
+
+      it 'never offers anything but a Work' do
+        doc = SolrDocument.new('id' => 'c1', 'internal_resource_tesim' => ['Collection'], 'has_downloads_bsi' => true,
+                               'download_read_groups_ssim' => %w[public])
+        expect(helper.offer_downloads?(doc)).to be(false)
+      end
+    end
+
+    context 'as a member of a gate group' do
+      it 'offers a Work whose only file is gated to that group' do
+        as(staff)
+        expect(helper.offer_downloads?(work_doc(has_downloads_bsi:         true,
+                                                download_read_groups_ssim: [Permissions::STAFF_EDIT_GROUP]))).to be(true)
+      end
+    end
+
+    context 'as an admin' do
+      before { as(admin) }
+
+      it 'offers a Work whose files are gated to any group' do
+        expect(helper.offer_downloads?(work_doc(has_downloads_bsi:         true,
+                                                download_read_groups_ssim: %w[some:other:group]))).to be(true)
+      end
+
+      it 'offers an embargoed Work, since an admin bypasses the embargo' do
+        doc = work_doc(has_downloads_bsi: true, download_read_groups_ssim: %w[public],
+                       embargo_release_date_dtsi: future_embargo)
+        expect(helper.offer_downloads?(doc)).to be(true)
+      end
+
+      it 'does not offer a Work with no downloadable file, whose modal would be empty for an admin too' do
+        expect(helper.offer_downloads?(work_doc(has_downloads_bsi: false))).to be(false)
+      end
+    end
+
+    it 'reads nothing from Atlas' do
+      allow(AtlasRb::Work).to receive(:assets)
+      allow(AtlasRb::Resource).to receive(:permissions)
+
+      helper.offer_downloads?(work_doc(has_downloads_bsi: true, download_read_groups_ssim: %w[public]))
+
+      expect(AtlasRb::Work).not_to have_received(:assets)
+      expect(AtlasRb::Resource).not_to have_received(:permissions)
+    end
+  end
 end

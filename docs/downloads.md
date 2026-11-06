@@ -22,11 +22,42 @@ Source files:
 - `app/services/rendition_asset.rb`
 - `bin/soffice-timeout`
 - `app/helpers/downloads_helper.rb`
+- `app/helpers/derivatives_helper.rb` (`offer_downloads?`)
 - `app/views/works/_file_history.html.haml`
 
 `IiifAssetsJob`, `CaptionJob` and `StreamingOnly` are covered in
 `docs/derivatives.md`. `SetDownloadsController` and the resolvers that feed the
 packers are covered in `docs/sets.md`.
+
+## Offering Downloads on a search result
+
+Each Work in the results list and the gallery gets a Downloads button that
+opens the downloads modal. `DerivativesHelper#offer_downloads?` shows it only
+when that modal would list a file for this viewer.
+
+The decision reads the row's own Solr doc and makes no Atlas call, so a page
+of 100 results still costs one Solr query. Atlas rolls two fields up onto each
+Work's doc when it indexes the Work:
+
+| Field | Meaning |
+|---|---|
+| `has_downloads_bsi` | whether `GET /works/:id/assets` lists anything |
+| `download_read_groups_ssim` | the union of every listed file's read gate |
+
+The button shows when all of these hold:
+
+1. **The doc is a Work.**
+2. **No active embargo holds it back from this viewer.** Staff and admins bypass
+   the embargo, as `embargo_withholds?` decides.
+3. **The Work has a downloadable file.** A Work with `has_downloads_bsi: false`
+   gets no button, for staff and admins too: their modal would be empty as well.
+4. **The viewer can read one of the files.** The helper asks the `:read` Ability
+   about a document whose read groups are the union of the gates. The modal
+   keeps a file when the viewer can read that file's gate, so the union is
+   readable exactly when one file is. An admin can read every gate.
+
+A doc indexed before Atlas added the fields lacks `has_downloads_bsi`, and keeps
+the button, as it had before. A full reindex fills the fields in.
 
 ## Downloading one Blob
 
