@@ -160,11 +160,12 @@ namespace :reset do
       # seeded by Atlas as "Doe, Jane"). 000000002 is the right subject: it's a
       # seeded, loginable user at the staff/depositor tier (privileged, non-admin),
       # so a demoer can exercise the publish fork as a regular depositor.
-      # Person.create mints her personal-root Collection (personal_root_id), the
-      # structural home for works she publishes; the affiliation makes the Library
-      # her publish target.
-      jane = AtlasRb::Person.create(nuid: '000000002', display_name: 'Jane Doe',
-                                    bio: 'Researches coastal resilience and marine ecosystems.')
+      # Atlas's reset seeds her Person, with its display name, bio and
+      # personal-root Collection (personal_root_id), so a Person.create here
+      # would 409. The affiliation stays here because the Library is ours.
+      jane = Array(AtlasRb::Person.resolve(['000000002'])).first
+      raise 'Atlas seeded no Person for 000000002; it must be 0.6.253 or later' unless jane
+
       AtlasRb::Person.add_affiliation(jane['id'], library['id'])
 
       # A personal workspace collection under Jane's root — what My DRS "My
