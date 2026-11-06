@@ -126,7 +126,7 @@ RSpec.describe 'Editing your own profile', type: :request do
       get root_path
 
       expect(AtlasRb::Person).to have_received(:resolve).once
-      expect(response.parsed_body.at_css('span.navbar-text').text).to eq(other.to_s)
+      expect(response.parsed_body.at_css('span.user-menu-name').text).to eq(other.to_s)
     end
   end
 end

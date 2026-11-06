@@ -302,6 +302,21 @@ $sets-via-soft: #e6eef6;
       color: var(--bs-nav-link-hover-color);
     }
   }
+
+  // The name as plain text, for someone with no Person. It takes the linked
+  // name's button box, so the header does not shift between the two.
+  .user-menu-name {
+    display: inline-block;
+    padding: $btn-padding-y $btn-padding-x;
+    border: $btn-border-width solid transparent;
+    line-height: $btn-line-height;
+    color: var(--bs-nav-link-color);
+  }
+}
+
+// The same for a user with no menu: the .nav-link box, without its hover.
+.nav-link.user-name-plain:hover {
+  color: var(--bs-nav-link-color);
 }
 
 // Sharing tab — edit_users grant chips (a person + their NUID, removable).
