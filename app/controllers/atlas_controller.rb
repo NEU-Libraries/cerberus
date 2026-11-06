@@ -16,10 +16,6 @@ class AtlasController < ApplicationController
     sign_in_from_atlas(attrs[:nuid])
   end
 
-  def user
-    @user = effective_user
-  end
-
   private
 
     def find_or_create_params

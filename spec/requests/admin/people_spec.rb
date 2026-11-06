@@ -362,6 +362,19 @@ RSpec.describe 'Admin::People', type: :request do
         expect(response).to redirect_to(edit_admin_person_path('cz8wbpk'))
       end
 
+      it "explains Atlas's refusal of a blank name on the form" do
+        refusal = AtlasRb::ResourceError.new(
+          '422', response: instance_double(Faraday::Response, status: 422, body: '{"error":"blank_display_name"}')
+        )
+        allow(AtlasRb::Person).to receive(:find).and_return(person)
+        allow(AtlasRb::Person).to receive(:update).and_raise(refusal)
+
+        patch admin_person_path('cz8wbpk'), params: { person: { display_name: '' } }
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include('Enter a display name.')
+      end
+
       # Otherwise a rename waits out NuidResolver's 12-hour cache.
       it "forgets the person's cached name" do
         allow(AtlasRb::Person).to receive_messages(find: person, update: person)

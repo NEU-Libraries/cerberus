@@ -7,6 +7,9 @@ background jobs that sweep or reindex a Set's Works.
 Source files:
 
 - `app/controllers/people_controller.rb`
+- `app/controllers/person_profiles_controller.rb`
+- `app/controllers/concerns/own_profile.rb`
+- `app/lib/person_profile_refusals.rb`
 - `app/controllers/admin/community_people_controller.rb`
 - `app/services/community_affiliates.rb`
 - `app/controllers/legacy_controller.rb`
@@ -33,7 +36,40 @@ Source files:
 | `show` | `/people/:id` | One profile: the curated header (display name, bio, ORCID) over a gated faceted search of the Works that person deposited |
 
 The controller inherits `CatalogController`, which is where the gated
-`search_service` comes from. It includes `WithoutFacetModal`, because it owns no
+`search_service` comes from.
+
+### Editing your own profile
+
+A person may change their own display name, bio and ORCID at
+`/people/:id/edit`. `PersonProfilesController` owns the edit and update routes,
+so `PeopleController` stays a read-only Blacklight surface.
+
+- **Who may edit** comes from the Person's NUID, compared with the effective
+  user's, server-side. The NUID never reaches the URL or the page. Anyone else
+  gets 403, and the profile page shows "Edit details" only to its owner.
+- **Atlas enforces the same rule.** It grants `:update_profile` for the Person
+  whose NUID matches the signed subject, to the standard, loader and privileged
+  roles. Guests have no grant.
+- **Impersonation:** the button shows in both modes, because the effective user
+  is the person. In acting-as, the save is signed by the admin on the person's
+  behalf, and an admin's grant covers it. In view-as, the save is refused like
+  every other view-as write.
+- **Atlas validates the fields** and answers 422 with `blank_display_name`,
+  `invalid_bio` or `invalid_orcid`. `PersonProfileRefusals` turns each code into
+  a message, for this form and the admin form alike. A blank bio or ORCID
+  clears it.
+
+### The header name
+
+The signed-in name in the header links to the person's own profile. If they
+have no Person, it is plain text: nothing creates a Person at sign-in, and a
+link to My DRS or a debug page would read as a profile that is not there.
+
+`OwnProfile#own_profile_noid` finds the Person with `Person.resolve`. The header
+renders on every page, so the answer is cached in the session for ten minutes,
+per NUID, and "no Person" is cached too. Without that, every page would cost an
+Atlas read. A failed read is not cached. While impersonating, the lookup is for
+the impersonated person, whose name the header shows. It includes `WithoutFacetModal`, because it owns no
 `facet` route for the sidebar's "See more" link (see `docs/discovery.md`).
 
 ### Affiliations from the community's side

@@ -149,6 +149,8 @@ Rails.application.routes.draw do
   # /communities/:community_id/people is the community-scoped Faculty & Staff
   # browse (Person docs filtered by affiliated_community_ids_ssim).
   resources :people, only: %i[index show]
+  # A person's own details. PersonProfilesController refuses anyone else.
+  resources :people, only: %i[edit update], controller: 'person_profiles'
   get 'communities/:community_id/people', to: 'people#index', as: :community_people
 
   # Genre / category landing — a Featured-Content gateway (homepage) into a single
@@ -419,10 +421,6 @@ Rails.application.routes.draw do
     get '/atlas/find_or_create' => 'atlas#find_or_create'
     post '/atlas/process_find_or_create' => 'atlas#process_find_or_create'
   end
-
-  # Not gated: the user menu links here for everyone, and it only renders the
-  # signed-in user's own record.
-  get '/atlas/user' => 'atlas#user'
 
   # error pages — also targeted by config.exceptions_app
   match '/403', to: 'errors#forbidden',             via: :all

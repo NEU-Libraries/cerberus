@@ -69,13 +69,12 @@ module Admin
       AtlasRb::Person.update(@noid, **update_params, nuid: Current.nuid)
       NuidResolver.forget(@person['nuid'])
       redirect_to edit_admin_person_path(@noid), notice: 'Person details saved.'
+    rescue AtlasRb::ResourceError => e
+      raise unless e.status == 422
+
+      rerender_edit(PersonProfileRefusals.message(e))
     rescue Faraday::Error, JSON::ParserError => e
-      @person = AtlasRb::Person.find(@noid, nuid: Current.nuid)
-      edit_breadcrumbs
-      load_affiliations
-      @accounts = sign_in_accounts
-      flash.now[:alert] = "Couldn't save those details: #{e.message}"
-      render :edit, status: :unprocessable_content
+      rerender_edit("Couldn't save those details: #{e.message}")
     end
 
     def add_affiliation
@@ -89,6 +88,15 @@ module Admin
     end
 
     private
+
+      def rerender_edit(alert)
+        @person = AtlasRb::Person.find(@noid, nuid: Current.nuid)
+        edit_breadcrumbs
+        load_affiliations
+        @accounts = sign_in_accounts
+        flash.now[:alert] = alert
+        render :edit, status: :unprocessable_content
+      end
 
       def set_person
         @noid = params[:noid]

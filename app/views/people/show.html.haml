@@ -13,9 +13,14 @@
   = render 'shared/breadcrumbs', show_add: @workspace_id.present?, add_to_collection: @workspace_id
 
   .container.p-4.my-3.well.rounded-3
-    %h3.mb-0
-      %i.fa-solid.fa-user.text-primary.me-2{ 'aria-hidden' => 'true' }
-      = @display_name
+    .d-flex.flex-wrap.align-items-start.gap-2
+      %h3.mb-0.flex-grow-1
+        %i.fa-solid.fa-user.text-primary.me-2{ 'aria-hidden' => 'true' }
+        = @display_name
+      - if @own_profile
+        = link_to edit_person_path(params[:id]), class: 'btn btn-tonal-primary' do
+          %i.fa-solid.fa-user-pen.me-1{ 'aria-hidden' => 'true' }
+          Edit details
     - if @person['bio'].present?
       %p.text-body-secondary.mt-3.mb-0{ style: 'max-width:62ch' }= @person['bio']
     - if @person['orcid'].present?

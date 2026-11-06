@@ -23,6 +23,8 @@ class PeopleController < CatalogController
     @person = require_resource!(AtlasRb::Person.find(params[:id], nuid: Current.nuid))
 
     @display_name = @person['display_name']
+    # From the Person's NUID, server-side, so no NUID reaches the page.
+    @own_profile = user_signed_in? && @person['nuid'].present? && @person['nuid'] == effective_user&.nuid
     @response = deposited_works(@person['nuid'])
     assign_workspace_add(@person['personal_root_id'])
     build_profile_breadcrumbs

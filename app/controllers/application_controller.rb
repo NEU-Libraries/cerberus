@@ -9,6 +9,7 @@ class ApplicationController < ActionController::Base
   include Tombstoning
   include UnfinishedDepositGate
   include ImpersonationSession
+  include OwnProfile
   include StructuralContainers
   include CriticalCssInlining
 
