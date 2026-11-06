@@ -24,7 +24,7 @@
   .admin-registry.my-3
     %header.admin-registry__head
       %span.admin-registry__title
-        %span.me-1{class: file_type_icon(asset.mime_type), 'aria-hidden' => 'true'}
+        %i.fa-solid.me-1{class: file_type_icon(asset.mime_type), 'aria-hidden' => 'true'}
         = asset.label.presence || asset[:use] || 'File'
         - if versions.any?
           %span.admin-registry__count= pluralize(versions.size, 'version')
