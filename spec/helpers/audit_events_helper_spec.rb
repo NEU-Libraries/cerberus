@@ -244,6 +244,11 @@ RSpec.describe AuditEventsHelper, type: :helper do
         expect(helper.tier_label('original')).to eq('Original')
       end
 
+      it 'names every tier a Sentinel can author' do
+        expect(AuditEventsHelper::TIER_LABELS.keys).to match_array(Sentinel::TIERS)
+        expect(helper.tier_label('structured_text')).to eq('Data files')
+      end
+
       it 'falls back to the raw token for an unknown tier' do
         expect(helper.tier_label('hologram')).to eq('Hologram')
       end

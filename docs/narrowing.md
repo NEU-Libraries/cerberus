@@ -269,8 +269,12 @@ resolution and widest audience first, full-resolution source and narrowest last.
 The monotonicity check follows this order, so reordering the array changes what
 the validation means.
 
-`INDEPENDENT` is `audio`, `video`, `pdf`. Non-image renditions are gated
-independently. There is no meaningful resolution order between an audio file
+`INDEPENDENT` is `audio`, `video`, `pdf`, then one tier per file type that
+Atlas classifies: `archive`, `spreadsheet`, `structured_text`, `presentation`
+and `text`. `generic` covers every other file type. Atlas assigns a file its
+tier from its MIME type, and a PDF stays on `pdf` although Atlas classifies it
+as text. A caption (WebVTT or SubRip) has no tier, so it always follows the
+Work's own read groups. Non-image renditions are gated independently. There is no meaningful resolution order between an audio file
 and a PDF, so no monotonicity ties them to each other or to the ladder.
 
 `TIERS` is the two together, and is every gateable tier. `original` and the

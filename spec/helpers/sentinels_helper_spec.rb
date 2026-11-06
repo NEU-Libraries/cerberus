@@ -12,6 +12,12 @@ RSpec.describe SentinelsHelper do
       expect(helper.derivative_tier_meta('original')).to eq(label: 'Original', note: 'Full-resolution source file')
       expect(helper.derivative_tier_meta('pdf')).to eq(label: 'PDF', note: 'Downloadable PDF file')
     end
+
+    it 'has a label and note for every tier a Sentinel can author' do
+      Sentinel::TIERS.each do |tier|
+        expect(helper.derivative_tier_meta(tier)).to include(:label, :note)
+      end
+    end
   end
 
   describe '#derivative_tier_form_state' do

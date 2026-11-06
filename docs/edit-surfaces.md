@@ -259,7 +259,7 @@ ACL envelope.
 
 `derivative_tier_rows` lists only the tiers that either side of the diff
 mentions, in `Sentinel::TIERS` narrowing order. The stored policy is sparse —
-only gated tiers appear — so listing all eight would bury the change under empty
+only gated tiers appear — so listing all fourteen would bury the change under empty
 rows. A tier `Sentinel::TIERS` does not know sorts last rather than vanishing,
 so a tier Atlas adds before Cerberus does still shows.
 
