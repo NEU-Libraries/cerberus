@@ -296,7 +296,7 @@ RSpec.describe 'Sets', type: :request do
         expect(response.body).to include('Already in this set')
 
         get '/sets/picker', params: { work_id: work_one.id, q: 'Picker Set' }
-        expect(response.body).to include('Hidden in this set')
+        expect(response.body).to include('Hidden in this set — put it back from Manage, on the Definition tab')
 
         get '/sets/picker', params: { work_id: lone_work.id, q: 'Picker Set' }
         expect(response.body).to include("/sets/#{set['id']}/works")
