@@ -65,6 +65,12 @@ The signed-in name in the header links to the person's own profile. If they
 have no Person, it is plain text: nothing creates a Person at sign-in, and a
 link to My DRS or a debug page would read as a profile that is not there.
 
+The name itself is the session's `display_name`, read once at sign-in (see
+[identity.md](identity.md#displaying-a-name)). An own-profile save writes the new
+name into the session with `bypass_sign_in`, so the header changes on the page
+the save returns to. It does so only when the signed-in user is the person. In
+acting-as, the signed-in user is the admin, and the save must not rename them.
+
 `OwnProfile#own_profile_noid` finds the Person with `Person.resolve`. The header
 renders on every page, so the answer is cached in the session for ten minutes,
 per NUID, and "no Person" is cached too. Without that, every page would cost an

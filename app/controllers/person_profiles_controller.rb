@@ -14,6 +14,7 @@ class PersonProfilesController < ApplicationController
   def update
     AtlasRb::Person.update(@noid, **profile_params, nuid: Current.nuid)
     NuidResolver.forget(@person['nuid'])
+    refresh_signed_in_name
     redirect_to person_path(@noid), notice: 'Your details are saved.'
   rescue AtlasRb::ResourceError => e
     raise unless e.status == 422
@@ -37,6 +38,16 @@ class PersonProfilesController < ApplicationController
 
     def own_person?
       @person['nuid'].present? && @person['nuid'] == effective_user&.nuid
+    end
+
+    # Compare against current_user, not effective_user: under Act as the
+    # signed-in user is the admin, whose name this save must not change.
+    # See docs/people-and-routing.md#the-header-name.
+    def refresh_signed_in_name
+      return unless current_user.nuid == @person['nuid']
+
+      current_user.display_name = profile_params[:display_name].to_s.strip
+      bypass_sign_in(current_user)
     end
 
     def profile_params

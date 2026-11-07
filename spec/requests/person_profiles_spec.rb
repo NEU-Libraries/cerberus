@@ -89,6 +89,37 @@ RSpec.describe 'Editing your own profile', type: :request do
       expect(response).to redirect_to(person_path('pp11aa22'))
     end
 
+    it 'shows the new name in the header without a fresh sign-in' do
+      sign_in owner
+      allow(AtlasRb::Person).to receive(:update).and_return(person)
+
+      patch person_path('pp11aa22'), params: { person: fields.merge(display_name: ' Sue Williams ') }
+      get root_path
+
+      expect(response.parsed_body.at_css(%(a[href="#{person_path('pp11aa22')}"])).text.strip).to eq('Sue Williams')
+    end
+
+    it "leaves an admin's own header name alone when they save while acting as the person" do
+      admin = User.new(email: 'admin@example.com', password: 'password', nuid: '000000004', name: 'Admin, Ada',
+                       role: 'admin', groups: [])
+      allow(AtlasRb::AuditEvent).to receive(:emit)
+      allow(AtlasRb::Authentication).to receive(:login).with('000000006').and_return(
+        AtlasRb::Mash.new('nuid' => '000000006', 'name' => 'Williams, Susan', 'email' => owner.email,
+                          'role' => owner.role, 'groups' => owner.groups)
+      )
+      allow(User).to receive(:curated_name_for).and_return(nil)
+      allow(AtlasRb::Person).to receive(:update).and_return(person)
+      sign_in admin
+      post admin_act_as_path, params: { nuid: '000000006' }
+
+      patch person_path('pp11aa22'), params: { person: fields }
+      delete admin_impersonation_path
+      get root_path
+
+      expect(response.body).to include('Ada Admin')
+      expect(response.body).not_to include('Sue Williams')
+    end
+
     it "refuses someone else's profile without writing" do
       sign_in other
       expect(AtlasRb::Person).not_to receive(:update)

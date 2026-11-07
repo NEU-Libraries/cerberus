@@ -57,9 +57,11 @@ A librarian can curate a Person's display name, and it wins over the SSO name
 wherever a name renders. `User.from_atlas` reads it once, at sign-in, account
 switch and impersonation, and the session carries it as `display_name`. It is
 read then rather than per render because the layout shows the name on every
-page, and the test and dev caches are null stores. A rename therefore reaches
-the user's own menu at their next sign-in. `pretty_name` returns a curated name
-verbatim.
+page, and the test and dev caches are null stores. A librarian's rename
+therefore reaches the user's own menu at their next sign-in. A person who
+renames themselves sees it at once, because their own profile save rewrites the
+session (see [people-and-routing.md](people-and-routing.md#the-header-name)).
+`pretty_name` returns a curated name verbatim.
 
 Without one, `pretty_name` runs the stored name through Namae, which understands only
 person-shaped names. A descriptive or organisational name, such as "Law Library
