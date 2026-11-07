@@ -26,11 +26,13 @@ class MyDrsController < CatalogController
 
     # An Atlas fault degrades to an empty list rather than a broken My DRS. The
     # list is the effective user's, but the caller stays the real person, so an
-    # impersonating admin's own credentials authorize the lookup.
+    # impersonating admin's own credentials authorize the lookup. Keep
+    # ResourceError in the list: it is how Atlas refuses a delegated admin, and
+    # unrescued it turns the whole page into a 403.
     def account_list
       accounts = AtlasRb::User.accounts(effective_user.nuid, nuid: current_user.nuid)
       Array(accounts && accounts['accounts'])
-    rescue Faraday::Error, JSON::ParserError => e
+    rescue AtlasRb::ResourceError, Faraday::Error, JSON::ParserError => e
       Rails.logger.error("My DRS account lookup failed for #{effective_user.nuid}: #{e.class} #{e.message}")
       []
     end

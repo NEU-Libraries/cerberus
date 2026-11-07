@@ -558,7 +558,7 @@ comes from `DepositorContext`, which the deposit fork shares.
 
 | Panel | Query | Why it is here |
 |---|---|---|
-| Account switcher | `AtlasRb::User.accounts` | The staff and student logins under one NUID. The view renders it only when there is more than one. An Atlas fault degrades to an empty list, so a hiccup costs the panel rather than the page |
+| Account switcher | `AtlasRb::User.accounts` | The staff and student logins under one NUID. The view renders it only when there is more than one. An Atlas fault degrades to an empty list, so a hiccup costs the panel rather than the page. So does a refusal: under View as the lookup carries the real person's credentials, and Atlas refuses it to a delegated admin, who then sees the target's My DRS without the panel |
 | Workspace collections | `DepositorContext#workspace_collections`, ungated | Non-showcase Collections under the Person's `personal_root_id`, newest first. Scoping to the personal root, not to every Collection this person deposited into, stops an admin who seeded the institutional tree from "owning" all of it |
 | Published | Showcase lookup, then per-showcase membership | Grouped by category |
 | Deposits to finish | `in_progress_bsi:true`, matching `depositor_ssi` or `proxy_uploader_ssi` | Deposits this person started and never confirmed, including ones a proxy uploader started for someone else. My DRS is the only place they can find one: an unfinished deposit is hidden from general discovery, and its depositor is the one person who can finish it |
