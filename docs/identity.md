@@ -57,9 +57,11 @@ A librarian can curate a Person's display name, and it wins over the SSO name
 wherever a name renders. `User.from_atlas` reads it once, at sign-in, account
 switch and impersonation, and the session carries it as `display_name`. It is
 read then rather than per render because the layout shows the name on every
-page, and the test and dev caches are null stores. A rename therefore reaches
-the user's own menu at their next sign-in. `pretty_name` returns a curated name
-verbatim.
+page, and the test and dev caches are null stores. A librarian's rename
+therefore reaches the user's own menu at their next sign-in. A person who
+renames themselves sees it at once, because their own profile save rewrites the
+session (see [people-and-routing.md](people-and-routing.md#the-header-name)).
+`pretty_name` returns a curated name verbatim.
 
 Without one, `pretty_name` runs the stored name through Namae, which understands only
 person-shaped names. A descriptive or organisational name, such as "Law Library
@@ -163,7 +165,7 @@ there.
 `depositor?` is not Work-scoped, because a depositor owns their Collections too.
 The whole workspace subtree inherits their NUID: Atlas's creators copy
 `parent.permissions`, which carries `depositor`. A Collection they own is theirs
-to edit and, once empty, to withdraw. Emptiness needs no check here, because
+to edit and, once empty, to tombstone. Emptiness needs no check here, because
 Atlas refuses the tombstone while live children remain.
 
 `proxy_uploader?` applies to Works only (`internal_resource_tesim` is `Work`). A
@@ -211,7 +213,14 @@ needs it to end the session. Its menu link hides, since the target has none.
 Three things that act on the real person hide while impersonating: the API
 token card and the account switch controls on My DRS, and the Inbox's Dismiss
 button. The Inbox also skips `mark_read!` while impersonating, so reading the
-target's messages does not change what the target sees next.
+target's messages does not change what the target sees next. For the same
+reason it hides "Mark all as read" and the row checkboxes, and
+`MessagesController#mark_read` refuses the request.
+
+Both of those controls go through `MessageReceipt.mark_many_read!`, in one
+write. A group message has no receipt until someone acts on it, so the method
+inserts the missing rows. "Mark all as read" covers every message in the inbox,
+not only the page on screen, because the unread badge counts the whole inbox.
 
 My Sets and the Add-to-set picker list the target's Sets by passing `owner:`
 to `Compilation.list`. Atlas allows a cross-owner listing for a full admin
@@ -382,19 +391,23 @@ means no workspace, and an empty list.
 
 `publish_targets` keys publish destinations by community NOID:
 `{ noid => { name:, genres: { label => showcase_noid } } }`. An empty hash hides
-the publish branch entirely, so the `personal_root_id` check gates publishing.
+the publish branch entirely, so the workspace check (`workspace_owner`) gates
+publishing. It passes for a personal root and for any collection inside one;
+[`deposit.md`](deposit.md#promoting-a-work-into-a-community-showcase) has the
+rule.
 Only the depositor's affiliated communities that have showcases appear, and
 staff-only genres (`FeaturedContent::STAFF_ONLY`) are left out.
 `community_name` falls back to the NOID when the lookup fails, so a stale
 affiliation cannot break the deposit form.
 
-`publish_showcase_id` resolves the showcase to promote into from the submitted
-`publish_community_id` and `publish_genre`. It returns `nil` when the request
+`publish_showcase_id(community_noid)` resolves the showcase to promote into
+from one of the submitted `publish_community_ids` and the `publish_genre`.
+`WorkDeposit` calls it once per chosen community. It returns `nil` when the request
 cannot be honoured: no curated Person, a community the depositor is not
 affiliated with, a staff-only genre, or no showcase for that genre there.
 `ShowcaseFinder` runs through the gated `SearchBuilder`, so a showcase the
 depositor cannot see also reads `nil`.
 
-`publish_showcase_id` does **not** check where the Work is going. The caller
-must confirm separately that the destination is the depositor's own root before
-offering promotion.
+`publish_showcase_id` checks only that the destination is in someone's
+workspace. It does **not** check that the Work's depositor is that workspace's
+owner, so the caller must confirm that separately before promoting.

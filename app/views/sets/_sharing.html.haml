@@ -29,17 +29,16 @@
         'aria-label' => 'Add a person', data: { 'set-user-grants-target': 'query', action: 'input->set-user-grants#search' }}
       .list-group.inbox-typeahead{hidden: true, data: { 'set-user-grants-target': 'results' }}
     %ul.list-unstyled.d-flex.flex-wrap.gap-2.mt-2.mb-0{data: { 'set-user-grants-target': 'chips' }}
+      -# Names only: the NUID rides the hidden field, which is what is saved.
       - Array(@edit_user_grants).each do |grant|
         %li.set-grant-chip.d-inline-flex.align-items-center.gap-2
           %span= grant[:name]
-          %span.inbox-typeahead__nuid= grant[:nuid]
           %button.btn-close.btn-sm{type: 'button', 'aria-label' => "Remove #{grant[:name]}", data: { action: 'set-user-grants#remove' }}
           %input{type: 'hidden', name: 'set[edit_users][]', value: grant[:nuid]}
     %template{data: { 'set-user-grants-target': 'template' }}
       %li.set-grant-chip.d-inline-flex.align-items-center.gap-2
         %span.js-name
-        %span.inbox-typeahead__nuid.js-nuid
-        %button.btn-close.btn-sm{type: 'button', 'aria-label' => 'Remove', data: { action: 'set-user-grants#remove' }}
+        %button.btn-close.btn-sm.js-remove{type: 'button', 'aria-label' => 'Remove', data: { action: 'set-user-grants#remove' }}
         %input.js-field{type: 'hidden', name: 'set[edit_users][]'}
 
   .well.p-3.my-3.rounded-3

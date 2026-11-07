@@ -101,6 +101,17 @@ RSpec.describe 'Collections sentinel', type: :request do
       )
     end
 
+    it 'authors the file-type tiers' do
+      params = { sentinel: { structured_text: { mode: 'restrict', groups: [Permissions::STAFF_EDIT_GROUP] },
+                             generic:         { mode: 'restrict', groups: [] } } }
+
+      patch sentinel_collection_path(collection.id), params: params
+
+      expect(Sentinel.find_by(target_id: collection.id).policy).to eq(
+        'structured_text' => [Permissions::STAFF_EDIT_GROUP], 'generic' => []
+      )
+    end
+
     it 'refuses an incoherent (non-monotonic) policy and flashes the error' do
       bad = { sentinel: { small: { mode: 'restrict', groups: [Permissions::STAFF_EDIT_GROUP] },
                           medium: { mode: 'public' }, large: { mode: 'public' }, service: { mode: 'public' } } }
@@ -259,6 +270,17 @@ RSpec.describe 'Collections sentinel', type: :request do
 
       expect(response.body).to include('Inherit from collection')
       expect(response.body).to match(/This\s+collection is public\./)
+    end
+
+    it 'offers a row for every file-type tier under one heading' do
+      set_access!(read: ['public'])
+
+      get edit_collection_path(collection.id)
+
+      expect(response.body).to include('Files by type')
+      ['Archives', 'Spreadsheets', 'Data files', 'Presentations', 'Documents', 'Other files'].each do |label|
+        expect(response.body).to include(label)
+      end
     end
   end
 end

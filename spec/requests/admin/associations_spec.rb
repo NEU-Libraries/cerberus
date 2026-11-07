@@ -49,6 +49,7 @@ RSpec.describe 'Admin::Associations', type: :request do
     allow(AtlasRb::Work).to receive(:associations).and_return(edges)
     allow(AtlasRb::Resource).to receive(:find_many)
       .and_return([OpenStruct.new('noid' => 'dataset', :title => 'Ocean survey data')])
+    allow(WorkAbstracts).to receive(:call).and_return({})
   end
 
   describe 'admin gate' do
@@ -110,6 +111,27 @@ RSpec.describe 'Admin::Associations', type: :request do
         expect(response.body).to include('Is codebook for', 'Ocean survey data', 'dataset')
       end
 
+      it 'shows the abstract under the title, with the PID in a chip' do
+        stub_manage('outbound' => { 'is_codebook_for' => ['dataset'] }, 'inbound' => {})
+        allow(WorkAbstracts).to receive(:call).and_return('dataset' => "Field measurements #{'and more ' * 30}")
+
+        get '/admin/associations/manage', params: { work_id: 'codebook' }
+
+        row = response.parsed_body.at_css('.work-association')
+        expect(row.at_css('.work-association__heading .admin-registry-table__id').text).to eq('dataset')
+        expect(row.at_css('.work-association__abstract').text).to start_with('Field measurements').and end_with('...')
+      end
+
+      it 'keeps the row and its chip when Solr has no abstract' do
+        stub_manage('outbound' => { 'is_codebook_for' => ['dataset'] }, 'inbound' => {})
+
+        get '/admin/associations/manage', params: { work_id: 'codebook' }
+
+        row = response.parsed_body.at_css('.work-association')
+        expect(row.at_css('.admin-registry-table__id').text).to eq('dataset')
+        expect(row.at_css('.work-association__abstract')).to be_nil
+      end
+
       it 'lists an inbound edge under its own phrasing' do
         stub_manage('outbound' => {}, 'inbound' => { 'is_codebook_for' => ['dataset'] })
 
@@ -125,6 +147,21 @@ RSpec.describe 'Admin::Associations', type: :request do
 
         expect(response.body).to include('This work claims no relationship to another',
                                          'No other work claims a relationship to this one')
+      end
+
+      it 'puts the search above the current relationships, which nest under one heading' do
+        stub_manage('outbound' => {}, 'inbound' => {})
+
+        get '/admin/associations/manage', params: { work_id: 'codebook' }
+
+        headings = response.parsed_body.css('h2, h3').map { |h| [h.name, h.text.squish] }
+        expect(headings.map(&:first)).to eq(%w[h2 h2 h3 h3])
+        expect(headings.map(&:last)).to match(
+          ['Assert a relationship', 'Current relationships',
+           a_string_starting_with('What this work says about others'),
+           a_string_starting_with('What other works say about this one')]
+        )
+        expect(response.body).to include('Use the search above to add one.')
       end
 
       # Pre-empts Atlas's self_association rejection at the point of choice
@@ -154,8 +191,8 @@ RSpec.describe 'Admin::Associations', type: :request do
 
       # Atlas's target is the managed Work, so its tombstoned_target is "this"
       # Work and tombstoned_work is the picked one.
-      { 'tombstoned_target' => 'This Work is withdrawn',
-        'tombstoned_work'   => 'That Work is withdrawn' }.each do |code, phrase|
+      { 'tombstoned_target' => 'This Work is retracted',
+        'tombstoned_work'   => 'That Work is retracted' }.each do |code, phrase|
         it "names the right Work when Atlas refuses with #{code}" do
           allow(AtlasRb::Work).to receive(:associate)
             .and_raise(AtlasRb::WorkAssociationError.new('nope', code: code))

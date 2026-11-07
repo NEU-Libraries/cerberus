@@ -28,7 +28,7 @@ module WorkHealthHelper
     'wrong_parent_type'            => 'move',
     'staff_edit_missing'           => 'permissions',
     'no_depositor'                 => 'permissions',
-    'live_under_withdrawn'         => 'delete'
+    'live_under_retracted'         => 'delete'
   }.freeze
 
   REINDEX_CODES = %w[not_indexed].freeze

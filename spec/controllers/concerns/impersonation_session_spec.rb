@@ -61,6 +61,9 @@ describe ImpersonationSession do
       AtlasRb::Mash.new('nuid' => nuid, 'name' => "User #{nuid}", 'email' => "#{nuid}@neu.edu",
                         'role' => role, 'groups' => groups)
     )
+    # from_atlas also reads the curated Person name. Unstubbed, it reaches the
+    # test Atlas, whose seeded fixture names replace "User <nuid>".
+    allow(User).to receive(:curated_name_for).with(nuid).and_return(nil)
   end
 
   describe 'mode predicates' do

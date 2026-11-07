@@ -123,6 +123,32 @@ the body. A binding that parsed first would unwrap a 403 envelope to the same
 `nil` a missing id gives, and the page would 404. Cerberus cannot recover a
 status the binding discarded.
 
+### A tombstone withholds the record
+
+Below the operator tiers, Atlas withholds a tombstoned resource, and everything
+under it, from every read except its own `find`. The `find` answers 410 with a
+stub that holds only the title, the permanent URL and the tombstone's reason and
+date. Every other read, including `Resource.permissions`, the MODS and the
+associations, refuses with `410 tombstoned`. atlas_rb raises that as
+`AtlasRb::TombstonedError`, which names the tombstoned resource and its type.
+
+`Authorizable#render_withheld` answers the refusal on every page:
+
+| `tombstoned_resource_type` | Page |
+|---|---|
+| `Work`, `Collection` or `Community` | the Removed page (`errors/gone`), built from that type's `find` stub |
+| `FileSet`, or anything else | the not-found page, for a file |
+
+So an editor who opens the edit form of a tombstoned Work gets the Removed page
+from `authorize_edit!`, because edit rights do not reach a tombstoned record.
+The show pages read the record first and render the Removed page from the stub,
+for every tier, admins included. Admins review a tombstoned item in the
+Tombstones registry instead.
+
+The handler is registered **below** the `ResourceError` handler, because
+`TombstonedError` subclasses it. Registered above, the refusal would land in the
+`ResourceError` handler and re-raise.
+
 **An unknown id still answers 404, but not for the obvious reason.** Atlas's
 `ResourcesController#permissions` authorizes before its nil check, against
 `resource || Resource`. For an unknown id CanCan gets the bare class. A class
@@ -171,7 +197,14 @@ above is deliberate: a write raises and a read returns nil. Keeping the
 conversion in one method puts the gem's contract in one place, so a change to
 what nil means is one edit.
 
-It converts nil and nothing else. Do not let it absorb the tombstone checks.
+It also turns Atlas's stub for a purged Work, Collection or Community into
+`ResourcePurged`, which renders the Removed page. A purge deletes the record, so
+Atlas answers the read with 410 and only the ID and `purged_at`, and an ID that
+never existed keeps its 404. Every caller wants the same page for a purge, so
+the check lives here. A surface that reads `Resource.permissions` first, such as
+the IIIF manifest, still answers 404, because a purged ID has no permissions.
+
+Do not let it absorb the tombstone checks.
 `CollectionsController#show` renders 410 Gone for a tombstoned Collection, via
 `render_gone`. `#facet_scope_filters` raises the same 404 for a tombstoned one,
 because a tombstoned container has no browsable contents to count. That

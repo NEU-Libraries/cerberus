@@ -4,7 +4,7 @@
 # ledger: there is no lifecycle on these rows and no update path. See
 # docs/admin.md.
 class AdminNotice < ApplicationRecord
-  REQUEST_KINDS = %w[request_withdraw request_move request_restrict].freeze
+  REQUEST_KINDS = %w[request_delete request_move request_restrict].freeze
 
   ACTIVITY_KINDS = %w[load_report work_completion_mismatch visibility_cascade
                       set_reindex showcase_promotion set_privatize

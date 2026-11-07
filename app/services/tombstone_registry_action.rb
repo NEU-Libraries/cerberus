@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# The two ways out of a withdrawal — restore and permanent deletion — for one
+# The two ways out of a tombstone — restore and permanent deletion — for one
 # item, shared by the registry's row buttons and TombstoneBulkJob. See
 # docs/admin.md.
 module TombstoneRegistryAction

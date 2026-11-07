@@ -11,6 +11,8 @@ Source files:
 - `app/assets/stylesheets/_layout.scss` (the `.well`, and hover without fades)
 - `app/assets/stylesheets/_tonal_buttons.scss` (the tonal button variants)
 - `app/assets/stylesheets/_admin_registry.scss` (the card shell and identifier chip)
+- `app/assets/stylesheets/_search_controls.scss` (the results-controls chrome)
+- `app/assets/stylesheets/_file_field.scss` and `app/views/shared/_file_field.html.haml` (file inputs)
 - `app/helpers/application_helper.rb` (`document_type_icon`, the catalog's type icon)
 - `app/helpers/admin_finder_helper.rb` (`RESOURCE_ICONS`, the admin finder's type chip)
 - `app/helpers/pages_helper.rb` (`featured_gateways`, the homepage buttons)
@@ -206,6 +208,24 @@ tab by extending that pattern. Do not introduce another navigation idiom.
 and `btn-light` is the body's own `$gray-100`, so both take the colour of
 whatever they sit on and read as text in a box.
 
+**The results controls are the one exception.** The sidebar's Sort, Per page and
+Add page to set, and the Add control under a container's results, share a
+transparent chrome: near-black label, light translucent border, grey icon and a
+faint grey hover. Their menus, and the breadcrumb Add's, open white like the
+facet cards beside them, and mark the current choice by weight alone, with no
+grey fill. A hovered row turns `$link-blue`. They always sit on the page ground, so the rule's reason does
+not apply. The chrome is the `results-control-chrome` mixin in
+`_search_controls.scss`, and `.results-control` applies it; use those rather
+than a copy, and do not use the chrome anywhere else.
+
+**These menus open to the side, away from the edge they sit on.** The breadcrumb
+Add and the sidebar's Sort and Per page open to the right, and the Add control
+under the results opens to the left. Each points an arrow back at its toggle,
+drawn by the `menu-side-arrow` mixin in `_layout.scss`. Where the side has no
+room, as on a phone, the menu drops below and loses the arrow. Sort and Per page
+take this from `Cerberus::ResultsDropdownComponent`, which CatalogController
+sets as Blacklight's `dropdown_component`.
+
 Give each surface one solid button for its main action: `btn-primary`, or
 `btn-success` for Save. Every other button takes a variant from
 `_tonal_buttons.scss`:
@@ -231,7 +251,31 @@ Keep the tonal border at full strength. It is what clears WCAG's 3:1 edge
 contrast against both the grey page and white cards; a softer border falls to
 about 2:1.
 
-## Hover
+## File inputs
+
+Render every file input through `shared/_file_field`, as a layout around the
+page's own input:
+
+```haml
+= render layout: 'shared/file_field' do
+  %input#binary.file-field__input{name: 'binary', type: 'file', required: true}
+```
+
+The browser writes the label on its own file button ("Browse…" in Firefox,
+"Choose File" in Chrome), and CSS cannot change it. The partial draws a "Choose
+file" button and a "No file chosen" line instead, and lays the real input over
+both, transparent. So the input keeps everything native: the click, the focus,
+drag and drop, and the "Please select a file" message, which points at the
+field. `file_field_controller.js` writes the chosen file's name in.
+
+- **Never hide the input with `display: none`.** It would leave the tab order,
+  and `required` would have nothing to point at.
+- **Pass the input in, do not rebuild it.** A form builder's `f.file_field`
+  keeps its name and makes the form multipart, which a hand-written input
+  would not.
+- `small: true` gives the compact size for a table row, as on Replace a file.
+  `extra_class:` adds a spacing class to the field.
+
 
 **Hover must never move or resize the element under the pointer.** No
 `translateY` lift, and no change to border width, padding or font weight. The

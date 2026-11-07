@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-# The editor-facing "Request withdraw / move" action on the Work edit page.
+# The editor-facing "Request deletion / move" action on the Work edit page.
 # Runs against the live Atlas test backend like the resource controller specs:
 # a real Work is created and a real edit ACL granted to the staff group, so the
 # authorize_resource_writes! gate (which reads Atlas permissions) is exercised
@@ -47,7 +47,7 @@ RSpec.describe 'Works request_change', type: :request do
     # unauthenticated caller is a clean 403 — same as PATCH #update.
     it 'forbids the unauthenticated and records nothing' do
       expect do
-        post request_change_work_path(work.id), params: { request_action: 'withdraw' }
+        post request_change_work_path(work.id), params: { request_action: 'delete' }
       end.not_to change(AdminNotice, :count)
       expect(response).to have_http_status(:forbidden)
     end
@@ -55,7 +55,7 @@ RSpec.describe 'Works request_change', type: :request do
     it 'forbids an authenticated non-editor and records nothing' do
       sign_in outsider
       expect do
-        post request_change_work_path(work.id), params: { request_action: 'withdraw' }
+        post request_change_work_path(work.id), params: { request_action: 'delete' }
       end.not_to change(AdminNotice, :count)
       expect(response).to have_http_status(:forbidden)
     end
@@ -64,13 +64,13 @@ RSpec.describe 'Works request_change', type: :request do
   describe 'as an in-group editor' do
     before { sign_in editor }
 
-    it 'records a withdraw request, snapshotting the title' do
+    it 'records a deletion request, snapshotting the title' do
       expect do
-        post request_change_work_path(work.id), params: { request_action: 'withdraw', request_note: 'No longer authoritative.' }
+        post request_change_work_path(work.id), params: { request_action: 'delete', request_note: 'No longer authoritative.' }
       end.to change(AdminNotice, :count).by(1)
 
       notice = AdminNotice.last
-      expect(notice.kind).to eq('request_withdraw')
+      expect(notice.kind).to eq('request_delete')
       expect(notice).to be_request
       expect(notice.subject_noid).to eq(work.id)
       expect(notice.actor_nuid).to eq('000000002')
@@ -85,7 +85,7 @@ RSpec.describe 'Works request_change', type: :request do
     # depositor off-site.
     it 'sends no inbox message' do
       expect do
-        post request_change_work_path(work.id), params: { request_action: 'withdraw' }
+        post request_change_work_path(work.id), params: { request_action: 'delete' }
       end.not_to change(Message, :count)
     end
 
@@ -110,7 +110,7 @@ RSpec.describe 'Works request_change', type: :request do
       expect do
         post request_change_work_path(work.id), params: { request_action: 'destroy_everything' }
       end.not_to change(AdminNotice, :count)
-      expect(flash[:alert]).to include('withdrawal or a move')
+      expect(flash[:alert]).to include('deletion or a move')
     end
   end
 

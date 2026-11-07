@@ -35,17 +35,19 @@ module Metadata
         text.presence
       end
 
-      # Does the document carry topical subjects this form deliberately does not
-      # show? `keywords` is only the attribute-free <subject> elements; anything
-      # authority-bearing is curated and left alone, so an authority-only record
-      # arrives here with subjects on its record page and an empty Keywords box.
+      # Does the document carry subjects this form deliberately does not show?
+      # The Keywords box manages only the attribute-free, topic-only subjects;
+      # an authority-bearing subject, a name, a place or any other kind is left
+      # alone, so such a record arrives here with an empty Keywords box.
       #
       # The form needs to know, because "at least one keyword" is a stand-in for
       # "at least one subject": without this, a record whose subjects are all
       # curated is told it has none and cannot be saved until someone invents a
-      # redundant free-text keyword.
+      # redundant free-text keyword. Compared by count, because a heading is
+      # composed text and need not match a keyword string.
       def curated_subjects?
-        (@mods.topical_subjects - @mods.keywords).any?
+        managed = @mods.keyword_subjects.count { |subject| subject.text.strip.present? }
+        @mods.subject_headings.size > managed
       end
   end
 end

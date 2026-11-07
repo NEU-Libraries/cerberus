@@ -42,6 +42,8 @@ class QueueZipPacker
 
         pack_queued_asset(zip, work_noid, asset, manifest, errors)
       end
+    rescue AtlasRb::TombstonedError
+      errors << withheld_as_removed(work_noid)
     rescue Faraday::Error, JSON::ParserError => e
       errors << "#{work_noid}: assets unavailable — #{e.class}: #{e.message}"
     end

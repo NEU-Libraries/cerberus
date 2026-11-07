@@ -176,7 +176,7 @@ RSpec.describe 'Loads', type: :request do
         [OpenStruct.new(noid: 'neu:c1', id: 'neu:c1', klass: 'Collection', title: 'Campus Life (Photographs)'),
          OpenStruct.new(noid: 'neu:c2', id: 'neu:c2', klass: 'Collection', title: 'Athletics (Photographs)'),
          OpenStruct.new(noid: 'neu:w1', id: 'neu:w1', klass: 'Work', title: 'A Stray Work'),
-         OpenStruct.new(noid: 'neu:c3', id: 'neu:c3', klass: 'Collection', title: 'Withdrawn', tombstoned: true)]
+         OpenStruct.new(noid: 'neu:c3', id: 'neu:c3', klass: 'Collection', title: 'Removed (Photographs)', tombstoned: true)]
       )
     end
 
@@ -193,7 +193,7 @@ RSpec.describe 'Loads', type: :request do
     # A Work destination would parent every ingested Work under it.
     it 'offers only live Collections' do
       get '/loaders/marcom/loads/new'
-      expect(response.body).not_to include('A Stray Work', 'Withdrawn')
+      expect(response.body).not_to include('A Stray Work', 'Removed (Photographs)')
     end
   end
 
@@ -443,6 +443,130 @@ RSpec.describe 'Loads', type: :request do
         get "/loaders/marcom/loads/#{load_report.id}"
         expect(response.body).not_to include('load-report-progress')
       end
+    end
+  end
+
+  describe 'GET /loaders/marcom/loads/:id — paging the rows' do
+    before { sign_in marcom_user }
+
+    def report_with(rows, status: :completed)
+      LoadReport.create!(loader: marcom_loader, source_filename: 'jpgs.zip',
+                         parent_collection_id: 'neu:c1', status: status).tap do |report|
+        rows.times { |n| create(:iptc_ingest, load_report: report, status: :completed, source_filename: format('img_%04d.jpg', n)) }
+      end
+    end
+
+    def table_rows = response.parsed_body.css('tbody tr.ingest-row')
+
+    it 'shows the first 50 rows and a pager' do
+      report = report_with(LoadReportRows::PER_PAGE + 3)
+
+      get loader_load_path(marcom_loader, report)
+
+      expect(table_rows.size).to eq(LoadReportRows::PER_PAGE)
+      expect(response.parsed_body.at_css('nav.paginate-section')).to be_present
+    end
+
+    it 'shows the rest on page 2' do
+      report = report_with(LoadReportRows::PER_PAGE + 3)
+
+      get loader_load_path(marcom_loader, report, page: 2)
+
+      expect(table_rows.map(&:text).join).to include('img_0052.jpg')
+      expect(table_rows.size).to eq(3)
+    end
+
+    it 'shows no pager when every row fits on one page' do
+      report = report_with(3)
+
+      get loader_load_path(marcom_loader, report)
+
+      expect(response.parsed_body.at_css('nav.paginate-section')).to be_nil
+    end
+
+    # Without the page in the poll URL, every reload mid-load would send the
+    # reader back to page 1.
+    it 'hands the poller the page being read' do
+      report = report_with(LoadReportRows::PER_PAGE + 3, status: :processing)
+
+      get loader_load_path(marcom_loader, report, page: 2)
+
+      expect(response.body).to include(%(data-load-poll-url-value="#{loader_load_path(marcom_loader, report, page: 2)}"))
+    end
+  end
+
+  describe 'GET /loaders/marcom/loads/:id — filtering by status' do
+    before { sign_in marcom_user }
+
+    let!(:report) do
+      LoadReport.create!(loader: marcom_loader, source_filename: 'jpgs.zip',
+                         parent_collection_id: 'neu:c1', status: :completed_with_warnings).tap do |r|
+        2.times { |n| create(:iptc_ingest, load_report: r, status: :failed, source_filename: "bad_#{n}.jpg") }
+        (LoadReportRows::PER_PAGE + 1).times do |n|
+          create(:iptc_ingest, load_report: r, status: :completed, source_filename: format('ok_%04d.jpg', n))
+        end
+      end
+    end
+
+    def html = response.parsed_body
+    def table_rows = html.css('tbody tr.ingest-row')
+    def tile(status) = html.at_css(".ingest-summary__tile--#{status}")
+
+    it 'shows only the rows with the chosen status, and says how many' do
+      get loader_load_path(marcom_loader, report, status: 'failed')
+
+      expect(table_rows.size).to eq(2)
+      expect(table_rows.map(&:text).join).not_to include('ok_')
+      expect(html.at_css('.ingest-filter-status').text.squish).to include('Showing 2 of 53 rows: Failed')
+    end
+
+    it 'presses the active tile, which then submits no status, so it clears the filter' do
+      get loader_load_path(marcom_loader, report, status: 'failed')
+
+      expect(tile(:failed)['aria-pressed']).to eq('true')
+      expect(tile(:failed)['name']).to be_nil
+      expect(tile(:total)['aria-pressed']).to eq('false')
+      expect(%w[name value].map { |attr| tile(:completed)[attr] }).to eq(%w[status completed])
+    end
+
+    it 'presses Total and shows every row when nothing is filtered' do
+      get loader_load_path(marcom_loader, report)
+
+      expect(tile(:total)['aria-pressed']).to eq('true')
+      expect(html.at_css('.ingest-filter-status')).to be_nil
+    end
+
+    it 'disables a tile with nothing to show' do
+      get loader_load_path(marcom_loader, report)
+
+      expect(tile(:pending)).to have_attribute('disabled')
+      expect(tile(:failed)).not_to have_attribute('disabled')
+    end
+
+    it 'ignores a status that is not one' do
+      get loader_load_path(marcom_loader, report, status: 'bogus')
+
+      expect(table_rows.size).to eq(LoadReportRows::PER_PAGE)
+      expect(html.at_css('.ingest-filter-status')).to be_nil
+    end
+
+    it 'keeps the filter on the pager and in the poll URL' do
+      report.update!(status: :processing)
+
+      get loader_load_path(marcom_loader, report, status: 'completed', page: 2)
+
+      expect(table_rows.size).to eq(1)
+      expect(html.css('nav.paginate-section a').pluck('href')).to all(include('status=completed'))
+      expect(html.at_css('[data-controller="load-poll"]')['data-load-poll-url-value'])
+        .to eq(loader_load_path(marcom_loader, report, page: 2, status: 'completed'))
+    end
+
+    # Mid-load, a status's last row can move on between the click and the render.
+    it 'says so when no rows have the status any more, instead of the empty-load copy' do
+      get loader_load_path(marcom_loader, report, status: 'processing')
+
+      expect(response.body).to include('No rows are processing now')
+      expect(response.body).not_to include('No images ingested')
     end
   end
 

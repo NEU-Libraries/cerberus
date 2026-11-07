@@ -1,0 +1,26 @@
+-# The "Add page to set" confirmation, rendered into the page picker's frame.
+-# The Add button posts every noid on the page; the server counts again and
+-# queues only what is still missing. See docs/sets.md.
+- addition = @addition
+- title = @set['title']
+= turbo_frame_tag 'set-picker-page' do
+  .set-page-confirm
+    - if addition.to_add.any?
+      %p.mb-2 Add #{pluralize(addition.to_add.size, 'work')} from this page to “#{title}”?
+    - else
+      %p.mb-2 Every work on this page is already in “#{title}”.
+    - if addition.contained.any? || addition.hidden.any?
+      %ul.small.text-subtle.ps-3.mb-3
+        - if addition.contained.any?
+          %li #{pluralize(addition.contained.size, 'work')} #{addition.contained.size == 1 ? 'is' : 'are'} already in it, and will be skipped.
+        - if addition.hidden.any?
+          %li
+            #{pluralize(addition.hidden.size, 'work')} #{addition.hidden.size == 1 ? 'is' : 'are'} hidden in it, and will stay hidden.
+            = link_to 'Put hidden works back from the set’s page', set_path(@set['id']),
+                      class: 'text-decoration-underline', data: { turbo_frame: '_top' }
+    .d-flex.gap-2
+      - if addition.to_add.any?
+        = button_to add_page_works_set_path(@set['id']), params: { work_ids: addition.noids },
+                    class: 'btn btn-primary btn-sm', form: { data: { turbo_frame: '_top' } } do
+          Add #{pluralize(addition.to_add.size, 'work')}
+      = link_to 'Back to your sets', page_picker_sets_path(work_ids: addition.noids), class: 'btn btn-tonal-secondary btn-sm'

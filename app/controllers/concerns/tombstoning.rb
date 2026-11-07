@@ -14,7 +14,7 @@ module Tombstoning
 
   private
 
-    # Withdraw the resource and report the outcome. atlas_rb does NOT raise on
+    # Tombstone the resource and report the outcome. atlas_rb does NOT raise on
     # the tombstone refusal — RaiseOnResourceError passes the 422 (`code:
     # "has_live_children"`) straight through as a raw Faraday::Response, so the
     # status has to be read. Ignoring it reports a false "deleted" while the
@@ -34,7 +34,7 @@ module Tombstoning
       end
     end
 
-    # Only the admin tier chooses the removal note. Anyone else withdrawing an
+    # Only the admin tier chooses the removal note. Anyone else tombstoning an
     # item records the curator's note, whatever the form sent. A request with no
     # reason is a cancelled deposit, which was never published and records none.
     def removal_reason
@@ -54,7 +54,7 @@ module Tombstoning
       when 'top_level_community'
         TOP_LEVEL_REFUSED
       else
-        "#{solr_type} can't be deleted while it still contains live members. Withdraw or move them first."
+        "#{solr_type} can't be deleted while it still contains live members. Delete or move them first."
       end
     end
 

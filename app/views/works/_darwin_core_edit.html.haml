@@ -20,7 +20,8 @@
   = form_with url: dwc_work_path(work.id), method: :put, multipart: true do
     .well.p-3.my-3.rounded-3
       %label.form-label{for: 'dwc_file'} Darwin Core XML file
-      %input#dwc_file.form-control{name: 'dwc_file', type: 'file', accept: '.xml,application/xml,text/xml', required: true}/
+      = render layout: 'shared/file_field' do
+        %input#dwc_file.file-field__input{name: 'dwc_file', type: 'file', accept: '.xml,application/xml,text/xml', required: true}/
       .mt-3
         %button.btn.btn-primary{type: 'submit'}= held ? 'Replace record' : 'Upload record'
         = link_to 'Cancel', work_path(work.id), class: 'btn btn-warning'

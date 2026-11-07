@@ -79,7 +79,7 @@ describe 'audit_events/_history.html.haml' do
     it 'renders the create/update/tombstone/restore action labels' do
       expect(rendered).to have_css('.audit-event--create .audit-event__action-label', text: 'Created')
       expect(rendered).to have_css('.audit-event--update .audit-event__action-label', text: 'Updated')
-      expect(rendered).to have_css('.audit-event--tombstone .audit-event__action-label', text: 'Tombstoned')
+      expect(rendered).to have_css('.audit-event--tombstone .audit-event__action-label', text: 'Retracted')
       expect(rendered).to have_css('.audit-event--restore .audit-event__action-label', text: 'Restored')
     end
 

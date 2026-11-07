@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# Lists every tombstoned (withdrawn) top-level resource — Works, Collections
+# Lists every tombstoned top-level resource — Works, Collections
 # and Communities — for the admin tombstone registry: paginated, filterable by
-# withdrawal date, and searchable by title or PID. A search that matches a
+# tombstone date, and searchable by title or PID. A search that matches a
 # container also lists the container's tombstoned descendants, because purging
 # a container means purging what it holds first. See docs/admin.md.
 class TombstonedItems < ApplicationService
@@ -22,8 +22,8 @@ class TombstonedItems < ApplicationService
   # @param page [Integer, String, nil] 1-based page number.
   # @param query [String, nil] words to search titles and PIDs by.
   # @param per_page [Integer, String, nil] one of PER_PAGE_OPTIONS.
-  # @param from [Date, nil] earliest withdrawal date, inclusive.
-  # @param to [Date, nil] latest withdrawal date, inclusive.
+  # @param from [Date, nil] earliest tombstone date, inclusive.
+  # @param to [Date, nil] latest tombstone date, inclusive.
   def initialize(scope:, page: nil, query: nil, per_page: nil, from: nil, to: nil)
     @scope = scope
     @page = page
@@ -34,7 +34,7 @@ class TombstonedItems < ApplicationService
     super()
   end
 
-  # @return [Blacklight::Solr::Response] most recently withdrawn first; a plain
+  # @return [Blacklight::Solr::Response] most recently tombstoned first; a plain
   #   search with no descendants to add ranks by relevance instead.
   def call
     identities = identity_listing

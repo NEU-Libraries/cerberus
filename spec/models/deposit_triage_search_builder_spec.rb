@@ -43,7 +43,7 @@ RSpec.describe DepositTriageSearchBuilder do
     expect(fq_for(:unconfirmed, starting_with: inherited).grep(/OR depositor_ssi/)).to be_empty
   end
 
-  it 'leaves the tombstone exclusion alone — a withdrawn deposit needs no triage' do
+  it 'leaves the tombstone exclusion alone — a tombstoned deposit needs no triage' do
     expect(fq_for(:unconfirmed, starting_with: ['-tombstoned_bsi:true']))
       .to include('-tombstoned_bsi:true')
   end

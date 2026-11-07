@@ -9,7 +9,7 @@
   .p-3
     %p.text-muted.small.mb-3
       Find the work whose collection placements you want to manage. Linking displays a work in additional collections for discovery. The work is not moved and permissions are unchanged.
-    = render 'admin/finder/search_form', url: admin_linked_members_path, q: params[:q], hidden: {}, placeholder: 'Search works by title…'
+    = render 'admin/finder/search_form', url: admin_linked_members_path, q: params[:q], hidden: {}, placeholder: 'Search by title or ID…'
 
   - if @results
     = render 'admin/finder/results', results: @results, select_label: 'Manage', select_url: ->(doc) { admin_linked_members_manage_path(work_id: doc.to_param) }

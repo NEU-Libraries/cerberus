@@ -2,6 +2,9 @@
 
 class CatalogController < ApplicationController
   include Blacklight::Catalog
+  include PageSetAddable
+  include AnonymousMatchAll
+  include WholeTreeSearch
 
   self.search_state_class = SearchState
 
@@ -100,6 +103,11 @@ class CatalogController < ApplicationController
     config.index.document_title_component = Cerberus::DocumentTitleComponent
     config.show.document_title_component = Cerberus::DocumentTitleComponent
 
+    # Sort and Per-page open to the side of the sidebar; see
+    # Cerberus::ResultsDropdownComponent. Blacklight reads this through
+    # view_config(:show), which falls through to index.
+    config.index.dropdown_component = Cerberus::ResultsDropdownComponent
+
     # config.add_results_document_tool(:bookmark, partial: 'bookmark_control', if: :render_bookmarks_control?)
     config.index.document_actions.delete(:bookmark)
     config.show.document_actions.delete(:bookmark)
@@ -108,6 +116,7 @@ class CatalogController < ApplicationController
     config.add_results_collection_tool(:sort_widget)
     config.add_results_collection_tool(:per_page_widget)
     config.add_results_collection_tool(:view_type_group)
+    config.add_results_collection_tool(:add_page_to_set, partial: 'catalog/add_page_to_set', if: :add_page_to_set?)
 
     # config.add_nav_action(:bookmark, partial: 'blacklight/nav/bookmark', if: :render_bookmarks_control?)
     # config.add_nav_action(:search_history, partial: 'blacklight/nav/search_history')
@@ -392,11 +401,14 @@ class CatalogController < ApplicationController
   # Used to hide empty Featured showcases from a community browse without leaving
   # the Type facet counting them (a Ruby post-filter on the documents would not
   # touch Solr's facets).
-  def find_children(uuid, noid, exclude_uuids: [])
+  # +sort+, when given, replaces the search state's sort in the Solr request
+  # alone; the state, and so every link the page builds, keeps its own.
+  def find_children(uuid, noid, exclude_uuids: [], sort: nil)
     return Blacklight::Solr::Response.new({}, {}) if uuid.blank?
 
     filters = child_membership_filters(uuid, noid, exclude_uuids: exclude_uuids)
     builder = search_service.search_builder.with(search_state).with_filters(*filters)
+    builder = builder.merge(sort: sort) if sort
     Blacklight.default_index.search(params: builder)
   end
 
@@ -405,8 +417,9 @@ class CatalogController < ApplicationController
   # ShowScopedSearch#facet). A modal built on a different filter would report
   # counts the page beneath it cannot reproduce.
   def child_membership_filters(uuid, noid, exclude_uuids: [])
-    # Direct members (browse), or the whole subtree when a keyword query is active.
-    membership = if params[:q].present?
+    # Direct members (browse, facets included), or the whole subtree for any
+    # search, an empty one too.
+    membership = if subtree_search?
                    subtree_membership_fq(uuid, noid)
                  else
                    MembershipQuery.members_fq([uuid], include_linked: true)

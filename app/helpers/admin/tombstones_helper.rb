@@ -7,12 +7,10 @@ module Admin
     # The types Atlas refuses to purge while they still hold a member.
     CONTAINER_TYPES = %w[Collection Community].freeze
 
-    PURGE_CONSEQUENCE = 'This removes the item and every preserved copy of its files, earlier ' \
-                        'versions included. It cannot be undone; only the audit record of the ' \
-                        'deletion survives.'
+    PURGE_CONSEQUENCE = 'This removes the item and every preserved copy of its files. ' \
+                        'It cannot be undone; only the audit record survives.'
 
-    PURGE_CONTAINER_CAVEAT = 'Atlas refuses this while the container still holds a member, and ' \
-                             'tombstoned members count.'
+    PURGE_CONTAINER_CAVEAT = 'A collection or community must be empty first, and retracted members count.'
 
     # The confirmation an admin reads before a purge. The shared turbo-confirm
     # modal splits on a blank line and renders the first block as the prompt and
@@ -21,7 +19,7 @@ module Admin
     #
     # The container caveat is not decoration. Atlas counts tombstoned members
     # when it refuses a container purge, where the tombstone refusal counts only
-    # live ones — so a Collection whose children are all withdrawn looks empty to
+    # live ones — so a Collection whose children are all tombstoned looks empty to
     # the admin and is not. Saying it up front saves a round trip through a flash.
     def tombstone_purge_confirm(doc)
       blocks = ["Permanently delete “#{finder_doc_title(doc)}”?", PURGE_CONSEQUENCE]
@@ -38,7 +36,7 @@ module Admin
       end
 
       safe_join([finder_doc_heading(parent),
-                 content_tag(:span, ' · tombstoned', class: 'text-muted small')])
+                 content_tag(:span, ' · retracted', class: 'text-muted small')])
     end
   end
 end

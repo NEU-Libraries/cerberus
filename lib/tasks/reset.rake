@@ -160,11 +160,12 @@ namespace :reset do
       # seeded by Atlas as "Doe, Jane"). 000000002 is the right subject: it's a
       # seeded, loginable user at the staff/depositor tier (privileged, non-admin),
       # so a demoer can exercise the publish fork as a regular depositor.
-      # Person.create mints her personal-root Collection (personal_root_id), the
-      # structural home for works she publishes; the affiliation makes the Library
-      # her publish target.
-      jane = AtlasRb::Person.create(nuid: '000000002', display_name: 'Jane Doe',
-                                    bio: 'Researches coastal resilience and marine ecosystems.')
+      # Atlas's reset seeds her Person, with its display name, bio and
+      # personal-root Collection (personal_root_id), so a Person.create here
+      # would 409. The affiliation stays here because the Library is ours.
+      jane = Array(AtlasRb::Person.resolve(['000000002'])).first
+      raise 'Atlas seeded no Person for 000000002; it must be 0.6.253 or later' unless jane
+
       AtlasRb::Person.add_affiliation(jane['id'], library['id'])
 
       # A personal workspace collection under Jane's root — what My DRS "My
@@ -318,16 +319,16 @@ namespace :reset do
       PdfRenditionJob.perform_later(doc_work['id'], staged_doc, SecureRandom.uuid)
       PdfRenditionJob.perform_later(pres_work['id'], staged_pres, SecureRandom.uuid)
 
-      # A withdrawn (tombstoned) Work so the admin restore registry has an entry
-      # to demonstrate the restore path. Tombstoning needs a completed Work, so
-      # it is built normally and then withdrawn.
-      withdrawn_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-withdrawn-mods.xml')
-      withdrawn_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/gorge.jpg')
-      AtlasRb::Resource.set_thumbnails(withdrawn_work['id'], **ThumbnailCreator.call(image: withdrawn_image))
-      AtlasRb::Resource.set_permissions(withdrawn_work['id'], { 'read' => ['public'] })
-      AtlasRb::Blob.create(withdrawn_work['id'], '/home/cerberus/web/spec/fixtures/files/gorge.jpg', 'gorge.jpg')
-      AtlasRb::Work.complete(withdrawn_work['id'])
-      AtlasRb::Resource.tombstone(withdrawn_work['id'])
+      # A tombstoned Work, so the Retracted items registry has an entry to
+      # demonstrate the restore path. Tombstoning needs a completed Work, so it
+      # is built normally and then tombstoned.
+      retracted_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-retracted-mods.xml')
+      retracted_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/gorge.jpg')
+      AtlasRb::Resource.set_thumbnails(retracted_work['id'], **ThumbnailCreator.call(image: retracted_image))
+      AtlasRb::Resource.set_permissions(retracted_work['id'], { 'read' => ['public'] })
+      AtlasRb::Blob.create(retracted_work['id'], '/home/cerberus/web/spec/fixtures/files/gorge.jpg', 'gorge.jpg')
+      AtlasRb::Work.complete(retracted_work['id'])
+      AtlasRb::Resource.tombstone(retracted_work['id'])
 
       # --- Group-permission UAT fixtures -----------------------------------
       # A representative slice of the Group table's ~75 real Grouper
@@ -413,7 +414,7 @@ namespace :reset do
 
       # A Work inside that collection, deposited as UNOWNED so 000000011 reaches
       # it purely through the group's edit grant and is not its depositor. That
-      # distinction is the whole fixture: a depositor withdraws their own work
+      # distinction is the whole fixture: a depositor tombstones their own work
       # directly from its show page, so only a non-depositor editor ever sees
       # the request-a-change controls on the Move and Delete tabs. Seeding this
       # under the persona's own name would silently break the flow it exists to

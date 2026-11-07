@@ -15,7 +15,7 @@
         %i.fa-solid.fa-list-check{'aria-hidden' => 'true'}
       %span.admin-action-card__title Requests & activity
       %span.admin-action-card__desc
-        What depositors have asked staff to do — withdraw, move, restrict — with a link to the tool that does each one. Alongside it, the record of what the repository did, including every work published to a community showcase, and a digest of each day.
+        What depositors have asked staff to do — delete, move, restrict — with a link to the tool that does each one. Alongside it, the record of what the repository did, including every work published to a community showcase, and a digest of each day.
       %span.admin-action-card__cta
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
@@ -77,7 +77,7 @@
         %i.fa-solid.fa-diagram-project{'aria-hidden' => 'true'}
       %span.admin-action-card__title Associated works
       %span.admin-action-card__desc
-        Record that one Work is the codebook, figure, transcription, instructional material or supplemental material for another. Both works keep their own page; each shows the relationship from its own end.
+        Connect two related works and assign a relationship: codebook, figure, transcription, instructional material, or supplemental material.
       %span.admin-action-card__cta
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
@@ -116,11 +116,13 @@
     = link_to admin_tombstones_path, class: 'admin-action-card admin-action-card--restore', role: 'listitem' do
       %span.admin-action-card__icon
         %i.fa-solid.fa-trash-can-arrow-up{'aria-hidden' => 'true'}
-      %span.admin-action-card__title Tombstoned items
+      %span.admin-action-card__title Retracted items
       %span.admin-action-card__desc
-        Review every tombstoned Work, Collection and Community, and reverse a tombstone — the item becomes discoverable again, with the restore recorded in its History.
+        Review every retracted work, collection and community.
         - if current_user&.admin?
-          An admin can also delete a tombstoned item permanently.
+          Restore one to make it discoverable again, or delete it permanently.
+        - else
+          Restore one to make it discoverable again.
       %span.admin-action-card__cta
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
@@ -140,7 +142,7 @@
         %i.fa-solid.fa-arrows-rotate{'aria-hidden' => 'true'}
       %span.admin-action-card__title Replace a file
       %span.admin-action-card__desc
-        Replace a Work's file with a new version, keeping the same identifier. Nothing is overwritten — prior versions stay in the history, downloadable and revertible.
+        Replace a Work's file with a new version, keeping the same identifier. Nothing is overwritten — prior versions stay in the history, downloadable and revertible. A single file can also be removed from a Work and restored later.
       %span.admin-action-card__cta
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}

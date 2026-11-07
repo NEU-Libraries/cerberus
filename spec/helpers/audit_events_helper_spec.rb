@@ -84,9 +84,9 @@ RSpec.describe AuditEventsHelper, type: :helper do
       expect(summary).to include('Darwin Core record · via Darwin Core upload')
     end
 
-    # Atlas records the withdrawal as a metadata tombstone, which would
-    # otherwise read as the Work itself being withdrawn.
-    it 'names the Darwin Core record on its withdrawal' do
+    # Atlas records the removal as a metadata tombstone, which would
+    # otherwise read as the Work itself being tombstoned.
+    it 'names the Darwin Core record on its removal' do
       summary = helper.audit_event_payload_summary(
         event(action: 'tombstone', change_type: 'metadata', payload: { 'source' => 'dwc' })
       )
@@ -242,6 +242,11 @@ RSpec.describe AuditEventsHelper, type: :helper do
       it 'gives the ladder prose names' do
         expect(helper.tier_label('service')).to eq('Service (deep zoom)')
         expect(helper.tier_label('original')).to eq('Original')
+      end
+
+      it 'names every tier a Sentinel can author' do
+        expect(AuditEventsHelper::TIER_LABELS.keys).to match_array(Sentinel::TIERS)
+        expect(helper.tier_label('structured_text')).to eq('Data files')
       end
 
       it 'falls back to the raw token for an unknown tier' do

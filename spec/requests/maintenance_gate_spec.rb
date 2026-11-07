@@ -66,14 +66,15 @@ RSpec.describe 'The maintenance window', type: :request do
       expect(response.body).to include('Back at 10:00')
     end
 
+    # A keyword search: an anonymous match-all listing is refused regardless.
     it 'keeps serving reads' do
-      get '/catalog'
+      get '/catalog', params: { q: 'sample' }
 
       expect(response).to have_http_status(:ok)
     end
 
     it 'keeps the standing banner in front of everyone' do
-      get '/catalog'
+      get '/catalog', params: { q: 'sample' }
 
       expect(response.body).to include('Read-only')
       expect(response.body).to include('depositing and editing are paused')
@@ -133,7 +134,7 @@ RSpec.describe 'The maintenance window', type: :request do
     before { allow(MaintenanceMode).to receive(:read_only?).and_return(false) }
 
     it 'renders no banner' do
-      get '/catalog'
+      get '/catalog', params: { q: 'sample' }
 
       expect(response.body).not_to include('maintenance-banner')
     end

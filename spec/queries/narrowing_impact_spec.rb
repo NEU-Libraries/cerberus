@@ -111,5 +111,17 @@ RSpec.describe NarrowingImpact do
         hash_including(fq: array_including(a_string_matching(/must_not/)))
       )
     end
+
+    # An editor is not told about an item they cannot see, and the ownership
+    # test must not turn on one either. See docs/narrowing.md.
+    it 'leaves tombstoned items out of the count and the ownership test' do
+      stub_solr(total: 0)
+
+      impact.count
+
+      expect(Blacklight.default_index).to have_received(:search).with(
+        hash_including(fq: array_including('-tombstoned_bsi:true'))
+      )
+    end
   end
 end

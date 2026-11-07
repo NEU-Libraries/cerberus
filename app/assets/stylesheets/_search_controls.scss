@@ -4,6 +4,28 @@
 // a hairline rule (no label — the controls are self-evident), so they read as a
 // tidy control panel in the narrow column. See catalog/_search_sidebar.html.erb.
 
+// The results controls' chrome: a transparent fill with the facet card's
+// near-black, medium-weight label and light translucent border, and a faint
+// grey hover. It is the one place a transparent button is allowed (see
+// docs/design.md): these controls sit on the page ground and nowhere else.
+@mixin results-control-chrome {
+  --bs-btn-color: #{$gray-900};
+  --bs-btn-border-color: var(--bs-border-color-translucent);
+  --bs-btn-hover-color: #{$gray-900};
+  --bs-btn-hover-bg: #{$gray-100};
+  --bs-btn-hover-border-color: var(--bs-border-color-translucent);
+  --bs-btn-active-color: #{$gray-900};
+  --bs-btn-active-bg: #{$gray-100};
+  --bs-btn-active-border-color: var(--bs-border-color-translucent);
+  font-weight: 500;
+
+  // A solid near-black icon made the label read larger than Sort's; the view
+  // toggle's gray keeps the icon quiet.
+  i {
+    color: $gray-600;
+  }
+}
+
 .sidebar-display-controls {
   margin-top: $spacer;
   padding-top: $spacer * .75;
@@ -31,15 +53,19 @@
   // the "Type" header's near-black, medium-weight label and the card's light
   // translucent border, with a faint gray hover. Keep the default centered
   // label (its content is multi-part: "Sort" + " by relevance" + caret, which a
-  // flex/space-between layout would scatter).
-  .btn-group .dropdown-toggle {
-    --bs-btn-color: #{$gray-900};
-    --bs-btn-border-color: var(--bs-border-color-translucent);
-    --bs-btn-hover-color: #{$gray-900};
-    --bs-btn-hover-bg: #{$gray-100};
-    --bs-btn-hover-border-color: var(--bs-border-color-translucent);
+  // flex/space-between layout would scatter). Add page to set shares the
+  // chrome, so the pane reads as one set of controls.
+  .btn-group .dropdown-toggle,
+  .add-page-to-set-btn {
+    @include results-control-chrome;
     width: 100%;
-    font-weight: 500;
+  }
+
+  // Sort and Per-page open to the right, over the results
+  // (Cerberus::ResultsDropdownComponent). Dropped below on a narrow screen,
+  // the menu takes no arrow.
+  .dropdown-menu[data-popper-placement^="right"] {
+    @include menu-side-arrow(left, 1.2rem);
   }
 
   // View-type (list / gallery): a quiet segmented toggle. The btn-group defaults
@@ -66,5 +92,24 @@
     --bs-btn-active-bg: #{$gray-200};
     --bs-btn-active-border-color: var(--bs-border-color-translucent);
     flex: 1 1 0;
+  }
+}
+
+.results-control {
+  @include results-control-chrome;
+}
+
+// The Add control under a container's results (shared/_add_control):
+// right-aligned under a list, centred under an empty container's message.
+.add-control {
+  display: flex;
+  margin: 1rem 0;
+
+  &--end { justify-content: flex-end; }
+  &--centered { justify-content: center; }
+
+  // Dropped below on a narrow screen, the menu takes no arrow.
+  .dropdown-menu[data-popper-placement^="left"] {
+    @include menu-side-arrow(right, 1.2rem);
   }
 }

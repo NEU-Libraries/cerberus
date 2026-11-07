@@ -34,38 +34,31 @@ RSpec.describe PdfRenditionJob, type: :job do
     expect(IiifAssetsJob).to have_received(:perform_now).with(work_id, pdf_path, refresh: false)
   end
 
-  it 'passes a refresh through, so a replaced document gets a fresh thumbnail' do
-    described_class.new.perform(work_id, staged_path, rendition_key, refresh: true)
-
-    expect(IiifAssetsJob).to have_received(:perform_now).with(work_id, pdf_path, refresh: true)
-  end
-
   describe 'on a replace or revert' do
-    def asset(noid, name, mime)
-      AtlasRb::Mash.new(role: 'original_file', noid: noid, original_filename: name, mime_type: mime)
-    end
-
     before { allow(AtlasRb::Blob).to receive(:update) }
 
-    it "updates the Work's existing PDF instead of attaching another" do
-      allow(AtlasRb::Work).to receive(:file_sets).with(work_id).and_return(
-        [AtlasRb::Mash.new(assets: [asset('b-1', 'thesis.docx', 'application/msword')]),
-         AtlasRb::Mash.new(assets: [asset('b-2', 'thesis.pdf', 'application/pdf')])]
-      )
+    def refresh = described_class.new.perform(work_id, staged_path, rendition_key, refresh: true)
 
-      described_class.new.perform(work_id, staged_path, rendition_key, refresh: true)
+    it "leaves the Work's PDF as first uploaded" do
+      refresh
 
-      expect(AtlasRb::Blob).to have_received(:update).with('b-2', pdf_path, idempotency_key: rendition_key)
       expect(AtlasRb::Blob).not_to have_received(:create)
+      expect(AtlasRb::Blob).not_to have_received(:update)
     end
 
-    # The first rendition may never have landed, for instance when soffice
-    # timed out at deposit.
-    it 'attaches a PDF when the Work has none yet' do
-      described_class.new.perform(work_id, staged_path, rendition_key, refresh: true)
+    it 'refreshes the thumbnail and full text from the new file' do
+      expect { refresh }.to have_enqueued_job(FullTextExtractionJob).with(work_id, pdf_path)
+      expect(IiifAssetsJob).to have_received(:perform_now).with(work_id, pdf_path, refresh: true)
+    end
 
-      expect(AtlasRb::Blob).to have_received(:create)
-      expect(AtlasRb::Blob).not_to have_received(:update)
+    # The staged directory keeps the first upload's PDF, so skipping the
+    # conversion would refresh from the old content.
+    it 'converts again even when a PDF of the same name is already staged' do
+      FileUtils.cp(fixtures.join('example.pdf'), pdf_path)
+
+      refresh
+
+      expect(WordToPdf).to have_received(:call).with(source_path: staged_path, target_path: pdf_path)
     end
   end
 

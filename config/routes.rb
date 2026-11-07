@@ -115,23 +115,26 @@ Rails.application.routes.draw do
       get :manifest
       get :metadata
       patch :metadata, action: :update_metadata
-      # Withdraw one of the Work's caption files, or restore a withdrawn one.
+      # Tombstone one of the Work's caption files, or restore a tombstoned one.
       # Admins and delegated admins only, like the Atlas FileSet tombstone and
       # restore beneath them (WorkCaptions).
       delete :caption, action: :remove_caption
       post :restore_caption
+      # Take the Work out of one community's genre showcase. Edit-gated, and
+      # further limited to the depositor and admins (WorkShowcaseCategory).
+      delete :showcase, action: :remove_showcase
       # Add an arbitrary binary to an existing Work: GET renders the upload
       # form, POST stages the file and queues the attach (AddFileJob). Both are
       # edit-gated via authorize_resource_writes!'s extra_edit list.
       get :upload
       post :upload, action: :add_file
       # The stored Darwin Core XML, behind the show page's read gate; the edit
-      # page uploads a replacement or withdraws it.
+      # page uploads a replacement or tombstones it.
       get :dwc, to: 'darwin_core_records#show'
       put :dwc, to: 'darwin_core_records#update'
       delete :dwc, to: 'darwin_core_records#destroy'
       post :tombstone
-      # An editor-submitted request to withdraw or move the work — notifies the
+      # An editor-submitted request to delete or move the work — notifies the
       # DRS staff inbox (no direct mutation; staff fulfill it with the tombstone
       # / re-parent tools). Edit-gated via authorize_resource_writes!.
       post :request_change
@@ -146,6 +149,8 @@ Rails.application.routes.draw do
   # /communities/:community_id/people is the community-scoped Faculty & Staff
   # browse (Person docs filtered by affiliated_community_ids_ssim).
   resources :people, only: %i[index show]
+  # A person's own details. PersonProfilesController refuses anyone else.
+  resources :people, only: %i[edit update], controller: 'person_profiles'
   get 'communities/:community_id/people', to: 'people#index', as: :community_people
 
   # Genre / category landing — a Featured-Content gateway (homepage) into a single
@@ -184,7 +189,10 @@ Rails.application.routes.draw do
   # User Inbox — in-app messaging. destroy is a per-recipient soft-dismiss,
   # not a row delete; recipients is the compose typeahead's JSON source.
   resources :messages, path: 'inbox', only: [:index, :show, :new, :create, :destroy] do
-    collection { get :recipients }
+    collection do
+      get :recipients
+      patch :mark_read
+    end
   end
 
   # Download Queue — a per-session basket of individual files, downloaded later
@@ -205,6 +213,7 @@ Rails.application.routes.draw do
     # pages). recipients: typeahead JSON for the Sharing tab's edit_users picker.
     collection do
       get :picker
+      get :page_picker
       get :recipients
     end
     member do
@@ -218,6 +227,10 @@ Rails.application.routes.draw do
       delete 'collections/:collection_id', to: 'sets#remove_collection', as: :remove_collection
       post   'works',                      to: 'sets#add_work',          as: :add_work
       delete 'works/:work_id',             to: 'sets#remove_work',       as: :remove_work
+      # "Add page to set": the confirmation that counts what is already in the
+      # Set, then the add itself. See SetPageAdd.
+      get    'page_works',                 to: 'sets#confirm_page_works', as: :confirm_page_works
+      post   'page_works',                 to: 'sets#add_page_works',     as: :add_page_works
       post   'aside',                      to: 'sets#set_aside',         as: :set_aside
       delete 'aside/:work_id',             to: 'sets#put_back',          as: :put_back
       # The Sentinel tab. `sentinel` authors the Set's Sentinel (the same
@@ -317,7 +330,7 @@ Rails.application.routes.draw do
     get 'ledger', to: 'ledger#index'
 
     # The tombstone registry — every tombstoned Work / Collection / Community,
-    # with the two ways out of a withdrawal: Restore reverses the show-page
+    # with the two ways out of a tombstone: Restore reverses the show-page
     # tombstone, and DELETE purges the item for good (both via atlas_rb's
     # operator-only Admin namespace). :id is the resource NOID; the `type` body
     # param selects the right Admin class. The two verbs are gated differently
@@ -346,6 +359,10 @@ Rails.application.routes.draw do
     get  'files/manage',   to: 'files#manage',   as: :files_manage
     post 'files/replace',  to: 'files#replace',  as: :files_replace
     post 'files/rollback', to: 'files#rollback', as: :files_rollback
+    # Tombstone one file's FileSet, or restore it. Reversible; the Work and its
+    # other files stay up.
+    post 'files/remove',   to: 'files#remove',   as: :files_remove
+    post 'files/restore',  to: 'files#restore',  as: :files_restore
     get  'files/:id/versions/:version_id/content', to: 'file_versions#content',
                                                    as: :file_version_content
 
@@ -404,10 +421,6 @@ Rails.application.routes.draw do
     get '/atlas/find_or_create' => 'atlas#find_or_create'
     post '/atlas/process_find_or_create' => 'atlas#process_find_or_create'
   end
-
-  # Not gated: the user menu links here for everyone, and it only renders the
-  # signed-in user's own record.
-  get '/atlas/user' => 'atlas#user'
 
   # error pages — also targeted by config.exceptions_app
   match '/403', to: 'errors#forbidden',             via: :all

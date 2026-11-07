@@ -96,7 +96,7 @@ describe Ability do
 
     # Depositor ownership is not Work-scoped: the whole workspace subtree
     # inherits the owner's NUID, so a Collection they deposited is theirs to
-    # withdraw. Atlas refuses the tombstone while live children remain, which
+    # tombstone. Atlas refuses the tombstone while live children remain, which
     # is where "only if empty" is enforced.
     it 'honours depositor matches on Collections' do
       doc = SolrDocument.new('internal_resource_tesim' => 'Collection',

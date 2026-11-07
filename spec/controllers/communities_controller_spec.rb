@@ -290,6 +290,26 @@ describe CommunitiesController do
       end
     end
 
+    context 'Add control under the results' do
+      def add_control = response.parsed_body.at_css('.add-control')
+
+      it 'is hidden from anonymous users' do
+        get :show, params: { id: community.id }
+        expect(add_control).to be_nil
+      end
+
+      it 'offers an editor the breadcrumb menu\'s choices for a community' do
+        AtlasRb::Resource.set_permissions(community.id,
+                                          { 'read' => ['public'], 'edit' => ['editors'] },
+                                          nuid: '000000004')
+        sign_in User.new(email: 'ed@example.com', nuid: '000000002', groups: ['editors'])
+        get :show, params: { id: community.id }
+        expect(add_control.css('.dropdown-item').map(&:text)).to eq(['New Collection', 'New Community'])
+        expect(response.parsed_body.css('.breadcrumb-add .dropdown-item').map(&:text))
+          .to eq(['New Collection', 'New Community'])
+      end
+    end
+
     context 'Edit affordance is gated on the :edit ability' do
       it 'is hidden from a signed-in user who cannot edit' do
         sign_in User.new(email: 'viewer@example.com', nuid: '000000005', role: 'standard', groups: [])
@@ -396,7 +416,7 @@ describe CommunitiesController do
     end
   end
 
-  # A community under the top-level one: Atlas refuses to withdraw a Community
+  # A community under the top-level one: Atlas refuses to tombstone a Community
   # with no parent, so only a child can be deleted.
   let(:child) do
     AtlasRb::Community.create(community.id, '/home/cerberus/web/spec/fixtures/files/community-mods.xml',
@@ -404,7 +424,7 @@ describe CommunitiesController do
   end
   let(:admin) { User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin') }
 
-  # Only an admin may withdraw a community whole: it holds other people's
+  # Only an admin may tombstone a community whole: it holds other people's
   # collections and showcases.
   describe 'tombstone with cascade' do
     before do
@@ -431,7 +451,7 @@ describe CommunitiesController do
       expect(response).to have_http_status(:forbidden)
     end
 
-    # The job withdraws the root last, so Atlas's own refusal would arrive only
+    # The job tombstones the root last, so Atlas's own refusal would arrive only
     # after everything beneath it was gone.
     it 'refuses a top-level community before enqueueing anything' do
       sign_in admin
@@ -576,7 +596,7 @@ describe CommunitiesController do
   # Atlas refuses a tombstone while any live member remains, and a showcase is a
   # live member even when it is empty and hidden from the listing. Offering Delete
   # off the listing alone promised a deletion that always failed, and told the
-  # reader to withdraw contents they could not see.
+  # reader to delete contents they could not see.
   describe '#deletable? (private)' do
     def deletable_with(documents:, showcases:)
       controller.instance_variable_set(:@response, instance_double(Blacklight::Solr::Response,
@@ -729,6 +749,87 @@ describe CommunitiesController do
         expect(NarrowingRequest).not_to have_received(:call)
         expect(Array(AtlasRb::Resource.permissions(community.id, nuid: '000000004')&.read)).not_to include('public')
       end
+    end
+  end
+
+  # The create form carries the Permissions tab's controls, under the Edit
+  # page's rule: only an administrator may start a community narrower than the
+  # one it sits in.
+  describe 'new and create, with permissions' do
+    render_views
+
+    let(:admin_user) { User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin') }
+    # Atlas mints only for a NUID it may create under, so the editor carries the
+    # stock admin's NUID. Cerberus decides narrowing from the role, which is unset.
+    let(:editor) { User.new(email: 'editor@example.com', nuid: '000000004', groups: ['editors']) }
+
+    def created_id = response.location.split('/').last
+
+    def read_acl(id) = Array(AtlasRb::Resource.permissions(id, nuid: '000000004')&.read)
+
+    before do
+      AtlasRb::Resource.set_permissions(community.id, { 'edit' => ['editors'] }, nuid: '000000004')
+      publicize_ancestry!(community: community)
+      allow(ShowcaseProvisioner).to receive(:call)
+    end
+
+    it 'renders the group grant editor on the create form' do
+      sign_in editor
+      get :new, params: { community_id: community.id }
+
+      expect(response.body).to include('community[permissions][new][group_id]')
+    end
+
+    it 'offers Private to an administrator' do
+      sign_in admin_user
+      get :new, params: { community_id: community.id }
+
+      expect(response.body).to match(/<option[^>]*value="private"/)
+    end
+
+    # The request form lives on the Edit page, which does not exist until the
+    # community does, so the copy must not point "below".
+    it 'withholds Private from a non-admin and points to the Edit page for a request' do
+      sign_in editor
+      get :new, params: { community_id: community.id }
+
+      expect(response.body).not_to match(/<option[^>]*value="private"/)
+      body = CGI.unescapeHTML(response.body)
+      expect(body).to include('on its Edit page')
+      expect(body).not_to include('” below.')
+    end
+
+    # Each showcase takes its parent's access when minted, so the community's
+    # own access has to be written first.
+    it 'writes the permissions before provisioning the showcases' do
+      sign_in admin_user
+      expect(controller).to receive(:apply_new_permissions).ordered.and_call_original
+      expect(ShowcaseProvisioner).to receive(:call).ordered
+
+      post :create, params: { community_id: community.id, mass: 'public', community: { title: 'Ordered', description: 'D' } }
+    ensure
+      AtlasRb::Resource.tombstone(created_id) if response&.location
+    end
+
+    it 'lets an administrator create it private' do
+      sign_in admin_user
+      post :create, params: { community_id: community.id, mass: 'private',
+                              community: { title: 'PrivateCommunity', description: 'D' } }
+
+      expect(read_acl(created_id)).not_to include('public')
+    ensure
+      AtlasRb::Resource.tombstone(created_id) if response&.location
+    end
+
+    it "refuses a non-admin's narrowing and keeps the inherited access" do
+      sign_in editor
+      post :create, params: { community_id: community.id, mass: 'private',
+                              community: { title: 'NarrowedCommunity', description: 'D' } }
+
+      expect(flash[:alert]).to eq(ResourcePermissions::MINTED_COMMUNITY_NARROWING_REFUSED)
+      expect(read_acl(created_id)).to include('public')
+    ensure
+      AtlasRb::Resource.tombstone(created_id) if response&.location
     end
   end
 end

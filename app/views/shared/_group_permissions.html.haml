@@ -19,7 +19,7 @@
 -# "new"), so a selection made but not "+"-ed is not lost; blank entries are
 -# skipped server-side (form_group_permissions ignores rows without a group_id).
 -#
--# A grant the acting user may not withdraw (Permissions::GrantRow#revocable?)
+-# A grant the acting user may not revoke (Permissions::GrantRow#revocable?)
 -# renders as a locked, read-only row instead. Unlike the repository staff group
 -# — which is filtered out of the list entirely — a grant naming someone else's
 -# group is information the depositor needs, since it says who can reach their

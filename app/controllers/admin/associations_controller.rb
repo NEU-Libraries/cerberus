@@ -27,8 +27,8 @@ module Admin
       'target_not_found'    => 'No Work with that PID — nothing was linked.',
       'invalid_target_type' => 'An association joins two Works. That PID names something else.',
       'self_association'    => 'A Work cannot be associated with itself.',
-      'tombstoned_work'     => 'That Work is withdrawn. Restore it before you associate it.',
-      'tombstoned_target'   => 'This Work is withdrawn. Restore it before you associate it.'
+      'tombstoned_work'     => 'That Work is retracted. Restore it before you associate it.',
+      'tombstoned_target'   => 'This Work is retracted. Restore it before you associate it.'
     }.freeze
 
     GENERIC_REFUSAL = 'Atlas refused the change — nothing was written.'
@@ -86,10 +86,14 @@ module Admin
       # and fall back to the bare noid when a title is missing.
       def rows_for(edges)
         edges = {} unless edges.is_a?(Hash)
-        by_noid = titles_for(edges.values.flatten.map(&:to_s).uniq)
+        all_noids = edges.values.flatten.map(&:to_s).uniq
+        by_noid = titles_for(all_noids)
+        abstracts = WorkAbstracts.call(scope: self, noids: all_noids)
         AtlasRb::Work::ASSOCIATION_TYPES.filter_map do |type|
           noids = Array(edges[type]).map(&:to_s)
-          [type, noids.map { |noid| OpenStruct.new(noid: noid, title: by_noid[noid]) }] if noids.any?
+          next if noids.empty?
+
+          [type, noids.map { |noid| OpenStruct.new(noid: noid, title: by_noid[noid], abstract: abstracts[noid]) }]
         end.to_h
       end
 

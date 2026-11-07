@@ -12,7 +12,7 @@ module WorkCaptions
     helper_method :caption_steward?
   end
 
-  # Withdraws the caption's FileSet, which takes it out of the player and the
+  # Tombstones the caption's FileSet, which takes it out of the player and the
   # downloads while Atlas keeps it, every revision included, for Restore. The
   # id is checked against the Work's own captions, so this cannot be pointed at
   # any other file.
@@ -54,10 +54,10 @@ module WorkCaptions
 
     # Atlas refuses the listing below the delegate tier, so only a steward asks.
     def removed_captions
-      CaptionTrack.all(AtlasRb::Work.withdrawn_assets(params[:id], nuid: current_user.nuid))
+      CaptionTrack.all(AtlasRb::Work.tombstoned_assets(params[:id], nuid: current_user.nuid))
     end
 
-    # The tiers Atlas allows to withdraw and restore a FileSet. The edit gate
+    # The tiers Atlas allows to tombstone and restore a FileSet. The edit gate
     # alone would let an editor reach a call Atlas then refuses.
     def caption_steward?(user = current_user)
       user.present? && (user.admin? || user.admin_delegate?)

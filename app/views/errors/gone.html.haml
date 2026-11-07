@@ -1,7 +1,8 @@
 - content_for(:head) { tag.meta(name: "turbo-cache-control", content: "no-cache") }
 - record     = local_assigns.fetch(:record, nil)
 - title      = record.try(:title) || params[:id]
-- headline   = TombstoneReasons.sentence(title, record.try(:tombstone_reason), record.try(:tombstoned_at))
+- purged     = record.try(:purged)
+- headline   = TombstoneReasons.headline(record, title)
 - url        = record.try(:identifier) || record.try(:permanent_url)
 - staff_link = link_to "contact the DRS staff", "mailto:Library-Repository-Team@neu.edu"
 .error-page.error-page--gone
@@ -11,7 +12,11 @@
       %span.error-page__status-label Removed
   .error-page__body
     %h1.error-page__title= headline
-    - if url.present?
+    - if purged
+      %dl.error-page__details
+        %dt Identifier
+        %dd= record.id
+    - elsif url.present?
       %dl.error-page__details
         %dt Title
         %dd= title

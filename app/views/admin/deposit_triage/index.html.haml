@@ -26,7 +26,7 @@
   .p-3
     %p.text-muted.small.mb-0
       - if unconfirmed
-        The depositor submitted these files for deposit but has not yet confirmed the upload metadata. The depositor and DRS staff can see these files, but other users cannot access them and they are hidden from search. Depositors can manage these files from the “Deposits to finish” section of their My DRS page.
+        The depositor submitted these files for deposit but has not yet confirmed the upload metadata. The depositor and DRS staff can see these files, in search and elsewhere; other users cannot find or open them. Depositors can manage these files from the “Deposits to finish” section of their My DRS page.
       - else
         These files are published and readable, but a background job ended before completing them. Each file must be replaced or resubmitted to complete it.
 
@@ -80,6 +80,6 @@
           Nothing is missing a part
       %p.mb-0.small.text-muted
         - if unconfirmed
-          A deposit whose metadata page is never saved appears here, so it can be finished or withdrawn.
+          A deposit whose metadata page is never saved appears here, so it can be finished or deleted.
         - else
           A work whose rendition, thumbnail or text extraction fails appears here, so it can be rebuilt.

@@ -67,5 +67,27 @@ RSpec.describe Metadata::MODSFields do
       expect(parsed[:keywords]).to eq(['free text'])
       expect(parsed[:curated_subjects]).to be false
     end
+
+    it 'is true when the only subject is a name, which the box never shows' do
+      name_only = <<~XML
+        <mods:mods xmlns:mods="http://www.loc.gov/mods/v3">
+          <mods:titleInfo><mods:title>Name only</mods:title></mods:titleInfo>
+          <mods:subject><mods:name type="personal"><mods:namePart>Smith, Jane</mods:namePart></mods:name></mods:subject>
+        </mods:mods>
+      XML
+      parsed = described_class.call(xml: name_only)
+      expect(parsed[:keywords]).to eq([])
+      expect(parsed[:curated_subjects]).to be true
+    end
+
+    it 'is false when the only other subject is a geographic code, which is not a heading' do
+      code_only = <<~XML
+        <mods:mods xmlns:mods="http://www.loc.gov/mods/v3">
+          <mods:titleInfo><mods:title>Code only</mods:title></mods:titleInfo>
+          <mods:subject><mods:geographicCode authority="marcgac">n-us-ma</mods:geographicCode></mods:subject>
+        </mods:mods>
+      XML
+      expect(described_class.call(xml: code_only)[:curated_subjects]).to be false
+    end
   end
 end

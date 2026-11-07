@@ -7,6 +7,9 @@ require 'csv'
 # Folder is the caller's choice; nil puts the entry at the archive root.
 # See docs/downloads.md.
 module ZipEntryWriter
+  # Raised inside the entry's block, so zip_kit rolls the empty entry back.
+  class RefusedStream < StandardError; end
+
   private
 
     # Chunk-by-chunk from Atlas: never read a Blob into memory. STORE, not
@@ -15,11 +18,20 @@ module ZipEntryWriter
     def write_asset(zip, folder, asset, manifest, errors)
       name = entry_filename(asset)
       zip.write_stored_file([folder, name].compact.join('/')) do |sink|
-        AtlasRb::Blob.content(asset.noid) { |chunk| sink << chunk }
+        result = AtlasRb::Blob.content(asset.noid) { |chunk| sink << chunk }
+        status = result[:status] if result.is_a?(Hash)
+        raise RefusedStream, "Atlas answered #{status}" if status && !(200..299).cover?(status)
       end
       manifest << { identifier: folder, filename: name }
-    rescue Faraday::Error, JSON::ParserError => e
+    rescue AtlasRb::TombstonedError
+      errors << withheld_as_removed(folder || asset.noid)
+    rescue RefusedStream, Faraday::Error, JSON::ParserError => e
       errors << "#{folder}: #{asset.noid} failed — #{e.class}: #{e.message}"
+    end
+
+    # Worded like an embargo, because it is withheld access, not a failure.
+    def withheld_as_removed(noid)
+      "#{noid}: withheld — removed from view"
     end
 
     # A delegate is pointer-only, so its bytes come over HTTP from the gated

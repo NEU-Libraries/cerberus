@@ -60,7 +60,7 @@ describe Transformable do
       expect(result.map(&:ability_label)).to contain_exactly('View', 'Manage')
     end
 
-    # Rule mirrored from Atlas: a grant may only be withdrawn by a member of the
+    # Rule mirrored from Atlas: a grant may only be revoked by a member of the
     # group it names, so a grant for someone else's group renders locked.
     it 'marks a grant for a group the user is not in as non-revocable' do
       host.current_user = user_double(groups: ['librarians'])

@@ -46,7 +46,7 @@ module AtlasResourceType
     end
 
     # Where to land once the resource is gone. Read it BEFORE a tombstone: the
-    # withdrawn resource's own read is gated. A failed read or a top-level
+    # tombstoned resource's own read is gated. A failed read or a top-level
     # resource falls back to the homepage rather than blocking the caller.
     def parent_path(id)
       parent = Array(atlas_class.find(id)&.ancestors).last

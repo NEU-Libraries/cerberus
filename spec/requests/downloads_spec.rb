@@ -233,4 +233,52 @@ RSpec.describe 'Blob downloads', type: :request do
 
     expect(response).to have_http_status(:ok)
   end
+
+  # Atlas withholds the bytes beneath a tombstone and atlas_rb raises before any
+  # chunk, so the page renders in place of the file. See docs/downloads.md.
+  context 'when Atlas withholds the file under a tombstone' do
+    def tombstoned(type, id)
+      AtlasRb::TombstonedError.new({ 'error' => 'tombstoned', 'tombstoned_resource_type' => type,
+                                     'tombstoned_resource_id' => id })
+    end
+
+    before do
+      allow(AtlasRb::Blob).to receive(:find)
+        .and_return(AtlasRb::Mash.new(mime_type: 'text/vtt', filename: 'captions.vtt'))
+    end
+
+    it 'answers a removed file as not found, with no file headers' do
+      # A removed FileSet leaves the Work's assets, so the per-blob gate fails open.
+      allow(AtlasRb::Work).to receive(:assets).and_return([])
+      allow(AtlasRb::Blob).to receive(:content).and_raise(tombstoned('FileSet', 'fs-1'))
+
+      get download_path(blob_id)
+
+      expect(response).to have_http_status(:not_found)
+      expect(response.headers['Content-Disposition']).to be_nil
+    end
+
+    it "answers a retracted work's file with the Removed page, before asking for bytes" do
+      allow(AtlasRb::Work).to receive(:assets).and_raise(tombstoned('Work', work_id))
+      allow(AtlasRb::Work).to receive(:find).with(work_id)
+                                            .and_return(AtlasRb::Mash.new(title: 'Sample Audio Recording'))
+      allow(AtlasRb::Blob).to receive(:content)
+
+      get download_path(blob_id)
+
+      expect(response).to have_http_status(:gone)
+      expect(response.body).to include('Sample Audio Recording')
+      expect(AtlasRb::Blob).not_to have_received(:content)
+    end
+
+    it 'answers any other refused stream with its page, not an empty file' do
+      stub_asset(gated: false, permission: ['public'], nuid: nil)
+      allow(AtlasRb::Blob).to receive(:content).and_return({ status: 403, headers: {} })
+
+      get download_path(blob_id)
+
+      expect(response).to have_http_status(:forbidden)
+      expect(response.headers['Content-Disposition']).to be_nil
+    end
+  end
 end

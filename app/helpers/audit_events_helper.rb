@@ -10,7 +10,7 @@ module AuditEventsHelper
   ACTION_DESCRIPTORS = {
     'create'          => { tone: 'create',    icon: 'fa-circle-plus',  label: 'Created' },
     'update'          => { tone: 'update',    icon: 'fa-pen',          label: 'Updated' },
-    'tombstone'       => { tone: 'tombstone', icon: 'fa-trash-can',    label: 'Tombstoned' },
+    'tombstone'       => { tone: 'tombstone', icon: 'fa-trash-can',    label: 'Retracted' },
     'restore'         => { tone: 'restore',   icon: 'fa-rotate-left',  label: 'Restored' },
     'reparent'        => { tone: 'reparent',  icon: 'fa-sitemap',      label: 'Reparented' },
     'link_member'     => { tone: 'link',      icon: 'fa-link',         label: 'Linked' },
@@ -71,14 +71,20 @@ module AuditEventsHelper
   # Prose for the download tiers. The vocabulary and its narrowing order come
   # from Sentinel::TIERS; naming the ladder twice would let the two drift.
   TIER_LABELS = {
-    'small'    => 'Small image',
-    'medium'   => 'Medium image',
-    'large'    => 'Large image',
-    'service'  => 'Service (deep zoom)',
-    'original' => 'Original',
-    'audio'    => 'Audio',
-    'video'    => 'Video',
-    'pdf'      => 'PDF'
+    'small'           => 'Small image',
+    'medium'          => 'Medium image',
+    'large'           => 'Large image',
+    'service'         => 'Service (deep zoom)',
+    'original'        => 'Original',
+    'audio'           => 'Audio',
+    'video'           => 'Video',
+    'pdf'             => 'PDF',
+    'archive'         => 'Archives',
+    'spreadsheet'     => 'Spreadsheets',
+    'structured_text' => 'Data files',
+    'presentation'    => 'Presentations',
+    'text'            => 'Documents',
+    'generic'         => 'Other files'
   }.freeze
 
   def audit_event_action(event_action)
@@ -318,7 +324,7 @@ module AuditEventsHelper
       permissions_diff_summary(payload)
     end
 
-    # Atlas records a Darwin Core withdrawal as a metadata tombstone. Without
+    # Atlas records a Darwin Core removal as a metadata tombstone. Without
     # naming the record, the row reads as the Work itself being tombstoned.
     def tombstone_payload_summary(payload)
       return record_summary(DARWIN_CORE_LABEL, payload) if payload['source'] == DarwinCoreRecord::FORMAT

@@ -1,0 +1,9 @@
+<%= content_tag :div, id: @id, class: @classes.join(' ') do %>
+  <%= render Cerberus::ResultsDropdownButtonComponent.new(label: button_label, popper: POPPER) %>
+
+  <div class="dropdown-menu">
+    <% options.each do |option| %>
+      <%= option %>
+    <% end %>
+  </div>
+<% end %>

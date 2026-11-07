@@ -55,6 +55,25 @@ RSpec.describe 'Set downloads', type: :request do
     expect(response).to have_http_status(:forbidden)
   end
 
+  it "offers a private set's group viewer the Download it serves them" do
+    set = make_set('Group-Viewed Set')
+    add_work(set, work)
+    AtlasRb::Compilation.update(set['id'],
+                                permissions: { read: ['northeastern:drs:repository:staff'], edit: [], edit_users: [] },
+                                nuid:        nuid)
+    sign_out_all
+    sign_in User.new(email: 'viewer@example.com', password: 'password', nuid: '000000006',
+                     name: 'Williams, Susan', role: 'standard', groups: ['northeastern:drs:repository:staff'])
+
+    get set_path(set['id'])
+    expect(response.parsed_body.at_css(%(a[href="#{download_set_path(set['id'])}"]))).to be_present
+    expect(response.body).not_to include(edit_set_path(set['id']))
+
+    get download_set_path(set['id'])
+    expect(response).to have_http_status(:ok)
+    expect(response.headers['Content-Type']).to include('application/zip')
+  end
+
   it '404s an unknown set id' do
     get download_set_path('zzzzzzz')
     expect(response).to have_http_status(:not_found)

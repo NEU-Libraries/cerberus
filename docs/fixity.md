@@ -148,8 +148,8 @@ facets or display fields.
 devolved-admin tier only what its groups can see. A short list would then read
 as a healthy repository.
 
-**Withdrawn Works are not listed.** The report keeps the catalog's tombstone
-exclusion. A withdrawn Work's bytes are still checked, and its Health tab still
+**Tombstoned Works are not listed.** The report keeps the catalog's tombstone
+exclusion. A tombstoned Work's bytes are still checked, and its Health tab still
 shows the result.
 
 The suite cannot seed a recorded check, because only the checker principal may

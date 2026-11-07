@@ -6,16 +6,22 @@ module SentinelsHelper
   # Display metadata per tier. The image rungs run widest audience (small) to
   # narrowest (original, the full-res source), with qualitative resolution notes —
   # the actual pixel sizes are per-Work, so a collection-level default names the
-  # rung, not a number. The independent media (audio/video/pdf) name the file.
+  # rung, not a number. The independent tiers name the file type.
   DERIVATIVE_TIER_META = {
-    'small'    => { label: 'Small',    note: 'Lowest-resolution download' },
-    'medium'   => { label: 'Medium',   note: 'Mid-resolution download' },
-    'large'    => { label: 'Large',    note: 'Highest-resolution download' },
-    'service'  => { label: 'Service',  note: 'Full-resolution deep-zoom' },
-    'original' => { label: 'Original', note: 'Full-resolution source file' },
-    'audio'    => { label: 'Audio',    note: 'Downloadable audio file' },
-    'video'    => { label: 'Video',    note: 'Downloadable video file' },
-    'pdf'      => { label: 'PDF',      note: 'Downloadable PDF file' }
+    'small'           => { label: 'Small',         note: 'Lowest-resolution download' },
+    'medium'          => { label: 'Medium',        note: 'Mid-resolution download' },
+    'large'           => { label: 'Large',         note: 'Highest-resolution download' },
+    'service'         => { label: 'Service',       note: 'Full-resolution deep-zoom' },
+    'original'        => { label: 'Original',      note: 'Full-resolution source file' },
+    'audio'           => { label: 'Audio',         note: 'Downloadable audio file' },
+    'video'           => { label: 'Video',         note: 'Downloadable video file' },
+    'pdf'             => { label: 'PDF',           note: 'Downloadable PDF file' },
+    'archive'         => { label: 'Archives',      note: 'Zip and tar files' },
+    'spreadsheet'     => { label: 'Spreadsheets',  note: 'Excel files' },
+    'structured_text' => { label: 'Data files',    note: 'CSV, TSV, XML and JSON' },
+    'presentation'    => { label: 'Presentations', note: 'PowerPoint files' },
+    'text'            => { label: 'Documents',     note: 'Word, EPUB and plain text' },
+    'generic'         => { label: 'Other files',   note: 'Any file type not listed above' }
   }.freeze
 
   def derivative_tier_meta(tier)

@@ -207,5 +207,16 @@ RSpec.describe 'My DRS', type: :request do
       expect(response.body).not_to include('Switch to this account', 'Set as default')
       expect(page).to have_no_css('.my-drs-card--api')
     end
+
+    # Atlas refuses the accounts read to a delegated admin's credentials.
+    it 'still renders, without the accounts card, when Atlas refuses the accounts read' do
+      allow(AtlasRb::User).to receive(:accounts)
+        .and_raise(AtlasRb::ResourceError.new('GET /users/by_nuid/x/accounts → 403', response: nil))
+
+      get '/my_drs'
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).not_to include('Your accounts')
+    end
   end
 end

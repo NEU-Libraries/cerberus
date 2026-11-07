@@ -1,4 +1,6 @@
 -# locals: resource (String) — 'work' / 'collection' / 'community', for the copy.
+-#         creating (Boolean, optional) — a create form, which has no request
+-#         form below it yet.
 -#
 -# The Public/Private control, shared by the Work / Collection / Community edit
 -# forms and the deposit metadata step.
@@ -49,7 +51,10 @@
       administrators handle that change.
     - else
       Restricting this collection would restrict other people's material, so DRS administrators handle it.
-    = "Use “Ask to restrict this #{resource}” below."
+    - if local_assigns[:creating]
+      = "Once it exists, use “Ask to restrict this #{resource}” on its Edit page."
+    - else
+      = "Use “Ask to restrict this #{resource}” below."
 - else
   - parent_kind = (@visibility_parent['klass'].presence || 'parent').downcase
   = hidden_field_tag 'mass', 'private'

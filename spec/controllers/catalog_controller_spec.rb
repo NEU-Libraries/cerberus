@@ -16,6 +16,11 @@ describe CatalogController do
 
   describe 'index' do
     render_views
+
+    # An anonymous match-all listing is refused (AnonymousMatchAll). A
+    # signed-in user with no groups sees exactly the public records an
+    # anonymous visitor would, so these still test the public index.
+    before { sign_in User.new(email: 'viewer@example.com', nuid: '000000005', role: 'standard', groups: []) }
     it 'renders the index partial' do
       AtlasRb::Resource.set_permissions(community.id, { 'read' => ['public'] }, nuid: '000000004')
       expect(community.title).to eq('Northeastern University')
@@ -113,6 +118,23 @@ describe CatalogController do
 
       expect(html).to include('thumbnail-fallback')
       expect(html).not_to include('av-placeholder')
+    end
+
+    # Atlas indexes has_downloads_bsi on the Work's doc, so the row decides
+    # without asking Atlas for the Work's files. See docs/downloads.md.
+    it 'offers no Downloads button on a Work with no files, and asks Atlas for none' do
+      publicize_ancestry!(community: community)
+      collection = AtlasRb::Collection.create(community.id, fixture_mods('collection'), nuid: '000000004')
+      AtlasRb::Resource.set_permissions(collection.id, { 'read' => ['public'] }, nuid: '000000004')
+      work = public_work(collection.id, 'work')
+      allow(AtlasRb::Work).to receive(:assets).and_call_original
+
+      get :index, params: { q: "What's New" }
+
+      row = response.parsed_body.css('.document').find { |doc| doc.to_html.include?(work.id) }
+      expect(row).to be_present
+      expect(row.at_css('[data-bs-target="#downloadsModal"]')).to be_nil
+      expect(AtlasRb::Work).not_to have_received(:assets)
     end
   end
 

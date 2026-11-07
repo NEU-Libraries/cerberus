@@ -65,7 +65,7 @@ on the file and writes nothing if it finds an error. Otherwise it calls
 upload". A `PUT` replaces the whole record, so uploading the same file twice is
 safe.
 
-`DELETE /works/:id/dwc` withdraws the record. Atlas does not purge it: the
+`DELETE /works/:id/dwc` removes the record. Atlas does not purge it: the
 record's history stays, and the next upload restores it.
 
 **Atlas repeats the shape checks and answers 422.** A file that passed

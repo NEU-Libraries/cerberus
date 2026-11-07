@@ -165,9 +165,9 @@ earlier version to diff against, so the link is update-only.
 
 A Darwin Core write is a `metadata` update too, and only `payload.source`
 tells it apart, so `metadata_history_path` branches on it. Without the branch,
-the row's View opened the MODS diff. Atlas records a Darwin Core withdrawal as
+the row's View opened the MODS diff. Atlas records a Darwin Core removal as
 a `metadata` **tombstone**, which has no diff, and its summary names the record
-so that the row does not read as the Work itself being withdrawn.
+so that the row does not read as the Work itself being tombstoned.
 
 Both links pass the event's `occurred_at` as `at:`, and each page uses it to
 find the event:
@@ -259,7 +259,7 @@ ACL envelope.
 
 `derivative_tier_rows` lists only the tiers that either side of the diff
 mentions, in `Sentinel::TIERS` narrowing order. The stored policy is sparse —
-only gated tiers appear — so listing all eight would bury the change under empty
+only gated tiers appear — so listing all fourteen would bury the change under empty
 rows. A tier `Sentinel::TIERS` does not know sorts last rather than vanishing,
 so a tier Atlas adds before Cerberus does still shows.
 
@@ -335,7 +335,7 @@ and for the show page's Edit and Delete links (`assign_show_abilities!`).
 names it.
 
 The private `parent_path(id)` says where to land once the resource is gone.
-Read it *before* a tombstone, because the withdrawn resource's own read is
+Read it *before* a tombstone, because the tombstoned resource's own read is
 gated. A failed read or a top-level resource falls back to the home page.
 
 ### Why all three arguments are stated
@@ -463,6 +463,12 @@ Two surfaces read those edges, and they resolve titles differently on purpose.
 Atlas gates a delegated admin's reads by group, so on the admin panel
 `find_many` can drop a Work that admin cannot read. `titles_for` then shows the
 bare NOID, and the edge stays removable.
+
+Each admin row also shows the first 160 characters of the Work's abstract, as
+the public box does, with the PID in a chip beside the title. `find_many`'s
+digest carries no abstract, so `WorkAbstracts` reads it from Solr in one gated
+query for the whole page. That query only adds text. A Work it does not return
+keeps its row, with the title and the chip and no abstract.
 
 ### The public box
 

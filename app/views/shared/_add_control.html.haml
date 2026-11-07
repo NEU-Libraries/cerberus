@@ -1,0 +1,19 @@
+-# The Add control under a collection's or community's results: the breadcrumb
+-# Add's gate and choices, opening to the left, as the breadcrumb's opens to the
+-# right. `centered` puts it under an empty container's message. See
+-# docs/design.md.
+- return unless user_signed_in? && @can_edit
+
+-# Where the left has no room, the menu drops below rather than covering the
+-# page. This config replaces Bootstrap's modifiers wholesale, so the offset
+-# (the arrow's gap) has to live here too.
+- popper = { modifiers: [{ name: 'preventOverflow', options: { boundary: 'clippingParents', padding: 16 } },
+                        { name: 'offset', options: { offset: [0, 16] } },
+                        { name: 'flip', options: { fallbackPlacements: ['bottom-end'] } }] }
+.add-control{class: local_assigns[:centered] ? 'add-control--centered' : 'add-control--end'}
+  .dropstart
+    %button#add-control-toggle.btn.results-control{type: 'button', 'aria-expanded' => 'false', data: { bs_toggle: 'dropdown', bs_popper_config: popper.to_json }}
+      %i.fa-regular.fa-square-plus.me-1{'aria-hidden' => 'true'}
+      Add
+    %ul.dropdown-menu{'aria-labelledby' => 'add-control-toggle'}
+      = render 'shared/add_menu_items'

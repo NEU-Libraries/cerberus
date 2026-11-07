@@ -14,7 +14,7 @@ class TombstoneBulkJob < ApplicationJob
 
   FAILURE_TEXT = {
     has_children:      'still holds members',
-    tombstoned_parent: 'its parent is still tombstoned; restore the parent first'
+    tombstoned_parent: 'its parent is still retracted; restore the parent first'
   }.freeze
 
   Item = Struct.new(:noid, :uuid, :parent_uuid, :klass, :title, keyword_init: true)
@@ -103,7 +103,7 @@ class TombstoneBulkJob < ApplicationJob
       verb = action == 'delete' ? 'permanently deleted' : 'restored'
       lines = ["#{verb.capitalize}:", *done.map { |item| "#{item['type']} #{item['noid']} — #{item['title']}" }]
       lines += ['', "These could not be #{verb}:", *failures] if failures.any?
-      lines += ['', 'No longer tombstoned when the run started, so left alone:', *skipped] if skipped.any?
+      lines += ['', 'No longer retracted when the run started, so left alone:', *skipped] if skipped.any?
       lines.join("\n")
     end
 end

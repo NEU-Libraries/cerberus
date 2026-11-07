@@ -40,7 +40,9 @@ RSpec.describe 'Environment smoke', :smoke, type: :request do
   end
 
   it 'renders the catalog, which reaches Solr through Blacklight' do
-    get search_catalog_path(q: '', search_field: 'all_fields')
+    # A keyword, because an anonymous match-all search is refused; any query
+    # proves the round trip to Solr.
+    get search_catalog_path(q: 'repository', search_field: 'all_fields')
 
     expect(response).to have_http_status(:ok)
   end

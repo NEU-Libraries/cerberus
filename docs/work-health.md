@@ -149,7 +149,7 @@ it. `REINDEX_CODES` lists the codes that the Reindex action repairs.
 | `mods_access_copy_missing`, `descriptive_file_set_missing`, `mods_xml_missing` | the XML editor. A Save writes the MODS and recreates a missing descriptive FileSet |
 | `orphaned`, `parent_missing`, `wrong_parent_type` | the Move tab |
 | `staff_edit_missing`, `no_depositor` | the Permissions tab |
-| `live_under_withdrawn` | the Delete tab |
+| `live_under_retracted` | the Delete tab |
 | `not_indexed` | Reindex, posting to `Admin::ReindexController#work` |
 
 The other codes, such as `binary_missing`, `blob_unlinked` and the envelope and

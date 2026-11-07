@@ -1,8 +1,11 @@
 %nav{"aria-label" => "breadcrumb"}
   %ol.breadcrumb.align-items-center
     - breadcrumb_trail do |crumb|
-      %li.breadcrumb-item{class: crumb.current? ? "active" : "" }
-        = link_to_unless crumb.current?, enhanced_text(crumb.name), crumb.url, (crumb.current? ? {"aria-current" => "page"} : {})
+      -# aria-current sits on the item, as in Bootstrap's own markup: the
+      -# current crumb renders as bare text, and link_to_unless drops the
+      -# options it would otherwise carry.
+      %li.breadcrumb-item{class: crumb.current? ? "active" : "", 'aria-current': ('page' if crumb.current?)}
+        = link_to_unless crumb.current?, enhanced_text(crumb.name), crumb.url
     -# The "Add a child here" affordance, gated on @can_edit (set by the show
     -# page) for every branch — you may only add a child to a container you can
     -# edit. Atlas enforces the same rule on the write (:create_child, resolved
@@ -22,19 +25,6 @@
             %i.fa-regular.fa-square-plus{'aria-hidden' => 'true'}
             %span.ms-1 Add
           %ul.dropdown-menu{"aria-labelledby" => "breadcrumb-add-toggle"}
-            - if controller_name == "communities"
-              %li
-                %a.dropdown-item{:href => new_community_collection_path(params[:id])} New Collection
-              %li
-                %a.dropdown-item{:href => new_community_community_path(params[:id])} New Community
-            - elsif controller_name == "collections" || local_assigns[:add_to_collection]
-              - collection_id = local_assigns[:add_to_collection] || params[:id]
-              %li
-                %a.dropdown-item{:href => new_collection_collection_path(collection_id)} New Collection
-              %li
-                %a.dropdown-item{:href => new_collection_work_path(collection_id)} New Work
-            - else
-              %li
-                %a.dropdown-item{:href => upload_work_path(params[:id])} Upload File
+            = render 'shared/add_menu_items', add_to_collection: local_assigns[:add_to_collection]
     - if block_given?
       = yield

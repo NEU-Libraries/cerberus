@@ -42,8 +42,7 @@ module SetSharing
       redirect_to set_path(@set['id']), notice: 'Sharing updated.'
     rescue AtlasRb::CompilationError => e
       flash.now[:alert] = e.message
-      prepare_sharing_form
-      prepare_set_definition
+      prepare_edit_page
       render :edit, status: :unprocessable_content
     end
 

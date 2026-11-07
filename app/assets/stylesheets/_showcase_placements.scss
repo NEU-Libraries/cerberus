@@ -1,0 +1,10 @@
+// The Work edit page's list of the communities a Work is showcased in, one row
+// per community. The same record-list shape as the caption files beside it.
+.showcase-placements {
+  @extend .caption-tracks;
+
+  &__row { @extend .caption-tracks__row; }
+  &__label { @extend .caption-tracks__label; }
+  &__meta { @extend .caption-tracks__meta; }
+  &__actions { @extend .caption-tracks__actions; }
+}

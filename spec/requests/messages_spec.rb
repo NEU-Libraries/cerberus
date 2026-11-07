@@ -140,6 +140,57 @@ RSpec.describe 'Messages', type: :request do
     end
   end
 
+  describe 'PATCH /inbox/mark_read' do
+    before { sign_in staff_user }
+
+    let!(:direct) { Message.create!(subject: 'Direct hello', recipient_nuid: staff_user.nuid) }
+    let!(:group_message) do
+      Message.create!(subject: 'Staff notice', recipient_group: 'northeastern:drs:repository:staff')
+    end
+    let!(:someone_elses) { Message.create!(subject: 'Not yours', recipient_nuid: '000000099') }
+
+    def read_ids = MessageReceipt.read.where(nuid: staff_user.nuid).pluck(:message_id)
+
+    it 'offers Mark all as read and a checkbox per row while something is unread' do
+      get '/inbox'
+
+      page = response.parsed_body
+      expect(page.at_css("form[action='#{mark_read_messages_path}'] input[name='all']")).to be_present
+      expect(page.css("input[name='ids[]'][form='inbox-bulk']").pluck('value'))
+        .to contain_exactly(direct.id.to_s, group_message.id.to_s)
+      expect(page.at_css('form#inbox-bulk[hidden]')).to be_present
+    end
+
+    it 'marks only the checked messages read' do
+      patch mark_read_messages_path, params: { ids: [group_message.id] }
+
+      expect(read_ids).to eq([group_message.id])
+      expect(response).to redirect_to(messages_path)
+      expect(flash[:notice]).to eq('Marked 1 message as read.')
+    end
+
+    it 'marks every message in the inbox read with all, and no one else\'s' do
+      patch mark_read_messages_path, params: { all: 1 }
+
+      expect(read_ids).to contain_exactly(direct.id, group_message.id)
+      expect(MessageReceipt.where(message: someone_elses)).to be_empty
+    end
+
+    it 'ignores an id that is not in the inbox' do
+      patch mark_read_messages_path, params: { ids: [someone_elses.id] }
+
+      expect(MessageReceipt.count).to eq(0)
+      expect(flash[:notice]).to eq('Nothing was unread.')
+    end
+
+    it 'hides Mark all as read once nothing is unread' do
+      patch mark_read_messages_path, params: { all: 1 }
+      get '/inbox'
+
+      expect(response.parsed_body.at_css("input[name='all']")).to be_nil
+    end
+  end
+
   describe 'DELETE /inbox/:id' do
     before { sign_in staff_user }
 
@@ -223,6 +274,14 @@ RSpec.describe 'Messages', type: :request do
 
     it 'refuses a dismissal' do
       expect { delete "/inbox/#{targets.id}" }.not_to change(MessageReceipt, :count)
+      expect(response).to redirect_to(messages_path)
+    end
+
+    it 'offers no mark-read controls, and refuses one' do
+      get '/inbox'
+      expect(response.parsed_body.at_css("input[name='ids[]'], input[name='all'], form#inbox-bulk")).to be_nil
+
+      expect { patch mark_read_messages_path, params: { all: 1 } }.not_to change(MessageReceipt, :count)
       expect(response).to redirect_to(messages_path)
     end
   end

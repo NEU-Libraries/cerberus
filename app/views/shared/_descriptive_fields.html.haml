@@ -38,8 +38,8 @@
   -# server strips/dedupes. At least one keyword is required (descriptive_valid?).
   -#
   -# ...unless the record already carries curated subjects, which this box never
-  -# shows: MODSFields skips authority-bearing ones and MODSMerge never overwrites
-  -# them. The requirement really means "has a subject", so a curated record already
+  -# shows: MODSFields skips every subject but attribute-free topics, and
+  -# MODSMerge never overwrites them. The requirement really means "has a subject", so a curated record already
   -# satisfies it. The flag relaxes the client-side check here; the server reads
   -# the stored record itself, or a curator editing only a title is forced to
   -# invent a keyword the record does not need.
@@ -49,7 +49,7 @@
     - if curated
       .form-text.text-muted.mt-0.mb-2
         %i.fa-solid.fa-circle-info{'aria-hidden' => 'true'}
-        This record also carries curated subjects from a controlled vocabulary. They appear on the record but cannot be edited here, so this box may be empty while the record still has subjects. Change them in the XML editor.
+        This record also carries subjects that cannot be edited here, such as controlled-vocabulary terms, names or places. They appear on the record, so this box may be empty while the record still has subjects. Change them in the XML editor.
     - Array(descriptive[:keywords]).each do |kw|
       .input-group.mb-2{ data: { 'keyword-list-target': 'row' } }
         %input.form-control{ type: 'text', name: "#{f.object_name}[keywords][]", value: kw, 'aria-label': 'Keyword', data: { action: 'input->keyword-list#syncRequired' } }

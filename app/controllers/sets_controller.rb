@@ -17,15 +17,18 @@ class SetsController < CatalogController
   include SetPendingItem
   include SetSharing
   include SetBulkActions
+  include SetBreadcrumbs
+  include SetPageAdd
 
   # :facet is the show page's facet modal, so it is as public as the show page
   # itself — load_set below is what gates a private Set, for both.
   before_action :authenticate_user!, except: %i[show facet facet_suggest]
   before_action :require_curator,    except: %i[show facet facet_suggest]
-  before_action :load_set,           except: [:index, :new, :create, :picker, :recipients]
-  # The edit page is a form, so one the caller could never save is refused up
-  # front rather than left for Atlas to refuse on Save. Atlas stays the boundary.
-  before_action :require_set_editor, only: :edit
+  before_action :load_set,           except: [:index, :new, :create, :picker, :page_picker, :recipients]
+  # The edit page and the page-add confirmation are forms, so one the caller
+  # could never submit is refused up front rather than left for Atlas to refuse.
+  # Atlas stays the boundary.
+  before_action :require_set_editor, only: %i[edit confirm_page_works add_page_works]
   # Declared here rather than in SetBulkActions so it lands after the two gates
   # above: an anonymous request has to reach authenticate_user! and be sent to
   # sign in, not be told it is forbidden. The two actions it names live in that
@@ -57,6 +60,7 @@ class SetsController < CatalogController
   end
 
   def show
+    set_breadcrumbs if set_trail?
     @resolver = SetResolver.new(compilation: @set, search_service: search_service)
     @response = contents_response
     @recipe_titles = recipe_titles
@@ -95,12 +99,7 @@ class SetsController < CatalogController
   # (gated in the view + on the sharing write path); the Sentinel tab
   # is operator-only (SetBulkActions#require_bulk_operator, mirrored in the
   # view by #bulk_operator?).
-  def edit
-    edit_breadcrumbs
-    prepare_set_definition
-    prepare_sharing_form if @owned
-    @sentinel = Sentinel.find_by(target_id: params[:id]) if bulk_operator?
-  end
+  def edit = prepare_edit_page
 
   def create
     @pending = pending_item
@@ -123,13 +122,15 @@ class SetsController < CatalogController
     redirect_to set_path(@set['id']), notice: 'Set updated.'
   rescue AtlasRb::CompilationError => e
     flash.now[:alert] = e.message
-    prepare_set_definition
+    prepare_edit_page
     render :edit, status: :unprocessable_content
   end
 
-  # Typeahead JSON for the edit_users picker on the Sharing tab
-  # (see UserDirectorySearchable).
+  # The Sharing tab's typeahead. It hides NUIDs, so it refuses a NUID query here:
+  # Atlas's NUID matching serves the other pickers, impersonation among them.
   def recipients
+    return render(json: []) if params[:q].to_s.strip.match?(/\A\d+\z/)
+
     render json: user_directory_results
   end
 
@@ -195,6 +196,14 @@ class SetsController < CatalogController
       params.expect(set: [:title, :description])
     end
 
+    # A rejected save re-renders the Edit page, so it needs all of this too.
+    def prepare_edit_page
+      edit_breadcrumbs
+      prepare_set_definition
+      prepare_sharing_form if @owned
+      @sentinel = Sentinel.find_by(target_id: params[:id]) if bulk_operator?
+    end
+
     # A Work already resolved into a set via an included collection should read
     # as included, not addable — so compute its covering container noids once
     # (empty for collection rows, which only need direct membership).
@@ -202,15 +211,6 @@ class SetsController < CatalogController
       return Set.new unless @kind == 'work'
 
       SetItemCoverage.call(noid: @noid, search_service: search_service)
-    end
-
-    # Edit-page trail, mirroring ApplicationController#edit_breadcrumb_tail: the
-    # Set links back to its show page (`match: :exact` so loaf doesn't mark it
-    # current on the `/edit` sub-path), then a non-link "Edit set" you-are-here.
-    # A Set has no Atlas ancestry, so there's no tree to walk — just the tail.
-    def edit_breadcrumbs
-      breadcrumb(@set['title'], set_path(@set['id']), match: :exact)
-      breadcrumb('Edit set', edit_set_path(@set['id']))
     end
 
     # The recipe fq layered onto a state-seeded builder — find_children's

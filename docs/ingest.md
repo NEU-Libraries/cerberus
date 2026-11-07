@@ -12,6 +12,8 @@ Source files:
 - `app/services/mods_record_validator.rb`
 - `app/services/xml_preview_file.rb`
 - `app/views/loads/_preview.html.haml`
+- `app/services/load_report_rows.rb`
+- `app/views/loads/_report.html.haml`
 - `app/javascript/preview_controllers/xml_viewer_controller.js`
 
 ## Routing a staged upload
@@ -26,7 +28,7 @@ too, to re-derive a Work's assets.
 |---|---|
 | `image/*` | `IiifAssetsJob` — IIIF TIFF and thumbnail Delegates |
 | `application/pdf` | `IiifAssetsJob` — `IiifImageCreator` rasterizes page 1 via vips and poppler |
-| Word, PowerPoint | `PdfRenditionJob` — LibreOffice writes a PDF rendition Blob, and thumbnails come from that rendition's first page |
+| Word, PowerPoint | `PdfRenditionJob` — LibreOffice writes a PDF rendition Blob on the first upload only, and thumbnails come from the converted PDF's first page. See `docs/downloads.md` |
 | `video/*`, `audio/*` | `MediaRenditionJob` — an MP4 remux when the container needs one. No poster frame: see `docs/derivatives.md` |
 | everything | `ContentCreationJob` — the primary Blob, unless `include_primary: false`. Enrichment never gates or blocks it |
 
@@ -165,6 +167,60 @@ self-guards on an existing thumbnail.
 `ContentCreationJob` is never enqueued here. It calls `Work.complete`, which is
 `CompleteWorkJob`'s responsibility, exactly once, after every page has landed.
 
+## Paging the load report
+
+A load's Processing page shows its rows 50 at a time
+(`LoadReportRows::PER_PAGE`). A load can run past a thousand rows, and the
+poller re-renders the whole report every few seconds while it runs. The status
+tiles above the table count the whole load, not the page.
+
+**IPTC and XML pages are 50 rows,** in the report's own order: failures, then
+warnings, then the rest by filename.
+
+**Multipage pages are whole Works.** A page takes Works in item order until the
+next Work would take it past 50 rows. A Work longer than 50 pages gets a page of
+its own. So a Work's pages never split across a page break, which is the reason
+the table groups multipage rows by item. A structural-failure row has no item,
+so it counts as a Work of its own and comes first. `LoadReportRows` counts each
+item's rows, packs the items, and gives Kaminari the packs as an array, one pack
+per page.
+
+Two details keep the page stable:
+
+- **The poll URL carries the page.** The poller reloads the URL that
+  `_report` hands it, so without the page a reload mid-load would send the reader
+  back to page 1.
+- **A page past the end shows the last page.** Otherwise a load that has rows
+  could render its "No images ingested" empty state.
+
+## Filtering the load report by status
+
+The status tiles above the table are toggle buttons. Pressing one shows only the
+rows with that status. Pressing it again, or pressing Total, shows every row. A
+tile with a count of 0 is disabled. Above a filtered table, a line says how many
+rows show, such as "Showing 3 of 60 rows: Failed", with a "Show all rows"
+button.
+
+The filter runs on the server, as `?status=` on the same query that pages the
+rows. A browser-side filter would see only the current page. So:
+
+- **The tiles are one GET form.** Each tile submits `status` with its own value.
+  The active tile and Total submit no `status`, which is what clears the filter,
+  and no tile submits `page`, so a new filter starts at page 1.
+- **The filter rides along everywhere the page does.** Kaminari's pager links
+  keep `status`, and so does the poll URL, so a reload mid-load keeps both.
+- **Only a real status counts.** `report_status_filter` checks the parameter
+  against `Ingest.statuses`, and anything else shows every row.
+- **Multipage filtering still pages by Work,** over the filtered rows.
+- **The tiles count the whole load,** whatever the filter.
+
+A filtered table can come up empty only while a load runs, when a status's last
+row moves on between the click and the render. The page then says so ("No rows
+are processing now") instead of showing the empty-load copy.
+
+A pressed tile takes a 10% tint of its tone and a tone label darkened with 20%
+black. A stronger tint puts the grey labels under 4.5:1.
+
 ## The XML preview
 
 An XML load stops on a preview of the first manifest row before anything is
@@ -242,17 +298,21 @@ fields below live in `MODSRecordValidator` instead.
 
 ### Required fields
 
-Every record needs a primary title, and every Work needs at least one keyword.
+Every record needs a primary title, and every Work needs at least one subject.
 `MODSRecordValidator` runs `XmlValidator` first, then checks both. The XML
 editor, and the XML and multipage loaders' previews and ingest jobs, all call
 it rather than `XmlValidator`.
 
 - **Title** means a non-blank `<mods:title>` in the primary `<mods:titleInfo>`.
-- **Keyword** means any non-blank `<mods:subject><mods:topic>`. An
-  authority-bearing subject counts, exactly as it does on the metadata form.
-- **Keywords are required where `DescriptivePolicy` says so**, which is Works
-  only. The loaders create Works, so they always require one. The XML editor
-  asks the policy with the resource's own type.
+- **Subject** means any top-level `<mods:subject>` with heading text: a topic,
+  place, period, name, occupation, genre, title or hierarchical place. It is
+  whatever `NEU::MODS` `subject_headings` returns. A subject holding only a
+  `<mods:geographicCode>` or `<mods:cartographics>` has no heading text, so it
+  does not count. An authority-bearing subject counts, exactly as it does on
+  the metadata form.
+- **A subject is required where `DescriptivePolicy` requires keywords**, which
+  is Works only. The loaders create Works, so they always require one. The XML
+  editor asks the policy with the resource's own type.
 
 The field checks run only after the floor passes. They need a parsed document,
 and a schema error is the one to fix first.

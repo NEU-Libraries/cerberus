@@ -258,6 +258,44 @@ describe CollectionsController do
         expect(ids).not_to include(work.valkyrie_id)
       end
     end
+
+    # The control under the results shares the breadcrumb Add's gate and its
+    # choices, from one partial.
+    context 'Add control under the results' do
+      let(:editor) { User.new(email: 'ed@example.com', nuid: '000000002', groups: ['editors']) }
+
+      def add_control = response.parsed_body.at_css('.add-control')
+
+      before do
+        AtlasRb::Resource.set_permissions(collection.id, { 'read' => ['public'], 'edit' => ['editors'] },
+                                          nuid: '000000004')
+      end
+
+      it 'is hidden from a signed-in user who cannot edit the collection' do
+        sign_in User.new(email: 'viewer@example.com', nuid: '000000005', role: 'standard', groups: [])
+        get :show, params: { id: collection.id }
+        expect(add_control).to be_nil
+      end
+
+      it 'offers an editor the breadcrumb menu\'s choices, centred under an empty collection' do
+        sign_in editor
+        get :show, params: { id: collection.id }
+        expect(add_control.css('.dropdown-item').map(&:text)).to eq(['New Collection', 'New Work'])
+        expect(add_control['class']).to include('add-control--centered')
+        expect(add_control.at_css('#add-control-toggle')).to be_present
+      end
+
+      it 'sits at the end of a collection that holds items' do
+        child = AtlasRb::Collection.create(collection.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml',
+                                           nuid: '000000004')
+        AtlasRb::Resource.set_permissions(child.id, { 'read' => ['public'] }, nuid: '000000004')
+        sign_in editor
+        get :show, params: { id: collection.id }
+        expect(add_control['class']).to include('add-control--end')
+      ensure
+        AtlasRb::Resource.tombstone(child.id) if child
+      end
+    end
   end
 
   # v1 answered 403 for a record the caller could not read, signed in or not
@@ -422,7 +460,7 @@ describe CollectionsController do
   end
 
   # A collection that still holds items: CascadeTombstoning, then
-  # TombstoneCascadeJob. The job is enqueued, never run, so nothing is withdrawn.
+  # TombstoneCascadeJob. The job is enqueued, never run, so nothing is tombstoned.
   describe 'tombstone with cascade' do
     let(:admin) { User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin') }
     let(:delegate) do

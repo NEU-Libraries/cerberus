@@ -31,6 +31,43 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     AtlasRb::Resource.put_dwc(@dwc_work.id, Rails.root.join('spec/fixtures/files/dwc-record.xml').to_s,
                               nuid: AtlasFixtures::ADMIN_NUID)
     @set = AtlasRb::Compilation.create('Axe audit set', nuid: AtlasFixtures::ADMIN_NUID)
+    @replaced_work = create_work_with_replaced_file(@collection.id)
+    @load_report = create_paged_load_report
+    # Unread, so the inbox renders its row checkboxes and Mark all as read.
+    @message = Message.create!(subject: 'Axe audit message', recipient_nuid: AxeAudit::STAFF_NUID)
+  end
+
+  # Local records, not Atlas ones, so the rollback that clears each example
+  # does not reach them.
+  after(:all) do
+    @load_report&.iptc_ingests&.delete_all
+    @load_report&.destroy
+    Loader.find_by(slug: 'axe-audit')&.destroy
+    MessageReceipt.where(message: @message).delete_all
+    @message&.destroy
+  end
+
+  # One row past a page, so the report renders its pager.
+  def create_paged_load_report
+    loader = Loader.create!(slug: 'axe-audit', display_name: 'Axe Audit Loader',
+                            group: 'northeastern:drs:repository:loaders:axe-audit', root_collection: 'neu:root')
+    LoadReport.create!(loader: loader, source_filename: 'batch.zip', status: :completed).tap do |report|
+      (LoadReportRows::PER_PAGE + 1).times do |n|
+        report.iptc_ingests.create!(source_filename: format('img_%04d.jpg', n), status: :completed,
+                                    idempotency_key: SecureRandom.uuid)
+      end
+    end
+  end
+
+  # Public before the Blob lands, so a guest can read the Blob, and its row
+  # carries the version chip and the File history card renders.
+  def create_work_with_replaced_file(parent_id)
+    image = Rails.root.join('spec/fixtures/files/image.png').to_s
+    work = create_work(parent_id, public: true)
+    AtlasRb::Blob.create(work.id, image, 'image.png', nuid: AtlasFixtures::ADMIN_NUID)
+    noid = AtlasRb::Work.assets(work.id, nuid: AtlasFixtures::ADMIN_NUID).first.noid
+    AtlasRb::Blob.update(noid, image, nuid: AtlasFixtures::ADMIN_NUID)
+    work
   end
 
   def expect_axe_clean
@@ -66,6 +103,7 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     'a community'      => -> { "/communities/#{@community.id}" },
     'a collection'     => -> { "/collections/#{@collection.id}" },
     'a work'           => -> { "/works/#{@work.id}" },
+    'a replaced file'  => -> { "/works/#{@replaced_work.id}" },
     'Darwin Core tab'  => -> { "/works/#{@dwc_work.id}#darwin-core" },
     'the sign-in page' => -> { atlas_login_path }
   }
@@ -80,6 +118,7 @@ RSpec.describe 'Accessibility', :browser, type: :system do
   }
 
   audits :admin_nuid, {
+    'a collection, admin' => -> { "/collections/#{@collection.id}" },
     'the deposit form'    => -> { "/collections/#{@collection.id}/works/new" },
     'a new collection'    => -> { "/collections/#{@collection.id}/collections/new" },
     'the work upload'     => -> { "/works/#{@work.id}/upload" },
@@ -104,7 +143,9 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     'deposit triage'      => -> { '/admin/deposit_triage' },
     'fixity'              => -> { '/admin/fixity?state=never' },
     'work health'         => -> { "/admin/work_health?noid=#{@work.id}" },
-    'a set Sentinel'      => -> { "/sets/#{@set['id']}/edit?tab=sentinel" }
+    'a set Sentinel'      => -> { "/sets/#{@set['id']}/edit?tab=sentinel" },
+    'a paged load report' => -> { "/loaders/axe-audit/loads/#{@load_report.id}" },
+    'a filtered report'   => -> { "/loaders/axe-audit/loads/#{@load_report.id}?status=completed" }
   }
 
   # axe skips what is not displayed, so each edit pane needs its own visit. The

@@ -10,9 +10,9 @@ RSpec.describe TombstoneTargets do
       .and_return(instance_double(ContainerDescendantsQuery, subtree_fq: 'SUBTREE'))
   end
 
-  # A community can hold communities, and an item withdrawn earlier must stay
+  # A community can hold communities, and an item tombstoned earlier must stay
   # off this cascade's list.
-  it 'widens the narrowing walk to communities and skips what is already withdrawn' do
+  it 'widens the narrowing walk to communities and skips what is already tombstoned' do
     expect(Blacklight.default_index).to receive(:search)
       .with(hash_including(fq: ['SUBTREE', described_class::TYPES, described_class::LIVE]))
       .and_return(instance_double(Blacklight::Solr::Response, documents: []))

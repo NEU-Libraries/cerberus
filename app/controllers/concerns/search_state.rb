@@ -16,4 +16,14 @@ class SearchState < Blacklight::SearchState
 
     super
   end
+
+  # A controller may name the default for a request with no sort (see
+  # TitleBrowseSort). Chosen here rather than written into params, it stays out
+  # of the links and forms built from this state, so a search typed after
+  # clicking a facet still ranks by relevance.
+  def sort_field
+    return super if sort_field_key.present? || !controller.respond_to?(:browse_sort_key, true)
+
+    blacklight_config.sort_fields[controller.send(:browse_sort_key, self)] || super
+  end
 end

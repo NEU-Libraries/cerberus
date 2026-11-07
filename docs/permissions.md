@@ -161,10 +161,24 @@ deliberately not `apply!`, because two of that method's assumptions are false
 one line after a create:
 
 - There is no cascade to run — nothing is inside a resource this new.
-- `current_read` still describes the **destination**, not this resource. So the
-  narrowing check would compare against the wrong audience.
+- `current_read` is the **destination's** read, not a record of this resource's
+  own history. `NarrowingRequest` asks what a change strips from existing
+  contents, and a resource this new has none.
 
-It sends the submitted grants alone. The new child already carries the ACL Atlas
+A new Community still follows the Edit page's rule: only an administrator may
+start one narrower than the community it sits in. The create form offers Private
+to administrators only. For the server-side check, the destination's read is the
+right baseline, because Atlas copies the parent's ACL onto a minted child. So
+`apply_minted!` runs `community_narrowing_refusal` against it. A refused submit
+leaves the new Community with its inherited access, writes none of the submitted
+grants, and reports `MINTED_COMMUNITY_NARROWING_REFUSED`. That message says the
+community exists, because the mint has already happened.
+
+`CommunitiesController#create` writes the permissions before
+`ShowcaseProvisioner` runs. Each genre showcase takes its parent's access when it
+is minted, so the community's access has to be final first.
+
+For every type, `apply_minted!` sends the submitted grants alone. The new child already carries the ACL Atlas
 copied from its parent, and Atlas keeps every key the payload omits. So reading
 the envelope back to merge onto would only re-send what is already there.
 `depositor` and `proxy_uploader` are never sent, so the write cannot re-assert

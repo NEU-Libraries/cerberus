@@ -5,7 +5,7 @@ module Admin
   #
   # **Waiting on a depositor** — the Work is `in_progress`: nobody confirmed the
   # metadata page, so it is hidden from discovery and its depositor sees it under
-  # "Deposits to finish" in My DRS. Somebody has to finish it or withdraw it.
+  # "Deposits to finish" in My DRS. Somebody has to finish it or tombstone it.
   #
   # **Missing something** — the Work finished, but an enrichment job gave up, so it
   # is readable while short a rendition, a thumbnail or its full text. Only staff

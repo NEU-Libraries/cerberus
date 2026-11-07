@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# The editor-facing "Request withdraw / move" action on the Work edit page.
+# The editor-facing "Request deletion / move" action on the Work edit page.
 #
 # Cerberus has no approval model and no request lifecycle: a request is one
 # write-once row on the admin ledger, which staff read and then fulfil with the
@@ -12,7 +12,7 @@ module WorkChangeRequest
   extend ActiveSupport::Concern
 
   # The actions an editor may *request* (not perform) on their own work.
-  REQUEST_ACTIONS = %w[withdraw move].freeze
+  REQUEST_ACTIONS = %w[delete move].freeze
 
   def request_change
     action = params[:request_action].to_s
@@ -31,7 +31,7 @@ module WorkChangeRequest
 
     # nil when the request is well-formed, else the user-facing reason it isn't.
     def change_request_problem(action, note)
-      return 'Choose whether to request a withdrawal or a move.' unless REQUEST_ACTIONS.include?(action)
+      return 'Choose whether to request a deletion or a move.' unless REQUEST_ACTIONS.include?(action)
 
       'Tell the staff where this work should move to.' if action == 'move' && note.blank?
     end

@@ -39,7 +39,10 @@ $ingest-tone-failed:     #a73a31;
   border-radius: 0.3rem;
   background-color: color-mix(in srgb, var(--ingest-tone, #{$ingest-tone-pending}) 12%, white);
   border: 1px solid color-mix(in srgb, var(--ingest-tone, #{$ingest-tone-pending}) 28%, white);
-  color: var(--ingest-tone, #{$ingest-tone-pending});
+  // The label is the tone darkened, not the tone itself: three of the five
+  // tones fall under 4.5:1 on their own tint. 20% black clears all five with
+  // margin; 15% leaves warnings on a hairline.
+  color: color-mix(in srgb, var(--ingest-tone, #{$ingest-tone-pending}) 80%, black);
   font-weight: 600;
   font-size: 0.78rem;
   line-height: 1.2;
@@ -93,9 +96,76 @@ $ingest-tone-failed:     #a73a31;
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: $gray-600;
+    // $gray-600 reads under 4.5:1 on every tile's tint.
+    color: $text-subtle;
     font-weight: 600;
     margin-top: 0.15rem;
+  }
+}
+
+// The tiles are toggle buttons that filter the table (loads/_report). Strip
+// the button's own chrome so a tile looks as it did as a readout. Pressed takes
+// a full tone outline, a stronger tint and a tone label; hover changes only the
+// border colour, so nothing under the pointer moves (docs/design.md).
+button.ingest-summary__tile {
+  position: relative;
+  // A button centres its content vertically; the readout tiles are top-aligned.
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: var(--ingest-tone, #{$gray-500});
+  }
+
+  &:focus-visible {
+    outline: 2px solid $link-blue;
+    outline-offset: 2px;
+  }
+
+  // 10%, not more: at 14% the grey label falls under 4.5:1 on three tones.
+  &[aria-pressed="true"] {
+    background-color: color-mix(in srgb, var(--ingest-tone, #{$gray-500}) 10%, white);
+    box-shadow: inset 0 0 0 1px var(--ingest-tone, #{$gray-500});
+    border-color: var(--ingest-tone, #{$gray-500});
+
+    .ingest-summary__label {
+      color: color-mix(in srgb, var(--ingest-tone, #{$gray-600}) 80%, black);
+    }
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.55;
+  }
+}
+
+.ingest-summary__check {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.6rem;
+  color: color-mix(in srgb, var(--ingest-tone) 80%, black);
+}
+
+// The line above a filtered table: how many rows show, and the way back.
+.ingest-filter-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid $gray-200;
+  font-size: 0.875rem;
+  color: $text-subtle;
+
+  strong {
+    color: $gray-900;
   }
 }
 
@@ -423,12 +493,6 @@ turbo-frame#load_report[busy] .admin-registry {
 
 // The archive field while a file is dragged over it: a dashed rail in the
 // Cerberus blue, so the drop target is obvious before the file is let go.
-.archive-upload__drop.is-dragover {
-  border: 1px dashed $blue;
-  background-color: color-mix(in srgb, #{$blue} 6%, white);
-  box-shadow: 0 0 0 0.2rem color-mix(in srgb, #{$blue} 20%, transparent);
-}
-
 @media (prefers-reduced-motion: reduce) {
   .archive-upload--indeterminate .archive-upload__fill {
     animation: none;

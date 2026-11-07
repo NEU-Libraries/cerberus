@@ -50,11 +50,12 @@ module Transformable
                                    current_embargo: @permissions&.embargo).apply!)
   end
 
-  # No current_read: one line after a create, @permissions still holds the
-  # DESTINATION's envelope, so it would answer the wrong question.
+  # One line after a create, @permissions still holds the DESTINATION's
+  # envelope. apply_minted! reads its read ACL only as the access a new
+  # community inherited, never for a cascade.
   def apply_new_permissions(id)
-    report(ResourcePermissions.new(solr_type: solr_type, id: id,
-                                   envelope: permission_params, actor: current_user).apply_minted!)
+    report(ResourcePermissions.new(solr_type: solr_type, id: id, envelope: permission_params,
+                                   current_read: Array(@permissions&.read), actor: current_user).apply_minted!)
   end
 
   private

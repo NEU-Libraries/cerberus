@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# The removal notes the library's withdrawal policy allows, in its wording.
+# The removal notes the library's removal policy allows, in its wording.
 #
 # Atlas holds the same list and answers 422 `invalid_reason` for anything else,
 # so a change here must ship with the matching Atlas change. The notes carry no
@@ -14,11 +14,11 @@ module TombstoneReasons
     "Removed from view at contributor or content curator's discretion"
   ].freeze
 
-  # Recorded for a depositor or proxy uploader withdrawing their own item. Only
+  # Recorded for a depositor or proxy uploader tombstoning their own item. Only
   # the admin tier may choose another note.
   CURATOR = ALL.last
 
-  # The gone page's headline. A withdrawal recorded without a note still reads
+  # The gone page's headline. A tombstone recorded without a note still reads
   # as a sentence, and an unparseable date drops out rather than guessing.
   def self.sentence(title, reason, tombstoned_at)
     return "\"#{title}\" has been removed." if reason.blank?
@@ -26,6 +26,18 @@ module TombstoneReasons
     date = removal_date(tombstoned_at)
     note = reason[0].downcase + reason[1..]
     "\"#{title}\" was #{note}#{" on #{date.strftime('%B %-d, %Y')}" if date}."
+  end
+
+  # A purge keeps no title or note, only the date.
+  def self.headline(record, title)
+    return purged_sentence(record.try(:purged_at)) if record.try(:purged)
+
+    sentence(title, record.try(:tombstone_reason), record.try(:tombstoned_at))
+  end
+
+  def self.purged_sentence(purged_at)
+    date = removal_date(purged_at)
+    "This item was removed#{" on #{date.strftime('%B %-d, %Y')}" if date}."
   end
 
   def self.removal_date(tombstoned_at)

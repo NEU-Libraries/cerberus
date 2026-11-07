@@ -127,26 +127,58 @@ are opt-in download renditions chosen on the metadata page and applied later by
 
 ## Promoting a Work into a community showcase
 
-Promotion surfaces the new Work in a community genre showcase via a
-linked-member edge. It is orthogonal to placement: the Work's structural home
-is wherever it was just deposited, and promotion does not touch it.
+Promotion surfaces the new Work in community genre showcases via linked-member
+edges. It is orthogonal to placement: the Work's structural home is wherever it
+was just deposited, and promotion does not touch it.
 
-`WorkDeposit#publish_offered?` offers promotion only when the destination is a
-person's personal root: `DepositorContext#workspace_owner` resolves that person.
-The route decides placement, so this check is what keeps a promoted Work in its
-owner's own space. It keys on the destination, not on the button the depositor
-arrived by, so typing a URL cannot sidestep it.
+A depositor affiliated with several communities, for example faculty in two
+departments, may promote one Work into several of them. The Work has **one**
+category, so the form asks for one Category and offers a checkbox per community
+(`publish_community_ids[]`). A depositor with one community gets that community
+as a hidden field. The Category select offers only the genres every checked
+community has a showcase for; `deposit_promotion_controller.js` recomputes it as
+boxes are ticked, and the server renders the genres all communities share as
+the fallback.
+
+`WorkDeposit#promote_if_requested` makes one attempt per chosen community. Each
+attempt gets its own ledger row, and a refusal in one community does not stop
+the others. If any attempt fails, the depositor sees `PUBLISH_LINK_FAILED`. A
+refusal that applies to the whole deposit, `not_personal_root` or
+`not_workspace_owner`, is recorded once per chosen community, so each row still
+names the community that was asked for.
+
+`WorkDeposit#publish_offered?` offers promotion only when the destination is in
+a person's workspace: their personal root, or any collection inside it.
+`DepositorContext#workspace_owner` resolves that person. A collection in the
+canonical community tree never offers it, even one the depositor may deposit
+into. The route decides placement, so this check is what keeps a promoted Work
+in its owner's own space. It keys on the destination, not on the button the
+depositor arrived by, so typing a URL cannot sidestep it.
+
+The depositor's own workspace needs no flag: their Person names the root, and
+`DepositorContext#within?` checks it against the destination and its
+`ancestors`. The root itself answers without reading the destination. For
+someone else's workspace, `workspace_root_id` finds the root: the destination
+when Atlas flags it `personal_root`, or else the ancestor that carries the flag.
+Atlas returns that flag on each entry of a collection's `ancestors`, so neither
+check costs a read beyond the destination's own.
 
 ### Publishing for someone else
 
 Staff reach another person's workspace from that person's profile (the
-breadcrumb Add), and can deposit there for them as a proxy. The workspace owner
-is the Person whose root the destination is, resolved from both sides:
+breadcrumb Add), and can deposit there for them as a proxy, into the root or
+into a collection inside it. The workspace owner is the Person whose root it
+is, resolved from both sides:
 
 1. Atlas mints a personal root with `personal_root: true`, and its owner as
    `depositor`.
 2. `Person.resolve` of that depositor must name this root as its
    `personal_root_id`.
+
+Both checks read the root, never the destination collection. Staff may have made
+a collection inside someone's workspace, so its own `depositor` proves nothing
+about whose workspace it is. For a collection inside the workspace, that costs
+one more collection read, made only when the root is not the depositor's own.
 
 When the owner is someone other than the signed-in user, three things follow:
 
@@ -165,8 +197,10 @@ When the owner is someone other than the signed-in user, three things follow:
   form offers publishing here. Without the radio the promotion could never be
   honoured, so the form offers none.
 
-The destination panel names the owner ("Jane Doe's workspace") rather than
-the root's stored title, "Personal Root", which says nothing about whose it is.
+For the root, the destination panel names the owner ("Jane Doe's workspace")
+rather than the root's stored title, "Personal Root", which says nothing about
+whose it is. A collection inside the workspace keeps its own title, and the
+panel adds "It is in Jane Doe's workspace."
 
 The showcase link is a `:system`-attributed write (`AtlasRb::System::Work`),
 not a call the depositor's own credential could make. Atlas scopes `:system`'s
@@ -190,7 +224,7 @@ see.
 
 | Reason token | Meaning |
 |---|---|
-| `not_personal_root` | The destination is not a person's personal root, so the form never offered promotion here — a typed URL, or a tampered field |
+| `not_personal_root` | The destination is not in a person's workspace, so the form never offered promotion here — a typed URL, or a tampered field. The token predates collections inside a workspace; stored ledger rows carry it, so it keeps its name |
 | `not_workspace_owner` | The destination is someone else's workspace, and the deposit was not a proxy for them, so its depositor is not the owner |
 | `no_showcase` | `DepositorContext#publish_showcase_id` found nothing: the depositor is not affiliated with that community, the genre is staff-only (`FeaturedContent::STAFF_ONLY`), no showcase exists for that genre there, or the depositor cannot see the one that does |
 
@@ -295,7 +329,7 @@ deposit. It is a lock, not housekeeping. An unfinished deposit is probably
 open on its depositor's screen at the metadata page, and this stops a second
 person editing underneath them. The metadata page itself stays reachable to
 anyone with edit rights, because it rides `extra_edit`, so an abandoned
-deposit can always be finished or withdrawn.
+deposit can always be finished or tombstoned.
 
 `WorksController#requested_work` memoises that read. `#edit` needs the same
 payload the in-progress gate already fetched, and the gate runs as a
@@ -330,10 +364,12 @@ when a Work is saved with no keywords.
 requires that the resource carry at least one subject. The Keywords box is how
 a depositor supplies one.
 
-A record whose subjects are all authority-controlled already satisfies that
-requirement, and those subjects are curated. `MODSFields` keeps them out of
-the box on purpose, and `MODSMerge` never writes over them. So the server
-counts them. Without that, a curator fixing a title on such a record would have
+The box manages only attribute-free, topic-only subjects. Every other subject —
+authority-controlled, or a name, place, genre or other kind — already satisfies
+that requirement, and is curated. `MODSFields` keeps those subjects out of the
+box on purpose, and `MODSMerge` never writes over them. So the server counts
+them, by the same `subject_headings` rule as
+[`MODSRecordValidator`](ingest.md#required-fields). Without that, a curator fixing a title on such a record would have
 to invent a redundant keyword to save. The form mirrors the same exemption
 client-side, from the `keyword-list` controller's `optional` value.
 

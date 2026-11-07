@@ -8,6 +8,7 @@ Source files:
 
 - `app/controllers/downloads_controller.rb`
 - `app/controllers/derivative_downloads_controller.rb`
+- `app/controllers/concerns/streams_blob.rb`
 - `app/services/zip_entry_writer.rb`
 - `app/services/blob_zip_packer.rb`
 - `app/services/set_zip_packer.rb`
@@ -20,10 +21,43 @@ Source files:
 - `app/jobs/pdf_rendition_job.rb`
 - `app/services/rendition_asset.rb`
 - `bin/soffice-timeout`
+- `app/helpers/downloads_helper.rb`
+- `app/helpers/derivatives_helper.rb` (`offer_downloads?`)
+- `app/views/works/_file_history.html.haml`
 
 `IiifAssetsJob`, `CaptionJob` and `StreamingOnly` are covered in
 `docs/derivatives.md`. `SetDownloadsController` and the resolvers that feed the
 packers are covered in `docs/sets.md`.
+
+## Offering Downloads on a search result
+
+Each Work in the results list and the gallery gets a Downloads button that
+opens the downloads modal. `DerivativesHelper#offer_downloads?` shows it only
+when that modal would list a file for this viewer.
+
+The decision reads the row's own Solr doc and makes no Atlas call, so a page
+of 100 results still costs one Solr query. Atlas rolls two fields up onto each
+Work's doc when it indexes the Work:
+
+| Field | Meaning |
+|---|---|
+| `has_downloads_bsi` | whether `GET /works/:id/assets` lists anything |
+| `download_read_groups_ssim` | the union of every listed file's read gate |
+
+The button shows when all of these hold:
+
+1. **The doc is a Work.**
+2. **No active embargo holds it back from this viewer.** Staff and admins bypass
+   the embargo, as `embargo_withholds?` decides.
+3. **The Work has a downloadable file.** A Work with `has_downloads_bsi: false`
+   gets no button, for staff and admins too: their modal would be empty as well.
+4. **The viewer can read one of the files.** The helper asks the `:read` Ability
+   about a document whose read groups are the union of the gates. The modal
+   keeps a file when the viewer can read that file's gate, so the union is
+   readable exactly when one file is. An admin can read every gate.
+
+A doc indexed before Atlas added the fields lacks `has_downloads_bsi`, and keeps
+the button, as it had before. A full reindex fills the fields in.
 
 ## Downloading one Blob
 
@@ -77,7 +111,46 @@ branch zip-versus-raw off its classification without a second assets fetch, and
 **It fails open when the asset cannot be resolved.** That covers a Blob with no
 containing Work and a Blob absent from the Work's assets list. The work-level
 gate has already passed at that point, so this is an edge case rather than a
-gate to bypass. A nil asset also serves raw.
+gate to bypass. A nil asset also serves raw. A Blob under a removed FileSet is
+absent from the list too, and the tombstone refusal below stops it.
+
+### A tombstone withholds the bytes
+
+Atlas refuses the bytes of a Blob whose Blob, FileSet or Work is tombstoned,
+for anyone below the operator tiers. Admins and delegated admins are still
+served, so they can review a file before they restore it. Cerberus signs each
+call as the viewer, so Atlas makes the tier decision and Cerberus makes none.
+
+atlas_rb raises the refusal as `AtlasRb::TombstonedError`, from `Work.assets`
+for a retracted Work and from `Blob.content` for any withheld Blob. Both raise
+before a byte moves. `Authorizable#render_withheld` answers it:
+
+| Tombstoned resource | Page |
+|---|---|
+| a FileSet (one file removed) | the not-found page, for a file |
+| the Work (retracted) | the Work's Removed page (`errors/gone`) |
+
+The same handler answers a tombstone on any other read, such as a Collection's
+or a Work's record. `docs/authorization.md` covers that.
+
+`DownloadsController` and `MediaController` stream through
+`StreamsBlob#stream_blob`, which sets the file's headers only when the first
+chunk arrives. Two traps make that necessary:
+
+- **The error page would download as the file.** With an attachment
+  `Content-Disposition` already set, the browser saves the page under the
+  file's name.
+- **Closing the stream commits the response.** Under `ActionController::Live`,
+  a `response.stream.close` in an `ensure` sends an empty 200 before
+  `rescue_from` can render. So the stream is closed only once a chunk was
+  written.
+
+atlas_rb yields no chunk for any other non-2xx status either, and returns the
+status. `stream_blob` renders a 403 as the forbidden page, a 404 or 410 as
+not found, and anything else as a bare status.
+
+The download counts the attempt before the refusal: `record_download_impression`
+runs before `show`, and only `Blob.content` knows the file is withheld.
 
 ## Downloading a gated image tier
 
@@ -176,6 +249,12 @@ drifting apart.
 - **Record a failure, do not raise it.** Once the response headers are out the
   archive cannot be un-sent, so a mid-stream fetch failure becomes an
   `ERRORS.txt` line.
+- **A tombstone is withheld access, not a failure.** A retracted Work's
+  `Work.assets`, or a withheld Blob's `Blob.content`, raises
+  `AtlasRb::TombstonedError`. The packers record it as
+  `<noid>: withheld — removed from view`, worded like an embargo. Any other
+  refused stream raises `ZipEntryWriter::RefusedStream` inside the entry's
+  block, so zip_kit rolls the empty entry back before the failure is recorded.
 - **Write the inventory last.** `write_manifest` writes `inventory.csv`, then
   `ERRORS.txt` when there are errors, after every file. A truncated or partial
   archive is therefore still self-describing.
@@ -330,16 +409,27 @@ The manifest is a small text grid even at the export cap
 and writes it once every item has been visited, followed by `ERRORS.txt` when
 there are errors. Only the MODS payloads stream. The `.xlsx` is itself a zip, so
 it too is STOREd. A failed MODS fetch leaves the row's MODS path blank and adds
-an `ERRORS.txt` line.
+an `ERRORS.txt` line. A Work that Atlas withholds under a tombstone gets no row,
+only the line `<noid>: withheld — removed from view`, because the tombstone
+withholds its record as well as its files.
 
 ### The manifest columns
 
 The first five `HEADERS` match `XmlLoader::Manifest::COLUMN_LABELS`, or the
 bundle no longer loads back. `PIDs` is v1's column name for what is a NOID in
-DRS 2, and the loader accepts `PIDs`, `PID`, `NOID` or `NOIDs`. A sixth column,
-Date Ingested, is for the reader: the Work's creation date (`created_at_dtsi`)
-in the app's Eastern time zone. The loader ignores columns it does not know, so
-the bundle still re-ingests.
+DRS 2, and the loader accepts `PIDs`, `PID`, `NOID` or `NOIDs`. Two more columns
+are for the reader, both as dates in the app's Eastern time zone:
+
+| Column | Source | Meaning |
+|---|---|---|
+| Date Ingested | `created_at_dtsi` | the day the Work was created |
+| Date MODS Last Edited | `mods_updated_at_dtsi` | the day the Work's MODS last changed |
+
+Atlas indexes `mods_updated_at_dtsi` from the MODS version history. It moves
+only when the XML changes, so a permissions, embargo or full-text save leaves
+it alone, unlike the Work's `updated_at`. A Work never edited after deposit
+shows its deposit day, because that is when its MODS was last written. The
+loader ignores both labels, so the bundle still re-ingests.
 
 File Name carries the name the Work's `original_file` was deposited under,
 falling back to its stored name. Solr holds no filename, so it costs one
@@ -566,35 +656,87 @@ LibreOffice returns after initialising a fresh profile, and libreconv starts
 every run with one. A missing `soffice` binary (`WordToPdf.available?` false)
 skips the rendition outright.
 
-### One PDF across replaces and reverts
+### The PDF keeps the first upload
 
-A replace or revert re-runs this job with `refresh: true`. The job then updates
-the Work's existing PDF with `Blob.update` rather than creating another one, so
-the Work keeps a single PDF that matches its current file. Each earlier PDF
-stays as a revision of that Blob.
+The job attaches the PDF on the first upload only. A replace or revert re-runs
+the job with `refresh: true`, and the job then converts the new file without
+attaching the result. It uses that PDF for two things: the Work's thumbnail,
+through `IiifAssetsJob` with `refresh: true`, and the Work's full text. The
+Work's PDF Blob is left as it is.
 
-Deleting the stale PDF and creating a new one was the obvious alternative. It
-does not work, because Atlas lets only an admin delete a Blob. This job runs as
+So after a replace, the downloadable PDF shows the first upload's content. The
+thumbnail, the full-text search and the Word file itself show the new version.
+
+A refresh always converts, even when a PDF of the same name is already on disk.
+Nothing cleans the staged directory, `uploads_root/<work_id>/`, so a replace
+under the original filename finds the first upload's PDF there. A deposit retry
+still skips the conversion when its own PDF is on disk.
+
+### One MP4 across replaces and reverts
+
+`MediaRenditionJob` remuxes a video or audio original into an MP4 when the
+container needs it, such as `talk.mov` to `talk.mp4`. A replace or revert
+updates the Work's existing MP4 with `Blob.update` rather than creating another
+one, so the Work keeps a single MP4 that matches its current file. Each earlier
+MP4 stays as a revision of that Blob.
+
+Deleting the stale MP4 and creating a new one was the obvious alternative. It
+does not work, because Atlas lets only an admin delete a Blob. The job runs as
 whoever replaced the file, and atlas_rb has no system-principal delete.
 
-`RenditionAsset.for` finds the existing PDF from `Work.file_sets`. Atlas
-stores a rendition as an ordinary `original_file` in a FileSet of its own, so
-nothing on the wire marks it as derived. The name does: the job writes
-`thesis.docx` as `thesis.pdf`, and a primary's `original_filename` survives
-every `Blob.update`. So the rendition
-is the `original_file` PDF whose name stem matches another `original_file` on
-the Work. It reads `original_filename` for that match only, and never renders
-it.
+`RenditionAsset.for` finds the existing MP4 from `Work.file_sets`. Atlas stores
+a rendition as an ordinary `original_file` in a FileSet of its own, so nothing
+on the wire marks it as derived. The name does: the job writes `talk.mov` as
+`talk.mp4`, and a primary's `original_filename` survives every `Blob.update`.
+So the rendition is the `original_file` MP4 whose name stem matches another
+`original_file` on the Work. It reads `original_filename` for that match only,
+and never renders it.
 
-Two consequences follow:
+Three consequences follow:
 
-- A PDF that the depositor attached under the same stem counts as the
+- An MP4 that the depositor attached under the same stem counts as the
   rendition. Updating it appends a revision, so its bytes stay recoverable.
-- A Work that already holds several PDFs keeps them. Every replace updates the
+- A Work that already holds several MP4s keeps them. Every replace updates the
   same one, the lowest NOID, and an admin can remove the others.
+- An original that is already an MP4 is never remuxed, and has no other
+  original under its stem, so it is never mistaken for its own rendition.
 
-`MediaRenditionJob` does the same for the MP4 it remuxes from a video or audio
-original, such as `talk.mov` to `talk.mp4`, asking `RenditionAsset` with
-`mime_types: RenditionAsset::MP4`. An original that is already an MP4 is never
-remuxed, and has no other original under its stem, so it is never mistaken for
-its own rendition.
+## Showing a file's replacement history
+
+The work page shows a replaced file's history in two places that work as a
+pair:
+
+- **A version chip on the file's Downloads row**, such as "Version 2", beside
+  its size. It only signals that the file has changed. It is plain text, not a
+  control, so it takes the identifier chip's shape at the filename's size rather
+  than a button size.
+- **A File history card under the Downloads card.** It names each replaced file
+  exactly as its row does, label and filename, so the chip and the entry read as
+  one. It lists every version, newest first, with the day each was uploaded, and
+  marks the current one.
+
+A file that was never replaced has no chip and no entry. A work with no replaced
+files has no card.
+
+The data comes from `AtlasRb::Work.file_revisions`, a fifth read in
+`WorksController#parallel_show_reads`. Atlas authorizes it with `:read` on the
+Work, so everyone who can see the work sees the history. Each entry carries only
+`revision` and `created`. The attributed history, with the actor, digest and
+filename of each version, stays on the admin Replace a file page, behind
+`:read_versions`.
+
+Some rules follow from the design:
+
+- **Only files the Downloads card shows.** `file_history_entries` pairs the
+  revisions with the card's own list. A file withheld from the viewer, by an
+  embargo or a gated tier, has no row, so it gets no chip and no entry. The
+  Downloads modal renders the same row but makes no revisions read, so it shows
+  no chip.
+- **A failed read drops the chip and the card, not the page.** The read is
+  rescued inside its task, as the associations read is, and `nil` renders
+  nothing.
+- **The history shows the day, not the time.** A reader cares which day a file
+  changed. The `<time>` element keeps the full timestamp.
+
+The version number is the contiguous revision ordinal, the same number the admin
+page shows. The raw OCFL version can skip numbers, so the page never shows it.

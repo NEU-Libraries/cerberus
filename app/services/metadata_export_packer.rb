@@ -10,7 +10,8 @@ class MetadataExportPacker
   # The first five must match XmlLoader::Manifest::COLUMN_LABELS, or the
   # exported bundle no longer loads back into the XML loader. The loader finds a
   # column by its label, not its position, and ignores labels it does not know.
-  HEADERS = ['PIDs', 'MODS XML File Path', 'File Name', 'Embargoed?', 'Embargo Date', 'Date Ingested'].freeze
+  HEADERS = ['PIDs', 'MODS XML File Path', 'File Name', 'Embargoed?', 'Embargo Date', 'Date Ingested',
+             'Date MODS Last Edited'].freeze
 
   # A manifest-only export bundles no MODS, so the column would point at nothing.
   # A full export keeps it even where one fetch failed: that row's blank cell is
@@ -25,6 +26,7 @@ class MetadataExportPacker
     alternate_ids_ssim
     embargo_release_date_dtsi
     created_at_dtsi
+    mods_updated_at_dtsi
   ].freeze
 
   def initialize(docs:, include_mods: true)
@@ -37,13 +39,7 @@ class MetadataExportPacker
     errors = []
 
     @docs.each_content_batch do |docs|
-      docs.each do |doc|
-        noid = noid_of(doc)
-        next if noid.blank?
-
-        xml_path = write_mods(zip, noid, errors) if @include_mods
-        rows << manifest_row(doc, noid, xml_path, file_name(noid, errors))
-      end
+      docs.each { |doc| pack_doc(zip, doc, rows, errors) }
     end
 
     write_manifest(zip, rows)
@@ -51,6 +47,18 @@ class MetadataExportPacker
   end
 
   private
+
+    # A tombstone withholds the Work's record as well as its files, so it gets
+    # an ERRORS.txt line, worded like the content zips, and no row.
+    def pack_doc(zip, doc, rows, errors)
+      noid = noid_of(doc)
+      return if noid.blank?
+
+      xml_path = write_mods(zip, noid, errors) if @include_mods
+      rows << manifest_row(doc, noid, xml_path, file_name(noid, errors))
+    rescue AtlasRb::TombstonedError
+      errors << "#{noid}: withheld — removed from view"
+    end
 
     # Solr stores the noid in `alternate_ids_ssim` as `id-<noid>`.
     def noid_of(doc)
@@ -70,7 +78,7 @@ class MetadataExportPacker
 
     # A row in headers order.
     def manifest_row(doc, noid, xml_path, file_name)
-      row = [noid, file_name, embargoed(doc), embargo_date(doc), ingest_date(doc)]
+      row = [noid, file_name, embargoed(doc), embargo_date(doc), ingest_date(doc), mods_edit_date(doc)]
       @include_mods ? row.insert(1, xml_path) : row
     end
 
@@ -87,6 +95,8 @@ class MetadataExportPacker
         asset['uri'].blank? && asset['role'].to_s == 'original_file'
       end
       original && (original['original_filename'].presence || original['filename'])
+    rescue AtlasRb::TombstonedError
+      raise
     rescue Faraday::Error, JSON::ParserError, AtlasRb::ResourceError => e
       errors << "#{noid}: file list fetch failed — #{e.class}: #{e.message}"
       nil
@@ -94,7 +104,17 @@ class MetadataExportPacker
 
     # The day the Work was created, in Eastern time like every date in the UI.
     def ingest_date(doc)
-      stamp = Array(doc['created_at_dtsi']).first
+      eastern_date(doc, 'created_at_dtsi')
+    end
+
+    # The day the Work's MODS last changed. Atlas indexes it from the MODS
+    # version history, so a save that leaves the XML alone does not move it.
+    def mods_edit_date(doc)
+      eastern_date(doc, 'mods_updated_at_dtsi')
+    end
+
+    def eastern_date(doc, field)
+      stamp = Array(doc[field]).first
       stamp.present? ? Time.zone.parse(stamp.to_s)&.to_date&.iso8601 : nil
     end
 

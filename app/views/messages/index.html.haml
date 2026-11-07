@@ -1,49 +1,78 @@
 - content_for :page_title, 'Inbox'
+-# Marking read changes what the person sees next, so an impersonating admin is
+-# offered neither control. See docs/identity.md.
+- markable = !impersonating?
 
-.admin-registry.my-3
-  %header.admin-registry__head
-    %span.admin-registry__title
-      %i.fa-solid.fa-envelope{'aria-hidden' => 'true'}
-      Inbox
-      - if @messages.total_count.positive?
-        %span.admin-registry__count= pluralize(@messages.total_count, 'message')
-    .admin-registry__head-actions
-      = link_to new_message_path, class: 'btn btn-primary btn-sm' do
-        %i.fa-solid.fa-pen-to-square.me-1{'aria-hidden' => 'true'}
-        New message
+%div{data: { controller: 'bulk-select', bulk_select_noun_value: 'message' }}
+  .admin-registry.my-3
+    %header.admin-registry__head
+      %span.admin-registry__title
+        %i.fa-solid.fa-envelope{'aria-hidden' => 'true'}
+        Inbox
+        - if @messages.total_count.positive?
+          %span.admin-registry__count= pluralize(@messages.total_count, 'message')
+      .admin-registry__head-actions
+        - if markable && unread_messages_count.positive?
+          = button_to mark_read_messages_path, method: :patch, params: { all: 1, page: params[:page] },
+                      class: 'btn btn-tonal-secondary btn-sm', form: { class: 'd-inline me-2' } do
+            %i.fa-solid.fa-envelope-open.me-1{'aria-hidden' => 'true'}
+            Mark all as read
+        = link_to new_message_path, class: 'btn btn-primary btn-sm' do
+          %i.fa-solid.fa-pen-to-square.me-1{'aria-hidden' => 'true'}
+          New message
 
-  - if @messages.any?
-    .table-responsive
-      %table.table.table-borderless.admin-registry-table.inbox-table
-        %thead
-          %tr
-            %th{scope: 'col'} From
-            %th{scope: 'col'} Subject
-            %th{scope: 'col'} To
-            %th{scope: 'col'} Sent
-        %tbody
-          - @messages.each do |message|
-            - unread = @receipts[message.id]&.read_at.blank?
-            %tr{class: ('inbox-row--unread' if unread)}
-              %td= message_sender(message, @sender_names)
-              %td
-                = link_to message.subject, message_path(message), class: 'inbox-subject'
-                - if unread
-                  %span.visually-hidden (unread)
-              %td
-                - if message.group_addressed?
-                  = message_group_chip(message)
-                - else
-                  %span.text-muted You
-              %td.text-nowrap= message_timestamp(message.created_at)
-  - else
-    .admin-registry__empty
-      %i.fa-solid.fa-envelope-open.admin-registry__empty-icon{'aria-hidden' => 'true'}
-      %p.mb-1.fw-semibold.text-body No messages
-      %p.mb-3.small.text-muted
-        Messages from other users — and from the system, like load reports — will appear here.
-      = link_to new_message_path, class: 'btn btn-primary btn-sm' do
-        %i.fa-solid.fa-pen-to-square.me-1{'aria-hidden' => 'true'}
-        Write the first one
+    - if @messages.any?
+      .table-responsive
+        %table.table.table-borderless.admin-registry-table.inbox-table
+          %thead
+            %tr
+              - if markable
+                %th.bulk-select-cell{scope: 'col'}
+                  = check_box_tag 'select_all', '1', false, id: 'select_all', class: 'form-check-input',
+                                  'aria-label' => 'Select every message on this page',
+                                  data: { bulk_select_target: 'all', action: 'bulk-select#toggleAll' }
+              %th{scope: 'col'} From
+              %th{scope: 'col'} Subject
+              %th{scope: 'col'} To
+              %th{scope: 'col'} Sent
+          %tbody
+            - @messages.each do |message|
+              - unread = @receipts[message.id]&.read_at.blank?
+              %tr{class: ('inbox-row--unread' if unread)}
+                - if markable
+                  %td.bulk-select-cell
+                    = check_box_tag 'ids[]', message.id, false, id: "select_#{message.id}", form: 'inbox-bulk',
+                                    class: 'form-check-input', 'aria-label' => "Select “#{message.subject}”",
+                                    data: { bulk_select_target: 'item', action: 'bulk-select#update' }
+                %td= message_sender(message, @sender_names)
+                %td
+                  = link_to message.subject, message_path(message), class: 'inbox-subject'
+                  - if unread
+                    %span.visually-hidden (unread)
+                %td
+                  - if message.group_addressed?
+                    = message_group_chip(message)
+                  - else
+                    %span.text-muted You
+                %td.text-nowrap= message_timestamp(message.created_at)
+    - else
+      .admin-registry__empty
+        %i.fa-solid.fa-envelope-open.admin-registry__empty-icon{'aria-hidden' => 'true'}
+        %p.mb-1.fw-semibold.text-body No messages
+        %p.mb-3.small.text-muted
+          Messages from other users — and from the system, like load reports — will appear here.
+        = link_to new_message_path, class: 'btn btn-primary btn-sm' do
+          %i.fa-solid.fa-pen-to-square.me-1{'aria-hidden' => 'true'}
+          Write the first one
+
+  - if markable && @messages.any?
+    = form_with url: mark_read_messages_path, method: :patch, id: 'inbox-bulk',
+                class: 'well p-3 my-3 rounded-3 bulk-actions',
+                data: { bulk_select_target: 'well' }, html: { hidden: true } do
+      = hidden_field_tag :page, params[:page], id: nil
+      = button_tag type: 'submit', class: 'btn btn-primary' do
+        %i.fa-solid.fa-envelope-open.me-1{'aria-hidden' => 'true'}
+        Mark as read
+      %span.bulk-actions__count{role: 'status', data: { bulk_select_target: 'count' }}
 
 = paginate @messages

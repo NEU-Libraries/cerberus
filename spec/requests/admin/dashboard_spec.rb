@@ -118,5 +118,17 @@ RSpec.describe 'Admin::Dashboard', type: :request do
       # The admin pages carry no access-tier label for either tier.
       expect(response.body).not_to include('Delegated admin access', 'Admin-only')
     end
+
+    # Only an admin can purge, so only an admin's card offers it.
+    it 'offers permanent deletion on the Retracted items card to an admin only' do
+      sign_in admin_user
+      get '/admin'
+      expect(response.body).to include('Retracted items', 'or delete it permanently')
+
+      sign_in delegate_user
+      get '/admin'
+      expect(response.body).to include('Retracted items', 'Restore one to make it discoverable again.')
+      expect(response.body).not_to include('delete it permanently')
+    end
   end
 end

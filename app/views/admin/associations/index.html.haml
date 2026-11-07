@@ -8,8 +8,8 @@
 
   .p-3
     %p.text-muted.small.mb-3
-      Find the Work whose associations you want to manage. An association records that one Work is the codebook, figure, transcription, instructional material or supplemental material for another. It is descriptive only — nothing moves, and no permissions change.
-    = render 'admin/finder/search_form', url: admin_associations_path, q: params[:q], hidden: {}, placeholder: 'Search works by title…'
+      Two or more related works may be associated by connecting them and assigning a relationship. Start by searching below for the main work. On the following page, search for the associated work and select the relationship you want to assign.
+    = render 'admin/finder/search_form', url: admin_associations_path, q: params[:q], hidden: {}, placeholder: 'Search by title or ID…'
 
   - if @results
     = render 'admin/finder/results', results: @results, select_label: 'Manage', select_url: ->(doc) { admin_associations_manage_path(work_id: doc.to_param) }

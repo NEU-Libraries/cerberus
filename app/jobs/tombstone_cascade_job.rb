@@ -1,35 +1,35 @@
 # frozen_string_literal: true
 
-# Withdraws a container and everything live beneath it, deepest first, with one
+# Tombstones a container and everything live beneath it, deepest first, with one
 # removal reason, then records every NOID it withdrew in one ledger entry. See
 # docs/admin.md ("Deleting a container that is not empty").
 #
 # There is no cascading restore. The ledger entry is the list a developer
 # restores from, parents first, so it must name every item this run withdrew
-# and nothing withdrawn before it.
+# and nothing tombstoned before it.
 class TombstoneCascadeJob < ApplicationJob
   queue_as :default
 
   # Atlas answers a lock conflict with a 409 on the raw response. Retried in
   # place rather than through retry_on: a re-run rebuilds the walk without the
-  # items already withdrawn, and its ledger entry would leave them out.
+  # items already tombstoned, and its ledger entry would leave them out.
   LOCK_ATTEMPTS = 3
 
   def perform(noid:, uuid:, klass:, title:, reason:)
-    withdrawn = []
+    tombstoned = []
     failures = []
 
     TombstoneTargets.new(noid: noid, uuid: uuid).each do |target|
       response = tombstone(target.noid, reason)
       if response.success?
-        withdrawn << { 'noid' => target.noid, 'type' => target.klass }
+        tombstoned << { 'noid' => target.noid, 'type' => target.klass }
       else
         failures << "#{target.klass} #{target.noid}: #{failure_text(response)}"
       end
     end
 
     report(container: { noid: noid, klass: klass, title: title }, reason: reason,
-           withdrawn: withdrawn, failures: failures)
+           tombstoned: tombstoned, failures: failures)
   end
 
   private
@@ -51,15 +51,15 @@ class TombstoneCascadeJob < ApplicationJob
       "Atlas answered #{response.status}"
     end
 
-    def report(container:, reason:, withdrawn:, failures:)
+    def report(container:, reason:, tombstoned:, failures:)
       CompletionNotice.deliver(
         kind:         'tombstone_cascade',
         to_nuid:      Current.nuid,
         subject:      subject_for(container, failures),
-        body:         body_for(container, withdrawn, failures),
+        body:         body_for(container, tombstoned, failures),
         subject_noid: container[:noid],
         payload:      { subject_type: container[:klass], subject_title: container[:title], reason: reason,
-                        withdrawn: withdrawn, failures: failures }
+                        tombstoned: tombstoned, failures: failures }
       )
     end
 
@@ -68,12 +68,12 @@ class TombstoneCascadeJob < ApplicationJob
       %(#{container[:klass]} “#{container[:title]}” #{verb})
     end
 
-    def body_for(container, withdrawn, failures)
-      lines = ["#{withdrawn.size} item#{'s' unless withdrawn.size == 1} withdrawn, " \
+    def body_for(container, tombstoned, failures)
+      lines = ["#{tombstoned.size} item#{'s' unless tombstoned.size == 1} deleted, " \
                "#{container[:klass].downcase} included."]
-      lines += ['', 'These could not be withdrawn and are still live:', *failures] if failures.any?
+      lines += ['', 'These could not be deleted and are still live:', *failures] if failures.any?
       lines += ['', 'There is no one-step restore. To bring these back, ask the development team: ' \
-                    'this entry lists every item withdrawn.']
+                    'this entry lists every item deleted.']
       lines.join("\n")
     end
 end

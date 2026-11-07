@@ -12,7 +12,9 @@ class Sentinel < ApplicationRecord
   # reordering this array changes what the validation below means.
   IMAGE_LADDER = %w[small medium large service original].freeze
 
-  INDEPENDENT = %w[audio video pdf].freeze
+  # Atlas's per-file tiers. Captions have none: they follow the Work. `generic`
+  # catches every file type not named here.
+  INDEPENDENT = %w[audio video pdf archive spreadsheet structured_text presentation text generic].freeze
 
   # Every gateable tier. Thumbnails are deliberately absent — they are the open
   # display pipe, public by construction.

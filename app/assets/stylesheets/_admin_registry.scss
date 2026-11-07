@@ -178,6 +178,24 @@
     font-variant-numeric: tabular-nums;
   }
 
+  // A row's parent named again after the row that links it. Plain text, not a
+  // second link: a grey link would have to keep its underline. The ellipsis
+  // clips only the display; the full title stays in the DOM for readers.
+  &__repeat {
+    display: inline-block;
+    max-width: 14rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+    font-size: 0.85rem;
+    color: $text-subtle;
+
+    @include media-breakpoint-down(sm) {
+      max-width: 8rem;
+    }
+  }
+
   // Raw OCFL version label sitting under the revision ordinal — a borderless,
   // muted footnote to the primary chip. Kept for debugging (the OCFL vN can
   // skip when preservation-envelope bumps consume versions); the revision
@@ -226,7 +244,7 @@
     }
 
     // Purge borrows the audit ledger's tombstone red rather than minting a
-    // deeper one. A withdrawal and a purge are the same kind of act at
+    // deeper one. A tombstone and a purge are the same kind of act at
     // different depths, so they share a hue; the weight that separates them
     // belongs to the confirm modal and the label, which a shade cannot carry.
     &--purge:hover {
@@ -437,7 +455,7 @@
   }
 }
 
-// Tombstone registry filters: search, a withdrawal date range and the page
+// Tombstone registry filters: search, a tombstone date range and the page
 // size on one row, wrapping to a stack at narrow widths. Search takes the
 // slack so the date inputs keep their native width.
 .tombstone-filters {
@@ -452,14 +470,15 @@
 }
 
 // The checkbox column stays as narrow as its box.
-.admin-registry-table .tombstone-select {
+.admin-registry-table .bulk-select-cell {
   width: 1%;
   padding-right: 0;
 }
 
-// Bulk actions for the checked rows, laid out as a form footer: the buttons
-// first, then how many rows they act on.
-.tombstone-bulk {
+// Bulk actions for the checked rows (bulk_select_controller.js), laid out as a
+// form footer: the buttons first, then how many rows they act on. Shared by the
+// Retracted items registry and the inbox.
+.bulk-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;

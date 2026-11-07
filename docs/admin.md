@@ -86,14 +86,14 @@ So there is no lifecycle on these rows and no update path.
 ### Why one table
 
 Requests and activity share it because nothing structural separates them. Take
-a request ("somebody asked for this work to be withdrawn") and an event ("a
+a request ("somebody asked for this work to be deleted") and an event ("a
 cascade finished"). Both are an attributed fact with a subject and some detail.
 They differ only in which question a reader is asking. That is exactly what the
 ledger tabs are: a filter on `kind`.
 
 | Family | Constant | What it holds |
 |---|---|---|
-| Requests | `REQUEST_KINDS` | what a depositor may ask staff to do but cannot do themselves: `request_withdraw`, `request_move`, `request_restrict` |
+| Requests | `REQUEST_KINDS` | what a depositor may ask staff to do but cannot do themselves: `request_delete`, `request_move`, `request_restrict` |
 | Activity | `ACTIVITY_KINDS` | what the repository did on its own account: `load_report`, `work_completion_mismatch`, `visibility_cascade`, `set_reindex`, `showcase_promotion`, `set_privatize` (nothing writes it; kept so existing rows render), `set_sentinel_apply` |
 | Digest | `DIGEST` | `daily_digest` — a whole day, summed up |
 
@@ -102,7 +102,7 @@ row is one event, and a page-sized summary among them buries them and reads badl
 itself.
 
 `request_action` strips the prefix off a request kind, giving the verb inside it:
-`withdraw`, `move`, `restrict`.
+`delete`, `move`, `restrict`.
 
 ### The payload
 
@@ -157,6 +157,7 @@ action between controllers.
 | Tombstone list, restore and bulk restore | `:admin` or the devolved-admin tier | Atlas grants `:restore` to both, in `apply_admin_delegate_abilities` |
 | Permanent delete and bulk delete | `:admin` only | Atlas omits `:destroy` from the delegate abilities, so a wider gate here only buys a 403 from Atlas |
 | Replace a file, roll back a version | `:admin` or the devolved-admin tier | Atlas grants Blob `:update` to every standard user, and its rollback checks `:update`. It grants `:read_versions` to the delegate tier |
+| Remove one file, restore a removed file | `:admin` or the devolved-admin tier | Atlas grants FileSet `:tombstone` and `:restore`, and the `tombstoned_assets` listing, to both. It sits on the Replace a file page, which already carries this gate |
 | Reindex a Work or a Set | `:admin` or the devolved-admin tier | Atlas applies no per-user check on this path at all |
 | The ledger | `:admin` or the devolved-admin tier | the same audience as deposit triage |
 | Work health lookup | `:admin` or the devolved-admin tier | Atlas allows its health check to both tiers, as `:read_health`. See `work-health.md` |
@@ -174,7 +175,7 @@ action between controllers.
 
 ## The removal reason
 
-The library's withdrawal policy requires a note on every withdrawn item, and it
+The library's removal policy requires a note on every tombstoned item, and it
 fixes the wording: five notes, held in `TombstoneReasons::ALL`. Atlas keeps the
 same list and answers `422 invalid_reason` for any other value. So a change to
 the wording needs an Atlas release as well.
@@ -190,12 +191,12 @@ The note is chosen in the Delete dialog on the show pages
   other value with it. A crafted request therefore cannot record "legal order".
 - **A cancelled deposit** records no note. The deposit's Cancel, My DRS and the
   triage "Cancel deposit" use the same tombstone route but send no `reason`,
-  because a Work that was never published has not been withdrawn from view.
+  because a Work that was never published has not been removed from view.
 
 Atlas returns the note as `tombstone_reason` and clears it on restore. The gone
 page joins it to the date from `tombstoned_at`: *"Sample Report" was removed
 from view at Northeastern University Library's discretion on September 30,
-2026.* An item withdrawn with no note says only that it has been removed. The
+2026.* An item tombstoned with no note says only that it has been removed. The
 tombstone row on the History tab shows the note too, because Atlas records it on
 the audit event.
 
@@ -203,7 +204,7 @@ the audit event.
 
 Atlas refuses to tombstone a Collection or Community that still holds a live
 member, so a plain Delete appears only on an empty one. For a container that
-holds items, `CascadeTombstoning` offers a delete that withdraws it and
+holds items, `CascadeTombstoning` offers a delete that tombstones it and
 everything live beneath it.
 
 | Who | May delete a non-empty |
@@ -213,7 +214,7 @@ everything live beneath it.
 | Anyone else with tombstone rights | Neither, so they keep the empty-only Delete |
 
 The confirmation (`shared/_tombstone_modal` with `cascade:`) counts what it will
-withdraw by type, through `TombstoneTargets#counts`. It asks for the removal
+tombstone by type, through `TombstoneTargets#counts`. It asks for the removal
 reason, says there is no one-step restore, and keeps its button disabled until
 the title is typed (`confirm-title` Stimulus controller). Formatting and spacing
 do not count, because a title can carry sub- and superscript markup. The server
@@ -223,28 +224,28 @@ no form, only a pointer to the development team.
 
 `TombstoneCascadeJob` does the work. `TombstoneTargets` walks the subtree
 deepest first, as the narrowing walk does, widened to communities and limited to
-what is not already withdrawn, and the job tombstones each with the one reason.
+what is not already tombstoned, and the job tombstones each with the one reason.
 Linked members are not part of the structural subtree, so they stay untouched. A
 lock conflict is retried in place, not through `retry_on`, because a re-run
-would rebuild the walk without what it had already withdrawn. A container
+would rebuild the walk without what it had already tombstoned. A container
 refuses while a member beneath it failed, so a failure leaves the path above it
-live, not half-withdrawn.
+live, not half-tombstoned.
 
 ### The top-level communities cannot be deleted
 
 The repository root and the People Community have no parent, and the whole
-tree hangs from them. Atlas refuses to withdraw, purge or move either one
+tree hangs from them. Atlas refuses to tombstone, purge or move either one
 (`top_level_community`), on the API only: a developer at the console still can.
 `CommunitiesController` offers no Delete on either, and refuses the tombstone
 request before anything else. That order matters for the cascade, because
-`TombstoneCascadeJob` withdraws the container last. If the request reached the
+`TombstoneCascadeJob` tombstones the container last. If the request reached the
 job, Atlas would refuse the root only after everything beneath it was gone. The
 Move tool refuses the root the same way (`Admin::ReparentController::ROOT_REFUSED`).
 
 ### There is no cascading restore
 
 On purpose. A restore that put everything back would have to tell this delete's
-tombstones from items withdrawn earlier, for policy, and must not resurrect
+tombstones from items tombstoned earlier, for policy, and must not resurrect
 those. Restoring is rare and consequential enough to want the development team.
 So the job records one `tombstone_cascade` ledger entry, through
 `CompletionNotice`, whose payload lists every NOID it withdrew, with its type,
@@ -255,27 +256,27 @@ container's PID, select everything, and restore. See "Bulk restore and bulk
 delete" below.
 
 The Requests & activity row shows only the summary. The list is in the
-`AdminNotice` payload, under `withdrawn`, as `{ "noid", "type" }` pairs, with
+`AdminNotice` payload, under `tombstoned`, as `{ "noid", "type" }` pairs, with
 `failures`, `reason`, `subject_type` and `subject_title` beside it.
 
 #### Restoring a cascade at the console
 
-The job withdraws deepest first and appends each item as it goes, so the list
+The job tombstones deepest first and appends each item as it goes, so the list
 runs leaf to container. Restoring it in reverse puts each parent back before its
 children, which is the order Atlas requires. Run it as an admin, so Atlas
 records who restored each item:
 
 ```ruby
 notice = AdminNotice.where(kind: 'tombstone_cascade', subject_noid: '<container noid>').last
-notice.detail(:withdrawn).reverse_each do |item|
+notice.detail(:tombstoned).reverse_each do |item|
   response = AtlasRb::Admin::Resource.restore(item['noid'], nuid: '<admin nuid>')
   puts "#{item['type']} #{item['noid']}: #{response.status}"
 end
 ```
 
-Restore only what the list names. An item withdrawn before the cascade is
+Restore only what the list names. An item tombstoned before the cascade is
 absent from it on purpose, and its own tombstone still stands. A container that
-had live members the job could not withdraw is on `failures`, not `withdrawn`,
+had live members the job could not tombstone is on `failures`, not `tombstoned`,
 and was never tombstoned. Each restore clears that item's removal reason and
 records a restore on its History tab.
 
@@ -284,8 +285,25 @@ records a restore on its History tab.
 `Admin::TombstonesController` is the registry: the staff counterpart to the
 tombstone ("Delete") action on the show pages. It lists every tombstoned Work,
 Collection and Community, and offers the two ways out. Restore reverses the
-withdrawal; permanent delete finishes it. Only a full admin sees the delete
+tombstone; permanent delete finishes it. Only a full admin sees the delete
 button.
+
+### What the interface calls it
+
+The code says "tombstone" throughout, and the screens do not. Each audience
+gets one word for the reversible removal, chosen with the librarians:
+
+| Audience | Wording |
+|---|---|
+| Anyone who removes or asks to remove something: the show-page link, its dialog and flash, the depositor's request, cancelling a deposit | **Delete**. To the person doing it, an item they can no longer find is gone. |
+| Staff in the admin tools: the registry, its dashboard card and breadcrumb, History, refusals, the ledger | **Retracted**, and **Restore** to undo it. The registry is "Retracted items". |
+| The irreversible purge | **Permanently delete**, the only "delete" that cannot be restored |
+| Visitors, on the gone page | **Removed**, with the reason |
+
+"Withdraw" appears on no screen: librarians read "withdrawn" as deaccessioned,
+which is the opposite of reversible. "Tombstone" names only the gone page, and
+only among staff. The code says "tombstone" too: routes, classes and Solr fields
+such as `tombstoned_bsi`. Atlas's API names follow Atlas.
 
 The two gates mirror Atlas's `Ability` exactly. Restore is an operator verb, so
 Atlas grants it alongside `:reparent` in `apply_admin_delegate_abilities`, not
@@ -318,7 +336,7 @@ the same way.
 
 `TombstonedItems` pages 50 rows at a time by default; `per_page` picks 10, 20,
 50 or 100, and any other value falls back to 50. With no search it sorts by
-`tombstoned_at_dtsi` descending, the withdrawal time, so the item just withdrawn
+`tombstoned_at_dtsi` descending, the tombstone time, so the item just tombstoned
 in error comes first. A record tombstoned before Atlas stored that field has no
 value until it is reindexed, and sorts last.
 The `q` param searches titles and PIDs, and ranks by relevance instead. v1 holds
@@ -349,12 +367,12 @@ without bound.
 
 When the reads find descendants, the listing becomes an identity filter
 (`MembershipQuery.identity_fq`) over the matches and their descendants, sorted
-by withdrawal time like the unfiltered list. When it finds none, the search runs
+by tombstone time like the unfiltered list. When it finds none, the search runs
 as a plain relevance-ranked query.
 
-### The withdrawal date filter
+### The tombstone date filter
 
-`from` and `to` narrow the list by withdrawal date, both inclusive, as a range
+`from` and `to` narrow the list by tombstone date, both inclusive, as a range
 on `tombstoned_at_dtsi` in whole UTC days. The upper bound is the start of the
 day after `to`, exclusive. A date the controller cannot parse is ignored rather
 than refused. Atlas also indexes the date as the string `tombstoned_at_ssi`;
@@ -429,7 +447,7 @@ reads `code`.
 them here. The tombstone refusal counts only live members. The two differ
 because a purge cannot be undone, so a member left behind is orphaned for good.
 The message spells this out, since "empty it first" reads as already done to an
-admin looking at a container whose children are all withdrawn. The purge
+admin looking at a container whose children are all tombstoned. The purge
 confirmation carries the same caveat for a Collection or Community
 (`tombstone_purge_confirm`).
 
@@ -489,6 +507,32 @@ filename.
 
 The acting user's NUID flows ambiently through `Current.nuid` and propagates
 into the enqueued jobs.
+
+## Removing one file from a Work
+
+The same page removes one file while the Work and its other files stay up, for
+example a transcript beside a video. Removal is reversible: `remove` tombstones
+the file's FileSet (`AtlasRb::Resource.tombstone`), and `restore` brings it back
+(`AtlasRb::Admin::Resource.restore`). It is a separate act from retracting the
+whole Work. The caption flow on the Work Edit page uses the same two calls.
+
+- **The FileSet goes as a whole.** A FileSet can hold more than one Blob, such as
+  an original and a rendition, so the confirm names everything stored with the
+  file.
+- **The last file is refused.** Removing a Work's only FileSet would leave an
+  empty Work, which is taking the whole Work down. `ONLY_FILE_REFUSED` points
+  to deleting the Work instead.
+- **Both ids are checked against the Work.** `remove` takes a Blob from the
+  Work's current assets, and `restore` takes a FileSet from its
+  `tombstoned_assets`, so neither can be pointed at another Work's file.
+
+Atlas's `/assets` drops a tombstoned FileSet, so the file leaves the work page,
+the downloads modal, the download queue and the zip downloads at once. Atlas
+also refuses the removed file's bytes below the operator tiers, so a link
+someone kept answers "not found". `docs/downloads.md` covers that refusal. Atlas
+records the tombstone and the restore as file events on the Work, which the
+History tab shows. Removed files are listed at the bottom of the page, with who
+removed them and when.
 
 ## Reindexing a Work or a Set
 
@@ -604,7 +648,7 @@ never touched here.
 | `add` | POST a linked membership, then return to `manage` |
 | `remove` | DELETE a linked membership, then return to `manage` |
 
-Removing is distinct from withdrawing the Work. It drops a discovery placement
+Removing is distinct from tombstoning the Work. It drops a discovery placement
 only; the Work and its home are untouched.
 
 `add` and `remove` both redirect to `manage`, which re-reads the live linked

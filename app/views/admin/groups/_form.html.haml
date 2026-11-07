@@ -12,13 +12,25 @@
     %h3.admin-registry-form__section-title
       %i.fa-solid.fa-tags{'aria-hidden' => 'true'}
       Group name
-    .mb-3
-      = f.label :raw, 'Grouper group', class: 'admin-registry-form__label' do
-        %i.fa-solid.fa-user-group{'aria-hidden' => 'true'}
-        Grouper group
-      = f.text_field :raw, class: 'form-control admin-registry-form__input--id', placeholder: 'northeastern:drs:repository:loaders:marcom', autocomplete: 'off'
-      .admin-registry-form__hint
-        The raw colon-separated Grouper identifier, exactly as it appears on user and object records.
+    -# The string is the key every display name is looked up by, so a saved row
+    -# keeps it; the update action does not permit it either.
+    - if @group.persisted?
+      %dl.admin-registry-form__readout
+        %dt
+          %i.fa-solid.fa-user-group{'aria-hidden' => 'true'}
+          Grouper group
+        %dd
+          %span.admin-registry-table__id= @group.raw
+          .admin-registry-form__hint
+            This can’t be changed. To use this display name for a different group, delete this entry from the Group names list and create a new one.
+    - else
+      .mb-3
+        = f.label :raw, 'Grouper group', class: 'admin-registry-form__label' do
+          %i.fa-solid.fa-user-group{'aria-hidden' => 'true'}
+          Grouper group
+        = f.text_field :raw, class: 'form-control admin-registry-form__input--id', placeholder: 'northeastern:drs:repository:loaders:marcom', autocomplete: 'off'
+        .admin-registry-form__hint
+          The raw colon-separated Grouper identifier, exactly as it appears on user and object records. It can’t be changed once saved.
     .mb-0
       = f.label :cosmetic, 'Display name', class: 'admin-registry-form__label' do
         %i.fa-solid.fa-id-card{'aria-hidden' => 'true'}

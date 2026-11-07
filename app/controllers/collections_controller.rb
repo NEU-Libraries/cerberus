@@ -9,9 +9,11 @@ class CollectionsController < CatalogController
   include ContainerRestrictionRequest
   include CascadeTombstoning
   include SentinelForm
+  include TitleBrowseSort
 
   atlas_resource AtlasRb::Collection, key: :collection, route: :collection
   authorize_resource_writes!(extra_edit: %i[sentinel request_restriction])
+  title_browse_on :show
   after_action :record_view_impression, only: :show
 
   # Scope the inherited Blacklight index to Collections only (see

@@ -6,7 +6,7 @@
 // resolution ladder (Small, widest audience, at the top down to Original,
 // narrowest, at the bottom), so the monotonicity rule reads as vertical
 // structure — a quiet left rail is the resolution axis. The other renditions
-// (audio/video/pdf) gate independently, so they list without a rail. Same
+// (audio, video, PDF and the other file types) gate independently, so they list without a rail. Same
 // restrained register as the audit ledger — no card candy, no gradients.
 // ---------------------------------------------------------------------
 
@@ -22,7 +22,7 @@
   margin-bottom: 0.35rem;
 }
 
-// The independent-media group carries no resolution rail (audio/video/pdf don't
+// The independent-media group carries no resolution rail (file types don't
 // rank), but shares the ladder's left inset so both groups' rows align.
 .derivative-independent {
   padding-left: 1rem;

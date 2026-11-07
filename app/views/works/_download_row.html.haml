@@ -8,7 +8,7 @@
 -# redirects to a signed URL — rather than linking the URI directly. They are
 -# always image renditions, so they take the image icon even though the
 -# pointer-only delegate carries no mime type.
-- display_label = CaptionTrack.caption?(file) ? CaptionTrack.download_label(file) : (file.label.presence || file[:use])
+- display_label = download_label(file)
 - icon = file[:uri].present? ? file_type_icon('image/jpeg') : file_type_icon(file.mime_type)
 %li.list-group-item.d-flex.align-items-center
   %span.fa-regular{class: icon, 'aria-hidden' => true}
@@ -30,6 +30,9 @@
       -# Read aloud as "about 59 KB"; the tilde alone would be read as "tilde".
       %small.text-muted.text-nowrap{title: 'Estimated size'}
         = safe_join([tag.span('~', 'aria-hidden': 'true'), tag.span('about ', class: 'visually-hidden'), number_to_human_size(estimate, precision: 2)])
+    -# A signal only. The versions themselves are in the File history card.
+    - if local_assigns[:revisions].present?
+      %span.file-version-chip= "Version #{revisions.first['revision']}"
   - if file[:uri].present?
     = link_to derivative_download_path(work_noid, file[:role]), class: 'btn btn-tonal-primary btn-sm ms-3', 'aria-label' => "Download #{display_label}", target: '_blank', rel: 'noopener' do
       %span.fa-solid.fa-download{'aria-hidden' => true}

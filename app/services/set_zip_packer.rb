@@ -45,6 +45,10 @@ class SetZipPacker
         return
       end
 
+      pack_assets(zip, noid, manifest, errors)
+    end
+
+    def pack_assets(zip, noid, manifest, errors)
       AtlasRb::Work.assets(noid, nuid: @nuid).each do |asset|
         next unless content_blob?(asset)
 
@@ -54,6 +58,8 @@ class SetZipPacker
           errors << "#{noid}: withheld — #{asset[:use].presence || asset.noid} is not available to download"
         end
       end
+    rescue AtlasRb::TombstonedError
+      errors << withheld_as_removed(noid)
     end
 
     # Solr stores the noid in `alternate_ids_ssim` as `id-<noid>`.

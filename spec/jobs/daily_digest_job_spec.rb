@@ -24,7 +24,7 @@ RSpec.describe DailyDigestJob do
 
   describe 'the counts' do
     it 'counts the requests made on the day, and not those made on another' do
-      notice_on(day, kind: 'request_withdraw', actor: '000000010')
+      notice_on(day, kind: 'request_delete', actor: '000000010')
       notice_on(day, kind: 'request_move', actor: '000000010')
       notice_on(day - 1, kind: 'request_restrict', actor: '000000010')
 
@@ -82,6 +82,18 @@ RSpec.describe DailyDigestJob do
       expect(showcases['entries'].pluck('title')).to contain_exactly('reef.csv', 'slides.pptx')
       expect(showcases['entries'].first['community']).to eq('Marine Science')
       expect(showcases['truncated']).to eq(0)
+    end
+
+    # Taking a work off one community's showcase is not a publication.
+    it 'does not count a removal as a promotion' do
+      notice_on(day, kind: 'showcase_promotion', outcome: 'promoted', work_title: 'reef.csv')
+      notice_on(day, kind: 'showcase_promotion', outcome: 'removed', work_title: 'reef.csv')
+
+      described_class.perform_now(day)
+
+      showcases = AdminNotice.find_by(kind: 'daily_digest').detail(:showcases)
+      expect(showcases['promoted']).to eq(1)
+      expect(showcases['entries'].pluck('outcome')).to contain_exactly('promoted', 'removed')
     end
 
     it 'caps the list and counts the rest, so the digest stays readable' do

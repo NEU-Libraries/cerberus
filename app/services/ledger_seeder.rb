@@ -85,7 +85,7 @@ class LedgerSeeder
     # One of each kind, including a community restriction — the row carrying the
     # remedy note, and the only one a delegate is told they cannot act on.
     def seed_requests
-      request(works[0], 'request_withdraw', 'Work', 6, 'Superseded by the 2026 edition.')
+      request(works[0], 'request_delete', 'Work', 6, 'Superseded by the 2026 edition.')
       request(works[1], 'request_move', 'Work', 4, 'Should sit under Engineering Theses.')
       request(container('Collection', 'Working Papers'), 'request_restrict', 'Collection', 2,
               'Archives staff only, please.')

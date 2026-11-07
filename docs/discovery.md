@@ -21,6 +21,10 @@ Source files:
 - `app/controllers/concerns/community_showcases.rb`
 - `app/controllers/my_drs_controller.rb`
 - `app/controllers/concerns/show_scoped_search.rb`
+- `app/controllers/concerns/title_browse_sort.rb`
+- `app/controllers/concerns/whole_tree_search.rb`
+- `app/controllers/concerns/anonymous_match_all.rb`
+- `app/components/cerberus/constraints_component.rb`
 - `app/controllers/concerns/without_facet_modal.rb`
 
 Three neighbouring pages carry the machinery these files reuse:
@@ -167,27 +171,46 @@ title, which provisioning does not produce, resolves last-writer-wins.
 The finder first resolves the community's noid to its uuid through
 `alternate_ids_ssim`, because the structural parent edge holds the uuid.
 
-### Changing a Work's showcase category
+### Changing a Work's showcases
 
-The Work Edit page offers a Showcase category choice when the Work is already
-in a genre showcase. The Work's depositor and admins see it. Nobody else does,
+A Work can appear in the showcases of several communities, for example when its
+depositor teaches in two departments. It always has **one** category: a
+dissertation is not also a dataset. So it sits in the same genre's showcase in
+each community.
+
+The Work Edit page has a Showcase section when the Work is already in at least
+one genre showcase. The Work's depositor and admins see it. Nobody else does,
 because Atlas links a Work into a showcase only on its depositor's behalf.
 `WorkShowcaseCategory` makes every change, a depositor's own included, through
 `AtlasRb::System::Work` with `on_behalf_of` set to the depositor.
 
-`WorkShowcase` reads where the Work is now. Atlas's `find_many` digest carries
-neither `featured` nor a parent. So `WorkShowcase` takes the Work's linked
-collections from `AtlasRb::Work.linked_members`, then asks Solr which one is a
-featured genre showcase and which community holds it. A Work an admin has
-linked into two showcases reports the first one Solr returns. `ShowcaseFinder`
-then lists the community's other showcases. A depositor is never offered a
-staff-only genre (`FeaturedContent::STAFF_ONLY`), as at deposit.
+`WorkShowcase` reads where the Work is now, as one `Placement` per community.
+Atlas's `find_many` digest carries neither `featured` nor a parent. So
+`WorkShowcase` takes the Work's linked collections from
+`AtlasRb::Work.linked_members`, asks Solr which of them are featured genre
+showcases, and resolves all their communities in one more query.
+`ShowcaseFinder` then lists each community's showcases.
 
-The swap adds the new link before it removes the old one. If the second call
-fails, the Work sits in both showcases, which an admin can see and fix. Removing
-first could leave it in neither. Every change reaches the admin ledger as a
-`showcase_promotion` `AdminNotice`, like a publish at deposit. An Atlas refusal
-is recorded too, with the outcome `refused`.
+The section offers two changes:
+
+- **A new category.** The select offers only the genres that every one of the
+  Work's communities has a showcase for, so a move can land in all of them. A
+  depositor is never offered a staff-only genre (`FeaturedContent::STAFF_ONLY`),
+  as at deposit. The move applies in every community. Each swap adds the new
+  link before it removes the old one: if the second call fails, the Work sits in
+  both showcases, which an admin can see and fix, and never in neither. If a
+  move fails in some communities, the alert names them.
+- **Remove from one community.** Each community has a Remove button, which
+  posts to `remove_showcase` (`DELETE /works/:id/showcase`) through the empty
+  `remove-showcase` form outside the metadata form. The id must name one of the
+  Work's own showcases. The Work stays in the repository and in its other
+  communities' showcases.
+
+Every change reaches the admin ledger as a `showcase_promotion` `AdminNotice`,
+like a publish at deposit, with the outcome `promoted` for a move, `removed` for
+a removal and `refused` for an Atlas refusal. The ledger row and the daily
+digest list a removal under its own wording, and the digest does not count it
+as a publication.
 
 ## The community landing page
 
@@ -207,9 +230,134 @@ Communities, and only the index action. Two things depend on that split:
 
 The index is the homepage's Communities gateway, so it has its own view,
 `communities/index`, with the People index's heading well and a search scoped to
-communities. With no query it sorts by title, as v1's did, because relevance has
-nothing to rank and would list communities in the order they were made. A query
-keeps relevance.
+communities. With no query it lists by title; see "Browsing by title" below.
+
+### Browsing by title
+
+The `/communities` index and every collection and community page list by title
+when there is no query and no chosen sort, as v1's did. A query keeps relevance,
+and a sort the visitor picks always wins. The global catalog keeps relevance as
+its default.
+
+Relevance is the first sort field, so it is Blacklight's default everywhere.
+With no query every item scores the same, and relevance's `created_at_dtsi desc`
+tie-break lists the newest items first.
+
+`TitleBrowseSort` holds the rule. An includer names its actions with
+`title_browse_on`: `CommunitiesController` names `:index` and `:show`, and
+`CollectionsController` names `:show`. `SearchState#sort_field` asks the
+controller for its `browse_sort_key` only when the request has no `sort` param.
+
+The default is chosen in `sort_field` and is never written into params. That
+matters because every link Blacklight builds comes from the search state: facet,
+sort, per-page and pagination links. A default written into params rides those
+links as `sort=title`. A visitor who then clicks a facet and types a search
+would get the search sorted by title, as if they had picked it. Left out of
+params, the next request with a `q` falls back to relevance.
+
+Blacklight's Sort dropdown marks the field that matches the sort Solr actually
+ran, so it shows "title" on a plain browse with no extra work. A community page
+is the exception; see "Showcases first on a community page" below.
+
+### Showcases first on a community page
+
+A community page with no keyword, no facet and no picked sort lists, in order:
+
+1. The community's own showcases, in `FeaturedContent::GENRES` order: the
+   homepage gateways' order.
+2. The Faculty & Staff row, when the community has affiliated people.
+3. Everything else, by title.
+
+This applies to a plain browse and to an empty search alike, as v1's genre rows
+did. A keyword, a facet or a picked sort turns it off, and the page sorts as it
+otherwise would. Only the page's own showcases float. A descendant community's
+showcases share the same genre titles, so on an empty search they sort by title
+with everything else.
+
+`CommunityShowcases#showcases_first_sort` builds a Solr function sort: a weight
+for each showcase id, highest first, then `title_ssi asc`. It goes to
+`find_children` as `sort:`, which replaces the sort in that Solr request alone.
+The search state keeps naming title, so no link carries the function sort.
+
+That leaves Blacklight's dropdown with nothing to match, because no sort field
+declares the function sort, and it would mark "relevance". So
+`CommunitiesController` answers `current_sort_field` from the search state.
+
+The showcases are at most seven rows, so they always land on page 1. The empty
+showcases an admin sees float with the rest, in the same order.
+
+### An empty search covers the whole tree
+
+A collection or community page lists its contents in one of two ways:
+
+| Request | Lists |
+|---|---|
+| The page opened, or narrowed by a facet alone | Direct members: one level of the tree |
+| Any search, an empty one included | The whole subtree: every descendant container, and every Work in or linked into any of them |
+
+`WholeTreeSearch#subtree_search?` makes the switch, and it tests for a `q` in
+the URL, not a present one. Submitting the box empty sends `q=`, and v1's
+community page treated that the same way (`!params[:q].nil?`).
+
+The empty search widens only for a signed-in user. An anonymous visitor who
+submits the box empty, or types `*` or `*:*`, gets the one-level list. From the
+root community, a match-all search lists the whole repository; see "Match-all
+queries are for signed-in users" below. A real keyword searches the whole tree
+for everyone, as it always has.
+
+A blank `q` survives into the page's links because Blacklight drops only nil
+params. So a facet, sort or page link from an empty search keeps `q=`, and page
+2 stays on the whole tree. The scoped facet modal reads the same
+`child_membership_filters`, so its counts follow too.
+
+A facet without a search narrows the current level only, as v1's did. Clicking a
+facet does not widen the page.
+
+The whole-tree listing includes linked members, as a keyword search already
+does. v1 had no linked members: its genre rows were canned queries over the
+community's employees' files.
+
+Blacklight treats a blank `q` as no constraint, so on its own the page would
+list the whole tree with nothing to say so. `Cerberus::ConstraintsComponent`
+adds an "Everything in this collection" (or community) chip, labelled by
+`whole_tree_label`, and the "Search results" heading shows as for any search.
+The chip's remove link is the keyword chip's: the state without `q`, which keeps
+any facet and returns to the one-level view.
+
+Two other rules read a present `q`, not a blank one, and so treat an empty search
+as a browse:
+
+- The title sort default (see "Browsing by title" above). There is no keyword to
+  rank by relevance.
+- The Faculty & Staff row stays at the top. v1 showed its row on page 1 with no
+  rendered constraints, and rendered none for a blank `q`.
+
+### Match-all queries are for signed-in users
+
+A query that matches everything lists the whole repository, which makes it an
+easy path for a scraper to enumerate every record. `AnonymousMatchAll` keeps
+those queries for signed-in users. A match-all query is a missing or blank `q`,
+or one made only of stars and colons. edismax answers `*` and `*:*` with every
+document, so they list everything just as a blank box does.
+
+| Surface | Anonymous match-all query |
+|---|---|
+| `/catalog`, with no facet | Refused with the 403 page, which offers sign-in |
+| `/catalog`, with a facet | Listed. A Work's metadata links browse this way (`ModsBrowseLinks`) |
+| A collection or community page | The one-level list, not the whole tree |
+
+v1 had the same idea: `catalog#index` refused an anonymous `q=*` outright, and
+showed a recent-items page rather than a full listing when there was no search.
+
+Only the catalog's own index is refused. Its subclasses inherit `#index` for
+public listings, `/communities` among them, and those stay open. The refusal
+also catches the header search box submitted empty, the Start over button, and
+removing the last chip on a catalog search. Each of those lands on a
+match-all `/catalog`.
+
+A facet listing can still be paged through to the end of its slice. Limiting
+that is left to traffic rules, as v1's `rack_attack` bans did, rather than to
+the app.
 
 ### Hiding empty showcases
 
@@ -251,7 +399,7 @@ any live member remains. A showcase Collection is a live member even when it is
 empty and therefore hidden from the listing.
 
 A test of the listing alone would offer Delete on a community reading "This
-community is empty". The delete would then fail and tell the reader to withdraw
+community is empty". The delete would then fail and tell the reader to delete
 contents they could not see. So `deletable?` requires both an empty listing and
 no showcases.
 
@@ -262,9 +410,10 @@ have no showcases.
 
 ### The Faculty & Staff row
 
-A community with affiliated People gets a synthetic "Faculty & Staff" row at
-the top of its browse (`prepend_faculty_staff_entry`). It is rendered through the normal Blacklight pipeline, so
-it matches the list and gallery rows exactly.
+A community with affiliated People gets a synthetic "Faculty & Staff" row near
+the top of its browse (`prepend_faculty_staff_entry`): after any floated
+showcases, where v1 put it, or first when none float. It is rendered through the
+normal Blacklight pipeline, so it matches the list and gallery rows exactly.
 
 It appears only on the unfiltered first page, mirroring v1's `current_page == 1
 && no constraints`. It drops out as soon as the visitor searches within the
@@ -409,7 +558,7 @@ comes from `DepositorContext`, which the deposit fork shares.
 
 | Panel | Query | Why it is here |
 |---|---|---|
-| Account switcher | `AtlasRb::User.accounts` | The staff and student logins under one NUID. The view renders it only when there is more than one. An Atlas fault degrades to an empty list, so a hiccup costs the panel rather than the page |
+| Account switcher | `AtlasRb::User.accounts` | The staff and student logins under one NUID. The view renders it only when there is more than one. An Atlas fault degrades to an empty list, so a hiccup costs the panel rather than the page. So does a refusal: under View as the lookup carries the real person's credentials, and Atlas refuses it to a delegated admin, who then sees the target's My DRS without the panel |
 | Workspace collections | `DepositorContext#workspace_collections`, ungated | Non-showcase Collections under the Person's `personal_root_id`, newest first. Scoping to the personal root, not to every Collection this person deposited into, stops an admin who seeded the institutional tree from "owning" all of it |
 | Published | Showcase lookup, then per-showcase membership | Grouped by category |
 | Deposits to finish | `in_progress_bsi:true`, matching `depositor_ssi` or `proxy_uploader_ssi` | Deposits this person started and never confirmed, including ones a proxy uploader started for someone else. My DRS is the only place they can find one: an unfinished deposit is hidden from general discovery, and its depositor is the one person who can finish it |

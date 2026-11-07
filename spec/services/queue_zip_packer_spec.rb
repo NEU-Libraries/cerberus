@@ -39,6 +39,8 @@ RSpec.describe QueueZipPacker do
         .with('work1').and_return(AtlasRb::Mash.new('embargo' => (Date.current + 30).to_s))
       allow(AtlasRb::Work).to receive(:assets)
         .and_return([blob(noid: 'blobA', filename: 'pdf_blobA.pdf', mime_type: 'application/pdf')])
+
+      allow(AtlasRb::Blob).to receive(:content).with('blobA').and_yield('bytes')
     end
 
     it 'packs none of its bytes for a caller who cannot bypass' do
@@ -133,6 +135,22 @@ RSpec.describe QueueZipPacker do
     errors = zip.entries.find { |e| e.name == 'ERRORS.txt' }
     expect(errors).to be_present
     expect(errors.body).to include('work1')
+  end
+
+  # Atlas refuses a retracted Work's file list below the operator tiers.
+  it 'names a retracted work as withheld and still packs the next work' do
+    items = [{ 'w' => 'work1', 'b' => 'blobA' }, { 'w' => 'work2', 'b' => 'blobC' }]
+    allow(AtlasRb::Work).to receive(:assets).with('work1', nuid: nil).and_raise(
+      AtlasRb::TombstonedError.new({ 'error' => 'tombstoned', 'tombstoned_resource_type' => 'Work',
+                                     'tombstoned_resource_id' => 'work1' })
+    )
+    allow(AtlasRb::Work).to receive(:assets).with('work2', nuid: nil).and_return([blob(noid: 'blobC', filename: 'c.jpg')])
+    allow(AtlasRb::Blob).to receive(:content).with('blobC').and_yield('c')
+
+    described_class.new(items: items, nuid: nil, ability: ability).pack(zip)
+
+    expect(names).to include('work2/c.jpg')
+    expect(zip.entries.find { |e| e.name == 'ERRORS.txt' }.body).to eq('work1: withheld — removed from view')
   end
 
   it 'writes a trailing inventory.csv' do

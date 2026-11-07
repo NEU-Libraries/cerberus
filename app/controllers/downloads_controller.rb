@@ -7,6 +7,7 @@ class DownloadsController < ApplicationController
   include RecordsImpressions
   include DerivativesHelper
   include ZipKit::RailsStreaming
+  include StreamsBlob
 
   # Atlas's Classification.generic.name. Branch on the classification, never on
   # the "Zip File" download label: that label is shared with genuine archive
@@ -27,13 +28,11 @@ class DownloadsController < ApplicationController
   private
 
     def download_raw(blob)
-      response.headers['Content-Type'] = blob.mime_type
-      response.headers['Content-Disposition'] =
-        ActionDispatch::Http::ContentDisposition.format(disposition: 'attachment', filename: blob.filename)
-
-      AtlasRb::Blob.content(params[:id]) { |chunk| response.stream.write(chunk) }
-    ensure
-      response.stream.close
+      stream_blob(params[:id]) do
+        response.headers['Content-Type'] = blob.mime_type
+        response.headers['Content-Disposition'] =
+          ActionDispatch::Http::ContentDisposition.format(disposition: 'attachment', filename: blob.filename)
+      end
     end
 
     # zip_kit_stream sets the type and disposition and, since ProxyUnbuffered

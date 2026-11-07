@@ -308,6 +308,33 @@ RSpec.describe 'Admin::People', type: :request do
         expect(page.at_css('.admin-registry__count').text).to eq('1')
       end
 
+      # Save ends the page, where people look for it.
+      it 'puts the affiliations card first and Save details last' do
+        allow(AtlasRb::Person).to receive(:find).and_return(person)
+        allow(AtlasRb::Resource).to receive(:find_many).and_return([])
+
+        get edit_admin_person_path('cz8wbpk')
+
+        cards = response.parsed_body.css('.admin-registry')
+        expect(cards.first.at_css('.admin-registry__title').text).to include('Community affiliations')
+        expect(cards.last.css('input[type=submit]').last['value']).to eq('Save details')
+      end
+
+      # With the details card no longer first, the top of the page still has to
+      # say whose record it is.
+      it 'names the person in the first card and in the breadcrumb' do
+        allow(AtlasRb::Person).to receive(:find).and_return(person)
+        allow(AtlasRb::Resource).to receive(:find_many).and_return([])
+
+        get edit_admin_person_path('cz8wbpk')
+
+        page = response.parsed_body
+        expect(page.at_css('.admin-registry .admin-registry__who').text).to eq('David Cliff')
+        crumbs = page.css('nav[aria-label="breadcrumb"] .breadcrumb-item')
+        expect(crumbs.map { |li| li.text.strip }.last(3)).to eq(['Manage people', 'David Cliff', 'Edit'])
+        expect(crumbs[-2].at_css('a')['href']).to eq(person_path('cz8wbpk'))
+      end
+
       it 'runs the community picker when a query is present' do
         allow(AtlasRb::Person).to receive(:find).and_return(person)
         allow(AtlasRb::Resource).to receive(:find_many)
@@ -333,6 +360,19 @@ RSpec.describe 'Admin::People', type: :request do
                                   orcid: '0000-0002-1825-0097' } }
 
         expect(response).to redirect_to(edit_admin_person_path('cz8wbpk'))
+      end
+
+      it "explains Atlas's refusal of a blank name on the form" do
+        refusal = AtlasRb::ResourceError.new(
+          '422', response: instance_double(Faraday::Response, status: 422, body: '{"error":"blank_display_name"}')
+        )
+        allow(AtlasRb::Person).to receive(:find).and_return(person)
+        allow(AtlasRb::Person).to receive(:update).and_raise(refusal)
+
+        patch admin_person_path('cz8wbpk'), params: { person: { display_name: '' } }
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include('Enter a display name.')
       end
 
       # Otherwise a rename waits out NuidResolver's 12-hour cache.

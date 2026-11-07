@@ -18,7 +18,7 @@
 # Exhausting the retries leaves the Work in_progress. That is the correct
 # outcome, not a failure to paper over: the deposit genuinely has no primary
 # file, so it stays out of public discovery and appears on the needs-attention
-# list for someone to finish or withdraw.
+# list for someone to finish or tombstone.
 class ConfirmDepositJob < ApplicationJob
   include PrimaryFilePresence
 

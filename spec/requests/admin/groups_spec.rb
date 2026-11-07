@@ -126,6 +126,32 @@ RSpec.describe 'Admin::Groups', type: :request do
         expect(response).to have_http_status(:unprocessable_content)
         expect(group.reload.cosmetic).to eq('Marketing and Communications')
       end
+
+      # The lock must hold on the server, not only on the page.
+      it 'keeps the Grouper string when an update sends a new one' do
+        patch "/admin/groups/#{group.id}", params: { group: { raw: 'northeastern:drs:other', cosmetic: 'Renamed' } }
+        expect(group.reload.raw).to eq('northeastern:drs:repository:loaders:marcom')
+        expect(group.cosmetic).to eq('Renamed')
+      end
+    end
+
+    describe 'GET /admin/groups/:id/edit' do
+      let!(:group) { Group.create!(valid_params[:group]) }
+
+      it 'shows the Grouper string as text, with no field to change it' do
+        get "/admin/groups/#{group.id}/edit"
+        page = response.parsed_body
+        expect(page.at_css('input[name="group[raw]"]')).to be_nil
+        expect(page.at_css('.admin-registry-form__readout').text).to include(group.raw)
+        expect(page.at_css('input[name="group[cosmetic]"]')).to be_present
+      end
+    end
+
+    describe 'GET /admin/groups/new' do
+      it 'offers the Grouper string as a field' do
+        get '/admin/groups/new'
+        expect(response.parsed_body.at_css('input[name="group[raw]"]')).to be_present
+      end
     end
 
     describe 'DELETE /admin/groups/:id' do

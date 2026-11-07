@@ -33,6 +33,13 @@ RSpec.describe 'Sets', type: :request do
     AtlasRb::Compilation.create(title, nuid: nuid)
   end
 
+  # My Sets has no title filter, and Atlas pages it A to Z. A set an example
+  # must find there needs a title that sorts ahead of every other set this run
+  # has made.
+  def make_first_page_set(title)
+    make_set("Aa #{title}")
+  end
+
   describe 'access gates' do
     it 'redirects anonymous visitors to sign in for the index' do
       get '/sets'
@@ -61,14 +68,25 @@ RSpec.describe 'Sets', type: :request do
     before { sign_in curator }
 
     it 'lists my sets on the index' do
-      set = make_set('Index Fixture Set')
+      set = make_first_page_set('Index Fixture Set')
       get '/sets'
-      expect(response.body).to include('Index Fixture Set')
+      expect(response.body).to include(set['title'])
       expect(response.body).to include(set_path(set['id']))
     end
 
+    # Atlas orders the listing by title, ignoring case, before it paginates.
+    # The "aa" prefix keeps these on the first page, ahead of every other set
+    # this run has made. They are created in A-to-Z order, so newest first
+    # would reverse them, and a case-sensitive sort would put AAB first.
+    it 'lists my sets by title, ignoring case' do
+      ['aaa Title Order', 'AAB Title Order', 'aac Title Order'].each { |title| make_set(title) }
+      get '/sets'
+      titles = response.parsed_body.css('.sets-table tbody tr td:first-child a').map { |a| a.text.strip }
+      expect(titles.grep(/Title Order/)).to eq(['aaa Title Order', 'AAB Title Order', 'aac Title Order'])
+    end
+
     it 'mounts a lazy works-count frame per index row' do
-      set = make_set('Counted Set')
+      set = make_first_page_set('Counted Set')
       get '/sets'
       expect(response.body).to include(works_count_set_path(set['id']))
     end
@@ -100,12 +118,56 @@ RSpec.describe 'Sets', type: :request do
       expect(response).to have_http_status(:not_found)
     end
 
-    it 'breadcrumbs the edit page back to the set' do
+    it 'breadcrumbs the edit page from My Sets, through the set' do
       set = make_set('Crumbed Set')
       get "/sets/#{set['id']}/edit"
-      expect(response.body).to include('breadcrumb')
-        .and include(set_path(set['id']))
-        .and include('Edit set')
+      crumbs = response.parsed_body.css('nav[aria-label="breadcrumb"] .breadcrumb-item')
+      expect(crumbs.map { |c| c.text.strip }).to eq(['My Sets', 'Crumbed Set', 'Edit set'])
+      expect(crumbs[0].at_css('a')['href']).to eq(sets_path)
+      expect(crumbs[1].at_css('a')['href']).to eq(set_path(set['id']))
+      expect(crumbs[2]['class']).to include('active')
+      expect(crumbs[2]['aria-current']).to eq('page')
+      expect(crumbs[0..1].pluck('aria-current')).to all(be_nil)
+    end
+
+    # A rejected save re-renders the form, not a redirect, so the trail has to
+    # be built again there.
+    it 'keeps the edit trail when a save is rejected' do
+      set = make_set('Rejected Save Set')
+      allow(AtlasRb::Compilation).to receive(:update).and_raise(AtlasRb::CompilationError, 'refused')
+      patch "/sets/#{set['id']}", params: { set: { title: 'Renamed', description: '' } }
+      expect(response).to have_http_status(:unprocessable_content)
+      crumbs = response.parsed_body.css('nav[aria-label="breadcrumb"] .breadcrumb-item')
+      expect(crumbs.map { |c| c.text.strip }).to eq(['My Sets', 'Rejected Save Set', 'Edit set'])
+    end
+
+    it 'keeps the edit trail when a sharing save is rejected' do
+      set = make_set('Rejected Share Set')
+      allow(AtlasRb::Compilation).to receive(:update).and_raise(AtlasRb::CompilationError, 'refused')
+      patch "/sets/#{set['id']}", params: { set: { form: 'sharing', edit_users: [] } }
+      expect(response).to have_http_status(:unprocessable_content)
+      crumbs = response.parsed_body.css('nav[aria-label="breadcrumb"] .breadcrumb-item')
+      expect(crumbs.map { |c| c.text.strip }).to eq(['My Sets', 'Rejected Share Set', 'Edit set'])
+    end
+
+    it 'breadcrumbs the set page from My Sets, with the set as the current crumb' do
+      set = make_set('Trail Set')
+      get "/sets/#{set['id']}"
+      crumbs = response.parsed_body.css('nav[aria-label="breadcrumb"] .breadcrumb-item')
+      expect(crumbs.map { |c| c.text.strip }).to eq(['My Sets', 'Trail Set'])
+      expect(crumbs[0].at_css('a')['href']).to eq(sets_path)
+      expect(crumbs[1]['class']).to include('active')
+      expect(crumbs[1]['aria-current']).to eq('page')
+      expect(crumbs[1].at_css('a')).to be_nil
+    end
+
+    # A search on the set page adds a query string, which must not turn the
+    # current crumb back into a link.
+    it 'keeps the set as the current crumb under a search' do
+      set = make_set('Searched Set')
+      get "/sets/#{set['id']}", params: { q: 'lake' }
+      current = response.parsed_body.at_css('nav[aria-label="breadcrumb"] .breadcrumb-item.active')
+      expect(current&.text&.strip).to eq('Searched Set')
     end
   end
 
@@ -148,14 +210,15 @@ RSpec.describe 'Sets', type: :request do
 
         expect(response).to redirect_to(results_page)
         expect(flash[:notice]).to include('Picked Set', 'work added')
-        created = AtlasRb::Compilation.list(nuid: nuid)['compilations'].find { |c| c['title'] == 'Picked Set' }
+        created = AtlasRb::Compilation.list(q: 'Picked Set', nuid: nuid)['compilations'].find { |c| c['title'] == 'Picked Set' }
         expect(AtlasRb::Compilation.find(created['id'])['included_works']).to include(lone_work.id)
       end
 
       it 'includes a chosen collection' do
         post '/sets', params: { set: { title: 'Collection Set' }, collection_id: collection.id }
 
-        created = AtlasRb::Compilation.list(nuid: nuid)['compilations'].find { |c| c['title'] == 'Collection Set' }
+        created = AtlasRb::Compilation.list(q: 'Collection Set', nuid: nuid)['compilations']
+                                      .find { |c| c['title'] == 'Collection Set' }
         expect(AtlasRb::Compilation.find(created['id'])['included_collections']).to include(collection.id)
       end
 
@@ -229,13 +292,13 @@ RSpec.describe 'Sets', type: :request do
         post "/sets/#{set['id']}/collections", params: { collection_id: collection.id }
         post "/sets/#{set['id']}/aside",       params: { work_id: work_one.id, title: 'Work One' }
 
-        get '/sets/picker', params: { collection_id: collection.id }
+        get '/sets/picker', params: { collection_id: collection.id, q: 'Picker Set' }
         expect(response.body).to include('Already in this set')
 
-        get '/sets/picker', params: { work_id: work_one.id }
-        expect(response.body).to include('Hidden in this set')
+        get '/sets/picker', params: { work_id: work_one.id, q: 'Picker Set' }
+        expect(response.body).to include('Hidden in this set — put it back from Manage, on the Definition tab')
 
-        get '/sets/picker', params: { work_id: lone_work.id }
+        get '/sets/picker', params: { work_id: lone_work.id, q: 'Picker Set' }
         expect(response.body).to include("/sets/#{set['id']}/works")
       end
 
@@ -245,7 +308,7 @@ RSpec.describe 'Sets', type: :request do
 
         # work_two lives under `collection` (now in the set) but was never added
         # individually — it should read as already-included, with no add button.
-        get '/sets/picker', params: { work_id: work_two.id }
+        get '/sets/picker', params: { work_id: work_two.id, q: 'Coverage Set' }
         expect(response.body).to include('via a collection it contains')
         expect(response.body).not_to include("/sets/#{set['id']}/works")
       end
@@ -260,6 +323,15 @@ RSpec.describe 'Sets', type: :request do
 
         get '/sets/picker', params: { work_id: lone_work.id, q: 'zzz-nope' }
         expect(response.body).to include('No sets match')
+      end
+
+      # Created in A-to-Z order, so newest first would reverse them, and a
+      # case-sensitive sort would put Banana first.
+      it 'lists sets by title, ignoring case' do
+        ['apple Picker Order', 'Banana Picker Order', 'cherry Picker Order'].each { |title| make_set(title) }
+        get '/sets/picker', params: { work_id: lone_work.id, q: 'Picker Order' }
+        titles = response.parsed_body.css('.picker-row .nm').map { |nm| nm.text.strip }
+        expect(titles).to eq(['apple Picker Order', 'Banana Picker Order', 'cherry Picker Order'])
       end
 
       it 'paginates past one page of sets' do
@@ -294,6 +366,102 @@ RSpec.describe 'Sets', type: :request do
         get "/collections/#{collection.id}", params: { view: 'gallery' }
         expect(response.body).to include('Add to Set')
           .and include("add-to-set-#{work_one.id}")
+      end
+    end
+
+    # v1's "Save files for later": the works on a results page, into a set,
+    # confirmed with counts first.
+    describe 'Add page to set' do
+      def confirm(set, works)
+        get "/sets/#{set['id']}/page_works", params: { work_ids: works.map(&:id) }
+      end
+
+      it 'offers the button on a results page that holds works' do
+        get "/collections/#{collection.id}"
+        expect(response.body).to include('Add page to set')
+        expect(response.parsed_body.css('#add-page-to-set input[name="work_ids[]"]').pluck('value')).to include(work_one.id)
+      end
+
+      it 'leaves the button off a page with no works on it' do
+        get "/communities/#{community.id}"
+        expect(response.body).not_to include('Add page to set')
+      end
+
+      # A set's own page would offer its works to a set: a set fed into itself.
+      it 'leaves the button off a set page' do
+        set = make_set('Self-Feeding Set')
+        post "/sets/#{set['id']}/collections", params: { collection_id: collection.id }
+        get "/sets/#{set['id']}"
+        expect(response.body).to include(work_one.id)
+        expect(response.body).not_to include('Add page to set')
+      end
+
+      it 'keeps the button from anyone who does not curate sets' do
+        sign_out curator
+        get "/collections/#{collection.id}"
+        expect(response.body).not_to include('Add page to set')
+      end
+
+      it 'lists sets as links to the confirmation, not as adds' do
+        set = make_set('Page Pick Set')
+        get '/sets/page_picker', params: { work_ids: [work_one.id, lone_work.id], q: 'Page Pick Set' }
+        hrefs = response.parsed_body.css('a.picker-row').pluck('href')
+        expect(hrefs).to include(confirm_page_works_set_path(set['id'], work_ids: [work_one.id, lone_work.id]))
+        expect(response.body).not_to include(add_work_set_path(set['id']))
+      end
+
+      it 'refuses a page picker request with no works' do
+        get '/sets/page_picker'
+        expect(response).to have_http_status(:bad_request)
+      end
+
+      it 'counts the works already in the set, directly, through a collection, or hidden' do
+        set = make_set('Counting Set')
+        post "/sets/#{set['id']}/collections", params: { collection_id: collection.id }
+        post "/sets/#{set['id']}/aside",       params: { work_id: work_two.id, title: 'Work Two' }
+
+        confirm(set, [work_one, work_two, lone_work])
+        expect(response.body).to include('Add 1 work from this page to “Counting Set”?')
+          .and include('1 work is already in it, and will be skipped.')
+          .and include('1 work is hidden in it, and will stay hidden.')
+          .and include('Add 1 work')
+      end
+
+      it 'offers no add when every work is already in the set' do
+        set = make_set('Full Set')
+        post "/sets/#{set['id']}/works", params: { work_id: lone_work.id }
+
+        confirm(set, [lone_work])
+        expect(response.body).to include('Every work on this page is already in “Full Set”.')
+        expect(response.body).not_to include(add_page_works_set_path(set['id']))
+      end
+
+      # Counted again on the POST, so only what is still missing is queued.
+      it 'queues only the works not yet in the set' do
+        set = make_set('Queued Set')
+        post "/sets/#{set['id']}/collections", params: { collection_id: collection.id }
+
+        expect do
+          post "/sets/#{set['id']}/page_works", params: { work_ids: [work_one.id, lone_work.id] }
+        end.to have_enqueued_job(SetBulkAddJob).with(set_noid: set['id'], work_ids: [lone_work.id])
+        expect(flash[:notice]).to include('Adding 1 work to “Queued Set”.')
+      end
+
+      it 'queues nothing when every work is already in the set' do
+        set = make_set('Nothing Left Set')
+        post "/sets/#{set['id']}/works", params: { work_id: lone_work.id }
+
+        expect do
+          post "/sets/#{set['id']}/page_works", params: { work_ids: [lone_work.id] }
+        end.not_to have_enqueued_job(SetBulkAddJob)
+        expect(flash[:notice]).to include('Nothing to add')
+      end
+
+      it 'refuses the confirmation to someone who cannot edit the set' do
+        set = make_set('Not Yours Set')
+        sign_in other_user
+        confirm(set, [lone_work])
+        expect(response).to have_http_status(:forbidden)
       end
     end
 
@@ -398,6 +566,18 @@ RSpec.describe 'Sets', type: :request do
       expect(response.body).to include('Public Set')
     end
 
+    # My Sets needs a set curator, so a trail starting there would lead an
+    # anonymous visitor to a sign-in page.
+    it 'gives an anonymous visitor on a public set no breadcrumb trail' do
+      set = make_set('Trail-free Public Set')
+      AtlasRb::Compilation.update(set['id'],
+                                  permissions: { read: ['public'], edit: [], edit_users: [] },
+                                  nuid:        nuid)
+      get "/sets/#{set['id']}"
+      expect(response).to have_http_status(:ok)
+      expect(response.body).not_to include('aria-label="breadcrumb"')
+    end
+
     it '403s an anonymous visitor on a private set' do
       set = make_set('Private Set')
       get "/sets/#{set['id']}"
@@ -450,6 +630,22 @@ RSpec.describe 'Sets', type: :request do
       patch "/sets/#{set['id']}", params: { set: { form: 'sharing', edit_users: [] } }
       expect(response).to have_http_status(:forbidden)
     end
+
+    # The tab names people without their NUIDs; the NUID rides only the hidden
+    # field that is saved.
+    it 'shows a granted person by name, without their NUID' do
+      sign_in curator
+      set = make_set('Named Grant Set')
+      AtlasRb::Compilation.update(set['id'],
+                                  permissions: { read: [], edit: [], edit_users: ['000000003'] },
+                                  nuid:        nuid)
+      get "/sets/#{set['id']}/edit"
+      chip = response.parsed_body.at_css('.set-grant-chip')
+      expect(chip.text.strip).to eq(NuidResolver.name_for('000000003'))
+      expect(chip.text).not_to include('000000003')
+      expect(chip.at_css('input[type=hidden]')['value']).to eq('000000003')
+      expect(response.parsed_body.at_css('template .inbox-typeahead__nuid')).to be_nil
+    end
   end
 
   describe 'discovery scopes' do
@@ -470,11 +666,11 @@ RSpec.describe 'Sets', type: :request do
 
     it 'excludes my own sets from the grant-scoped tabs' do
       sign_in curator
-      make_set('My Own Set')
+      set = make_first_page_set('My Own Set')
       get '/sets', params: { scope: 'editable' }
-      expect(response.body).not_to include('My Own Set')
+      expect(response.body).not_to include(set['title'])
       get '/sets'
-      expect(response.body).to include('My Own Set')
+      expect(response.body).to include(set['title'])
     end
 
     it 'treats an unknown scope as My Sets' do
@@ -497,6 +693,15 @@ RSpec.describe 'Sets', type: :request do
       get '/sets/recipients', params: { q: 'ps' }
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body).to be_an(Array)
+    end
+
+    # The Sharing tab never shows a NUID, so it must not find people by one.
+    # The directory itself still matches NUIDs, for the pickers that need it.
+    it 'finds no one by a NUID' do
+      expect(AtlasRb::User.search('000000003', nuid: nuid).pluck('nuid')).to include('000000003')
+      get '/sets/recipients', params: { q: '000000003' }
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body).to eq([])
     end
   end
 

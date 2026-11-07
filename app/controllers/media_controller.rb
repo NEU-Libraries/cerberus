@@ -7,13 +7,14 @@
 # The bytes live in Atlas, which serves byte ranges via Blob.content(range:).
 # Under ActionController::Live the response commits on the
 # first stream write, so the 206 status + Content-Range must be set BEFORE
-# streaming — we compute them from the client's Range + the blob size (MediaRange)
+# that write — we compute them from the client's Range + the blob size (MediaRange)
 # rather than relaying Atlas's post-stream headers (too late), and forward the
 # same Range to Atlas so only the requested slice crosses the wire.
 class MediaController < ApplicationController
   include ProxyUnbuffered
   include RecordsImpressions
   include DerivativesHelper
+  include StreamsBlob
 
   before_action :authorize_show!
   before_action :deny_if_work_embargoed!, only: :show
@@ -23,13 +24,7 @@ class MediaController < ApplicationController
     blob = AtlasRb::Blob.find(params[:id])
     # blob['size'] is the byte size; blob.size is Hash#size (key count) on a Mash.
     range = MediaRange.parse(request.headers['Range'], blob['size'])
-    set_media_headers(blob, range)
-
-    AtlasRb::Blob.content(params[:id], range: range && request.headers['Range']) do |chunk|
-      response.stream.write(chunk)
-    end
-  ensure
-    response.stream.close
+    stream_blob(params[:id], range: range && request.headers['Range']) { set_media_headers(blob, range) }
   end
 
   private

@@ -26,7 +26,7 @@ RSpec.describe TombstoneCascadeJob do
 
   def notice = AdminNotice.where(kind: 'tombstone_cascade').last
 
-  it 'withdraws each target in the walk order, with the one reason' do
+  it 'tombstones each target in the walk order, with the one reason' do
     stub_targets(target('w1'), target('child', 'Collection'), target('top', 'Collection'))
     allow(AtlasRb::Resource).to receive(:tombstone).and_return(response(200))
 
@@ -47,13 +47,13 @@ RSpec.describe TombstoneCascadeJob do
     expect(notice.subject).to eq('Collection “Working Papers” deleted')
     expect(notice.subject_noid).to eq('top')
     expect(notice.actor_nuid).to eq(actor)
-    expect(notice.detail(:withdrawn)).to eq([{ 'noid' => 'w1', 'type' => 'Work' },
-                                             { 'noid' => 'top', 'type' => 'Collection' }])
+    expect(notice.detail(:tombstoned)).to eq([{ 'noid' => 'w1', 'type' => 'Work' },
+                                              { 'noid' => 'top', 'type' => 'Collection' }])
     expect(notice.detail(:reason)).to eq('curator')
-    expect(notice.body).to include('2 items withdrawn', 'ask the development team')
+    expect(notice.body).to include('2 items deleted', 'ask the development team')
   end
 
-  it 'names what failed, leaves it off the withdrawn list, and says the delete is incomplete' do
+  it 'names what failed, leaves it off the tombstoned list, and says the delete is incomplete' do
     stub_targets(target('w1'), target('top', 'Collection'))
     allow(AtlasRb::Resource).to receive(:tombstone).with('w1', reason: 'curator').and_return(response(500))
     allow(AtlasRb::Resource).to receive(:tombstone).with('top', reason: 'curator')
@@ -62,13 +62,13 @@ RSpec.describe TombstoneCascadeJob do
     run
 
     expect(notice.subject).to eq('Collection “Working Papers” was not fully deleted')
-    expect(notice.detail(:withdrawn)).to eq([])
+    expect(notice.detail(:tombstoned)).to eq([])
     expect(notice.detail(:failures)).to eq(['Work w1: Atlas answered 500',
                                             'Collection top: still holds a live member'])
   end
 
   # A lock conflict is transient, and a job-level retry would rebuild the walk
-  # without what it had already withdrawn.
+  # without what it had already tombstoned.
   it 'retries one item through a lock conflict without restarting the walk' do
     stub_targets(target('w1'))
     allow(AtlasRb::Resource).to receive(:tombstone).and_return(response(409), response(200))
@@ -76,6 +76,6 @@ RSpec.describe TombstoneCascadeJob do
     run
 
     expect(AtlasRb::Resource).to have_received(:tombstone).twice
-    expect(notice.detail(:withdrawn)).to eq([{ 'noid' => 'w1', 'type' => 'Work' }])
+    expect(notice.detail(:tombstoned)).to eq([{ 'noid' => 'w1', 'type' => 'Work' }])
   end
 end

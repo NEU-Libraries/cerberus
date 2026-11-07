@@ -36,7 +36,7 @@ module Admin
     end
 
     def create
-      @group = Group.new(group_params)
+      @group = Group.new(params.require(:group).permit(:raw, :cosmetic))
       if @group.save
         redirect_to admin_groups_path, notice: "Display name for '#{@group.raw}' created."
       else
@@ -45,7 +45,9 @@ module Admin
     end
 
     def update
-      if @group.update(group_params)
+      # `raw` is the key every display name is looked up by. Changing it would
+      # move this name onto another group, so a saved row only renames.
+      if @group.update(params.require(:group).permit(:cosmetic))
         redirect_to admin_groups_path, notice: "Display name for '#{@group.raw}' updated."
       else
         render :edit, status: :unprocessable_content
@@ -61,10 +63,6 @@ module Admin
 
       def set_group
         @group = Group.find(params[:id])
-      end
-
-      def group_params
-        params.require(:group).permit(:raw, :cosmetic)
       end
   end
 end

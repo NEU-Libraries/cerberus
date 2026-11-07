@@ -13,11 +13,13 @@ class CommunitiesController < CatalogController
   include ContainerAnalytics
   include ContainerRestrictionRequest
   include CommunitiesIndex
+  include TitleBrowseSort
   include CommunityShowcases
   include CascadeTombstoning
 
   atlas_resource AtlasRb::Community, key: :community, route: :community
   authorize_resource_writes!(extra_edit: %i[request_restriction])
+  title_browse_on :index, :show
   after_action :record_view_impression, only: :show
 
   # Before the find: Atlas refuses the People Community to everyone but full
@@ -38,7 +40,7 @@ class CommunitiesController < CatalogController
 
   # cascade is the confirmation's flag for a container that is not empty.
   # The top-level refusal must come first: Atlas refuses the root itself, but
-  # only after the cascade has withdrawn everything beneath it.
+  # only after the cascade has tombstoned everything beneath it.
   def tombstone
     return refuse_top_level_tombstone if top_level?(require_resource!(AtlasRb::Community.find(params[:id])))
 
@@ -48,6 +50,8 @@ class CommunitiesController < CatalogController
   def new
     @community = OpenStruct.new
     @create_path = child_create_path('communities')
+    @narrowing_allowed = current_user&.admin? || false
+    new_form_permissions!(@destination_id)
   end
 
   def edit
@@ -62,11 +66,14 @@ class CommunitiesController < CatalogController
   end
 
   # Provision showcases only after the community exists and is titled, so a
-  # missing title never leaves orphaned showcases behind.
+  # missing title never leaves orphaned showcases behind. The permissions go
+  # first: a showcase takes its parent's access when it is minted, so writing
+  # them after would leave the showcases with the destination's access.
   def create
     c = mint_titled!
     return redirect_to(new_child_path('community')) if c.nil?
 
+    apply_new_permissions(c.id)
     ShowcaseProvisioner.call(community_id: c.id)
     redirect_to community_path(c.id)
   end
@@ -94,7 +101,8 @@ class CommunitiesController < CatalogController
     def load_children_and_deletability
       showcases = featured_showcase_uuids(@community.valkyrie_id)
       empty = empty_showcase_uuids(showcases)
-      @response = find_children(@community.valkyrie_id, params[:id], exclude_uuids: hidden_showcase_uuids(empty))
+      @response = find_children(@community.valkyrie_id, params[:id],
+                                exclude_uuids: hidden_showcase_uuids(empty), sort: showcases_first_sort(showcases))
       mark_empty_showcases(empty)
       @deletable = deletable?(showcases)
     end
@@ -124,14 +132,21 @@ class CommunitiesController < CatalogController
     end
 
     # The synthetic row is not in Solr, so raise the response total by one or
-    # "Displaying N entries" undercounts the rows on screen.
+    # "Displaying N entries" undercounts the rows on screen. It follows any
+    # floated showcases, where v1 listed it.
     def prepend_faculty_staff_entry(community_noid)
-      return if params[:page].present? && params[:page].to_i > 1
-      return if params[:q].present? || params[:f].present?
-      return unless affiliated_people_count(community_noid).positive?
+      return unless faculty_staff_row?(community_noid)
 
-      @response.documents.unshift(faculty_staff_stub(community_noid))
+      @response.documents.insert(floated_showcase_count, faculty_staff_stub(community_noid))
       @response.response['numFound'] = @response.total + 1
+    end
+
+    # Page 1 of an unconstrained browse, and only when someone is affiliated.
+    def faculty_staff_row?(community_noid)
+      return false if params[:page].present? && params[:page].to_i > 1
+      return false if params[:q].present? || params[:f].present?
+
+      affiliated_people_count(community_noid).positive?
     end
 
     def faculty_staff_stub(community_noid)

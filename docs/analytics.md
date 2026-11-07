@@ -365,9 +365,9 @@ of the scoped item, not of its traffic.
 `storage_bytes` sums Atlas's `storage_bytes_ls` over the same scope, with a Solr
 JSON facet, `sum(storage_bytes_ls)`. Atlas gives each Work, Collection and
 Community the bytes its own OCFL objects hold on disk: every revision of every
-file, withdrawn files, MODS and METS versions, and OCFL's bookkeeping. The
+file, tombstoned files, MODS and METS versions, and OCFL's bookkeeping. The
 measure is storage cost, so a Work replaced a hundred times outweighs one that
-never changed. `subtree_fq` keeps tombstoned documents, so withdrawn files
+never changed. `subtree_fq` keeps tombstoned documents, so tombstoned files
 count, as they still take disk. Bytes outside OCFL are not counted: Cerberus's
 IIIF TIFFs, its staged uploads and the IIIF cache.
 

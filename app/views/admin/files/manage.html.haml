@@ -10,6 +10,7 @@
     Replacing a file in
     %strong= enhanced_text(@work.title)
     creates a new version while keeping the same identifier. Each version keeps its own filename. Previous versions can be managed below.
+    Removing a file takes it off the work while the work and its other files stay up, and it can be restored at the bottom of this page.
 
 - if @blobs.empty?
   .admin-registry.my-3
@@ -23,7 +24,7 @@
   .admin-registry.my-3
     %header.admin-registry__head
       %span.admin-registry__title
-        %span.me-1{class: file_type_icon(asset.mime_type), 'aria-hidden' => 'true'}
+        %i.fa-solid.me-1{class: file_type_icon(asset.mime_type), 'aria-hidden' => 'true'}
         = asset.label.presence || asset[:use] || 'File'
         - if versions.any?
           %span.admin-registry__count= pluralize(versions.size, 'version')
@@ -31,6 +32,17 @@
         - if asset[:size]
           %span.admin-registry__subtitle= number_to_human_size(asset[:size])
         %span.admin-registry-table__id= asset.noid
+        -# Removing tombstones the file's FileSet, so the confirm names anything
+        -# else stored with it, which leaves the work too.
+        - name = asset.label.presence || asset[:use] || 'File'
+        - siblings = @blobs.map { |other| other[:asset] }.select { |other| other.file_set == asset.file_set && other.noid != asset.noid }
+        - also = siblings.any? ? " #{siblings.map { |other| other.label.presence || other.noid }.to_sentence} #{siblings.one? ? 'is' : 'are'} stored with it and will be removed too." : ''
+        = button_to admin_files_remove_path, method: :post, params: { work_id: params[:work_id], blob_noid: asset.noid },
+                    class: 'btn btn-tonal-danger btn-sm', form_class: 'd-inline', 'aria-label' => "Remove #{name}",
+                    form: { data: { turbo_confirm: "Remove #{name} from this work?#{also} It leaves the work page and the downloads, and can be restored from this page.",
+                                    turbo_confirm_title: 'Remove file', turbo_confirm_button: 'Remove', turbo_confirm_variant: 'danger' } } do
+          %i.fa-solid.fa-trash-can.me-1{'aria-hidden' => 'true'}
+          Remove
 
     .admin-registry__body
       = form_with url: admin_files_replace_path, method: :post, multipart: true do
@@ -41,7 +53,8 @@
             %label.admin-registry-form__label{for: "binary-#{asset.noid}"}
               %i.fa-solid.fa-arrow-up-from-bracket{'aria-hidden' => 'true'}
               Upload a replacement
-            %input.form-control.form-control-sm{id: "binary-#{asset.noid}", name: 'binary', type: 'file', required: true}
+            = render layout: 'shared/file_field', locals: { small: true } do
+              %input.file-field__input{id: "binary-#{asset.noid}", name: 'binary', type: 'file', required: true}
           .col-sm-auto
             %button.btn.btn-primary.btn-sm{type: 'submit'}
               %i.fa-solid.fa-arrows-rotate.me-1{'aria-hidden' => 'true'}
@@ -88,3 +101,36 @@
                     = button_to admin_files_rollback_path, method: :post, params: { work_id: params[:work_id], blob_noid: asset.noid, version_id: version['version_id'], revision: version['revision'] }, class: 'admin-registry-table__edit admin-registry-table__edit--restore ms-1', form_class: 'd-inline', form: { data: { turbo_confirm: "Revert to version #{version['revision']}? It becomes the current file and the download renditions are rebuilt from it. Nothing is deleted — the version you are leaving stays in the history." } } do
                       %i.fa-solid.fa-rotate-left{'aria-hidden' => 'true'}
                       Revert
+
+-# Removed files are tombstoned, not deleted: Atlas keeps them, every version
+-# included, until someone restores them here.
+- if @removed.any?
+  .admin-registry.my-3
+    %header.admin-registry__head
+      %span.admin-registry__title
+        %i.fa-solid.fa-trash-can-arrow-up{'aria-hidden' => 'true'}
+        Removed files
+        %span.admin-registry__count= @removed.size
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table
+        %thead
+          %tr
+            %th{scope: 'col'} File
+            %th{scope: 'col'} Removed
+            %th{scope: 'col'} By
+            %th.text-end{scope: 'col'} Actions
+        %tbody
+          - @removed.each do |asset|
+            - name = asset.label.presence || asset[:original_filename].presence || asset[:use] || 'File'
+            %tr
+              %td
+                %span.admin-registry-table__name= name
+                %span.admin-registry-table__id.ms-2= asset.noid
+              %td.text-muted.small{style: 'font-variant-numeric: tabular-nums'}= file_version_when(asset[:tombstoned_at])
+              %td= file_version_who(asset[:tombstoned_by])
+              %td.text-end
+                = button_to admin_files_restore_path, method: :post, params: { work_id: params[:work_id], file_set_id: asset.file_set },
+                            class: 'admin-registry-table__edit admin-registry-table__edit--restore', form_class: 'd-inline',
+                            'aria-label' => "Restore #{name}" do
+                  %i.fa-solid.fa-rotate-left{'aria-hidden' => 'true'}
+                  Restore

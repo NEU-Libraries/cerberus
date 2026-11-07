@@ -15,13 +15,10 @@ class DownloadQueueController < ApplicationController
   end
 
   # Add a content Blob or an IIIF derivative rendition (turbo-stream swaps the
-  # navbar badge + the row's button). A derivative passes `role:` (no blob noid),
-  # which doubles as its label in the swapped-in "In queue" state.
+  # navbar badge + the row's button). A derivative passes `role:` (no blob noid).
   def create
     @queue = DownloadQueue.new(session)
-    @work_noid = params[:work_noid].to_s
-    @role = params[:role].to_s.presence
-    @blob_noid = params[:blob_noid].to_s
+    read_item_params
     @result = add_current_item
     warn_if_full
 
@@ -31,14 +28,20 @@ class DownloadQueueController < ApplicationController
     end
   end
 
+  # The modal's Remove asks for a stream by its .turbo_stream path and gets the
+  # control swapped back. Every other remove, the queue page's included, is
+  # redirected to the queue page: Turbo's Accept header alone asks for a stream
+  # on any form, so it cannot tell the two apart.
   def destroy
-    queue = DownloadQueue.new(session)
-    if params[:role].present?
-      queue.remove_derivative(params[:work_noid].to_s, params[:role].to_s)
+    @queue = DownloadQueue.new(session)
+    read_item_params
+    @role ? @queue.remove_derivative(@work_noid, @role) : @queue.remove(@work_noid, @blob_noid)
+
+    if params[:format] == 'turbo_stream'
+      render :destroy
     else
-      queue.remove(params[:work_noid].to_s, params[:blob_noid].to_s)
+      redirect_to download_queue_path, notice: 'Removed from your download queue.'
     end
-    redirect_to download_queue_path, notice: 'Removed from your download queue.'
   end
 
   def destroy_all
@@ -47,6 +50,14 @@ class DownloadQueueController < ApplicationController
   end
 
   private
+
+    # A derivative's role token doubles as its label when the row sent none.
+    def read_item_params
+      @work_noid = params[:work_noid].to_s
+      @role = params[:role].to_s.presence
+      @blob_noid = params[:blob_noid].to_s
+      @label = params[:label].to_s.presence || @role&.titleize
+    end
 
     # Add the request's item — a derivative rendition (by role) or a Blob (by noid).
     def add_current_item

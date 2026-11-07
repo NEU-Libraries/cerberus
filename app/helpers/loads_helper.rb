@@ -47,6 +47,12 @@ module LoadsHelper
     loader.xml? ? load_report.xml_ingests : load_report.iptc_ingests
   end
 
+  # The status a report is filtered to, from ?status=. Only a real status
+  # counts; anything else shows every row.
+  def report_status_filter(param)
+    param.to_s.presence_in(Ingest.statuses.keys)
+  end
+
   # IPTC and XML rows lead with what needs attention: failures, then warnings.
   # Multipage rows are pages of several Works — group them by item, then page
   # order, since sorting pages by status would split a Work apart. NULLS FIRST

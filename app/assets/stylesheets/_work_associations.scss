@@ -69,6 +69,14 @@
     font-weight: 500;
   }
 
+  // The admin manage panel's title line: the title, then the PID chip.
+  &__heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.15rem 0.5rem;
+  }
+
   &__abstract {
     font-size: 0.82rem;
     color: $gray-600;

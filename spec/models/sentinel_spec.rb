@@ -68,6 +68,14 @@ RSpec.describe Sentinel do
       policy = { 'original' => ['g:arch'], 'audio' => ['public'] }
       expect(Sentinel.new(target_id: 'c', policy: policy)).to be_valid
     end
+
+    it 'accepts and passes through every file-type tier' do
+      tiers = %w[archive spreadsheet structured_text presentation text generic]
+      sentinel = Sentinel.new(target_id: 'c', policy: tiers.index_with { ['g:arch'] })
+
+      expect(sentinel).to be_valid
+      expect(sentinel.tier_policy.keys).to eq(tiers)
+    end
   end
 
   describe 'container ceiling (tier ⊆ resource_read_groups)' do

@@ -132,7 +132,7 @@ RSpec.describe MetadataExportPacker do
     # left blank. The loader finds columns by label, so the rest still parse.
     it 'leaves out the MODS XML File Path column' do
       expect(manifest_headers(entries.fetch('manifest.xlsx')))
-        .to eq(['PIDs', 'File Name', 'Embargoed?', 'Embargo Date', 'Date Ingested'])
+        .to eq(['PIDs', 'File Name', 'Embargoed?', 'Embargo Date', 'Date Ingested', 'Date MODS Last Edited'])
 
       rows = manifest_rows(entries.fetch('manifest.xlsx'))
       expect(rows.map(&:identifier)).to eq(%w[aaa111 bbb222])
@@ -145,14 +145,16 @@ RSpec.describe MetadataExportPacker do
     end
   end
 
-  context 'the Date Ingested column' do
+  context 'the Date Ingested and Date MODS Last Edited columns' do
     let(:docs) do
       Class.new do
         def initialize(rows) = @rows = rows
         def each_content_batch(**) = yield @rows
       end.new([
-                # 02:30 UTC on the 16th is still the 15th in Boston.
-                { 'alternate_ids_ssim' => ['id-aaa111'], 'created_at_dtsi' => '2026-07-16T02:30:00Z' },
+                # 02:30 UTC on the 16th is still the 15th in Boston, and 03:15
+                # UTC on 2 September is still 1 September.
+                { 'alternate_ids_ssim' => ['id-aaa111'], 'created_at_dtsi' => '2026-07-16T02:30:00Z',
+                  'mods_updated_at_dtsi' => '2026-09-02T03:15:00Z' },
                 { 'alternate_ids_ssim' => ['id-bbb222'] }
               ])
     end
@@ -172,12 +174,24 @@ RSpec.describe MetadataExportPacker do
     it 'follows the loader columns and gives each Work its Eastern ingest date' do
       header, first, second = sheet_rows(entries.fetch('manifest.xlsx'))
 
-      expect(header.last).to eq('Date Ingested')
-      expect(first.last).to eq('2026-07-15')
+      expect(header[-2]).to eq('Date Ingested')
+      expect(first[-2]).to eq('2026-07-15')
+      expect(second[-2]).to be_nil
+    end
+
+    it 'ends with the Eastern date of the last MODS edit' do
+      header, first, second = sheet_rows(entries.fetch('manifest.xlsx'))
+
+      expect(header.last).to eq('Date MODS Last Edited')
+      expect(first.last).to eq('2026-09-01')
       expect(second.last).to be_nil
     end
 
-    it 'still re-parses through the loader, which ignores the extra column' do
+    it 'asks the resolvers for the MODS edit date' do
+      expect(described_class::REQUIRED_DOC_FIELDS).to include('mods_updated_at_dtsi')
+    end
+
+    it 'still re-parses through the loader, which ignores the extra columns' do
       expect(manifest_rows(entries.fetch('manifest.xlsx')).map(&:identifier)).to eq(%w[aaa111 bbb222])
     end
   end
@@ -241,6 +255,32 @@ RSpec.describe MetadataExportPacker do
       failed = rows.find { |r| r.identifier == 'aaa111' }
 
       expect(failed.xml_path).to be_nil
+    end
+  end
+
+  # A tombstone withholds the record as well as the files, so the Work gets no
+  # row and no MODS entry. See docs/downloads.md.
+  context 'when Atlas withholds a Work under a tombstone' do
+    let(:withheld) do
+      AtlasRb::TombstonedError.new({ 'error' => 'tombstoned', 'tombstoned_resource_type' => 'Work',
+                                     'tombstoned_resource_id' => 'aaa111' })
+    end
+
+    it 'names it in ERRORS.txt and leaves it out of the bundle' do
+      allow(AtlasRb::Work).to receive(:mods).with('aaa111', anything).and_raise(withheld)
+      entries = pack_to_entries(include_mods: true)
+
+      expect(entries['ERRORS.txt'].dup.force_encoding('UTF-8')).to eq('aaa111: withheld — removed from view')
+      expect(entries).not_to have_key('mods/aaa111.xml')
+      expect(manifest_rows(entries.fetch('manifest.xlsx')).map(&:identifier)).to eq(['bbb222'])
+    end
+
+    it 'leaves it out of a manifest-only bundle too' do
+      allow(AtlasRb::Work).to receive(:assets).with('aaa111').and_raise(withheld)
+      entries = pack_to_entries(include_mods: false)
+
+      expect(entries['ERRORS.txt'].dup.force_encoding('UTF-8')).to eq('aaa111: withheld — removed from view')
+      expect(manifest_rows(entries.fetch('manifest.xlsx')).map(&:identifier)).to eq(['bbb222'])
     end
   end
 end

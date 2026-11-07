@@ -1,4 +1,4 @@
--# What a cascading delete withdraws, before the reason and the typed title.
+-# What a cascading delete removes, before the reason and the typed title.
 -#
 -# Locals:
 -#   cascade — the container's TombstoneTargets
@@ -6,7 +6,7 @@
 -#   title   — the container's title, plain text
 - parts = cascade.counts.reject { |_type, count| count.zero? }.map { |type, count| pluralize(count, type.downcase) }
 %p
-  This withdraws
+  This removes
   %strong= title
   and everything live inside it:
 %ul
@@ -21,4 +21,4 @@
   .alert.alert-warning.py-2.px-3.small.d-flex.align-items-start
     %i.fa-solid.fa-triangle-exclamation.me-2.mt-1{'aria-hidden' => 'true'}
     %span
-      There is no one-step restore. Each item can be restored on its own from the tombstone registry, parents first. To bring everything back, ask the development team: Requests &amp; activity will list every item withdrawn.
+      There is no one-step restore for this #{kind}. Each part can be restored on its own.

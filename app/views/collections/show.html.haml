@@ -45,5 +45,6 @@
     = render 'catalog/search_sidebar'
 
 = render 'catalog/search_results'
+= render 'shared/add_control', centered: @response.documents.empty?
 = render 'shared/downloads_modal'
 = render 'shared/explain_modal'

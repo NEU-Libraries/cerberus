@@ -7,7 +7,38 @@ module CommunityShowcases
 
   MEMBERSHIP_FIELDS = [MembershipQuery::STRUCTURAL_FIELD, MembershipQuery::LINKED_FIELD].freeze
 
+  included do
+    helper_method :current_sort_field
+  end
+
   private
+
+    # The Sort dropdown marks Blacklight's current_sort_field, which matches the
+    # sort Solr ran. Floating the showcases runs a sort no field declares, which
+    # would mark "relevance"; the search state still names the field in force.
+    def current_sort_field
+      search_state.sort_field
+    end
+
+    # The community's own showcases first, in FeaturedContent::GENRES order, then
+    # everything by title, as v1 floated its genre rows. Only for a plain browse
+    # or an empty search: a keyword, a facet or a picked sort each take the
+    # listing over. nil leaves the search state's sort alone.
+    def showcases_first_sort(showcase_uuids)
+      @floated_showcase_uuids = []
+      return if showcase_uuids.empty? || params[:q].present? || params[:sort].present? || search_state.filters.any?
+
+      @floated_showcase_uuids = showcase_uuids
+      weights = showcase_uuids.reverse.each_with_index.map do |uuid, i|
+        "mul(#{i + 1},query({!term f=id v=#{uuid}},0))"
+      end
+      "sum(0,#{weights.join(',')}) desc, title_ssi asc"
+    end
+
+    # How many rows at the top of this page are floated showcases.
+    def floated_showcase_count
+      @response.documents.take_while { |doc| @floated_showcase_uuids.to_a.include?(doc.id) }.size
+    end
 
     # The people who load into a showcase must be able to find it before it
     # has anything in it: an XML load into a new community's Theses &
@@ -40,12 +71,16 @@ module CommunityShowcases
       showcase_uuids - populated_showcase_ids(showcase_uuids).to_a
     end
 
+    # In FeaturedContent::GENRES order; a title outside the genre list goes last.
     def featured_showcase_uuids(community_uuid)
       builder = search_service.search_builder.with({}).with_filters(
         'internal_resource_tesim:Collection', 'featured_bsi:true', '-tombstoned_bsi:true',
         MembershipQuery.members_fq([community_uuid], include_linked: false)
-      ).merge(rows: 100)
-      Blacklight.default_index.search(params: builder).documents.map(&:id)
+      ).merge(rows: 100, fl: 'id,title_tsim')
+      genres = FeaturedContent.genre_labels
+      Blacklight.default_index.search(params: builder).documents
+                .sort_by { |doc| genres.index(Array(doc['title_tsim']).first) || genres.size }
+                .map(&:id)
     end
 
     def populated_showcase_ids(showcase_uuids)

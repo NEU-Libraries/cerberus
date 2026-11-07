@@ -20,19 +20,23 @@
       = bootstrap_form_tag(url: work_path(params[:id]), method: :patch, multipart: true) do |f|
         = f.hidden_field :id, value: params[:id]
         %label.form-label{:for => "thumbnail"} Thumbnail
-        %input#thumbnail.form-control.mb-3{:name => "thumbnail", :type => "file"}/
+        = render layout: 'shared/file_field', locals: { extra_class: 'mb-3' } do
+          %input#thumbnail.file-field__input{name: 'thumbnail', type: 'file'}/
         = bootstrap_fields_for :work do |c|
           = render 'shared/descriptive_fields', f: c, descriptive: @descriptive, keywords: true
         - if @caption_offered
           = render 'works/captions', captions: @captions, removed: @removed_captions,
                                      removable: caption_steward?(effective_user)
-        - if @showcase
-          = render 'works/showcase_category', showcase: @showcase, genres: @showcase_genres
+        - if @showcases.any?
+          = render 'works/showcase_category', showcases: @showcases, genres: @showcase_genres
         .well.p-3.my-3.rounded-3
           = f.button :submit, class: "btn btn-success"
           = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"
-      -# Outside the metadata form, which cannot nest one; the Remove button in
-      -# the Captions section submits it through its form attribute.
+      -# Outside the metadata form, which cannot nest one; the Remove buttons in
+      -# the Captions and Showcase sections submit these through their form
+      -# attribute.
+      - if @showcases.any?
+        = form_tag(showcase_work_path(params[:id]), method: :delete, id: 'remove-showcase') {}
       - if caption_steward?(effective_user)
         - if @captions.any?
           = form_tag(caption_work_path(params[:id]), method: :delete, id: 'remove-caption') {}
@@ -96,9 +100,9 @@
   #delete.tab-pane{"aria-labelledby" => "delete-tab", role: "tabpanel"}
     .edit-pane
       %p.text-muted.small.mb-3
-        Ask the DRS staff to delete (withdraw) this work. They will be in touch.
+        Ask the DRS staff to delete this work. They will be in touch.
       = form_with url: request_change_work_path(params[:id]), method: :post do
-        = hidden_field_tag :request_action, "withdraw"
+        = hidden_field_tag :request_action, "delete"
         .well.p-3.my-3.rounded-3
           %label.form-label{for: "delete_note"} Reason (optional)
           %textarea.form-control#delete_note{name: "request_note", rows: 3, placeholder: "Optionally, tell the staff why this work should be deleted."}

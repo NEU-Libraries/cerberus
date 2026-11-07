@@ -11,9 +11,10 @@
           My DRS
         %p.text-muted.mb-0
           Your personal workspace and what you've published to your community.
-      -# Deposits into the personal root, which is also the one destination that
-      -# offers promotion to a community showcase. No root means no destination,
-      -# so no button: that depositor works through a collection's Add menu.
+      -# Deposits into the personal root. It and the collections inside it are
+      -# the destinations that offer promotion to a community showcase. No root
+      -# means no destination, so no button: that depositor works through a
+      -# collection's Add menu.
       - if @personal_root_id.present?
         .ms-md-3
           = link_to new_collection_work_path(@personal_root_id), class: 'btn btn-primary' do

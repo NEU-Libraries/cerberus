@@ -38,13 +38,11 @@ export default class extends Controller {
     button.dataset.name = name
     button.dataset.action = "set-user-grants#choose"
 
+    // Names only: this tab never shows a NUID.
     const label = document.createElement("span")
     label.textContent = name
-    const nuidChip = document.createElement("span")
-    nuidChip.className = "inbox-typeahead__nuid"
-    nuidChip.textContent = nuid
 
-    button.append(label, nuidChip)
+    button.append(label)
     return button
   }
 
@@ -59,7 +57,7 @@ export default class extends Controller {
   addChip(nuid, name) {
     const chip = this.templateTarget.content.cloneNode(true).firstElementChild
     chip.querySelector(".js-name").textContent = name
-    chip.querySelector(".js-nuid").textContent = nuid
+    chip.querySelector(".js-remove").setAttribute("aria-label", `Remove ${name}`)
     chip.querySelector(".js-field").value = nuid
     this.chipsTarget.appendChild(chip)
   }

@@ -17,6 +17,23 @@ RSpec.describe SetsHelper do
       expect(helper.set_recipe_sentence(chips_count: 0, added_count: 2, aside_count: 0))
         .to eq('This set contains 2 items you added individually.')
     end
+
+    it 'points an editor at the Manage page' do
+      expect(helper.set_recipe_sentence(chips_count: 1, added_count: 3, aside_count: 0, can_manage: true))
+        .to eq('This set contains everything in 1 collection, plus 3 items you added individually. ' \
+               'It updates automatically as those collections change. ' \
+               'Manage the Set to remove items or restore hidden items.')
+    end
+
+    it 'leaves the Manage pointer off an empty set' do
+      expect(helper.set_recipe_sentence(chips_count: 0, added_count: 0, aside_count: 0, can_manage: true))
+        .not_to include('Manage the Set')
+    end
+
+    it 'leaves the Manage pointer off for a viewer who cannot manage the set' do
+      expect(helper.set_recipe_sentence(chips_count: 1, added_count: 0, aside_count: 0))
+        .not_to include('Manage the Set')
+    end
   end
 
   def chip(live, total)
@@ -66,6 +83,18 @@ RSpec.describe SetsHelper do
       # a direct add or set-aside still wins over coverage
       expect(helper.set_picker_state(set, 'work', 'wrk1111', ['col1234'])).to eq(:included)
       expect(helper.set_picker_state(set, 'work', 'wrk2222', ['col1234'])).to eq(:aside)
+    end
+  end
+
+  describe '#set_picker_page_path' do
+    it 'keeps the one item and the filter for a row picker' do
+      expect(helper.set_picker_page_path('work', 'wrk1111', 'notes', 2))
+        .to eq(picker_sets_path(work_id: 'wrk1111', q: 'notes', page: 2))
+    end
+
+    it 'keeps every work on the page for the page picker, and drops a blank filter' do
+      expect(helper.set_picker_page_path('page', 'page', '', 2, work_ids: %w[wrk1111 wrk2222]))
+        .to eq(page_picker_sets_path(work_ids: %w[wrk1111 wrk2222], page: 2))
     end
   end
 end

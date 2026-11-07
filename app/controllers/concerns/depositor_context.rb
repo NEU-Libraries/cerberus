@@ -36,16 +36,38 @@ module DepositorContext
       effective_user.nuid.to_s.gsub(/["\\]/, '')
     end
 
-    # The Person whose personal root the destination is: the depositor's own, or
-    # another person's that staff are depositing into for them. Nil for any
-    # other destination, which is what keeps promotion to workspaces. See
+    # The Person whose workspace the destination is in: the depositor's own, or
+    # another person's that staff are depositing into for them. Nil anywhere
+    # outside a workspace, which is what keeps promotion to workspaces. See
     # docs/deposit.md ("Publishing for someone else").
     def workspace_owner
       return @workspace_owner if defined?(@workspace_owner)
 
+      @workspace_owner = own_workspace_owner || other_workspace_owner
+    end
+
+    # The depositor's Person names its root, so no flag is needed here.
+    def own_workspace_owner
       own = deposit_person
-      @workspace_owner = own if own && own['personal_root_id'].to_s == @destination_id.to_s
-      @workspace_owner ||= other_workspace_owner
+      root_id = own&.[]('personal_root_id').to_s
+      own if root_id.present? && within?(root_id)
+    end
+
+    # The root itself answers without reading the destination.
+    def within?(root_id)
+      root_id == @destination_id.to_s ||
+        Array(destination_collection&.[]('ancestors')).any? { |node| node['noid'].to_s == root_id }
+    end
+
+    # The destination itself when it is a personal root, else the personal root
+    # among its ancestors. Atlas flags each ancestor, so this costs no read
+    # beyond the destination's own.
+    def workspace_root_id
+      collection = destination_collection
+      return nil if collection.nil?
+      return @destination_id.to_s if collection['personal_root']
+
+      Array(collection['ancestors']).find { |node| node['personal_root'] }&.dig('noid')&.to_s
     end
 
     # True when the workspace is someone else's, so a promotion has to be made
@@ -64,17 +86,20 @@ module DepositorContext
         genres = ShowcaseFinder.call(scope: self, community_noid: noid).except(*FeaturedContent::STAFF_ONLY)
         next if genres.blank?
 
+        # The hash order is the option order, both in the no-JS fallback and in
+        # the list the Stimulus controller rebuilds, so the sort happens here.
+        genres = genres.slice(*FeaturedContent.picker_order(genres.keys))
         targets[noid.to_s] = { name: community_name(noid), genres: genres }
       end
     end
 
     # Resolves a showcase in one of the workspace owner's communities only. The
     # caller must confirm separately that the Work's depositor is that owner.
-    def publish_showcase_id
+    def publish_showcase_id(community_noid)
       person = workspace_owner
       return nil if person.blank?
 
-      community_noid = params[:publish_community_id].to_s
+      community_noid = community_noid.to_s
       return nil unless Array(person['affiliated_community_ids']).map(&:to_s).include?(community_noid)
       return nil if FeaturedContent::STAFF_ONLY.include?(params[:publish_genre])
 
@@ -83,15 +108,24 @@ module DepositorContext
     end
 
     # Atlas mints a personal root with its owner as depositor, and the owner's
-    # Person names it back as personal_root_id. Both have to agree.
+    # Person names it back as personal_root_id. Both have to agree. Read off the
+    # root, not the destination: a collection inside the workspace may have
+    # been made by staff, so its own depositor proves nothing.
     def other_workspace_owner
-      root = destination_collection
+      root_id = workspace_root_id
+      root = workspace_root(root_id)
       return nil unless root && root['personal_root'] && root['depositor'].present?
 
       person = Array(AtlasRb::Person.resolve([root['depositor']])).first
-      person if person && person['personal_root_id'].to_s == @destination_id.to_s
+      person if person && person['personal_root_id'].to_s == root_id
     rescue AtlasRb::Error, Faraday::Error, JSON::ParserError
       nil
+    end
+
+    def workspace_root(root_id)
+      return nil if root_id.nil?
+
+      root_id == @destination_id.to_s ? destination_collection : AtlasRb::Collection.find(root_id)
     end
 
     def destination_collection

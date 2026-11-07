@@ -74,4 +74,26 @@ RSpec.describe 'works/_download_row', type: :view do
     expect(rendered).to include('Add to queue')
     expect(rendered).to include('queue-control-w-1-large_image')
   end
+
+  describe 'the version chip' do
+    let(:file) do
+      AtlasRb::Mash.new(noid: 'b-1', mime_type: 'image/jpeg', label: 'Original Image',
+                        filename: 'original_b-1.jpg', size: 1000)
+    end
+    let(:revisions) { [{ 'revision' => 2 }, { 'revision' => 1 }] }
+
+    it 'names the current version as plain text, not a control' do
+      render partial: 'works/download_row', locals: { file: file, work_noid: 'w-1', revisions: revisions }
+
+      chip = Nokogiri::HTML.fragment(rendered).at_css('.file-version-chip')
+      expect(chip.name).to eq('span')
+      expect(chip.text.strip).to eq('Version 2')
+    end
+
+    it 'is absent from a file that was never replaced' do
+      render partial: 'works/download_row', locals: { file: file, work_noid: 'w-1' }
+
+      expect(rendered).not_to include('file-version-chip')
+    end
+  end
 end

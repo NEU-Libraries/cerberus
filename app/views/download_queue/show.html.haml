@@ -18,9 +18,9 @@
           Clear queue
 
   - if @queue.count.positive?
-    -# Files grouped by parent work (mirrors the zip's per-work folders): the
-    -# work names itself once, then its files list beneath it. One borderless
-    -# table on the card's white body — no nested panels.
+    -# Files grouped by parent work (mirrors the zip's per-work folders). A
+    -# work's first row links its title; later rows repeat the title as plain
+    -# muted text, so no Work cell reads as missing data.
     .table-responsive
       %table.table.table-borderless.admin-registry-table
         %thead
@@ -32,23 +32,28 @@
               %span.visually-hidden Remove
         %tbody
           - @queue.items.group_by { |item| item['w'] }.each do |work_noid, entries|
+            - work_title = @titles.dig(work_noid, 'title').presence || 'Untitled work'
             - entries.each_with_index do |entry, index|
               -# Two kinds of queued item: a content Blob (identified by its noid)
-              -# or an IIIF derivative rendition (identified by its role token, since
-              -# renditions carry no persistent identifier). Both take their label
-              -# from the work's assets; a role falls back to its titleized token.
+              -# or a derivative (identified by its role token, since derivatives
+              -# carry no persistent identifier, so its Identifier cell names the work
+              -# it derives from). Both take their label from the work's assets; a
+              -# role falls back to its titleized token.
               - derivative = entry['d'].present?
               - file_label = derivative ? (@labels.dig(work_noid, entry['d']).presence || entry['d'].titleize) : (@labels.dig(work_noid, entry['b']).presence || 'File')
               - remove_params = derivative ? { work_noid: work_noid, role: entry['d'] } : { work_noid: work_noid, blob_noid: entry['b'] }
               %tr
                 %td
                   - if index.zero?
-                    = link_to enhanced_text(@titles.dig(work_noid, 'title').presence || 'Untitled work'), work_path(work_noid), class: 'admin-registry-table__name fw-semibold'
+                    = link_to enhanced_text(work_title), work_path(work_noid), class: 'admin-registry-table__name fw-semibold'
                     %span.admin-registry-table__id.ms-2= work_noid
+                  - else
+                    %span.admin-registry-table__repeat{title: plain_text(work_title)}= enhanced_text(work_title)
                 %td.admin-registry-table__name= file_label
                 %td
                   - if derivative
-                    %span.text-muted.small IIIF rendition
+                    %span.text-muted.small derivative of
+                    %span.admin-registry-table__id= work_noid
                   - else
                     %span.admin-registry-table__id= entry['b']
                 %td.text-end

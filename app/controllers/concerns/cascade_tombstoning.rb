@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Deleting a Collection or Community that still holds items: everything live
-# beneath it is withdrawn with it, by TombstoneCascadeJob. See docs/admin.md
+# beneath it is tombstoned with it, by TombstoneCascadeJob. See docs/admin.md
 # ("Deleting a container that is not empty").
 #
 # Every check the confirmation makes in the browser is made again here, since a
@@ -52,7 +52,7 @@ module CascadeTombstoning
     end
 
     # A community holds other people's collections and showcases, so only an
-    # admin may withdraw one whole. The delegated tier may withdraw a collection.
+    # admin may tombstone one whole. The delegated tier may tombstone a collection.
     def cascade_delete_allowed?
       return false if effective_user.nil?
       return effective_user.admin? if solr_type == 'Community'

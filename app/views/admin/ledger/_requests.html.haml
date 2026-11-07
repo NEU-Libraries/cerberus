@@ -34,8 +34,9 @@
       %tbody
         - @notices.each do |notice|
           = render partial: 'admin/ledger/request', locals: { notice: notice }
-  %nav.paginate-section{ 'aria-label' => 'Request pages' }
-    = paginate @notices, theme: 'blacklight'
+  - if @notices.total_pages > 1
+    %nav.paginate-section{ 'aria-label' => 'Request pages' }
+      = paginate @notices, theme: 'blacklight'
 - else
   .admin-registry__empty
     %i.fa-solid.fa-clipboard-check.admin-registry__empty-icon{'aria-hidden' => 'true'}
@@ -47,4 +48,4 @@
     - else
       %p.mb-1.fw-semibold.text-body Nothing asked for yet
       %p.mb-0.small.text-muted
-        Requests to withdraw or move a work, and to restrict a collection or community, appear here.
+        Requests to delete or move a work, and to restrict a collection or community, appear here.

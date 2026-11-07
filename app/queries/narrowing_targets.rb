@@ -12,6 +12,7 @@ class NarrowingTargets
   include Enumerable
 
   AFFECTED_TYPES = NarrowingImpact::AFFECTED_TYPES
+  LIVE           = NarrowingImpact::LIVE
   ANCESTOR_FIELD = MembershipQuery::ANCESTOR_FIELD
   MAX_ROWS       = ContainerDescendantsQuery::MAX_ROWS
 
@@ -66,9 +67,9 @@ class NarrowingTargets
       ).documents
     end
 
-    # TombstoneTargets widens the types and drops what is already withdrawn.
+    # TombstoneTargets widens the types.
     def filters
-      [subtree_fq, AFFECTED_TYPES]
+      [subtree_fq, AFFECTED_TYPES, LIVE]
     end
 
     def subtree_fq
