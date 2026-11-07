@@ -153,6 +153,29 @@ RSpec.describe 'Admin::Impressions', type: :request do
       expect(response.body).to include('Filtered by: Featured Content: Datasets')
     end
 
+    # The Filter by… select submits the packed param, so the export links have
+    # to carry it or the download ignores the filter on screen.
+    it 'carries a packed-param filter into both export links' do
+      allow(FacetedWorkNoids).to receive(:call).with(type: 'content', value: 'Image').and_return([])
+      # The links render only above a table with rows.
+      row = { doc: nil, noid: 'w1', counts: { 'view' => 1, 'download' => 0, 'stream' => 0 }, total: 1 }
+      allow(ImpressionsReport).to receive(:new).and_wrap_original do |original, **kwargs|
+        original.call(**kwargs).tap { |report| allow(report).to receive(:top_works).and_return([row]) }
+      end
+      allow(ImpressionScope).to receive(:new).and_call_original
+
+      get '/admin/impressions', params: { facet: 'content::Image' }
+
+      links = Capybara.string(response.body).all('.usage-export a').pluck(:href)
+      expect(links.size).to eq(2)
+      expect(links).to all(include('facet=content%3A%3AImage'))
+
+      get links.first
+      expect(response).to have_http_status(:ok)
+      expect(ImpressionScope).to have_received(:new)
+        .with(hash_including(facet: { type: 'content', value: 'Image' })).twice
+    end
+
     it 'combines an item scope with a facet, hiding Top collections even for a Collection' do
       allow(ContainerDescendantsQuery).to receive(:new).with(noid: 'c1', uuid: 'uuid-c1')
                                                        .and_return(instance_double(ContainerDescendantsQuery, noids: ['c1'], work_noids: [], container_noids: ['c1'],

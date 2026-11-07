@@ -19,9 +19,11 @@ module Admin
               'aria-current' => ('true' if active)
     end
 
+    # FACET_PARAMS, not just the canonical pair: the Filter by… select submits
+    # the packed `facet`, and a link without it exports the unfiltered report.
     def usage_export_params(report)
       { from: report.range.begin, to: report.range.end, segment: report.segment }
-        .merge(request.query_parameters.slice(*ITEM_PARAMS, 'facet_type', 'facet_value'))
+        .merge(request.query_parameters.slice(*ITEM_PARAMS, *FACET_PARAMS))
     end
 
     def usage_preserved_params(*except)
