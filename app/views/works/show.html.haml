@@ -8,7 +8,8 @@
 -# Only the assets the viewer may actually fetch — inaccessible gated tiers
 -# and, while under embargo, every tier (unless the viewer can bypass it) are
 -# kept out of the card, its modal, and the count.
-- downloads = downloadable_files(@files, embargo_date: @permissions&.embargo)
+- editors = work_editors(@permissions)
+- downloads = downloadable_files(@files, embargo_date: @permissions&.embargo, editors: editors)
 - embargo_date = Embargo.release_date(@permissions&.embargo)
 
 .container
@@ -87,7 +88,7 @@
         = render partial: 'av_player',
                  locals: { file:         @av_file,
                            captions:     @captions,
-                           downloadable: derivative_readable?(@av_file, embargo_date: @permissions&.embargo),
+                           downloadable: derivative_readable?(@av_file, embargo_date: @permissions&.embargo, editors: editors),
                            streaming_only: StreamingOnly.on?(StreamingOnly.policy_from(@work), tiers: StreamingOnly.tiers_for([@av_file]), read: @permissions&.read) }
       - else
         = render partial: "thumbnail"

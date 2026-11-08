@@ -26,6 +26,6 @@ module ZoomViewer
     def zoom_service_readable?(pages)
       service = pages.flat_map { |page| Array(page['assets']) }
                      .find { |asset| asset['role'].to_s == 'service_file' && asset['uri'].present? }
-      service.present? && helpers.derivative_readable?(service)
+      service.present? && helpers.derivative_readable?(service, editors: helpers.work_editors(@permissions))
     end
 end

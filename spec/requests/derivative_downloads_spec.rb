@@ -58,6 +58,19 @@ RSpec.describe 'Derivative downloads', type: :request do
     expect(response).to have_http_status(:found)
   end
 
+  # Edit implies read at the tier gate. See docs/downloads.md.
+  it 'redirects a reserved tier for the depositor, outside the reserved group' do
+    allow(AtlasRb::Resource).to receive(:permissions).with(work_id).and_return(
+      AtlasRb::Mash.new('embargo' => '', 'edit' => [], 'depositor' => '000000123')
+    )
+    sign_in User.new(email: 'd@x.edu', password: 'password', nuid: '000000123', groups: [])
+    stub_tier(gated: true, permission: ['g:arch'], nuid: '000000123')
+
+    get derivative_download_path(work_id, 'large_image')
+
+    expect(response).to have_http_status(:found)
+  end
+
   it 'forbids a gated tier for a signed-in non-member' do
     sign_in User.new(email: 'o@x.edu', password: 'password', nuid: '000000005', groups: ['g:other'])
     stub_tier(gated: true, permission: ['g:arch'], nuid: '000000005')

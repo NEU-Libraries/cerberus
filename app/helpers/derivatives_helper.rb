@@ -1,44 +1,31 @@
 # frozen_string_literal: true
 
-# View + controller support for gated derivatives. Every downloadable asset —
-# image-tier Delegates (S/M/L) and Blobs alike (original / PDF / audio / video) —
-# carries a per-asset read gate (`gated`/`permission`) on the Work's assets
-# payload. The downloads UI (which files to show), DerivativeDownloadsController
-# (whether to authorize a delegate fetch), and DownloadsController (whether to
-# authorize a blob stream) all decide access by projecting that gate onto a
-# SolrDocument and asking the standard :read Ability — one source of truth.
-# An active embargo on the containing Work is layered on top of that per-asset
-# gate (see embargo_withholds?), not merged into it.
+# The per-asset download gate for views and controllers, layered under the
+# Work's embargo. The rule lives in DerivativeGate. See docs/downloads.md.
 module DerivativesHelper
-  # Public tier (gated: false) → readable by anyone; gated tier → only members
-  # of its read groups (permission), which Atlas withholds from guests (nil →
-  # empty → denied). The rule itself lives in DerivativeGate, so the bulk-download
-  # packers — which run outside a request and have no current_ability — apply the
-  # same one rather than a second copy of it.
-  def derivative_tier_document(delegate)
-    DerivativeGate.document(delegate)
+  def derivative_tier_document(delegate, editors: {})
+    DerivativeGate.document(delegate, editors: editors)
   end
 
-  # Can the current viewer read this asset? Blobs (original / PDF / audio / video)
-  # and delegate image tiers both carry `gated`/`permission`, so both project
-  # onto the same :read Ability. An asset with no gate (`gated` falsy) resolves
-  # to public — the safe default for anything Atlas hasn't stamped.
-  # `embargo_date` is the containing Work's permissions.embargo — a blanket
-  # hold checked ahead of (not instead of) the asset's own per-tier gate.
-  def derivative_readable?(file, embargo_date: nil)
-    !embargo_withholds?(embargo_date) && current_ability.can?(:read, derivative_tier_document(file))
+  # `embargo_date` is the containing Work's permissions.embargo, checked ahead of
+  # the asset's own gate. An edit grant does not lift it.
+  def derivative_readable?(file, embargo_date: nil, editors: {})
+    !embargo_withholds?(embargo_date) &&
+      current_ability.can?(:read, derivative_tier_document(file, editors: editors))
   end
 
-  # The downloadable assets the current viewer may actually fetch — used to keep
-  # inaccessible tiers out of the downloads card, its modal, and its count.
-  def downloadable_files(files, embargo_date: nil)
-    files.select { |file| derivative_readable?(file, embargo_date: embargo_date) }
+  def downloadable_files(files, embargo_date: nil, editors: {})
+    files.select { |file| derivative_readable?(file, embargo_date: embargo_date, editors: editors) }
   end
 
-  # A Work under an active embargo withholds every download — any tier, any
-  # blob — from everyone except staff (grouper) or an Admin, regardless of the
-  # asset's own gate. Distinct from :read: an embargoed Work's metadata/show
-  # page still renders (see WorksController), only its downloads are held back.
+  # @param permissions the Work's AtlasRb::Resource.permissions, as
+  #   authorize_show! leaves it in @permissions.
+  def work_editors(permissions)
+    DerivativeGate.editors_from_permissions(permissions)
+  end
+
+  # Staff and admins only. An embargoed Work's show page still renders; only its
+  # downloads are held back.
   def embargo_withholds?(embargo_date)
     Embargo.active?(embargo_date) && !effective_user&.can_bypass_embargo?
   end
@@ -52,17 +39,19 @@ module DerivativesHelper
     return true if has_downloads.nil? # indexed before Atlas rolled the fields up
     return false unless has_downloads
 
-    gate = SolrDocument.new('read_access_group_ssim'  => Array(document['download_read_groups_ssim']),
-                            'internal_resource_tesim' => 'Work')
-    current_ability.can?(:read, gate)
+    gate = DerivativeGate.editors_from_doc(document)
+                         .merge('read_access_group_ssim'  => Array(document['download_read_groups_ssim']),
+                                'internal_resource_tesim' => 'Work')
+    current_ability.can?(:read, SolrDocument.new(gate))
   end
 
-  # Controller-side raise for the two download-serving endpoints (Blob stream,
-  # derivative-tier redirect): a second Atlas permissions read (the Work's own,
-  # not the Blob's/tier's) is unavoidable here since neither's own gate carries
-  # the containing Work's embargo.
+  # Neither a Blob's nor a tier's own gate carries the containing Work's
+  # embargo, so the download endpoints read the Work's permissions as well.
+  # Returns them, so the tier gate's edit grant needs no second read.
   def deny_if_embargoed!(work_id)
-    embargo_date = AtlasRb::Resource.permissions(work_id)&.embargo
-    raise CanCan::AccessDenied if embargo_withholds?(embargo_date)
+    permissions = AtlasRb::Resource.permissions(work_id)
+    raise CanCan::AccessDenied if embargo_withholds?(permissions&.embargo)
+
+    permissions
   end
 end

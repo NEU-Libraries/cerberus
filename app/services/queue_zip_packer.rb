@@ -29,18 +29,18 @@ class QueueZipPacker
   private
 
     def pack_work(zip, work_noid, entries, manifest, errors)
-      if (release = withheld_until(work_noid))
-        errors << "#{work_noid}: withheld — under embargo until #{release}"
-        return
-      end
+      permissions = AtlasRb::Resource.permissions(work_noid)
+      release = withheld_until(permissions)
+      return errors << "#{work_noid}: withheld — under embargo until #{release}" if release
 
-      blob_noids = values_for(entries, 'b')
-      roles = values_for(entries, 'd')
-
-      AtlasRb::Work.assets(work_noid, nuid: @nuid).each do |asset|
-        next unless queued?(asset, blob_noids, roles)
-
-        pack_queued_asset(zip, work_noid, asset, manifest, errors)
+      editors = DerivativeGate.editors_from_permissions(permissions)
+      queued_assets(work_noid, entries).each do |asset|
+        # Without this the archive serves tier bytes `/downloads/:id` refuses.
+        if DerivativeGate.readable?(asset, @ability, editors: editors)
+          pack_queued_asset(zip, work_noid, asset, manifest, errors)
+        else
+          errors << "#{work_noid}: withheld — #{asset[:use].presence || asset.noid} is not available to download"
+        end
       end
     rescue AtlasRb::TombstonedError
       errors << withheld_as_removed(work_noid)
@@ -48,20 +48,17 @@ class QueueZipPacker
       errors << "#{work_noid}: assets unavailable — #{e.class}: #{e.message}"
     end
 
+    def queued_assets(work_noid, entries)
+      blob_noids = values_for(entries, 'b')
+      roles = values_for(entries, 'd')
+      AtlasRb::Work.assets(work_noid, nuid: @nuid).select { |asset| queued?(asset, blob_noids, roles) }
+    end
+
     def queued?(asset, blob_noids, roles)
       content_blob?(asset) ? blob_noids.include?(asset.noid) : roles.include?(asset[:role])
     end
 
-    # Atlas re-authorizes at the WORK level only; the per-asset gate rides the
-    # returned entries as advisory, so a restricted tier arrives looking like any
-    # other asset. Without DerivativeGate the archive serves bytes
-    # `/downloads/:id` refuses.
     def pack_queued_asset(zip, work_noid, asset, manifest, errors)
-      unless DerivativeGate.readable?(asset, @ability)
-        errors << "#{work_noid}: withheld — #{asset[:use].presence || asset.noid} is not available to download"
-        return
-      end
-
       if content_blob?(asset)
         write_asset(zip, work_noid, asset, manifest, errors)
       else
@@ -74,12 +71,11 @@ class QueueZipPacker
     end
 
     # An embargoed Work is deliberately READABLE — public metadata, withheld
-    # content — so Atlas returns its assets and they would be packed. Costs one
-    # Atlas call per distinct work; the alternative is serving embargoed bytes.
-    def withheld_until(work_noid)
+    # content — so Atlas returns its assets and they would be packed.
+    def withheld_until(permissions)
       return nil if @bypass_embargo
 
-      release = AtlasRb::Resource.permissions(work_noid)&.embargo
+      release = permissions&.embargo
       Embargo.active?(release) ? Embargo.release_date(release) : nil
     end
 end

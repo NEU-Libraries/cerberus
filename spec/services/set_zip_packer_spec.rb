@@ -223,4 +223,25 @@ RSpec.describe SetZipPacker do
 
     expect(names).to include('bc1234/video.mp4')
   end
+
+  # Edit implies read at the tier gate; the edit fields come off the member's
+  # own Solr doc. See docs/downloads.md.
+  it "packs a reserved asset for the member Work's depositor" do
+    doc = SolrDocument.new('alternate_ids_ssim' => ['id-bc1234'], 'depositor_ssi' => '000000123')
+    allow(resolver).to receive(:each_content_batch).and_yield([doc])
+    gated = blob(noid: 'vid1', filename: 'video.mp4', mime_type: 'video/mp4')
+    gated['gated'] = true
+    gated['permission'] = ['northeastern:drs:repository:admin']
+    allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000123').and_return([gated])
+    allow(AtlasRb::Blob).to receive(:content).with('vid1').and_yield('MP4')
+    depositor = User.new(email: 'd@example.com', nuid: '000000123', groups: [])
+
+    described_class.new(resolver: resolver, nuid: '000000123', ability: Ability.new(depositor)).pack(zip)
+
+    expect(names).to include('bc1234/video.mp4')
+  end
+
+  it 'declares the edit fields, so Solr returns them' do
+    expect(described_class::REQUIRED_DOC_FIELDS).to include(*DerivativeGate::EDITOR_FIELDS)
+  end
 end
