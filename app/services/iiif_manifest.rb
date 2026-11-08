@@ -47,7 +47,7 @@ class IiifManifest < ApplicationService
 
     def canvases
       @pages.filter_map do |page|
-        service = Array(page['assets']).find { |asset| asset['uri'].present? }&.[]('uri')
+        service = Array(page['assets']).find { |asset| asset['role'].to_s == 'service_file' }&.[]('uri')
         next if service.blank?
 
         size = dimensions(service)

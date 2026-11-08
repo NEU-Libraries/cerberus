@@ -9,7 +9,7 @@
 -# always image renditions, so they take the image icon even though the
 -# pointer-only delegate carries no mime type.
 - display_label = download_label(file)
-- icon = file[:uri].present? ? file_type_icon('image/jpeg') : file_type_icon(file.mime_type)
+- icon = AssetKind.delegate?(file) ? file_type_icon('image/jpeg') : file_type_icon(file.mime_type)
 %li.list-group-item.d-flex.align-items-center
   %span.fa-regular{class: icon, 'aria-hidden' => true}
   -# Label, filename, and size read inline on one baseline. The filename
@@ -17,9 +17,9 @@
   -# share a generic label (two "Video File" entries, say). A Blob carries its
   -# filename and size; a rendition is named by DerivativeCreator.filename and
   -# rendered on request, so its size is an estimate, marked with a tilde.
-  - rendition = file[:uri].present? && file[:role].present?
+  - rendition = AssetKind.delegate?(file) && file[:role].present?
   - filename = rendition ? DerivativeCreator.filename(file[:role], work_noid) : file[:filename]
-  - estimate = DerivativeSizeEstimate.call(uri: file[:uri]) if rendition
+  - estimate = DerivativeSizeEstimate.call(uri: file[:uri]) if rendition && file[:uri].present?
   .ms-3.flex-grow-1.d-flex.align-items-baseline.flex-wrap.gap-2
     %span.fw-semibold= display_label
     - if filename.present?
@@ -33,7 +33,7 @@
     -# A signal only. The versions themselves are in the File history card.
     - if local_assigns[:revisions].present?
       %span.file-version-chip= "Version #{revisions.first['revision']}"
-  - if file[:uri].present?
+  - if AssetKind.delegate?(file)
     = link_to derivative_download_path(work_noid, file[:role]), class: 'btn btn-tonal-primary btn-sm ms-3', 'aria-label' => "Download #{display_label}", target: '_blank', rel: 'noopener' do
       %span.fa-solid.fa-download{'aria-hidden' => true}
       %span.ms-1 Download

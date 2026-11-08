@@ -25,7 +25,7 @@ RSpec.describe SetZipPacker do
   end
 
   def delegate(noid:, uri:, use: 'Large Image')
-    AtlasRb::Mash.new('noid' => noid, 'uri' => uri, 'use' => use)
+    AtlasRb::Mash.new('noid' => noid, 'kind' => 'Delegate', 'uri' => uri, 'use' => use)
   end
 
   def names = zip.entries.map(&:name)
@@ -84,7 +84,7 @@ RSpec.describe SetZipPacker do
     expect(entry.body).to eq('PDFBYTES')
   end
 
-  it 'excludes Delegate-backed derivatives (they carry a uri)' do
+  it 'excludes Delegate-backed derivatives' do
     allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000002')
                                             .and_return([blob(noid: 'blob1', filename: 'pdf_blob1.pdf'),
                                                          delegate(noid: 'del1', uri: 'https://iiif.example/large')])
@@ -95,6 +95,17 @@ RSpec.describe SetZipPacker do
     expect(names).to include('bc1234/pdf_blob1.pdf')
     expect(names).not_to include(a_string_matching(/del1/))
     expect(AtlasRb::Blob).not_to have_received(:content).with('del1')
+  end
+
+  # An embargo nulls a gated Delegate's uri; it is still not content.
+  it 'excludes a Delegate whose uri Atlas withheld' do
+    allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000002')
+                                            .and_return([delegate(noid: 'del1', uri: nil)])
+    allow(AtlasRb::Blob).to receive(:content)
+
+    packer.pack(zip)
+
+    expect(AtlasRb::Blob).not_to have_received(:content)
   end
 
   it 'falls back to a neutral <noid>.<ext> when the labeled filename is absent, never the original_filename' do

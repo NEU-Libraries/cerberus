@@ -22,7 +22,7 @@ RSpec.describe 'Derivative downloads', type: :request do
   # route matches the token.
   def stub_tier(gated:, permission:, nuid:, role: 'large_image')
     allow(AtlasRb::Work).to receive(:assets).with(work_id, nuid: nuid)
-                                            .and_return([AtlasRb::Mash.new(use: 'Large Image', role: role, uri: uri,
+                                            .and_return([AtlasRb::Mash.new(kind: 'Delegate', use: 'Large Image', role: role, uri: uri,
                                                                            gated: gated, permission: permission)])
   end
 
@@ -109,6 +109,19 @@ RSpec.describe 'Derivative downloads', type: :request do
     before do
       allow(AtlasRb::Resource).to receive(:permissions).with(work_id)
                                                        .and_return(AtlasRb::Mash.new('embargo' => (Date.current + 30).to_s))
+    end
+
+    # Atlas withholds the tier's URL from this caller, so the tier arrives with
+    # `uri: null`. It is still the tier, and the embargo is the reason.
+    it 'answers 403, not 404, when Atlas has withheld the URL' do
+      allow(AtlasRb::Work).to receive(:assets).with(work_id, nuid: nil).and_return(
+        [AtlasRb::Mash.new(kind: 'Delegate', use: 'Large Image', role: 'large_image', uri: nil,
+                           gated: false, permission: ['public'])]
+      )
+
+      get derivative_download_path(work_id, 'large_image')
+
+      expect(response).to have_http_status(:forbidden)
     end
 
     it 'forbids an otherwise-public tier for a guest' do

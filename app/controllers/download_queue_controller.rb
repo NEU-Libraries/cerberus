@@ -88,7 +88,7 @@ class DownloadQueueController < ApplicationController
 
     def label_asset(labels, asset)
       label = asset.label.presence || asset[:use]
-      key = asset[:uri].present? ? asset[:role] : asset.noid
+      key = AssetKind.delegate?(asset) ? asset[:role] : asset.noid
       labels[key] = label if key.present?
     end
 end

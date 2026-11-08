@@ -123,7 +123,7 @@ RSpec.describe MultipageIngestJob, type: :job do
       ingest.update!(file_set_pid: 'fs-2', blob_attached_at: 1.minute.ago)
       allow(AtlasRb::Work).to receive(:file_sets).with('w-1').and_return(
         [{ 'noid' => 'fs-2', 'position' => 2,
-           'assets' => [{ 'noid' => 'b-1' }, { 'uri' => 'https://iiif.test/iiif/3/old.tif' }] }]
+           'assets' => [{ 'noid' => 'b-1' }, { 'kind' => 'Delegate', 'role' => 'service_file', 'uri' => 'https://iiif.test/iiif/3/old.tif' }] }]
       )
 
       described_class.new.perform(ingest.id)

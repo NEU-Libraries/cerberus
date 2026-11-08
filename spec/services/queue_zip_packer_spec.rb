@@ -16,7 +16,7 @@ RSpec.describe QueueZipPacker do
   end
 
   def delegate(noid:, uri:)
-    AtlasRb::Mash.new('noid' => noid, 'uri' => uri, 'use' => 'Large Image', 'role' => 'large_image')
+    AtlasRb::Mash.new('noid' => noid, 'kind' => 'Delegate', 'uri' => uri, 'use' => 'Large Image', 'role' => 'large_image')
   end
 
   def names = zip.entries.map(&:name)
@@ -115,7 +115,7 @@ RSpec.describe QueueZipPacker do
   it 'skips a derivative whose role is not the queued one' do
     items = [{ 'w' => 'work1', 'd' => 'large_image' }]
     allow(AtlasRb::Work).to receive(:assets).with('work1', nuid: nil).and_return(
-      [AtlasRb::Mash.new('noid' => 'd2', 'uri' => 'https://iiif.example/small', 'use' => 'Small Image',
+      [AtlasRb::Mash.new('noid' => 'd2', 'kind' => 'Delegate', 'uri' => 'https://iiif.example/small', 'use' => 'Small Image',
                          'role' => 'small_image')]
     )
     allow(Faraday).to receive(:get)

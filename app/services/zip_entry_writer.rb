@@ -49,9 +49,9 @@ module ZipEntryWriter
       errors << "#{folder}: #{delegate[:use]} failed — #{e.class}: #{e.message}"
     end
 
-    # Delegates are pointer-only and carry a `uri`; content Blobs do not.
+    # A Delegate is pointer-only, with no noid-backed bytes. See AssetKind.
     def content_blob?(asset)
-      asset[:uri].blank?
+      AssetKind.blob?(asset)
     end
 
     # Delegate URIs carry Cantaloupe's PUBLIC host, but the packer runs

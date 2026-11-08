@@ -23,7 +23,7 @@ class MediaRemux
   # in a universal container (the original if already MP4/MP3, else the ingest MP4
   # rendition). nil until one exists. The work-show player reads this.
   def self.playable_file(files)
-    files.find { |file| file[:uri].blank? && PLAYABLE_CONTAINER_MIMES.include?(file.mime_type.to_s) }
+    files.find { |file| AssetKind.blob?(file) && PLAYABLE_CONTAINER_MIMES.include?(file.mime_type.to_s) }
   end
 
   # Lossless container swap to MP4, moov atom at the front for instant Range

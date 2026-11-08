@@ -8,7 +8,7 @@ class DerivativeDownloadsController < ApplicationController
 
   def show
     delegate = AtlasRb::Work.assets(params[:work_id], nuid: viewer_nuid)
-                            .find { |asset| asset['role'] == params[:role] && asset['uri'].present? }
+                            .find { |asset| asset['role'] == params[:role] && AssetKind.delegate?(asset) }
     raise Authorizable::ResourceNotFound if delegate.nil?
 
     authorize_tier!(delegate)

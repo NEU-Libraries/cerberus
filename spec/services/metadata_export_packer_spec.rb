@@ -30,7 +30,8 @@ RSpec.describe MetadataExportPacker do
   # the content file was deposited under; the loader ignores it on an update row.
   context 'the File Name column' do
     def asset(role:, original: nil, stored: nil, uri: nil)
-      AtlasRb::Mash.new('role' => role, 'original_filename' => original, 'filename' => stored, 'uri' => uri)
+      AtlasRb::Mash.new('kind' => (uri ? 'Delegate' : 'Blob'), 'role' => role, 'original_filename' => original,
+                        'filename' => stored, 'uri' => uri)
     end
 
     def file_names

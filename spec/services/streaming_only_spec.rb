@@ -43,7 +43,7 @@ RSpec.describe StreamingOnly do
 
   describe '.tiers_for' do
     def asset(mime, uri: nil)
-      AtlasRb::Mash.new('noid' => 'n1', 'mime_type' => mime, 'uri' => uri)
+      AtlasRb::Mash.new('noid' => 'n1', 'kind' => (uri ? 'Delegate' : 'Blob'), 'mime_type' => mime, 'uri' => uri)
     end
 
     it "names the Atlas tier for the Work's own media type, once" do
@@ -89,7 +89,7 @@ RSpec.describe StreamingOnly do
 
   describe '.applicable?' do
     def asset(mime, uri: nil)
-      AtlasRb::Mash.new('noid' => 'n1', 'mime_type' => mime, 'uri' => uri)
+      AtlasRb::Mash.new('noid' => 'n1', 'kind' => (uri ? 'Delegate' : 'Blob'), 'mime_type' => mime, 'uri' => uri)
     end
 
     it 'is true for a work carrying a video blob' do
@@ -108,8 +108,8 @@ RSpec.describe StreamingOnly do
       expect(described_class.applicable?([asset('application/pdf'), asset('image/jpeg')])).to be(false)
     end
 
-    # Image tiers are Delegates and carry a uri; they are not the Work's content.
-    it 'ignores uri-backed delegates' do
+    # Image tiers are Delegates; they are not the Work's content.
+    it 'ignores delegates' do
       expect(described_class.applicable?([asset('video/mp4', uri: 'https://iiif/x')])).to be(false)
     end
   end

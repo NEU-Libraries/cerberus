@@ -103,11 +103,11 @@ class MultipageIngestJob < ApplicationJob
       )
     end
 
-    # Only consulted on resumed executions. Delegates carry a `uri` in the
-    # listing's polymorphic assets; content Blobs don't.
+    # Only consulted on resumed executions. Match the service Delegate by role,
+    # not by its `uri`, which an embargo can null.
     def page_service_present?(ingest)
       entry = AtlasRb::Work.file_sets(ingest.work_pid).find { |fs| fs['noid'] == ingest.file_set_pid }
-      Array(entry&.[]('assets')).any? { |asset| asset['uri'].present? }
+      Array(entry&.[]('assets')).any? { |asset| AssetKind.delegate?(asset) && asset['role'].to_s == 'service_file' }
     end
 
     def finalize_success(ingest)

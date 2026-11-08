@@ -28,7 +28,7 @@ RSpec.describe DownloadsHelper, type: :helper do
   describe '#file_history_entries' do
     let(:pdf) { AtlasRb::Mash.new(noid: 'b1', label: 'PDF') }
     let(:image) { AtlasRb::Mash.new(noid: 'b2', label: 'Image') }
-    let(:rendition) { AtlasRb::Mash.new(role: 'large_image', uri: 'https://g/x.jp2/full/pct:75/0/default.jpg') }
+    let(:rendition) { AtlasRb::Mash.new(kind: 'Delegate', role: 'large_image', uri: 'https://g/x.jp2/full/pct:75/0/default.jpg') }
     let(:by_blob) { { 'b2' => [{ 'revision' => 2 }], 'b1' => [{ 'revision' => 3 }], 'b9' => [{ 'revision' => 2 }] } }
 
     it 'pairs each replaced file with its revisions, in the order of the files' do

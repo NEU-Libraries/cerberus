@@ -24,6 +24,7 @@ Source files:
 - `app/helpers/downloads_helper.rb`
 - `app/helpers/derivatives_helper.rb`
 - `app/lib/derivative_gate.rb`
+- `app/lib/asset_kind.rb`
 - `app/views/works/_file_history.html.haml`
 
 `IiifAssetsJob`, `CaptionJob` and `StreamingOnly` are covered in
@@ -330,8 +331,17 @@ host changes; the signed path is unaffected.
 
 ### Content only, and how a Blob is told from a Delegate
 
-`content_blob?` is the single test: a Delegate carries a `uri` and no
-noid-backed bytes, and a content Blob does not.
+`content_blob?` is the single test, through `AssetKind`. Atlas names each
+asset's model in its `kind` field: `"Blob"` or `"Delegate"`. A Delegate is
+pointer-only, with no noid-backed bytes.
+
+**Never tell the two apart by `uri`.** Under an active embargo Atlas sends
+`uri: null` for the gated small, medium, large and service Delegates to a
+caller below staff with no edit grant. A test on `uri` then reads those
+Delegates as Blobs. Every Cerberus site asks `AssetKind` instead. A site that
+needs the URL itself, such as `DepositDerivativesJob`, `ZoomViewer` or
+`DerivativeCreator`, matches the Delegate by `role` and then reads `uri`. An
+entry with no `kind` counts as a Blob.
 
 `SetZipPacker` needs nothing more. Atlas's `GET /works/:id/assets` already drops
 metadata FileSets and non-downloadable roles, and `content_blob?` drops the
