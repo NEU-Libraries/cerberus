@@ -137,8 +137,8 @@ RSpec.describe QueueZipPacker do
     expect(errors.body).to include('work1')
   end
 
-  # Atlas refuses a retracted Work's file list below the operator tiers.
-  it 'names a retracted work as withheld and still packs the next work' do
+  # Atlas refuses a suppressed Work's file list below the operator tiers.
+  it 'names a suppressed work as withheld and still packs the next work' do
     items = [{ 'w' => 'work1', 'b' => 'blobA' }, { 'w' => 'work2', 'b' => 'blobC' }]
     allow(AtlasRb::Work).to receive(:assets).with('work1', nuid: nil).and_raise(
       AtlasRb::TombstonedError.new({ 'error' => 'tombstoned', 'tombstoned_resource_type' => 'Work',

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # The inverse of the catalog's default tombstone filter, for the admin
-# Retracted items registry.
+# Suppressed items registry.
 #
 # Every SearchBuilder inherits CatalogController.default_solr_params, whose fq
 # carries `-tombstoned_bsi:true` (so tombstoned objects never surface in normal

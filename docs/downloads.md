@@ -153,13 +153,13 @@ served, so they can review a file before they restore it. Cerberus signs each
 call as the viewer, so Atlas makes the tier decision and Cerberus makes none.
 
 atlas_rb raises the refusal as `AtlasRb::TombstonedError`, from `Work.assets`
-for a retracted Work and from `Blob.content` for any withheld Blob. Both raise
+for a suppressed Work and from `Blob.content` for any withheld Blob. Both raise
 before a byte moves. `Authorizable#render_withheld` answers it:
 
 | Tombstoned resource | Page |
 |---|---|
 | a FileSet (one file removed) | the not-found page, for a file |
-| the Work (retracted) | the Work's Removed page (`errors/gone`) |
+| the Work (suppressed) | the Work's Removed page (`errors/gone`) |
 
 The same handler answers a tombstone on any other read, such as a Collection's
 or a Work's record. `docs/authorization.md` covers that.
@@ -280,7 +280,7 @@ drifting apart.
 - **Record a failure, do not raise it.** Once the response headers are out the
   archive cannot be un-sent, so a mid-stream fetch failure becomes an
   `ERRORS.txt` line.
-- **A tombstone is withheld access, not a failure.** A retracted Work's
+- **A tombstone is withheld access, not a failure.** A suppressed Work's
   `Work.assets`, or a withheld Blob's `Blob.content`, raises
   `AtlasRb::TombstonedError`. The packers record it as
   `<noid>: withheld — removed from view`, worded like an embargo. Any other

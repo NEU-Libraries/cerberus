@@ -116,7 +116,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
         page = response.parsed_body
         expect(page.css('th').map(&:text)).to include('Parent')
         expect(page.at_css('a[href="/collections/live1"]')&.text).to eq('Theses Collection')
-        expect(response.body).to include('Removed Collection', '· retracted')
+        expect(response.body).to include('Removed Collection', '· suppressed')
         expect(page.css('a[href="/collections/gone1"]')).to be_empty
         rows = page.css('tbody tr').map { |row| row.css('td')[2].text.squish }
         expect(rows.last).to eq('—')
@@ -181,14 +181,14 @@ RSpec.describe 'Admin::Tombstones', type: :request do
 
         get '/admin/tombstones', params: { q: 'nomatch' }
 
-        expect(response.body).to include('No retracted items match these filters').and include('Show all retracted items')
-        expect(response.body).not_to include('Nothing is retracted')
+        expect(response.body).to include('No suppressed items match these filters').and include('Show all suppressed items')
+        expect(response.body).not_to include('Nothing is suppressed')
       end
 
       it 'shows the empty state when nothing is tombstoned' do
         allow(TombstonedItems).to receive(:call).and_return(fake_results)
         get '/admin/tombstones'
-        expect(response.body).to include('Nothing is retracted')
+        expect(response.body).to include('Nothing is suppressed')
       end
 
       # The caveat is row-typed because it is only true of a container: Atlas
@@ -210,7 +210,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
 
         get '/admin/tombstones'
 
-        expect(response.body).to include('must be empty first, and retracted members count')
+        expect(response.body).to include('must be empty first, and suppressed members count')
       end
     end
 
@@ -346,7 +346,7 @@ RSpec.describe 'Admin::Tombstones', type: :request do
 
         delete '/admin/tombstones/abc', params: { type: 'Collection' }
 
-        expect(flash[:alert]).to include('still has members', 'retracted members count')
+        expect(flash[:alert]).to include('still has members', 'suppressed members count')
       end
 
       it 'falls back to the generic alert on a refusal it cannot read' do

@@ -172,7 +172,7 @@ RSpec.describe SetZipPacker do
 
     def errors_body = zip.entries.find { |e| e.name == 'ERRORS.txt' }&.body
 
-    it 'names a retracted member as withheld and completes the archive' do
+    it 'names a suppressed member as withheld and completes the archive' do
       allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000002').and_raise(tombstoned('Work', 'bc1234'))
 
       packer.pack(zip)

@@ -10,7 +10,7 @@ module AuditEventsHelper
   ACTION_DESCRIPTORS = {
     'create'          => { tone: 'create',    icon: 'fa-circle-plus',  label: 'Created' },
     'update'          => { tone: 'update',    icon: 'fa-pen',          label: 'Updated' },
-    'tombstone'       => { tone: 'tombstone', icon: 'fa-trash-can',    label: 'Retracted' },
+    'tombstone'       => { tone: 'tombstone', icon: 'fa-trash-can',    label: 'Suppressed' },
     'restore'         => { tone: 'restore',   icon: 'fa-rotate-left',  label: 'Restored' },
     'reparent'        => { tone: 'reparent',  icon: 'fa-sitemap',      label: 'Reparented' },
     'link_member'     => { tone: 'link',      icon: 'fa-link',         label: 'Linked' },

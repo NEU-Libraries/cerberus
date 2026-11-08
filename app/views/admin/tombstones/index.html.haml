@@ -9,27 +9,27 @@
     %header.admin-registry__head
       %span.admin-registry__title
         %i.fa-solid.fa-trash-can-arrow-up{'aria-hidden' => 'true'}
-        Retracted items
+        Suppressed items
         - if documents.any?
           %span.admin-registry__count= pluralize(@response.total, 'item')
 
     .p-3
       %p.text-muted.small.mb-0
-        Every retracted work, collection and community. Restore an item to make it discoverable again. This action will be recorded in the activity history. An item can only be restored after any retracted parent above it has been restored.
+        Every suppressed work, collection and community. Restore an item to make it discoverable again. This action will be recorded in the activity history. An item can only be restored after any suppressed parent above it has been restored.
       - if current_user&.admin?
         %p.text-muted.small.mb-0.mt-2
-          Permanent deletion cannot be undone. It removes the item and every preserved copy of its files, leaving only the audit record. Empty a collection or community first; retracted members count.
+          Permanent deletion cannot be undone. It removes the item and every preserved copy of its files, leaving only the audit record. Empty a collection or community first; suppressed members count.
       %p.text-muted.small.mb-0.mt-2
-        A search that finds a collection or community also lists everything retracted inside it.
+        A search that finds a collection or community also lists everything suppressed inside it.
       = form_with url: admin_tombstones_path, method: :get, class: 'tombstone-filters mt-3', data: { controller: 'auto-submit' } do
         .tombstone-filters__search
           %label.form-label.small.mb-1{for: 'tombstone_q'} Title or PID
-          = text_field_tag :q, params[:q], id: 'tombstone_q', class: 'form-control', placeholder: 'Search retracted items…'
+          = text_field_tag :q, params[:q], id: 'tombstone_q', class: 'form-control', placeholder: 'Search suppressed items…'
         .tombstone-filters__date
-          %label.form-label.small.mb-1{for: 'from'} Retracted from
+          %label.form-label.small.mb-1{for: 'from'} Suppressed from
           = date_field_tag :from, @from, id: 'from', class: 'form-control'
         .tombstone-filters__date
-          %label.form-label.small.mb-1{for: 'to'} Retracted to
+          %label.form-label.small.mb-1{for: 'to'} Suppressed to
           = date_field_tag :to, @to, id: 'to', class: 'form-control'
         .tombstone-filters__per-page
           %label.form-label.small.mb-1{for: 'per_page'} Per page
@@ -77,19 +77,19 @@
           = paginate @response
     - elsif params[:q].present? || @from || @to
       .admin-registry__empty
-        %p.mb-2.text-muted No retracted items match these filters.
-        = link_to 'Show all retracted items', admin_tombstones_path, class: 'btn btn-tonal-secondary btn-sm'
+        %p.mb-2.text-muted No suppressed items match these filters.
+        = link_to 'Show all suppressed items', admin_tombstones_path, class: 'btn btn-tonal-secondary btn-sm'
     - else
       .admin-registry__empty
         %i.fa-solid.fa-trash-can-arrow-up.admin-registry__empty-icon{'aria-hidden' => 'true'}
-        %p.mb-1.fw-semibold.text-body Nothing is retracted
+        %p.mb-1.fw-semibold.text-body Nothing is suppressed
         %p.mb-0.small.text-muted
           When a Work, Collection or Community is deleted, it appears here so it can be restored.
 
   - if documents.any?
     = form_with url: bulk_admin_tombstones_path, id: 'tombstone-bulk', class: 'well p-3 my-3 rounded-3 bulk-actions', data: { bulk_select_target: 'well' }, html: { hidden: true } do
       .d-inline-flex.gap-2
-        = button_tag type: 'submit', name: 'bulk_action', value: 'restore', class: 'btn btn-tonal-primary', data: { bulk_select_target: 'confirm', confirm_template: 'Restore {items}? Each will be discoverable again once its retracted parent, if any, is restored. The result arrives in your inbox.', turbo_confirm_title: 'Confirm bulk restore', turbo_confirm_button: 'Restore', turbo_confirm_variant: 'primary' } do
+        = button_tag type: 'submit', name: 'bulk_action', value: 'restore', class: 'btn btn-tonal-primary', data: { bulk_select_target: 'confirm', confirm_template: 'Restore {items}? Each will be discoverable again once its suppressed parent, if any, is restored. The result arrives in your inbox.', turbo_confirm_title: 'Confirm bulk restore', turbo_confirm_button: 'Restore', turbo_confirm_variant: 'primary' } do
           %i.fa-solid.fa-rotate-left.me-1{'aria-hidden' => 'true'}
           Bulk restore
         - if current_user&.admin?

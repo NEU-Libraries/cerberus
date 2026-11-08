@@ -68,6 +68,13 @@ RSpec.describe WorkHealthHelper do
       end
     end
 
+    # The code is Atlas's, so this key has to match it exactly.
+    it 'sends a live Work under a suppressed ancestor to the Delete tab' do
+      html = helper.work_health_repair(finding('live_under_suppressed'), 'w1')
+
+      expect(html).to include('href="#delete"')
+    end
+
     it 'offers Reindex for a missing Solr document, returning to the Health tab' do
       html = helper.work_health_repair(finding('not_indexed'), 'w1')
 

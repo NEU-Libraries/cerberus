@@ -310,7 +310,7 @@ RSpec.describe 'Blob downloads', type: :request do
       expect(response.headers['Content-Disposition']).to be_nil
     end
 
-    it "answers a retracted work's file with the Removed page, before asking for bytes" do
+    it "answers a suppressed work's file with the Removed page, before asking for bytes" do
       allow(AtlasRb::Work).to receive(:assets).and_raise(tombstoned('Work', work_id))
       allow(AtlasRb::Work).to receive(:find).with(work_id)
                                             .and_return(AtlasRb::Mash.new(title: 'Sample Audio Recording'))
