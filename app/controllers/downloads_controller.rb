@@ -67,7 +67,7 @@ class DownloadsController < ApplicationController
       return if @derivative_asset.nil?
 
       deny_if_unfinished_work!(work_id)
-      deny_if_embargoed!(work_id)
-      authorize! :read, derivative_tier_document(@derivative_asset)
+      permissions = deny_if_embargoed!(work_id)
+      authorize! :read, derivative_tier_document(@derivative_asset, editors: work_editors(permissions))
     end
 end

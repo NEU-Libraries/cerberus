@@ -8,7 +8,7 @@ class DerivativeDownloadsController < ApplicationController
 
   def show
     delegate = AtlasRb::Work.assets(params[:work_id], nuid: viewer_nuid)
-                            .find { |asset| asset['role'] == params[:role] && asset['uri'].present? }
+                            .find { |asset| asset['role'] == params[:role] && AssetKind.delegate?(asset) }
     raise Authorizable::ResourceNotFound if delegate.nil?
 
     authorize_tier!(delegate)
@@ -19,8 +19,8 @@ class DerivativeDownloadsController < ApplicationController
 
     def authorize_tier!(delegate)
       deny_if_unfinished_work!(params[:work_id])
-      deny_if_embargoed!(params[:work_id])
-      authorize! :read, derivative_tier_document(delegate)
+      permissions = deny_if_embargoed!(params[:work_id])
+      authorize! :read, derivative_tier_document(delegate, editors: work_editors(permissions))
     end
 
     # The redirect lands on Cantaloupe, so only ITS disposition header makes the

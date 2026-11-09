@@ -10,7 +10,7 @@ module Admin
     PURGE_CONSEQUENCE = 'This removes the item and every preserved copy of its files. ' \
                         'It cannot be undone; only the audit record survives.'
 
-    PURGE_CONTAINER_CAVEAT = 'A collection or community must be empty first, and retracted members count.'
+    PURGE_CONTAINER_CAVEAT = 'A collection or community must be empty first, and suppressed members count.'
 
     # The confirmation an admin reads before a purge. The shared turbo-confirm
     # modal splits on a blank line and renders the first block as the prompt and
@@ -36,7 +36,7 @@ module Admin
       end
 
       safe_join([finder_doc_heading(parent),
-                 content_tag(:span, ' · retracted', class: 'text-muted small')])
+                 content_tag(:span, ' · suppressed', class: 'text-muted small')])
     end
   end
 end

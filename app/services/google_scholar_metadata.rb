@@ -47,7 +47,7 @@ class GoogleScholarMetadata
   def pdf_blob_noid
     return nil unless public? && !embargoed?
 
-    pdf = @files.find { |asset| asset[:uri].blank? && asset[:mime_type] == 'application/pdf' }
+    pdf = @files.find { |asset| AssetKind.blob?(asset) && asset[:mime_type] == 'application/pdf' }
     pdf&.[](:noid)
   end
 

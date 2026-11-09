@@ -477,7 +477,7 @@
 
 // Bulk actions for the checked rows (bulk_select_controller.js), laid out as a
 // form footer: the buttons first, then how many rows they act on. Shared by the
-// Retracted items registry and the inbox.
+// Suppressed items registry and the inbox.
 .bulk-actions {
   display: flex;
   flex-wrap: wrap;

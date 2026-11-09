@@ -9,11 +9,11 @@ class SetZipPacker
   # Every Solr field this packer reads off a member doc; SetResolver builds its
   # `fl` from it. A field read here but not declared here is silently nil, which
   # once disabled the embargo check on every document.
-  REQUIRED_DOC_FIELDS = %w[
+  REQUIRED_DOC_FIELDS = (%w[
     id
     alternate_ids_ssim
     embargo_release_date_dtsi
-  ].freeze
+  ] + DerivativeGate::EDITOR_FIELDS).freeze
 
   # `ability` and `bypass_embargo` are the CALLER's, never the set owner's.
   def initialize(resolver:, nuid:, ability:, bypass_embargo: false)
@@ -45,14 +45,14 @@ class SetZipPacker
         return
       end
 
-      pack_assets(zip, noid, manifest, errors)
+      pack_assets(zip, noid, DerivativeGate.editors_from_doc(doc), manifest, errors)
     end
 
-    def pack_assets(zip, noid, manifest, errors)
+    def pack_assets(zip, noid, editors, manifest, errors)
       AtlasRb::Work.assets(noid, nuid: @nuid).each do |asset|
         next unless content_blob?(asset)
 
-        if DerivativeGate.readable?(asset, @ability)
+        if DerivativeGate.readable?(asset, @ability, editors: editors)
           write_asset(zip, noid, asset, manifest, errors)
         else
           errors << "#{noid}: withheld — #{asset[:use].presence || asset.noid} is not available to download"

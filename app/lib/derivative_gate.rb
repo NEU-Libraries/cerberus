@@ -1,28 +1,35 @@
 # frozen_string_literal: true
 
-# The per-asset download gate, in a form that does not need a view context.
-#
-# Atlas stamps every downloadable asset with `gated` / `permission` and leaves
-# enforcement to the display layer, so Cerberus decides access by projecting that
-# stamp onto a SolrDocument and asking the standard :read Ability — one rule,
-# whether the caller is a view filtering rows, a controller authorizing a stream,
-# or a zip packer deciding what goes in the archive.
-#
-# DerivativesHelper is the view/controller face of this and delegates here; the
-# bulk-download packers call it directly, since they run outside a request and
-# have no current_ability to reach for.
+# The per-asset download gate, without a view context, so the zip packers apply
+# the same rule as the views and controllers. See docs/downloads.md.
 module DerivativeGate
-  # An asset Atlas has not stamped resolves to public — the safe default for
-  # anything predating the gate. A gated asset whose `permission` is nil (what
-  # Atlas returns to guests) resolves to an empty audience, and so is denied.
-  def self.document(asset)
+  # What Ability#edit_equivalent? reads. A packer that reads these off a Solr doc
+  # must declare them, or Solr omits them and every editor is refused.
+  EDITOR_FIELDS = %w[edit_access_group_ssim edit_access_person_ssim depositor_ssi].freeze
+
+  # An unstamped asset is public. A gated one whose `permission` is nil (what
+  # Atlas sends a guest) has an empty audience, so only `editors` can admit.
+  def self.document(asset, editors: {})
     read = asset['gated'] ? Array(asset['permission']) : ['public']
-    SolrDocument.new('read_access_group_ssim' => read, 'internal_resource_tesim' => 'Work')
+    SolrDocument.new(editors.merge('read_access_group_ssim' => read, 'internal_resource_tesim' => 'Work'))
   end
 
-  # @param asset [Hash] one entry from AtlasRb::Work.assets.
-  # @param ability [Ability] the caller's ability.
-  def self.readable?(asset, ability)
-    ability.can?(:read, document(asset))
+  # @param editors [Hash] the containing Work's EDITOR_FIELDS.
+  def self.readable?(asset, ability, editors: {})
+    ability.can?(:read, document(asset, editors: editors))
+  end
+
+  # @param permissions the Work's AtlasRb::Resource.permissions, or nil.
+  def self.editors_from_permissions(permissions)
+    return {} if permissions.nil?
+
+    { 'edit_access_group_ssim'  => Array(permissions.edit),
+      'edit_access_person_ssim' => Array(permissions.try(:edit_users)),
+      'depositor_ssi'           => permissions.try(:depositor) }
+  end
+
+  # @param doc [SolrDocument, Hash] the Work's own Solr doc.
+  def self.editors_from_doc(doc)
+    EDITOR_FIELDS.index_with { |field| doc[field] }
   end
 end

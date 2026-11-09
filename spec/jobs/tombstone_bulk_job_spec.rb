@@ -89,7 +89,7 @@ RSpec.describe TombstoneBulkJob do
     run('restore', %w[w1])
 
     expect(notice.detail(:failures))
-      .to eq(['Work w1: its parent is still retracted; restore the parent first'])
+      .to eq(['Work w1: its parent is still suppressed; restore the parent first'])
   end
 
   # The page can be stale by the time the job runs.

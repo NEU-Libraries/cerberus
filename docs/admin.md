@@ -296,10 +296,13 @@ gets one word for the reversible removal, chosen with the librarians:
 | Audience | Wording |
 |---|---|
 | Anyone who removes or asks to remove something: the show-page link, its dialog and flash, the depositor's request, cancelling a deposit | **Delete**. To the person doing it, an item they can no longer find is gone. |
-| Staff in the admin tools: the registry, its dashboard card and breadcrumb, History, refusals, the ledger | **Retracted**, and **Restore** to undo it. The registry is "Retracted items". |
+| Staff in the admin tools: the registry, its dashboard card and breadcrumb, History, refusals, the ledger | **Suppressed**, and **Restore** to undo it. The registry is "Suppressed items". |
 | The irreversible purge | **Permanently delete**, the only "delete" that cannot be restored |
 | Visitors, on the gone page | **Removed**, with the reason |
 
+"Suppressed" is the library catalogue term for a record hidden from discovery
+but kept, and staff are the only ones who see it. "Retracted" would suggest a
+fault in the work itself.
 "Withdraw" appears on no screen: librarians read "withdrawn" as deaccessioned,
 which is the opposite of reversible. "Tombstone" names only the gone page, and
 only among staff. The code says "tombstone" too: routes, classes and Solr fields
@@ -513,7 +516,7 @@ into the enqueued jobs.
 The same page removes one file while the Work and its other files stay up, for
 example a transcript beside a video. Removal is reversible: `remove` tombstones
 the file's FileSet (`AtlasRb::Resource.tombstone`), and `restore` brings it back
-(`AtlasRb::Admin::Resource.restore`). It is a separate act from retracting the
+(`AtlasRb::Admin::Resource.restore`). It is a separate act from suppressing the
 whole Work. The caption flow on the Work Edit page uses the same two calls.
 
 - **The FileSet goes as a whole.** A FileSet can hold more than one Blob, such as

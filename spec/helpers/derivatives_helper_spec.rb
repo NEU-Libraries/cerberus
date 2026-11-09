@@ -87,6 +87,63 @@ RSpec.describe DerivativesHelper, type: :helper do
         expect(helper.derivative_readable?(blob, embargo_date: future_embargo)).to be(true)
       end
     end
+
+    # Edit implies read at the tier gate. See docs/downloads.md.
+    context 'as the depositor of a private Work, outside every group' do
+      let(:user) { User.new(nuid: '000000123', groups: []) }
+      let(:private_file) { tier(gated: true, permission: []) }
+      let(:editors) { { 'depositor_ssi' => '000000123' } }
+
+      it 'allows the file through the edit grant' do
+        expect(helper.derivative_readable?(private_file, editors: editors)).to be(true)
+      end
+
+      it 'allows a tier reserved to a group they lack' do
+        expect(helper.derivative_readable?(tier(gated: true, permission: ['g:arch']), editors: editors)).to be(true)
+      end
+
+      it 'denies the file when the caller passes no edit fields' do
+        expect(helper.derivative_readable?(private_file)).to be(false)
+      end
+
+      it 'is still withheld by an active embargo' do
+        expect(helper.derivative_readable?(private_file, embargo_date: future_embargo, editors: editors)).to be(false)
+      end
+    end
+
+    context 'as staff, through the staff edit group' do
+      let(:user) { User.new(nuid: '000000002', groups: [Permissions::STAFF_EDIT_GROUP]) }
+      let(:editors) { { 'edit_access_group_ssim' => [Permissions::STAFF_EDIT_GROUP] } }
+
+      it 'allows a tier reserved to a group they lack' do
+        expect(helper.derivative_readable?(tier(gated: true, permission: ['g:arch']), editors: editors)).to be(true)
+      end
+    end
+
+    context 'as a reader outside the reserved group' do
+      let(:user) { User.new(nuid: '000000123', groups: ['g:other']) }
+      let(:editors) { { 'edit_access_group_ssim' => [Permissions::STAFF_EDIT_GROUP], 'depositor_ssi' => '000000999' } }
+
+      it 'is still refused' do
+        expect(helper.derivative_readable?(tier(gated: true, permission: ['g:arch']), editors: editors)).to be(false)
+      end
+    end
+  end
+
+  describe '#work_editors' do
+    let(:user) { nil }
+
+    it 'maps the Work permissions onto the fields Ability reads' do
+      permissions = AtlasRb::Mash.new(edit: ['g:ed'], edit_users: ['000000123'], depositor: '000000456')
+
+      expect(helper.work_editors(permissions)).to eq('edit_access_group_ssim'  => ['g:ed'],
+                                                     'edit_access_person_ssim' => ['000000123'],
+                                                     'depositor_ssi'           => '000000456')
+    end
+
+    it 'is empty without permissions' do
+      expect(helper.work_editors(nil)).to eq({})
+    end
   end
 
   describe '#downloadable_files' do
@@ -196,6 +253,27 @@ RSpec.describe DerivativesHelper, type: :helper do
         as(staff)
         expect(helper.offer_downloads?(work_doc(has_downloads_bsi:         true,
                                                 download_read_groups_ssim: [Permissions::STAFF_EDIT_GROUP]))).to be(true)
+      end
+    end
+
+    context 'as an editor of a private Work' do
+      it 'offers it to the depositor, from the row alone' do
+        as(User.new(nuid: '000000123', groups: []))
+        expect(helper.offer_downloads?(work_doc(has_downloads_bsi: true, download_read_groups_ssim: [],
+                                                depositor_ssi: '000000123'))).to be(true)
+      end
+
+      it 'offers it to staff, through the staff edit group' do
+        as(staff)
+        expect(helper.offer_downloads?(work_doc(has_downloads_bsi: true, download_read_groups_ssim: [],
+                                                edit_access_group_ssim: [Permissions::STAFF_EDIT_GROUP]))).to be(true)
+      end
+
+      it 'does not offer it to the depositor while it is embargoed' do
+        as(User.new(nuid: '000000123', groups: []))
+        expect(helper.offer_downloads?(work_doc(has_downloads_bsi: true, download_read_groups_ssim: [],
+                                                depositor_ssi: '000000123',
+                                                embargo_release_date_dtsi: future_embargo))).to be(false)
       end
     end
 

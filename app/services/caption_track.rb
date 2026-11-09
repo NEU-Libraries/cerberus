@@ -67,7 +67,7 @@ class CaptionTrack
   end
 
   def self.caption?(file)
-    file[:uri].blank? && file.mime_type.to_s == MIME
+    AssetKind.blob?(file) && file.mime_type.to_s == MIME
   end
 
   def self.language(file)
@@ -91,7 +91,7 @@ class CaptionTrack
   # Audio or video. Its own predicate rather than StreamingOnly.applicable?,
   # which tests the same thing today for an unrelated reason — not one rule.
   def self.applicable?(files)
-    Array(files).any? { |file| file[:uri].blank? && file.mime_type.to_s.start_with?('video/', 'audio/') }
+    Array(files).any? { |file| AssetKind.blob?(file) && file.mime_type.to_s.start_with?('video/', 'audio/') }
   end
 
   # The extension, never sniffed content: WebVTT is plain text, so a sniffer

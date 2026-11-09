@@ -103,7 +103,7 @@ RSpec.describe 'Media', type: :request do
       expect(response.headers['Content-Range']).to be_nil
     end
 
-    it "answers a retracted work's file with the Removed page" do
+    it "answers a suppressed work's file with the Removed page" do
       allow(AtlasRb::Blob).to receive(:content).and_raise(tombstoned('Work', 'w1'))
 
       get '/media/b1'

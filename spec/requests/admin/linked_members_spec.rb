@@ -160,7 +160,7 @@ RSpec.describe 'Admin::LinkedMembers', type: :request do
 
         delete '/admin/linked_members/remove', params: { work_id: 'w1', collection_id: 'c' }
 
-        expect(flash[:alert]).to eq('This work is retracted, so it cannot be linked anywhere.')
+        expect(flash[:alert]).to eq('This work is suppressed, so it cannot be linked anywhere.')
       end
     end
   end

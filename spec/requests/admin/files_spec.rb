@@ -145,7 +145,7 @@ RSpec.describe 'Admin::Files', type: :request do
           [
             AtlasRb::Mash.new('noid' => 'b1', 'label' => 'report.pdf', 'use' => 'content',
                               'mime_type' => 'application/pdf', 'size' => 1234),
-            AtlasRb::Mash.new('noid' => 'd1', 'label' => 'A thumbnail delegate', 'uri' => 'http://img/thumb',
+            AtlasRb::Mash.new('noid' => 'd1', 'kind' => 'Delegate', 'label' => 'A thumbnail delegate', 'uri' => 'http://img/thumb',
                               'mime_type' => 'image/jpeg')
           ]
         )
@@ -220,7 +220,7 @@ RSpec.describe 'Admin::Files', type: :request do
 
       it 'makes no history call when the Work has no replaceable Blobs' do
         allow(AtlasRb::Work).to receive(:assets).with('w1').and_return(
-          [AtlasRb::Mash.new('noid' => 'd1', 'label' => 'delegate', 'uri' => 'http://img/thumb')]
+          [AtlasRb::Mash.new('noid' => 'd1', 'kind' => 'Delegate', 'label' => 'delegate', 'uri' => 'http://img/thumb')]
         )
         expect(AtlasRb::Blob).not_to receive(:find_many_versions)
 
@@ -230,7 +230,7 @@ RSpec.describe 'Admin::Files', type: :request do
         expect(response.body).to include('no replaceable files')
       end
 
-      it 'excludes derived Delegates (those with a uri), which are not replaceable' do
+      it 'excludes derived Delegates, which are not replaceable' do
         get '/admin/files/manage', params: { work_id: 'w1' }
         expect(response.body).not_to include('A thumbnail delegate')
       end

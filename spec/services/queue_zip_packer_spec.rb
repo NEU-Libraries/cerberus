@@ -16,7 +16,7 @@ RSpec.describe QueueZipPacker do
   end
 
   def delegate(noid:, uri:)
-    AtlasRb::Mash.new('noid' => noid, 'uri' => uri, 'use' => 'Large Image', 'role' => 'large_image')
+    AtlasRb::Mash.new('noid' => noid, 'kind' => 'Delegate', 'uri' => uri, 'use' => 'Large Image', 'role' => 'large_image')
   end
 
   def names = zip.entries.map(&:name)
@@ -115,7 +115,7 @@ RSpec.describe QueueZipPacker do
   it 'skips a derivative whose role is not the queued one' do
     items = [{ 'w' => 'work1', 'd' => 'large_image' }]
     allow(AtlasRb::Work).to receive(:assets).with('work1', nuid: nil).and_return(
-      [AtlasRb::Mash.new('noid' => 'd2', 'uri' => 'https://iiif.example/small', 'use' => 'Small Image',
+      [AtlasRb::Mash.new('noid' => 'd2', 'kind' => 'Delegate', 'uri' => 'https://iiif.example/small', 'use' => 'Small Image',
                          'role' => 'small_image')]
     )
     allow(Faraday).to receive(:get)
@@ -137,8 +137,8 @@ RSpec.describe QueueZipPacker do
     expect(errors.body).to include('work1')
   end
 
-  # Atlas refuses a retracted Work's file list below the operator tiers.
-  it 'names a retracted work as withheld and still packs the next work' do
+  # Atlas refuses a suppressed Work's file list below the operator tiers.
+  it 'names a suppressed work as withheld and still packs the next work' do
     items = [{ 'w' => 'work1', 'b' => 'blobA' }, { 'w' => 'work2', 'b' => 'blobC' }]
     allow(AtlasRb::Work).to receive(:assets).with('work1', nuid: nil).and_raise(
       AtlasRb::TombstonedError.new({ 'error' => 'tombstoned', 'tombstoned_resource_type' => 'Work',
@@ -151,6 +151,44 @@ RSpec.describe QueueZipPacker do
 
     expect(names).to include('work2/c.jpg')
     expect(zip.entries.find { |e| e.name == 'ERRORS.txt' }.body).to eq('work1: withheld — removed from view')
+  end
+
+  # Edit implies read at the tier gate; the edit fields come from the Work's
+  # permissions, the same read as the embargo check. See docs/downloads.md.
+  context 'when a queued file is reserved to a group the caller lacks' do
+    let(:items) { [{ 'w' => 'work1', 'b' => 'blobA' }] }
+    let(:caller_ability) { Ability.new(User.new(email: 'd@example.com', nuid: '000000123', groups: [])) }
+
+    before do
+      reserved = blob(noid: 'blobA', filename: 'pdf_blobA.pdf', mime_type: 'application/pdf')
+      reserved['gated'] = true
+      reserved['permission'] = ['g:arch']
+      allow(AtlasRb::Work).to receive(:assets).with('work1', nuid: '000000123').and_return([reserved])
+      allow(AtlasRb::Blob).to receive(:content).with('blobA').and_yield('bytes')
+    end
+
+    it "packs it for the Work's depositor" do
+      allow(AtlasRb::Resource).to receive(:permissions).with('work1')
+                                                       .and_return(AtlasRb::Mash.new('embargo' => '', 'edit' => [],
+                                                                                     'depositor' => '000000123'))
+
+      described_class.new(items: items, nuid: '000000123', ability: caller_ability).pack(zip)
+
+      expect(names).to include('work1/pdf_blobA.pdf')
+    end
+
+    it 'withholds it from a caller with no edit grant, and names it' do
+      described_class.new(items: items, nuid: '000000123', ability: caller_ability).pack(zip)
+
+      expect(names).not_to include('work1/pdf_blobA.pdf')
+      expect(names).to include('ERRORS.txt')
+    end
+
+    it 'reads the Work permissions once, even for a caller who may bypass the embargo' do
+      described_class.new(items: items, nuid: '000000123', ability: caller_ability, bypass_embargo: true).pack(zip)
+
+      expect(AtlasRb::Resource).to have_received(:permissions).with('work1').once
+    end
   end
 
   it 'writes a trailing inventory.csv' do

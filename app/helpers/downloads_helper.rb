@@ -18,10 +18,10 @@ module DownloadsHelper
   end
 
   # The File history card's entries: each file the Downloads card shows that
-  # has revisions, in the card's order. Renditions carry a `uri` and none.
+  # has revisions, in the card's order. Renditions (Delegates) have none.
   def file_history_entries(files, revisions_by_blob)
     Array(files).filter_map do |file|
-      next if file[:uri].present?
+      next if AssetKind.delegate?(file)
 
       revisions = revisions_by_blob[file[:noid]]
       [file, revisions] if revisions.present?

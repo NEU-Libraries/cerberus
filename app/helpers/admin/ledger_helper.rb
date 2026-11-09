@@ -25,7 +25,7 @@ module Admin
       'set_sentinel_apply'       => { label: 'Sentinel',   icon: 'fa-user-lock' },
       'showcase_promotion'       => { label: 'Showcase',   icon: 'fa-star' },
       'tombstone_cascade'        => { label: 'Deleted',    icon: 'fa-trash-can' },
-      'tombstone_bulk'           => { label: 'Retracted',  icon: 'fa-trash-can-arrow-up' },
+      'tombstone_bulk'           => { label: 'Suppressed', icon: 'fa-trash-can-arrow-up' },
       'daily_digest'             => { label: 'Digest',     icon: 'fa-book' }
     }.freeze
 

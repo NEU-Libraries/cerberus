@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe 'works/_download_row', type: :view do
   it 'routes an S/M/L delegate through the derivative controller, not the raw gated URI' do
-    file = AtlasRb::Mash.new(use: 'Large Image', role: 'large_image', mime_type: 'image/jpeg', label: 'Large',
+    file = AtlasRb::Mash.new(kind: 'Delegate', use: 'Large Image', role: 'large_image', mime_type: 'image/jpeg', label: 'Large',
                              uri: 'https://gated.example/iiif/3/x.tif/full/pct:75/0/default.jpg')
 
     render partial: 'works/download_row', locals: { file: file, work_noid: 'w-1' }
@@ -15,7 +15,7 @@ RSpec.describe 'works/_download_row', type: :view do
 
   describe 'a rendition row' do
     let(:file) do
-      AtlasRb::Mash.new(use: 'Small Image', role: 'small_image', label: 'Small Image',
+      AtlasRb::Mash.new(kind: 'Delegate', use: 'Small Image', role: 'small_image', label: 'Small Image',
                         uri: 'https://gated.example/iiif/3/x.tif/full/pct:33/0/default.jpg')
     end
 
@@ -66,7 +66,7 @@ RSpec.describe 'works/_download_row', type: :view do
   end
 
   it 'offers an Add-to-queue control on a derivative row, keyed on work + role' do
-    file = AtlasRb::Mash.new(use: 'Large Image', role: 'large_image', label: 'Large',
+    file = AtlasRb::Mash.new(kind: 'Delegate', use: 'Large Image', role: 'large_image', label: 'Large',
                              uri: 'https://gated.example/iiif/3/x.tif/full/pct:75/0/default.jpg')
 
     render partial: 'works/download_row', locals: { file: file, work_noid: 'w-1' }

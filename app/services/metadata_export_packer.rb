@@ -92,7 +92,7 @@ class MetadataExportPacker
     # failed lookup costs only the reader's information: blank, and noted.
     def file_name(noid, errors)
       original = Array(AtlasRb::Work.assets(noid)).find do |asset|
-        asset['uri'].blank? && asset['role'].to_s == 'original_file'
+        AssetKind.blob?(asset) && asset['role'].to_s == 'original_file'
       end
       original && (original['original_filename'].presence || original['filename'])
     rescue AtlasRb::TombstonedError

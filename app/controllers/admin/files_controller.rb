@@ -26,8 +26,8 @@ module Admin
       @results = ResourceSearch.call(scope: self, query: params[:q], types: %w[Work]) if params[:q].present?
     end
 
-    # Content Blobs only. A Delegate carries a `uri` and is derived, so it is
-    # rejected here rather than offered for replacement.
+    # Content Blobs only. A Delegate is derived, so it is rejected here rather
+    # than offered for replacement.
     def manage
       breadcrumb 'Manage files', admin_files_manage_path(work_id: params[:work_id])
       @work = require_resource!(AtlasRb::Work.find(params[:work_id]))
@@ -84,12 +84,12 @@ module Admin
     private
 
       def content_assets
-        @content_assets ||= AtlasRb::Work.assets(params[:work_id]).reject { |asset| asset[:uri].present? }
+        @content_assets ||= AtlasRb::Work.assets(params[:work_id]).select { |asset| AssetKind.blob?(asset) }
       end
 
       def removed_assets
         @removed_assets ||= AtlasRb::Work.tombstoned_assets(params[:work_id], nuid: current_user.nuid)
-                                         .reject { |asset| asset[:uri].present? }
+                                         .select { |asset| AssetKind.blob?(asset) }
       end
 
       def asset_name(asset)

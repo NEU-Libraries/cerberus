@@ -73,8 +73,8 @@ RSpec.describe GoogleScholarMetadata do
       expect(meta.pdf_blob_noid).to be_nil
     end
 
-    it 'ignores a Delegate derivative that carries a uri' do
-      delegate = { noid: 'del', uri: 'https://iiif/x', mime_type: 'application/pdf' }
+    it 'ignores a Delegate derivative' do
+      delegate = { noid: 'del', kind: 'Delegate', uri: 'https://iiif/x', mime_type: 'application/pdf' }
       meta = described_class.new(work: work, permissions: permissions, files: [delegate], solr_doc: solr_doc)
       expect(meta.pdf_blob_noid).to be_nil
     end

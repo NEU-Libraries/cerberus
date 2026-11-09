@@ -319,16 +319,16 @@ namespace :reset do
       PdfRenditionJob.perform_later(doc_work['id'], staged_doc, SecureRandom.uuid)
       PdfRenditionJob.perform_later(pres_work['id'], staged_pres, SecureRandom.uuid)
 
-      # A tombstoned Work, so the Retracted items registry has an entry to
+      # A tombstoned Work, so the Suppressed items registry has an entry to
       # demonstrate the restore path. Tombstoning needs a completed Work, so it
       # is built normally and then tombstoned.
-      retracted_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-retracted-mods.xml')
-      retracted_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/gorge.jpg')
-      AtlasRb::Resource.set_thumbnails(retracted_work['id'], **ThumbnailCreator.call(image: retracted_image))
-      AtlasRb::Resource.set_permissions(retracted_work['id'], { 'read' => ['public'] })
-      AtlasRb::Blob.create(retracted_work['id'], '/home/cerberus/web/spec/fixtures/files/gorge.jpg', 'gorge.jpg')
-      AtlasRb::Work.complete(retracted_work['id'])
-      AtlasRb::Resource.tombstone(retracted_work['id'])
+      suppressed_work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/sample-suppressed-mods.xml')
+      suppressed_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/gorge.jpg')
+      AtlasRb::Resource.set_thumbnails(suppressed_work['id'], **ThumbnailCreator.call(image: suppressed_image))
+      AtlasRb::Resource.set_permissions(suppressed_work['id'], { 'read' => ['public'] })
+      AtlasRb::Blob.create(suppressed_work['id'], '/home/cerberus/web/spec/fixtures/files/gorge.jpg', 'gorge.jpg')
+      AtlasRb::Work.complete(suppressed_work['id'])
+      AtlasRb::Resource.tombstone(suppressed_work['id'])
 
       # --- Group-permission UAT fixtures -----------------------------------
       # A representative slice of the Group table's ~75 real Grouper

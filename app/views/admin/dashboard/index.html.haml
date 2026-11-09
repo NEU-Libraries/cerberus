@@ -116,9 +116,9 @@
     = link_to admin_tombstones_path, class: 'admin-action-card admin-action-card--restore', role: 'listitem' do
       %span.admin-action-card__icon
         %i.fa-solid.fa-trash-can-arrow-up{'aria-hidden' => 'true'}
-      %span.admin-action-card__title Retracted items
+      %span.admin-action-card__title Suppressed items
       %span.admin-action-card__desc
-        Review every retracted work, collection and community.
+        Review every suppressed work, collection and community.
         - if current_user&.admin?
           Restore one to make it discoverable again, or delete it permanently.
         - else

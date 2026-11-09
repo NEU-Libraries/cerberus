@@ -191,8 +191,8 @@ RSpec.describe 'Admin::Associations', type: :request do
 
       # Atlas's target is the managed Work, so its tombstoned_target is "this"
       # Work and tombstoned_work is the picked one.
-      { 'tombstoned_target' => 'This Work is retracted',
-        'tombstoned_work'   => 'That Work is retracted' }.each do |code, phrase|
+      { 'tombstoned_target' => 'This Work is suppressed',
+        'tombstoned_work'   => 'That Work is suppressed' }.each do |code, phrase|
         it "names the right Work when Atlas refuses with #{code}" do
           allow(AtlasRb::Work).to receive(:associate)
             .and_raise(AtlasRb::WorkAssociationError.new('nope', code: code))

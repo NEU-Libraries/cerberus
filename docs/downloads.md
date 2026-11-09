@@ -22,7 +22,9 @@ Source files:
 - `app/services/rendition_asset.rb`
 - `bin/soffice-timeout`
 - `app/helpers/downloads_helper.rb`
-- `app/helpers/derivatives_helper.rb` (`offer_downloads?`)
+- `app/helpers/derivatives_helper.rb`
+- `app/lib/derivative_gate.rb`
+- `app/lib/asset_kind.rb`
 - `app/views/works/_file_history.html.haml`
 
 `IiifAssetsJob`, `CaptionJob` and `StreamingOnly` are covered in
@@ -52,8 +54,9 @@ The button shows when all of these hold:
 3. **The Work has a downloadable file.** A Work with `has_downloads_bsi: false`
    gets no button, for staff and admins too: their modal would be empty as well.
 4. **The viewer can read one of the files.** The helper asks the `:read` Ability
-   about a document whose read groups are the union of the gates. The modal
-   keeps a file when the viewer can read that file's gate, so the union is
+   about a document whose read groups are the union of the gates, and which
+   carries the Work's own edit fields from the same row. The modal keeps a file
+   when the viewer can read that file's gate or edit the Work, so the union is
    readable exactly when one file is. An admin can read every gate.
 
 A doc indexed before Atlas added the fields lacks `has_downloads_bsi`, and keeps
@@ -102,7 +105,35 @@ Ability, through `DerivativesHelper#derivative_tier_document`. It also refuses
 an unfinished deposit, and an embargoed Work unless the effective user may
 bypass the embargo. The embargo needs its own Atlas call: the Blob's own
 permissions, which `authorize_show!` already fetched, do not carry the Work's
-embargo.
+embargo. `deny_if_embargoed!` returns the permissions it read, because the tier
+gate takes the Work's edit grant from the same permissions.
+
+### An edit grant passes the tier gate
+
+Anyone with an edit grant on the Work passes every tier's gate: an edit group,
+an edit user, or the depositor. Staff always do, through the
+`repository:staff` edit group Atlas keeps on every Work. Edit implies read here
+as it does in `Ability` everywhere else. A reader outside a reserved group is
+still refused, which is what a reservation is for.
+
+`DerivativeGate.document` carries the Work's edit fields
+(`DerivativeGate::EDITOR_FIELDS`) onto the document it projects, so
+`Ability#edit_equivalent?` applies without a rule of its own. Every caller has
+to pass them, or an editor is refused as a reader:
+
+| Caller | Where the edit fields come from |
+|---|---|
+| `works/show`, `works/downloads`, `ZoomViewer` | `@permissions`, through `work_editors` |
+| `DownloadsController`, `DerivativeDownloadsController` | the permissions `deny_if_embargoed!` returns |
+| `offer_downloads?` | the result row's own Solr doc |
+| `SetZipPacker` | the member's Solr doc, declared in `REQUIRED_DOC_FIELDS` |
+| `QueueZipPacker` | `AtlasRb::Resource.permissions`, read once per Work |
+
+An edit grant does not lift an embargo. Only staff and admins bypass one, as
+`embargo_withholds?` decides, and the depositor gets no bypass of their own.
+
+Atlas applies the same rule on the byte routes (`WithheldBytesGate`), so the two
+apps agree on who gets a reserved file's bytes. Change both together.
 
 The method memoizes the resolved entry as `@derivative_asset`. So `show` can
 branch zip-versus-raw off its classification without a second assets fetch, and
@@ -122,13 +153,13 @@ served, so they can review a file before they restore it. Cerberus signs each
 call as the viewer, so Atlas makes the tier decision and Cerberus makes none.
 
 atlas_rb raises the refusal as `AtlasRb::TombstonedError`, from `Work.assets`
-for a retracted Work and from `Blob.content` for any withheld Blob. Both raise
+for a suppressed Work and from `Blob.content` for any withheld Blob. Both raise
 before a byte moves. `Authorizable#render_withheld` answers it:
 
 | Tombstoned resource | Page |
 |---|---|
 | a FileSet (one file removed) | the not-found page, for a file |
-| the Work (retracted) | the Work's Removed page (`errors/gone`) |
+| the Work (suppressed) | the Work's Removed page (`errors/gone`) |
 
 The same handler answers a tombstone on any other read, such as a Collection's
 or a Work's record. `docs/authorization.md` covers that.
@@ -249,7 +280,7 @@ drifting apart.
 - **Record a failure, do not raise it.** Once the response headers are out the
   archive cannot be un-sent, so a mid-stream fetch failure becomes an
   `ERRORS.txt` line.
-- **A tombstone is withheld access, not a failure.** A retracted Work's
+- **A tombstone is withheld access, not a failure.** A suppressed Work's
   `Work.assets`, or a withheld Blob's `Blob.content`, raises
   `AtlasRb::TombstonedError`. The packers record it as
   `<noid>: withheld — removed from view`, worded like an embargo. Any other
@@ -300,8 +331,17 @@ host changes; the signed path is unaffected.
 
 ### Content only, and how a Blob is told from a Delegate
 
-`content_blob?` is the single test: a Delegate carries a `uri` and no
-noid-backed bytes, and a content Blob does not.
+`content_blob?` is the single test, through `AssetKind`. Atlas names each
+asset's model in its `kind` field: `"Blob"` or `"Delegate"`. A Delegate is
+pointer-only, with no noid-backed bytes.
+
+**Never tell the two apart by `uri`.** Under an active embargo Atlas sends
+`uri: null` for the gated small, medium, large and service Delegates to a
+caller below staff with no edit grant. A test on `uri` then reads those
+Delegates as Blobs. Every Cerberus site asks `AssetKind` instead. A site that
+needs the URL itself, such as `DepositDerivativesJob`, `ZoomViewer` or
+`DerivativeCreator`, matches the Delegate by `role` and then reads `uri`. An
+entry with no `kind` counts as a Blob.
 
 `SetZipPacker` needs nothing more. Atlas's `GET /works/:id/assets` already drops
 metadata FileSets and non-downloadable roles, and `content_blob?` drops the
@@ -348,8 +388,10 @@ the **caller's**, never the Set owner's.
 | `QueueZipPacker` | `AtlasRb::Resource.permissions` | one Atlas call per distinct Work |
 
 A queue is a bare list of noids with no Solr doc behind it, so `QueueZipPacker`
-pays that call. It is acceptable: a queue is user-curated and short, and the
-alternative is handing out embargoed bytes.
+pays that call. It pays it for every caller, staff and admins included, because
+the same permissions carry the Work's edit grant for the tier gate. It is
+acceptable: a queue is user-curated and short, and the alternative is handing
+out embargoed bytes.
 
 Both report a withheld item in `ERRORS.txt` rather than dropping it in silence.
 Someone asks for a set of twelve and gets eleven files, or queues a file and
@@ -368,12 +410,13 @@ in the query by being declared there.
 
 **A field read but not declared is silently nil.** Solr does not return it, and
 nothing raises. For `SetZipPacker` that disables the embargo check on every
-document, because `embargo_release_date_dtsi` reads as blank.
+document, because `embargo_release_date_dtsi` reads as blank. A missing edit
+field fails the other way: every editor is refused a reserved file.
 
 | Packer | Fields |
 |---|---|
-| `SetZipPacker` | `id`, `alternate_ids_ssim`, `embargo_release_date_dtsi` |
-| `MetadataExportPacker` | the same, plus `created_at_dtsi` |
+| `SetZipPacker` | `id`, `alternate_ids_ssim`, `embargo_release_date_dtsi`, and `DerivativeGate::EDITOR_FIELDS` |
+| `MetadataExportPacker` | `id`, `alternate_ids_ssim`, `embargo_release_date_dtsi`, `created_at_dtsi`, `mods_updated_at_dtsi` |
 
 Solr stores the noid in `alternate_ids_ssim` as `id-<noid>`; both packers strip
 that prefix, and skip a doc with no noid.

@@ -120,14 +120,14 @@ RSpec.describe 'Admin::Dashboard', type: :request do
     end
 
     # Only an admin can purge, so only an admin's card offers it.
-    it 'offers permanent deletion on the Retracted items card to an admin only' do
+    it 'offers permanent deletion on the Suppressed items card to an admin only' do
       sign_in admin_user
       get '/admin'
-      expect(response.body).to include('Retracted items', 'or delete it permanently')
+      expect(response.body).to include('Suppressed items', 'or delete it permanently')
 
       sign_in delegate_user
       get '/admin'
-      expect(response.body).to include('Retracted items', 'Restore one to make it discoverable again.')
+      expect(response.body).to include('Suppressed items', 'Restore one to make it discoverable again.')
       expect(response.body).not_to include('delete it permanently')
     end
   end

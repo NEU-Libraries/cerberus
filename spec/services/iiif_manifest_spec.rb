@@ -9,11 +9,11 @@ RSpec.describe IiifManifest do
   let(:pages) do
     [
       { 'noid' => 'p-1', 'position' => 1,
-        'assets' => [{ 'noid' => 'b-1' }, { 'uri' => 'https://iiif.test/iiif/3/one.jp2' }] },
+        'assets' => [{ 'noid' => 'b-1' }, { 'kind' => 'Delegate', 'role' => 'service_file', 'uri' => 'https://iiif.test/iiif/3/one.jp2' }] },
       { 'noid' => 'p-2', 'position' => 2,
         'assets' => [{ 'noid' => 'b-2' }] }, # no service pointer — skipped
       { 'noid' => 'p-3', 'position' => 3,
-        'assets' => [{ 'uri' => 'https://iiif.test/iiif/3/three.jp2' }] }
+        'assets' => [{ 'kind' => 'Delegate', 'role' => 'service_file', 'uri' => 'https://iiif.test/iiif/3/three.jp2' }] }
     ]
   end
 
@@ -35,6 +35,27 @@ RSpec.describe IiifManifest do
     expect(manifest['label']).to eq('none' => ['Field Notebook'])
     expect(manifest['items'].pluck('id'))
       .to eq(["#{url}/canvas/p-1", "#{url}/canvas/p-3"])
+  end
+
+  # A page lists its open preview Delegate too. Only the service file is the
+  # page's image service, whichever comes first.
+  it 'takes the service file, not the first Delegate with a uri' do
+    preview = { 'kind' => 'Delegate', 'role' => 'preview_image', 'uri' => 'https://iiif.test/open.jpg' }
+    service = { 'kind' => 'Delegate', 'role' => 'service_file', 'uri' => 'https://iiif.test/iiif/3/one.jp2' }
+    pages = [{ 'noid' => 'p-1', 'position' => 1, 'assets' => [preview, service] }]
+
+    json = described_class.call(work: work, pages: pages, url: url).to_json
+
+    expect(json).to include('one.jp2')
+    expect(json).not_to include('open.jpg')
+  end
+
+  it 'skips a page whose service URL an embargo withheld' do
+    preview = { 'kind' => 'Delegate', 'role' => 'preview_image', 'uri' => 'https://iiif.test/open.jpg' }
+    service = { 'kind' => 'Delegate', 'role' => 'service_file', 'uri' => nil }
+    pages = [{ 'noid' => 'p-1', 'position' => 1, 'assets' => [preview, service] }]
+
+    expect(described_class.call(work: work, pages: pages, url: url)['items']).to eq([])
   end
 
   it 'paints each canvas with the image service and its real dimensions' do

@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe CaptionTrack do
   def asset(mime, uri: nil, noid: 'b-1')
-    AtlasRb::Mash.new(noid: noid, mime_type: mime, uri: uri)
+    AtlasRb::Mash.new(noid: noid, kind: (uri ? 'Delegate' : 'Blob'), mime_type: mime, uri: uri)
   end
 
   def caption(noid, language: nil, label: nil)
@@ -22,7 +22,7 @@ RSpec.describe CaptionTrack do
       expect(described_class.all(nil)).to eq([])
     end
 
-    # A Delegate carries a uri and is a derivative, not content. None is text/vtt
+    # A Delegate is a derivative, not content. None is text/vtt
     # today, but the same test guards MediaRemux.playable_file and the cost of
     # keeping them consistent is one clause.
     it 'ignores a delegate' do

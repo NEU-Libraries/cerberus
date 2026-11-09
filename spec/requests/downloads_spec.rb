@@ -118,6 +118,58 @@ RSpec.describe 'Blob downloads', type: :request do
     expect(response).to have_http_status(:ok)
   end
 
+  # Edit implies read at the tier gate. See docs/downloads.md.
+  context 'with an edit grant on the Work' do
+    let(:depositor) { '000000123' }
+
+    before do
+      allow(AtlasRb::Resource).to receive(:permissions).with(work_id).and_return(
+        AtlasRb::Mash.new('embargo' => '', 'read' => [], 'edit' => [Permissions::STAFF_EDIT_GROUP],
+                          'depositor' => depositor)
+      )
+    end
+
+    it "streams a private Work's file to its depositor" do
+      sign_in User.new(email: 'd@x.edu', password: 'password', nuid: depositor, groups: [])
+      stub_asset(gated: true, permission: [], nuid: depositor)
+      stub_stream!
+
+      get download_path(blob_id)
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'streams a reserved file to staff outside the reserved group' do
+      sign_in User.new(email: 's@x.edu', password: 'password', nuid: '000000006',
+                       groups: [Permissions::STAFF_EDIT_GROUP])
+      stub_asset(gated: true, permission: ['g:arch'], nuid: '000000006')
+      stub_stream!
+
+      get download_path(blob_id)
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'still forbids a reader outside the reserved group' do
+      sign_in User.new(email: 'o@x.edu', password: 'password', nuid: '000000005', groups: ['g:other'])
+      stub_asset(gated: true, permission: ['g:arch'], nuid: '000000005')
+
+      get download_path(blob_id)
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it 'reads the Work permissions once' do
+      sign_in User.new(email: 'd@x.edu', password: 'password', nuid: depositor, groups: [])
+      stub_asset(gated: true, permission: [], nuid: depositor)
+      stub_stream!
+
+      get download_path(blob_id)
+
+      expect(AtlasRb::Resource).to have_received(:permissions).with(work_id).once
+    end
+  end
+
   it 'fails open (streams) when the blob is absent from the work assets' do
     allow(AtlasRb::Work).to receive(:assets).with(work_id, nuid: nil).and_return([])
     stub_stream!
@@ -258,7 +310,7 @@ RSpec.describe 'Blob downloads', type: :request do
       expect(response.headers['Content-Disposition']).to be_nil
     end
 
-    it "answers a retracted work's file with the Removed page, before asking for bytes" do
+    it "answers a suppressed work's file with the Removed page, before asking for bytes" do
       allow(AtlasRb::Work).to receive(:assets).and_raise(tombstoned('Work', work_id))
       allow(AtlasRb::Work).to receive(:find).with(work_id)
                                             .and_return(AtlasRb::Mash.new(title: 'Sample Audio Recording'))

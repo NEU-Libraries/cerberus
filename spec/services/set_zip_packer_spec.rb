@@ -25,7 +25,7 @@ RSpec.describe SetZipPacker do
   end
 
   def delegate(noid:, uri:, use: 'Large Image')
-    AtlasRb::Mash.new('noid' => noid, 'uri' => uri, 'use' => use)
+    AtlasRb::Mash.new('noid' => noid, 'kind' => 'Delegate', 'uri' => uri, 'use' => use)
   end
 
   def names = zip.entries.map(&:name)
@@ -84,7 +84,7 @@ RSpec.describe SetZipPacker do
     expect(entry.body).to eq('PDFBYTES')
   end
 
-  it 'excludes Delegate-backed derivatives (they carry a uri)' do
+  it 'excludes Delegate-backed derivatives' do
     allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000002')
                                             .and_return([blob(noid: 'blob1', filename: 'pdf_blob1.pdf'),
                                                          delegate(noid: 'del1', uri: 'https://iiif.example/large')])
@@ -95,6 +95,17 @@ RSpec.describe SetZipPacker do
     expect(names).to include('bc1234/pdf_blob1.pdf')
     expect(names).not_to include(a_string_matching(/del1/))
     expect(AtlasRb::Blob).not_to have_received(:content).with('del1')
+  end
+
+  # An embargo nulls a gated Delegate's uri; it is still not content.
+  it 'excludes a Delegate whose uri Atlas withheld' do
+    allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000002')
+                                            .and_return([delegate(noid: 'del1', uri: nil)])
+    allow(AtlasRb::Blob).to receive(:content)
+
+    packer.pack(zip)
+
+    expect(AtlasRb::Blob).not_to have_received(:content)
   end
 
   it 'falls back to a neutral <noid>.<ext> when the labeled filename is absent, never the original_filename' do
@@ -161,7 +172,7 @@ RSpec.describe SetZipPacker do
 
     def errors_body = zip.entries.find { |e| e.name == 'ERRORS.txt' }&.body
 
-    it 'names a retracted member as withheld and completes the archive' do
+    it 'names a suppressed member as withheld and completes the archive' do
       allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000002').and_raise(tombstoned('Work', 'bc1234'))
 
       packer.pack(zip)
@@ -222,5 +233,26 @@ RSpec.describe SetZipPacker do
                         ability: Ability.new(User.new(email: 'a@example.com', role: 'admin'))).pack(zip)
 
     expect(names).to include('bc1234/video.mp4')
+  end
+
+  # Edit implies read at the tier gate; the edit fields come off the member's
+  # own Solr doc. See docs/downloads.md.
+  it "packs a reserved asset for the member Work's depositor" do
+    doc = SolrDocument.new('alternate_ids_ssim' => ['id-bc1234'], 'depositor_ssi' => '000000123')
+    allow(resolver).to receive(:each_content_batch).and_yield([doc])
+    gated = blob(noid: 'vid1', filename: 'video.mp4', mime_type: 'video/mp4')
+    gated['gated'] = true
+    gated['permission'] = ['northeastern:drs:repository:admin']
+    allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000123').and_return([gated])
+    allow(AtlasRb::Blob).to receive(:content).with('vid1').and_yield('MP4')
+    depositor = User.new(email: 'd@example.com', nuid: '000000123', groups: [])
+
+    described_class.new(resolver: resolver, nuid: '000000123', ability: Ability.new(depositor)).pack(zip)
+
+    expect(names).to include('bc1234/video.mp4')
+  end
+
+  it 'declares the edit fields, so Solr returns them' do
+    expect(described_class::REQUIRED_DOC_FIELDS).to include(*DerivativeGate::EDITOR_FIELDS)
   end
 end
