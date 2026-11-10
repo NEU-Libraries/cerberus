@@ -31,14 +31,14 @@ describe CommunitiesController do
   describe 'edit' do
     render_views
 
-    let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
+    let(:user) { User.new(email: 'test@example.com', nuid: '000000005', role: 'standard', groups: ['editors']) }
 
     before do
       AtlasRb::Resource.set_permissions(community.id, { 'edit' => ['editors'] }, nuid: '000000004')
-      # Readable as well as editable. Atlas gates reads on the resource's own ACL,
-      # and this fixture user carries no NUID, so the ACL read is made as the
-      # guest — a private resource comes back as nothing and the page 404s before
-      # the edit gate runs. Publicizing after the edit write, because
+      # A NUID, because Atlas tells a guest no group but public, which would
+      # strip the edit grant from the ACL the gate reads. Readable as well:
+      # `editors` exists only on the Cerberus side, so Atlas would hide a private
+      # resource and the page would 404. Publicizing after the edit write, because
       # publicize_resource! reads the current envelope and carries the grant
       # through; the reverse order would drop it.
       publicize_resource!(community, '000000004')

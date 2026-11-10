@@ -10,23 +10,31 @@ load_defaults: 9.0
 #
 # Use `timeout`, not `read_timeout` — RSolr 2.6 deprecates the latter and drops
 # it in 3.
+#
+# `http_adapter` keeps Solr connections alive; a new one costs more than the
+# query it carries. It reuses a connection only while the client lives, so
+# `adapter` names a repository class that shares one client per process.
 development:
-  adapter: solr
+  adapter: Cerberus::SolrRepository
+  http_adapter: net_http_persistent
   url: <%= ENV['SOLR_URL'] || "http://solr:8983/solr/blacklight-core" %>
   open_timeout: 2
   timeout: 10
 staging:
-  adapter: solr
+  adapter: Cerberus::SolrRepository
+  http_adapter: net_http_persistent
   url: <%= ENV['SOLR_URL'] || "http://solr:8983/solr/blacklight-core" %>
   open_timeout: 2
   timeout: 10
 test: &test
-  adapter: solr
+  adapter: Cerberus::SolrRepository
+  http_adapter: net_http_persistent
   url: <%= ENV['SOLR_URL'] || "http://solr:8983/solr/blacklight-test" %>
   open_timeout: 2
   timeout: 10
 production:
-  adapter: solr
+  adapter: Cerberus::SolrRepository
+  http_adapter: net_http_persistent
   url: <%= ENV['SOLR_URL'] || "http://solr:8983/solr/blacklight-core" %>
   open_timeout: 2
   timeout: 10

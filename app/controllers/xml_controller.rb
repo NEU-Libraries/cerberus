@@ -2,6 +2,8 @@
 
 # The raw-XML metadata editor. See docs/people-and-routing.md.
 class XmlController < ApplicationController
+  include AtlasWrite
+
   # A sibling of the Metadata and Permissions edit tabs, and gated the same way:
   # authenticate first, then the :edit ability keyed on the resource.
   before_action :authenticate_user!
@@ -24,7 +26,7 @@ class XmlController < ApplicationController
     @errors = record_errors(item)
     @repairable = Metadata::ControlCharacters.any?(params[:raw_xml])
     @double_escapes = Metadata::DoubleEscapes.report(params[:raw_xml])
-    @mods = AtlasRb::Resource.preview(create_temp_xml) if @errors.empty?
+    @mods = with_tmp_xml(params[:raw_xml]) { |path| AtlasRb::Resource.preview(path) } if @errors.empty?
   end
 
   # Offers the repair; does not apply it. Nothing is written until the curator
@@ -47,7 +49,9 @@ class XmlController < ApplicationController
     @errors = record_errors(item)
     return render_invalid(item) if @errors.any?
 
-    AtlasRb::Resource.put_mods(params[:resource_id], create_temp_xml, origin: 'xml_editor')
+    with_tmp_xml(params[:raw_xml]) do |path|
+      AtlasRb::Resource.put_mods(params[:resource_id], path, origin: 'xml_editor')
+    end
     redirect_to resource_path(klass, params[:resource_id])
   end
 
@@ -115,11 +119,5 @@ class XmlController < ApplicationController
     def resource_mods
       @mods = AtlasRb::Resource.mods(params[:id], 'html')
       @raw_xml = AtlasRb::Resource.mods(params[:id], 'xml')
-    end
-
-    def create_temp_xml
-      tmp_path = Rails.root.join("/tmp/#{Time.now.to_f.to_s.gsub!('.', '')}.xml")
-      File.write(tmp_path, params[:raw_xml])
-      tmp_path
     end
 end

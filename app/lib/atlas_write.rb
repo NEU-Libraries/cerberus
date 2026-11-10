@@ -46,13 +46,15 @@ module AtlasWrite
       merged = Metadata::MODSMerge.call(xml: xml, **fields)
       break if Metadata::MODSMerge.unchanged?(xml, merged)
 
-      AtlasRb::Resource.put_mods(id, write_tmp_xml(merged), origin: origin)
+      with_tmp_xml(merged) { |path| AtlasRb::Resource.put_mods(id, path, origin: origin) }
     end
   end
 
-  def write_tmp_xml(xml)
-    path = Rails.root.join('tmp', "#{SecureRandom.uuid}.xml").to_s
-    File.write(path, xml)
-    path
+  def with_tmp_xml(xml)
+    Tempfile.create(['mods', '.xml']) do |file|
+      file.write(xml)
+      file.close
+      yield file.path
+    end
   end
 end

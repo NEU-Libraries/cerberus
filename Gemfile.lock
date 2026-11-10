@@ -529,6 +529,7 @@ DEPENDENCIES
   diffy
   factory_bot_rails
   faker
+  faraday-net_http_persistent (~> 2.3)
   fix-db-schema-conflicts
   haml
   haml_lint
