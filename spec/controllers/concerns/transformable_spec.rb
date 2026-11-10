@@ -509,7 +509,6 @@ describe Transformable do
     before do
       declare(AtlasRb::Work, :work)
       allow(host).to receive(:sleep) # don't actually back off in specs
-      allow(host).to receive(:write_tmp_xml).and_return('/tmp/merged.xml')
       allow(AtlasRb::Resource).to receive(:mods).and_return('<mods/>')
       allow(Metadata::MODSMerge).to receive(:call).and_return('<mods>merged</mods>')
       allow(Metadata::MODSMerge).to receive(:unchanged?).and_return(false)
