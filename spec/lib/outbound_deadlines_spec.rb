@@ -20,7 +20,7 @@ require 'rails_helper'
 describe 'outbound deadlines' do
   describe 'Solr, via Blacklight' do
     let(:options) do
-      Blacklight::Solr::Repository.new(CatalogController.blacklight_config).connection.connection.options
+      CatalogController.blacklight_config.repository.connection.connection.options
     end
 
     it 'bounds the connect' do
