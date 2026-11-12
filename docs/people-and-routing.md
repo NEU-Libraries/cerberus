@@ -13,7 +13,6 @@ Source files:
 - `app/controllers/admin/community_people_controller.rb`
 - `app/services/community_affiliates.rb`
 - `app/controllers/legacy_controller.rb`
-- `app/models/legacy_identifier.rb`
 - `app/controllers/application_controller.rb`
 - `app/lib/atlas_routes.rb`
 - `app/lib/modsable_types.rb`

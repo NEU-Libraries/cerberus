@@ -85,7 +85,7 @@ repository meaning:
 | Ingest bookkeeping | `load_reports`, `xml_ingests`, `iptc_ingests`, `multipage_ingests` |
 | Usage analytics | `impressions` and its daily rollups (TimescaleDB) |
 | Notices and messaging | `admin_notices`, `messages`, `message_receipts` |
-| Discovery furniture | `searches`, `bookmarks`, `sentinels`, `legacy_identifiers` |
+| Discovery furniture | `searches`, `bookmarks`, `sentinels` |
 
 No Work, Collection or Community row exists here. `app/models/work.rb` and its
 siblings are presenters over Atlas responses and Solr documents, not
