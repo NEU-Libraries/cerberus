@@ -22,7 +22,7 @@ namespace :reset do
     # ACL setup. The Current.set block makes atlas_rb's configured
     # default_nuid resolve to the admin NUID for every call inside.
     Current.set(nuid: '000000004') do
-      community = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', depositor: unowned)
+      community = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', depositor: unowned, legacy_pid: 'neu:1')
       river_image = IiifImageCreator.call(path: '/home/cerberus/web/spec/fixtures/files/river.jpg')
       AtlasRb::Resource.set_thumbnails(community['id'], **ThumbnailCreator.call(image: river_image))
       AtlasRb::Resource.set_permissions(community['id'], { 'read' => ['public'] })
