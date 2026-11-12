@@ -13,7 +13,8 @@
 #
 # Idempotent on pid, so a corrected export can be re-run over an earlier one.
 namespace :legacy do
-  desc 'Load the v1 pid → v2 NOID map from CSV. Usage: rake legacy:load[path/to/map.csv]'
+  desc 'Load the v1 pid → v2 NOID map from CSV; exits 1 if any row was skipped. ' \
+       'Usage: rake legacy:load[path/to/map.csv]'
   task :load, [:path] => :environment do |_task, args|
     require 'csv'
 
@@ -40,11 +41,14 @@ namespace :legacy do
     end
 
     puts "Wrote #{written} mapping#{'s' unless written == 1}."
-    return if skipped.empty?
+    next if skipped.empty?
 
     puts "Skipped #{skipped.size}:"
     skipped.first(20).each { |line| puts "  #{line}" }
     puts "  … and #{skipped.size - 20} more." if skipped.size > 20
+    # Every good row is already saved. The status tells a scripted caller the
+    # map is partial without making it parse the output.
+    exit 1
   end
 
   desc 'Report what the v1 pid → v2 NOID map currently holds.'
