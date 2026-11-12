@@ -207,7 +207,7 @@ class WorksController < ApplicationController
       reads = parallel_show_reads
       assign_metadata_blocks(reads)
       @files = page_ordered_files(reads)
-      @scholar = GoogleScholarMetadata.for(work: @work, permissions: @permissions, files: @files)
+      @scholar = scholar_metadata(reads)
       @av_file = MediaRemux.playable_file(@files)
       @captions = CaptionTrack.all(@files)
       @file_revisions = reads[:file_revisions]
@@ -255,8 +255,20 @@ class WorksController < ApplicationController
           file_sets:      -> { AtlasRb::Work.file_sets(id, nuid: nuid) },
           associations:   -> { associations_or_none(id) },
           file_revisions: -> { file_revisions_or_none(id, nuid) }
-        }.merge(darwin_core_read)
+        }.merge(darwin_core_read, citation_read)
       )
+    end
+
+    def scholar_metadata(reads)
+      GoogleScholarMetadata.new(citation: reads[:citation], permissions: @permissions, files: @files)
+    end
+
+    # The Scholar tags emit only for a public Work, so nothing else pays for
+    # the read.
+    def citation_read
+      return {} unless GoogleScholarMetadata.public?(@permissions)
+
+      { citation: -> { GoogleScholarMetadata.citation_for(params[:id]) } }
     end
 
     # dwc, like mods, carries no nuid, and is read only for a Work that holds a
