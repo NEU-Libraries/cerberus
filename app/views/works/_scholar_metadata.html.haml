@@ -1,6 +1,6 @@
 -# Highwire Press / Google Scholar citation tags in the Work show <head>.
--# Gated to public, scholarly-genre works (GoogleScholarMetadata#emit?); built
--# entirely from the indexed Solr fields, no MODS parsing. The site-wide
+-# Gated to public works of a scholarly CSL type (GoogleScholarMetadata#emit?);
+-# built from the Work's citation, no MODS parsing. The site-wide
 -# robots noindex stays as-is — these tags sit ready until production enables
 -# indexing.
 - if scholar.emit?
@@ -16,5 +16,5 @@
       = tag.link(rel: 'alternate', type: 'application/pdf', href: pdf_url, title: plain_text(scholar.title))
     - if scholar.abstract
       = tag.meta(name: 'description', content: plain_text(scholar.abstract))
-    - if scholar.keywords.any?
-      = tag.meta(name: 'keywords', content: scholar.keywords.join(', '))
+    - if scholar.keywords
+      = tag.meta(name: 'keywords', content: scholar.keywords)

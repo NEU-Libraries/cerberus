@@ -2,13 +2,10 @@
 
 require 'rails_helper'
 
-# End-to-end over the real test Atlas + Solr: a created Work is completed (which
-# runs Atlas's CitationIndexer, projecting creator_ssim/pub_date_ssim onto its
-# Solr doc, and its MODSIndexer, projecting subject_ssim), then its show page is
-# fetched and the <head> inspected.
-# The gating/field-mapping logic is unit-specced (google_scholar_metadata_spec);
-# this proves the controller's Solr lookup + the content_for(:head) partial
-# actually emit the tags, and that the genre gate holds.
+# End-to-end over the real test Atlas: a public Work's show page is fetched and
+# the <head> inspected. The gating and field mapping are unit-specced
+# (google_scholar_metadata_spec); this proves the show page's citation read and
+# the content_for(:head) partial emit the tags, and that the CSL type gate holds.
 RSpec.describe 'Work Google Scholar metadata', type: :request do
   include Devise::Test::IntegrationHelpers
 
@@ -29,7 +26,7 @@ RSpec.describe 'Work Google Scholar metadata', type: :request do
   end
 
   it 'emits no citation_* tags for a non-scholarly genre' do
-    work = public_work(collection.id, 'work') # the fixture's genre is "podcasts"
+    work = public_work(collection.id, 'work') # "podcasts", a sound recording: CSL type song
 
     get work_path(work.id)
 

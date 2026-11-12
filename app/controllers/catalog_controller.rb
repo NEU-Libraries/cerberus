@@ -198,8 +198,7 @@ class CatalogController < ApplicationController
     config.add_facet_field 'pub_date_ssim', label: 'Publication Year', single: true
     # Topical subject and language, projected by Atlas's MODSIndexer for every
     # Modsable resource rather than for Works alone. subject_ssim carries MODS
-    # <topic>, which is a wider set than the citation keywords GoogleScholarMetadata
-    # reads off the same field.
+    # <topic>.
     config.add_facet_field 'subject_ssim', label: 'Topic', limit: true, index_range: 'A'..'Z'
     # The other four MODS subject axes, labelled as Atlas's WorkDecorator::DISPLAY
     # labels them so a facet and the metadata row beneath a result agree. Kept

@@ -35,7 +35,7 @@ Three neighbouring pages carry the machinery these files reuse:
 - `docs/sets.md` holds `SetResolver`, whose export surface
   `CollectionContentsResolver` mirrors.
 
-## The queries on this page are gated, with two exceptions
+## The queries on this page are gated, with one exception
 
 Almost every query here reaches Solr through the Blacklight `SearchBuilder`
 chain. It uses either `SearchBuilder.new(scope)` with the controller as scope,
@@ -51,12 +51,9 @@ The failure mode is silent. A hand-built `Blacklight.default_index.search` with
 literal params returns the ungated set, and nothing raises. The inline comments
 in these files mark the gating for that reason.
 
-Two queries are deliberately ungated:
-
-- `DepositorContext#workspace_collections` fills My DRS's workspace panel. A
-  depositor's own private Collections must stay visible there.
-- `GoogleScholarMetadata.for` reads one Work's citation fields. The show page
-  has already authorized that Work, and the tags emit only for a public one.
+One query is deliberately ungated: `DepositorContext#workspace_collections`,
+which fills My DRS's workspace panel. A depositor's own private Collections must
+stay visible there.
 
 ## Finding a resource to move or link
 
@@ -622,29 +619,53 @@ embargo nobody touched.
 `GoogleScholarMetadata` builds the Highwire Press `<meta>` tag set for a Work
 show page.
 
-It reads the Work's Solr document and nothing else, because nothing may parse
-MODS XML on the render path. Atlas's `CitationIndexer` projects `creator_ssim`
-and `pub_date_ssim` onto the Work document, beside `description_tsim` and
-`genre_ssim`. Atlas's `MODSIndexer` projects `subject_ssim`, which feeds the
-`keywords` tag. The title comes from the `AtlasRb::Work` itself. Public status
-and embargo come from the resource permissions the show page has already
-loaded.
+It reads the Work's CSL-JSON citation from `AtlasRb::Work.citation`
+(`GET /works/{id}/citation`), and nothing parses MODS on the render path. Atlas
+builds the citation with the same `Citation` rule that its `CitationIndexer`
+uses for search, so the tags, the Creator facet and the year cannot disagree.
+Public status and embargo come from the resource permissions the show page has
+already loaded.
 
-`subject_ssim` is also the Topic facet's field. One indexer writes the concept
-and both consumers read it, so a subject cannot be browsable and absent from the
-citation tags at the same time.
+| Tag | From the citation |
+|---|---|
+| `citation_title` | `title` |
+| `citation_author` | each `author[].literal` |
+| `citation_publication_date` | the year, `issued["date-parts"][0][0]` |
+| `description` | `abstract` |
+| `keywords` | `keyword`, passed through as Atlas joins it |
 
-`GoogleScholarMetadata.for` runs the lookup, and `CITATION_FL` keeps it to the
-fields the tags need. A Solr failure (`RSolr::Error`) degrades to no tags rather
-than breaking a show page that otherwise has no Solr dependency.
+Atlas leaves out a key the record does not give, rather than sending `null`, and
+each reader tolerates that. A date the record could not encode arrives as
+`issued["literal"]`, with no parts, and gives no date tag. `keyword` is one
+string, already comma-joined. Splitting it would break a subject that holds a
+comma of its own.
+
+### The read
+
+`WorksController#parallel_show_reads` reads the citation as one more task beside
+the show page's other Atlas reads, so it adds no wall-clock time. Two rules
+apply:
+
+- **Only for a public Work.** `citation_read` adds the task only when
+  `GoogleScholarMetadata.public?` holds, because the tags emit for nothing
+  else.
+- **A failed read means no tags.** `parallel_atlas_reads` re-raises a task's
+  error, so `GoogleScholarMetadata.citation_for` rescues inside the task and
+  returns nil. The show page renders without the tags.
 
 ### What gets tags
 
-Only a public Work whose `genre_ssim` includes one of `SCHOLAR_GENRES`:
-Research Publications, Technical Reports, or Theses & Dissertations
-(`#emit?`). DRS v1 restricted
-the tags the same way. Emitting `citation_*` for a photo or an A/V clip would be
-noise to Scholar.
+Only a public Work whose citation `type` is one of `SCHOLAR_TYPES`: `thesis`,
+`report` or `article` (`#emit?`). Emitting `citation_*` for a photo or an A/V
+clip would be noise to Scholar.
+
+Atlas decides the type (`Citation#csl_type`). It maps the genres DRS v1 gated
+on, "Theses & Dissertations", "Technical Reports" and "Research Publications",
+to those three types. It also maps plain genres such as "dissertation",
+"technical report" and "article", in any case. A Work has one type, taken from
+the first of its genres that maps to one. So a Work whose genres are "Book" and
+then "Research Publications" is a `book`, and gets no tags. That rule belongs
+to Atlas; change it there, not here.
 
 `app/views/works/_scholar_metadata.html.haml` reads the value object and
 renders into `<head>`. URL building, meaning `citation_pdf_url`, stays in the
@@ -657,16 +678,14 @@ and only when the Work is public and not under embargo. Returning nil suppresses
 which is how a private or embargoed file stays unadvertised. The view turns the
 noid into an absolute download URL.
 
-`WorksController#prepare_show_view` calls `GoogleScholarMetadata.for(work:,
-permissions:, files:)`, which fetches the Solr document and passes it to the
-constructor:
+`WorksController#prepare_show_view` builds the value object from the show
+page's reads:
 
 | Constructor argument | Meaning |
 |---|---|
-| `work:` | The show page's `AtlasRb::Work`, for the display title |
+| `citation:` | The Work's citation, from `AtlasRb::Work.citation`, or nil |
 | `permissions:` | The resource permissions loaded by `authorize_show!`. `read` carries `public`; `embargo` carries a date string |
 | `files:` | The Work's assets, from `AtlasRb::Work.assets`, in page order |
-| `solr_doc:` | The Work's Solr document, or nil |
 
 ## Browsable values in the MODS block
 
