@@ -312,10 +312,21 @@ assertion carries. See `docs/maintenance.md` for what the gate does.
 `LegacyController` sends an inbound `neu:` pid URL to the v2 object it became at
 migration.
 
-v1 ran on Fedora, so every object carried a `neu:` pid. v2 mints fresh NOIDs and
-does not carry the pid forward. Ten years of `neu:` pid URLs live in published
-papers, syllabi, finding aids, catalogue records and the search index. Without
-this controller they all land on a 404.
+v1 ran on Fedora, so every object carried a `neu:` pid. v2 mints fresh NOIDs,
+and the migration gives each object its v1 pid as `legacy_pid` when it creates
+it in Atlas. Ten years of `neu:` pid URLs live in published papers, syllabi,
+finding aids, catalogue records and the search index. Without this controller
+they all land on a 404.
+
+`show` asks Atlas which object holds the pid, with
+`AtlasRb::System.find_by_legacy_pid`. Atlas answers the object's NOID, its type
+and whether it is tombstoned, or `nil`. The lookup runs on the system path
+because the redirect must resolve for any visitor, signed in or not. The
+destination page then applies the visitor's own read gate, so a guest who
+follows a link to a private object is refused there, not here.
+
+`reset:data` creates the repository root with `legacy_pid: "neu:1"`, so v1's
+root URL resolves after every reset.
 
 The routes catch five v1 prefixes — `/files`, `/collections`, `/communities`,
 `/downloads` and `/sets` — with a `neu:` constraint, and send all of them to
@@ -323,33 +334,35 @@ The routes catch five v1 prefixes — `/files`, `/collections`, `/communities`,
 four of the prefixes are also v2 routes and Rails matches in declaration order.
 The constraint makes that safe: a v2 NOID never contains a colon.
 
-A hit redirects. A pid that never existed 404s. There is no `410 Gone` branch,
-because every v1 object migrates. That includes the hand-rolled integer pids, one
+A hit redirects, including to a tombstoned object, which keeps its pid and
+shows its tombstone page. A pid that no object holds 404s. There is no
+`410 Gone` branch, because every v1 object migrates. That includes the hand-rolled integer pids, one
 of which, `neu:1`, is the root Northeastern University Community.
 
 ### The path prefix does not decide the destination
 
-The inbound path prefix is only how the URL is caught. `object_type` on the
-mapping row decides where the request goes, because the prefixes do not
-correspond. A v1 CoreFile at `/files/:pid` is a v2 Work at `/works/:noid`.
+The inbound path prefix is only how the URL is caught. The type Atlas answers
+decides where the request goes, because the prefixes do not correspond. A v1
+CoreFile at `/files/:pid` is a v2 Work at `/works/:noid`.
 
-That also means the request never has to ask Atlas what kind of thing a NOID
-names. That matters when the caller is a crawler working through a decade of
-links.
+The one lookup answers the type with the NOID, so the request never makes a
+second call to ask what kind of thing a NOID names. That matters when the
+caller is a crawler working through a decade of links.
 
-Migration tooling outside this app writes the rows, so an `object_type` the
-model never validated can arrive. `destination_for` logs it and returns `nil`,
-which takes the same 404 path as an unknown pid. The 404 renders directly, with
+`destination_for` maps `Community`, `Collection` and `Work`. Atlas can answer
+a type this app has no route for yet, such as a `Blob` for a v1 file pid.
+`destination_for` logs it and returns `nil`, which takes the same 404 path as
+an unknown pid. The 404 renders directly, with
 "page" as the missing thing, rather than through `ResourceNotFound`, which would
 call it "the legacy you requested".
 
 ### The redirect status
 
-`REDIRECT_STATUS` is `:found`, a 302, while the mapping table is unverified.
-Browsers and intermediaries cache a 301 hard, so a wrong row would outlive its
-fix. A 301 is the intended end state, because it transfers search-index equity
+`REDIRECT_STATUS` is `:found`, a 302, while the migration's pids are
+unverified. Browsers and intermediaries cache a 301 hard, so a wrong pid would
+outlive its fix. A 301 is the intended end state, because it transfers search-index equity
 to the new URLs. Flip the constant to `:moved_permanently` once the migration's
-mappings are confirmed.
+pids are confirmed.
 
 ## The raw-XML editor
 
