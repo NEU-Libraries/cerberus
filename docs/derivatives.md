@@ -109,6 +109,13 @@ Atlas clear the stored size. That includes each seed call in
   that keeps the blurred edges opaque. It sets that SVG as the `<img>`'s own
   background, clipped to the content box so the frame's 4 px padding shows no
   blurred ring.
+- **The frame sits outside the picture.** The `<img>` is `content-box`, so its
+  `width` attribute is the picture's own width and the 4 px padding and 1 px
+  border add to it. Under Bootstrap's `border-box` the frame came out of that
+  width instead: a 500 px preview drew at 490 px, and the resample blurred
+  fine text such as a scanned title page. `max-width: calc(100% - 10px)` takes
+  the frame back off, so a column narrower than the preview still holds both
+  the frame and the picture.
 - **Nothing swaps the placeholder out.** The browser paints the decoded picture
   over its own background, from the progressive JPEG's first pass on. The
   preview is an opaque JPEG, so it hides the blur completely.

@@ -41,10 +41,14 @@ RSpec.describe 'Thumbnails when the image server is down', :browser, type: :syst
       (function () {
         var img = document.querySelector('.preview-blur-up img');
         var r = img.getBoundingClientRect();
-        return { loaded: img.naturalWidth > 0, ratio: r.width / r.height };
+        var s = getComputedStyle(img);
+        return { loaded: img.naturalWidth > 0, ratio: r.width / r.height,
+                 drawn: img.clientWidth - parseFloat(s.paddingLeft) - parseFloat(s.paddingRight) };
       })()
     JS
     expect(box['loaded']).to be(true)
+    # The picture draws at its stored width; a narrower one is resampled and blurs.
+    expect(box['drawn']).to eq(500)
     # The frame's 4 px padding and 1 px border sit outside the 4:3 content box.
     expect(box['ratio']).to be_within(0.02).of(4.0 / 3)
   end

@@ -7,7 +7,9 @@
 # See docs/derivatives.md.
 module ThumbnailsHelper
   AV_PLACEHOLDER = 'av-placeholder.svg'
-  PREVIEW_FRAME = 'max-width: 100%; padding: 4px; border: 1px solid rgba(0,0,0,0.2);'
+  # Content-box, or border-box resamples the picture and blurs it (docs/derivatives.md).
+  PREVIEW_FRAME = 'box-sizing: content-box; max-width: calc(100% - 10px); ' \
+                  'padding: 4px; border: 1px solid rgba(0,0,0,0.2);'
   BASE64 = %r{\A[A-Za-z0-9+/]+=*\z}
 
   # A stored thumbnail value that is safe to hand to image_tag, or nil.
