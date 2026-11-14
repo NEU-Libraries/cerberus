@@ -160,6 +160,14 @@ textarea {
       padding-left: 0;
     }
   }
+
+  // Bootstrap's navbar-brand never wraps, and the service name is wider than a
+  // 320px screen, so below sm it would push the whole page sideways.
+  @include media-breakpoint-down(sm) {
+    .navbar-brand {
+      white-space: normal;
+    }
+  }
 }
 
 // Navbar icon link carrying an optional count badge (the inbox envelope, the
