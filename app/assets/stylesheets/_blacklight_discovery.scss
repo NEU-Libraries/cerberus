@@ -37,14 +37,19 @@
   }
 }
 
+// The box's 1 px border and the img's 2 px padding, on each side. The box adds
+// them to the stored IIIF size, or the picture resamples a few pixels smaller
+// and blurs (docs/derivatives.md).
+$thumbnail-frame: 2 * (1px + 2px);
+
 .document-thumbnail {
   background-color: white;
   border: 1px solid rgba(0, 0, 0, 0.2);
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
-  width: 85px;
-  height: 85px;
+  width: 85px + $thumbnail-frame;
+  height: 85px + $thumbnail-frame;
 }
 
 .col-md-auto .document-thumbnail {
@@ -130,11 +135,22 @@
 // dotted divider; the gap between cards does the separating. The
 // #documents id keeps this ahead of the gem's bare .documents-list
 // rules on specificity.
-#documents.documents-list .document {
+//
+// A Set's contents rows take the same card through this mixin.
+@mixin result-row-card {
   background-color: var(--bs-body-bg); // #fff — the facet .card surface
   border: 1px solid var(--bs-border-color); // $gray-300; also overrides the gem's dotted bottom divider
   border-radius: var(--bs-border-radius);
   margin-top: 0.75rem;
+
+  &:hover {
+    border-color: $gray-400;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+}
+
+#documents.documents-list .document {
+  @include result-row-card;
   // The unbalanced gap under short cards came from the gem's 48px
   // thumbnail bottom margin (zeroed below), not the padding — so a
   // modest 0.5rem bottom keeps content off the lower border without
@@ -170,15 +186,9 @@
     margin-top: calc(0.75rem + 7px);
   }
 
-  // Quiet hover affordance — the title is a link, so the whole row is
-  // effectively a target. A faint border-darken + lift, nothing showy,
-  // in keeping with the institutional register.
+  // The card's hover (in the mixin) is a quiet affordance: the title is a
+  // link, so the whole row is effectively a target.
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
-
-  &:hover {
-    border-color: $gray-400;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  }
 }
 
 .documents-list .document-thumbnail {
@@ -206,8 +216,8 @@ dl.document-metadata.row {
   row-gap: var(--bs-gutter-x);
 
   .document-thumbnail {
-    width: 170px;
-    height: 170px;
+    width: 170px + $thumbnail-frame;
+    height: 170px + $thumbnail-frame;
     border: 1px solid rgba(0, 0, 0, 0.2);
   }
 

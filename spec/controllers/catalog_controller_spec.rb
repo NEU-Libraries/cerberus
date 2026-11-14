@@ -120,6 +120,19 @@ describe CatalogController do
       expect(html).not_to include('av-placeholder')
     end
 
+    # A Set row calls this directly, unlinked, and needs a decorative img.
+    it "passes a direct caller's keywords to the img, and ignores Blacklight's positional options" do
+      get :index
+      doc = SolrDocument.new('id' => 'w4', 'internal_resource_tesim' => ['Work'],
+                             'thumbnail_2x_ssi' => 'https://iiif/t2.jpg')
+
+      direct = Capybara.string(controller.view_context.iiif_thumbnail(doc, alt: '', loading: 'lazy'))
+      blacklight = Capybara.string(controller.view_context.iiif_thumbnail(doc, { alt: 'x' }))
+
+      expect(direct).to have_css('img[alt=""][loading="lazy"]')
+      expect(blacklight).to have_css('img:not([alt]):not([loading])')
+    end
+
     # Atlas indexes has_downloads_bsi on the Work's doc, so the row decides
     # without asking Atlas for the Work's files. See docs/downloads.md.
     it 'offers no Downloads button on a Work with no files, and asks Atlas for none' do

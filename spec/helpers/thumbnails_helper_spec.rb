@@ -104,4 +104,16 @@ describe ThumbnailsHelper do
       expect(html).to have_css('img + span.thumbnail-fallback.d-none > i.fa-image', visible: :all)
     end
   end
+
+  describe '#thumbnail_srcset' do
+    it 'offers the 2x copy beside the 1x' do
+      expect(helper.thumbnail_srcset('https://iiif/t.jpg', 'https://iiif/t2.jpg'))
+        .to eq('https://iiif/t.jpg 1x, https://iiif/t2.jpg 2x')
+    end
+
+    it 'is nil without a renderable 2x copy' do
+      expect(helper.thumbnail_srcset('https://iiif/t.jpg', nil)).to be_nil
+      expect(helper.thumbnail_srcset('https://iiif/t.jpg', 't2.jpg')).to be_nil
+    end
+  end
 end

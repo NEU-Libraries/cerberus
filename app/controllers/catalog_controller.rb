@@ -468,14 +468,17 @@ class CatalogController < ApplicationController
   # of the thumbnail media (both inside .document-thumbnail, the positioning
   # context), so the media's img→fallback nextElementSibling onerror swap is
   # unaffected.
-  def iiif_thumbnail(document, *_args)
+  #
+  # Blacklight passes its image options as a positional hash, which `_args`
+  # swallows. Only a direct caller's keywords, such as a Set row's, reach the img.
+  def iiif_thumbnail(document, *_args, **img_options)
     # Pill text via the shared helper (ApplicationHelper#pill_label owns the
     # priority order). Two states earn an opaque variant over the translucent gray
     # every other tile uses, because both are facts worth reading at a glance
     # rather than blending into the thumbnail.
     pill_class = ['thumb-type-pill', pill_state_class(document)].compact.join(' ')
     pill = view_context.content_tag(:span, view_context.pill_label(document), class: pill_class)
-    view_context.safe_join([thumbnail_media(document), pill])
+    view_context.safe_join([thumbnail_media(document, **img_options), pill])
   end
 
   # Same precedence as the label, so the tone and the text never disagree.
@@ -489,14 +492,14 @@ class CatalogController < ApplicationController
 
   # The thumbnail image (with a hidden type-icon fallback for broken/missing
   # images) or, when there's no custom thumbnail, the type icon itself.
-  def thumbnail_media(document)
+  def thumbnail_media(document, **img_options)
     icon_class = helpers.document_type_icon(document.klass_type)
     icon_html  = view_context.content_tag(:i, '', class: "fa-solid #{icon_class} fa-2xl text-black-50")
 
     src = helpers.renderable_thumbnail(document.thumbnail_2x_ssi.presence || document.thumbnail_ssi)
     return view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback') if src.blank?
 
-    media = view_context.thumbnail_with_fallback(src, icon_html, fallback_class: 'thumbnail-fallback')
+    media = view_context.thumbnail_with_fallback(src, icon_html, fallback_class: 'thumbnail-fallback', **img_options)
     view_context.content_tag(:span, media, class: 'thumbnail-wrapper')
   end
 

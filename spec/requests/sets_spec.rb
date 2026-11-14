@@ -230,6 +230,20 @@ RSpec.describe 'Sets', type: :request do
       end
     end
 
+    # The page always renders rows, so a Gallery toggle would do nothing. Sets
+    # edit their own copy of the Blacklight config, so the catalog keeps it.
+    it 'offers no gallery view on the Set page, while the catalog keeps one' do
+      set = make_set('Toggle Set')
+      post "/sets/#{set['id']}/works", params: { work_id: lone_work.id }
+
+      get "/sets/#{set['id']}"
+      expect(response.body).to include('result-row')
+      expect(response.body).not_to include('view=gallery')
+
+      get "/collections/#{collection.id}"
+      expect(response.body).to include('view=gallery')
+    end
+
     it 'walks the whole flow: include, add, set aside, put back, remove' do
       set = make_set('Flow Set')
 

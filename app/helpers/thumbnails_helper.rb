@@ -7,7 +7,9 @@
 # See docs/derivatives.md.
 module ThumbnailsHelper
   AV_PLACEHOLDER = 'av-placeholder.svg'
-  PREVIEW_FRAME = 'max-width: 100%; padding: 4px; border: 1px solid rgba(0,0,0,0.2);'
+  # Content-box, or border-box resamples the picture and blurs it (docs/derivatives.md).
+  PREVIEW_FRAME = 'box-sizing: content-box; max-width: calc(100% - 10px); ' \
+                  'padding: 4px; border: 1px solid rgba(0,0,0,0.2);'
   BASE64 = %r{\A[A-Za-z0-9+/]+=*\z}
 
   # A stored thumbnail value that is safe to hand to image_tag, or nil.
@@ -29,6 +31,11 @@ module ThumbnailsHelper
   def thumbnail_with_fallback(src, fallback, fallback_class: nil, **img_options)
     img = image_tag(src, onerror: THUMBNAIL_ONERROR, **img_options)
     safe_join([img, content_tag(:span, fallback, class: [fallback_class, 'd-none'].compact.join(' '))])
+  end
+
+  def thumbnail_srcset(src, src_2x)
+    src_2x = renderable_thumbnail(src_2x)
+    src_2x && "#{src} 1x, #{src_2x} 2x"
   end
 
   THUMBNAIL_ONERROR = "this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none');"

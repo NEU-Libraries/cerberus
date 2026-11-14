@@ -109,6 +109,13 @@ Atlas clear the stored size. That includes each seed call in
   that keeps the blurred edges opaque. It sets that SVG as the `<img>`'s own
   background, clipped to the content box so the frame's 4 px padding shows no
   blurred ring.
+- **The frame sits outside the picture.** The `<img>` is `content-box`, so its
+  `width` attribute is the picture's own width and the 4 px padding and 1 px
+  border add to it. Under Bootstrap's `border-box` the frame came out of that
+  width instead: a 500 px preview drew at 490 px, and the resample blurred
+  fine text such as a scanned title page. `max-width: calc(100% - 10px)` takes
+  the frame back off, so a column narrower than the preview still holds both
+  the frame and the picture.
 - **Nothing swaps the placeholder out.** The browser paints the decoded picture
   over its own background, from the progressive JPEG's first pass on. The
   preview is an opaque JPEG, so it hides the blur completely.
@@ -141,6 +148,32 @@ anchor from which `DepositDerivativesJob` later recovers the gated base for
 opt-in S/M/L. `persist_service!` writes it onto the Work's first FileSet, and
 skips when no FileSet is listed yet.
 
+### Thumbnails draw at their stored size
+
+Atlas stores two square-capped thumbnails, `!85,85` and `!170,170`. A browser
+that draws one a few pixels off its stored size resamples it, and the small
+step blurs it visibly. Upscaling blurs it too.
+
+Every thumbnail box is a `.document-thumbnail`, which fits the whole picture
+inside a white frame and never crops it. The box is the stored size plus
+`$thumbnail-frame`, its 1 px border and the img's 2 px padding on each side.
+So the picture inside is exactly 85 or 170 px:
+
+| Surface | Picture | Copy |
+|---|---|---|
+| Search results, Set rows | 85 px | 170 px at half size, exact on a HiDPI screen |
+| The gallery view and the home page | 170 px | 170 px |
+| The Collection and Community header | 85 px | 85 px, with a 2x `srcset` |
+| Association tiles | 46 px | 170 px |
+
+A Set row renders the catalog's own box and type pill, through
+`CatalogController#iiif_thumbnail`, so a Set's contents read like search
+results. The association tile is the one compact box. It keeps the catalog's
+frame at 52 px so the Associated works card stays short. Its picture is not a
+stored size, but from the 170 px copy it only ever scales down, by about 0.3
+at 1x and 0.6 at 2x. A step that large does not blur the way a step just
+under 1 does.
+
 ### Thumbnails that fail to load
 
 Every other thumbnail swaps itself for an icon when it fails to load, through
@@ -152,10 +185,9 @@ request can fail, and it needs no JavaScript file.
 
 | Surface | Fallback |
 |---|---|
-| Search results, the gallery view and the home page | The type icon, as with no thumbnail (`CatalogController#thumbnail_media`) |
+| Search results, the gallery view, the home page and Set rows (`sets/show`) | The type icon, as with no thumbnail (`CatalogController#thumbnail_media`) |
 | The Collection and Community header (`shared/_thumbnail`) | The type icon, from the `type` local the show page passes |
 | Associated-works rows (`works/_associations`) | `fa-image`, as with no thumbnail |
-| Set rows (`sets/show`) | `fa-image`, as with no thumbnail |
 
 `spec/system/thumbnail_load_failure_spec.rb` covers each surface and the Work
 preview. It runs in the browser lane, with a closed local port standing in for

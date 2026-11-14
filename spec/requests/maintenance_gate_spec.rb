@@ -47,7 +47,7 @@ RSpec.describe 'The maintenance window', type: :request do
       post '/sets', params: { set: { title: 'A set' } }
 
       expect(response.body).to include('read-only')
-      expect(response.body).to include('503')
+      expect(Capybara.string(response.body)).to have_css('.error-page__status-code', text: '503')
     end
 
     it 'passes Atlas\'s retry hint to the caller' do
