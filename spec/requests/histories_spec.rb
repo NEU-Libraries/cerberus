@@ -36,6 +36,13 @@ RSpec.describe 'Histories', type: :request do
     AtlasRb::Mash.new('resource_id' => resource_id, 'events' => events)
   end
 
+  # Only the event list's text, so a check for a group name cannot match the
+  # page chrome. The navbar links the signed-in user to their Person page,
+  # whose NOID the test Atlas mints afresh on every reset.
+  def rendered_events
+    Capybara.string(response.body).find('.rights-diff__list').text
+  end
+
   def perm_event(at:, before:, after:, action: 'update', **provenance)
     payload = { 'before' => before, 'after' => after }
     payload['source'] = provenance[:source] if provenance[:source]
@@ -213,17 +220,17 @@ RSpec.describe 'Histories', type: :request do
     end
 
     it 'isolates the ?at deep-linked event on its own page (one event per page)' do
-      events = Array.new(25) { |i| perm_event(at: format('2026-05-%02dT00:00:00Z', i + 1), before: {}, after: { 'read' => ["g#{i}"] }) }
+      events = Array.new(25) { |i| perm_event(at: format('2026-05-%02dT00:00:00Z', i + 1), before: {}, after: { 'read' => ["read-group-#{i}"] }) }
       allow(AtlasRb::Resource).to receive(:history).and_return(history_mash(events))
       get rights_history_path(resource_id, at: events[22]['occurred_at'])
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('g22')      # the deep-linked event renders
-      expect(response.body).not_to include('g21')  # neighbours are NOT stacked alongside it
-      expect(response.body).not_to include('g23')
+      expect(rendered_events).to include('read-group-22')      # the deep-linked event renders
+      expect(rendered_events).not_to include('read-group-21')  # neighbours are NOT stacked alongside it
+      expect(rendered_events).not_to include('read-group-23')
     end
 
     it 'renders a Newer/Older walker stepping between changes' do
-      events = Array.new(3) { |i| perm_event(at: format('2026-05-%02dT00:00:00Z', i + 1), before: {}, after: { 'read' => ["g#{i}"] }) }
+      events = Array.new(3) { |i| perm_event(at: format('2026-05-%02dT00:00:00Z', i + 1), before: {}, after: { 'read' => ["read-group-#{i}"] }) }
       allow(AtlasRb::Resource).to receive(:history).and_return(history_mash(events))
       get rights_history_path(resource_id, at: events[1]['occurred_at']) # middle event → page 2 of 3
       expect(response).to have_http_status(:ok)
@@ -233,16 +240,16 @@ RSpec.describe 'Histories', type: :request do
       expect(response.body).to include('Newer')                        # time-axis labels (not Previous/Next)
       expect(response.body).to include('Older')
       expect(response.body).not_to include('rights-diff__nav-link--disabled') # mid-sequence: both live
-      expect(response.body).to include('g1')
-      expect(response.body).not_to include('g0')
-      expect(response.body).not_to include('g2')
+      expect(rendered_events).to include('read-group-1')
+      expect(rendered_events).not_to include('read-group-0')
+      expect(rendered_events).not_to include('read-group-2')
     end
 
     it 'walker links navigate by page only, never carrying the ?at deep-link param' do
       # Regression: Kaminari omits `page` from the page-1 link, so a lingering
       # `?at` would re-resolve back to the deep-linked page — clicking "Newer"
       # would loop instead of stepping toward the newest. The walker strips it.
-      events = Array.new(3) { |i| perm_event(at: format('2026-05-%02dT00:00:00Z', i + 1), before: {}, after: { 'read' => ["g#{i}"] }) }
+      events = Array.new(3) { |i| perm_event(at: format('2026-05-%02dT00:00:00Z', i + 1), before: {}, after: { 'read' => ["read-group-#{i}"] }) }
       allow(AtlasRb::Resource).to receive(:history).and_return(history_mash(events))
       get rights_history_path(resource_id, at: events[1]['occurred_at']) # arrive on page 2 via ?at
       expect(response).to have_http_status(:ok)
@@ -251,7 +258,7 @@ RSpec.describe 'Histories', type: :request do
     end
 
     it 'shows an inert boundary control at an end of the walk' do
-      events = Array.new(2) { |i| perm_event(at: format('2026-05-%02dT00:00:00Z', i + 1), before: {}, after: { 'read' => ["g#{i}"] }) }
+      events = Array.new(2) { |i| perm_event(at: format('2026-05-%02dT00:00:00Z', i + 1), before: {}, after: { 'read' => ["read-group-#{i}"] }) }
       allow(AtlasRb::Resource).to receive(:history).and_return(history_mash(events))
       get rights_history_path(resource_id) # page 1 = newest → "Newer" control is inert
       expect(response).to have_http_status(:ok)
