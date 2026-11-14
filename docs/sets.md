@@ -40,7 +40,7 @@ drops the gated-discovery clause the search builder adds.
 `SetResolver` is deliberately not an `ApplicationService`: it has no single
 `#call` product. A caller builds one per request and reads it piecemeal:
 
-- `contents_fqs`, which `SetsController#contents_response` layers onto a builder
+- `contents_fqs`, which `SetContents#contents_response` layers onto a builder
   seeded with the live search state. That is the shape of
   `CatalogController#find_children`.
 - The chips, provenance lookups and aside-zone documents. The Set show page
@@ -107,6 +107,15 @@ documents for the aside zone. It returns only exclusions the recipe still
 reaches. Atlas keeps an exclusion row when its collection is removed from the
 Set, so without the positive clause a Work set aside from a departed collection
 would linger there.
+
+### How the rows display
+
+Each contents row is a catalog result card (the `result-row-card` mixin in
+`_blacklight_discovery.scss`) holding the catalog's thumbnail box. Beside the
+title it carries the provenance chip and, for an editor, the Hide button. A
+gallery card has no place for either, so `SetContents` removes the gallery view
+from the Set page's copy of the Blacklight config, and the shared sidebar shows
+no List/Gallery toggle. The catalog keeps its own gallery.
 
 ## Adding a page of results
 

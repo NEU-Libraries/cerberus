@@ -19,6 +19,7 @@ class SetsController < CatalogController
   include SetBulkActions
   include SetBreadcrumbs
   include SetPageAdd
+  include SetContents
 
   # :facet is the show page's facet modal, so it is as public as the show page
   # itself — load_set below is what gates a private Set, for both.
@@ -170,16 +171,6 @@ class SetsController < CatalogController
       Array(effective_user.groups).intersect?(Array(@set['edit_groups']))
     end
 
-    # The Set's resolved contents, which is what #show lists. load_set has
-    # already fetched and authorized the Set itself, so a private Set refuses
-    # here exactly as it refuses on the show page. A recipe with no positive
-    # clause yields nil, and the modal renders empty rather than counting the
-    # whole index.
-    def facet_scope_filters
-      @resolver = SetResolver.new(compilation: @set, search_service: search_service)
-      @resolver.contents_fqs
-    end
-
     def require_set_editor
       return if @can_edit
 
@@ -211,16 +202,5 @@ class SetsController < CatalogController
       return Set.new unless @kind == 'work'
 
       SetItemCoverage.call(noid: @noid, search_service: search_service)
-    end
-
-    # The recipe fq layered onto a state-seeded builder — find_children's
-    # shape. A recipe with no positive clause renders empty (nil fq would
-    # otherwise match the whole index).
-    def contents_response
-      fqs = @resolver.contents_fqs
-      return Blacklight::Solr::Response.new({}, {}) if fqs.nil?
-
-      builder = search_service.search_builder.with(search_state).with_filters(*fqs)
-      Blacklight.default_index.search(params: builder)
     end
 end
