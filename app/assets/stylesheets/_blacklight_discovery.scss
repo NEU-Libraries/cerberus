@@ -37,14 +37,19 @@
   }
 }
 
+// The box's 1 px border and the img's 2 px padding, on each side. The box adds
+// them to the stored IIIF size, or the picture resamples a few pixels smaller
+// and blurs (docs/derivatives.md).
+$thumbnail-frame: 2 * (1px + 2px);
+
 .document-thumbnail {
   background-color: white;
   border: 1px solid rgba(0, 0, 0, 0.2);
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
-  width: 85px;
-  height: 85px;
+  width: 85px + $thumbnail-frame;
+  height: 85px + $thumbnail-frame;
 }
 
 .col-md-auto .document-thumbnail {
@@ -206,8 +211,8 @@ dl.document-metadata.row {
   row-gap: var(--bs-gutter-x);
 
   .document-thumbnail {
-    width: 170px;
-    height: 170px;
+    width: 170px + $thumbnail-frame;
+    height: 170px + $thumbnail-frame;
     border: 1px solid rgba(0, 0, 0, 0.2);
   }
 
