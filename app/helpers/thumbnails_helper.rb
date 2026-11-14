@@ -33,6 +33,11 @@ module ThumbnailsHelper
     safe_join([img, content_tag(:span, fallback, class: [fallback_class, 'd-none'].compact.join(' '))])
   end
 
+  def thumbnail_srcset(src, src_2x)
+    src_2x = renderable_thumbnail(src_2x)
+    src_2x && "#{src} 1x, #{src_2x} 2x"
+  end
+
   THUMBNAIL_ONERROR = "this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none');"
 
   # The player's poster: the Work's own, else the placeholder mark. Only the

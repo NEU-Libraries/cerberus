@@ -148,6 +148,29 @@ anchor from which `DepositDerivativesJob` later recovers the gated base for
 opt-in S/M/L. `persist_service!` writes it onto the Work's first FileSet, and
 skips when no FileSet is listed yet.
 
+### Thumbnails draw at their stored size
+
+Atlas stores two square-capped thumbnails, `!85,85` and `!170,170`. A browser
+that draws one a few pixels off its stored size resamples it, and the small
+step blurs it visibly. Each surface avoids that in one of two ways.
+
+**The boxes that fit the picture whole** are `.document-thumbnail`: search
+results, the gallery view, the home page, and the Collection and Community
+header. The box is the stored size plus `$thumbnail-frame`, its 1 px border and
+the img's 2 px padding on each side. So the picture inside is exactly 85 or
+170 px. A list row draws the 170 px copy at half size, which is exact on a
+HiDPI screen. The header uses the 85 px copy with a 2x `srcset`.
+
+**The squares that crop the picture** are Set rows (72 px) and association
+tiles (50 px). They use `object-fit: cover`, which fills the square from the
+picture's short edge, so they never draw at the stored size. What matters is
+that they scale down, not up. An association tile takes the 2x copy through
+`ThumbnailsHelper#thumbnail_srcset`. A Set row's square is taller than the
+85 px copy's short edge, so it always uses the 170 px copy.
+
+A very wide or very tall picture still upscales in a cropped square, because
+its short edge is small in both copies.
+
 ### Thumbnails that fail to load
 
 Every other thumbnail swaps itself for an icon when it fails to load, through

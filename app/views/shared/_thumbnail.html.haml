@@ -7,8 +7,7 @@
   .document-thumbnail
     - icon = content_tag(:i, '', class: "fa-solid #{document_type_icon(type)} fa-2xl text-black-50")
     - if (thumb = renderable_thumbnail(src))
-      - thumb_2x = renderable_thumbnail(src_2x)
       = thumbnail_with_fallback(thumb, icon, fallback_class: 'thumbnail-fallback', alt: '', loading: 'lazy',
-        srcset: thumb_2x && "#{thumb} 1x, #{thumb_2x} 2x")
+        srcset: thumbnail_srcset(thumb, src_2x))
     - else
       %span.thumbnail-fallback= icon

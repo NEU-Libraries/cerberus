@@ -19,7 +19,7 @@
               .work-association__thumb
                 - if (thumb = renderable_thumbnail(doc.thumbnail_ssi))
                   = thumbnail_with_fallback(thumb, tag.i(class: 'fa-regular fa-image', 'aria-hidden': 'true'),
-                    alt: '', loading: 'lazy')
+                    alt: '', loading: 'lazy', srcset: thumbnail_srcset(thumb, doc.thumbnail_2x_ssi))
                 - else
                   %i.fa-regular.fa-image{'aria-hidden' => 'true'}
               .work-association__body

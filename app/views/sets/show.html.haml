@@ -84,7 +84,9 @@
       - provenance = @resolver.provenance_for(doc)
       .result-row
         .thumb
-          - if (thumb = renderable_thumbnail(doc.thumbnail_ssi))
+          -# Cover fills the 72 px square from the short edge, which the 85 px copy
+          -# lacks, so even a 1x screen gets the 170 px copy.
+          - if (thumb = renderable_thumbnail(doc.thumbnail_2x_ssi.presence || doc.thumbnail_ssi))
             = thumbnail_with_fallback(thumb, tag.i(class: 'fa-regular fa-image', 'aria-hidden': 'true'),
               alt: '', loading: 'lazy')
           - else
