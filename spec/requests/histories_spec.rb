@@ -300,8 +300,8 @@ RSpec.describe 'Histories', type: :request do
                                                         .and_return('<mods><titleInfo><title>New</title></titleInfo></mods>')
       get mods_history_path(resource_id)
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('class="diff"')
-      expect(response.body).to include('New')
+      # Scoped to the diff: the page's inline CSS names "Courier New".
+      expect(Capybara.string(response.body)).to have_css('.diff', text: 'New')
     end
 
     it 'shows the empty state when no versions exist' do

@@ -1058,8 +1058,8 @@ describe WorksController do
 
       body = CGI.unescapeHTML(response.body)
       expect(body).to include('Image Derivatives')
-      expect(body).to include('longest edge is')
-      expect(body).to include('588')
+      # The whole sentence, since "588" alone could match anywhere on the page.
+      expect(Capybara.string(response.body)).to have_css('p', text: /longest edge is\s+588\s+pixels/)
       expect(body).to include('derivative_widths[small]')
       expect(body).to include('derivative-sizes')
     end

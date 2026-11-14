@@ -412,7 +412,7 @@ RSpec.describe 'Loads', type: :request do
       it 'renders the determinate progress meter with the processed/total count' do
         get "/loaders/marcom/loads/#{load_report.id}"
         expect(response.body).to include('load-report-progress')
-        expect(response.body).to include('of 3')
+        expect(Capybara.string(response.body)).to have_css('.load-report-progress__total', text: 'of 3')
         expect(response.body).to include('aria-valuenow="1"')
         expect(response.body).to include('aria-valuemax="3"')
       end
