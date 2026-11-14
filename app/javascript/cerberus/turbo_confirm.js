@@ -18,6 +18,7 @@ let modal
 let titleEl
 let bodyEl
 let okButton
+let cancelButton
 
 function build() {
   modalEl = document.createElement("div")
@@ -46,6 +47,7 @@ function build() {
   titleEl = modalEl.querySelector(".modal-title")
   bodyEl = modalEl.querySelector(".modal-body")
   okButton = modalEl.querySelector(".modal-footer .btn:not(.btn-secondary)")
+  cancelButton = modalEl.querySelector(".modal-footer .btn-secondary")
 }
 
 // Render the message, preserving the blank-line paragraph breaks the existing
@@ -101,9 +103,9 @@ function showConfirm(message, formElement, submitter) {
 
     okButton.addEventListener("click", onOk)
     modalEl.addEventListener("hidden.bs.modal", onHidden)
-    // Focus the confirm button once visible so Enter confirms / Esc cancels,
-    // matching the native confirm() keyboard flow this replaces.
-    modalEl.addEventListener("shown.bs.modal", () => okButton.focus(), { once: true })
+    // Focus Cancel, the safe answer, once visible. The actions behind these
+    // confirms are mostly destructive, so a reflexive Enter must not carry them.
+    modalEl.addEventListener("shown.bs.modal", () => cancelButton.focus(), { once: true })
     modal.show()
   })
 }

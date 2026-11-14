@@ -26,6 +26,13 @@ module Blacklight
       @label_class = label_class
       @value_tag = value_tag
       @value_class = value_class
+      # A page renders the same field in more than one place, so the ids the
+      # clamp toggle points at need a per-render suffix to stay unique.
+      @dom_base = "metadata-#{@key}-#{SecureRandom.hex(4)}"
     end
+
+    def label_id = "#{@dom_base}-label"
+    def value_id(index) = "#{@dom_base}-value-#{index}"
+    def toggle_id(index) = "#{@dom_base}-toggle-#{index}"
   end
 end

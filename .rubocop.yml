@@ -177,6 +177,7 @@ Rails/SkipsModelValidations:
 Rails/DynamicFindBy:
   Whitelist:
     - find_by_alternate_identifier
+    - find_by_legacy_pid
 Layout/IndentationConsistency:
   EnforcedStyle: indented_internal_methods
 Layout/HashAlignment:

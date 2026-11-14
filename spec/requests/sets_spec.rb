@@ -254,6 +254,11 @@ RSpec.describe 'Sets', type: :request do
         .and match(%r{Hid\s+<b>Work One</b>\s+from this set})
         .and match(%r{</b>, which is still in your set})
         .and include('still in your set')
+      # A live region that arrives already holding its text is not announced,
+      # so the toast's status region must render empty for the script to fill.
+      toast = response.parsed_body.at_css('.drs-toast')
+      expect(toast['role']).to be_nil
+      expect(toast.at_css('[role="status"]').text).to be_empty
       # The per-collection count is drawn in the definition, on the Manage page.
       get "/sets/#{set['id']}/edit"
       expect(response.body).to include('1</span><span class="of"> of 2')
@@ -564,6 +569,22 @@ RSpec.describe 'Sets', type: :request do
       get "/sets/#{set['id']}"
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('Public Set')
+    end
+
+    # The label swap is the feedback for sighted readers; the status region
+    # beside the button is the feedback for screen readers. An aria-label on
+    # the button would hide the swap from them.
+    it 'gives the copy link button a status region and no aria-label' do
+      set = make_set('Copyable Public Set')
+      AtlasRb::Compilation.update(set['id'],
+                                  permissions: { read: ['public'], edit: [], edit_users: [] },
+                                  nuid:        nuid)
+      get "/sets/#{set['id']}"
+      html = response.parsed_body
+      button = html.at_css('[data-controller="clipboard"] button')
+      expect(button.text).to include('Copy link')
+      expect(button['aria-label']).to be_nil
+      expect(html.at_css('[data-controller="clipboard"] > [role="status"]')).to be_present
     end
 
     # My Sets needs a set curator, so a trail starting there would lead an

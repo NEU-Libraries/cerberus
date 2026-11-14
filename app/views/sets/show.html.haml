@@ -39,10 +39,13 @@
     - if public_set || downloadable || @can_edit || @owned || admin_tier
       .d-flex.align-items-center.flex-wrap.gap-2.pt-3
         - if public_set
-          %span{data: { controller: 'clipboard', 'clipboard-text-value': set_url(@set['id']) }}
-            %button.btn.btn-tonal-secondary.btn-sm{type: 'button', 'aria-label' => 'Copy link to this set', data: { action: 'clipboard#copy' }}
+          -# No aria-label on the button: its visible text is its name, so the
+          -# "Copied" swap reaches assistive technology too.
+          %span.position-relative{data: { controller: 'clipboard', 'clipboard-text-value': set_url(@set['id']) }}
+            %button.btn.btn-tonal-secondary.btn-sm{type: 'button', data: { action: 'clipboard#copy' }}
               %i.fa-solid.fa-link.me-1{'aria-hidden' => 'true'}
               %span{data: { 'clipboard-target': 'label' }} Copy link
+            %span.visually-hidden{role: 'status', data: { 'clipboard-target': 'status' }}
         - if downloadable
           = link_to download_set_path(@set['id']), class: 'btn btn-tonal-primary btn-sm', 'aria-label' => "Download #{@set['title']} as a zip", data: { turbo: false } do
             %i.fa-solid.fa-file-zipper.me-1{'aria-hidden' => 'true'}

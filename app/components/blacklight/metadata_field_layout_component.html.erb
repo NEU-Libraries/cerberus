@@ -1,11 +1,11 @@
-<dt class="blacklight-<%= @key %> <%= @label_class %>"><%= label %></dt>
-<% values.each do |v| %>
+<dt id="<%= label_id %>" class="blacklight-<%= @key %> <%= @label_class %>"><%= label %></dt>
+<% values.each_with_index do |v, i| %>
   <dd class="d-flex <%= @value_class %> blacklight-<%= @key %>" data-controller="metadata-section-clamp">
-    <span data-metadata-section-clamp-target="container" class="metadata-section-clamped"><%= v %></span>
-    <button class="btn btn-link btn-sm p-0 ms-1 d-none" data-action="click->metadata-section-clamp#expand" data-metadata-section-clamp-target="expandBtn" aria-label="Show full value">
+    <span id="<%= value_id(i) %>" data-metadata-section-clamp-target="container" class="metadata-section-clamped"><%= v %></span>
+    <%# One button for both states, so focus stays put when it is pressed. Its name
+        joins its own aria-label to the field label: "Show full Abstract". %>
+    <button type="button" id="<%= toggle_id(i) %>" class="btn btn-link btn-sm p-0 ms-1 d-none metadata-section-toggle" data-action="click->metadata-section-clamp#toggle" data-metadata-section-clamp-target="toggle" aria-expanded="false" aria-controls="<%= value_id(i) %>" aria-label="Show full" aria-labelledby="<%= toggle_id(i) %> <%= label_id %>">
       <i class="fa-regular fa-square-plus fa-xs" aria-hidden="true"></i>
-    </button>
-    <button class="btn btn-link btn-sm p-0 ms-1 d-none" data-action="click->metadata-section-clamp#collapse" data-metadata-section-clamp-target="collapseBtn" aria-label="Collapse value">
       <i class="fa-regular fa-square-minus fa-xs" aria-hidden="true"></i>
     </button>
   </dd>

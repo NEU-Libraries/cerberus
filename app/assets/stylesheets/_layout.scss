@@ -160,6 +160,14 @@ textarea {
       padding-left: 0;
     }
   }
+
+  // Bootstrap's navbar-brand never wraps, and the service name is wider than a
+  // 320px screen, so below sm it would push the whole page sideways.
+  @include media-breakpoint-down(sm) {
+    .navbar-brand {
+      white-space: normal;
+    }
+  }
 }
 
 // Navbar icon link carrying an optional count badge (the inbox envelope, the
@@ -183,6 +191,59 @@ textarea {
     text-align: center;
     font-variant-numeric: tabular-nums;
   }
+}
+
+// Below md the topbar collapses into a stacked list (navbar-expand-md). There
+// each icon link shows its label beside a fixed-width icon, and the count
+// follows the label: on a full-width row, the corner position would fling it
+// to the far edge, away from what it counts.
+.topbar {
+  @include media-breakpoint-down(md) {
+    .nav-count-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .fa-solid {
+        width: 1.25em;
+        text-align: center;
+      }
+    }
+
+    .nav-count-link__badge {
+      position: static;
+    }
+
+    // Bootstrap shows a collapsed navbar's dropdown in the flow, but inside the
+    // btn-group's flex row it lands beside the name. Wrapping puts it under the
+    // name. The btn-group also stretches its buttons across the full-width row,
+    // centring the name and flinging the caret to the edge, so they keep their
+    // own width; dropping the name's left padding lines it up with the rows
+    // above and below it.
+    .user-menu {
+      flex-wrap: wrap;
+      width: 100%;
+
+      > .btn,
+      > .user-menu-name {
+        flex: 0 0 auto;
+      }
+
+      > :first-child {
+        padding-left: 0;
+      }
+
+      .dropdown-menu {
+        flex-basis: 100%;
+      }
+    }
+  }
+}
+
+// Bootstrap rings the toggler on :focus, so a tap leaves the ring behind.
+// Keyboard focus still gets it.
+.navbar-toggler:focus:not(:focus-visible) {
+  box-shadow: none;
 }
 
 // An edit tab pane. Plain content sits 0.5rem inside the edge its wells and

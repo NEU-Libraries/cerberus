@@ -54,6 +54,19 @@ RSpec.describe 'Narrowing a collection asks first', :browser, type: :system do
     expect(page).to have_select('mass', selected: 'Private')
   end
 
+  it 'declines on a reflexive Enter, because Cancel holds the focus' do
+    select 'Private', from: 'mass'
+    submit_permissions
+    wait_for_confirm_dialog
+
+    page.send_keys(:enter)
+
+    expect(page).to have_no_css('.modal.show')
+    # A saved Private reloads with nothing left to narrow, which disarms the
+    # guard, so a still-armed guard is what proves the save never ran.
+    expect(confirm_message).to include('will be restricted to match it')
+  end
+
   # --- helpers ---------------------------------------------------------------
 
   # The visibility select only renders when the parent allows public. The Work
@@ -77,11 +90,11 @@ RSpec.describe 'Narrowing a collection asks first', :browser, type: :system do
   end
 
   # Bootstrap ignores hide() while the show transition is still running, so a
-  # dismissal sent too early is dropped and the dialog just stays open. The
-  # confirm button takes focus on shown.bs.modal, which makes it the signal that
-  # the transition has finished and the dialog is ready to be answered.
+  # dismissal sent too early is dropped and the dialog just stays open. Cancel
+  # takes focus on shown.bs.modal, which makes it the signal that the transition
+  # has finished and the dialog is ready to be answered.
   def wait_for_confirm_dialog
     expect(page).to have_css('.modal.show')
-    expect(page).to have_css('.modal.show .modal-footer .btn:not(.btn-secondary):focus')
+    expect(page).to have_css('.modal.show .modal-footer .btn-secondary:focus')
   end
 end

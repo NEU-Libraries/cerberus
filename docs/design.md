@@ -2,8 +2,9 @@
 
 The DRS look in one phrase is *restrained, librarian/archival, institutional*.
 This page holds the rules that make it so: which container a surface gets, the
-palette and its coupled tokens, type, icons, tabs, buttons and hover. Read it
-before you change a view, a component or a stylesheet.
+palette and its coupled tokens, type, icons, tabs, buttons, hover and the
+Bootstrap components. Read it before you change a view, a component or a
+stylesheet.
 
 Source files:
 
@@ -299,6 +300,31 @@ fade off. `works/_image` and `_preview_blur_up.scss` hold the mechanism.
 
 Do not copy it onto other images or surfaces without the same reason: a
 picture that arrives slowly, in scans, at the size of the page's main content.
+
+## Bootstrap components stay
+
+Build overlays and menus from Bootstrap 5's own components: the modal, toast,
+tooltip, dropdown and collapse. Do not replace one with a native platform
+element, such as `<dialog>` or the `popover` attribute, or with a hand-built
+widget. Bootstrap already handles the focus trap, Esc, and the collapsed
+navbar, and a second idiom beside it is one more thing to keep consistent.
+
+Fix a defect inside the Bootstrap markup instead. Guides to the web platform
+often say to switch to the native element; take their accessibility and
+behaviour rules, and leave the component in place. The rules that have
+transferred so far:
+
+- A live region must be in the page, empty, before its text arrives. One that
+  loads already holding its text is not announced.
+- An `aria-label` must not override a control's visible text. Where it has to
+  stay, the visible text must start it.
+- A control must not hide itself while it has focus. Use one toggle with
+  `aria-expanded`, not two buttons that swap.
+- A destructive confirmation focuses Cancel, so a reflexive Enter declines.
+
+Override Bootstrap's styles only for a reason: a rule on this page, or a
+defect, such as the collapsed navbar's layout below `md` in `_layout.scss`. Do
+not restyle a component because a different look seems nicer.
 
 ## What not to add
 

@@ -48,8 +48,8 @@ Rails.application.routes.draw do
   # `/files` is the exception with no v2 equivalent at the top level, and it is
   # the most-cited shape of the five — a v1 CoreFile is a v2 Work.
   #
-  # One action serves all five. The prefix only catches the URL; the mapping
-  # row's `object_type` picks the destination. See LegacyController.
+  # One action serves all five. The prefix only catches the URL; the type Atlas
+  # answers for the pid picks the destination. See LegacyController.
   LEGACY_PID = /neu:[^\/.?]+/
   %w[files collections communities downloads sets].each do |v1_prefix|
     get "/#{v1_prefix}/:pid", to: 'legacy#show', constraints: { pid: LEGACY_PID },

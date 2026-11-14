@@ -57,6 +57,17 @@ RSpec.describe 'Messages', type: :request do
       get '/inbox'
       expect(response.body).to include('nav-count-link__badge')
     end
+
+    # The phone menu shows each icon link's label, and the link's aria-label
+    # overrides it, so the label must open the aria-label (WCAG 2.5.3).
+    it 'opens each navbar icon link aria-label with its phone label' do
+      get '/inbox'
+      links = response.parsed_body.css('a.nav-count-link')
+      expect(links.size).to eq(2)
+      links.each do |link|
+        expect(link['aria-label']).to start_with(link.at_css('.nav-count-link__label').text)
+      end
+    end
   end
 
   describe 'GET /inbox/:id' do
