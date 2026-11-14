@@ -137,13 +137,27 @@ $sets-via-soft: #e6eef6;
   border-radius: 0.4rem;
 }
 
-// contents result rows (Blacklight-adjacent, with the provenance rail)
+// contents result rows (Blacklight-adjacent, with the provenance rail), each
+// in the catalog's result card
 #set-results {
   .result-row {
+    @include result-row-card;
+
     display: flex;
     gap: 1rem;
-    padding: 1rem 0;
-    border-bottom: 1px solid $gray-200;
+    padding: 1rem;
+
+    // With the gap, the catalog list's 3rem between thumbnail and title.
+    .document-thumbnail {
+      margin-right: 2rem;
+    }
+
+    // Level the first card with the facet card across the gutter, as the
+    // catalog does. The count-and-search bar above is shorter than the
+    // sidebar's "Limit your search" heading, leaving the card ~10px high.
+    &:first-child {
+      margin-top: calc(0.75rem + 10px);
+    }
 
     h3 {
       font-size: 1.06rem;
