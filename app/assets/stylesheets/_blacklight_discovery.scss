@@ -30,6 +30,13 @@
   overflow: hidden;
 }
 
+.metadata-section-toggle {
+  &[aria-expanded="true"] .fa-square-plus,
+  &[aria-expanded="false"] .fa-square-minus {
+    display: none;
+  }
+}
+
 .document-thumbnail {
   background-color: white;
   border: 1px solid rgba(0, 0, 0, 0.2);
