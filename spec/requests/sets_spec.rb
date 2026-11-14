@@ -566,6 +566,22 @@ RSpec.describe 'Sets', type: :request do
       expect(response.body).to include('Public Set')
     end
 
+    # The label swap is the feedback for sighted readers; the status region
+    # beside the button is the feedback for screen readers. An aria-label on
+    # the button would hide the swap from them.
+    it 'gives the copy link button a status region and no aria-label' do
+      set = make_set('Copyable Public Set')
+      AtlasRb::Compilation.update(set['id'],
+                                  permissions: { read: ['public'], edit: [], edit_users: [] },
+                                  nuid:        nuid)
+      get "/sets/#{set['id']}"
+      html = response.parsed_body
+      button = html.at_css('[data-controller="clipboard"] button')
+      expect(button.text).to include('Copy link')
+      expect(button['aria-label']).to be_nil
+      expect(html.at_css('[data-controller="clipboard"] > [role="status"]')).to be_present
+    end
+
     # My Sets needs a set curator, so a trail starting there would lead an
     # anonymous visitor to a sign-in page.
     it 'gives an anonymous visitor on a public set no breadcrumb trail' do
