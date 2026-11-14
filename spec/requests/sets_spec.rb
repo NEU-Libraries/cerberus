@@ -254,6 +254,11 @@ RSpec.describe 'Sets', type: :request do
         .and match(%r{Hid\s+<b>Work One</b>\s+from this set})
         .and match(%r{</b>, which is still in your set})
         .and include('still in your set')
+      # A live region that arrives already holding its text is not announced,
+      # so the toast's status region must render empty for the script to fill.
+      toast = response.parsed_body.at_css('.drs-toast')
+      expect(toast['role']).to be_nil
+      expect(toast.at_css('[role="status"]').text).to be_empty
       # The per-collection count is drawn in the definition, on the Manage page.
       get "/sets/#{set['id']}/edit"
       expect(response.body).to include('1</span><span class="of"> of 2')

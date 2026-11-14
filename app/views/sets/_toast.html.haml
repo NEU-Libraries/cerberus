@@ -7,9 +7,11 @@
   - aside = flash[:aside]
   - chip = aside['chip'].presence && chips.find { |c| c.noid == aside['chip'] }
   .toast-wrap
-    .drs-toast{'data-controller' => 'set-toast', role: 'status'}
+    .drs-toast{data: { controller: 'set-toast', action: 'focusin->set-toast#pause focusout->set-toast#resume' }}
       %i.fa-solid.fa-circle-info{'aria-hidden' => 'true'}
-      .flex-grow-1
+      -# Arrives empty; set_toast_controller.js fills it, so it is announced.
+      .visually-hidden{role: 'status', data: { 'set-toast-target': 'announce' }}
+      .flex-grow-1{data: { 'set-toast-target': 'message' }}
         Hid
         %b= aside['title']
         - if chip
