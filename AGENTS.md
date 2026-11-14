@@ -39,7 +39,7 @@ When making changes to the UI, ensure that any new UI elements are accessible an
 
 ## UI Design
 
-When creating a Rails interface whole-cloth or editing one in place, invoke the **`/frontend-design`** skill rather than reaching for bare Bootstrap defaults. The skill is for raising the design quality bar — but on this project it must be paired with the **existing DRS aesthetic** so we don't ship marketing-flashy UI on what is an institutional repository surface.
+When creating a Rails interface whole-cloth or editing one in place, work to the **existing DRS aesthetic** rather than reaching for bare Bootstrap defaults, so we don't ship marketing-flashy UI on what is an institutional repository surface.
 
 **The aesthetic, in one phrase:** *restrained, librarian/archival, institutional.*
 
