@@ -28,11 +28,10 @@ RSpec.describe 'works/_associations' do
     expect(rendered).to have_css('.work-association__id', text: 'abc1234')
   end
 
-  # The 50 px tile is 100 device pixels on a HiDPI screen, more than the 85 px copy holds.
-  it "offers a HiDPI screen the thumbnail's 2x copy" do
+  # On a HiDPI screen the tile's picture is 92 device pixels, more than the 85 px copy holds.
+  it 'draws the 170 px copy in the catalog frame' do
     render_with(doc('abc1234', thumbnail_ssi: 'https://iiif/t.jpg', thumbnail_2x_ssi: 'https://iiif/t2.jpg'))
 
-    expect(rendered).to have_css('.work-association__thumb img[src="https://iiif/t.jpg"]' \
-                                 '[srcset="https://iiif/t.jpg 1x, https://iiif/t2.jpg 2x"]')
+    expect(rendered).to have_css('.document-thumbnail.work-association__thumb img[src="https://iiif/t2.jpg"]')
   end
 end

@@ -26,8 +26,8 @@
   }
 }
 
-// One associated work. The thumbnail box matches the set-contents row so
-// a reader meets the same object shape wherever a Work is listed.
+// One associated work. The thumbnail takes the catalog's frame at a compact
+// size, so the card stays short (docs/derivatives.md).
 .work-association {
   display: flex;
   gap: 0.85rem;
@@ -38,24 +38,11 @@
     border-top: 1px solid $gray-200;
   }
 
+  // Overrides .document-thumbnail's size; this sheet loads after it.
   &__thumb {
     width: 52px;
     height: 52px;
-    flex: none;
-    border: 1px solid $gray-300;
-    background: $gray-100;
-    border-radius: 0.3rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     color: $gray-400;
-    overflow: hidden;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
   }
 
   &__body {

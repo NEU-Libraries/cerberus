@@ -152,24 +152,27 @@ skips when no FileSet is listed yet.
 
 Atlas stores two square-capped thumbnails, `!85,85` and `!170,170`. A browser
 that draws one a few pixels off its stored size resamples it, and the small
-step blurs it visibly. Each surface avoids that in one of two ways.
+step blurs it visibly. Upscaling blurs it too.
 
-**The boxes that fit the picture whole** are `.document-thumbnail`: search
-results, the gallery view, the home page, and the Collection and Community
-header. The box is the stored size plus `$thumbnail-frame`, its 1 px border and
-the img's 2 px padding on each side. So the picture inside is exactly 85 or
-170 px. A list row draws the 170 px copy at half size, which is exact on a
-HiDPI screen. The header uses the 85 px copy with a 2x `srcset`.
+Every thumbnail box is a `.document-thumbnail`, which fits the whole picture
+inside a white frame and never crops it. The box is the stored size plus
+`$thumbnail-frame`, its 1 px border and the img's 2 px padding on each side.
+So the picture inside is exactly 85 or 170 px:
 
-**The squares that crop the picture** are Set rows (72 px) and association
-tiles (50 px). They use `object-fit: cover`, which fills the square from the
-picture's short edge, so they never draw at the stored size. What matters is
-that they scale down, not up. An association tile takes the 2x copy through
-`ThumbnailsHelper#thumbnail_srcset`. A Set row's square is taller than the
-85 px copy's short edge, so it always uses the 170 px copy.
+| Surface | Picture | Copy |
+|---|---|---|
+| Search results, Set rows | 85 px | 170 px at half size, exact on a HiDPI screen |
+| The gallery view and the home page | 170 px | 170 px |
+| The Collection and Community header | 85 px | 85 px, with a 2x `srcset` |
+| Association tiles | 46 px | 170 px |
 
-A very wide or very tall picture still upscales in a cropped square, because
-its short edge is small in both copies.
+A Set row renders the catalog's own box and type pill, through
+`CatalogController#iiif_thumbnail`, so a Set's contents read like search
+results. The association tile is the one compact box. It keeps the catalog's
+frame at 52 px so the Associated works card stays short. Its picture is not a
+stored size, but from the 170 px copy it only ever scales down, by about 0.3
+at 1x and 0.6 at 2x. A step that large does not blur the way a step just
+under 1 does.
 
 ### Thumbnails that fail to load
 
@@ -182,10 +185,9 @@ request can fail, and it needs no JavaScript file.
 
 | Surface | Fallback |
 |---|---|
-| Search results, the gallery view and the home page | The type icon, as with no thumbnail (`CatalogController#thumbnail_media`) |
+| Search results, the gallery view, the home page and Set rows (`sets/show`) | The type icon, as with no thumbnail (`CatalogController#thumbnail_media`) |
 | The Collection and Community header (`shared/_thumbnail`) | The type icon, from the `type` local the show page passes |
 | Associated-works rows (`works/_associations`) | `fa-image`, as with no thumbnail |
-| Set rows (`sets/show`) | `fa-image`, as with no thumbnail |
 
 `spec/system/thumbnail_load_failure_spec.rb` covers each surface and the Work
 preview. It runs in the browser lane, with a closed local port standing in for
