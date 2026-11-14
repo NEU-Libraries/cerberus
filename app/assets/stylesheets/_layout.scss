@@ -208,11 +208,18 @@ textarea {
 
     // Bootstrap shows a collapsed navbar's dropdown in the flow, but inside the
     // btn-group's flex row it lands beside the name. Wrapping puts it under the
-    // name; dropping the button's left padding lines the name up with the rows
+    // name. The btn-group also stretches its buttons across the full-width row,
+    // centring the name and flinging the caret to the edge, so they keep their
+    // own width; dropping the name's left padding lines it up with the rows
     // above and below it.
     .user-menu {
       flex-wrap: wrap;
       width: 100%;
+
+      > .btn,
+      > .user-menu-name {
+        flex: 0 0 auto;
+      }
 
       > :first-child {
         padding-left: 0;
