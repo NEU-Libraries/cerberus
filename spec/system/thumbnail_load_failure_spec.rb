@@ -75,10 +75,11 @@ RSpec.describe 'Thumbnails when the image server is down', :browser, type: :syst
     expect(page).to have_css('.work-association__thumb img.d-none', visible: :all)
   end
 
-  it "swaps a Set row's thumbnail for the image icon" do
+  it "swaps a Set row's thumbnail for its type icon" do
     visit "/sets/#{@set['id']}"
 
-    expect(page).to have_css('#set-results .thumb span:not(.d-none) .fa-image', visible: :visible)
-    expect(page).to have_css('#set-results .thumb img.d-none', visible: :all)
+    expect(page).to have_css('#set-results .document-thumbnail .thumbnail-fallback:not(.d-none) .fa-file',
+                             visible: :visible)
+    expect(page).to have_css('#set-results .document-thumbnail img.d-none', visible: :all)
   end
 end

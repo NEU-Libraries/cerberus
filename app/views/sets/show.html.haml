@@ -83,14 +83,8 @@
     - @response.documents.each do |doc|
       - provenance = @resolver.provenance_for(doc)
       .result-row
-        .thumb
-          -# Cover fills the 72 px square from the short edge, which the 85 px copy
-          -# lacks, so even a 1x screen gets the 170 px copy.
-          - if (thumb = renderable_thumbnail(doc.thumbnail_2x_ssi.presence || doc.thumbnail_ssi))
-            = thumbnail_with_fallback(thumb, tag.i(class: 'fa-regular fa-image', 'aria-hidden': 'true'),
-              alt: '', loading: 'lazy')
-          - else
-            %i.fa-regular.fa-image{'aria-hidden' => 'true'}
+        -# The catalog's own box, so a Set's contents read like search results.
+        .document-thumbnail= iiif_thumbnail(doc, alt: '', loading: 'lazy')
         .flex-grow-1
           %h3
             = link_to set_document_title(doc), work_path(doc.to_param), class: 'text-decoration-none'

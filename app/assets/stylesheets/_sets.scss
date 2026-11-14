@@ -145,27 +145,6 @@ $sets-via-soft: #e6eef6;
     padding: 1rem 0;
     border-bottom: 1px solid $gray-200;
 
-    .thumb {
-      width: 74px;
-      height: 74px;
-      flex: none;
-      border: 1px solid $gray-300;
-      background: $gray-100;
-      border-radius: 0.3rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: $gray-400;
-      font-size: 1.4rem;
-      overflow: hidden;
-
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-    }
-
     h3 {
       font-size: 1.06rem;
       margin: 0 0 0.15rem;
