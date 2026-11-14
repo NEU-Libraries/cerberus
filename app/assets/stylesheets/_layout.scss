@@ -185,6 +185,52 @@ textarea {
   }
 }
 
+// Below md the topbar collapses into a stacked list (navbar-expand-md). There
+// each icon link shows its label beside a fixed-width icon, and the count
+// follows the label: on a full-width row, the corner position would fling it
+// to the far edge, away from what it counts.
+.topbar {
+  @include media-breakpoint-down(md) {
+    .nav-count-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .fa-solid {
+        width: 1.25em;
+        text-align: center;
+      }
+    }
+
+    .nav-count-link__badge {
+      position: static;
+    }
+
+    // Bootstrap shows a collapsed navbar's dropdown in the flow, but inside the
+    // btn-group's flex row it lands beside the name. Wrapping puts it under the
+    // name; dropping the button's left padding lines the name up with the rows
+    // above and below it.
+    .user-menu {
+      flex-wrap: wrap;
+      width: 100%;
+
+      > :first-child {
+        padding-left: 0;
+      }
+
+      .dropdown-menu {
+        flex-basis: 100%;
+      }
+    }
+  }
+}
+
+// Bootstrap rings the toggler on :focus, so a tap leaves the ring behind.
+// Keyboard focus still gets it.
+.navbar-toggler:focus:not(:focus-visible) {
+  box-shadow: none;
+}
+
 // An edit tab pane. Plain content sits 0.5rem inside the edge its wells and
 // alerts run to, the inset the Set Details tab gets from its .p-2; the
 // negative margin keeps that chrome at the pane's full width. See

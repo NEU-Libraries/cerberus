@@ -13,6 +13,7 @@
         <li class="nav-item">
           <%= link_to messages_path, class: 'nav-link nav-count-link', 'aria-label': inbox_aria_label do %>
             <i class="fa-solid fa-envelope" aria-hidden="true"></i>
+            <span class="nav-count-link__label d-md-none">Inbox</span>
             <% if unread_messages_count.positive? %>
               <span class="nav-count-link__badge"><%= unread_messages_count %></span>
             <% end %>
