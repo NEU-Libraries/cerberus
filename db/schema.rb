@@ -232,11 +232,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_16_120000) do
   add_foreign_key "xml_ingests", "load_reports"
   create_hypertable "impressions", time_column: "created_at", chunk_time_interval: "30 days", compress_segmentby: "action", compress_orderby: "noid ASC, created_at DESC", compress_after: "P120D"
   create_continuous_aggregate("impression_counts_by_day", <<-SQL, refresh_policies: { start_offset: "INTERVAL 'P7D'", end_offset: "INTERVAL 'PT1H'", schedule_interval: "INTERVAL '3600'" }, materialized_only: true)
-    SELECT impressions.noid,
-      impressions.action,
-      time_bucket('PT1H'::interval, impressions.created_at) AS hour,
+    SELECT noid,
+      action,
+      time_bucket('PT1H'::interval, created_at) AS hour,
       count(*) AS impressions
      FROM impressions
-    GROUP BY impressions.noid, impressions.action, (time_bucket('PT1H'::interval, impressions.created_at))
+    GROUP BY noid, action, (time_bucket('PT1H'::interval, created_at))
   SQL
 end
