@@ -13,6 +13,11 @@ class ApplicationController < ActionController::Base
   include StructuralContainers
   include CriticalCssInlining
 
+  # Only the store changes, not the check: re-declaring protect_from_forgery
+  # here would move verify_authenticity_token behind the callbacks above it.
+  # See docs/identity.md#a-guest-has-no-session.
+  self.csrf_token_storage_strategy = ActionController::RequestForgeryProtection::CookieStore.new(:csrf_token)
+
   before_action do
     I18n.locale = :en
   end
