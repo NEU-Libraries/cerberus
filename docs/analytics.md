@@ -142,6 +142,20 @@ file and nothing else.
 | Policy | Object | What it does |
 |---|---|---|
 | Refresh | `impression_counts_by_day` | Re-materializes the last 7 days of the aggregate every hour, up to an hour ago |
+| Compression | `impressions` | Compresses each raw chunk once it is 120 days old |
+
+There is no retention policy. Raw impressions are kept for good, compressed.
+
+Compression starts after 120 days so that it stays clear of every reader of raw
+rows. The rollups read 90 days, the throttle reads one hour, and the aggregate's
+refresh policy reads 7 days. Only a full refresh of the aggregate, run by hand,
+reads a compressed chunk, and TimescaleDB decompresses it on the fly. If a
+rollup window ever grows past 120 days, move the compression point with it.
+
+Compressed rows are segmented by `action` and ordered by `noid` and
+`created_at`. Most noids collect only a few impressions in a 30-day chunk, so
+segmenting by `noid` would make thousands of tiny segments that compress
+poorly.
 
 To list the policies a database actually has:
 

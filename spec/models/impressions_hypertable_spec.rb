@@ -21,6 +21,10 @@ RSpec.describe 'impressions hypertable', type: :model do
     expect(policy_count('policy_refresh_continuous_aggregate', 'impression_counts_by_day')).to eq(1)
   end
 
+  it 'compresses impression chunks past the rollup window' do
+    expect(policy_count('policy_compression', 'impressions')).to eq(1)
+  end
+
   it 'is registered as a TimescaleDB hypertable' do
     count = connection.select_value(<<~SQL.squish)
       SELECT count(*) FROM timescaledb_information.hypertables
