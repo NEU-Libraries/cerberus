@@ -22,7 +22,8 @@
       <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
     <% end %>
 
-    <%= csrf_meta_tags %>
+    <%# Signed-in only. See docs/identity.md#a-guest-has-no-session. %>
+    <%= csrf_meta_tags if user_signed_in? %>
     <%= content_for(:head) %>
   </head>
   <body class="<%= render_body_class %>">

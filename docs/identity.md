@@ -13,6 +13,8 @@ Source files:
 - `app/controllers/concerns/impersonation_session.rb`
 - `app/controllers/admin/impersonations_controller.rb`
 - `app/controllers/concerns/depositor_context.rb`
+- `app/helpers/blacklight_helper.rb`
+- `app/views/layouts/blacklight/base.html.erb` (the CSRF meta tag)
 
 The ACL vocabulary these files gate on — the grant lists and the group
 constants — is in [`docs/permissions.md`](permissions.md). The controller gates
@@ -411,3 +413,31 @@ depositor cannot see also reads `nil`.
 `publish_showcase_id` checks only that the destination is in someone's
 workspace. It does **not** check that the Work's depositor is that workspace's
 owner, so the caller must confirm that separately before promoting.
+
+## A guest has no session
+
+A guest who only reads pages gets no session. The session store is
+`ActiveRecord::SessionStore`, and it inserts a `sessions` row the first time a
+request *writes* the session. A read with no session cookie returns `nil` and
+stores nothing. Most crawlers never send the cookie back, so each write on a
+guest page would cost a new row, and `SessionTrimJob` would delete it two weeks
+later.
+
+Two things wrote on every guest page, and neither needed to:
+
+- **The CSRF meta tag.** `csrf_meta_tags` stores `_csrf_token` in the session.
+  The layout renders it only for a signed-in user, whose pages carry the
+  sign-out link and the staff `turbo_method` links that need it. A guest's own
+  forms, the download queue buttons and the sign-in form, render a hidden
+  `authenticity_token` field. That field writes the token on the pages that
+  have such a form, and Turbo submits it without the meta tag.
+- **Blacklight's `session_tracking_params`.** Its default arguments read
+  `search_session`, which runs `session[:search] ||= {}`, even though
+  `CatalogController` turns search tracking off. `BlacklightHelper` returns
+  `{}` first when tracking is off, which is the value Blacklight returns in
+  that case anyway. The override lives in an app-local `BlacklightHelper`
+  because `Blacklight::Controller` adds that helper after `ApplicationHelper`,
+  so an override in `ApplicationHelper` would lose.
+
+The test environment turns forgery protection off, so a spec that checks for
+the token write must turn it on. `spec/requests/guest_session_spec.rb` does.
