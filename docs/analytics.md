@@ -212,16 +212,20 @@ built from `db/schema.rb`, so a policy the dump drops fails there.
 
 ### The refresh policy and the schema dump
 
-The `timescaledb` gem joins a continuous aggregate to its jobs on the view's
-name. TimescaleDB files a refresh policy under the materialization hypertable's
-name instead, such as `_materialized_hypertable_4`. Left alone, the dumper finds
-no policy and writes `create_continuous_aggregate` without `refresh_policies:`.
-A database built from that dump never refreshes the aggregate, and the "All
-traffic" segment stops moving without any error.
+TimescaleDB lists a refresh policy in `timescaledb_information.jobs` under a
+name that depends on its version. Before 2.20, `hypertable_name` holds the
+materialization hypertable's name, such as `_materialized_hypertable_4`. From
+2.20 on, it holds the aggregate's view name. The `timescaledb` gem joins on one
+name only: 0.3.2 and earlier on the materialization hypertable, 0.3.3 on the
+view. On the other side of 2.20, the dumper finds no policy and writes
+`create_continuous_aggregate` without `refresh_policies:`. A database built from
+that dump never refreshes the aggregate, and the "All traffic" segment stops
+moving without any error.
 
-`config/initializers/timescaledb_schema_dumper.rb` redeclares the association on
-`materialization_hypertable_name`. Remove it once the gem joins on that column
-itself, and keep the spec.
+`config/initializers/timescaledb_schema_dumper.rb` redeclares the association to
+match either name, so the dump keeps the policy on any TimescaleDB version.
+Remove it once the gem matches both names itself, or once every database runs
+TimescaleDB 2.20 or later with gem 0.3.3 or later. Keep the spec either way.
 
 ## Scoping a report to one container
 
