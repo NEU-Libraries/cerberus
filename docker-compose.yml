@@ -14,18 +14,21 @@ volumes:
   handle-data:
 services:
   db:
-    # TimescaleDB is a Postgres extension; this image is vanilla Postgres 14
+    # TimescaleDB is a Postgres extension; this image is vanilla Postgres 17
     # plus the extension available-but-inactive (no CREATE EXTENSION until a
     # migration runs it, and only in Cerberus's logical DB — Atlas's logical DB
-    # on this shared service is untouched). The non-`ha` image is a true drop-in:
-    # it honors the same PGDATA/entrypoint as postgres:14, so the existing `db`
-    # volume mounts cleanly with no re-init. (The `-ha` image uses a different
-    # data dir/user and would orphan this volume — do not use it here.)
-    image: timescale/timescaledb:2.17.2-pg14
-    # The extension must be preloaded at server start. The image only injects
-    # this into postgresql.conf when it initialises a *fresh* data dir; because
-    # we reuse the existing postgres:14 volume, we pass it as a server flag
-    # instead. Inert for Atlas's logical DB (which never CREATEs the extension).
+    # on this shared service is untouched). The non-`ha` image honors the same
+    # PGDATA/entrypoint as the official postgres image; the `-ha` image uses a
+    # different data dir/user, so do not use it here.
+    #
+    # Postgres cannot open a data directory from an older major version. Moving
+    # this tag to a new major means recreating the `db` volume (dev) or a dump
+    # and restore (anywhere the data matters).
+    image: timescale/timescaledb:2.31.0-pg17
+    # The extension must be preloaded at server start. The image writes this
+    # into postgresql.conf only when it initialises a fresh data dir, so a
+    # volume created any other way would lack it; the flag makes it explicit.
+    # Inert for Atlas's logical DB (which never CREATEs the extension).
     # max_worker_processes is raised well above Postgres's default of 8 because
     # TimescaleDB claims one background scheduler per database that has the
     # extension, and the parallel spec lane multiplies those: each worker owns a
