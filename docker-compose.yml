@@ -36,7 +36,12 @@ services:
     # Starved of a slot, the scheduler cannot start and Postgres logs "failed to
     # launch job" once a second forever — noisy, and it never resolves itself.
     # Only settable at server start, so changing it means recreating this service.
-    command: postgres -c shared_preload_libraries=timescaledb -c max_worker_processes=32
+    #
+    # max_connections is pinned because the image's init step tunes it to the
+    # container's memory, and a fresh volume came up allowing 25. The idle test
+    # lanes alone hold about 20, so a four-way spec run, or the dev apps beside
+    # it, get "too many clients already".
+    command: postgres -c shared_preload_libraries=timescaledb -c max_worker_processes=32 -c max_connections=100
     volumes:
       - db:/var/lib/postgresql/data/pgdata
     restart: always
