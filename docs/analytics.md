@@ -87,6 +87,19 @@ An IP hammering the repository across many different noids is abusive traffic
 even when the caller only wants one noid's numbers. Scoping the detection would
 under-detect it.
 
+### The offenders are an anti-join
+
+`from_where_sql` joins the offender set as a derived table and keeps the rows
+that match no offender. It must not go back to
+`(ip, day) NOT IN (subquery)`. Postgres runs an `IN` subquery as a hash only
+while it expects the hash to fit in `work_mem`. Past that point it switches to a
+plain subplan and reruns the 90-day offender aggregate for every impression
+row, which is quadratic. A hash join can spill to disk, so the anti-join slows
+down gently as traffic grows.
+
+The fragment also drops rows with no IP address. `Impression` requires an IP,
+so such rows should not exist, and a row without one cannot count as a visitor.
+
 ### The constructor's parameters
 
 | Parameter | Meaning |

@@ -17,17 +17,22 @@ class HumanImpressionsQuery
 
   # A fragment to append after the caller's own SELECT or aggregate. It
   # aliases the impressions table `i`.
+  #
+  # The offenders are an anti-join, not `NOT IN (subquery)`: Postgres hashes an
+  # IN subquery only while it fits in work_mem, and past that reruns it for
+  # every outer row. See docs/analytics.md.
   def from_where_sql
     <<~SQL.squish
       FROM impressions i
       LEFT JOIN user_agents ua ON ua.ua_string = i.user_agent
+      LEFT JOIN (#{volume_offenders_sql}) offender
+        ON offender.ip_address = i.ip_address
+       AND offender.day = #{ImpressionDay.of('i.created_at')}
       WHERE i.created_at >= #{@window_start}
         #{range_end_sql('i.')}
+        AND i.ip_address IS NOT NULL
         AND COALESCE(ua.is_bot, FALSE) = FALSE
-        AND NOT (
-          i.ip_address NOT IN (#{allow_in})
-          AND (i.ip_address, #{ImpressionDay.of('i.created_at')}) IN (#{volume_offenders_sql})
-        )
+        AND (offender.ip_address IS NULL OR i.ip_address IN (#{allow_in}))
         #{noid_filter_sql}
     SQL
   end
@@ -56,7 +61,7 @@ class HumanImpressionsQuery
     # does respect the outer query's date window.
     def volume_offenders_sql
       <<~SQL.squish
-        SELECT ip_address, #{ImpressionDay.of('created_at')}
+        SELECT ip_address, #{ImpressionDay.of('created_at')} AS day
         FROM impressions
         WHERE created_at >= #{@window_start}
           #{range_end_sql('')}
