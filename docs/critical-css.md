@@ -14,7 +14,7 @@ Source files:
 - `app/services/critical_css/markup.rb` (the tokens a page carries)
 - `app/helpers/stylesheets_helper.rb` (the three `<head>` shapes)
 - `app/controllers/concerns/critical_css_inlining.rb` (rewrites the response)
-- `app/views/layouts/blacklight/base.html.erb` (the one-line Blacklight override)
+- `app/views/layouts/blacklight/base.html.erb` (the Blacklight override: the stylesheet tags; the CSRF meta tag is in `docs/identity.md`)
 
 ## The three heads
 

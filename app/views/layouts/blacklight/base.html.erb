@@ -1,6 +1,7 @@
-<%# Overrides Blacklight's base layout for one change: the stylesheet tags come
+<%# Overrides Blacklight's base layout for two changes. The stylesheet tags come
     from layout_stylesheet_tags, which a full page load turns into inline rules
-    plus deferred files. See docs/critical-css.md. -%>
+    plus deferred files; see docs/critical-css.md. The CSRF meta tag renders
+    only for a signed-in user; see docs/identity.md#a-guest-has-no-session. -%>
 <!DOCTYPE html>
 <%= content_tag :html, class: 'no-js', **html_tag_attributes do %>
   <head>
@@ -22,7 +23,6 @@
       <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
     <% end %>
 
-    <%# Signed-in only. See docs/identity.md#a-guest-has-no-session. %>
     <%= csrf_meta_tags if user_signed_in? %>
     <%= content_for(:head) %>
   </head>
