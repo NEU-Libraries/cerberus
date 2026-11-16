@@ -132,6 +132,40 @@ Two methods read the aggregate. Never read its `hour` column directly:
 keep the day they were rolled up on until the job runs once with a longer
 `window:`.
 
+## TimescaleDB policies
+
+TimescaleDB runs background jobs, called policies, against the impressions
+tables. `db/schema.rb` must record every policy, because the test databases,
+`bin/setup` (`db:prepare`) and any `db:schema:load` build a database from that
+file and nothing else.
+
+| Policy | Object | What it does |
+|---|---|---|
+| Refresh | `impression_counts_by_day` | Re-materializes the last 7 days of the aggregate every hour, up to an hour ago |
+
+To list the policies a database actually has:
+
+```sql
+SELECT proc_name, hypertable_name, schedule_interval, config
+FROM timescaledb_information.jobs WHERE job_id >= 1000;
+```
+
+`spec/models/impressions_hypertable_spec.rb` checks the test database, which is
+built from `db/schema.rb`, so a policy the dump drops fails there.
+
+### The refresh policy and the schema dump
+
+The `timescaledb` gem joins a continuous aggregate to its jobs on the view's
+name. TimescaleDB files a refresh policy under the materialization hypertable's
+name instead, such as `_materialized_hypertable_4`. Left alone, the dumper finds
+no policy and writes `create_continuous_aggregate` without `refresh_policies:`.
+A database built from that dump never refreshes the aggregate, and the "All
+traffic" segment stops moving without any error.
+
+`config/initializers/timescaledb_schema_dumper.rb` redeclares the association on
+`materialization_hypertable_name`. Remove it once the gem joins on that column
+itself, and keep the spec.
+
 ## Scoping a report to one container
 
 `ContainerAnalytics` loads the scoped `ImpressionsReport` and the composition

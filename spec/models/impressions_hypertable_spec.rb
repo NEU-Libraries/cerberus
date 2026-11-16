@@ -2,14 +2,24 @@
 
 require 'rails_helper'
 
-# Confirms the impressions table is a real TimescaleDB hypertable with the
-# capture/throttle indexes. This depends on the test DB loading from
-# db/structure.sql (schema_format = :sql) with the extension active — i.e. the
-# developer has recreated the stack on the timescale image and run db:migrate.
-# If pg_dump's hypertable round-trip turns out to be lossy, the first example
-# fails here as the canary (see the plan's Risk #3).
+# The test database is built from db/schema.rb, so these examples fail when the
+# dump loses a TimescaleDB object or policy. See docs/analytics.md.
 RSpec.describe 'impressions hypertable', type: :model do
   let(:connection) { ActiveRecord::Base.connection }
+
+  def policy_count(proc_name, object)
+    connection.select_value(<<~SQL.squish)
+      SELECT count(*) FROM timescaledb_information.jobs j
+      LEFT JOIN timescaledb_information.continuous_aggregates c
+        ON c.materialization_hypertable_name = j.hypertable_name
+      WHERE j.proc_name = #{connection.quote(proc_name)}
+        AND COALESCE(c.view_name, j.hypertable_name) = #{connection.quote(object)}
+    SQL
+  end
+
+  it 'refreshes the impression_counts_by_day aggregate on a schedule' do
+    expect(policy_count('policy_refresh_continuous_aggregate', 'impression_counts_by_day')).to eq(1)
+  end
 
   it 'is registered as a TimescaleDB hypertable' do
     count = connection.select_value(<<~SQL.squish)
