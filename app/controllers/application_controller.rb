@@ -12,6 +12,7 @@ class ApplicationController < ActionController::Base
   include OwnProfile
   include StructuralContainers
   include CriticalCssInlining
+  include AnswersHead
 
   # Only the store changes, not the check: re-declaring protect_from_forgery
   # here would move verify_authenticity_token behind the callbacks above it.
