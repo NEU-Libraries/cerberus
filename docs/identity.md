@@ -15,6 +15,7 @@ Source files:
 - `app/controllers/concerns/depositor_context.rb`
 - `app/helpers/blacklight_helper.rb`
 - `app/views/layouts/blacklight/base.html.erb` (the CSRF meta tag)
+- `app/controllers/application_controller.rb` (the CSRF token store)
 
 The ACL vocabulary these files gate on — the grant lists and the group
 constants — is in [`docs/permissions.md`](permissions.md). The controller gates
@@ -425,12 +426,11 @@ later.
 
 Two things wrote on every guest page, and neither needed to:
 
-- **The CSRF meta tag.** `csrf_meta_tags` stores `_csrf_token` in the session.
-  The layout renders it only for a signed-in user, whose pages carry the
-  sign-out link and the staff `turbo_method` links that need it. A guest's own
-  forms, the download queue buttons and the sign-in form, render a hidden
-  `authenticity_token` field. That field writes the token on the pages that
-  have such a form, and Turbo submits it without the meta tag.
+- **The CSRF meta tag.** The layout renders `csrf_meta_tags` only for a
+  signed-in user, whose pages carry the sign-out link and the staff
+  `turbo_method` links that need it. A guest's own forms, the download queue
+  buttons and the sign-in form, render a hidden `authenticity_token` field
+  instead, and Turbo submits it without the meta tag.
 - **Blacklight's `session_tracking_params`.** Its default arguments read
   `search_session`, which runs `session[:search] ||= {}`, even though
   `CatalogController` turns search tracking off. `BlacklightHelper` returns
@@ -439,5 +439,26 @@ Two things wrote on every guest page, and neither needed to:
   because `Blacklight::Controller` adds that helper after `ApplicationHelper`,
   so an override in `ApplicationHelper` would lose.
 
+### The CSRF token lives in a cookie
+
+A guest form still needs a token, and a Work with files shows one on every
+view: the queue button. Rails' default stores the token in the session, so
+that page would insert a row for every crawler. `ApplicationController` sets
+`csrf_token_storage_strategy` to Rails' `CookieStore` instead, which keeps the
+token in an encrypted `csrf_token` cookie. A guest who only views a Work gets
+that cookie and no session row. A guest who uses the queue gets a session, as
+they need one to hold the queue.
+
+The cookie store binds the token to the session id, so sign-in rotates it, and
+a guest's token is refused once the session changes. It sets the strategy
+only, rather than declaring `protect_from_forgery` again, because a second
+declaration would move `verify_authenticity_token` behind the callbacks
+declared before it.
+
+The cookie store keeps one cost: a page with a guest form still sends a
+`Set-Cookie`, so a proxy cannot cache it as it is.
+
+### Testing it
+
 The test environment turns forgery protection off, so a spec that checks for
-the token write must turn it on. `spec/requests/guest_session_spec.rb` does.
+the token must turn it on. `spec/requests/guest_session_spec.rb` does.

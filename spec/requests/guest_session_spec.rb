@@ -3,9 +3,10 @@
 require 'rails_helper'
 
 # A guest who only reads pages must not cost a sessions row: most crawlers never
-# send the cookie back, so every write would insert a new one. The test
-# environment turns forgery protection off, which would hide the CSRF token
-# write, so these examples turn it back on. See docs/identity.md.
+# send the cookie back, so every write would insert a new one. A guest form's
+# CSRF token lives in its own cookie for the same reason. The test environment
+# turns forgery protection off, which would hide both, so these examples turn it
+# back on. See docs/identity.md.
 RSpec.describe 'Guest sessions', type: :request do
   include Devise::Test::IntegrationHelpers
 
@@ -41,6 +42,50 @@ RSpec.describe 'Guest sessions', type: :request do
       get collection_path(collection.id)
 
       expect(response.parsed_body.at_css(%(a[href="#{work_path(work.id)}"]))).to be_present
+    end
+  end
+
+  describe 'a guest page that carries a form' do
+    def sign_in_form
+      form = response.parsed_body.at_css(%(form[action="#{atlas_process_login_path}"]))
+      [form['action'], form.at_css('input[name="authenticity_token"]')['value']]
+    end
+
+    def staff_login = { user: { nuid: '000000002' } }
+
+    it 'keeps its token in the csrf_token cookie, not a sessions row' do
+      expect { get atlas_login_path }.not_to(change { session_rows })
+
+      expect(response.headers['Set-Cookie'].to_s).to include('csrf_token=')
+      expect(response.headers['Set-Cookie'].to_s).not_to include('_cerberus_session')
+    end
+
+    it 'submits with that token, and is refused without it' do
+      get atlas_login_path
+      action, token = sign_in_form
+
+      post action, params: staff_login
+      expect(response).to have_http_status(:unprocessable_content)
+
+      post action, params: staff_login.merge(authenticity_token: token)
+      expect(response).to have_http_status(:redirect)
+    end
+
+    it 'rotates the token on sign-in, so the guest token does not outlive it' do
+      get atlas_login_path
+      guest_cookie = cookies['csrf_token']
+      action, token = sign_in_form
+      post action, params: staff_login.merge(authenticity_token: token)
+      follow_redirect!
+
+      expect(cookies['csrf_token']).not_to eq(guest_cookie)
+
+      meta = response.parsed_body.at_css('meta[name="csrf-token"]')
+      delete destroy_user_session_path, headers: { 'X-CSRF-Token' => meta['content'] }
+      expect(response).to have_http_status(:redirect)
+
+      post action, params: staff_login.merge(authenticity_token: token)
+      expect(response).to have_http_status(:unprocessable_content)
     end
   end
 
