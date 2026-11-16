@@ -22,12 +22,16 @@ class UserAgent < ApplicationRecord
   end
 
   # First-sight upsert: record a distinct UA once with its derived verdict.
-  # A no-op once the UA is known (the verdict is refreshed in bulk by the
-  # Phase 2 reclassify job, not on every sighting).
+  # A no-op once the UA is known (ReclassifyUserAgentsJob refreshes verdicts in
+  # bulk, not on every sighting).
+  #
+  # Read first: nearly every sighting is a known UA, and an insert-first
+  # create_or_find_by would fail on the unique index each time. The fallback
+  # still covers two jobs racing to record the same new UA.
   def self.record(ua_string)
     return if ua_string.blank?
 
-    find_or_create_by(ua_string:) do |row|
+    find_by(ua_string:) || create_or_find_by(ua_string:) do |row|
       row.is_bot = bot?(ua_string)
       row.classified_at = Time.current
     end

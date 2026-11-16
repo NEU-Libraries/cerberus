@@ -42,6 +42,14 @@ RSpec.describe UserAgent do
         .not_to change(described_class, :count)
     end
 
+    # Another job inserts the UA between this one's read and its insert.
+    it 'returns the existing row when it loses the race to record a new UA' do
+      winner = described_class.create!(ua_string: 'Racer/1.0', is_bot: false, classified_at: Time.current)
+      allow(described_class).to receive(:find_by).and_return(nil)
+
+      expect(described_class.record('Racer/1.0')).to eq(winner)
+    end
+
     it 'ignores a blank UA' do
       expect { described_class.record(nil) }.not_to change(described_class, :count)
     end
