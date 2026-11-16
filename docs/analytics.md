@@ -141,9 +141,39 @@ Two methods read the aggregate. Never read its `hour` column directly:
 - `ImpressionCountByDay.day_sql` groups by the Eastern date. `ImpressionsReport`
   asks each leaf for its `day_sql`, and the human leaf's is its stored `day`.
 
-`RollupImpressionsJob` re-derives only its last 90 days. Rows older than that
-keep the day they were rolled up on until the job runs once with a longer
-`window:`.
+`RollupImpressionsJob` re-derives at most its last 90 days. Rows older than that
+keep the day they were rolled up on until the job runs once with a larger
+`days:`.
+
+## When the rollups run
+
+`config/recurring.yml` runs `RollupImpressionsJob` twice over:
+
+| Run | Schedule | Window |
+|---|---|---|
+| `rollup_impressions` | every hour | the last 2 days (`days: 2`) |
+| `rollup_impressions_full` | daily at 4:05 | the last 90 days (`FULL_DAYS`) |
+
+The short hourly run gives the same counts for its two days as a full run would.
+The volume-offender check groups by (IP, day), and the window starts at an
+Eastern midnight, so each day is computed from that day's rows alone.
+
+The full run exists for rule changes. A new bot verdict, volume threshold or
+allowlist entry changes the counts for days the hourly run no longer touches.
+`ReclassifyUserAgentsJob` runs at 4:00, so the full run at 4:05 applies a bot
+list change to every day in the window. A threshold or allowlist change reaches
+every day within a day of deploy.
+
+Each run takes a transaction-scoped advisory lock before it deletes. Two
+overlapping runs would otherwise delete and re-insert the same days, and the
+second insert would fail on the unique index. The second run waits instead.
+
+`RollupContainerImpressionsJob` runs daily at 4:10, after the full run. It
+replaces one container's rows per transaction, after that container's Solr
+lookup, so no transaction stays open across the lookups. A final delete clears
+the rows of containers that no longer exist in Solr. A report read mid-run can
+show some containers updated and others not, but each container's own figures
+are always consistent.
 
 ## TimescaleDB policies
 

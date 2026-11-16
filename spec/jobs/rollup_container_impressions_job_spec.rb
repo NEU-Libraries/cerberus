@@ -24,4 +24,20 @@ RSpec.describe RollupContainerImpressionsJob do
     expect(ImpressionContainerDailyCount.find_by(noid: 'c1', action: 'view', day: today)[:count]).to eq(8)
     expect(ImpressionContainerDailyCount.find_by(noid: 'c1', action: 'download', day: today)[:count]).to eq(2)
   end
+
+  it 'clears totals for a container with no leaf traffic and for one gone from Solr' do
+    container_doc = instance_double(SolrDocument, id: 'uuid-c2')
+    allow(container_doc).to receive(:[]).with('alternate_ids_ssim').and_return(['id-c2'])
+    allow(Blacklight.default_index).to receive(:search)
+      .and_return(instance_double(Blacklight::Solr::Response, documents: [container_doc]))
+    allow(ContainerDescendantsQuery).to receive(:new).with(noid: 'c2', uuid: 'uuid-c2')
+                                                     .and_return(instance_double(ContainerDescendantsQuery, noids: %w[c2 w7]))
+
+    ImpressionContainerDailyCount.create!(noid: 'c2',     action: 'view', day: today, count: 4)
+    ImpressionContainerDailyCount.create!(noid: 'c-gone', action: 'view', day: today, count: 9)
+
+    described_class.perform_now
+
+    expect(ImpressionContainerDailyCount.where(noid: %w[c2 c-gone])).to be_empty
+  end
 end

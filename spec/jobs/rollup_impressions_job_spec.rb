@@ -73,6 +73,19 @@ RSpec.describe RollupImpressionsJob do
     expect(ImpressionDailyVisitor.find_by(day: today).unique_visitors).to eq(2)
   end
 
+  it 'leaves days before a short window as they were' do
+    five_days_ago = today - 5
+    insert_impression(noid: 'w5', ip_address: '10.0.0.1', user_agent: 'Mozilla/5.0',
+                      recorded_at: Time.zone.local(five_days_ago.year, five_days_ago.month, five_days_ago.day, 12))
+    insert_impression(noid: 'w5', ip_address: '10.0.0.1', user_agent: 'Mozilla/5.0')
+    ImpressionDailyCount.create!(noid: 'w6', action: 'view', day: five_days_ago, count: 7)
+
+    described_class.perform_now(days: 2)
+
+    expect(ImpressionDailyCount.where(noid: 'w5').pluck(:day)).to eq([today])
+    expect(ImpressionDailyCount.find_by(noid: 'w6', day: five_days_ago)[:count]).to eq(7)
+  end
+
   it 're-derives idempotently across runs' do
     insert_impression(noid: 'w1', ip_address: '10.0.0.1', user_agent: 'Mozilla/5.0')
 
