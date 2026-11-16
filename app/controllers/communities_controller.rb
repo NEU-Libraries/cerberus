@@ -31,11 +31,9 @@ class CommunitiesController < CatalogController
     return render_gone(@community) if @community.tombstoned
 
     authorize_show!
-    load_children_and_deletability
-    prepend_faculty_staff_entry(params[:id])
-    assign_show_abilities!
-    offer_cascade_delete
-    breadcrumbs_for(@community)
+    return if request.head? # The gates set the status; skip what only the body shows.
+
+    prepare_show_view
   end
 
   # cascade is the confirmation's flag for a container that is not empty.
@@ -83,6 +81,14 @@ class CommunitiesController < CatalogController
   end
 
   private
+
+    def prepare_show_view
+      load_children_and_deletability
+      prepend_faculty_staff_entry(params[:id])
+      assign_show_abilities!
+      offer_cascade_delete
+      breadcrumbs_for(@community)
+    end
 
     # The same children #show lists — empty showcases excluded, exactly as the
     # listing excludes them — gated the same way. A caller who may not read the

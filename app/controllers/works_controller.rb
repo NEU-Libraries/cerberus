@@ -57,6 +57,8 @@ class WorksController < ApplicationController
 
     authorize_show!
     deny_if_unfinished!(@work)
+    return if request.head? # The gates set the status; skip what only the body shows.
+
     flash.now[:alert] = in_progress_notice(@work) if @work.in_progress
     prepare_show_view
     # After prepare_show_view, which sets @can_edit.

@@ -32,10 +32,9 @@ class CollectionsController < CatalogController
     return redirect_to(personal_root_home(params[:id])) if @collection.personal_root
 
     authorize_show!
-    @response = find_children(@collection.valkyrie_id, params[:id])
-    assign_show_abilities!
-    offer_cascade_delete
-    breadcrumbs_for(@collection)
+    return if request.head? # The gates set the status; skip what only the body shows.
+
+    prepare_show_view
   end
 
   # cascade is the confirmation's flag for a container that is not empty.
@@ -82,6 +81,13 @@ class CollectionsController < CatalogController
   end
 
   private
+
+    def prepare_show_view
+      @response = find_children(@collection.valkyrie_id, params[:id])
+      assign_show_abilities!
+      offer_cascade_delete
+      breadcrumbs_for(@collection)
+    end
 
     # The same children #show lists, gated the same way: the modal's counts
     # describe this Collection's contents, so a caller who may not read the
