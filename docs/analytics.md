@@ -39,6 +39,10 @@ A view is recorded only when the request actually rendered. A tombstone 410 and
 an authz 403 are not views, so `record_view_impression` returns early unless the
 response was successful.
 
+A HEAD request records nothing, whatever the callback. It reads no content, so
+it is neither a view nor a download; link checkers and monitors send it. See
+[`head-requests.md`](head-requests.md).
+
 A download or stream carries the Blob id rather than a noid.
 `RecordImpressionJob` resolves the containing Work's noid with
 `AtlasRb::Blob.work`, and records nothing when the Blob resolves to no Work.

@@ -29,7 +29,10 @@ module RecordsImpressions
       record_impression(blob_id: params[:id], action:)
     end
 
+    # HEAD reads no content, so it is neither a view nor a download.
     def record_impression(action:, noid: nil, blob_id: nil)
+      return if request.head?
+
       RecordImpressionJob.perform_later(
         action: action, noid: noid, blob_id: blob_id,
         request_meta: {
