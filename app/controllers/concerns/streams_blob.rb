@@ -12,6 +12,8 @@ module StreamsBlob
     # the stream commits the response, so it is closed only once streaming
     # began: closed earlier, the refusal handler would find an empty 200 sent.
     def stream_blob(id, range: nil, &apply_headers)
+      return head_blob(&apply_headers) if request.head?
+
       started = false
       result = AtlasRb::Blob.content(id, range: range) do |chunk|
         apply_headers.call unless started
@@ -25,6 +27,14 @@ module StreamsBlob
       started = true
     ensure
       response.stream.close if started
+    end
+
+    # The same headers as GET, without fetching the bytes. The gates have run,
+    # so a refusal has already answered. A file lost from storage behind a valid
+    # Blob answers 200 here, where GET would find out and answer 404.
+    def head_blob(&apply_headers)
+      apply_headers.call
+      head response.status
     end
 
     def refused_status?(result)

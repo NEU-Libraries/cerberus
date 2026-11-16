@@ -23,7 +23,8 @@ class MediaController < ApplicationController
   def show
     blob = AtlasRb::Blob.find(params[:id])
     # blob['size'] is the byte size; blob.size is Hash#size (key count) on a Mash.
-    range = MediaRange.parse(request.headers['Range'], blob['size'])
+    # HTTP defines Range for GET only, so HEAD reports the whole file.
+    range = MediaRange.parse(request.headers['Range'], blob['size']) unless request.head?
     stream_blob(params[:id], range: range && request.headers['Range']) { set_media_headers(blob, range) }
   end
 

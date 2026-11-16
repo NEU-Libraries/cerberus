@@ -9,7 +9,7 @@
 # only exports the Works they can discover.
 class CollectionExportsController < CatalogController
   include ProxyUnbuffered
-  include ZipKit::RailsStreaming
+  include StreamsZip
   include LoaderGated
 
   rescue_from AtlasRb::ForbiddenError do
