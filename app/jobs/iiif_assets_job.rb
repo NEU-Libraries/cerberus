@@ -21,8 +21,17 @@ class IiifAssetsJob < ApplicationJob
     IncompleteFlag.set(job.arguments.first, nuid: job.current_nuid, reason: IncompleteReasons::THUMBNAILS)
   end
 
+  # Every write here is a replace, so a re-run converges.
+  retry_on AtlasRb::StaleResourceError, attempts: 5, wait: :polynomially_longer do |job, exception|
+    Rails.logger.warn(
+      "IiifAssetsJob: work #{job.arguments.first} kept losing the lock on #{exception.resource_id} — " \
+      'IIIF assets left unfinished'
+    )
+    IncompleteFlag.set(job.arguments.first, nuid: job.current_nuid, reason: IncompleteReasons::THUMBNAILS)
+  end
+
   def perform(work_id, source_path, derivative_widths: nil, refresh: false)
-    return if !refresh && AtlasRb::Work.find(work_id).thumbnail.present?
+    return if already_seeded?(work_id, refresh)
     return unless File.exist?(source_path)
 
     result = IiifImageCreator.call(path: source_path)
@@ -41,6 +50,15 @@ class IiifAssetsJob < ApplicationJob
   end
 
   private
+
+    # Only the first attempt may stop at an existing thumbnail. On a retry it is
+    # usually the one the earlier attempt wrote before a later write lost its
+    # lock, and stopping there leaves the IIIF service and renditions unwritten.
+    def already_seeded?(work_id, refresh)
+      return false if refresh || executions > 1
+
+      AtlasRb::Work.find(work_id).thumbnail.present?
+    end
 
     def existing_widths(work_id)
       DerivativeCreator.existing_widths(AtlasRb::Work.assets(work_id))
