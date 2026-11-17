@@ -11,8 +11,8 @@ class DepositDerivativesJob < ApplicationJob
 
   class ServiceNotReady < StandardError; end
 
-  # Also absorbs the optimistic-lock 500 if another job is still PATCHing the
-  # same FileSet (the serial-PATCH concern documented in IiifAssetsJob).
+  # Also absorbs AtlasRb::StaleResourceError if another job is still PATCHing
+  # the same FileSet (the serial-PATCH concern documented in IiifAssetsJob).
   retry_on StandardError, attempts: 3, wait: :polynomially_longer do |job, exception|
     Rails.logger.warn(
       "DepositDerivativesJob gave up for work #{job.arguments.first}: #{exception.class}: #{exception.message}"

@@ -650,8 +650,8 @@ deposit and its metadata are untouched, and the depositor can revisit the
 metadata page to request sizes again. A later success clears the flag.
 
 A separate `retry_on StandardError` (three attempts) absorbs transient Atlas
-failures, including the optimistic-lock 500 raised when another job is still
-PATCHing the same FileSet. It sets the same flag on exhaustion. That
+failures, including the `AtlasRb::StaleResourceError` (409) raised when another
+job is still PATCHing the same FileSet. It sets the same flag on exhaustion. That
 serial-PATCH constraint is documented on `IiifAssetsJob`.
 
 **`ServiceNotReady`'s handler must be declared after the `StandardError` one.**

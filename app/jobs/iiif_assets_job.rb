@@ -48,8 +48,8 @@ class IiifAssetsJob < ApplicationJob
 
     result = IiifImageCreator.call(path: source_path)
     # Serial, not parallel: these all PATCH Delegates that attach to the same
-    # FileSet, and parallel execution races Atlas's optimistic-lock check on
-    # the FileSet (StaleObjectError → 500 → Delegates not persisted).
+    # FileSet. In parallel they race the FileSet's optimistic lock, and a write
+    # that outlasts Atlas's retries comes back as AtlasRb::StaleResourceError.
     at(:thumbnails) { ThumbnailCreationJob.perform_now(work_id, result) }
     at(:service) { persist_service!(work_id, result.gated_base) }
 
