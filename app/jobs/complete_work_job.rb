@@ -7,6 +7,8 @@
 # status-settle signal enqueues this exactly once per report; a report carries
 # many Works (one per item), so this completes each independently.
 class CompleteWorkJob < ApplicationJob
+  include AtlasWrite
+
   queue_as :default
 
   # Safe to retry: Work.complete is idempotent server-side (re-completing an
@@ -34,7 +36,10 @@ class CompleteWorkJob < ApplicationJob
 
       expected = rows.where.not(sequence: nil).count
       actual   = positioned_page_count(work_pid)
-      return AtlasRb::Work.complete(work_pid) if actual == expected
+      # A lock conflict is retried on the one Work, not through retry_on: a
+      # re-run of the whole loop would message the creator again about every
+      # mismatched Work it had already reported.
+      return with_stale_retry { AtlasRb::Work.complete(work_pid) } if actual == expected
 
       report_mismatch(report, work_pid, expected, actual)
     end
