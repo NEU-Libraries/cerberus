@@ -15,10 +15,12 @@
 # The wait keys on the artifact via PrimaryFilePresence — same idiom as
 # DepositDerivativesJob's ServiceNotReady.
 #
-# Exhausting the retries leaves the Work in_progress. That is the correct
-# outcome, not a failure to paper over: the deposit genuinely has no primary
-# file, so it stays out of public discovery and appears on the needs-attention
-# list for someone to finish or tombstone.
+# Exhausting the primary-file retries leaves the Work in_progress. That is the
+# correct outcome, not a failure to paper over: the deposit genuinely has no
+# primary file, so it stays out of public discovery and appears on the
+# needs-attention list for someone to finish or tombstone.
+#
+# The lock-conflict retry is a separate wait. See docs/deposit.md.
 class ConfirmDepositJob < ApplicationJob
   include PrimaryFilePresence
 
@@ -31,6 +33,10 @@ class ConfirmDepositJob < ApplicationJob
       "ConfirmDepositJob: work #{job.arguments.first} never received its primary file — left in progress"
     )
   end
+
+  # No block, deliberately: an exhausted conflict must land in the failed-jobs
+  # list, because a Work that Atlas has already completed is on no other list.
+  retry_on AtlasRb::StaleResourceError, attempts: 5, wait: :polynomially_longer
 
   def perform(work_id)
     raise PrimaryFileMissing, "work #{work_id} has no primary file yet" unless primary_file?(work_id)

@@ -293,6 +293,22 @@ The order inside `#update_metadata` is load-bearing:
    because Atlas asks callers to complete only once the expected children are
    deposited. The primary Blob may still be in flight.
 
+`ConfirmDepositJob` therefore waits for two things. It waits for the primary
+file, as above. It also retries a lost optimistic-lock race. Steps 2 to 4 queue
+jobs that write to the same Work, and the worker runs them alongside the
+confirm. A caption FileSet that lands as the Work completes makes Atlas rebuild
+the Work's METS twice, and one rebuild loses. Atlas retries that conflict
+itself, and only a conflict that outlasts its budget reaches Cerberus as
+`AtlasRb::StaleResourceError`. Even then Atlas has already completed the Work,
+minted its handle and written the audit row, and a second `complete` call
+finishes the METS.
+
+So the retry is safe, because `Work.complete` is idempotent. It also needs no
+exhaustion block: a job that runs out of retries lands in the failed-jobs list.
+The Work is already complete there, so it is on no needs-attention list, and
+the failed job and its Retry button are the only trace. `ContentCreationJob`
+does the same on the batch paths, where it is the job that completes the Work.
+
 ### The Advanced metadata disclosure
 
 The deposit page carries the Advanced field set — title parts and repeatable
