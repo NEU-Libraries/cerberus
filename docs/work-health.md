@@ -150,7 +150,7 @@ it. `REINDEX_CODES` lists the codes that the Reindex action repairs.
 | `orphaned`, `parent_missing`, `wrong_parent_type` | the Move tab |
 | `staff_edit_missing`, `no_depositor` | the Permissions tab |
 | `live_under_suppressed` | the Delete tab |
-| `not_indexed` | Reindex, posting to `Admin::ReindexController#work` |
+| `not_indexed`, `index_stale` | Reindex, posting to `Admin::ReindexController#work`. Atlas reports `index_stale` when Solr holds an older save than Postgres, and a reindex writes what Postgres holds |
 
 The other codes, such as `binary_missing`, `blob_unlinked` and the envelope and
 OCFL codes, have no Cerberus surface. They show the message alone.

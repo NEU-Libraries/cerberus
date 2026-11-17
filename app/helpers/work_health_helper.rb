@@ -31,7 +31,7 @@ module WorkHealthHelper
     'live_under_suppressed'        => 'delete'
   }.freeze
 
-  REINDEX_CODES = %w[not_indexed].freeze
+  REINDEX_CODES = %w[not_indexed index_stale].freeze
 
   # Atlas's record of the nightly checks, not a re-hash: a Work is only as
   # verified as its least recently checked object. A fail is the worst outcome
