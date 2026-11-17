@@ -21,13 +21,25 @@ class IiifAssetsJob < ApplicationJob
     IncompleteFlag.set(job.arguments.first, nuid: job.current_nuid, reason: IncompleteReasons::THUMBNAILS)
   end
 
+  # What the reader has lost depends on which write kept losing its lock: the
+  # writes before it landed. Clearing the flag is no stage, because by then every
+  # asset the reader sees is in place.
+  STAGE_REASONS = {
+    thumbnails: IncompleteReasons::THUMBNAILS,
+    service:    IncompleteReasons::IIIF_SERVICE,
+    renditions: IncompleteReasons::DERIVATIVES
+  }.freeze
+
+  attr_reader :stage
+
   # Every write here is a replace, so a re-run converges.
   retry_on AtlasRb::StaleResourceError, attempts: 5, wait: :polynomially_longer do |job, exception|
     Rails.logger.warn(
-      "IiifAssetsJob: work #{job.arguments.first} kept losing the lock on #{exception.resource_id} — " \
-      'IIIF assets left unfinished'
+      "IiifAssetsJob: work #{job.arguments.first} kept losing the lock on #{exception.resource_id} " \
+      "at #{job.stage || 'the incomplete flag'} — IIIF assets left unfinished"
     )
-    IncompleteFlag.set(job.arguments.first, nuid: job.current_nuid, reason: IncompleteReasons::THUMBNAILS)
+    reason = STAGE_REASONS[job.stage]
+    IncompleteFlag.set(job.arguments.first, nuid: job.current_nuid, reason: reason) if reason
   end
 
   def perform(work_id, source_path, derivative_widths: nil, refresh: false)
@@ -38,18 +50,23 @@ class IiifAssetsJob < ApplicationJob
     # Serial, not parallel: these all PATCH Delegates that attach to the same
     # FileSet, and parallel execution races Atlas's optimistic-lock check on
     # the FileSet (StaleObjectError → 500 → Delegates not persisted).
-    ThumbnailCreationJob.perform_now(work_id, result)
-    persist_service!(work_id, result.gated_base)
+    at(:thumbnails) { ThumbnailCreationJob.perform_now(work_id, result) }
+    at(:service) { persist_service!(work_id, result.gated_base) }
 
-    IncompleteFlag.clear(work_id)
+    at(nil) { IncompleteFlag.clear(work_id) }
 
     widths = derivative_widths || (refresh ? existing_widths(work_id) : nil)
     return if widths.nil?
 
-    DerivativeCreationJob.perform_now(work_id, result.gated_base, widths: widths)
+    at(:renditions) { DerivativeCreationJob.perform_now(work_id, result.gated_base, widths: widths) }
   end
 
   private
+
+    def at(stage)
+      @stage = stage
+      yield
+    end
 
     # Only the first attempt may stop at an existing thumbnail. On a retry it is
     # usually the one the earlier attempt wrote before a later write lost its

@@ -177,18 +177,40 @@ RSpec.describe IiifAssetsJob, type: :job do
       expect(IncompleteFlag).not_to have_received(:set)
     end
 
-    it 'flags the Work incomplete once the retries run out' do
+    # The flag names what the reader lost, which is everything from the write
+    # that kept losing onwards.
+    {
+      'the thumbnails'   => [:thumbnails, IncompleteReasons::THUMBNAILS],
+      'the IIIF service' => [:service, IncompleteReasons::IIIF_SERVICE],
+      'the renditions'   => [:renditions, IncompleteReasons::DERIVATIVES]
+    }.each do |label, (stage, reason)|
+      it "flags the Work with #{reason} once #{label} run out of retries" do
+        allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: nil))
+        failing = { thumbnails: ThumbnailCreationJob, service: AtlasRb::FileSet,
+                    renditions: DerivativeCreationJob }.fetch(stage)
+        allow(failing).to receive(stage == :service ? :set_iiif_service : :perform_now).and_raise(AtlasRb::StaleResourceError.new('stale', resource_id: 'mets-uuid', action: 'complete'))
+        allow(Rails.logger).to receive(:warn)
+
+        expect do
+          perform_enqueued_jobs { described_class.perform_later(work_id, source_path, derivative_widths: { small: 64 }) }
+        end.not_to raise_error
+
+        expect(Rails.logger).to have_received(:warn).with(/w-123 kept losing the lock on mets-uuid at #{stage}/)
+        expect(IncompleteFlag).to have_received(:set).with(work_id, nuid: anything, reason: reason).once
+      end
+    end
+
+    # By the time the flag is cleared every asset is in place, so there is
+    # nothing lost to name.
+    it 'sets no flag when only clearing the flag keeps losing' do
       allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: nil))
-      allow(AtlasRb::FileSet).to receive(:set_iiif_service).and_raise(AtlasRb::StaleResourceError.new('stale', resource_id: 'mets-uuid', action: 'complete'))
+      allow(IncompleteFlag).to receive(:clear).and_raise(AtlasRb::StaleResourceError.new('stale', resource_id: 'mets-uuid', action: 'complete'))
       allow(Rails.logger).to receive(:warn)
 
-      expect do
-        perform_enqueued_jobs { described_class.perform_later(work_id, source_path) }
-      end.not_to raise_error
+      perform_enqueued_jobs { described_class.perform_later(work_id, source_path) }
 
-      expect(Rails.logger).to have_received(:warn).with(/w-123 kept losing the lock on mets-uuid/)
-      expect(IncompleteFlag).to have_received(:set)
-        .with(work_id, nuid: anything, reason: IncompleteReasons::THUMBNAILS)
+      expect(Rails.logger).to have_received(:warn).with(/at the incomplete flag/)
+      expect(IncompleteFlag).not_to have_received(:set)
     end
   end
 end
