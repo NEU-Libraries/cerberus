@@ -144,6 +144,37 @@ RSpec.describe CompleteWorkJob, type: :job do
         expect(notice.detail(:actual)).to eq(1)
       end
 
+      # retry_on Faraday::Error re-runs the whole loop, so a second pass over the
+      # same report must not tell the creator again.
+      it 'reports a mismatch once across re-runs of the same report' do
+        report = create(:load_report, loader: loader, creator_nuid: '000000003', status: :completed)
+        create(:multipage_ingest, load_report: report, status: :completed, work_pid: 'neu:w1', sequence: 1)
+        create(:multipage_ingest, load_report: report, status: :completed, work_pid: 'neu:w1', sequence: 2)
+
+        allow(AtlasRb::Work).to receive(:file_sets).and_return([page_entry('fs1', 1)])
+        allow(AtlasRb::Work).to receive(:complete)
+
+        expect { 2.times { described_class.perform_now(report.id) } }
+          .to change(Message, :count).by(1).and change(AdminNotice, :count).by(1)
+      end
+
+      it 'still reports the same Work for a different report' do
+        first = create(:load_report, loader: loader, creator_nuid: '000000003', status: :completed)
+        second = create(:load_report, loader: loader, creator_nuid: '000000003', status: :completed)
+        [first, second].each do |report|
+          create(:multipage_ingest, load_report: report, status: :completed, work_pid: 'neu:w1', sequence: 1)
+          create(:multipage_ingest, load_report: report, status: :completed, work_pid: 'neu:w1', sequence: 2)
+        end
+
+        allow(AtlasRb::Work).to receive(:file_sets).and_return([page_entry('fs1', 1)])
+        allow(AtlasRb::Work).to receive(:complete)
+
+        expect do
+          described_class.perform_now(first.id)
+          described_class.perform_now(second.id)
+        end.to change(AdminNotice, :count).by(2)
+      end
+
       # A breach is a staff concern whether or not there is a depositor to tell,
       # so the ledger records it even when the inbox half is suppressed.
       it 'sends no message without a creator, still refuses to complete, and still records it' do
