@@ -97,6 +97,10 @@ Rack::Attack.safelist("mark any devise user safe") do |request|
   !request.session["warden.user.user.key"].blank?
 end
 
+Rack::Attack.safelist("KAUST") do |req|
+  !req.asn.blank? && req.asn == "50999"
+end
+
 Rack::Attack.safelist("Wake Forest") do |req|
   !req.asn.blank? && req.asn == "40245"
 end
