@@ -116,13 +116,19 @@ writes are not alike.
 | Write | Behaviour on a repeat call |
 |---|---|
 | `FileSet.create` | Idempotent, keyed on `ingest.idempotency_key`. The result is stamped on `file_set_pid`, so a retry skips or converges |
-| `FileSet.update` (the binary PATCH) | **Appends a new Blob every time it is called** |
+| `FileSet.update` (the binary PATCH) | **Appends a new Blob every time it is called**, unless it carries an `Idempotency-Key` Atlas has already recorded |
 
 `blob_attached_at` is stamped immediately after a successful PATCH. On a resumed
 execution the job asks Atlas before PATCHing, so a lost response cannot
 double-attach the page. A resumed execution is one where `file_set_pid` was
 already set when the job started, meaning a previous attempt got past the
 create. The happy path makes no extra reads.
+
+An `Idempotency-Key` on the PATCH would not replace that read. Atlas records the
+key only after the Blob lands, so a crash between the two still appends twice.
+The key is also scoped per resource class, and `FileSet.create` already uses
+`ingest.idempotency_key` in the FileSet scope, so the PATCH would need a key of
+its own.
 
 That asymmetry is why `file_set_has_content?` exists and why it is consulted
 only on a resume. The question it answers is narrow. Did a previous attempt's

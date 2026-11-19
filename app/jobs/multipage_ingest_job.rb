@@ -4,7 +4,8 @@
 # page binary. Page jobs parallelise safely; each touches only its own FileSet.
 #
 # `FileSet.update` APPENDS a Blob on every call, so the resume path consults
-# Atlas before PATCHing. See docs/ingest.md for the retry-safety argument.
+# Atlas before PATCHing. An Idempotency-Key would not replace that read: Atlas
+# records the key only after the Blob lands. See docs/ingest.md.
 class MultipageIngestJob < ApplicationJob
   queue_as :default
 
