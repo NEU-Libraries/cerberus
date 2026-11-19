@@ -14,12 +14,14 @@ class AccountsController < ApplicationController
   # accounts lookup, the switch login, and set-preferred all cross the wire.
   rescue_from Faraday::Error, JSON::ParserError, with: :atlas_unavailable
 
+  NOT_YOURS = 'That account is not one of yours.'
+
   # Re-hydrate the session identity as one of the caller's other accounts. Email
   # is the account key; login rides it as a signed `acct` claim, so the whole
   # session (groups, role, affiliation) becomes that account's.
   def switch
     email = params[:email].to_s
-    return reject('That account is not one of yours.') unless own_account?(email)
+    return reject(NOT_YOURS) unless own_account?(email)
 
     values = AtlasRb::Authentication.login(current_user.nuid, email: email)
     sign_in(User.from_atlas(values))
@@ -27,16 +29,24 @@ class AccountsController < ApplicationController
     # requests; set after sign_in so it survives the Warden session update.
     session[:account_email] = email
     redirect_to my_drs_path, notice: "Switched to #{email}."
+  rescue AtlasRb::ResourceError => e
+    # Atlas's own refusal of a foreign account. Any other status goes on to
+    # Authorizable's handlers.
+    raise unless e.status == 400
+
+    reject(NOT_YOURS)
   end
 
   # Set the caller's preferred (default) account — the one a future login lands
   # on when it names none.
   def prefer
     email = params[:email].to_s
-    return reject('That account is not one of yours.') unless own_account?(email)
+    return reject(NOT_YOURS) unless own_account?(email)
 
     AtlasRb::User.set_preferred(current_user.nuid, email: email, nuid: current_user.nuid)
     redirect_to my_drs_path, notice: "#{email} is now your preferred account."
+  rescue AtlasRb::NotFoundError
+    reject(NOT_YOURS)
   end
 
   private
@@ -52,8 +62,7 @@ class AccountsController < ApplicationController
     end
 
     # Nil comes back only on a 404 (an ATLAS_URL that is not Atlas); a NUID with
-    # no other accounts is an empty list. An unknown signing NUID is a 400
-    # AtlasRb::ResourceError, which the rescue_from above does not catch.
+    # no other accounts is an empty list.
     def my_account_emails
       accounts = AtlasRb::User.accounts(current_user.nuid, nuid: current_user.nuid)
       Array(accounts && accounts['accounts']).pluck('email')
