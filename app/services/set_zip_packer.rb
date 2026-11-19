@@ -68,8 +68,10 @@ class SetZipPacker
     end
 
     # The resolver's gated search cannot do this: an embargoed Work is
-    # deliberately DISCOVERABLE, so it arrives here like any other member.
-    # Without this check the archive hands out bytes `/downloads/:id` refuses.
+    # deliberately DISCOVERABLE, so it arrives here like any other member. Atlas
+    # refuses its Blob bytes to the signed-in caller, but under view-as that is
+    # the admin, and a Delegate rendition never asks Atlas, so the archive
+    # decides here.
     def embargo_withholds_doc?(doc)
       return false if @bypass_embargo
 

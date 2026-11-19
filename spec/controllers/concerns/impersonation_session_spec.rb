@@ -230,9 +230,15 @@ describe ImpersonationSession do
       expect(host.effective_user.groups).to eq(['public-readers'])
     end
 
+    # What atlas_rb raises when Atlas does not know the signing NUID.
+    let(:unknown_principal) do
+      AtlasRb::ResourceError.new('unknown principal',
+                                 response: instance_double(Faraday::Response, status: 400, body: '{}'))
+    end
+
     it 'fails closed to a least-privilege guest when hydration fails' do
       host.session[:view_as_nuid] = '000000002'
-      allow(AtlasRb::Authentication).to receive(:login).and_raise(JSON::ParserError)
+      allow(AtlasRb::Authentication).to receive(:login).and_raise(unknown_principal)
 
       expect(host.effective_user.role).to eq('guest')
       expect(host.effective_user.groups).to eq([])
@@ -249,7 +255,7 @@ describe ImpersonationSession do
 
     it 'fails closed to a guest during acting-as too' do
       host.session[:acting_as_nuid] = '000000002'
-      allow(AtlasRb::Authentication).to receive(:login).and_raise(JSON::ParserError)
+      allow(AtlasRb::Authentication).to receive(:login).and_raise(unknown_principal)
 
       expect(host.effective_user.role).to eq('guest')
       expect(host.effective_user.admin?).to be(false)

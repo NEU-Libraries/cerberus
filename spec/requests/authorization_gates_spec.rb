@@ -97,12 +97,9 @@ RSpec.describe 'Authorization gates', type: :request do
 
   # G3 — creating a child is a write to its container, so it takes :edit on the
   # DESTINATION, not merely a signed-in session. The destination is a route
-  # segment, so no request shape reaches these actions without one.
-  #
-  # This block previously asserted the opposite — that any authenticated caller
-  # could create anywhere — which is the hole it now covers: a signed-in user
-  # with no rights on the container was able to create Collections and Works
-  # inside it.
+  # segment, so no request shape reaches these actions without one. Without the
+  # gate, a signed-in user with no rights on the container could create
+  # Collections and Works inside it.
   describe 'POST #create (edit on the destination)' do
     # The destination is readable but grants edit to nobody, which is the state
     # these examples need: the caller can see the container and is still refused.

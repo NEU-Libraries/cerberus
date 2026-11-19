@@ -24,7 +24,7 @@ RSpec.describe 'My DRS', type: :request do
   context 'signed in' do
     before do
       sign_in user
-      # My DRS now consults the accounts list; default to a single account so the
+      # My DRS consults the accounts list; default to a single account so the
       # switcher panel is absent (the panel spec below overrides this), keeping
       # these renders off the live accounts call.
       allow(AtlasRb::User).to receive(:accounts).and_return(
