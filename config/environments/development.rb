@@ -26,6 +26,10 @@ Rails.application.configure do
   # Enable server timing
   config.server_timing = true
 
+  # Tag each log line with the request id atlas_rb sends to Atlas, as staging
+  # and production do, so a page view can be found in both apps' logs here too.
+  config.log_tags = [:request_id]
+
   # Enable/disable caching. By default caching is disabled.
   # Run rails dev:cache to toggle caching.
   if Rails.root.join("tmp/caching-dev.txt").exist?

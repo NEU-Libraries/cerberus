@@ -38,4 +38,22 @@ RSpec.describe 'Request id sent to Atlas', type: :request do
     expect(calls.map(&:last).uniq.size).to be > 1
     expect(calls.map(&:first).uniq).to eq([response.headers['X-Request-Id']])
   end
+
+  # Sending the id proves only Cerberus's half. Atlas echoes the id it adopted,
+  # so every Atlas response must carry the page's id back, or Atlas logs under
+  # an id of its own.
+  it "gets the page's request id back from Atlas on every call" do
+    echoed = Queue.new
+    subscriber = ActiveSupport::Notifications.subscribe('request.atlas_rb') do |*args|
+      echoed << ActiveSupport::Notifications::Event.new(*args).payload.response_headers&.[]('x-request-id')
+    end
+
+    get work_path(@work.id)
+
+    ids = Array.new(echoed.size) { echoed.pop }
+    expect(ids).not_to be_empty
+    expect(ids.uniq).to eq([response.headers['X-Request-Id']])
+  ensure
+    ActiveSupport::Notifications.unsubscribe(subscriber)
+  end
 end
