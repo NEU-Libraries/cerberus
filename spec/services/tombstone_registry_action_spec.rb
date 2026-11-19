@@ -7,6 +7,11 @@ RSpec.describe TombstoneRegistryAction do
     instance_double(Faraday::Response, status: status, body: body, success?: status < 300)
   end
 
+  # What atlas_rb raises when Atlas answers a lock conflict.
+  def stale = AtlasRb::StaleResourceError.new('stale')
+
+  before { allow(described_class).to receive(:sleep) }
+
   describe '.restore' do
     it 'is :ok when Atlas accepts' do
       allow(AtlasRb::Admin::Resource).to receive(:restore).with('abc').and_return(response(200))
@@ -24,15 +29,18 @@ RSpec.describe TombstoneRegistryAction do
       expect(described_class.restore('abc')).to eq(:failed)
     end
 
-    # A 409 is a lock conflict, and nothing changed, so the call is repeated.
+    # A lock conflict changes nothing, so the call is repeated.
     it 'retries a lock conflict' do
-      allow(AtlasRb::Admin::Resource).to receive(:restore).and_return(response(409), response(200))
+      calls = 0
+      allow(AtlasRb::Admin::Resource).to receive(:restore) do
+        (calls += 1) == 1 ? raise(stale) : response(200)
+      end
       expect(described_class.restore('abc')).to eq(:ok)
       expect(AtlasRb::Admin::Resource).to have_received(:restore).twice
     end
 
     it 'gives up after the lock attempts' do
-      allow(AtlasRb::Admin::Resource).to receive(:restore).and_return(response(409))
+      allow(AtlasRb::Admin::Resource).to receive(:restore).and_raise(stale)
       expect(described_class.restore('abc')).to eq(:failed)
       expect(AtlasRb::Admin::Resource).to have_received(:restore).exactly(described_class::LOCK_ATTEMPTS).times
     end
@@ -58,6 +66,12 @@ RSpec.describe TombstoneRegistryAction do
     it 'is :failed on a refusal it cannot read' do
       allow(AtlasRb::Admin::Resource).to receive(:destroy).and_return(response(404, 'Not Found'))
       expect(described_class.purge('abc')).to eq(:failed)
+    end
+
+    it 'is :failed when a lock conflict outlasts the attempts' do
+      allow(AtlasRb::Admin::Resource).to receive(:destroy).and_raise(stale)
+      expect(described_class.purge('abc')).to eq(:failed)
+      expect(AtlasRb::Admin::Resource).to have_received(:destroy).exactly(described_class::LOCK_ATTEMPTS).times
     end
   end
 end

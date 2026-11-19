@@ -8,11 +8,14 @@
 # restores from, parents first, so it must name every item this run withdrew
 # and nothing tombstoned before it.
 class TombstoneCascadeJob < ApplicationJob
+  include AtlasWrite
+
   queue_as :default
 
-  # Atlas answers a lock conflict with a 409 on the raw response. Retried in
-  # place rather than through retry_on: a re-run rebuilds the walk without the
-  # items already tombstoned, and its ledger entry would leave them out.
+  # Atlas does not retry a tombstone, so a lock conflict raises
+  # AtlasRb::StaleResourceError. Retried in place rather than through retry_on:
+  # a re-run rebuilds the walk without the items already tombstoned, and its
+  # ledger entry would leave them out.
   LOCK_ATTEMPTS = 3
 
   def perform(noid:, uuid:, klass:, title:, reason:)
@@ -20,11 +23,11 @@ class TombstoneCascadeJob < ApplicationJob
     failures = []
 
     TombstoneTargets.new(noid: noid, uuid: uuid).each do |target|
-      response = tombstone(target.noid, reason)
-      if response.success?
+      outcome = tombstone(target.noid, reason)
+      if outcome.success?
         tombstoned << { 'noid' => target.noid, 'type' => target.klass }
       else
-        failures << "#{target.klass} #{target.noid}: #{failure_text(response)}"
+        failures << "#{target.klass} #{target.noid}: #{failure_text(outcome)}"
       end
     end
 
@@ -34,17 +37,23 @@ class TombstoneCascadeJob < ApplicationJob
 
   private
 
+    # A conflict that outlasts the retries fails this one item, not the walk.
     def tombstone(noid, reason)
-      LOCK_ATTEMPTS.times do
-        response = AtlasRb::Resource.tombstone(noid, reason: reason)
-        return response unless response.status == 409
-      end
-      AtlasRb::Resource.tombstone(noid, reason: reason)
+      with_stale_retry(attempts: LOCK_ATTEMPTS) { AtlasRb::Resource.tombstone(noid, reason: reason) }
+    rescue AtlasRb::StaleResourceError
+      LockConflict.new
+    end
+
+    # Stands in for the refused response, so the walk reports it like any other.
+    LockConflict = Struct.new(:status) do
+      def success? = false
     end
 
     # A container refuses while a member it holds failed above, so the root of
     # a failure reads plainly and its parents read as consequences.
     def failure_text(response)
+      return 'another write held its lock' if response.is_a?(LockConflict)
+
       code = JSON.parse(response.body.to_s)['code']
       code == 'has_live_children' ? 'still holds a live member' : "Atlas answered #{response.status}"
     rescue JSON::ParserError

@@ -225,9 +225,12 @@ no form, only a pointer to the development team.
 `TombstoneCascadeJob` does the work. `TombstoneTargets` walks the subtree
 deepest first, as the narrowing walk does, widened to communities and limited to
 what is not already tombstoned, and the job tombstones each with the one reason.
-Linked members are not part of the structural subtree, so they stay untouched. A
-lock conflict is retried in place, not through `retry_on`, because a re-run
-would rebuild the walk without what it had already tombstoned. A container
+Linked members are not part of the structural subtree, so they stay untouched.
+Atlas does not retry a tombstone, so a lock conflict raises
+`AtlasRb::StaleResourceError`. The job retries it in place, not through
+`retry_on`, because a re-run would rebuild the walk without what it had already
+tombstoned. A conflict that outlasts the retries fails that one item, and the
+walk carries on. A container
 refuses while a member beneath it failed, so a failure leaves the path above it
 live, not half-tombstoned.
 
@@ -400,8 +403,8 @@ shallowest first, and deletes deepest first. An item that is no longer
 tombstoned when the job runs is skipped and listed as such.
 
 Both the single-item actions and the job call Atlas through
-`TombstoneRegistryAction`, which retries a 409 lock conflict and turns each
-response into `:ok` or `:failed`, or the refusal the admin can act on:
+`TombstoneRegistryAction`, which retries a lock conflict
+(`AtlasRb::StaleResourceError`) and turns each response into `:ok` or `:failed`, or the refusal the admin can act on:
 `:tombstoned_parent` for a restore, `:has_children` for a purge. The job records one
 `tombstone_bulk` ledger entry, through `CompletionNotice`, with `done`,
 `failures` and `skipped` in its payload, and the admin gets the same summary in
@@ -429,9 +432,13 @@ dash rather than failing the registry.
 Restore and destroy are outside atlas_rb's typed-error middleware,
 `RaiseOnResourceError`, which fires only on a narrow set of write paths
 (re-parent, linked members, associations, Compilations, and a few others). Both
-bindings return the raw `Faraday::Response`, so a non-2xx never raises. That is
-why `TombstoneRegistryAction` tests `success?` itself: drop the check and a refused
-restore reports as done. A value that does not respond to `success?` counts as a
+bindings return the raw `Faraday::Response` for a refusal such as a 422 or 403,
+so those never raise. That is why `TombstoneRegistryAction` tests `success?`
+itself: drop the check and a refused restore reports as done. Three translators
+apply on every path, though. A lock conflict raises
+`AtlasRb::StaleResourceError`, which the action retries, and a maintenance or
+outage 503 raises `AtlasRb::ReadOnlyModeError` or
+`AtlasRb::BackendUnavailableError`. A value that does not respond to `success?` counts as a
 success. A transport-level failure, such as the host being down, still raises
 `Faraday::Error`. `TombstoneRegistryAction` logs it and reports `:failed`.
 

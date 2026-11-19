@@ -68,14 +68,32 @@ RSpec.describe TombstoneCascadeJob do
   end
 
   # A lock conflict is transient, and a job-level retry would rebuild the walk
-  # without what it had already tombstoned.
+  # without what it had already tombstoned. atlas_rb raises it rather than
+  # returning the 409.
   it 'retries one item through a lock conflict without restarting the walk' do
     stub_targets(target('w1'))
-    allow(AtlasRb::Resource).to receive(:tombstone).and_return(response(409), response(200))
+    calls = 0
+    allow(AtlasRb::Resource).to receive(:tombstone) do
+      (calls += 1) == 1 ? raise(AtlasRb::StaleResourceError, 'stale') : response(200)
+    end
 
     run
 
     expect(AtlasRb::Resource).to have_received(:tombstone).twice
     expect(notice.detail(:tombstoned)).to eq([{ 'noid' => 'w1', 'type' => 'Work' }])
+  end
+
+  it 'fails only the locked item when a conflict outlasts the retries, and finishes the walk' do
+    stub_targets(target('w1'), target('w2'))
+    allow(AtlasRb::Resource).to receive(:tombstone).with('w1', reason: 'curator')
+                                                   .and_raise(AtlasRb::StaleResourceError, 'stale')
+    allow(AtlasRb::Resource).to receive(:tombstone).with('w2', reason: 'curator').and_return(response(200))
+
+    run
+
+    expect(AtlasRb::Resource).to have_received(:tombstone).with('w1', reason: 'curator')
+                                                          .exactly(TombstoneCascadeJob::LOCK_ATTEMPTS).times
+    expect(notice.detail(:tombstoned)).to eq([{ 'noid' => 'w2', 'type' => 'Work' }])
+    expect(notice.detail(:failures)).to eq(['Work w1: another write held its lock'])
   end
 end
