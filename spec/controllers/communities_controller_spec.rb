@@ -37,8 +37,8 @@ describe CommunitiesController do
       AtlasRb::Resource.set_permissions(community.id, { 'edit' => ['editors'] }, nuid: '000000004')
       # A NUID, because Atlas tells a guest no group but public, which would
       # strip the edit grant from the ACL the gate reads. Readable as well:
-      # `editors` exists only on the Cerberus side, so Atlas would hide a private
-      # resource and the page would 404. Publicizing after the edit write, because
+      # `editors` exists only on the Cerberus side, so Atlas would refuse the read
+      # of a private resource and the page would 403. Publicizing after the edit write, because
       # publicize_resource! reads the current envelope and carries the grant
       # through; the reverse order would drop it.
       publicize_resource!(community, '000000004')

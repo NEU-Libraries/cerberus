@@ -212,8 +212,7 @@ describe CatalogController do
     # The "Content" facet rides Atlas's classification_ssim projection (the
     # ClassificationIndexer rolls each Work's FileSet Classifications onto the
     # Work doc). Config-level assertion is deterministic here; rendering with
-    # real values is verified in-browser against Atlas-indexed content (the
-    # test env can't deposit classified FileSets to populate the field).
+    # real values is verified in-browser against Atlas-indexed content.
     it 'surfaces a "Content" facet over the projected classification_ssim field' do
       field = described_class.blacklight_config.facet_fields['classification_ssim']
       expect(field).to be_present

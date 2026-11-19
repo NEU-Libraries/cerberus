@@ -7,8 +7,7 @@ require 'rails_helper'
 # community showcases (grouped by category, via the linked-member edge). The
 # empty render runs against real test Solr/Atlas; the populated grouping stubs
 # the per-showcase queries so the category fan-out and ordering are exercised
-# without depending on seeded published works (which need the Atlas personal
-# root that hasn't shipped yet).
+# without depending on published works seeded in the test Atlas.
 RSpec.describe 'My DRS', type: :request do
   include Devise::Test::IntegrationHelpers
 

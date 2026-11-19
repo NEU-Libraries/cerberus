@@ -265,7 +265,8 @@ describe ImpersonationSession do
       expect(host.viewer_nuid).to eq('000000002')
     end
 
-    # Acting-as sends On-Behalf-Of, which Atlas refuses from a non-admin User:.
+    # Acting-as signs an `obo` claim, which Atlas refuses unless the `sub` is an
+    # admin.
     it 'stays the admin during acting-as' do
       host.session[:acting_as_nuid] = '000000002'
 
@@ -280,8 +281,8 @@ describe ImpersonationSession do
   describe 'profile hydration' do
     # Regression: a target profile lookup is NOT an on-behalf-of operation.
     # During acting-as, Current.on_behalf_of is set; if it leaked onto the
-    # GET /user (whose User: header is the non-admin target), Atlas's
-    # admin-gate on the header rejects it and the banner shows "Unknown user".
+    # GET /user as an `obo` claim (whose `sub` is the non-admin target), Atlas's
+    # admin gate on `obo` refuses it and the banner shows "Unknown user".
     it 'suppresses the ambient on_behalf_of for the duration of the lookup' do
       host.session[:acting_as_nuid] = '000000002'
       Current.on_behalf_of = '000000002'

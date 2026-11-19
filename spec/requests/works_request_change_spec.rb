@@ -28,9 +28,9 @@ RSpec.describe 'Works request_change', type: :request do
   def grant_edit!
     # Public read alongside the edit grant, so the :edit gate is what the
     # authorization examples exercise. Atlas gates reads on the resource's own
-    # ACL, so a private Work is invisible to a guest and the request 404s before
-    # reaching the gate — proving the resource is hidden, not that the write is
-    # refused. Widening runs top-down; Atlas refuses a resource more visible than
+    # ACL, so Atlas refuses a guest's read of a private Work and the request 403s
+    # before reaching the gate — proving the resource is unreadable, not that the
+    # write is refused. Widening runs top-down; Atlas refuses a resource more visible than
     # its container. Read and edit go in one call, since Atlas assigns the edit
     # grants unconditionally from the payload.
     publicize_ancestry!(community: community, collection: collection)

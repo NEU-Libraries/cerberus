@@ -44,9 +44,9 @@ RSpec.describe 'Authorization gates', type: :request do
   # (and Atlas authorizes its write); the outsider does not. Set as admin.
   #
   # Public read as well, because Atlas gates reads on the resource's own ACL: a
-  # private resource is invisible to anyone outside its read audience, so the
-  # request 404s before reaching the gate and proves only that the resource is
-  # hidden. These examples exist to prove the gate refuses, so the resource has
+  # private resource refuses anyone outside its read audience, so the request
+  # 403s at Atlas's read before reaching the gate and proves only that the
+  # resource is unreadable. These examples exist to prove the gate refuses, so the resource has
   # to be visible to the caller being refused.
   #
   # Widening runs top-down — Atlas refuses a resource more visible than its
@@ -106,7 +106,7 @@ RSpec.describe 'Authorization gates', type: :request do
   describe 'POST #create (edit on the destination)' do
     # The destination is readable but grants edit to nobody, which is the state
     # these examples need: the caller can see the container and is still refused.
-    # Left private, Atlas's read gate hides it and the request 404s before the
+    # Left private, Atlas's read gate refuses it and the request 403s before the
     # :edit gate runs, so the example would pass for the wrong reason.
     before { publicize_resource!(community, '000000004') }
 

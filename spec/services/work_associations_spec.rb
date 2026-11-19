@@ -105,9 +105,10 @@ RSpec.describe WorkAssociations do
       AtlasRb::Work.disassociate(@secret.id, @dataset.id, type: 'is_figure_for', nuid: '000000004')
     end
 
-    # Atlas's read floor is unconditional, so the endpoint reports this edge to
-    # everybody. The gate is entirely Cerberus's here.
-    it 'is reported by Atlas regardless of the viewer' do
+    # Atlas drops an edge whose far end the caller cannot read, but this call
+    # reads as the admin, who reads everything, so the edge comes back. What the
+    # viewer sees is then decided by Cerberus's gated search.
+    it 'is reported by Atlas to an admin caller' do
       expect(AtlasRb::Work.associations(dataset.id, nuid: nuid).dig('inbound', 'is_figure_for'))
         .to include(secret.id)
     end
