@@ -110,6 +110,14 @@ RSpec.describe 'Admin::Reparent', type: :request do
     end
 
     describe 'GET choose_parent (step 2)' do
+      it 'answers 404 for a node id Atlas does not know' do
+        allow(AtlasRb::Resource).to receive(:find).with('gone').and_return(nil)
+
+        get '/admin/reparent/choose_parent', params: { node_id: 'gone', node_uuid: 'uuid-gone' }
+
+        expect(response).to have_http_status(:not_found)
+      end
+
       it 'shows the node being moved and the destination candidates' do
         allow(AtlasRb::Resource).to receive(:find).with('node')
                                                   .and_return(atlas_node(noid: 'node', title: 'Node Collection'))
