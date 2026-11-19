@@ -8,18 +8,30 @@ module StreamsBlob
 
   private
 
-    # The block sets the file's headers, once, before the first write. Closing
-    # the stream commits the response, so it is closed only once streaming
-    # began: closed earlier, the refusal handler would find an empty 200 sent.
+    # The block sets the file's headers, once, before the first write.
     def stream_blob(id, range: nil, &apply_headers)
       return head_blob(&apply_headers) if request.head?
 
+      relay(apply_headers) { |sink| AtlasRb::Blob.content(id, range: range, &sink) }
+    end
+
+    # A superseded version, refused the same way: an unknown version is Atlas's
+    # 404, and no header is set until a chunk arrives.
+    def stream_blob_version(id, version_id, &apply_headers)
+      relay(apply_headers) { |sink| AtlasRb::Blob.version_content(id, version_id, &sink) }
+    end
+
+    # Closing the stream commits the response, so it is closed only once
+    # streaming began: closed earlier, the refusal handler would find an empty
+    # 200 sent.
+    def relay(apply_headers)
       started = false
-      result = AtlasRb::Blob.content(id, range: range) do |chunk|
+      sink = lambda do |chunk|
         apply_headers.call unless started
         started = true
         response.stream.write(chunk)
       end
+      result = yield sink
       return if started
       return refuse_unstreamed(result[:status]) if refused_status?(result)
 
