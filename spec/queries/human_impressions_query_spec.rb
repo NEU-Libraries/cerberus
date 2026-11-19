@@ -19,8 +19,8 @@ RSpec.describe HumanImpressionsQuery do
     UserAgent.create!(ua_string: 'Googlebot',   is_bot: true,  classified_at: Time.current)
   end
 
-  def human_view_count(**kwargs)
-    from_where = described_class.new(conn:, window_start: 7.days.ago.beginning_of_day, **kwargs).from_where_sql
+  def human_view_count(**)
+    from_where = described_class.new(conn:, window_start: 7.days.ago.beginning_of_day, **).from_where_sql
     conn.select_value("SELECT count(*) #{from_where}").to_i
   end
 

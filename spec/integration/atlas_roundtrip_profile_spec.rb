@@ -160,12 +160,12 @@ RSpec.describe 'Atlas round-trip profile', :profile, type: :request do
   # Count and time everything the block sends to Atlas, plus its ActiveRecord
   # queries and its wall time. Subscriptions are torn down in ensure so they
   # cannot leak into a later measurement.
-  def profile(label, &block)
+  def profile(label, &)
     calls = []
     queries = []
     subs = [subscribe_atlas(calls), subscribe_sql(queries)]
 
-    wall_ms = timed(&block)
+    wall_ms = timed(&)
 
     RESULTS << { label: label, status: response.status, wall_ms: wall_ms,
                  calls: calls, queries: queries.size }
