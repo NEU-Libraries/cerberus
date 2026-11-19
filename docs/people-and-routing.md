@@ -348,9 +348,9 @@ The one lookup answers the type with the NOID, so the request never makes a
 second call to ask what kind of thing a NOID names. That matters when the
 caller is a crawler working through a decade of links.
 
-`destination_for` maps `Community`, `Collection` and `Work`. Atlas can answer
-a type this app has no route for yet, such as a `Blob` for a v1 file pid.
-`destination_for` logs it and returns `nil`, which takes the same 404 path as
+`destination_for` maps `Community`, `Collection` and `Work`, the only types
+Atlas records a v1 pid on. Any other type it is handed it logs and returns
+`nil`, which takes the same 404 path as
 an unknown pid. The 404 renders directly, with
 "page" as the missing thing, rather than through `ResourceNotFound`, which would
 call it "the legacy you requested".
@@ -379,8 +379,8 @@ carries, because `editor` carries `params[:id]` and `validate`, `repair` and
 `require_modsable_resource!` refuses a type that has no MODS editing surface,
 before anything reads or renders. The gate asks the resource's class,
 `resource.resource_class.mods_editable?`, and atlas_rb answers true for Work,
-Collection and Community only. Atlas names the same set with its own `Modsable`
-concern.
+Collection and Community only. Atlas names the same set in
+`ResourcesController::TYPED_IVARS`.
 
 The `:edit` gate above it is not enough on its own, and neither is the read
 succeeding:
@@ -481,12 +481,12 @@ that takes effect. Each reports to the actor's inbox through
 `CompletionNotice.deliver`, under its own `AdminNotice` kind.
 
 `SetSentinelApplyJob` retries `AtlasRb::StaleResourceError` on the one Work, up
-to `LOCK_ATTEMPTS`. Atlas surfaces it only once its own optimistic-lock retries
-are exhausted. The retry stays per Work, not a `retry_on`, because a re-run finds
+to `LOCK_ATTEMPTS`. Atlas does not retry either rights write, so a conflict
+comes back at once. The retry stays per Work, not a `retry_on`, because a re-run finds
 the Works it already changed matching, and its ledger entry would leave them
 out. `SetReindexJob` retries `Faraday::TimeoutError`,
-because atlas_rb sets no Faraday timeout on the system connection and a large
-included collection can hold the thread. Its `TimeoutError` re-raise has to stay
+because a large included collection can outrun the read timeout atlas_rb sets
+on the system connection. Its `TimeoutError` re-raise has to stay
 above the `Faraday::Error` rescue, or `retry_on` never sees it.
 
 ### Visibility writes the resource ACL, not the derivative gate
@@ -525,9 +525,10 @@ to withhold.
 A failure leaves a rendition *wider* than intended. So the report's lead names
 what the operator still has to deal with rather than merely saying it failed.
 
-The write is a whole-object replace, on purpose. Atlas reads an absent tier as
-riding the Work's own visibility, which is what a Sentinel that does not name the
-tier means.
+The write is a whole-object replace, on purpose. Atlas reads an absent image
+tier as inheriting the nearest lower-resolution tier that is named, falling back
+to the Work's own visibility, and an absent media tier as riding the Work's
+visibility. That is what a Sentinel that does not name the tier means.
 
 `set_noid` is the Compilation's NOID, which is also the Sentinel's `target_id`.
 With no Sentinel for the Set, the job does nothing.

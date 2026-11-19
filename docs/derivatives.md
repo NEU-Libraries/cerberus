@@ -342,7 +342,7 @@ Intersecting instead always yields a legal policy, and errs restrictive:
 
 - On a public Work, the admin group survives.
 - On a group-restricted Work, the tier collapses to `[]` — private, reachable
-  only through a full admin's blanket ability.
+  only through a full admin's blanket ability or an edit grant on the Work.
 
 A restricted Work's video is already limited to the people who can read it, so
 that is a coherent floor rather than a degradation.
@@ -381,8 +381,9 @@ so it is not used.
 
 `applicable?` asks whether the Work has an audio or video Blob. A remuxed MP4
 shares its original's media type. A Work therefore matches from the moment its
-content lands, not only once it is playable. Delegates — the image tiers — carry
-a `uri` and are not content.
+content lands, not only once it is playable. Delegates — the image tiers — are
+not content, and `AssetKind` tells them apart by the `kind` Atlas names on each
+asset.
 
 At deposit the Blob may still be in flight, so the metadata page asks
 `StagedMediaProbe` instead, which reads the staged upload's media type.

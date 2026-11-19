@@ -462,9 +462,10 @@ Two surfaces read those edges, and they resolve titles differently on purpose.
 | The public association box (`WorkAssociations`) | The gated Blacklight search | A viewer must not learn that a Work they cannot see exists |
 | The admin panel (`Admin::AssociationsController`) | `AtlasRb::Resource.find_many` | A management surface must show every edge, including one to a tombstoned Work. The gated search drops that Work, and the edge would then be unremovable |
 
-Atlas gates a delegated admin's reads by group, so on the admin panel
-`find_many` can drop a Work that admin cannot read. `titles_for` then shows the
-bare NOID, and the edge stays removable.
+Atlas filters both directions of the edge list by the caller's `:read`, so a
+delegated admin never receives an edge whose far end they cannot read. If
+`find_many` drops an id it cannot resolve, `titles_for` shows the bare NOID, and
+the edge stays removable.
 
 Each admin row also shows the first 160 characters of the Work's abstract, as
 the public box does, with the PID in a chip beside the title. `find_many`'s
@@ -478,9 +479,9 @@ keeps its row, with the title and the chip and no abstract.
 see. It takes one Solr query to cover both directions and every predicate,
 however many edges a Work has.
 
-Atlas answers with noids, and that is what makes this safe. Atlas's association
-endpoint is ungated: it reports every edge, including edges to Works the viewer
-must not see. Resolving those noids through the gated search reduces the list
+Atlas answers with noids, and that is what makes this safe. Atlas filters the
+edges by what the signed-in user may read, not by the view-as viewer, and it
+still lists edges to tombstoned Works. Resolving those noids through the gated search reduces the list
 to the rows this viewer may have. A noid that resolves to no document does not
 render, and leaves no trace: no group heading, no count, no "1 item hidden".
 Each of those would confirm the record exists. The same lookup drops tombstoned

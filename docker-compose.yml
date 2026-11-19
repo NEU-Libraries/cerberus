@@ -165,8 +165,8 @@ services:
   # night, and posts each result to Atlas. Atlas's docs/fixity.md is the
   # reference. Exactly one replica: two checkers race over the same objects.
   # Same tag as atlas, so the checker and the endpoint it reports to move
-  # together. Harmless while ATLAS_FIXITY_TOKEN is unset: each sweep is
-  # refused with a 401 and the loop sleeps until the next one.
+  # together. Harmless while ATLAS_FIXITY_TOKEN is unset: each sweep stops
+  # before calling Atlas and the loop sleeps until the next one.
   fixity:
     image: nakatomi/atlas_web:${ATLAS:-latest}
     entrypoint: ["/home/atlas/web/bin/fixity-entrypoint.sh"]

@@ -63,9 +63,9 @@ Atlas keeps its own `.env`, on the same pattern.
 ### Encrypted credentials
 
 `config/master.key` is gitignored. Without it every credential resolves to
-`nil`. That fails late and obscurely rather than at boot: a request signs with a
-missing key and Atlas answers 401. Get the key from a maintainer before you run
-anything.
+`nil`. That fails late and obscurely rather than at boot: the first Atlas call
+finds no signing key and atlas_rb raises `AtlasRb::ConfigurationError`. Get the
+key from a maintainer before you run anything.
 
 ### The request deadline
 
@@ -113,8 +113,8 @@ explains what each number protects against.
 **Compose does not pick up a plain `docker-compose.override.yml` here.** Compose
 auto-merges an override only when you invoke the base file alone, and Cerberus
 comes up with an explicit `-f` chain. That is why the local file has its own
-name and has to be named in the chain. (Atlas has no extra `-f` files, so it
-uses a plain override.)
+name and has to be named in the chain. (Atlas's README starts it with a plain
+`docker compose up`, so it uses a plain override.)
 
 ## Running specs
 
@@ -200,7 +200,7 @@ start. To run against a genuinely separate Atlas, point
 
 **A run refuses to reset the wrong Atlas.** `before(:suite)` wipes and reseeds
 whichever instance `ATLAS_URL` names. That endpoint authenticates *optionally*:
-it is the one call that still succeeds with no credentials.
+it is the one destructive call that still succeeds with no credentials.
 `spec/support/spec_preflight.rb` runs first. It checks that the target is the
 test instance, that the signing key is present, and that something is
 listening. A misconfigured checkout then gets one message instead of a destroyed

@@ -594,9 +594,8 @@ propagation: `Current.nuid` set on the request thread does *not* automatically
 reach the worker thread that runs the job. Background jobs that call
 `AtlasRb::*` without an explicit `nuid:` kwarg rely on the configured
 `default_nuid` resolving to `Current.nuid`. If the value is not restored at
-perform, the request goes out with no `User:` header, and Atlas's
-`require_auth` rejects it with 400. That surfaces as an unrelated
-`NoMethodError` when the gem parses the error envelope and returns nil.
+perform, atlas_rb has no acting NUID to sign and raises
+`AtlasRb::ConfigurationError` before the request is sent.
 
 `before_enqueue` captures `Current.nuid` into `current_nuid`, which
 `serialize` and `deserialize` carry with the job. `around_perform` re-sets it

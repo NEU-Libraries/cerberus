@@ -156,14 +156,14 @@ action between controllers.
 |---|---|---|
 | Tombstone list, restore and bulk restore | `:admin` or the devolved-admin tier | Atlas grants `:restore` to both, in `apply_admin_delegate_abilities` |
 | Permanent delete and bulk delete | `:admin` only | Atlas omits `:destroy` from the delegate abilities, so a wider gate here only buys a 403 from Atlas |
-| Replace a file, roll back a version | `:admin` or the devolved-admin tier | Atlas grants Blob `:update` to every standard user, and its rollback checks `:update`. It grants `:read_versions` to the delegate tier |
+| Replace a file, roll back a version | `:admin` or the devolved-admin tier | Atlas grants Blob `:update` to admins and to anyone holding edit rights on the Blob's Work, and its rollback checks `:update`. It grants `:read_versions` to the delegate tier |
 | Remove one file, restore a removed file | `:admin` or the devolved-admin tier | Atlas grants FileSet `:tombstone` and `:restore`, and the `tombstoned_assets` listing, to both. It sits on the Replace a file page, which already carries this gate |
 | Reindex a Work or a Set | `:admin` or the devolved-admin tier | Atlas applies no per-user check on this path at all |
 | The ledger | `:admin` or the devolved-admin tier | the same audience as deposit triage |
 | Work health lookup | `:admin` or the devolved-admin tier | Atlas allows its health check to both tiers, as `:read_health`. See `work-health.md` |
 | Fixity report | `:admin` only | it lists through the gated search, so a delegate would see a partial list that reads as healthy. See `fixity.md` |
 | Linked members | `:admin` only | it edits placement, which the delegate tier does not manage |
-| Associated works | `:admin` or the devolved-admin tier | Atlas grants `:associate` to both. A delegate's reads stay group-gated, so a Work they cannot read gets the forbidden page, and an edge to one shows its bare NOID |
+| Associated works | `:admin` or the devolved-admin tier | Atlas grants `:associate` to both. A delegate's reads stay group-gated, so a Work they cannot read gets the forbidden page, and Atlas leaves an edge to one out of the list |
 | Communities registry | `:admin` or the devolved-admin tier | it only lists and links, through the gated search, so a delegate sees what they may discover. Its People link is `:admin` only, as the page it opens is |
 | A community's people (`Admin::CommunityPeopleController`) | `:admin` only | Atlas grants Person `:update` to admins and the system principal alone. It is a hub page rather than a tab on the community's Edit page, because people who may edit a community's details must not be offered its people |
 | The History tab, and the rights, MODS and Darwin Core history pages | `:admin` or the devolved-admin tier, as `:read, :audit_event` | Atlas grants the delegate tier `:read_history` on Works and containers, and still checks `:read` on the resource, so a delegate reads the history of what they can open. The history of a resource that no longer resolves stays admin-only in Atlas |
@@ -329,7 +329,7 @@ Atlas restores and purges every type through one generic endpoint, which
 atlas_rb binds as `AtlasRb::Admin::Resource.restore` and `.destroy`. So the
 controller needs no per-type class. `RESTORABLE_TYPES` is only the allow-list
 for the `type` param: Work, Collection and Community. It still has to refuse a
-FileSet or a Blob, which the generic endpoint would otherwise accept.
+FileSet, which the generic restore endpoint would otherwise accept.
 
 The index borrows `CatalogController`'s Solr configuration with
 `copy_blacklight_config_from`. The `TombstonedItems` service searches through
@@ -509,11 +509,10 @@ a file with no version table.
 `ActionController::Live`. Keeping it separate means the finder and mutation
 actions here are not forced into stream semantics. It shares the same gate.
 
-It checks the version id against the Blob's own history before any bytes move.
-The streaming binding cannot raise on Atlas's 404 for an unknown version,
-because chunks reach the client before the status is known. Without the check,
-the error body would arrive as the file's contents, under a 200 and the download
-filename.
+It streams through `StreamsBlob`, as the public download does, so the download
+headers go on with the first chunk. atlas_rb hands the block only a 2xx body,
+so an unknown version is Atlas's 404, which arrives before any header is set
+and renders the not-found page.
 
 The acting user's NUID flows ambiently through `Current.nuid` and propagates
 into the enqueued jobs.
@@ -782,5 +781,6 @@ only in their reads and their wording. `MODSDiff` is a line diff of
 pretty-printed XML with nothing MODS-specific in it, so it serves both.
 
 It also refuses any type but a Work, before reading. Only a Work holds a
-record, and Atlas answers an empty version list for anything else, so without
-the gate a Collection would show an empty history rather than a 404.
+record, and Atlas answers 404 for anything else, which atlas_rb reads back as
+`nil`, so without the gate a Collection would show an empty history rather than
+a 404.

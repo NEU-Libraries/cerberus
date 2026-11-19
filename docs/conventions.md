@@ -37,7 +37,7 @@ A gap report has five parts:
 |---|---|
 | Cerberus feature | What you are building, and why the gap blocks it |
 | What is needed | The specific method, endpoint or capability that is missing |
-| Atlas status | Whether the endpoint already exists, checked against the [Atlas OpenAPI spec](https://raw.githubusercontent.com/NEU-Libraries/atlas/develop/openapi/openapi.yaml) |
+| Atlas status | Whether the endpoint already exists, checked against Atlas's OpenAPI specs: the [public spec](https://raw.githubusercontent.com/NEU-Libraries/atlas/develop/openapi/public/openapi.yaml) for client endpoints and the [internal spec](https://raw.githubusercontent.com/NEU-Libraries/atlas/develop/openapi/internal/openapi.yaml) for system and admin endpoints |
 | Gap type | *Binding-only* if Atlas has the endpoint but atlas_rb lacks a wrapper; *new endpoint* if Atlas itself needs the capability |
 | Suggested implementation | A sketch of the atlas_rb method signature, the Atlas endpoint, or both |
 

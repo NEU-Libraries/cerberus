@@ -393,8 +393,9 @@ Atlas keeps the descendant's other keys.
 
 ### Retrying on a lock conflict
 
-Atlas retries its own optimistic-lock conflicts and raises
-`AtlasRb::StaleResourceError` only once its budget is spent. During a deposit,
+Atlas does not retry a permissions write, so an optimistic-lock conflict comes
+back at once as a 409, which atlas_rb raises as `AtlasRb::StaleResourceError`.
+During a deposit,
 that means finalize jobs are still touching the same resources.
 
 The job retries that one target in place, up to `LOCK_ATTEMPTS`, and then names

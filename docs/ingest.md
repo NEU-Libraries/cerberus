@@ -162,8 +162,8 @@ a warning and skips its service rather than failing the row.
 
 Atlas upserts the Delegate, so re-PATCHing is never additive and a retry is
 safe. `page_service_present?` is consulted only on a resume. It distinguishes a
-Delegate from content the same way everything else does. Delegates carry a `uri`
-in the listing's polymorphic assets, and content Blobs do not.
+Delegate from content the same way everything else does: through `AssetKind`,
+which reads the `kind` Atlas names on each of the listing's polymorphic assets.
 
 ### What page 1 does that other pages do not
 
