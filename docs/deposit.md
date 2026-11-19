@@ -563,8 +563,8 @@ person reads, with a fallback, so adding one needs no view change.
 where it must come from the job instance the handler is passed
 (`job.current_nuid`). A handler runs *outside* `perform`, so
 `ApplicationJob`'s `around_perform` has already unwound and the ambient
-`Current.nuid` is gone. Atlas then has no principal to authenticate and
-refuses the write with a `ConfigurationError`. That failure is caught, so the
+`Current.nuid` is gone. atlas_rb then has no NUID to sign and raises
+`AtlasRb::ConfigurationError` before the write is sent. That failure is caught, so the
 symptom is a flag that silently never appears.
 
 `IncompleteFlag.clear` takes no `nuid:`, deliberately. It runs inside
