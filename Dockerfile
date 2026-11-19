@@ -1,4 +1,4 @@
-FROM ruby:3.2.2-slim
+FROM ruby:4.0.10-slim
 # One apt layer: a later RUN can't reclaim space cleaned from an earlier one
 # (the union FS keeps the earlier layer's files), so the package lists are
 # purged in the same RUN that populates them. LibreOffice powers Word/PowerPoint
