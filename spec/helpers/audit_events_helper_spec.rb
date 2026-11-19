@@ -59,11 +59,20 @@ RSpec.describe AuditEventsHelper, type: :helper do
       expect(html).to include('/resources/w-1/dwc_history')
     end
 
-    it 'also links a title/description field-patch (plain_title= edits the MODS doc too)' do
+    it 'also links an older title/description field patch, which wrote MODS' do
       html = helper.audit_event_view_cell(
         event(action: 'update', change_type: 'metadata', payload: { 'fields' => %w[title] }), 'w-1'
       )
       expect(html).to include('/resources/w-1/mods_history')
+    end
+
+    # Atlas records these as metadata updates, but neither writes a version.
+    it 'renders nothing for a Featured toggle or a Person profile save' do
+      featured = event(action: 'update', change_type: 'metadata', payload: { 'featured' => true })
+      profile = event(action: 'update', change_type: 'metadata')
+
+      expect(helper.audit_event_view_cell(featured, 'c-1')).to be_nil
+      expect(helper.audit_event_view_cell(profile, 'p-1')).to be_nil
     end
 
     it 'renders nothing for non-update rows' do

@@ -147,7 +147,7 @@ semantic and styling hook, notably for permissions.
 |---|---|---|
 | `permissions` | `create` or `update` (`PERMISSION_VIEW_ACTIONS`) | The Rights-history diff page, `rights_history_path` |
 | `metadata` | `update`, with `source: 'dwc'` | The Darwin Core history diff page, `dwc_history_path` |
-| `metadata` | any other `update` | The MODS-history diff page, `mods_history_path` |
+| `metadata` | `update` with `source: 'mods'`, or an older `fields` patch | The MODS-history diff page, `mods_history_path` |
 | anything else | any | nil — the column renders an empty cell and stays aligned |
 
 Both permission actions carry a before/after snapshot. `create` is the initial
@@ -156,12 +156,13 @@ change. Atlas suppresses no-op permission writes, so each event is a real
 transition worth a page. `HistoriesController#permission_events` filters on the
 same `PERMISSION_VIEW_ACTIONS`.
 
-Every metadata update writes a new `descMetadata.xml` OCFL version, so every
-one gets a MODS-diff link. That covers a full MODS upload (`{ source: 'mods' }`)
-and a title or description field patch (`{ fields: }`) alike. Atlas's
-`plain_title=` and `plain_description=` edit the MODS document and call
-`mods_xml=` too, in `MODSAssignment`. The MODS document's `create` row has no
-earlier version to diff against, so the link is update-only.
+A MODS upload (`{ source: 'mods' }`) writes a new `descMetadata.xml` OCFL
+version, so it gets a MODS-diff link. Older history also holds title or
+description patches (`{ fields: }`), which wrote MODS too and keep the link.
+Atlas records two more `metadata` updates that write no version: a Collection's
+Featured toggle (`{ featured: }`) and a Person profile save, with no payload.
+Neither gets a View. The MODS document's `create` row has no earlier version to
+diff against, so the link is update-only.
 
 A Darwin Core write is a `metadata` update too, and only `payload.source`
 tells it apart, so `metadata_history_path` branches on it. Without the branch,
@@ -196,7 +197,8 @@ action. The shapes mirror what Atlas emits:
 | `reparent` | `{ to: noid }` | "moved to &lt;noid&gt;" |
 | `link_member` | `{ collection: noid }` | "to &lt;noid&gt;" |
 | `unlink_member` | `{ collection: noid }` | "from &lt;noid&gt;" |
-| `create`, `tombstone`, `restore` | none | none; the category label stands alone |
+| `create`, `restore` | none shown | none; the category label stands alone |
+| `tombstone` | `{ reason: }` when one was given | the reason |
 | `release_embargo` | `{ release_date: }` | none; the row's own timestamp is the release day |
 
 `update_payload_summary` matches `source` exactly, not merely for presence.
