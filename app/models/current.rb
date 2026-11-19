@@ -4,8 +4,8 @@
 # read by every AtlasRb::* call site (controllers, jobs, rake tasks).
 #
 # Rails does not carry these across enqueue and perform. ApplicationJob
-# serializes nuid by hand and restores it on perform; the other attributes
-# are nil inside a job.
+# serializes nuid by hand and restores it on perform, and sets request_id to
+# the job's own id; the other attributes are nil inside a job.
 class Current < ActiveSupport::CurrentAttributes
   # The authenticated acting identity — always the real signed-in user,
   # even while impersonating. Signed as atlas_rb's `sub` claim.
@@ -32,4 +32,8 @@ class Current < ActiveSupport::CurrentAttributes
   # threads ParallelAtlasReads spawns copy the same object by reference and their
   # Atlas calls count toward this request. Never sent to Atlas.
   attribute :request_timing
+
+  # The id this request or job logs under, sent to Atlas as X-Request-Id so
+  # Atlas's log lines carry it. A log label only; Atlas trusts nothing about it.
+  attribute :request_id
 end

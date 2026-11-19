@@ -24,7 +24,10 @@ class ApplicationController < ActionController::Base
   end
 
   # Prepended so it runs before any callback that reads Atlas.
-  prepend_before_action { Current.request_timing = RequestTiming.new }
+  prepend_before_action do
+    Current.request_timing = RequestTiming.new
+    Current.request_id     = request.request_id
+  end
 
   before_action :store_preferred_view
   before_action :set_current_nuid

@@ -511,7 +511,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord-session_store
-  atlas_rb (>= 1.29.8)
+  atlas_rb (>= 1.29.9)
   axe-core-rspec
   blacklight (~> 9.0)
   blacklight-gallery (~> 6.0)

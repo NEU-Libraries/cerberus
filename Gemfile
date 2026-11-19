@@ -74,7 +74,7 @@ gem 'bootsnap', require: false
 # binding would report every unparseable Atlas response as 404 again. It also
 # sets per-connection deadlines, without which a hung Atlas holds a Puma thread
 # for minutes.
-gem 'atlas_rb', '>= 1.29.8'
+gem 'atlas_rb', '>= 1.29.9'
 gem 'blacklight', '~> 9.0'
 # 6.x is the first line that allows Blacklight 9; its gemspec pins the 9.0.0
 # betas, which 9.0.0 final satisfies.

@@ -59,9 +59,9 @@ Rails.application.configure do
   # page. An unexplained gap in its accounting is the tell.
   config.server_timing = true
 
-  # Prepend all log lines with the following tags. The request id groups the
-  # lines of one Cerberus request. It is not sent to Atlas, which mints its own,
-  # so a Cerberus line joins the Atlas line it caused by time, not by id.
+  # Prepend all log lines with the following tags. atlas_rb sends the request id
+  # to Atlas, which tags its own lines with it, so one search finds a page view
+  # in both logs. See docs/outages.md.
   config.log_tags = [:request_id]
 
   # The store, from one definition — see config/cache_store.rb. Staging needs a

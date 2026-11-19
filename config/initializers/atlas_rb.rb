@@ -30,6 +30,7 @@ AtlasRb.configure do |config|
   config.default_nuid         = -> { Current.nuid }
   config.default_on_behalf_of = -> { Current.on_behalf_of }
   config.default_account      = -> { Current.account_email }
+  config.request_id           = -> { Current.request_id }
 
   config.assertion_signing_key = -> { Rails.application.credentials.cerberus_signing_key }
   config.assertion_signing_kid = -> { Rails.application.credentials.cerberus_signing_kid }
