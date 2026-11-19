@@ -158,10 +158,6 @@ class WorksController < ApplicationController
 
   def update_metadata
     handle_metadata_update(include_advanced: true)
-    # AFTER the descriptive save, deliberately: with a live worker
-    # DepositDerivativesJob runs inside this request and its Delegate PATCH
-    # bumps the lock, racing save_descriptive! into StaleResourceError. Specs
-    # never see it — the test adapter does not run the job inline.
     process_derivative_widths
     apply_streaming_only! { StagedMediaProbe.call(work_id: params[:id]) }
     # Before the confirm, so the caption Blob queues behind the deposit's own

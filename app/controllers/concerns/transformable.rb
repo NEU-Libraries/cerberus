@@ -15,7 +15,7 @@ module Transformable
 
   # The resource's raw MODS, read once per request. Read paths only:
   # #save_descriptive! deliberately re-reads inside with_stale_retry, because a
-  # retry needs the current MODS and its lock token, not a memo from earlier.
+  # retry has to merge into the MODS as stored now, not a memo from earlier.
   def resource_mods
     @resource_mods ||= AtlasRb::Resource.mods(params[:id], 'xml')
   end

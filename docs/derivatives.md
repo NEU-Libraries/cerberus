@@ -276,9 +276,9 @@ caption first would let a deposit complete around captions alone. Atlas builds
 the Work's METS structMap at completion, recording a preservation structure that
 omits the recording.
 
-Waiting also orders this write after the deposit's own. It does not remove the
-race entirely: a Blob write bumps the Work's optimistic lock, so the job still
-retries on `AtlasRb::StaleResourceError`.
+Waiting also orders this write after the deposit's own. Atlas retries a Blob's
+attach to its FileSet a few times and answers a conflict that outlasts them
+with a 409, so the job still retries on `AtlasRb::StaleResourceError`.
 
 ### What happens when the wait runs out
 

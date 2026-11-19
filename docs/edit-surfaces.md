@@ -428,7 +428,7 @@ loaders parse the same document: `DescriptiveMetadata` for the bare title,
 abstract and keywords, and `AdvancedMetadata` for the structured title parts and
 names. The Work edit page runs both, so without the memo it would fetch the same
 XML from Atlas twice. The memo is for reads only. `merge_mods!` re-reads inside
-`with_stale_retry`, because a retry needs the current MODS and its lock token.
+`with_stale_retry`, because a retry has to merge into the MODS as stored now.
 
 ### The two ACL writes
 

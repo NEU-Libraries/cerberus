@@ -278,11 +278,10 @@ assets.
 The order inside `#update_metadata` is load-bearing:
 
 1. `handle_metadata_update` — the descriptive save.
-2. `process_derivative_widths` — after the descriptive save, deliberately.
-   With a live worker, `DepositDerivativesJob` can execute within this same
-   request, and its Delegate PATCH bumps the Work's optimistic lock. Enqueueing
-   it first races `save_descriptive!` into `AtlasRb::StaleResourceError`. Specs
-   cannot catch this, because the test adapter never runs the job inline.
+2. `process_derivative_widths` — queues `DepositDerivativesJob` for the
+   renditions the depositor chose. Its Delegate writes re-save the Work, but
+   they do not conflict with the MODS write: Atlas holds a lock across each
+   MODS write and retries the re-save that follows it.
 3. `apply_streaming_only!`.
 4. `apply_caption!` — before the confirm, so the caption Blob is queued behind
    the deposit's own finalization rather than ahead of it. `CaptionJob` waits
@@ -398,15 +397,16 @@ no-op.
 
 It runs inside `with_stale_retry`, through `merge_mods!`. Right after a
 deposit, the async ingest and derivative jobs are still finalizing the same
-Work, so this read-merge-write can lose an optimistic-lock race. Re-reading
-picks up the current MODS and token.
+Work. Atlas retries the re-save that follows a MODS write, so a conflict
+reaches Cerberus only when it outlasts those retries. Re-reading then merges
+into the MODS as stored now.
 
 Both `save_descriptive!` and `save_advanced!` are thin calls over
 `AtlasWrite#merge_mods!`, which is the read-merge-write spine itself: read the
 current MODS inside the retry, merge, skip the write when nothing changed, and
 tag the event with the calling surface's origin. The read sits *inside* the
-retry deliberately, because a retry needs the current MODS and its lock token
-rather than a memo from the first attempt.
+retry deliberately, because a retry has to merge into the MODS as stored now,
+not a memo from the first attempt.
 
 `save_descriptive!` takes an `advanced:` hash so a form carrying **both** field
 sets is **one** write. `MODSMerge` already accepts every field in a single

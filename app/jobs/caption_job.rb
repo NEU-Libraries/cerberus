@@ -20,8 +20,8 @@ class CaptionJob < ApplicationJob
     )
   end
 
-  # A Blob write bumps the Work's optimistic lock, so this can lose a race with
-  # the deposit's own finalization even after the wait above.
+  # Atlas retries a Blob's attach to its FileSet a few times, then answers a
+  # conflict that outlasts them with a 409.
   retry_on AtlasRb::StaleResourceError, attempts: 5, wait: :polynomially_longer
 
   # `track` is { 'language', 'track_label' }. The English default covers a job

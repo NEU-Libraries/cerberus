@@ -6,14 +6,11 @@
 # services that write MODS, so neither carries its own copy.
 # See docs/deposit.md.
 module AtlasWrite
-  # Atlas enforces optimistic locking server-side and raises
-  # AtlasRb::StaleResourceError (HTTP 409) only once its own retry budget is
-  # exhausted. During a deposit the async ingest/derivative jobs are still
-  # finalizing the Work (Work.complete, Delegate PATCHes), so an interactive
-  # metadata/permissions save can lose the race. Re-run the block so each attempt
-  # re-reads the current state and token, backing off briefly between tries.
-  # atlas_rb blesses this pattern via retry_on for jobs; the interactive path
-  # needs its own bounded loop.
+  # Atlas answers a lost optimistic-lock race with AtlasRb::StaleResourceError
+  # (HTTP 409). It never retries a permissions or metadata update itself, and a
+  # deposit's jobs are still writing the same Work while its form is saved. Re-run
+  # the block so each attempt re-reads the current state, backing off briefly;
+  # jobs get the same from retry_on.
   def with_stale_retry(attempts: 5)
     tries = 0
     begin
@@ -31,8 +28,8 @@ module AtlasWrite
   # means "leave it untouched", so a caller passes only what its own form owns
   # and one call can carry two forms' worth of fields.
   #
-  # The read sits INSIDE with_stale_retry deliberately: a retry needs the
-  # current MODS and its lock token, not a memo from the first attempt.
+  # The read sits INSIDE with_stale_retry deliberately: a retry has to merge into
+  # the MODS as stored now, not a memo from the first attempt.
   #
   # The unchanged? guard is what keeps a no-op submit from minting an OCFL MODS
   # version and an audit row. Do not hoist it: `update` writes unconditionally.
