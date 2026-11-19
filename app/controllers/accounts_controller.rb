@@ -4,7 +4,7 @@
 # (their staff/student logins), each with its own group set; this lets them act
 # as a different one of *their own* accounts without logging out, and choose a
 # preferred (default) one. Both actions are constrained to the caller's own
-# accounts — Atlas independently rejects a foreign account (a 403 on the switch
+# accounts — Atlas independently rejects a foreign account (a 400 on the switch
 # read, a 404 on set-preferred), so the membership check here is the Cerberus
 # half of a two-sided guarantee, not the only one.
 class AccountsController < ApplicationController
@@ -51,9 +51,9 @@ class AccountsController < ApplicationController
       email.present? && my_account_emails.include?(email)
     end
 
-    # A NUID Atlas has never seen reads back as nil, not as a raise, so the
-    # rescue_from above does not cover it — and an empty list is the right
-    # answer for "you have no other accounts to switch to".
+    # Nil comes back only on a 404 (an ATLAS_URL that is not Atlas); a NUID with
+    # no other accounts is an empty list. An unknown signing NUID is a 400
+    # AtlasRb::ResourceError, which the rescue_from above does not catch.
     def my_account_emails
       accounts = AtlasRb::User.accounts(current_user.nuid, nuid: current_user.nuid)
       Array(accounts && accounts['accounts']).pluck('email')

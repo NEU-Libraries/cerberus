@@ -7,7 +7,7 @@ require 'tempfile'
 # Two modes, decided by the row (v1's edit-vs-create determination):
 #
 # - update: the row carries an identifier (a v2 NOID, which *is* the Atlas
-#   resource id), so we replace the existing Work's MODS via Work.update.
+#   resource id), so we replace the existing Work's MODS via Resource.put_mods.
 # - create: the row carries a File Name and no identifier, so we mint a new
 #   Work seeded with the bundled MODS, stage the content file, and hand off to
 #   IngestDispatch (ContentCreationJob plus per-type enrichment: thumbnails
@@ -186,8 +186,8 @@ class XmlIngestJob < ApplicationJob
     def finalize_success(ingest)
       # The warnings channel (completed_with_warnings) is shared with IPTC and
       # left unpopulated here — the natural signal (a no-op update whose new
-      # MODS equals the existing) needs a raw-MODS read-back Atlas doesn't
-      # expose today. Reserved, not blocking.
+      # MODS equals the existing) would need a raw-MODS read-back before each
+      # put, which the job does not do. Reserved, not blocking.
       ingest.update!(status: :completed)
       ingest.load_report.maybe_finalize!
     end

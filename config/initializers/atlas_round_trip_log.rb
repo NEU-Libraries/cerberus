@@ -28,7 +28,8 @@
 if Rails.env.development?
   # Atlas's own view of the same call, from the headers it sends back: x-runtime
   # is its whole Rails stack, and Server-Timing's process_action is the action
-  # alone, which is what its /metrics/latency reports. Cerberus's time minus
+  # alone. Its /metrics/latency times from the top of its Rack stack, so it
+  # matches neither header exactly. Cerberus's time minus
   # x-runtime is what happened outside Atlas's Rails app.
   atlas_timings = lambda do |headers|
     runtime = headers['x-runtime']

@@ -32,9 +32,9 @@ class CaptionTrack
   ].freeze
   OTHER = 'other'
 
-  # Atlas checks the same shape and refuses a malformed tag with 422, but only
-  # after the upload is staged and the job queued. Checking here refuses it at
-  # the form, where the depositor can still correct it.
+  # Atlas refuses a malformed tag with 422, but only after the upload is staged
+  # and the job queued, and it accepts one-character subtags this does not.
+  # Checking here refuses it at the form, where the depositor can still correct it.
   TAG_FORMAT = /\A[a-z]{2,3}(-[a-z0-9]{2,8})*\z/i
   LABEL_LIMIT = 64
 

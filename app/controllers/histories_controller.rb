@@ -24,8 +24,9 @@ class HistoriesController < ApplicationController
     end
   end
 
-  # Only a Work holds a Darwin Core record. Atlas answers an empty list for any
-  # other id, so without the gate a Collection would show an empty history.
+  # Only a Work holds a Darwin Core record. Atlas answers 404 for any other id,
+  # which reads back as nil, so without the gate a Collection would show an
+  # empty history rather than the 404 page.
   def dwc
     load_resource!
     raise ResourceNotFound unless @resource_klass == 'Work'

@@ -5,8 +5,8 @@
 class SetReindexJob < ApplicationJob
   queue_as :default
 
-  # atlas_rb sets no Faraday timeout on the system connection, so a large included
-  # collection can hold this thread for a while. A timeout is transient and the
+  # atlas_rb bounds the system connection by its read timeout, so a large included
+  # collection's subtree reindex can time out. A timeout is transient and the
   # walk is idempotent, so re-running the recipe only repeats converged work.
   retry_on Faraday::TimeoutError, wait: :polynomially_longer, attempts: 3
 

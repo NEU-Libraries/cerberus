@@ -3,13 +3,12 @@
 # Ambient per-request context. Set once at the controller boundary and
 # read by every AtlasRb::* call site (controllers, jobs, rake tasks).
 #
-# Rails 7's ActiveJob ↔ CurrentAttributes integration captures attribute
-# values at enqueue and restores them on perform, so jobs and their
-# downstream child enqueues see the same nuid (and on_behalf_of) without
-# explicit threading.
+# Rails does not carry these across enqueue and perform. ApplicationJob
+# serializes nuid by hand and restores it on perform; the other attributes
+# are nil inside a job.
 class Current < ActiveSupport::CurrentAttributes
   # The authenticated acting identity — always the real signed-in user,
-  # even while impersonating. Sent as atlas_rb's `User:` header.
+  # even while impersonating. Signed as atlas_rb's `sub` claim.
   attribute :nuid
 
   # The account the person has switched to — their email (the account key: a NUID
@@ -20,7 +19,7 @@ class Current < ActiveSupport::CurrentAttributes
   attribute :account_email
 
   # Acting-as target. Populated only during an acting-as impersonation
-  # session; sent as atlas_rb's `On-Behalf-Of:` header so writes are
+  # session; signed as atlas_rb's `obo` claim so writes are
   # attributed to the target while authorization stays with `nuid`.
   attribute :on_behalf_of
 

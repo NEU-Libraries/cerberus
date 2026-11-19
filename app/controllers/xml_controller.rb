@@ -91,10 +91,11 @@ class XmlController < ApplicationController
 
     # Refuse a type that has no MODS editing surface, before anything reads or
     # renders it. Atlas answers /resources/:id/permissions for every type, so
-    # the :edit gate above passes on a FileSet, Blob, Delegate or Person, and
-    # the MODS read then succeeds too because atlas_rb defines it on the base
-    # class. Without this the editor opens on a resource it could never save and
-    # dies in the breadcrumb builder, which has no route for those types.
+    # the :edit gate above passes on a FileSet, Blob, Delegate or Person. The
+    # MODS read then comes back nil rather than raising, since Atlas answers 404
+    # for those types. Without this the editor opens on a resource it could
+    # never save and dies in the breadcrumb builder, which has no route for
+    # those types.
     def require_modsable_resource!
       resource = require_resource!(resolved_resource)
       raise ResourceNotFound unless resource.resource_class.mods_editable?

@@ -158,8 +158,9 @@ namespace :reset do
 
       # Jane Doe — a curated Person for the staff fixture user (NUID 000000002,
       # seeded by Atlas as "Doe, Jane"). 000000002 is the right subject: it's a
-      # seeded, loginable user at the staff/depositor tier (privileged, non-admin),
-      # so a demoer can exercise the publish fork as a regular depositor.
+      # seeded, loginable staff depositor and a delegated admin (privileged, in
+      # the repository admin group, short of full admin), so a demoer can
+      # exercise the publish fork without the full-admin wildcard.
       # Atlas's reset seeds her Person, with its display name, bio and
       # personal-root Collection (personal_root_id), so a Person.create here
       # would 409. The affiliation stays here because the Library is ours.

@@ -183,8 +183,8 @@ module ImpersonationSession
     end
 
     # A plain profile lookup, NOT an on-behalf-of operation: it must not inherit
-    # the ambient Current.on_behalf_of of an acting-as session. The call sets
-    # `User:` to the target (a non-admin), so a leaked On-Behalf-Of makes Atlas
+    # the ambient Current.on_behalf_of of an acting-as session. The call signs
+    # the target (a non-admin) as `sub`, so a leaked on-behalf-of makes Atlas
     # refuse the self-lookup and the banner reads "Unknown user".
     def hydrate_user(nuid)
       return if nuid.blank?
@@ -193,7 +193,8 @@ module ImpersonationSession
       # it sits inside the same guard.
       Current.set(on_behalf_of: nil) do
         values = AtlasRb::Authentication.login(nuid)
-        # A NUID Atlas does not know reads as nil; the callers fail closed on nil.
+        # A NUID Atlas does not know is a 400, which the rescue below turns into
+        # nil; the callers fail closed on nil.
         values && User.from_atlas(values)
       end
     rescue AtlasRb::Error, Faraday::Error, JSON::ParserError => e
