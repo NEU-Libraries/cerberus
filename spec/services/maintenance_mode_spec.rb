@@ -52,8 +52,8 @@ RSpec.describe MaintenanceMode do
     expect(described_class.unreachable?).to be false
   end
 
-  # Atlas answered, but not with a window — most often a build older than the
-  # endpoint. The opposite answer, deliberately: failing closed here would put
+  # Atlas answered 2xx, but not with a window, such as a proxy's HTML page. The
+  # opposite answer, deliberately: failing closed here would put
   # the whole site into maintenance mode on any Atlas hiccup, and would make
   # Cerberus impossible to deploy ahead of Atlas. Atlas still refuses the write
   # if a window really is open, and the gate's error rescue renders the same
@@ -126,18 +126,17 @@ RSpec.describe MaintenanceMode do
   # controller specs, so a binding or endpoint drift fails here rather than in
   # a window. It reads only — nothing is opened.
   #
-  # A JSON::ParserError here means the running Atlas image predates the
-  # endpoint: the response is Puma's HTML error page, not a window. The fix is
-  # the image, not this spec — see the failure message.
+  # A nil here means the running Atlas image predates the endpoint: atlas_rb
+  # reads its 404 back as nil. The fix is the image, not this spec — see the
+  # failure message.
   describe 'against Atlas' do
     it 'answers the window with the fields Cerberus reads' do
       described_class.reset_cache!
 
-      begin
-        state = AtlasRb::Maintenance.read(nuid: '000000004')
-      rescue JSON::ParserError
+      state = AtlasRb::Maintenance.read(nuid: '000000004')
+      if state.nil?
         pinned = Rails.root.join('.atlas_version').read.strip
-        raise 'GET /maintenance did not answer JSON. The running Atlas image is older ' \
+        raise 'GET /maintenance answered 404. The running Atlas image is older ' \
               "than the endpoint; bring it up to .atlas_version (#{pinned})."
       end
 
