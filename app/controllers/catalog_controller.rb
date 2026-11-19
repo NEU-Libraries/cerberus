@@ -58,11 +58,11 @@ class CatalogController < ApplicationController
 
     ## Default parameters to send to solr for all search-like requests. See also SearchBuilder#processed_parameters
     # hl*: body-text highlighting for the "Full Text Match" snippet, over the
-    # dedicated full_text_tsim field Atlas projects from extracted document text.
+    # dedicated full-text field Atlas projects from extracted document text.
     # NOT all_text_timv — that is a catch-all (ACLs, NUIDs, ids, URLs) and would
     # leak internal data into snippets and match noise tokens.
     config.default_solr_params = {
-      rows: 10, hl: true, 'hl.fl': 'full_text_tsim', 'hl.fragsize': 200,
+      rows: 10, hl: true, 'hl.fl': SolrDocument::FULL_TEXT_FIELD, 'hl.fragsize': 200,
       fq: ['-internal_resource_tesim:FileSet',
            '-internal_resource_tesim:Blob',
            '-internal_resource_tesim:Delegate',

@@ -2,8 +2,13 @@
 
 class SolrDocument
   # Provides highlight_field / has_highlight_field? (used for the "Full Text
-  # Match" result snippet over full_text_tsim) — both defined on this base module.
+  # Match" result snippet) — both defined on this base module.
   include Blacklight::Solr::Document
+
+  # The field Atlas projects a Work's extracted body text onto. The catalog asks
+  # Solr to highlight it and the result list reads the fragments back, so both
+  # must name the field Atlas writes.
+  FULL_TEXT_FIELD = 'full_text_tesimv'
 
   # self.unique_key = 'id'
 
