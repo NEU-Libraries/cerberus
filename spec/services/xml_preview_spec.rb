@@ -149,4 +149,19 @@ RSpec.describe XmlPreview do
       expect(errors).to eq(["Darwin Core XML file 'rec-dwc.xml' was not found in the archive."])
     end
   end
+
+  context 'when Atlas refuses the draft' do
+    let(:fixture) { 'metadata_existing_file.zip' }
+
+    before do
+      allow(AtlasRb::Resource).to receive(:preview)
+        .and_raise(AtlasRb::ResourceError.new('POST /resources/preview → 422', response: nil))
+    end
+
+    it 'leaves decorated_html nil rather than rendering the error' do
+      result = described_class.call(load_report: load_report)
+      expect(result).not_to be_blocked
+      expect(result.decorated_html).to be_nil
+    end
+  end
 end

@@ -158,4 +158,18 @@ RSpec.describe MultipagePreview do
       expect(result.decorated_html).to be_nil
     end
   end
+
+  context 'when Atlas refuses the draft' do
+    let(:archive_path) { zip_multipage_fixture('multipage') }
+
+    before do
+      allow(AtlasRb::Resource).to receive(:preview)
+        .and_raise(AtlasRb::ResourceError.new('POST /resources/preview → 422', response: nil))
+    end
+
+    it 'stays ok with a nil decorated_html rather than rendering the error' do
+      expect(result).to be_ok
+      expect(result.decorated_html).to be_nil
+    end
+  end
 end

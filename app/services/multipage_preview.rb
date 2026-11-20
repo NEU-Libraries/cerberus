@@ -122,7 +122,7 @@ class MultipagePreview < ApplicationService
         f.flush
         AtlasRb::Resource.preview(f.path)
       end
-    rescue Faraday::Error => e
+    rescue Faraday::Error, AtlasRb::ResourceError => e
       Rails.logger.warn("MultipagePreview: decorated render unavailable (#{e.class}: #{e.message})")
       nil
     end
