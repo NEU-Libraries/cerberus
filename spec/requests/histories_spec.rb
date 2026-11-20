@@ -300,8 +300,9 @@ RSpec.describe 'Histories', type: :request do
                                                         .and_return('<mods><titleInfo><title>New</title></titleInfo></mods>')
       get mods_history_path(resource_id)
       expect(response).to have_http_status(:ok)
-      # Scoped to the diff: the page's inline CSS names "Courier New".
-      expect(Capybara.string(response.body)).to have_css('.diff', text: 'New')
+      page = Capybara.string(response.body)
+      expect(page).to have_css('.mods-diff__row--del mark', text: 'Old')
+      expect(page).to have_css('.mods-diff__row--ins mark', text: 'New')
     end
 
     it 'shows the empty state when no versions exist' do
@@ -332,9 +333,10 @@ RSpec.describe 'Histories', type: :request do
       get dwc_history_path(resource_id)
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('Darwin Core history', 'class="diff"')
-      # The diff highlights the changed letters, so the word arrives split.
-      expect(response.body).to include('<li class="del">', '<li class="ins">', '<strong>Dipodomy</strong>s')
+      expect(response.body).to include('Darwin Core history')
+      page = Capybara.string(response.body)
+      expect(page).to have_css('.mods-diff__row--del mark', text: 'Perognathus')
+      expect(page).to have_css('.mods-diff__row--ins mark', text: 'Dipodomys')
     end
 
     it 'shows the empty state when no versions exist' do

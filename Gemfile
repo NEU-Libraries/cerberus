@@ -87,7 +87,7 @@ gem 'chartkick' # admin usage-analytics charts (importmap-pinned Chart.js); read
 gem 'dartsass-rails'
 gem 'devise'
 gem 'devise-i18n'
-gem 'diffy' # line-diff for the MODS version-history page (wraps system diff)
+gem 'diff-lcs' # line and word diff for the MODS and Darwin Core history pages
 # Keeps Solr connections alive; config/blacklight.yml names it as `http_adapter`.
 gem 'faraday-net_http_persistent', '~> 2.3'
 gem 'haml'

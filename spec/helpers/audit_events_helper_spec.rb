@@ -122,6 +122,23 @@ RSpec.describe AuditEventsHelper, type: :helper do
     end
   end
 
+  describe 'version diff rendering' do
+    let(:row) do
+      MODSDiff::Row.new(:ins, nil, 4, [MODSDiff::Segment.new('  <title>', false),
+                                       MODSDiff::Segment.new('<b>', true)])
+    end
+
+    it 'marks the changed segments and escapes the XML, with nothing between segments' do
+      expect(helper.version_diff_line(row)).to eq('  &lt;title&gt;<mark>&lt;b&gt;</mark>')
+    end
+
+    it 'gives a screen reader the word for each sign, and nothing for an unchanged line' do
+      expect(helper.version_diff_sign(:del)).to include('aria-hidden="true">-</span>', 'visually-hidden">Removed')
+      expect(helper.version_diff_sign(:ins)).to include('visually-hidden">Added')
+      expect(helper.version_diff_sign(:same)).to be_nil
+    end
+  end
+
   # Atlas sends the embargo as an ISO8601 string inside the same permissions
   # snapshot as the grant slots; "no embargo" arrives as nil, '', or an absent
   # key depending on the resource's history and when the event was written.

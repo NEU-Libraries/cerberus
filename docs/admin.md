@@ -784,3 +784,35 @@ It also refuses any type but a Work, before reading. Only a Work holds a
 record, and Atlas answers 404 for anything else, which atlas_rb reads back as
 `nil`, so without the gate a Collection would show an empty history rather than
 a 404.
+
+### The line diff
+
+`MODSDiff` returns rows, not HTML. Each `Row` has a kind (`:same`, `:del` or
+`:ins`), its line number on each side, and a list of `Segment`s whose `changed`
+flag marks the words to highlight. `histories/_version_diff` renders them as a
+table, and `AuditEventsHelper#version_diff_line` does the escaping.
+
+It works in four steps:
+
+1. **Canonicalise.** Both documents are pretty-printed through Nokogiri, so a
+   change in serialisation whitespace is not a change. A document that will not
+   parse is diffed as it stands, because a read-only page must not fail on a
+   malformed historical record.
+2. **Diff the lines.** `Diff::LCS.sdiff` splits the lines into unchanged lines
+   and blocks of changes. Each block prints every removal before every addition,
+   the order diff tools use.
+3. **Pair the edits.** Each added line in a block pairs with the removed line
+   most like it, measured as the share of words the two have in common. A pair
+   that shares less than `SIMILARITY` (half) stays unpaired, because word
+   highlights on two unrelated lines are noise. Pairing by likeness, not by
+   position, matters when a block removes many lines and edits one: the edit
+   still gets its highlights. A block larger than `PAIRING_LIMIT` (removals
+   times additions) skips pairing, so a wholesale rewrite costs nothing extra.
+4. **Mark the words.** A paired line is split into tokens (words, runs of
+   whitespace, and single punctuation marks) and diffed again. A changed run
+   absorbs the whitespace between it and the next changed run, so a changed
+   phrase reads as one highlight. A changed number is marked whole: `1998` →
+   `1999`, not the last digit.
+
+The colours are the red and green that diff tools use, not the ACL diff's
+teal and mauve, because readers already know them from other diffs.
