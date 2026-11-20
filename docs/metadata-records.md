@@ -59,7 +59,8 @@ the file only where the tab would appear.
 
 ## The edit page
 
-The Darwin Core pane uploads a record, replaces it, or removes it, for anyone
+The Supplemental Metadata tab holds a section per format. Its Darwin Core
+section uploads a record, replaces it, or removes it, for anyone
 who may edit the Work. `PUT /works/:id/dwc` runs `DarwinCoreRecordValidator`
 on the file and writes nothing if it finds an error. Otherwise it calls
 `put_dwc` with origin `dwc_upload`, which the History tab names "Darwin Core
@@ -74,7 +75,7 @@ record's history stays, and the next upload restores it.
 turns a 422 into an error on the pane. Any other refusal keeps the shared
 handling in `Authorizable`.
 
-**Both actions return with `?tab=darwin-core`, not `#darwin-core`.** Turbo
+**Both actions return with `?tab=supplemental-metadata`, not a fragment.** Turbo
 follows a redirect with fetch, and the Fetch spec strips the fragment, so a
 fragment would land on the Metadata pane. The Work edit view passes
 `params[:tab]` to `edit_tab_open_key`, which ignores a key the page does not
@@ -109,7 +110,7 @@ Both writes carry origin `xml_editor`, which the History tab names "XML editor".
 
 **The editor offers only formats the Work holds.** It never creates a record:
 a hand-typed `metadata_format` the Work does not offer opens MODS. Uploading
-the first record stays with the Darwin Core pane.
+the first record stays with the Supplemental Metadata tab.
 
 **A format joins the editor in two places.** Atlas must list it in
 `metadata_formats`, and `XmlEditorFormat::ADDITIONAL` must name it with a
