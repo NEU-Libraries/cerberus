@@ -89,10 +89,12 @@ schema rules, and the flash is stored in the session row.
 ## The XML editor
 
 The raw-XML editor opens a Work's Darwin Core record as well as its MODS. When
-the Work holds a record, a "Metadata record" picker above the editor lists both.
-Picking one reloads the page with `?metadata_format=dwc`, so unsaved text in the
-buffer is lost, and the picker says so. A resource that holds only MODS shows no
-picker.
+the Work holds a record, a "Metadata record" picker in the editor's header
+strip lists both. Opening one reloads the page with `?metadata_format=dwc`, so
+unsaved text in the buffer is lost. Once the buffer holds an edit,
+`preview_controller.js` puts a confirm on the picker's form, so the curator is
+asked only when there is something to lose. A resource that holds only MODS
+names it in the strip, with no picker.
 
 `XmlEditorFormat` gives each format its check, its read and its write:
 

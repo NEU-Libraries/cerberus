@@ -34,7 +34,8 @@
 
 -# Empty, and outside #raw_xml_form, which cannot nest a form. The record
 -# picker's controls sit in the editor's header strip and join this form through
--# their form attribute.
+-# their form attribute. preview_controller adds a confirm once the buffer holds
+-# an edit, since opening another record reloads the page.
 - if @offered.any?
   = form_with(url: xml_editor_path(@resource.id), method: :get, id: 'xml_format_picker') {}
 
@@ -62,10 +63,8 @@
               - if @offered.any?
                 %label.xml-editor__label{for: 'metadata_format'} Metadata record
                 = select_tag 'metadata_format', options_for_select(@offered, @format.token),
-                             form: 'xml_format_picker', class: 'form-select form-select-sm',
-                             'aria-describedby' => 'xml_format_hint'
+                             form: 'xml_format_picker', class: 'form-select form-select-sm'
                 %button.btn.btn-sm.btn-tonal-secondary{type: 'submit', form: 'xml_format_picker'} Open
-                %span#xml_format_hint.xml-editor__hint Unsaved changes are discarded.
               - else
                 %span.xml-editor__label Metadata record
                 %span.xml-editor__current MODS
@@ -76,7 +75,8 @@
             .form-check.form-switch.mb-0
               %input.form-check-input#toggle_word_wrap{type: 'checkbox', role: 'switch'}/
               %label.form-check-label.xml-editor__label{for: 'toggle_word_wrap'} Word wrap
-          #editor<
+          -# Names Ace's own text box for a screen reader, by the record it holds.
+          #editor{data: { label: "#{@offered.rassoc(@format.token)&.first || 'MODS'} XML" }}<
             = @raw_xml
       .col#content{"data-controller" => "preview"}
         -# Validate's stream replaces this node, so its id is ours rather than the

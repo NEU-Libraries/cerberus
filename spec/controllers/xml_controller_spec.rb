@@ -272,6 +272,12 @@ describe XmlController do
         expect(response.body).to have_field('metadata_format', type: :hidden, with: 'dwc')
       end
 
+      it 'names the editor for a screen reader by the record it holds' do
+        get :editor, params: { id: work.id, metadata_format: 'dwc' }
+
+        expect(response.body).to have_css('#editor[data-label="Darwin Core XML"]')
+      end
+
       # The picker's select and the editor form's hidden field share a name, so
       # an id derived from it would point the picker's label at both.
       it 'gives the picker and the hidden field different ids' do

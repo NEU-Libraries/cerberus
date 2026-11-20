@@ -10,7 +10,19 @@ export default class extends Controller {
     editor.session.setMode("ace/mode/xml");
     // Ace types into a hidden textarea of its own, which is what a screen
     // reader lands on; without a name it is announced as a bare "edit text".
-    editor.textInput.getElement().setAttribute('aria-label', 'MODS XML');
+    editor.textInput.getElement().setAttribute('aria-label', document.getElementById('editor').dataset.label || 'MODS XML');
+
+    // Opening another record reloads the page and drops the buffer, so the
+    // record picker asks first once there is an edit to lose. A repair's
+    // setValue counts as an edit too: it is not saved until Save.
+    const picker = document.getElementById('xml_format_picker');
+    if (picker) {
+      editor.getSession().on('change', () => {
+        picker.dataset.turboConfirm = 'Your changes to this record are not saved. Opening another record discards them.';
+        picker.dataset.turboConfirmTitle = 'Discard unsaved changes?';
+        picker.dataset.turboConfirmButton = 'Discard and open';
+      });
+    }
 
     // Sync the editor's current content into the hidden raw_xml field at
     // form-submit time. Single source of truth — doesn't matter whether
