@@ -271,6 +271,14 @@ describe XmlController do
         expect(response.body).to have_field('metadata_format', type: :hidden, with: 'dwc')
       end
 
+      # The picker's select and the editor form's hidden field share a name, so
+      # an id derived from it would point the picker's label at both.
+      it 'gives the picker and the hidden field different ids' do
+        get :editor, params: { id: work.id, metadata_format: 'dwc' }
+
+        expect(response.body.scan('id="metadata_format"').size).to eq(1)
+      end
+
       it 'validates with the Darwin Core rules and previews through Atlas as Darwin Core' do
         allow(AtlasRb::Resource).to receive(:preview).and_call_original
         put :validate, params: { resource_id: work.id, raw_xml: record, metadata_format: 'dwc' }, xhr: true

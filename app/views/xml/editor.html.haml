@@ -57,7 +57,7 @@
 = form_tag xml_validate_path, :method => :put, :id => "raw_xml_form" do
   = hidden_field_tag "resource_id", @resource.id
   = hidden_field_tag "raw_xml"
-  = hidden_field_tag "metadata_format", @format.token
+  = hidden_field_tag "metadata_format", @format.token, id: "raw_xml_metadata_format"
   .container
     .row
       .col
