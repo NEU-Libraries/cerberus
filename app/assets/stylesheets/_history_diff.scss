@@ -254,13 +254,18 @@
       word-break: break-word;
       border-left: 3px solid transparent;
 
+      // A changed line keeps body-colour text, so the row tint can run deep
+      // enough to scan for. The rail takes the full tone, which clears 3:1
+      // against white as a non-text edge.
       &.ins {
-        background-color: color-mix(in srgb, $audit-tone-create 8%, white);
-        border-left-color: color-mix(in srgb, $audit-tone-create 45%, white);
+        color: $gray-900;
+        background-color: color-mix(in srgb, $audit-tone-create 18%, white);
+        border-left-color: $audit-tone-create;
       }
       &.del {
-        background-color: color-mix(in srgb, $audit-tone-unlink 8%, white);
-        border-left-color: color-mix(in srgb, $audit-tone-unlink 40%, white);
+        color: $gray-900;
+        background-color: color-mix(in srgb, $audit-tone-unlink 18%, white);
+        border-left-color: $audit-tone-unlink;
       }
       &.unchanged {
         color: $text-subtle;
@@ -276,12 +281,12 @@
       padding: 0 0.05rem;
     }
     ins {
-      color: color-mix(in srgb, $audit-tone-create 80%, black);
-      background-color: color-mix(in srgb, $audit-tone-create 18%, white);
+      color: color-mix(in srgb, $audit-tone-create 55%, black);
+      background-color: color-mix(in srgb, $audit-tone-create 34%, white);
     }
     del {
-      color: color-mix(in srgb, $audit-tone-unlink 75%, black);
-      background-color: color-mix(in srgb, $audit-tone-unlink 16%, white);
+      color: color-mix(in srgb, $audit-tone-unlink 55%, black);
+      background-color: color-mix(in srgb, $audit-tone-unlink 34%, white);
     }
   }
 }
