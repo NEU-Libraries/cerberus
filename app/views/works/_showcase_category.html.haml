@@ -9,9 +9,9 @@
 - communities = showcases.map { |placement| plain_text(placement.community_title) }
 %hr.section-divider.my-3
 
-.my-3.rounded-3
-  %h4.pb-2
-    %i.fa-solid.fa-star.me-2{ 'aria-hidden' => 'true' }
+.my-3
+  %h5.mb-2
+    %i.fa-solid.fa-star.me-2.text-secondary{ 'aria-hidden' => 'true' }
     Showcase
   %ul.showcase-placements.list-unstyled.mb-3{ 'aria-label' => 'Communities this work is showcased in' }
     - showcases.each do |placement|

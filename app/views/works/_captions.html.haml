@@ -17,9 +17,9 @@
 -# field, which is the same reason the Thumbnail input beside it is bare too.
 %hr.section-divider.my-3
 
-.my-3.rounded-3
-  %h4.pb-2
-    %i.fa-solid.fa-closed-captioning.me-2{ 'aria-hidden' => 'true' }
+.my-3
+  %h5.mb-2
+    %i.fa-solid.fa-closed-captioning.me-2.text-secondary{ 'aria-hidden' => 'true' }
     Captions
 
   - if captions.any?
@@ -43,7 +43,7 @@
 
   - removed = Array(local_assigns[:removed])
   - if local_assigns[:removable] && removed.any?
-    %h5.caption-tracks__heading Removed caption files
+    %h6.caption-tracks__heading Removed caption files
     %ul.caption-tracks.caption-tracks--removed.list-unstyled.mb-3{ 'aria-label' => 'Removed caption files' }
       - removed.each do |caption|
         - label = CaptionTrack.label(caption)
