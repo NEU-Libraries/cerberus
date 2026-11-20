@@ -32,10 +32,21 @@
 -# on its show page, so the curator arrives here already looking for the cause.
 = render 'escape_advisory', advisory: @double_escapes
 
+-# Outside #raw_xml_form, which cannot nest a form. Opening another record is a
+-# fresh page load, so it drops whatever the buffer holds.
+- if @offered.any?
+  = form_with url: xml_editor_path(@resource.id), method: :get, class: 'mb-3' do |f|
+    .d-flex.flex-wrap.align-items-end.gap-2
+      %div
+        = f.label :metadata_format, 'Metadata record', class: 'form-label small mb-1'
+        = f.select :metadata_format, @offered, { selected: @format.token }, class: 'form-select form-select-sm'
+      = f.submit 'Open', name: nil, class: 'btn btn-sm btn-tonal-secondary'
+    %p.small.text-subtle.mt-1.mb-0 Opening another record discards unsaved changes in the editor.
+
 -# The preservation XML is gone from storage while the access copy survives, so
 -# the preview renders beside an empty buffer that would otherwise read as a
--# blank record.
-- if @raw_xml.nil? && @mods.present?
+-# blank record. Only MODS has an access copy without its XML.
+- if @format.mods? && @raw_xml.nil? && @preview.present?
   = render 'missing_xml_notice', resource: @resource, klass: @klass
 
 -# The slot a repair's stream replaces with the script that reseats the Ace
@@ -46,6 +57,7 @@
 = form_tag xml_validate_path, :method => :put, :id => "raw_xml_form" do
   = hidden_field_tag "resource_id", @resource.id
   = hidden_field_tag "raw_xml"
+  = hidden_field_tag "metadata_format", @format.token
   .container
     .row
       .col
@@ -59,12 +71,13 @@
         #editor<
           = @raw_xml
       .col#content{"data-controller" => "preview"}
-        -# Atlas answers 404 for the HTML when the Work has no access copy. The
-        -# placeholder keeps the #mods id, which Validate's stream replaces.
-        - if @mods
-          = @mods.html_safe
-        - else
-          #mods
+        -# Validate's stream replaces this node, so its id is ours rather than the
+        -# id Atlas puts on its block, which differs by format. Atlas answers 404
+        -# for the HTML when the Work has no access copy.
+        #xml_preview
+          - if @preview
+            = @preview.html_safe
+          - else
             %p.small.text-subtle
               There is no access copy to preview. Saving a document here writes a new one.
     .row

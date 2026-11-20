@@ -8,6 +8,7 @@ the ways to write it.
 Source files:
 
 - `app/lib/darwin_core_record.rb`
+- `app/lib/xml_editor_format.rb`
 - `app/controllers/darwin_core_records_controller.rb`
 - `app/views/works/_darwin_core_edit.html.haml`
 - `app/services/darwin_core_record_validator.rb`
@@ -84,6 +85,47 @@ dialog.
 only the standard flash keys, so the pane renders the list itself, and the
 standard alert says the record was not saved. A wrong file can break hundreds of
 schema rules, and the flash is stored in the session row.
+
+## The XML editor
+
+The raw-XML editor opens a Work's Darwin Core record as well as its MODS. When
+the Work holds a record, a "Metadata record" picker above the editor lists both.
+Picking one reloads the page with `?metadata_format=dwc`, so unsaved text in the
+buffer is lost, and the picker says so. A resource that holds only MODS shows no
+picker.
+
+`XmlEditorFormat` gives each format its check, its read and its write:
+
+| Step | MODS | Darwin Core |
+|---|---|---|
+| Check | `MODSRecordValidator` | `DarwinCoreRecordValidator` |
+| Read | `Resource.mods` | `Work.dwc` |
+| Write | `put_mods` | `put_dwc` |
+| Preview | `Resource.preview` | `Resource.preview(metadata_format: 'dwc')` |
+
+Both writes carry origin `xml_editor`, which the History tab names "XML editor".
+
+**The editor offers only formats the Work holds.** It never creates a record:
+a hand-typed `metadata_format` the Work does not offer opens MODS. Uploading
+the first record stays with the Darwin Core pane.
+
+**A format joins the editor in two places.** Atlas must list it in
+`metadata_formats`, and `XmlEditorFormat::ADDITIONAL` must name it with a
+validator, read and write. Atlas supplies the label through
+`Resource.metadata_formats`, so the picker keeps no names of its own. The
+editor reads that list only when a Work offers more than MODS.
+
+**The preview pane is `#xml_preview`, not Atlas's id.** Atlas roots MODS at
+`#mods` and Darwin Core at `#dwc`. Validate's stream replaces the pane by an id
+Cerberus owns, so one stream serves every format.
+
+**A refusal from Atlas reads as a validation error.** Atlas checks more than
+the Cerberus validators do, so a draft can pass here and still get a 422 on
+preview or save. The editor lists Atlas's message with the other errors and
+writes nothing.
+
+**A save lands on the show page's Metadata tab.** The show page opens a tab
+only from a fragment, and Turbo strips the fragment when it follows a redirect.
 
 ## History
 

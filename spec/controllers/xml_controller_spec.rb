@@ -87,7 +87,7 @@ describe XmlController do
       get :editor, params: { id: work.id }
       expect(assigns(:resource)).to eq(work)
       expect(assigns(:klass)).to eq('Work')
-      expect(assigns(:mods)).to be_present
+      expect(assigns(:preview)).to be_present
       expect(assigns(:raw_xml)).to be_present
     end
 
@@ -133,13 +133,13 @@ describe XmlController do
 
     before { allow(AtlasRb::Resource).to receive(:mods).and_call_original }
 
-    it 'opens without an access copy, keeping the #mods node Validate replaces' do
+    it 'opens without an access copy, keeping the preview node Validate replaces' do
       allow(AtlasRb::Resource).to receive(:mods).with(work.id, 'html').and_return(nil)
 
       get :editor, params: { id: work.id }
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('There is no access copy to preview', 'id="mods"')
+      expect(response.body).to include('There is no access copy to preview', 'id="xml_preview"')
     end
 
     it 'says the preservation XML is missing rather than opening a silent blank buffer' do
@@ -156,7 +156,7 @@ describe XmlController do
       get :editor, params: { id: work.id }
 
       expect(response.body).not_to include('preservation XML for this Work is missing')
-      expect(response.body).to include('id="mods"')
+      expect(response.body).to include('id="xml_preview"')
     end
   end
 
@@ -170,11 +170,11 @@ describe XmlController do
     context 'when XmlValidator passes' do
       before { allow(XmlValidator).to receive(:call).and_return([]) }
 
-      it 'assigns @errors empty and @mods to the Atlas preview' do
+      it 'assigns @errors empty and @preview to the Atlas preview' do
         put :validate, params: { resource_id: work.id, raw_xml: raw_xml }, xhr: true
         expect(assigns(:resource)).to eq(work)
         expect(assigns(:errors)).to eq([])
-        expect(assigns(:mods)).to eq(preview_result)
+        expect(assigns(:preview)).to eq(preview_result)
       end
     end
 
@@ -184,12 +184,12 @@ describe XmlController do
       it 'assigns @errors and does not call Atlas preview' do
         put :validate, params: { resource_id: work.id, raw_xml: raw_xml }, xhr: true
         expect(assigns(:errors)).to eq(['xmlns:mods missing'])
-        expect(assigns(:mods)).to be_nil
+        expect(assigns(:preview)).to be_nil
         expect(AtlasRb::Resource).not_to have_received(:preview)
       end
     end
 
-    # The refusal banner sits above the form, outside the #mods node the preview
+    # The refusal banner sits above the form, outside the #xml_preview node the preview
     # replaces, so clearing it needs a replace of its own. Asserted on the stream
     # body rather than on assigns, since the bug was entirely in what got sent.
     context 'the refusal banner left by an earlier refused Save' do
@@ -225,6 +225,88 @@ describe XmlController do
         put :validate, params: { resource_id: work.id, raw_xml: raw_xml }, xhr: true
 
         expect(response.body).to include('window.scrollTo(', 'prefers-reduced-motion: reduce')
+      end
+    end
+  end
+
+  # A Work's Darwin Core record opens in the same editor as its MODS. The record
+  # is written for real, so the format list the picker reads is Atlas's own.
+  describe 'a Darwin Core record' do
+    render_views
+
+    let(:record_path) { Rails.root.join('spec/fixtures/files/dwc-record.xml').to_s }
+    let(:record) { File.read(record_path) }
+    let(:refusal) { instance_double(Faraday::Response, status: 422, body: '{}') }
+
+    context 'on a Work that holds none' do
+      it 'offers no picker, and opens MODS' do
+        get :editor, params: { id: work.id }
+
+        expect(assigns(:format).token).to eq('mods')
+        expect(response.body).not_to include('Metadata record')
+      end
+
+      it 'opens MODS for a hand-typed format, so nothing can create a record here' do
+        get :editor, params: { id: work.id, metadata_format: 'dwc' }
+
+        expect(assigns(:format).token).to eq('mods')
+      end
+    end
+
+    context 'on a Work that holds one' do
+      before { AtlasRb::Resource.put_dwc(work.id, record_path, nuid: '000000004') }
+
+      it 'offers both records by the names Atlas gives them, MODS first' do
+        get :editor, params: { id: work.id }
+
+        expect(assigns(:offered)).to eq([%w[MODS mods], ['Darwin Core', 'dwc']])
+        expect(response.body).to have_select('metadata_format', selected: 'MODS')
+      end
+
+      it 'opens the stored record in the buffer, with its display beside it' do
+        get :editor, params: { id: work.id, metadata_format: 'dwc' }
+
+        expect(assigns(:raw_xml)).to eq(record)
+        expect(response.body).to include('id="dwc"')
+        expect(response.body).to have_field('metadata_format', type: :hidden, with: 'dwc')
+      end
+
+      it 'validates with the Darwin Core rules and previews through Atlas as Darwin Core' do
+        allow(AtlasRb::Resource).to receive(:preview).and_call_original
+        put :validate, params: { resource_id: work.id, raw_xml: record, metadata_format: 'dwc' }, xhr: true
+
+        expect(assigns(:errors)).to eq([])
+        expect(AtlasRb::Resource).to have_received(:preview).with(kind_of(String), metadata_format: 'dwc')
+        expect(response.body).to include('target="xml_preview"', 'id="dwc"')
+      end
+
+      it 'refuses a MODS document as a Darwin Core record, without previewing it' do
+        allow(AtlasRb::Resource).to receive(:preview)
+        put :validate, params: { resource_id: work.id, raw_xml: raw_xml, metadata_format: 'dwc' }, xhr: true
+
+        expect(assigns(:errors)).not_to be_empty
+        expect(AtlasRb::Resource).not_to have_received(:preview)
+      end
+
+      it 'shows a refusal from Atlas as a validation error' do
+        allow(AtlasRb::Resource).to receive(:preview)
+          .and_raise(AtlasRb::ResourceError.new('exactly one record', response: refusal))
+        put :validate, params: { resource_id: work.id, raw_xml: record, metadata_format: 'dwc' }, xhr: true
+
+        expect(assigns(:errors)).to eq(['exactly one record'])
+        expect(response.body).to include('XML validation failed', 'exactly one record')
+      end
+
+      it 'saves through put_dwc, leaving the MODS alone' do
+        resource_id = work.id
+        allow(AtlasRb::Resource).to receive(:put_mods)
+        allow(AtlasRb::Resource).to receive(:put_dwc).and_call_original
+
+        put :update, params: { resource_id: resource_id, raw_xml: record, metadata_format: 'dwc' }
+
+        expect(response).to redirect_to(work_path(resource_id))
+        expect(AtlasRb::Resource).to have_received(:put_dwc).with(resource_id, kind_of(String), origin: 'xml_editor')
+        expect(AtlasRb::Resource).not_to have_received(:put_mods)
       end
     end
   end
