@@ -13,6 +13,9 @@ Source files:
 - `app/controllers/concerns/impersonation_session.rb`
 - `app/controllers/admin/impersonations_controller.rb`
 - `app/controllers/concerns/depositor_context.rb`
+- `app/helpers/blacklight_helper.rb`
+- `app/views/layouts/blacklight/base.html.erb` (the CSRF meta tag)
+- `app/controllers/application_controller.rb` (the CSRF token store)
 
 The ACL vocabulary these files gate on — the grant lists and the group
 constants — is in [`docs/permissions.md`](permissions.md). The controller gates
@@ -163,8 +166,12 @@ there.
 ### Ownership and proxy deposits
 
 `depositor?` is not Work-scoped, because a depositor owns their Collections too.
-The whole workspace subtree inherits their NUID: Atlas's creators copy
-`parent.permissions`, which carries `depositor`. A Collection they own is theirs
+The whole workspace subtree carries their NUID, though Atlas stamps the two types
+differently. A Work takes the depositor the create names, else the acting-as
+target, else its parent's depositor, so a Work deposited into their Collection
+is theirs. A Collection takes the named depositor, else the acting-as target,
+else the caller, so a sub-Collection is theirs when they, or someone acting as
+them, create it. A Collection they own is theirs
 to edit and, once empty, to tombstone. Emptiness needs no check here, because
 Atlas refuses the tombstone while live children remain.
 
@@ -183,7 +190,7 @@ reproducing a user's problem. Its two modes are mutually exclusive: each
 
 | Mode | Who may start it | Authenticated identity | Effect | Writes |
 |---|---|---|---|---|
-| acting-as | `:admin` only | stays the admin (`Current.nuid`) | `effective_user` is the target. Sets `Current.on_behalf_of` to the target, so atlas_rb writes carry `On-Behalf-Of: <target>` through the default on-behalf-of callable. Atlas authorizes the admin and stamps the target as provenance | allowed, and attributed to the target |
+| acting-as | `:admin` only | stays the admin (`Current.nuid`) | `effective_user` is the target. Sets `Current.on_behalf_of` to the target, so atlas_rb signs the target into each write's assertion as its `obo` claim, through the default on-behalf-of callable. Atlas authorizes the admin and stamps the target as provenance | allowed, and attributed to the target |
 | view-as | `:admin` or a devolved admin | untouched | `effective_user` is the target. Sets `view_as_nuid`, which also moves `viewer_nuid` to the target | rejected |
 
 Session state lives in the Rails session (`session[:acting_as_nuid]` or
@@ -251,8 +258,8 @@ and tell them an exit failed that had in fact succeeded.
 `emit_impersonation_event` records a session-scoped event through
 `AtlasRb::AuditEvent.emit`; there is no resource to hang it on. It passes the
 admin as `actor_nuid` explicitly, with the target as `on_behalf_of_nuid` and
-the mode. The gem sends `actor_nuid` as the `User:` header and records it as
-the principal. So the admin gate still holds on an `impersonation_ended` emit
+the mode. The gem signs `actor_nuid` as the assertion's `sub`, which Atlas
+records as the principal. So the admin gate still holds on an `impersonation_ended` emit
 fired after the session is gone.
 
 ### Context plumbing
@@ -265,9 +272,9 @@ header. `effective_user` reads the session, not `Current`.
 ### Which NUID a gated read uses
 
 `viewer_nuid` is the view-as target in view-as, and the real user otherwise,
-acting-as included. Acting-as sends `On-Behalf-Of`, and Atlas refuses that
-header from a non-admin `User:`, so a target NUID there would 403 every gated
-read. A read that gates on the *view-as target* passes it to atlas_rb. Three reads take it: `Work.assets`,
+acting-as included. Acting-as signs an `obo` claim, and Atlas refuses that
+claim unless the assertion's `sub` is an admin, so a target NUID there would 403
+every gated read. A read that gates on the *view-as target* passes it to atlas_rb. Three reads take it: `Work.assets`,
 `Work.file_sets` and `Blob.work`. So do the two zip packers, `QueueZipPacker`
 and `SetZipPacker`.
 
@@ -279,7 +286,7 @@ correctness regression — `mods` would silently acquire view-as gating.
 
 | Read | Gated by |
 |---|---|
-| `mods`, `find` | `Current.nuid`, the real user, via atlas_rb's ambient `User:` header |
+| `mods`, `find` | `Current.nuid`, the real user, which atlas_rb signs ambiently as the assertion's `sub` |
 | `Work.assets`, `Work.file_sets`, `Blob.work` | `viewer_nuid`, the view-as target |
 
 `WorksController#parallel_show_reads` and `#downloads` resolve it into a local
@@ -329,8 +336,8 @@ every refresh sent in reply to the request that triggered it.
 `hydrate_user` builds a `User` from the same Atlas user lookup that sign-in uses,
 `AtlasRb::Authentication.login`; there is no database to read. It clears
 `Current.on_behalf_of` for the call, because this is a plain profile lookup, not
-an on-behalf-of operation. The lookup sends the target as `User:`, and the
-target is not an admin. So a leaked `On-Behalf-Of` makes Atlas refuse the
+an on-behalf-of operation. The lookup signs the target as `sub`, and the
+target is not an admin. So a leaked `obo` claim makes Atlas refuse the
 lookup, and the banner reads "Unknown user". A transport or parse failure logs
 and returns `nil`.
 
@@ -347,7 +354,7 @@ hydration live in the concern.
 Act-as stays `:admin`-only, even for a delegate who cleared the broader gate to
 reach the controller. That matches the view: `_start.html.haml` renders the "Act
 as" control for a full admin only. Atlas also gates acting-as, authorizing the
-`On-Behalf-Of` header against the admin role. So the Cerberus gate is defense in
+assertion's `obo` claim against the admin role. So the Cerberus gate is defense in
 depth, not the only backstop. Atlas's devolved-admin grants include
 `:create, AuditEvent`, which view-as needs for its session-start emit. They do
 not touch on-behalf-of.
@@ -362,8 +369,8 @@ still run.
 Impersonation card. That matches the other admin actions, such as Re-parent and
 Linked members, which open onto their own page. `recipients` is the typeahead
 JSON for the target picker, from `UserDirectorySearchable`. Atlas's directory
-leaves out guest, anonymous and system users, and the requesting user. That
-suits impersonation, which targets real people and never oneself.
+leaves out guest, anonymous, system and fixity-checker accounts, which suits
+impersonation, since it targets real people. It does list the requesting user.
 `resolve_target` returns `nil` for a blank entry without calling Atlas.
 
 ## Depositor context
@@ -411,3 +418,51 @@ depositor cannot see also reads `nil`.
 `publish_showcase_id` checks only that the destination is in someone's
 workspace. It does **not** check that the Work's depositor is that workspace's
 owner, so the caller must confirm that separately before promoting.
+
+## A guest has no session
+
+A guest who only reads pages gets no session. The session store is
+`ActiveRecord::SessionStore`, and it inserts a `sessions` row the first time a
+request *writes* the session. A read with no session cookie returns `nil` and
+stores nothing. Most crawlers never send the cookie back, so each write on a
+guest page would cost a new row, and `SessionTrimJob` would delete it two weeks
+later.
+
+Two things wrote on every guest page, and neither needed to:
+
+- **The CSRF meta tag.** The layout renders `csrf_meta_tags` only for a
+  signed-in user, whose pages carry the sign-out link and the staff
+  `turbo_method` links that need it. A guest's own forms, the download queue
+  buttons and the sign-in form, render a hidden `authenticity_token` field
+  instead, and Turbo submits it without the meta tag.
+- **Blacklight's `session_tracking_params`.** Its default arguments read
+  `search_session`, which runs `session[:search] ||= {}`, even though
+  `CatalogController` turns search tracking off. `BlacklightHelper` returns
+  `{}` first when tracking is off, which is the value Blacklight returns in
+  that case anyway. The override lives in an app-local `BlacklightHelper`
+  because `Blacklight::Controller` adds that helper after `ApplicationHelper`,
+  so an override in `ApplicationHelper` would lose.
+
+### The CSRF token lives in a cookie
+
+A guest form still needs a token, and a Work with files shows one on every
+view: the queue button. Rails' default stores the token in the session, so
+that page would insert a row for every crawler. `ApplicationController` sets
+`csrf_token_storage_strategy` to Rails' `CookieStore` instead, which keeps the
+token in an encrypted `csrf_token` cookie. A guest who only views a Work gets
+that cookie and no session row. A guest who uses the queue gets a session, as
+they need one to hold the queue.
+
+The cookie store binds the token to the session id, so sign-in rotates it, and
+a guest's token is refused once the session changes. It sets the strategy
+only, rather than declaring `protect_from_forgery` again, because a second
+declaration would move `verify_authenticity_token` behind the callbacks
+declared before it.
+
+The cookie store keeps one cost: a page with a guest form still sends a
+`Set-Cookie`, so a proxy cannot cache it as it is.
+
+### Testing it
+
+The test environment turns forgery protection off, so a spec that checks for
+the token must turn it on. `spec/requests/guest_session_spec.rb` does.

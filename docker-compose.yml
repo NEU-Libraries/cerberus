@@ -14,18 +14,21 @@ volumes:
   handle-data:
 services:
   db:
-    # TimescaleDB is a Postgres extension; this image is vanilla Postgres 14
+    # TimescaleDB is a Postgres extension; this image is vanilla Postgres 17
     # plus the extension available-but-inactive (no CREATE EXTENSION until a
     # migration runs it, and only in Cerberus's logical DB — Atlas's logical DB
-    # on this shared service is untouched). The non-`ha` image is a true drop-in:
-    # it honors the same PGDATA/entrypoint as postgres:14, so the existing `db`
-    # volume mounts cleanly with no re-init. (The `-ha` image uses a different
-    # data dir/user and would orphan this volume — do not use it here.)
-    image: timescale/timescaledb:2.17.2-pg14
-    # The extension must be preloaded at server start. The image only injects
-    # this into postgresql.conf when it initialises a *fresh* data dir; because
-    # we reuse the existing postgres:14 volume, we pass it as a server flag
-    # instead. Inert for Atlas's logical DB (which never CREATEs the extension).
+    # on this shared service is untouched). The non-`ha` image honors the same
+    # PGDATA/entrypoint as the official postgres image; the `-ha` image uses a
+    # different data dir/user, so do not use it here.
+    #
+    # Postgres cannot open a data directory from an older major version. Moving
+    # this tag to a new major means recreating the `db` volume (dev) or a dump
+    # and restore (anywhere the data matters).
+    image: timescale/timescaledb:2.31.0-pg17
+    # The extension must be preloaded at server start. The image writes this
+    # into postgresql.conf only when it initialises a fresh data dir, so a
+    # volume created any other way would lack it; the flag makes it explicit.
+    # Inert for Atlas's logical DB (which never CREATEs the extension).
     # max_worker_processes is raised well above Postgres's default of 8 because
     # TimescaleDB claims one background scheduler per database that has the
     # extension, and the parallel spec lane multiplies those: each worker owns a
@@ -33,7 +36,12 @@ services:
     # Starved of a slot, the scheduler cannot start and Postgres logs "failed to
     # launch job" once a second forever — noisy, and it never resolves itself.
     # Only settable at server start, so changing it means recreating this service.
-    command: postgres -c shared_preload_libraries=timescaledb -c max_worker_processes=32
+    #
+    # max_connections is pinned because the image's init step tunes it to the
+    # container's memory, and a fresh volume came up allowing 25. The idle test
+    # lanes alone hold about 20, so a four-way spec run, or the dev apps beside
+    # it, get "too many clients already".
+    command: postgres -c shared_preload_libraries=timescaledb -c max_worker_processes=32 -c max_connections=100
     volumes:
       - db:/var/lib/postgresql/data/pgdata
     restart: always
@@ -157,8 +165,8 @@ services:
   # night, and posts each result to Atlas. Atlas's docs/fixity.md is the
   # reference. Exactly one replica: two checkers race over the same objects.
   # Same tag as atlas, so the checker and the endpoint it reports to move
-  # together. Harmless while ATLAS_FIXITY_TOKEN is unset: each sweep is
-  # refused with a 401 and the loop sleeps until the next one.
+  # together. Harmless while ATLAS_FIXITY_TOKEN is unset: each sweep stops
+  # before calling Atlas and the loop sleeps until the next one.
   fixity:
     image: nakatomi/atlas_web:${ATLAS:-latest}
     entrypoint: ["/home/atlas/web/bin/fixity-entrypoint.sh"]

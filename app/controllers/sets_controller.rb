@@ -37,8 +37,8 @@ class SetsController < CatalogController
   before_action :require_bulk_operator, only: %i[sentinel apply_sentinel]
 
   # A private Set read (or any write) the caller may not perform: Atlas says
-  # 403, the user sees the standard forbidden page. Unknown ids surface as
-  # JSON::ParserError → Authorizable's 404 path.
+  # 403, the user sees the standard forbidden page. An unknown id reads back
+  # as nil, which load_set's require_resource! turns into the 404 page.
   rescue_from AtlasRb::ForbiddenError do
     render template: 'errors/forbidden', status: :forbidden
   end

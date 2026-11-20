@@ -19,6 +19,26 @@ RSpec.describe 'Recurring task schedule' do
     expect([cron.hours, cron.minutes]).to eq([[0], [15]])
   end
 
+  # The full rollup applies a new bot verdict to every day, and the container
+  # rollup sums the leaf counts, so each must follow the one before it.
+  it 'reclassifies user agents, then rolls up the full window, then the containers' do
+    minute_of_day = lambda do |task|
+      cron = Fugit.parse_cronish(recurring.dig('production', task, 'schedule'))
+      (cron.hours.first * 60) + cron.minutes.first
+    end
+
+    times = %w[reclassify_user_agents rollup_impressions_full rollup_container_impressions].map(&minute_of_day)
+
+    expect(times.each_cons(2)).to all(satisfy { |earlier, later| earlier < later })
+  end
+
+  it 'passes the hourly rollup a window the job accepts' do
+    args = recurring.dig('production', 'rollup_impressions', 'args')
+
+    expect(args).to eq([{ 'days' => 2 }])
+    expect(RollupImpressionsJob.instance_method(:perform).parameters).to include(%i[key days])
+  end
+
   it 'gives staging the same tasks as production' do
     expect(recurring['staging']).to eq(recurring['production'])
   end

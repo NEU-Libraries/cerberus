@@ -251,8 +251,11 @@ RSpec.describe 'Admin::Impersonations', type: :request do
     end
 
     describe 'unknown / blank NUID' do
-      it 'refuses to start when hydration fails' do
-        allow(AtlasRb::Authentication).to receive(:login).and_raise(JSON::ParserError)
+      # Atlas answers a NUID it does not know with a 400, which atlas_rb raises.
+      it 'refuses to start when Atlas does not know the NUID' do
+        refusal = instance_double(Faraday::Response, status: 400, body: '{"error":"unknown principal"}')
+        allow(AtlasRb::Authentication).to receive(:login)
+          .and_raise(AtlasRb::ResourceError.new('unknown principal', response: refusal))
         post admin_act_as_path, params: { nuid: '999999999' }
 
         expect(session[:acting_as_nuid]).to be_blank
@@ -260,8 +263,8 @@ RSpec.describe 'Admin::Impersonations', type: :request do
         expect(flash[:alert]).to match(/valid NUID/)
       end
 
-      # A status-guarded read answers an unknown NUID with nil, not a raise.
-      it 'refuses to start when Atlas does not know the NUID' do
+      # A status-guarded read answers a 404 with nil, not a raise.
+      it 'refuses to start when the read comes back nil' do
         allow(AtlasRb::Authentication).to receive(:login).and_return(nil)
         post admin_act_as_path, params: { nuid: '999999999' }
 

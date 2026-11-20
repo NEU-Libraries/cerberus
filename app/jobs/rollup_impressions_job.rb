@@ -4,22 +4,25 @@
 # rules a continuous aggregate can't (they must filter BEFORE aggregating by
 # noid) via HumanImpressionsQuery: exclude bot user-agents (UA dimension),
 # exclude volume-offending (ip, day) pairs (> threshold/day), rescue the
-# allowlist IP. Re-derives a trailing window each run (idempotent
-# delete+insert), so a bot-list change (via ReclassifyUserAgentsJob) is
-# reflected at the next run. Also materializes the per-day distinct-human-IP
-# "unique visitors" metric (§10). Scheduled hourly.
+# allowlist IP. Re-derives a trailing window of whole days each run (idempotent
+# delete+insert). Also materializes the per-day distinct-human-IP "unique
+# visitors" metric (§10). Hourly over the last two days, nightly over all
+# FULL_DAYS; docs/analytics.md explains the split.
 class RollupImpressionsJob < ApplicationJob
   queue_as :background
 
-  WINDOW = 90.days
+  FULL_DAYS = 90
 
-  def perform(window: WINDOW)
+  def perform(days: FULL_DAYS)
     conn = ActiveRecord::Base.connection
-    raw_window_start = window.ago.beginning_of_day
+    raw_window_start = days.days.ago.beginning_of_day
     window_start = conn.quote(raw_window_start)
     human = HumanImpressionsQuery.new(conn:, window_start: raw_window_start).from_where_sql
 
     conn.transaction do
+      # Two overlapping runs would each delete and re-insert the same days, and
+      # the second insert would hit the unique index. Released at commit.
+      conn.execute("SELECT pg_advisory_xact_lock(hashtext('rollup_impressions'))")
       rebuild_daily_counts(conn, window_start, human)
       rebuild_daily_visitors(conn, window_start, human)
     end

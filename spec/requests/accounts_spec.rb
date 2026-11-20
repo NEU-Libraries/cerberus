@@ -51,6 +51,19 @@ RSpec.describe 'Accounts', type: :request do
         expect(flash[:notice]).to include('student@husky.neu.edu')
       end
 
+      # The list can change between the membership check and the login, and
+      # Atlas then refuses the account itself with a 400.
+      it 'turns Atlas refusing the account into the same refusal' do
+        refusal = instance_double(Faraday::Response, status: 400, body: '{"error":"unknown account"}')
+        allow(AtlasRb::Authentication).to receive(:login)
+          .and_raise(AtlasRb::ResourceError.new('unknown account', response: refusal))
+
+        post '/accounts/switch', params: { email: 'student@husky.neu.edu' }
+
+        expect(response).to redirect_to(my_drs_path)
+        expect(flash[:alert]).to match(/not one of yours/)
+      end
+
       it 'refuses an account that is not the caller\'s (and makes no login call)' do
         expect(AtlasRb::Authentication).not_to receive(:login)
 
@@ -70,6 +83,15 @@ RSpec.describe 'Accounts', type: :request do
 
         expect(response).to redirect_to(my_drs_path)
         expect(flash[:notice]).to match(/preferred account/)
+      end
+
+      it 'turns Atlas answering 404 into the same refusal' do
+        allow(AtlasRb::User).to receive(:set_preferred).and_raise(AtlasRb::NotFoundError.new('no such account'))
+
+        post '/accounts/prefer', params: { email: 'student@husky.neu.edu' }
+
+        expect(response).to redirect_to(my_drs_path)
+        expect(flash[:alert]).to match(/not one of yours/)
       end
 
       it 'refuses a foreign account (and makes no set-preferred call)' do

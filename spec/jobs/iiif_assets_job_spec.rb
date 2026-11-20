@@ -148,4 +148,69 @@ RSpec.describe IiifAssetsJob, type: :job do
     expect(ThumbnailCreationJob).not_to have_received(:perform_now)
     expect(DerivativeCreationJob).not_to have_received(:perform_now)
   end
+
+  context 'when a later write loses a lock race' do
+    before do
+      allow(IiifImageCreator).to receive(:call).with(path: source_path).and_return(result)
+      allow(IncompleteFlag).to receive(:set)
+      allow(IncompleteFlag).to receive(:clear)
+    end
+
+    # The first attempt writes the thumbnail, so the retry finds one. Stopping
+    # at the guard would leave the service and the renditions unwritten.
+    it 'retries past the thumbnail guard and finishes the service and renditions' do
+      widths = { small: 320 }
+      thumbnail = nil
+      allow(AtlasRb::Work).to receive(:find).with(work_id) { AtlasRb::Mash.new(thumbnail: thumbnail) }
+      allow(ThumbnailCreationJob).to receive(:perform_now) { thumbnail = 'written' }
+      calls = 0
+      allow(AtlasRb::FileSet).to receive(:set_iiif_service) do
+        calls += 1
+        raise AtlasRb::StaleResourceError.new('stale', resource_id: 'mets-uuid', action: 'complete') if calls == 1
+      end
+
+      perform_enqueued_jobs { described_class.perform_later(work_id, source_path, derivative_widths: widths) }
+
+      expect(AtlasRb::FileSet).to have_received(:set_iiif_service).with('fs-1', gated_base).twice
+      expect(DerivativeCreationJob).to have_received(:perform_now).with(work_id, gated_base, widths: widths).once
+      expect(IncompleteFlag).to have_received(:clear).with(work_id)
+      expect(IncompleteFlag).not_to have_received(:set)
+    end
+
+    # The flag names what the reader lost, which is everything from the write
+    # that kept losing onwards.
+    {
+      'the thumbnails'   => [:thumbnails, IncompleteReasons::THUMBNAILS],
+      'the IIIF service' => [:service, IncompleteReasons::IIIF_SERVICE],
+      'the renditions'   => [:renditions, IncompleteReasons::DERIVATIVES]
+    }.each do |label, (stage, reason)|
+      it "flags the Work with #{reason} once #{label} run out of retries" do
+        allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: nil))
+        failing = { thumbnails: ThumbnailCreationJob, service: AtlasRb::FileSet,
+                    renditions: DerivativeCreationJob }.fetch(stage)
+        allow(failing).to receive(stage == :service ? :set_iiif_service : :perform_now).and_raise(AtlasRb::StaleResourceError.new('stale', resource_id: 'mets-uuid', action: 'complete'))
+        allow(Rails.logger).to receive(:warn)
+
+        expect do
+          perform_enqueued_jobs { described_class.perform_later(work_id, source_path, derivative_widths: { small: 64 }) }
+        end.not_to raise_error
+
+        expect(Rails.logger).to have_received(:warn).with(/w-123 kept losing the lock on mets-uuid at #{stage}/)
+        expect(IncompleteFlag).to have_received(:set).with(work_id, nuid: anything, reason: reason).once
+      end
+    end
+
+    # By the time the flag is cleared every asset is in place, so there is
+    # nothing lost to name.
+    it 'sets no flag when only clearing the flag keeps losing' do
+      allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: nil))
+      allow(IncompleteFlag).to receive(:clear).and_raise(AtlasRb::StaleResourceError.new('stale', resource_id: 'mets-uuid', action: 'complete'))
+      allow(Rails.logger).to receive(:warn)
+
+      perform_enqueued_jobs { described_class.perform_later(work_id, source_path) }
+
+      expect(Rails.logger).to have_received(:warn).with(/at the incomplete flag/)
+      expect(IncompleteFlag).not_to have_received(:set)
+    end
+  end
 end

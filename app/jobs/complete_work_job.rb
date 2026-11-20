@@ -7,6 +7,8 @@
 # status-settle signal enqueues this exactly once per report; a report carries
 # many Works (one per item), so this completes each independently.
 class CompleteWorkJob < ApplicationJob
+  include AtlasWrite
+
   queue_as :default
 
   # Safe to retry: Work.complete is idempotent server-side (re-completing an
@@ -34,7 +36,9 @@ class CompleteWorkJob < ApplicationJob
 
       expected = rows.where.not(sequence: nil).count
       actual   = positioned_page_count(work_pid)
-      return AtlasRb::Work.complete(work_pid) if actual == expected
+      # A lock conflict is retried on the one Work, not through retry_on, so
+      # one conflict does not re-run the loop for every other Work.
+      return with_stale_retry { AtlasRb::Work.complete(work_pid) } if actual == expected
 
       report_mismatch(report, work_pid, expected, actual)
     end
@@ -49,6 +53,8 @@ class CompleteWorkJob < ApplicationJob
     # Work we can't vouch for. It reaches the admin ledger too — a breach is a
     # staff concern, and the creator is told to contact staff about it anyway.
     def report_mismatch(report, work_pid, expected, actual)
+      return if mismatch_reported?(report, work_pid)
+
       Rails.logger.error(
         "CompleteWorkJob: LoadReport #{report.id} expected #{expected} page FileSets " \
         "on #{work_pid}, Atlas lists #{actual} — not completing"
@@ -63,5 +69,12 @@ class CompleteWorkJob < ApplicationJob
         subject_noid: work_pid,
         payload:      { load_report_id: report.id, expected: expected, actual: actual }
       )
+    end
+
+    # retry_on Faraday::Error re-runs the whole loop, so a Work reported on an
+    # earlier attempt must not message its creator a second time.
+    def mismatch_reported?(report, work_pid)
+      AdminNotice.where(kind: 'work_completion_mismatch', subject_noid: work_pid)
+                 .exists?(['payload @> ?', { load_report_id: report.id }.to_json])
     end
 end

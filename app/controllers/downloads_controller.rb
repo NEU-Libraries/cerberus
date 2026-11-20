@@ -6,7 +6,7 @@ class DownloadsController < ApplicationController
   include ProxyUnbuffered
   include RecordsImpressions
   include DerivativesHelper
-  include ZipKit::RailsStreaming
+  include StreamsZip
   include StreamsBlob
 
   # Atlas's Classification.generic.name. Branch on the classification, never on

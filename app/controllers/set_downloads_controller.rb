@@ -6,7 +6,7 @@
 # supplies the gated search service. See docs/sets.md.
 class SetDownloadsController < CatalogController
   include ProxyUnbuffered
-  include ZipKit::RailsStreaming
+  include StreamsZip
 
   rescue_from AtlasRb::ForbiddenError do
     render template: 'errors/forbidden', status: :forbidden

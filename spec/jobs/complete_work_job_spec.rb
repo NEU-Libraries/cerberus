@@ -144,6 +144,37 @@ RSpec.describe CompleteWorkJob, type: :job do
         expect(notice.detail(:actual)).to eq(1)
       end
 
+      # retry_on Faraday::Error re-runs the whole loop, so a second pass over the
+      # same report must not tell the creator again.
+      it 'reports a mismatch once across re-runs of the same report' do
+        report = create(:load_report, loader: loader, creator_nuid: '000000003', status: :completed)
+        create(:multipage_ingest, load_report: report, status: :completed, work_pid: 'neu:w1', sequence: 1)
+        create(:multipage_ingest, load_report: report, status: :completed, work_pid: 'neu:w1', sequence: 2)
+
+        allow(AtlasRb::Work).to receive(:file_sets).and_return([page_entry('fs1', 1)])
+        allow(AtlasRb::Work).to receive(:complete)
+
+        expect { 2.times { described_class.perform_now(report.id) } }
+          .to change(Message, :count).by(1).and change(AdminNotice, :count).by(1)
+      end
+
+      it 'still reports the same Work for a different report' do
+        first = create(:load_report, loader: loader, creator_nuid: '000000003', status: :completed)
+        second = create(:load_report, loader: loader, creator_nuid: '000000003', status: :completed)
+        [first, second].each do |report|
+          create(:multipage_ingest, load_report: report, status: :completed, work_pid: 'neu:w1', sequence: 1)
+          create(:multipage_ingest, load_report: report, status: :completed, work_pid: 'neu:w1', sequence: 2)
+        end
+
+        allow(AtlasRb::Work).to receive(:file_sets).and_return([page_entry('fs1', 1)])
+        allow(AtlasRb::Work).to receive(:complete)
+
+        expect do
+          described_class.perform_now(first.id)
+          described_class.perform_now(second.id)
+        end.to change(AdminNotice, :count).by(2)
+      end
+
       # A breach is a staff concern whether or not there is a depositor to tell,
       # so the ledger records it even when the inbox half is suppressed.
       it 'sends no message without a creator, still refuses to complete, and still records it' do
@@ -157,6 +188,42 @@ RSpec.describe CompleteWorkJob, type: :job do
         expect { described_class.perform_now(report.id) }
           .to change(AdminNotice, :count).by(1).and(not_change(Message, :count))
         expect(AtlasRb::Work).not_to have_received(:complete)
+      end
+    end
+
+    context 'when Atlas reports a lost lock race on one Work' do
+      let(:report) { create(:load_report, loader: loader, status: :completed) }
+
+      before do
+        create(:multipage_ingest, load_report: report, status: :completed, item_index: 0, work_pid: 'neu:w1', sequence: 1)
+        create(:multipage_ingest, load_report: report, status: :completed, item_index: 1, work_pid: 'neu:w2', sequence: 1)
+        allow(AtlasRb::Work).to receive(:file_sets).with('neu:w1').and_return([page_entry('a1', 1)])
+        allow(AtlasRb::Work).to receive(:file_sets).with('neu:w2').and_return([page_entry('b1', 1)])
+        allow_any_instance_of(described_class).to receive(:sleep)
+      end
+
+      it 'retries that Work in place and goes on to the next' do
+        calls = 0
+        allow(AtlasRb::Work).to receive(:complete).with('neu:w2')
+        allow(AtlasRb::Work).to receive(:complete).with('neu:w1') do
+          calls += 1
+          raise AtlasRb::StaleResourceError.new('stale', resource_id: 'mets-uuid', action: 'complete') if calls == 1
+        end
+
+        described_class.perform_now(report.id)
+
+        expect(AtlasRb::Work).to have_received(:complete).with('neu:w1').twice
+        expect(AtlasRb::Work).to have_received(:complete).with('neu:w2').once
+      end
+
+      # A whole-job retry would re-run report_mismatch for every Work the loop
+      # had already reported, and message the creator twice.
+      it 'does not re-run the job through retry_on' do
+        allow(AtlasRb::Work).to receive(:complete).and_raise(AtlasRb::StaleResourceError.new('stale', resource_id: 'mets-uuid', action: 'complete'))
+
+        expect { described_class.perform_now(report.id) }.to raise_error(AtlasRb::StaleResourceError)
+        expect(AtlasRb::Work).to have_received(:complete).with('neu:w1').exactly(5).times
+        expect(AtlasRb::Work).not_to have_received(:complete).with('neu:w2')
       end
     end
   end

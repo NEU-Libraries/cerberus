@@ -147,7 +147,7 @@ semantic and styling hook, notably for permissions.
 |---|---|---|
 | `permissions` | `create` or `update` (`PERMISSION_VIEW_ACTIONS`) | The Rights-history diff page, `rights_history_path` |
 | `metadata` | `update`, with `source: 'dwc'` | The Darwin Core history diff page, `dwc_history_path` |
-| `metadata` | any other `update` | The MODS-history diff page, `mods_history_path` |
+| `metadata` | `update` with `source: 'mods'`, or an older `fields` patch | The MODS-history diff page, `mods_history_path` |
 | anything else | any | nil — the column renders an empty cell and stays aligned |
 
 Both permission actions carry a before/after snapshot. `create` is the initial
@@ -156,12 +156,13 @@ change. Atlas suppresses no-op permission writes, so each event is a real
 transition worth a page. `HistoriesController#permission_events` filters on the
 same `PERMISSION_VIEW_ACTIONS`.
 
-Every metadata update writes a new `descMetadata.xml` OCFL version, so every
-one gets a MODS-diff link. That covers a full MODS upload (`{ source: 'mods' }`)
-and a title or description field patch (`{ fields: }`) alike. Atlas's
-`plain_title=` and `plain_description=` edit the MODS document and call
-`mods_xml=` too, in `MODSAssignment`. The MODS document's `create` row has no
-earlier version to diff against, so the link is update-only.
+A MODS upload (`{ source: 'mods' }`) writes a new `descMetadata.xml` OCFL
+version, so it gets a MODS-diff link. Older history also holds title or
+description patches (`{ fields: }`), which wrote MODS too and keep the link.
+Atlas records two more `metadata` updates that write no version: a Collection's
+Featured toggle (`{ featured: }`) and a Person profile save, with no payload.
+Neither gets a View. The MODS document's `create` row has no earlier version to
+diff against, so the link is update-only.
 
 A Darwin Core write is a `metadata` update too, and only `payload.source`
 tells it apart, so `metadata_history_path` branches on it. Without the branch,
@@ -196,7 +197,8 @@ action. The shapes mirror what Atlas emits:
 | `reparent` | `{ to: noid }` | "moved to &lt;noid&gt;" |
 | `link_member` | `{ collection: noid }` | "to &lt;noid&gt;" |
 | `unlink_member` | `{ collection: noid }` | "from &lt;noid&gt;" |
-| `create`, `tombstone`, `restore` | none | none; the category label stands alone |
+| `create`, `restore` | none shown | none; the category label stands alone |
+| `tombstone` | `{ reason: }` when one was given | the reason |
 | `release_embargo` | `{ release_date: }` | none; the row's own timestamp is the release day |
 
 `update_payload_summary` matches `source` exactly, not merely for presence.
@@ -428,7 +430,7 @@ loaders parse the same document: `DescriptiveMetadata` for the bare title,
 abstract and keywords, and `AdvancedMetadata` for the structured title parts and
 names. The Work edit page runs both, so without the memo it would fetch the same
 XML from Atlas twice. The memo is for reads only. `merge_mods!` re-reads inside
-`with_stale_retry`, because a retry needs the current MODS and its lock token.
+`with_stale_retry`, because a retry has to merge into the MODS as stored now.
 
 ### The two ACL writes
 
@@ -460,9 +462,10 @@ Two surfaces read those edges, and they resolve titles differently on purpose.
 | The public association box (`WorkAssociations`) | The gated Blacklight search | A viewer must not learn that a Work they cannot see exists |
 | The admin panel (`Admin::AssociationsController`) | `AtlasRb::Resource.find_many` | A management surface must show every edge, including one to a tombstoned Work. The gated search drops that Work, and the edge would then be unremovable |
 
-Atlas gates a delegated admin's reads by group, so on the admin panel
-`find_many` can drop a Work that admin cannot read. `titles_for` then shows the
-bare NOID, and the edge stays removable.
+Atlas filters both directions of the edge list by the caller's `:read`, so a
+delegated admin never receives an edge whose far end they cannot read. If
+`find_many` drops an id it cannot resolve, `titles_for` shows the bare NOID, and
+the edge stays removable.
 
 Each admin row also shows the first 160 characters of the Work's abstract, as
 the public box does, with the PID in a chip beside the title. `find_many`'s
@@ -476,9 +479,9 @@ keeps its row, with the title and the chip and no abstract.
 see. It takes one Solr query to cover both directions and every predicate,
 however many edges a Work has.
 
-Atlas answers with noids, and that is what makes this safe. Atlas's association
-endpoint is ungated: it reports every edge, including edges to Works the viewer
-must not see. Resolving those noids through the gated search reduces the list
+Atlas answers with noids, and that is what makes this safe. Atlas filters the
+edges by what the signed-in user may read, not by the view-as viewer, and it
+still lists edges to tombstoned Works. Resolving those noids through the gated search reduces the list
 to the rows this viewer may have. A noid that resolves to no document does not
 render, and leaves no trace: no group heading, no count, no "1 item hidden".
 Each of those would confirm the record exists. The same lookup drops tombstoned

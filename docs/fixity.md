@@ -72,8 +72,10 @@ which can mint a token for anyone.
    passes it to the `fixity` service as `FIXITY_TOKEN`. Cerberus itself never
    sends it.
 
-Until both ends are set, every sweep logs `due list answered 401` and the loop
-sleeps until the next one. The service is harmless while unconfigured, which is
+With no `ATLAS_FIXITY_TOKEN`, every sweep logs `set FIXITY_TOKEN or
+FIXITY_TOKEN_FILE` without calling Atlas. With a token Atlas does not hold, every
+sweep logs `due list answered 401`. Either way the loop sleeps until the next
+one. The service is harmless while unconfigured, which is
 why CI's plain `up` can start it.
 
 ## Staging

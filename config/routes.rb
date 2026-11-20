@@ -63,7 +63,7 @@ Rails.application.routes.draw do
   # keeps "where does this go?" out of the forms entirely: you say it by
   # navigating to the container you mean.
   # No unparented create for either container: a Collection must have a parent
-  # (Atlas raises on a nil one), and a root Community is a seed-time concern, not
+  # (Atlas answers 404 to a nil one), and a root Community is a seed-time concern, not
   # something the UI offers. Dropping the top-level new/create removes the
   # parentless route rather than patching the links that reached it.
   # The facet-suggest box inside the scoped "more" modal. Blacklight's JS builds
@@ -283,8 +283,9 @@ Rails.application.routes.draw do
 
     # Associated works — find a Work, then assert or retract the typed edges
     # between it and other Works (codebook / figure / transcription / …).
-    # Admin-only because Atlas gates the write that way: the claim renders on
-    # the target's page too. `remove` carries holder_id, because the edge lives
+    # Admin and delegated admin only, because Atlas gates the write that way:
+    # the claim renders on the target's page too. `remove` carries holder_id,
+    # because the edge lives
     # on whichever Work asserted it and either direction is retractable here.
     get    'associations',        to: 'associations#index'
     get    'associations/manage', to: 'associations#manage',  as: :associations_manage

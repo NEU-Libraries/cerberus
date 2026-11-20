@@ -137,7 +137,7 @@ details, including the run lock and the reset preflight, are in
 |---|---|
 | Setting up, running things, organising a change | [`docs/development.md`](docs/development.md) |
 | How one component works, while you edit it | [`docs/`](docs/README.md) |
-| The Atlas API contract | Atlas's `/docs`, and its `openapi/openapi.yaml` |
+| The Atlas API contract | Atlas's `/docs`, and its `openapi/public/openapi.yaml` (client endpoints) and `openapi/internal/openapi.yaml` (system and admin endpoints) |
 | Using the repository as a depositor or reviewer | the user guide (`cerberus-guide`) |
 | Repository software, as a Rails developer new to it | the developer primer (`cerberus-primer`) |
 

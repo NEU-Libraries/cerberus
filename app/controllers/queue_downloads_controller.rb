@@ -9,7 +9,7 @@
 # caller's bypass right to decide whether withheld content may be included.
 class QueueDownloadsController < ApplicationController
   include ProxyUnbuffered
-  include ZipKit::RailsStreaming
+  include StreamsZip
 
   def show
     queue = DownloadQueue.new(session)

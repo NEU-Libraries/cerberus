@@ -448,7 +448,8 @@ string per Work, the cheapest thing in the payload. The documents themselves are
 never held, per the batch-job memory budget rule.
 
 `nuid:` is the acting operator, whose discovery scopes the walk. A full Atlas
-admin sees every Work; anyone else sees public Works plus their own groups'.
+admin sees every Work; anyone else sees public Works, Works their groups may
+read or edit, and Works they deposited or hold a personal edit grant on.
 
 `MAX_WORKS` (10,000) bounds one sweep, matching `SetResolver::MAX_EXPORT_ROWS`.
 A recipe that names several large collections can denote far more Works than

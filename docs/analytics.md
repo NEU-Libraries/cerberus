@@ -39,6 +39,10 @@ A view is recorded only when the request actually rendered. A tombstone 410 and
 an authz 403 are not views, so `record_view_impression` returns early unless the
 response was successful.
 
+A HEAD request records nothing, whatever the callback. It reads no content, so
+it is neither a view nor a download; link checkers and monitors send it. See
+[`head-requests.md`](head-requests.md).
+
 A download or stream carries the Blob id rather than a noid.
 `RecordImpressionJob` resolves the containing Work's noid with
 `AtlasRb::Blob.work`, and records nothing when the Blob resolves to no Work.
@@ -87,6 +91,19 @@ An IP hammering the repository across many different noids is abusive traffic
 even when the caller only wants one noid's numbers. Scoping the detection would
 under-detect it.
 
+### The offenders are an anti-join
+
+`from_where_sql` joins the offender set as a derived table and keeps the rows
+that match no offender. It must not go back to
+`(ip, day) NOT IN (subquery)`. Postgres runs an `IN` subquery as a hash only
+while it expects the hash to fit in `work_mem`. Past that point it switches to a
+plain subplan and reruns the 90-day offender aggregate for every impression
+row, which is quadratic. A hash join can spill to disk, so the anti-join slows
+down gently as traffic grows.
+
+The fragment also drops rows with no IP address. `Impression` requires an IP,
+so such rows should not exist, and a row without one cannot count as a visitor.
+
 ### The constructor's parameters
 
 | Parameter | Meaning |
@@ -128,9 +145,91 @@ Two methods read the aggregate. Never read its `hour` column directly:
 - `ImpressionCountByDay.day_sql` groups by the Eastern date. `ImpressionsReport`
   asks each leaf for its `day_sql`, and the human leaf's is its stored `day`.
 
-`RollupImpressionsJob` re-derives only its last 90 days. Rows older than that
-keep the day they were rolled up on until the job runs once with a longer
-`window:`.
+`RollupImpressionsJob` re-derives at most its last 90 days. Rows older than that
+keep the day they were rolled up on until the job runs once with a larger
+`days:`.
+
+## When the rollups run
+
+`config/recurring.yml` runs `RollupImpressionsJob` twice over:
+
+| Run | Schedule | Window |
+|---|---|---|
+| `rollup_impressions` | every hour | the last 2 days (`days: 2`) |
+| `rollup_impressions_full` | daily at 4:05 | the last 90 days (`FULL_DAYS`) |
+
+The short hourly run gives the same counts for its two days as a full run would.
+The volume-offender check groups by (IP, day), and the window starts at an
+Eastern midnight, so each day is computed from that day's rows alone.
+
+The full run exists for rule changes. A new bot verdict, volume threshold or
+allowlist entry changes the counts for days the hourly run no longer touches.
+`ReclassifyUserAgentsJob` runs at 4:00, so the full run at 4:05 applies a bot
+list change to every day in the window. A threshold or allowlist change reaches
+every day within a day of deploy.
+
+Each run takes a transaction-scoped advisory lock before it deletes. Two
+overlapping runs would otherwise delete and re-insert the same days, and the
+second insert would fail on the unique index. The second run waits instead.
+
+`RollupContainerImpressionsJob` runs daily at 4:10, after the full run. It
+replaces one container's rows per transaction, after that container's Solr
+lookup, so no transaction stays open across the lookups. A final delete clears
+the rows of containers that no longer exist in Solr. A report read mid-run can
+show some containers updated and others not, but each container's own figures
+are always consistent.
+
+## TimescaleDB policies
+
+TimescaleDB runs background jobs, called policies, against the impressions
+tables. `db/schema.rb` must record every policy, because the test databases,
+`bin/setup` (`db:prepare`) and any `db:schema:load` build a database from that
+file and nothing else.
+
+| Policy | Object | What it does |
+|---|---|---|
+| Refresh | `impression_counts_by_day` | Re-materializes the last 7 days of the aggregate every hour, up to an hour ago |
+| Compression | `impressions` | Compresses each raw chunk once it is 120 days old |
+
+There is no retention policy. Raw impressions are kept for good, compressed.
+
+Compression starts after 120 days so that it stays clear of every reader of raw
+rows. The rollups read 90 days, the throttle reads one hour, and the aggregate's
+refresh policy reads 7 days. Only a full refresh of the aggregate, run by hand,
+reads a compressed chunk, and TimescaleDB decompresses it on the fly. If a
+rollup window ever grows past 120 days, move the compression point with it.
+
+Compressed rows are segmented by `action` and ordered by `noid` and
+`created_at`. Most noids collect only a few impressions in a 30-day chunk, so
+segmenting by `noid` would make thousands of tiny segments that compress
+poorly.
+
+To list the policies a database actually has:
+
+```sql
+SELECT proc_name, hypertable_name, schedule_interval, config
+FROM timescaledb_information.jobs WHERE job_id >= 1000;
+```
+
+`spec/models/impressions_hypertable_spec.rb` checks the test database, which is
+built from `db/schema.rb`, so a policy the dump drops fails there.
+
+### The refresh policy and the schema dump
+
+TimescaleDB lists a refresh policy in `timescaledb_information.jobs` under a
+name that depends on its version. Before 2.20, `hypertable_name` holds the
+materialization hypertable's name, such as `_materialized_hypertable_4`. From
+2.20 on, it holds the aggregate's view name. The `timescaledb` gem joins on one
+name only: 0.3.2 and earlier on the materialization hypertable, 0.3.3 on the
+view. On the other side of 2.20, the dumper finds no policy and writes
+`create_continuous_aggregate` without `refresh_policies:`. A database built from
+that dump never refreshes the aggregate, and the "All traffic" segment stops
+moving without any error.
+
+`config/initializers/timescaledb_schema_dumper.rb` redeclares the association to
+match either name, so the dump keeps the policy on any TimescaleDB version.
+Remove it once the gem matches both names itself, or once every database runs
+TimescaleDB 2.20 or later with gem 0.3.3 or later. Keep the spec either way.
 
 ## Scoping a report to one container
 

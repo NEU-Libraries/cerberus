@@ -19,13 +19,15 @@ module IncompleteReasons
   DERIVATIVES = 'derivatives_gave_up'
   FULL_TEXT = 'full_text_gave_up'
   THUMBNAILS = 'thumbnails_gave_up'
+  IIIF_SERVICE = 'iiif_service_gave_up'
 
   DESCRIPTIONS = {
     PDF_RENDITION   => 'No PDF version was made, so this document has no preview.',
     MEDIA_RENDITION => 'No streamable version was made, so this file may not play in the browser.',
     DERIVATIVES     => 'The small, medium and large download sizes were not made.',
     FULL_TEXT       => 'The text was not extracted, so this work will not be found by a full-text search.',
-    THUMBNAILS      => 'No thumbnail was made, so this work shows a placeholder icon.'
+    THUMBNAILS      => 'No thumbnail was made, so this work shows a placeholder icon.',
+    IIIF_SERVICE    => 'The full-size image was not set up, so this work cannot be zoomed in the viewer.'
   }.freeze
 
   UNKNOWN = 'Part of this work was not finished. Contact DRS staff.'

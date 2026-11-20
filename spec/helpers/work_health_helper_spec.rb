@@ -80,6 +80,12 @@ RSpec.describe WorkHealthHelper do
 
       expect(html).to include(admin_reindex_work_path('w1'), CGI.escapeHTML(edit_work_path('w1', tab: 'health')))
     end
+
+    it 'offers Reindex for a Solr document that trails Postgres' do
+      html = helper.work_health_repair(finding('index_stale'), 'w1')
+
+      expect(html).to include(admin_reindex_work_path('w1'))
+    end
   end
 
   describe '#work_health_problems' do
@@ -95,6 +101,7 @@ RSpec.describe WorkHealthHelper do
     it 'is true only for a code this page can repair' do
       expect(helper.work_health_repair_offered?(finding('untitled'))).to be true
       expect(helper.work_health_repair_offered?(finding('not_indexed'))).to be true
+      expect(helper.work_health_repair_offered?(finding('index_stale'))).to be true
       expect(helper.work_health_repair_offered?(finding('envelope_stale'))).to be false
     end
   end

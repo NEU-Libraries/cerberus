@@ -21,14 +21,14 @@
       <% end %>
 
       <%# "Full Text Match" — a Solr highlight fragment from the document body
-          (full_text_tsim, the dedicated extracted-text field — NOT the
+          (SolrDocument::FULL_TEXT_FIELD, the dedicated extracted-text field — NOT the
           all_text_timv catch-all, which leaks ACLs/NUIDs), shown only when the
           query matched inside the text. List view only: the gallery component is
           image-forward and omits it. Pick the first non-empty fragment: the
           highlighter can emit a leading empty fragment (notably with
           hl.fragsize), which .first would render blank. %>
-      <% if @document.has_highlight_field?('full_text_tsim') &&
-            (fragment = @document.highlight_field('full_text_tsim').find(&:present?)) %>
+      <% if @document.has_highlight_field?(SolrDocument::FULL_TEXT_FIELD) &&
+            (fragment = @document.highlight_field(SolrDocument::FULL_TEXT_FIELD).find(&:present?)) %>
         <div class="full-text-match">
           <div class="full-text-match__label">Full Text Match</div>
           <div class="full-text-match__snippet mb-2">… <%= sanitize(fragment, tags: %w[em]) %> …</div>

@@ -3,6 +3,8 @@
 require 'rails_helper'
 
 RSpec.describe ContentCreationJob, type: :job do
+  include ActiveJob::TestHelper
+
   let(:work_id) { 'w-456' }
   let(:original_filename) { 'image.png' }
   let(:idempotency_key) { SecureRandom.uuid }
@@ -45,5 +47,34 @@ RSpec.describe ContentCreationJob, type: :job do
 
     expect(AtlasRb::Blob).to have_received(:create)
     expect(AtlasRb::Work).not_to have_received(:complete)
+  end
+
+  context 'when Atlas reports a lost lock race' do
+    before { allow(AtlasRb::Blob).to receive(:create) }
+
+    # Blob.create carries the idempotency key, so the re-run converges on the
+    # one Blob rather than attaching a second.
+    it 'retries the whole job and completes the Work' do
+      calls = 0
+      allow(AtlasRb::Work).to receive(:complete).with(work_id) do
+        calls += 1
+        raise AtlasRb::StaleResourceError.new('stale', resource_id: 'mets-uuid', action: 'complete') if calls == 1
+      end
+
+      perform_enqueued_jobs { described_class.perform_later(work_id, source_path, original_filename, idempotency_key) }
+
+      expect(AtlasRb::Blob).to have_received(:create)
+        .with(work_id, source_path, original_filename, idempotency_key: idempotency_key).twice
+      expect(AtlasRb::Work).to have_received(:complete).with(work_id).twice
+    end
+
+    it 're-raises once the retries run out' do
+      allow(AtlasRb::Work).to receive(:complete).and_raise(AtlasRb::StaleResourceError.new('stale', resource_id: 'mets-uuid', action: 'complete'))
+
+      # The test helper wraps a job's exception in Minitest::UnexpectedError.
+      expect do
+        perform_enqueued_jobs { described_class.perform_later(work_id, source_path, original_filename, idempotency_key) }
+      end.to raise_error { |e| expect(e.error).to be_a(AtlasRb::StaleResourceError) }
+    end
   end
 end

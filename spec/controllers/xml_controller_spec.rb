@@ -268,8 +268,8 @@ describe XmlController do
       before { allow(XmlValidator).to receive(:call).and_return(['Opening and ending tag mismatch']) }
 
       it 'does not write anything to Atlas' do
-        # Reference the fixture before the stub: AtlasRb::Work.create issues its
-        # own update to attach the MODS, which the stub would otherwise absorb.
+        # Reference the fixture before the stub: AtlasRb::Work.create seeds the
+        # MODS through Resource.put_mods, which the stub would otherwise absorb.
         resource_id = work.id
         allow(AtlasRb::Resource).to receive(:put_mods)
 

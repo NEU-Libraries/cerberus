@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 # A Work's typed associations, resolved through the GATED search to only the
-# documents this viewer may see. Atlas's association endpoint is ungated and
-# names every edge, so a gated-away Work must leave no trace here: no group
+# documents this viewer may see. Atlas filters the edges by the signed-in
+# caller's read, not the view-as viewer's, so a gated-away Work must leave no
+# trace here: no group
 # header, no count, no "1 item hidden" — each of those confirms the record
 # exists, which is what the gate prevents. See docs/edit-surfaces.md.
 class WorkAssociations < ApplicationService

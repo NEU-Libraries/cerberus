@@ -343,8 +343,8 @@ RSpec.describe 'Histories', type: :request do
       expect(response.body).to include('No Darwin Core versions recorded')
     end
 
-    # Only a Work holds a record; Atlas would answer an empty list for anything
-    # else, so the gate refuses before reading.
+    # Only a Work holds a record; Atlas answers 404 for anything else, which
+    # atlas_rb returns as nil, so the gate refuses before reading.
     it 'refuses a Collection without reading its versions' do
       allow(AtlasRb::Resource).to receive(:find).with(resource_id).and_return(found(klass: 'Collection'))
       allow(AtlasRb::Resource).to receive(:dwc_versions)

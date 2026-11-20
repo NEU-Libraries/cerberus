@@ -94,10 +94,10 @@ module Admin
 
     private
 
-      # Atlas resolves the node by id and tells us its type; a bad id raises
-      # JSON::ParserError → Authorizable's rescue renders the 404 page.
+      # Atlas resolves the node by id and tells us its type. An unknown id reads
+      # back as nil, which require_resource! turns into the 404 page.
       def load_node(id)
-        AtlasRb::Resource.find(id)
+        require_resource!(AtlasRb::Resource.find(id))
       end
 
       # The item, its subtree and its current parent are all left out: the

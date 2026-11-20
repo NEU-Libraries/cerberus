@@ -89,4 +89,26 @@ RSpec.describe ApplicationJob, type: :job do
       expect(CurrentNuidProbeJob.observed_nuid).to eq('parent-nuid')
     end
   end
+
+  # Atlas tags its log lines with the X-Request-Id it receives. A job sends its
+  # own job_id, which ActiveJob already tags the job's log lines with.
+  describe 'the request id sent to Atlas' do
+    let(:atlas_job_class) do
+      stub_const('AtlasRequestIdProbeJob', Class.new(ApplicationJob) do
+        def perform = AtlasRb::Maintenance.read
+      end)
+    end
+
+    it "sends the job's own id on an Atlas call made inside perform" do
+      sent = []
+      allow(AtlasRb::Transport::Proxy).to receive(:new).and_wrap_original do |original, *args|
+        original.call(*args).tap { |proxy| sent << proxy.headers['X-Request-Id'] }
+      end
+      job = Current.set(nuid: '000000004') { atlas_job_class.perform_later }
+
+      perform_enqueued_jobs
+
+      expect(sent).to eq([job.job_id])
+    end
+  end
 end

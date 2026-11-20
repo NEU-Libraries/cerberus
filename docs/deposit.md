@@ -278,11 +278,10 @@ assets.
 The order inside `#update_metadata` is load-bearing:
 
 1. `handle_metadata_update` — the descriptive save.
-2. `process_derivative_widths` — after the descriptive save, deliberately.
-   With a live worker, `DepositDerivativesJob` can execute within this same
-   request, and its Delegate PATCH bumps the Work's optimistic lock. Enqueueing
-   it first races `save_descriptive!` into `AtlasRb::StaleResourceError`. Specs
-   cannot catch this, because the test adapter never runs the job inline.
+2. `process_derivative_widths` — queues `DepositDerivativesJob` for the
+   renditions the depositor chose. Its Delegate writes re-save the Work, but
+   they do not conflict with the MODS write: Atlas holds a lock across each
+   MODS write and retries the re-save that follows it.
 3. `apply_streaming_only!`.
 4. `apply_caption!` — before the confirm, so the caption Blob is queued behind
    the deposit's own finalization rather than ahead of it. `CaptionJob` waits
@@ -292,6 +291,22 @@ The order inside `#update_metadata` is load-bearing:
    deliberately leaves it `in_progress`. The completion is deferred to a job
    because Atlas asks callers to complete only once the expected children are
    deposited. The primary Blob may still be in flight.
+
+`ConfirmDepositJob` therefore waits for two things. It waits for the primary
+file, as above. It also retries a lost optimistic-lock race. Steps 2 to 4 queue
+jobs that write to the same Work, and the worker runs them alongside the
+confirm. A caption FileSet that lands as the Work completes makes Atlas rebuild
+the Work's METS twice, and one rebuild loses. Atlas retries that conflict
+itself, and only a conflict that outlasts its budget reaches Cerberus as
+`AtlasRb::StaleResourceError`. Even then Atlas has already completed the Work,
+minted its handle and written the audit row, and a second `complete` call
+finishes the METS.
+
+So the retry is safe, because `Work.complete` is idempotent. It also needs no
+exhaustion block: a job that runs out of retries lands in the failed-jobs list.
+The Work is already complete there, so it is on no needs-attention list, and
+the failed job and its Retry button are the only trace. `ContentCreationJob`
+does the same on the batch paths, where it is the job that completes the Work.
 
 ### The Advanced metadata disclosure
 
@@ -382,15 +397,16 @@ no-op.
 
 It runs inside `with_stale_retry`, through `merge_mods!`. Right after a
 deposit, the async ingest and derivative jobs are still finalizing the same
-Work, so this read-merge-write can lose an optimistic-lock race. Re-reading
-picks up the current MODS and token.
+Work. Atlas retries the re-save that follows a MODS write, so a conflict
+reaches Cerberus only when it outlasts those retries. Re-reading then merges
+into the MODS as stored now.
 
 Both `save_descriptive!` and `save_advanced!` are thin calls over
 `AtlasWrite#merge_mods!`, which is the read-merge-write spine itself: read the
 current MODS inside the retry, merge, skip the write when nothing changed, and
 tag the event with the calling surface's origin. The read sits *inside* the
-retry deliberately, because a retry needs the current MODS and its lock token
-rather than a memo from the first attempt.
+retry deliberately, because a retry has to merge into the MODS as stored now,
+not a memo from the first attempt.
 
 `save_descriptive!` takes an `advanced:` hash so a form carrying **both** field
 sets is **one** write. `MODSMerge` already accepts every field in a single
@@ -547,8 +563,8 @@ person reads, with a fallback, so adding one needs no view change.
 where it must come from the job instance the handler is passed
 (`job.current_nuid`). A handler runs *outside* `perform`, so
 `ApplicationJob`'s `around_perform` has already unwound and the ambient
-`Current.nuid` is gone. Atlas then has no principal to authenticate and
-refuses the write with a `ConfigurationError`. That failure is caught, so the
+`Current.nuid` is gone. atlas_rb then has no NUID to sign and raises
+`AtlasRb::ConfigurationError` before the write is sent. That failure is caught, so the
 symptom is a flag that silently never appears.
 
 `IncompleteFlag.clear` takes no `nuid:`, deliberately. It runs inside
@@ -578,9 +594,8 @@ propagation: `Current.nuid` set on the request thread does *not* automatically
 reach the worker thread that runs the job. Background jobs that call
 `AtlasRb::*` without an explicit `nuid:` kwarg rely on the configured
 `default_nuid` resolving to `Current.nuid`. If the value is not restored at
-perform, the request goes out with no `User:` header, and Atlas's
-`require_auth` rejects it with 400. That surfaces as an unrelated
-`NoMethodError` when the gem parses the error envelope and returns nil.
+perform, atlas_rb has no acting NUID to sign and raises
+`AtlasRb::ConfigurationError` before the request is sent.
 
 `before_enqueue` captures `Current.nuid` into `current_nuid`, which
 `serialize` and `deserialize` carry with the job. `around_perform` re-sets it

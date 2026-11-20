@@ -126,7 +126,8 @@ module Cerberus
     # Route exceptions through ErrorsController so error pages share the
     # application layout (header, footer, search bar). Rails dispatches
     # by status-code path (/404, /500, etc.) when set to self.routes.
-    # ErrorPagesApp serves public/ when that page itself fails.
+    # ErrorPagesApp serves a static page from lib/error_pages/ when that page
+    # itself fails.
     config.exceptions_app = ErrorPagesApp.new(->(env) { Rails.application.routes.call(env) })
 
     # config.active_support.to_time_preserves_timezone = :zone

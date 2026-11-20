@@ -13,6 +13,10 @@
 class ContentCreationJob < ApplicationJob
   queue_as :default
 
+  # Both calls are idempotent, so a re-run converges. No block: an exhausted
+  # conflict lands in the failed-jobs list. See docs/deposit.md.
+  retry_on AtlasRb::StaleResourceError, attempts: 5, wait: :polynomially_longer
+
   def perform(work_id, source_path, original_filename, idempotency_key, complete_work: true)
     return unless File.exist?(source_path)
 

@@ -15,7 +15,7 @@
 # the caller cannot read still 403s at Compilation.find (Atlas is the boundary).
 class SetExportsController < CatalogController
   include ProxyUnbuffered
-  include ZipKit::RailsStreaming
+  include StreamsZip
   include LoaderGated
 
   rescue_from AtlasRb::ForbiddenError do

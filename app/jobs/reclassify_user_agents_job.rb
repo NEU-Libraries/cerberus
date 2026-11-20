@@ -3,10 +3,10 @@
 # Re-scans the user_agents dimension against the current bot list
 # (config.x.cerberus.impression_bots) and updates is_bot where the verdict
 # changed. O(distinct UAs) — a tiny table — and monotonic-narrowing in practice
-# (the list only grows, moving UAs human → bot). After this runs, the next
-# RollupImpressionsJob window re-derives human counts with the new verdicts, so
-# a bot-list edit retroactively re-cleans history with no raw mutation (§9).
-# Scheduled daily.
+# (the list only grows, moving UAs human → bot). The nightly full
+# RollupImpressionsJob, scheduled just after this, re-derives human counts with
+# the new verdicts, so a bot-list edit retroactively re-cleans history with no
+# raw mutation (§9). Scheduled daily.
 class ReclassifyUserAgentsJob < ApplicationJob
   queue_as :background
 

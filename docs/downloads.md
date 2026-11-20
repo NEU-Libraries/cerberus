@@ -367,15 +367,17 @@ That is not sufficient, twice over.
 **An embargoed Work is deliberately readable.** Its metadata stays public and
 only its content is withheld. So it clears both Atlas's read check and the
 resolver's gated search, and arrives at the packer looking like any other
-member. Without a packer-side embargo check the archive is assembled with the
-*owner's* reach and hands an anonymous requester bytes that `/downloads/:id`
-refuses them.
+member. Atlas refuses an embargoed Blob's bytes to anyone who may not bypass
+the embargo, but the packer fetches those bytes as the signed-in user, which
+under view-as is the admin rather than the target. The packer-side embargo check
+is what holds the archive to the requester's reach.
 
-**Atlas re-authorizes at the Work level, not the tier level.** The per-asset
-gate rides the returned entries as advisory `gated` and `permission` values.
-The display layer enforces them. A restricted tier — a Streaming Only recording, a
-gated original — therefore arrives looking ordinary. `DerivativeGate.readable?` is
-what stops the archive handing out those bytes.
+**Atlas's listing re-authorizes at the Work level, not the tier level.** The
+per-asset gate rides the returned entries as advisory `gated` and `permission`
+values. The display layer enforces them. A restricted tier — a Streaming Only
+recording, a gated original — therefore arrives looking ordinary. Atlas enforces
+the tier on a Blob's bytes, for the signed-in user, but a Delegate rendition
+comes from Cantaloupe, and for it `DerivativeGate.readable?` is the only check.
 
 The caller's own rights drive both checks. `ability` and `bypass_embargo` are
 the **caller's**, never the Set owner's.
@@ -650,8 +652,8 @@ deposit and its metadata are untouched, and the depositor can revisit the
 metadata page to request sizes again. A later success clears the flag.
 
 A separate `retry_on StandardError` (three attempts) absorbs transient Atlas
-failures, including the optimistic-lock 500 raised when another job is still
-PATCHing the same FileSet. It sets the same flag on exhaustion. That
+failures, including the `AtlasRb::StaleResourceError` (409) raised when another
+job is still PATCHing the same FileSet. It sets the same flag on exhaustion. That
 serial-PATCH constraint is documented on `IiifAssetsJob`.
 
 **`ServiceNotReady`'s handler must be declared after the `StandardError` one.**
@@ -730,9 +732,10 @@ whoever replaced the file, and atlas_rb has no system-principal delete.
 `RenditionAsset.for` finds the existing MP4 from `Work.file_sets`. Atlas stores
 a rendition as an ordinary `original_file` in a FileSet of its own, so nothing
 on the wire marks it as derived. The name does: the job writes `talk.mov` as
-`talk.mp4`, and a primary's `original_filename` survives every `Blob.update`.
-So the rendition is the `original_file` MP4 whose name stem matches another
-`original_file` on the Work. It reads `original_filename` for that match only,
+`talk.mp4`, so the rendition is the `original_file` MP4 whose name stem matches
+another `original_file` on the Work. A replace renames the primary to the
+uploaded file's name before this job looks, so the match holds only while a
+replacement keeps the original's stem. It reads `original_filename` for that match only,
 and never renders it.
 
 Three consequences follow:

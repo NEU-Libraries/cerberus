@@ -38,9 +38,9 @@ RSpec.describe SetZipPacker do
 
   # The set's gated search cannot filter these out: an embargoed Work is
   # deliberately DISCOVERABLE — public metadata, withheld content — so it clears
-  # discovery and reaches the packer. Without the per-file check the archive is
-  # built with the set OWNER's reach and hands an anonymous caller bytes that
-  # /downloads/:id refuses them.
+  # discovery and reaches the packer. Atlas refuses the caller its bytes too, but
+  # checking here first names the Work in ERRORS.txt as under embargo, rather
+  # than as a failed stream, and spends no Atlas call on it.
   context 'when a member work is under an active embargo' do
     before do
       allow(resolver).to receive(:each_content_batch)
@@ -205,9 +205,9 @@ RSpec.describe SetZipPacker do
     end
   end
 
-  # Atlas re-authorizes a member at the WORK level only; the per-asset gate rides
-  # its assets as advisory metadata, so a Streaming Only video reaches the packer
-  # looking ordinary and must be refused here or the archive leaks it.
+  # Atlas refuses a tier-gated Blob's bytes to a caller outside its audience as
+  # well. Refusing here first, from the gate on the assets payload, names the
+  # asset as withheld rather than as a failed stream and spends no byte fetch.
   it 'withholds an asset whose derivative tier this caller cannot read, and names it' do
     gated = blob(noid: 'vid1', filename: 'video.mp4', mime_type: 'video/mp4')
     gated['gated'] = true

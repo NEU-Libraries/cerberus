@@ -41,7 +41,9 @@ nothing about tags, so cutting the markup-bearing string can sever one.
 `enhanced_paragraphs` splits on one or more blank lines (`PARAGRAPH_BREAK`,
 which tolerates the trailing spaces a textarea collects). A lone newline is a
 wrap, not a break, and becomes a space. Those rules are Atlas's: its decorator
-projects the same abstract into `<p>` elements that way. A Work's show page and
+projects the same abstract into `<p>` elements that way, except that it splits
+only on bare newlines, so a line holding only spaces does not break a paragraph
+there. A Work's show page and
 a container's must agree about one stored value. The `<p>` wrappers are built in
 the helper, never taken from the value, so the no-parsing rule below still
 holds.
@@ -288,8 +290,8 @@ included, so the role cannot tell them apart.
 
 `CaptionTrack.for_language` finds at most one per language, because
 `CaptionJob` updates the bytes of the Blob it finds rather than creating a
-second. Delegates — the image tiers —
-carry a `uri` and are not content. `MediaRemux.playable_file` applies the same
+second. Delegates — the image tiers — are not content, and `AssetKind` tells
+them apart by the `kind` Atlas names on each asset. `MediaRemux.playable_file` applies the same
 test.
 
 ### Audio and video

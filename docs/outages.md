@@ -191,7 +191,7 @@ redirects. `PageLatency` records each successful GET of those routes into a
 - **The columns.** "Median" is the p50: a typical visit, which one slow load does not pull up the way it pulls up a mean. "1 in 20 slower than" is the p95. Both are approximate, because they are interpolated from latency buckets; the card does not say so, to keep it short.
 - **The key.** A dot key in the bar's column header names the two segments: blue for Atlas, the audit history's restore orange (`#c46410`) for the rest of the page. That orange clears 3:1 against white and the bar's light grey track. Bootstrap's `$orange` does not.
 - **Where the time goes** splits each page's average into the time it waited on Atlas and the rest. **The bar uses means, never percentiles.** Means add up: an average of 220 ms on Atlas and 90 ms otherwise is a 310 ms average page. A p95 of the parts is not a part of the p95, so a bar built from percentiles would be wrong.
-- **Waiting on Atlas is elapsed time, not summed time.** It runs from the start of the page's first Atlas call to the end of its last, so the Work page's four parallel reads count once, as the reader experiences them.
+- **Waiting on Atlas is elapsed time, not summed time.** It runs from the start of the page's first Atlas call to the end of its last, so the Work page's parallel reads count once, as the reader experiences them.
 
 **How a page's Atlas time is collected.** `ApplicationController` sets
 `Current.request_timing` to a new `RequestTiming` before any other callback.
@@ -222,6 +222,17 @@ The card shows page figures only, because per-call figures don't tell anyone
 how long a page took. To find which Atlas call is
 slow, read that endpoint, or switch on the development round-trip logger, which
 prints Atlas's `x-runtime` and `Server-Timing` `process_action` beside each call.
+
+**Finding a page's Atlas requests.** Atlas adopts an incoming `X-Request-Id` and
+tags its log lines with it, as Cerberus does. `ApplicationController` copies
+`request.request_id` into `Current.request_id`, and atlas_rb sends it on every
+binding call. So one search for a page view's id finds its lines in both logs,
+including the reads on `ParallelAtlasReads`'s worker threads, which copy
+`Current`. A job sends its own `job_id`, which ActiveJob already tags its log
+lines with. That makes Atlas load from jobs attributable to one job run, rather
+than to the page that queued it. The id is a log label: Atlas trusts nothing
+about it. If a proxy between the two apps sets its own `X-Request-Id`, or log
+shipping drops the tag, the join breaks.
 
 ### The histogram store
 

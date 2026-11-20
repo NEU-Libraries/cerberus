@@ -4,12 +4,10 @@ require 'rails_helper'
 
 # Admin file-version content streaming — the "download a superseded version"
 # half of the replace surface. Devolved: :admin and the devolved-admin tier
-# (User#admin_delegate?) both pass Cerberus's gate; Atlas's own `:read, Blob`
-# check (BlobsController#version_content) is already open to any authenticated
-# non-system/non-anonymous role via the unconditional `can :read, Resource`
-# floor (Blob < Resource) — see the retraction note in
-# atlas_admin_delegation_authorization.md — so the streaming action itself
-# needed no Atlas change, only the Cerberus-side gate broadening. The gate is
+# (User#admin_delegate?) both pass Cerberus's gate. Atlas's own `:read, Blob`
+# check (BlobsController#version_content) resolves to the containing Work's
+# read ACL, which the devolved tier passes through the staff edit group Atlas
+# keeps on every Work, so Cerberus's gate is the one that decides. The gate is
 # stub-free (it short-circuits before the action body); the streaming
 # happy-path runs against the live test Atlas, the same way
 # DownloadsController's spec does, to avoid stubbing inside the

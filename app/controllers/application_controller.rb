@@ -12,13 +12,22 @@ class ApplicationController < ActionController::Base
   include OwnProfile
   include StructuralContainers
   include CriticalCssInlining
+  include AnswersHead
+
+  # Only the store changes, not the check: re-declaring protect_from_forgery
+  # here would move verify_authenticity_token behind the callbacks above it.
+  # See docs/identity.md#a-guest-has-no-session.
+  self.csrf_token_storage_strategy = ActionController::RequestForgeryProtection::CookieStore.new(:csrf_token)
 
   before_action do
     I18n.locale = :en
   end
 
   # Prepended so it runs before any callback that reads Atlas.
-  prepend_before_action { Current.request_timing = RequestTiming.new }
+  prepend_before_action do
+    Current.request_timing = RequestTiming.new
+    Current.request_id     = request.request_id
+  end
 
   before_action :store_preferred_view
   before_action :set_current_nuid

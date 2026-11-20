@@ -17,10 +17,19 @@ production: &production
     class: SessionTrimJob
     queue: background
     schedule: every hour at minute 27
+  # A day's counts depend only on that day's rows, so the hourly run re-derives
+  # the two days still taking traffic. The nightly run re-derives the whole
+  # window, so a change to the bot list (reclassify_user_agents, just before),
+  # the volume threshold or the allowlist reaches every day within a day.
   rollup_impressions:
     class: RollupImpressionsJob
     queue: background
+    args: [ { days: 2 } ]
     schedule: every hour at minute 42
+  rollup_impressions_full:
+    class: RollupImpressionsJob
+    queue: background
+    schedule: every day at 4:05am
   rollup_container_impressions:
     class: RollupContainerImpressionsJob
     queue: background

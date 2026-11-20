@@ -4,9 +4,8 @@ module Metadata
   # Edits the form-owned fields of a MODS document IN PLACE, preserving every
   # other node, attribute, and namespace (authority-bearing subjects + names,
   # non-Creator names, nested relatedItem titles, genres, extensions,
-  # drs:/niec:/xsi: ...). This is the structure-safe counterpart to Atlas's flat
-  # plain_title=/plain_description=, which clobber siblings; Cerberus owns the
-  # merge, Atlas just stores the XML.
+  # drs:/niec:/xsi: ...). Atlas stores the whole document it is given and
+  # merges nothing, so Cerberus owns the merge.
   #
   # Serves both forms: the simple Metadata form (title / abstract / keywords) and
   # the Advanced tab (title parts + personal/corporate creators). Node location,

@@ -227,6 +227,16 @@ RSpec.describe 'Messages', type: :request do
       expect(response.parsed_body).to eq([{ 'nuid' => '000000004', 'name' => 'David Cliff' }])
     end
 
+    it 'leaves the requesting user out of their own results' do
+      allow(AtlasRb::User).to receive(:search).with('dav', nuid: staff_user.nuid)
+                                              .and_return([{ 'nuid' => staff_user.nuid, 'name' => 'Self, Staff' },
+                                                           { 'nuid' => '000000004', 'name' => 'User, Admin' }])
+
+      get '/inbox/recipients', params: { q: 'dav' }
+
+      expect(response.parsed_body.pluck('nuid')).to eq(['000000004'])
+    end
+
     it 'returns [] for a blank query without calling Atlas' do
       allow(AtlasRb::User).to receive(:search)
 

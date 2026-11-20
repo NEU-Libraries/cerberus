@@ -11,7 +11,7 @@ RSpec.describe 'bin/comment-density' do
   let(:script) { Rails.root.join('bin/comment-density').to_s }
   let(:no_git) { { 'GIT_DIR' => '/nonexistent/git-dir' } }
 
-  def run(*args, env: {}) = Open3.capture3(env, script, *args, chdir: Rails.root.to_s)
+  def run(*, env: {}) = Open3.capture3(env, script, *, chdir: Rails.root.to_s)
 
   # Naming every file needs no git, so it is the answer whether or not this
   # spec itself can reach git.

@@ -57,6 +57,8 @@ class WorksController < ApplicationController
 
     authorize_show!
     deny_if_unfinished!(@work)
+    return if request.head? # The gates set the status; skip what only the body shows.
+
     flash.now[:alert] = in_progress_notice(@work) if @work.in_progress
     prepare_show_view
     # After prepare_show_view, which sets @can_edit.
@@ -156,10 +158,6 @@ class WorksController < ApplicationController
 
   def update_metadata
     handle_metadata_update(include_advanced: true)
-    # AFTER the descriptive save, deliberately: with a live worker
-    # DepositDerivativesJob runs inside this request and its Delegate PATCH
-    # bumps the lock, racing save_descriptive! into StaleResourceError. Specs
-    # never see it — the test adapter does not run the job inline.
     process_derivative_widths
     apply_streaming_only! { StagedMediaProbe.call(work_id: params[:id]) }
     # Before the confirm, so the caption Blob queues behind the deposit's own

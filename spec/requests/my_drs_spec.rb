@@ -7,8 +7,7 @@ require 'rails_helper'
 # community showcases (grouped by category, via the linked-member edge). The
 # empty render runs against real test Solr/Atlas; the populated grouping stubs
 # the per-showcase queries so the category fan-out and ordering are exercised
-# without depending on seeded published works (which need the Atlas personal
-# root that hasn't shipped yet).
+# without depending on published works seeded in the test Atlas.
 RSpec.describe 'My DRS', type: :request do
   include Devise::Test::IntegrationHelpers
 
@@ -25,7 +24,7 @@ RSpec.describe 'My DRS', type: :request do
   context 'signed in' do
     before do
       sign_in user
-      # My DRS now consults the accounts list; default to a single account so the
+      # My DRS consults the accounts list; default to a single account so the
       # switcher panel is absent (the panel spec below overrides this), keeping
       # these renders off the live accounts call.
       allow(AtlasRb::User).to receive(:accounts).and_return(

@@ -196,12 +196,15 @@ module AuditEventsHelper
     end
   end
 
-  # A Darwin Core write is a metadata event too, told apart from a MODS write
-  # only by its source. Without the branch its View opens the MODS diff.
+  # Only a MODS or Darwin Core write cuts a version to diff. Atlas also records
+  # a Collection's Featured toggle and a Person profile save as metadata
+  # updates, and those write neither, so they get no View. A `fields` payload is
+  # the older title or description patch, which wrote MODS.
   def metadata_history_path(event, resource_id)
-    if event.dig('payload', 'source') == DarwinCoreRecord::FORMAT
+    payload = event['payload'] || {}
+    if payload['source'] == DarwinCoreRecord::FORMAT
       dwc_history_path(resource_id, at: event['occurred_at'])
-    else
+    elsif payload['source'] == 'mods' || payload.key?('fields')
       mods_history_path(resource_id, at: event['occurred_at'])
     end
   end

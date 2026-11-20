@@ -159,9 +159,9 @@ RSpec.describe SetResolver do
   end
 
   describe '#each_content_batch' do
-    def batched_ids(compilation, **opts)
+    def batched_ids(compilation, **)
       ids = []
-      resolver(compilation).each_content_batch(**opts) { |docs| ids.concat(docs.map(&:id)) }
+      resolver(compilation).each_content_batch(**) { |docs| ids.concat(docs.map(&:id)) }
       ids
     end
 

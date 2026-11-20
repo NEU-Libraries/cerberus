@@ -50,10 +50,10 @@ RSpec.describe ParallelAtlasReads do
   # ActionDispatch::ServerTiming keeps its collection per-thread, so an event
   # from a worker is dropped and the batch stays invisible.
   describe 'instrumentation' do
-    def capture_batch_events(&block)
+    def capture_batch_events(&)
       seen = []
       subscriber = ->(event) { seen << { event: event, thread: Thread.current } }
-      ActiveSupport::Notifications.subscribed(subscriber, described_class::INSTRUMENTATION_EVENT, &block)
+      ActiveSupport::Notifications.subscribed(subscriber, described_class::INSTRUMENTATION_EVENT, &)
       seen
     end
 

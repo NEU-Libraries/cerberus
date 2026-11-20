@@ -2,8 +2,9 @@
 
 require 'rails_helper'
 
-# The suite cannot record a check (only Atlas's checker principal may post
-# one), so the failed and overdue lists are asserted at the fq they produce.
+# The suite cannot record a check (atlas_rb has no binding for Atlas's
+# POST /fixity_checks), so the failed and overdue lists are asserted at the fq
+# they produce.
 RSpec.describe FixitySearchBuilder do
   let(:scope) do
     double('scope', blacklight_config: CatalogController.blacklight_config,
