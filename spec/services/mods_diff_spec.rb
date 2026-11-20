@@ -75,6 +75,21 @@ RSpec.describe MODSDiff do
     expect(rows.select { |row| marked(row).any? }.map(&:kind)).to eq(%i[del ins])
   end
 
+  it 'does not pair two different elements because their punctuation matches' do
+    from = mods('A', "\n  <nonSort/>")
+    to = mods('A', "\n  <title/>")
+    expect(changed(diff(from, to)).flat_map { |row| marked(row) }).to be_empty
+  end
+
+  it 'pairs an emptied element with its old self, not a structurally similar neighbour' do
+    from = mods('A', "\n  <name type=\"corporate\" usage=\"primary\"/>" \
+                     "\n  <identifier type=\"hdl\" displayLabel=\"Permanent URL\">http://hdl.example/1</identifier>")
+    to = mods('A', "\n  <identifier type=\"hdl\" displayLabel=\"Permanent URL\"/>")
+    rows = changed(diff(from, to))
+    paired = rows.find { |row| row.kind == :del && marked(row).any? }
+    expect(paired.segments.map(&:text).join).to include('<identifier')
+  end
+
   it 'skips word marks when a block is too large to pair' do
     from = mods('A', (1..30).map { |n| "\n  <note>old note #{n}</note>" }.join)
     to = mods('A', (1..30).map { |n| "\n  <note>new note #{n}</note>" }.join)

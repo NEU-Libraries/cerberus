@@ -13,9 +13,10 @@ class MODSDiff < ApplicationService
 
   TOKEN = /\s+|\w+|[^\w\s]/
   BLANK = /\A\s+\z/
-  # A removed and an added line share at least this share of their words before
-  # their words are marked; below it the marks are noise.
-  SIMILARITY = 0.5
+  # The Dice score two lines need before their words are marked. Scored on
+  # words alone: XML is mostly < : = " punctuation, which would make any two
+  # elements look alike. 0.6 keeps <mods:nonSort/> and <mods:title/> apart.
+  SIMILARITY = 0.6
   # Pairing compares every removed line in a block with every added one, so a
   # wholesale rewrite skips word marks rather than paying for the product.
   PAIRING_LIMIT = 400
@@ -99,14 +100,10 @@ class MODSDiff < ApplicationService
     end
 
     def similarity(old_line, new_line)
-      old_words = words(old_line)
-      new_words = words(new_line)
-      longest = [old_words.size, new_words.size].max
-      longest.zero? ? 0 : Diff::LCS.lcs(old_words, new_words).size.fdiv(longest)
-    end
-
-    def words(line)
-      line.scan(TOKEN).grep_v(BLANK)
+      old_words = old_line.scan(/\w+/)
+      new_words = new_line.scan(/\w+/)
+      total = old_words.size + new_words.size
+      total.zero? ? 0 : (2 * Diff::LCS.lcs(old_words, new_words).size).fdiv(total)
     end
 
     def segments(old_line, new_line)

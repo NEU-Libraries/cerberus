@@ -802,9 +802,12 @@ It works in four steps:
    and blocks of changes. Each block prints every removal before every addition,
    the order diff tools use.
 3. **Pair the edits.** Each added line in a block pairs with the removed line
-   most like it, measured as the share of words the two have in common. A pair
-   that shares less than `SIMILARITY` (half) stays unpaired, because word
-   highlights on two unrelated lines are noise. Pairing by likeness, not by
+   most like it. Likeness is the Dice score of the two lines' words (twice the
+   words in common, over the words in both), counting words only: XML is mostly
+   `<`, `:`, `=` and `"`, and with punctuation counted `<mods:nonSort/>` and
+   `<mods:title/>` look like an edit of each other. A pair scoring under
+   `SIMILARITY` (0.6) stays unpaired, because word highlights on two unrelated
+   lines are noise. Pairing by likeness, not by
    position, matters when a block removes many lines and edits one: the edit
    still gets its highlights. A block larger than `PAIRING_LIMIT` (removals
    times additions) skips pairing, so a wholesale rewrite costs nothing extra.
