@@ -52,7 +52,11 @@
           = f.button :submit, class: "btn btn-success"
           = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"
   #supplemental-metadata.tab-pane{class: ('active' if open_tab == 'supplemental-metadata'), "aria-labelledby" => "supplemental-metadata-tab", role: "tabpanel"}
-    = render 'works/darwin_core_edit', work: @work
+    .edit-pane
+      %h5.pb-2 Supplemental Metadata
+      %p.text-muted.small.mb-3
+        Records this work holds beside its MODS, one section per format.
+      = render 'works/darwin_core_edit', work: @work
   #permissions.tab-pane{"aria-labelledby" => "permissions-tab", role: "tabpanel"}
     .edit-pane{ data: { controller: "group-permissions", "group-permissions-resource-value": "work" } }
       = bootstrap_form_tag(url: work_path(params[:id]), method: :patch, multipart: true) do |f|
