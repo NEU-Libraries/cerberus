@@ -239,11 +239,12 @@ describe XmlController do
     let(:refusal) { instance_double(Faraday::Response, status: 422, body: '{}') }
 
     context 'on a Work that holds none' do
-      it 'offers no picker, and opens MODS' do
+      it 'names MODS without offering a choice' do
         get :editor, params: { id: work.id }
 
         expect(assigns(:format).token).to eq('mods')
-        expect(response.body).not_to include('Metadata record')
+        expect(response.body).not_to have_select('metadata_format')
+        expect(response.body).to have_css('.xml-editor__current', text: 'MODS')
       end
 
       it 'opens MODS for a hand-typed format, so nothing can create a record here' do

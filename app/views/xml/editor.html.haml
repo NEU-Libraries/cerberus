@@ -32,16 +32,11 @@
 -# on its show page, so the curator arrives here already looking for the cause.
 = render 'escape_advisory', advisory: @double_escapes
 
--# Outside #raw_xml_form, which cannot nest a form. Opening another record is a
--# fresh page load, so it drops whatever the buffer holds.
+-# Empty, and outside #raw_xml_form, which cannot nest a form. The record
+-# picker's controls sit in the editor's header strip and join this form through
+-# their form attribute.
 - if @offered.any?
-  = form_with url: xml_editor_path(@resource.id), method: :get, class: 'mb-3' do |f|
-    .d-flex.flex-wrap.align-items-end.gap-2
-      %div
-        = f.label :metadata_format, 'Metadata record', class: 'form-label small mb-1'
-        = f.select :metadata_format, @offered, { selected: @format.token }, class: 'form-select form-select-sm'
-      = f.submit 'Open', name: nil, class: 'btn btn-sm btn-tonal-secondary'
-    %p.small.text-subtle.mt-1.mb-0 Opening another record discards unsaved changes in the editor.
+  = form_with(url: xml_editor_path(@resource.id), method: :get, id: 'xml_format_picker') {}
 
 -# The preservation XML is gone from storage while the access copy survives, so
 -# the preview renders beside an empty buffer that would otherwise read as a
@@ -61,15 +56,28 @@
   .container
     .row
       .col
-        -# Off by default, so a curator's first sight of the document keeps one
-        -# line per XML line and the indentation still reads as depth. Ace owns a
-        -# virtual DOM over #editor, so wrapping has to be asked of the session
-        -# rather than set in CSS.
-        .form-check.form-check-reverse.mb-2
-          %input.form-check-input#toggle_word_wrap{type: 'checkbox'}/
-          %label.form-check-label.small.text-muted{for: 'toggle_word_wrap'} Word wrap
-        #editor<
-          = @raw_xml
+        .xml-editor
+          .xml-editor__head
+            .xml-editor__record
+              - if @offered.any?
+                %label.xml-editor__label{for: 'metadata_format'} Metadata record
+                = select_tag 'metadata_format', options_for_select(@offered, @format.token),
+                             form: 'xml_format_picker', class: 'form-select form-select-sm',
+                             'aria-describedby' => 'xml_format_hint'
+                %button.btn.btn-sm.btn-tonal-secondary{type: 'submit', form: 'xml_format_picker'} Open
+                %span#xml_format_hint.xml-editor__hint Unsaved changes are discarded.
+              - else
+                %span.xml-editor__label Metadata record
+                %span.xml-editor__current MODS
+            -# Off by default, so a curator's first sight of the document keeps
+            -# one line per XML line and the indentation still reads as depth.
+            -# Ace owns a virtual DOM over #editor, so wrapping has to be asked of
+            -# the session rather than set in CSS.
+            .form-check.form-switch.mb-0
+              %input.form-check-input#toggle_word_wrap{type: 'checkbox', role: 'switch'}/
+              %label.form-check-label.xml-editor__label{for: 'toggle_word_wrap'} Word wrap
+          #editor<
+            = @raw_xml
       .col#content{"data-controller" => "preview"}
         -# Validate's stream replaces this node, so its id is ours rather than the
         -# id Atlas puts on its block, which differs by format. Atlas answers 404
