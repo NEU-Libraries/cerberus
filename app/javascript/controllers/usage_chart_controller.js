@@ -50,11 +50,14 @@ export default class extends Controller {
   }
 
   // The floor sits below 1 so a day with a single event still draws a bar.
-  // Labels only 1, 2 and 5 in each decade; the rest would crowd the axis.
+  // Labels only 1, 2 and 5 in each decade; the rest would crowd the axis. The
+  // blank labels throw Chart.js's width measurement, which clipped the real
+  // ones, so the width is fixed; it also lines the stacked charts up.
   logAxis() {
     return {
       type: "logarithmic",
       min: 0.6,
+      afterFit: (scale) => { scale.width = 44 },
       grid: { display: false },
       ticks: {
         autoSkip: false,
