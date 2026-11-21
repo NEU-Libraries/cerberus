@@ -14,8 +14,8 @@ RSpec.describe 'shared/_usage_charts', type: :view do
   end
 
   def page(visitors: true)
-    render partial: 'shared/usage_charts',
-           locals: { report: report, actions: %w[view download stream], period: 'over time', visitors: visitors }
+    locals = { report: report, actions: %w[view download stream], period: 'over time', visitors: visitors }
+    render partial: 'shared/usage_charts', locals: locals
     Nokogiri::HTML.fragment(rendered)
   end
 
