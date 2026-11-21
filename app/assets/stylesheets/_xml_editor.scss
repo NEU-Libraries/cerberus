@@ -1,0 +1,50 @@
+// ---------------------------------------------------------------------
+// Raw-XML editor — the buffer's card and its header strip.
+//
+// The same card shell and header fill as .audit-history and the history
+// diff's version picker, so the editor, its record picker and the history
+// page read as one family of XML surfaces. The strip holds the record
+// picker on the left and the editor's own setting, word wrap, on the right.
+// ---------------------------------------------------------------------
+
+.xml-editor {
+  background-color: #fff;
+  border: 1px solid $gray-300;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+
+  &__head {
+    background-color: #f6f8fa;
+    border-bottom: 1px solid $gray-300;
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    flex-wrap: wrap;
+  }
+
+  &__record {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+
+    .form-select {
+      width: auto;
+    }
+  }
+
+  &__label {
+    font-size: 0.875rem;
+    color: $text-subtle;
+    margin-bottom: 0;
+  }
+
+  &__current {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: $gray-800;
+  }
+}

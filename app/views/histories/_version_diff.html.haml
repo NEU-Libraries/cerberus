@@ -47,8 +47,23 @@
               = f.submit 'Compare', class: 'btn btn-sm btn-success'
 
       - if @diff
-        .mods-diff__body
-          = @diff.to_s(:html).html_safe
+        -# Focusable so a keyboard can scroll a line too long to wrap.
+        .mods-diff__body{tabindex: 0, role: 'region', 'aria-labelledby': 'version-diff-caption'}
+          %table.mods-diff__table
+            %caption.visually-hidden#version-diff-caption Line changes between the two versions
+            %thead.visually-hidden
+              %tr
+                %th{scope: 'col'} Line before
+                %th{scope: 'col'} Line after
+                %th{scope: 'col'} Change
+                %th{scope: 'col'} XML
+            %tbody
+              - @diff.each do |row|
+                %tr{class: "mods-diff__row mods-diff__row--#{row.kind}"}
+                  %td.mods-diff__num= row.old_number
+                  %td.mods-diff__num= row.new_number
+                  %td.mods-diff__sign= version_diff_sign(row.kind)
+                  %td.mods-diff__code= version_diff_line(row)
       - else
         .p-3.text-muted.small
           %i.fa-solid.fa-circle-info{'aria-hidden' => 'true'}

@@ -7,15 +7,15 @@ module EditTabsHelper
   # A key doubles as the pane's DOM id (`#<key>`) and its tab button's id
   # (`<key>-tab`), so it must match the `.tab-pane` id in the edit view.
   TABS = {
-    'Work'       => %w[metadata advanced darwin-core permissions move delete xml history health],
+    'Work'       => %w[metadata advanced supplemental-metadata permissions move delete xml history health],
     'Collection' => %w[metadata permissions xml sentinel export history analytics],
     'Community'  => %w[metadata permissions xml history analytics]
   }.freeze
 
   # Only where the label isn't the key humanized (see #edit_tab_label).
   LABELS = {
-    'xml'         => 'XML',
-    'darwin-core' => 'Darwin Core'
+    'xml'                   => 'XML',
+    'supplemental-metadata' => 'Supplemental Metadata'
   }.freeze
 
   # Tabs that navigate to their own page instead of switching an in-page pane.
@@ -47,7 +47,7 @@ module EditTabsHelper
   end
 
   # Hyphens are swapped first: String#humanize only turns *underscores* into
-  # spaces, so 'darwin-core' would label itself "Darwin-core".
+  # spaces, so 'move-work' would label itself "Move-work".
   def edit_tab_label(key)
     LABELS.fetch(key) { key.tr('-', ' ').humanize }
   end

@@ -84,7 +84,7 @@ GEM
     addressable (2.9.2)
       public_suffix (>= 2.0.2, < 8.0)
     ast (2.4.3)
-    atlas_rb (1.29.10)
+    atlas_rb (1.29.11)
       faraday (~> 2.7)
       faraday-follow_redirects (~> 0.5)
       faraday-multipart (~> 1)
@@ -157,7 +157,6 @@ GEM
       devise (>= 5.0.0)
       rails-i18n
     diff-lcs (1.6.2)
-    diffy (3.4.4)
     drb (2.2.3)
     dumb_delegator (1.1.0)
     erb (6.0.7)
@@ -511,7 +510,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord-session_store
-  atlas_rb (>= 1.29.9)
+  atlas_rb (>= 1.29.11)
   axe-core-rspec
   blacklight (~> 9.0)
   blacklight-gallery (~> 6.0)
@@ -526,7 +525,7 @@ DEPENDENCIES
   debug
   devise
   devise-i18n
-  diffy
+  diff-lcs
   factory_bot_rails
   faker
   faraday-net_http_persistent (~> 2.3)

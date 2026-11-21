@@ -1,5 +1,5 @@
 -# A passing validation clears the refusal banner that a refused Save left above
--# the form. The banner sits outside #mods, so the preview replacement below
+-# the form. The banner sits outside #xml_preview, so the preview replacement below
 -# cannot reach it. A FAILING validation deliberately leaves it alone: nothing
 -# was written, so "Not saved" is still true, and the errors themselves render in
 -# the preview pane rather than twice on one screen.
@@ -13,9 +13,9 @@
 = turbo_stream.replace 'escape_advisory' do
   = render 'escape_advisory', advisory: @double_escapes
 
-= turbo_stream.replace "mods" do
-  - if @errors.present?
-    #mods
+= turbo_stream.replace "xml_preview" do
+  #xml_preview
+    - if @errors.present?
       .alert.alert-danger.mt-3{role: "alert"}
         %h5.alert-heading XML validation failed
         %ul.mb-0
@@ -25,8 +25,8 @@
           = render 'repair_offer', kind: 'control_characters',
                                    label: 'Replace the control characters',
                                    variant: 'danger'
-  - else
-    = @mods.html_safe
+    - else
+      = @preview.html_safe
 
   :javascript
     document.querySelectorAll(".loading-state").forEach(function(el){

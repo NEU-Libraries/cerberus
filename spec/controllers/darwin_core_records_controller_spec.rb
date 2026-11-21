@@ -73,7 +73,7 @@ describe DarwinCoreRecordsController do
 
   describe 'writes' do
     let(:admin) { User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin') }
-    let(:edit_tab) { edit_work_path(work.id, tab: 'darwin-core') }
+    let(:edit_tab) { edit_work_path(work.id, tab: 'supplemental-metadata') }
 
     # The schema check is XmlValidator's, with its own specs; the live chain is
     # the TDWG smoke. Here it passes, so these exercise the shape rules and the
@@ -94,7 +94,7 @@ describe DarwinCoreRecordsController do
       context 'as an editor' do
         before { sign_in admin }
 
-        it 'saves a valid record and returns to the Darwin Core pane' do
+        it 'saves a valid record and returns to the Supplemental Metadata pane' do
           put :update, params: { id: work.id, dwc_file: fixture_file_upload('dwc-record.xml', 'application/xml') }
 
           expect(response).to redirect_to(edit_tab)
@@ -135,7 +135,7 @@ describe DarwinCoreRecordsController do
         sign_in admin
       end
 
-      it 'removes the record and returns to the Darwin Core pane' do
+      it 'removes the record and returns to the Supplemental Metadata pane' do
         delete :destroy, params: { id: work.id }
 
         expect(response).to redirect_to(edit_tab)

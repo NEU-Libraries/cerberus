@@ -65,6 +65,6 @@ class DarwinCoreRecordsController < ApplicationController
     # A query param, not a fragment, because Turbo drops the fragment when it
     # follows a redirect.
     def back_to_tab(flash_values)
-      redirect_to edit_work_path(params[:id], tab: 'darwin-core'), flash: flash_values
+      redirect_to edit_work_path(params[:id], tab: 'supplemental-metadata'), flash: flash_values
     end
 end

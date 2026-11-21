@@ -49,7 +49,7 @@ A key doubles as the pane's DOM id (`#<key>`) and its tab button's id
 | `STANDALONE` | Tabs that navigate to their own page instead of switching an in-page pane |
 
 `edit_tab_label` swaps hyphens for spaces before humanizing, so a hyphenated key
-such as `darwin-core` would need no `LABELS` entry for its spacing. `String#humanize` alone
+such as `move-work` would need no `LABELS` entry for its spacing. `String#humanize` alone
 turns only underscores into spaces.
 
 `edit_tab_keys(klass)` returns the keys this viewer may see, in display order.

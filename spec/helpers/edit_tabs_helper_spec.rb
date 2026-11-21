@@ -18,7 +18,7 @@ RSpec.describe EditTabsHelper do
   describe '#edit_tab_keys' do
     it 'gives each class its own tab set, in display order' do
       expect(helper.edit_tab_keys('Work'))
-        .to eq(%w[metadata advanced darwin-core permissions move delete xml history health])
+        .to eq(%w[metadata advanced supplemental-metadata permissions move delete xml history health])
       expect(helper.edit_tab_keys('Collection'))
         .to eq(%w[metadata permissions xml sentinel export history analytics])
       expect(helper.edit_tab_keys('Community'))
@@ -66,7 +66,7 @@ RSpec.describe EditTabsHelper do
 
   describe '#edit_tab_label' do
     it 'humanizes a key by default and special-cases the acronym' do
-      expect(helper.edit_tab_label('darwin-core')).to eq('Darwin Core')
+      expect(helper.edit_tab_label('supplemental-metadata')).to eq('Supplemental Metadata')
       expect(helper.edit_tab_label('metadata')).to eq('Metadata')
       expect(helper.edit_tab_label('xml')).to eq('XML')
     end

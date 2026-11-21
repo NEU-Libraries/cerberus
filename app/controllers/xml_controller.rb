@@ -14,7 +14,10 @@ class XmlController < ApplicationController
     item = resolved_resource
     @resource = item.resource
     @klass = item.klass
-    resource_mods
+    @format = editor_format
+    @offered = format_choices
+    @preview = @format.read(params[:id], 'html')
+    @raw_xml = @format.read(params[:id], 'xml')
     @double_escapes = Metadata::DoubleEscapes.report(@raw_xml)
     breadcrumbs(params[:id], editing: true, result: item)
   end
@@ -23,10 +26,11 @@ class XmlController < ApplicationController
     item = resolved_resource
     @resource = item.resource
 
+    @format = editor_format
     @errors = record_errors(item)
     @repairable = Metadata::ControlCharacters.any?(params[:raw_xml])
     @double_escapes = Metadata::DoubleEscapes.report(params[:raw_xml])
-    @mods = with_tmp_xml(params[:raw_xml]) { |path| AtlasRb::Resource.preview(path) } if @errors.empty?
+    @preview = rendered_preview if @errors.empty?
   end
 
   # Offers the repair; does not apply it. Nothing is written until the curator
@@ -44,15 +48,18 @@ class XmlController < ApplicationController
   # after it, with no error and an ordinary-looking audit entry.
   def update
     item = resolved_resource
-    klass = item.klass
+    @format = editor_format
 
     @errors = record_errors(item)
     return render_invalid(item) if @errors.any?
 
-    with_tmp_xml(params[:raw_xml]) do |path|
-      AtlasRb::Resource.put_mods(params[:resource_id], path, origin: 'xml_editor')
-    end
-    redirect_to resource_path(klass, params[:resource_id])
+    with_tmp_xml(params[:raw_xml]) { |path| @format.write(params[:resource_id], path) }
+    redirect_to resource_path(item.klass, params[:resource_id])
+  rescue AtlasRb::ResourceError => e
+    raise unless e.status == 422
+
+    @errors = [e.message]
+    render_invalid(item)
   end
 
   private
@@ -80,7 +87,8 @@ class XmlController < ApplicationController
       @raw_xml = params[:raw_xml]
       @repairable = Metadata::ControlCharacters.any?(params[:raw_xml])
       @double_escapes = Metadata::DoubleEscapes.report(params[:raw_xml])
-      @mods = AtlasRb::Resource.mods(params[:resource_id], 'html')
+      @offered = format_choices
+      @preview = @format.read(params[:resource_id], 'html')
       breadcrumbs(params[:resource_id], editing: true, result: item)
       render :editor, status: :unprocessable_content
     end
@@ -113,12 +121,31 @@ class XmlController < ApplicationController
     end
 
     def record_errors(item)
-      keywords = DescriptivePolicy.keywords_required?(item.resource_class)
-      MODSRecordValidator.call(xml: params[:raw_xml], keywords:)
+      @format.errors(params[:raw_xml], item.resource_class)
     end
 
-    def resource_mods
-      @mods = AtlasRb::Resource.mods(params[:id], 'html')
-      @raw_xml = AtlasRb::Resource.mods(params[:id], 'xml')
+    def editor_format
+      XmlEditorFormat.for(resolved_resource.resource, params[:metadata_format])
+    end
+
+    # Atlas names the formats, so the picker carries no labels of its own. Read
+    # only when there is a choice to make: most resources offer MODS alone.
+    def format_choices
+      tokens = XmlEditorFormat.offered(resolved_resource.resource)
+      return [] if tokens.one?
+
+      labels = AtlasRb::Resource.metadata_formats.to_h { |f| [f['id'], f['label']] }
+      tokens.map { |token| [labels.fetch(token, token), token] }
+    end
+
+    # Atlas checks more than the Cerberus validator does, so a draft that passes
+    # here can still be refused there. Its refusal reads as a validation error.
+    def rendered_preview
+      with_tmp_xml(params[:raw_xml]) { |path| @format.preview(path) }
+    rescue AtlasRb::ResourceError => e
+      raise unless e.status == 422
+
+      @errors = [e.message]
+      nil
     end
 end

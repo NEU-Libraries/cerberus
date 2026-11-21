@@ -232,56 +232,103 @@
   }
   &__body {
     overflow-x: auto;
+
+    &:focus-visible {
+      outline: 2px solid $primary;
+      outline-offset: -2px;
+    }
   }
 
-  // Diffy's HTML output, scoped + recoloured into the archival palette. The
-  // ins/del tints reuse the same teal-green (added) / mauve (removed) tokens
-  // as the ACL diff above, so "gained" vs "lost" reads consistently across
-  // both history pages. Monospace + tabular so the XML lines up.
-  &__body .diff {
+  // The line diff, in the red/green every diff tool uses: a line diff is a
+  // convention readers already know, so it does not take the ACL diff's
+  // teal/mauve. Text stays body-colour on every line; the colour sits behind
+  // it, light for the line and stronger for the changed words.
+  &__table {
+    $diff-ins-line: #ddffdd;
+    $diff-ins-gutter: #ccffcc;
+    $diff-ins-gutter-edge: #a6e9a6;
+    $diff-ins-word: #97f295;
+    $diff-ins-mark: #1a7f37;
+    $diff-del-line: #fee8e9;
+    $diff-del-gutter: #ffdddd;
+    $diff-del-gutter-edge: #f5b5bb;
+    $diff-del-word: #fac5cd;
+    $diff-del-mark: #b0302a;
+
+    width: 100%;
+    border-collapse: collapse;
     font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     font-size: 0.8rem;
     font-variant-numeric: tabular-nums;
 
-    ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
+    td {
+      padding: 0.05rem 0.5rem;
+      vertical-align: top;
     }
-    li {
-      padding: 0.05rem 1rem;
+
+    .mods-diff__num {
+      width: 1%;
+      text-align: right;
+      white-space: nowrap;
+      user-select: none;
+      color: $text-subtle;
+      background-color: #f6f8fa;
+      border-right: 1px solid $gray-200;
+    }
+    .mods-diff__sign {
+      width: 1%;
+      padding-inline: 0.25rem;
+      text-align: center;
+      user-select: none;
+    }
+    .mods-diff__code {
       white-space: pre-wrap;
       word-break: break-word;
-      border-left: 3px solid transparent;
+      color: $gray-900;
+    }
+    .mods-diff__row--same .mods-diff__code {
+      color: $text-subtle;
+    }
 
-      &.ins {
-        background-color: color-mix(in srgb, $audit-tone-create 8%, white);
-        border-left-color: color-mix(in srgb, $audit-tone-create 45%, white);
+    // $text-subtle falls just under 4.5:1 on the gutter tints, so a changed
+    // row's line numbers take the darker grey.
+    .mods-diff__row--ins {
+      td {
+        background-color: $diff-ins-line;
       }
-      &.del {
-        background-color: color-mix(in srgb, $audit-tone-unlink 8%, white);
-        border-left-color: color-mix(in srgb, $audit-tone-unlink 40%, white);
+      .mods-diff__num {
+        background-color: $diff-ins-gutter;
+        border-right-color: $diff-ins-gutter-edge;
+        color: $gray-700;
       }
-      &.unchanged {
-        color: $text-subtle;
+      .mods-diff__sign {
+        color: $diff-ins-mark;
+      }
+      mark {
+        background-color: $diff-ins-word;
+      }
+    }
+    .mods-diff__row--del {
+      td {
+        background-color: $diff-del-line;
+      }
+      .mods-diff__num {
+        background-color: $diff-del-gutter;
+        border-right-color: $diff-del-gutter-edge;
+        color: $gray-700;
+      }
+      .mods-diff__sign {
+        color: $diff-del-mark;
+      }
+      mark {
+        background-color: $diff-del-word;
       }
     }
 
-    // Inline word-level highlights within a changed line.
-    ins,
-    del {
-      text-decoration: none;
-      font-weight: 600;
+    mark {
+      padding: 0;
+      color: inherit;
       border-radius: 0.15rem;
-      padding: 0 0.05rem;
-    }
-    ins {
-      color: color-mix(in srgb, $audit-tone-create 80%, black);
-      background-color: color-mix(in srgb, $audit-tone-create 18%, white);
-    }
-    del {
-      color: color-mix(in srgb, $audit-tone-unlink 75%, black);
-      background-color: color-mix(in srgb, $audit-tone-unlink 16%, white);
     }
   }
 }

@@ -74,7 +74,7 @@ gem 'bootsnap', require: false
 # binding would report every unparseable Atlas response as 404 again. It also
 # sets per-connection deadlines, without which a hung Atlas holds a Puma thread
 # for minutes.
-gem 'atlas_rb', '>= 1.29.9'
+gem 'atlas_rb', '>= 1.29.11'
 gem 'blacklight', '~> 9.0'
 # 6.x is the first line that allows Blacklight 9; its gemspec pins the 9.0.0
 # betas, which 9.0.0 final satisfies.
@@ -87,7 +87,7 @@ gem 'chartkick' # admin usage-analytics charts (importmap-pinned Chart.js); read
 gem 'dartsass-rails'
 gem 'devise'
 gem 'devise-i18n'
-gem 'diffy' # line-diff for the MODS version-history page (wraps system diff)
+gem 'diff-lcs' # line and word diff for the MODS and Darwin Core history pages
 # Keeps Solr connections alive; config/blacklight.yml names it as `http_adapter`.
 gem 'faraday-net_http_persistent', '~> 2.3'
 gem 'haml'

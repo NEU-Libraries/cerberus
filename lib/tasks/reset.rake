@@ -87,6 +87,10 @@ namespace :reset do
       AtlasRb::Resource.set_permissions(lake_work['id'], { 'read' => ['public'] })
       AtlasRb::Blob.create(lake_work['id'], '/home/cerberus/web/spec/fixtures/files/lake.jpg', 'lake.jpg')
       AtlasRb::Work.complete(lake_work['id'])
+      # The one seeded Darwin Core record, so the show page's tab, the record's
+      # history page and the XML editor's format picker each have something to
+      # open. The specimen is the spec fixture's, unrelated to the lake.
+      AtlasRb::Resource.put_dwc(lake_work['id'], '/home/cerberus/web/spec/fixtures/files/dwc-record.xml')
 
       # Marcom loader fixtures — Communications community → Communications
       # Photo Archive collection → Campus Life (Photographs) collection. The

@@ -220,6 +220,20 @@ module AuditEventsHelper
     end
   end
 
+  # One string, because the cell is pre-wrap: whitespace the template put
+  # between segments would show in the XML.
+  def version_diff_line(row)
+    safe_join(row.segments.map { |segment| segment.changed ? tag.mark(segment.text) : segment.text })
+  end
+
+  # The sign is for sight; a screen reader hears the word.
+  def version_diff_sign(kind)
+    sign, word = { del: ['-', 'Removed'], ins: ['+', 'Added'] }[kind]
+    return unless sign
+
+    safe_join([tag.span(sign, 'aria-hidden': 'true'), tag.span(word, class: 'visually-hidden')])
+  end
+
   def audit_event_dom_id(event)
     "evt-#{event['occurred_at'].to_s.gsub(/[^0-9]/, '')}"
   end

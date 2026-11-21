@@ -110,14 +110,15 @@ class XmlPreview < ApplicationService
 
     # Atlas renders the MODS to its HTML display the same way the XML editor's
     # live preview does (POST /resources/preview). Best-effort: if Atlas is
-    # unreachable the raw column still stands on its own.
+    # unreachable, or refuses the draft with a 422, the raw column still stands
+    # on its own.
     def decorated(mods)
       Tempfile.create(['preview_mods', '.xml']) do |f|
         f.write(mods)
         f.flush
         AtlasRb::Resource.preview(f.path)
       end
-    rescue Faraday::Error => e
+    rescue Faraday::Error, AtlasRb::ResourceError => e
       Rails.logger.warn("XmlPreview: decorated render unavailable (#{e.class}: #{e.message})")
       nil
     end

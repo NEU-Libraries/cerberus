@@ -9,6 +9,7 @@
 //                           (thumbnails, gallery, metadata)
 //   _audit_history       — Edit → History tab (archival ledger)
 //   _history_diff        — audit-log "View" → Rights / MODS diff pages
+//   _xml_editor          — the raw-XML editor's card and header strip
 //   _admin_registry      — Admin → Loader registry (and future admin CRUD)
 //   _admin_dashboard     — Admin → actions hub (/admin landing, action cards)
 //   _admin_reparent      — Admin → Move finder (step indicator, from→to preview)
@@ -33,6 +34,7 @@
 @import 'audit_history';
 @import 'work_health';
 @import 'history_diff';
+@import 'xml_editor';
 @import 'derivative_access';
 @import 'admin_registry';
 @import 'admin_dashboard';
