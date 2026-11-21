@@ -44,6 +44,7 @@ export default class extends Controller {
 
     this.waiting = true
     this.trigger = event.relatedTarget
+    this.showBusy(true)
     this.frameTarget.innerHTML = this.initialFrame
     this.frameTarget.addEventListener("turbo:frame-load", this.reveal, { once: true })
     this.timer = setTimeout(this.reveal, SLOW_LOAD_MS)
@@ -62,6 +63,20 @@ export default class extends Controller {
     this.waiting = false
     clearTimeout(this.timer)
     this.frameTarget.removeEventListener("turbo:frame-load", this.reveal)
+    this.showBusy(false)
+  }
+
+  // Nothing is on screen while the list loads, so the cursor says the click
+  // is working. The button sets its own pointer cursor, and the mouse is on
+  // it, so it needs the cursor as well as the page.
+  showBusy(busy) {
+    for (const el of [document.documentElement, this.trigger]) {
+      if (!el) continue
+      if (busy) el.style.cursor = "progress"
+      else el.style.removeProperty("cursor")
+    }
+    if (busy) this.trigger?.setAttribute("aria-busy", "true")
+    else this.trigger?.removeAttribute("aria-busy")
   }
 
   handleHidden() {
