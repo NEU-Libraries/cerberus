@@ -39,7 +39,9 @@ export default class extends Controller {
     if (this.hasUrlKeyValue) {
       url = trigger?.dataset?.[this.urlKeyValue]
       if (!url) return
-    } else if (this.frameTarget.complete) {
+    } else if (this.frameTarget.hasAttribute("complete")) {
+      // Not the frame's `complete` property, which means only "not loading
+      // now" and so is true for a lazy frame that has never loaded.
       return
     }
 
