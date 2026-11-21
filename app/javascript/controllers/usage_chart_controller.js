@@ -37,7 +37,7 @@ export default class extends Controller {
           library: {
             maintainAspectRatio: false,
             plugins: { legend: { display: this.datasetValue.length > 1, position: "bottom" } },
-            ...(log && { scales: { y: this.logAxis(this.peak(this.datasetValue)) } }),
+            ...(log && { scales: { y: this.logAxis(this.peak(this.datasetValue)) }, layout: { padding: { top: 10 } } }),
           },
         }
 
@@ -51,9 +51,10 @@ export default class extends Controller {
 
   // The floor sits below 1 so a day with a single event still draws a bar.
   // Labels only 1, 2 and 5 in each decade; the rest would crowd the axis.
-  // Chart.js sizes the axis from the labels it draws, and the blank ones leave
-  // too little room, so the width is fixed and the top ends on a labelled
-  // step. Otherwise the outer labels are clipped.
+  // Chart.js leaves no room for the outer labels on a log axis, so the width
+  // is fixed and the chart is padded at the top (in connect); without both,
+  // the side and top labels are clipped. Ending on a labelled step gives the
+  // tallest bar a labelled ceiling.
   logAxis(peak) {
     return {
       type: "logarithmic",
