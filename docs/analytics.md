@@ -480,6 +480,13 @@ Content overview tab. v1 had a flat table of entity counts plus a file-type
 breakdown. This report is the equivalent in substance for v2's data shape, not a
 literal port.
 
+The Communities and Faculty & Staff counts appear only for the whole
+repository and for a Community. Both live only under a Community, so under a
+Collection or a Work they would always read 0. `composition_entity_types` in
+`Admin::ImpressionsHelper` picks the counts from the scoped item's class, and
+`composition_counted_phrase` builds the sentences that name them, so the
+figures and the text above them always agree.
+
 Composition is not a traffic metric. It ignores the date range and the segment,
 whatever `scope_fq` is. There is no "composition of the last 90 days" —
 only "composition of this subtree, or of the whole repository".

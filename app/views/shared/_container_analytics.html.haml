@@ -69,7 +69,8 @@
         = render 'shared/container_analytics_top_table', entries: @analytics.top_containers, empty: usage_empty_message(@analytics)
     #analytics-composition.tab-pane.active{'aria-labelledby' => 'analytics-composition-tab', role: 'tabpanel'}
       = render 'admin/impressions/composition', composition: @analytics_composition,
-                                                scope_phrase: "in #{plain_text(@analytics_base_item[:title])}"
+                                                scope_phrase: "in #{plain_text(@analytics_base_item[:title])}",
+                                                scope_klass: @analytics_base_item[:klass]
 
   - if effective_user&.admin? || effective_user&.admin_delegate?
     .mt-3.text-center

@@ -54,4 +54,5 @@
         #collections.tab-pane{'aria-labelledby' => 'collections-tab', role: 'tabpanel'}
           = render 'top_table', entries: @report.top_containers, kind: 'container', empty: usage_empty_message(@report)
       #composition.tab-pane.active{'aria-labelledby' => 'composition-tab', role: 'tabpanel'}
-        = render 'composition', composition: @composition, scope_phrase: @composition_scope_phrase
+        = render 'composition', composition: @composition, scope_phrase: @composition_scope_phrase,
+                                scope_klass: @composition_scope_klass

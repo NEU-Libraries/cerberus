@@ -21,8 +21,9 @@ module ContainerAnalyticsHelper
     elsif report.scope.facet_active?
       narrowed_blurb("the works under this #{container} that match the filter below")
     else
-      "An overview of the contents and usage of #{base_item[:title]}, including counts of its communities, " \
-        'collections, and works, along with usage statistics recorded by human visitors.'
+      counted = composition_counted_phrase(composition_entity_types(base_item[:klass]))
+      "An overview of the contents and usage of #{base_item[:title]}, including counts of its #{counted}, " \
+        'along with usage statistics recorded by human visitors.'
     end
   end
 

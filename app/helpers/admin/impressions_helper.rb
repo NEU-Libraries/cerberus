@@ -70,5 +70,24 @@ module Admin
     def usage_composition_colors
       COMPOSITION_COLORS
     end
+
+    COMPOSITION_LABELS = { 'Community' => 'Communities', 'Collection' => 'Collections', 'Work' => 'Works',
+                           'Person' => 'Faculty & Staff' }.freeze
+
+    # Communities and Faculty & Staff live only under a Community, so any
+    # narrower scope would always show them as 0.
+    #
+    # @param scope_klass [String, nil] the scoped item's class; nil for the
+    #   whole repository.
+    def composition_entity_types(scope_klass)
+      types = RepositoryCompositionReport::ENTITY_TYPES
+      scope_klass.nil? || scope_klass == 'Community' ? types : types - %w[Community Person]
+    end
+
+    # "communities, collections and works", or "collections and works".
+    def composition_counted_phrase(types)
+      (types - %w[Person]).map { |type| COMPOSITION_LABELS.fetch(type).downcase }
+                          .to_sentence(last_word_connector: ' and ')
+    end
   end
 end
