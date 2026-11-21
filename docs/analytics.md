@@ -364,6 +364,19 @@ resolved, or that a search result already returned.
 `url_for` honours only the symbol form. The anchor would come out as a literal
 `anchor=analytics` query param and the tab would be lost.
 
+`#analytics` is only the fallback. Both dashboards wrap their controls in the
+`carry-hash` controller, which puts the current fragment on every same-page
+form and link inside it, replacing any fragment the server built. A change of
+date range, segment, scope or filter therefore reloads the page on the tab
+the reader had open: `#files` on the Usage analytics dashboard, or
+`#analytics-files` on an edit page. Without it, a GET form drops the fragment
+when it submits, and a server-built link names at most the outer tab.
+
+The Analytics tab's own row (Content overview, Usage history, Top files, Top
+collections) is a `tab-hash` row nested inside the edit page's row.
+[`edit-surfaces.md`](edit-surfaces.md#nested-tab-rows) explains how one
+fragment opens both.
+
 ### Preserving params across a GET form
 
 `usage_preserved_params` and `container_analytics_preserved_params` return every

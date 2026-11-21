@@ -44,6 +44,28 @@ RSpec.describe 'Edit page tabs', :browser, type: :system do
     expect(page).to have_css('#advanced.active')
   end
 
+  describe 'a row nested inside a pane' do
+    before(:all) { @collection = create_collection(create_community.id) }
+
+    it 'opens both rows from one fragment naming the inner pane' do
+      visit "#{edit_collection_path(@collection.id)}#analytics-files"
+
+      expect(page).to have_css('#analytics.active')
+      expect(page).to have_css('#analytics-files.active')
+      expect(page.evaluate_script('window.location.hash')).to eq('#analytics-files')
+    end
+
+    it 'writes the inner pane into the URL when an inner tab is clicked' do
+      visit "#{edit_collection_path(@collection.id)}#analytics"
+      expect(page).to have_css('#analytics-composition.active')
+
+      click_button 'Usage history'
+
+      expect(page).to have_css('#analytics-overview.active')
+      expect(page.evaluate_script('window.location.hash')).to eq('#analytics-overview')
+    end
+  end
+
   # --- helpers ---------------------------------------------------------------
 
   def create_editable_work

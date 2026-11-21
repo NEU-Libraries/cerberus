@@ -1,9 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
 
 // The tab-hash row records the open tab in the URL fragment, but a GET form
-// drops the fragment when it submits and a server-built link never had one, so
-// either reloads the page on its default tab. Carries the current fragment onto
-// every same-page navigation that starts inside this element.
+// drops the fragment when it submits, and a server-built link carries at most
+// a fixed one, so either reloads the page on the wrong tab. Puts the current
+// fragment on every same-page navigation that starts inside this element.
 export default class extends Controller {
   submit(event) {
     const form = event.target
@@ -25,7 +25,7 @@ export default class extends Controller {
     if (!link || !this.element.contains(link)) return
 
     const url = this.samePageUrl(link.href)
-    if (!url || url.hash) return
+    if (!url) return
 
     url.hash = window.location.hash
     link.href = url.toString()
