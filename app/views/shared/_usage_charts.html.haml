@@ -17,7 +17,7 @@
     .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-scale-value' => 'log', 'usage-chart-dataset-value' => usage_visitors_series(report).to_json, 'usage-chart-colors-value' => %w[#5d569b].to_json}}
 
 %p.usage-charts__minimum.text-subtle.small
-  A graph visualizing interactions with a file will display when a file has
+  A graph visualizing interactions with a resource will display when a resource has
   #{UsageChartsHelper::CHART_MINIMUM} or more views, downloads, or streams. Please visit the
   #{link_to 'DRS subject guide', UsageChartsHelper::STATISTICS_GUIDE_URL, class: 'text-decoration-underline'}
   for more information about DRS statistics.

@@ -39,8 +39,8 @@ RSpec.describe 'shared/_usage_charts', type: :view do
   it 'explains the minimum once, under the charts, with a link to the statistics guide' do
     note = page.at_css('.usage-charts__minimum')
 
-    expect(note.text.squish).to start_with('A graph visualizing interactions with a file will display when a file ' \
-                                           'has 10 or more views, downloads, or streams.')
+    expect(note.text.squish).to start_with('A graph visualizing interactions with a resource will display when a ' \
+                                           'resource has 10 or more views, downloads, or streams.')
     expect(note.at_css('a')['href']).to eq('https://subjectguides.lib.neu.edu/drs/statistics')
     expect(note.at_css('a').text).to eq('DRS subject guide')
   end

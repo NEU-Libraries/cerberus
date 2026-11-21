@@ -358,7 +358,8 @@ unique visitors where the page shows them. Three rules shape every chart:
   heading are left out. Each chart is judged on its own total, so a Work with
   40 views and 3 downloads shows the views chart only. The ledger above still
   gives the exact totals. One note under the charts states the rule in v1's
-  words and links to the DRS statistics subject guide
+  words, with "a resource" for v1's "a file" because the charts also cover
+  collections and communities, and links to the DRS statistics subject guide
   (`UsageChartsHelper::STATISTICS_GUIDE_URL`).
 
 Columns, not lines: the daily series carry no key for a zero-activity day, so a
