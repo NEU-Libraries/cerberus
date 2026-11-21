@@ -37,7 +37,7 @@ export default class extends Controller {
           library: {
             maintainAspectRatio: false,
             plugins: { legend: { display: this.datasetValue.length > 1, position: "bottom" } },
-            ...(log && { scales: { y: this.logAxis() } }),
+            ...(log && { scales: { y: this.logAxis(this.peak(this.datasetValue)) } }),
           },
         }
 
@@ -50,13 +50,15 @@ export default class extends Controller {
   }
 
   // The floor sits below 1 so a day with a single event still draws a bar.
-  // Labels only 1, 2 and 5 in each decade; the rest would crowd the axis. The
-  // blank labels throw Chart.js's width measurement, which clipped the real
-  // ones, so the width is fixed; it also lines the stacked charts up.
-  logAxis() {
+  // Labels only 1, 2 and 5 in each decade; the rest would crowd the axis.
+  // Chart.js sizes the axis from the labels it draws, and the blank ones leave
+  // too little room, so the width is fixed and the top ends on a labelled
+  // step. Otherwise the outer labels are clipped.
+  logAxis(peak) {
     return {
       type: "logarithmic",
       min: 0.6,
+      max: this.labelledStepAbove(peak),
       afterFit: (scale) => { scale.width = 44 },
       grid: { display: false },
       ticks: {
@@ -67,6 +69,16 @@ export default class extends Controller {
         },
       },
     }
+  }
+
+  peak(dataset) {
+    return Math.max(1, ...dataset.flatMap((series) => Object.values(series.data).map(Number)))
+  }
+
+  // The smallest 1, 2 or 5 step at or above n: 27 gives 50, 20 gives 20.
+  labelledStepAbove(n) {
+    const decade = 10 ** Math.floor(Math.log10(n))
+    return [1, 2, 5, 10].map((m) => m * decade).find((step) => step >= n)
   }
 
   // A log axis has no 0, so a quiet day becomes a gap instead of a bar.
