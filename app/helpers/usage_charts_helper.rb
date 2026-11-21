@@ -20,6 +20,11 @@ module UsageChartsHelper
     end
   end
 
+  # See "The usage charts" in docs/analytics.md.
+  CHART_MINIMUM = 10
+
+  def usage_chartable?(total) = total.to_i >= CHART_MINIMUM
+
   def usage_series_colors(actions: ImpressionsReport::ACTIONS)
     actions.map { |action| SERIES_COLORS.fetch(action) }
   end
