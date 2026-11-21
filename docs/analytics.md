@@ -328,14 +328,35 @@ The tab is smaller than a container's on purpose:
   picker and no Solr query.
 - It shows views, downloads and streams over the last 90 days of human traffic.
   Streams appear only for a Work that plays in the browser.
-- Each action gets its own chart on its own scale, rather than one stacked
-  chart. A Work's downloads and streams are usually a fraction of its views,
-  and would flatten under them.
 - It leaves out unique visitors, which the librarians do not use.
 - An admin or admin delegate gets a link to the Usage analytics dashboard,
   scoped to the Work, for other date ranges.
 
 `app/views/works/_analytics.html.haml` renders the tab.
+
+## The usage charts
+
+The Usage analytics dashboard, a container's Analytics tab and a Work's
+Analytics tab draw their charts through one partial, `shared/_usage_charts`.
+Each action (views, downloads, streams) gets a chart of its own, and so do
+unique visitors where the page shows them. Three rules shape every chart:
+
+- **One chart per action, not one stacked chart.** Downloads and streams are
+  usually a fraction of views, and flatten under them on a shared chart. A
+  separate chart also needs no control for hiding a series.
+- **A log axis.** A single spike day flattens every other day on a linear
+  axis. This made the v1 charts hard to read. On a log axis each step is ten
+  times the one below, so busy and quiet days both stay readable. A log axis has
+  no 0, so a day with no activity is a gap. The axis starts at 0.6, so a day
+  with one event still draws a bar. Stacking would not survive a log axis,
+  because a stacked segment's height would depend on the segments below it.
+- **No horizontal gridlines.** The axis labels only 1, 2 and 5 in each decade,
+  which is enough to read the scale. Hovering a bar gives the exact count.
+
+Columns, not lines: the daily series carry no key for a zero-activity day, so a
+line would interpolate straight through the gaps.
+
+`usage_chart_controller.js` draws the log axis when its `scale` value is `log`.
 
 ## Building the scoping UI
 

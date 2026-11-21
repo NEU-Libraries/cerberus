@@ -1,0 +1,15 @@
+-# locals: report (ImpressionsReport), actions (Array<String>), period (String,
+-# such as "over time"), visitors (Boolean) — whether to add the unique visitors
+-# chart.
+-#
+-# One chart per action, each on a log axis, so a spike day does not flatten
+-# the rest. docs/analytics.md explains the choice.
+- actions.each do |action|
+  %section.usage-chart-block
+    %h2.usage-chart-block__title= "#{action.capitalize.pluralize} #{period}"
+    .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-scale-value' => 'log', 'usage-chart-dataset-value' => usage_timeseries(report, actions: [action]).to_json, 'usage-chart-colors-value' => usage_series_colors(actions: [action]).to_json}}
+
+- if visitors
+  %section.usage-chart-block
+    %h2.usage-chart-block__title= "Unique visitors #{period}"
+    .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-scale-value' => 'log', 'usage-chart-dataset-value' => usage_visitors_series(report).to_json, 'usage-chart-colors-value' => %w[#5d569b].to_json}}
