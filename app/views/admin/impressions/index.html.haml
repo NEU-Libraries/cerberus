@@ -1,6 +1,6 @@
 = render 'admin/breadcrumb_header'
 
-.admin-registry.my-3
+.admin-registry.my-3{data: {controller: 'carry-hash', action: 'submit->carry-hash#submit click->carry-hash#click'}}
   %header.admin-registry__head
     %span.admin-registry__title
       %i.fa-solid.fa-chart-line{'aria-hidden' => 'true'}
