@@ -6,19 +6,18 @@
 -# the rest. docs/analytics.md explains the choice and the minimum count.
 - totals = report.totals
 - actions.each do |action|
+  - next unless usage_chartable?(totals[action])
   %section.usage-chart-block
     %h2.usage-chart-block__title= "#{action.capitalize.pluralize} #{period}"
-    - if usage_chartable?(totals[action])
-      .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-scale-value' => 'log', 'usage-chart-dataset-value' => usage_timeseries(report, actions: [action]).to_json, 'usage-chart-colors-value' => usage_series_colors(actions: [action]).to_json}}
-    - else
-      %p.usage-chart-block__too-few.text-subtle.small.mb-0
-        = "Fewer than #{UsageChartsHelper::CHART_MINIMUM} #{action.pluralize} in this period, too few to chart."
+    .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-scale-value' => 'log', 'usage-chart-dataset-value' => usage_timeseries(report, actions: [action]).to_json, 'usage-chart-colors-value' => usage_series_colors(actions: [action]).to_json}}
 
-- if visitors
+- if visitors && usage_chartable?(report.unique_visitors_series.values.sum)
   %section.usage-chart-block
     %h2.usage-chart-block__title= "Unique visitors #{period}"
-    - if usage_chartable?(report.unique_visitors_series.values.sum)
-      .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-scale-value' => 'log', 'usage-chart-dataset-value' => usage_visitors_series(report).to_json, 'usage-chart-colors-value' => %w[#5d569b].to_json}}
-    - else
-      %p.usage-chart-block__too-few.text-subtle.small.mb-0
-        = "Fewer than #{UsageChartsHelper::CHART_MINIMUM} unique visitors in this period, too few to chart."
+    .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-scale-value' => 'log', 'usage-chart-dataset-value' => usage_visitors_series(report).to_json, 'usage-chart-colors-value' => %w[#5d569b].to_json}}
+
+%p.usage-charts__minimum.text-subtle.small
+  A graph visualizing interactions with a file will display when a file has
+  #{UsageChartsHelper::CHART_MINIMUM} or more views, downloads, or streams. Please visit the
+  #{link_to 'DRS subject guide', UsageChartsHelper::STATISTICS_GUIDE_URL, class: 'text-decoration-underline'}
+  for more information about DRS statistics.

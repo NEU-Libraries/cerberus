@@ -22,6 +22,7 @@ module UsageChartsHelper
 
   # See "The usage charts" in docs/analytics.md.
   CHART_MINIMUM = 10
+  STATISTICS_GUIDE_URL = 'https://subjectguides.lib.neu.edu/drs/statistics'
 
   def usage_chartable?(total) = total.to_i >= CHART_MINIMUM
 

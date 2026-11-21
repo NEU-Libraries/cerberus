@@ -352,13 +352,14 @@ unique visitors where the page shows them. Three rules shape every chart:
   because a stacked segment's height would depend on the segments below it.
 - **No horizontal gridlines.** The axis labels only 1, 2 and 5 in each decade,
   which is enough to read the scale. Hovering a bar gives the exact count.
-- **At least 10 events.** A chart draws only when its own total for the period
-  is `UsageChartsHelper::CHART_MINIMUM` (10) or more. Below that, a few scattered
-  bars suggest a trend that is not there, so the block keeps its heading and
-  says there are too few to chart. The ledger above still gives the exact
-  totals. v1 used the same threshold, for the same reason. Each chart is judged
-  on its own total, so a Work with 40 views and 3 downloads shows the views
-  chart only.
+- **At least 10 events.** A chart appears only when its own total for the
+  period is `UsageChartsHelper::CHART_MINIMUM` (10) or more. Below that, a few
+  scattered bars suggest a trend that is not there, so the chart and its
+  heading are left out. Each chart is judged on its own total, so a Work with
+  40 views and 3 downloads shows the views chart only. The ledger above still
+  gives the exact totals. One note under the charts states the rule in v1's
+  words and links to the DRS statistics subject guide
+  (`UsageChartsHelper::STATISTICS_GUIDE_URL`).
 
 Columns, not lines: the daily series carry no key for a zero-activity day, so a
 line would interpolate straight through the gaps.
