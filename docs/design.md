@@ -326,6 +326,31 @@ Override Bootstrap's styles only for a reason: a rule on this page, or a
 defect, such as the collapsed navbar's layout below `md` in `_layout.scss`. Do
 not restyle a component because a different look seems nicer.
 
+### Modals animate, and open at their final size
+
+Every modal takes Bootstrap's `.fade`. `$modal-fade-transform` in
+`application.scss` makes the animation a zoom rather than a slide.
+
+A modal whose body loads into a turbo-frame must not open until that frame has
+loaded. Otherwise the content arrives mid-animation, and the modal visibly
+jumps or its text reflows as it grows. `lazy_modal_controller.js` handles
+this. Put `data-controller="lazy-modal"` on the `.modal`, and mark the frame
+with `data-lazy-modal-target="frame"`. The controller has two modes:
+
+| Mode | How to set it | Used by |
+|---|---|---|
+| Load on every open | `data-lazy-modal-url-key-value` names the trigger's data attribute holding the URL (`downloadsUrl` reads `data-downloads-url`). Closing resets the frame, so the next open asks again. | Downloads, Why this result? |
+| Load once | No url key. The frame's own lazy `src` loads on the first open and stays. | Add to set |
+
+While the frame loads, the cursor shows progress and the trigger carries
+`aria-busy`. A response slower than a second opens the modal on its
+placeholder, so a click never goes unanswered. Because the controller opens
+the modal itself, it also returns focus to the trigger on close, which
+Bootstrap does only for a modal it opened.
+
+Do not give such a modal a `min-height` to hide the jump. It leaves a short
+list sitting in empty space.
+
 ## What not to add
 
 - Tailwind, another CSS framework, or another design system.

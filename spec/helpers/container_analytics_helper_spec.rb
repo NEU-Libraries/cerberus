@@ -25,11 +25,22 @@ RSpec.describe ContainerAnalyticsHelper do
   end
 
   describe '#container_analytics_scope_blurb' do
+    # The views get every helper; a helper spec gets only the one it describes.
+    before { helper.extend(Admin::ImpressionsHelper) }
+
+    # A collection holds no communities, so its sentence does not count them.
+    it 'counts what a community can hold' do
+      community = base_item.merge(klass: 'Community', title: 'Test Community')
+      blurb = helper.container_analytics_scope_blurb(report(scope), community, community)
+
+      expect(blurb).to include('including counts of its communities, collections and works,')
+    end
+
     it 'describes the whole subtree when neither a drill-down nor a facet is active' do
       blurb = helper.container_analytics_scope_blurb(report(scope), base_item, base_item)
 
       expect(blurb).to eq('An overview of the contents and usage of Test Collection, including counts of its ' \
-                          'communities, collections, and works, along with usage statistics recorded by human ' \
+                          'collections and works, along with usage statistics recorded by human ' \
                           'visitors.')
     end
 

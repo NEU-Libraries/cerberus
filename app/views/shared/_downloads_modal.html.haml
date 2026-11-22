@@ -1,14 +1,16 @@
-.modal#downloadsModal{tabindex: '-1', 'aria-labelledby' => 'downloadsModalLabel', 'aria-hidden' => 'true', data: { controller: 'downloads-modal' }}
+.modal.fade#downloadsModal{tabindex: '-1', 'aria-labelledby' => 'downloadsModalLabel', 'aria-hidden' => 'true', data: { controller: 'lazy-modal', 'lazy-modal-url-key-value' => 'downloadsUrl' }}
   -# Wider than the default dialog so each row's label, filename, size, and
   -# action buttons sit on one line without crowding (the filename detail makes
   -# the default ~500px modal cramped).
   .modal-dialog.modal-dialog-centered.modal-lg
-    .modal-content{style: 'min-height: 12rem;'}
+    .modal-content
       .modal-header
         %h2.modal-title.h5#downloadsModalLabel Downloads
         %button.btn-close{type: 'button', 'data-bs-dismiss' => 'modal', 'aria-label' => 'Close'}
-      .modal-body.p-0
-        %turbo-frame#downloads-modal-frame{data: { 'downloads-modal-target' => 'frame' }}
+      -# Bottom padding keeps the flush list's square rows off the rounded
+      -# corners, and the last row off the modal's edge.
+      .modal-body.p-0.pb-3
+        %turbo-frame#downloads-modal-frame{data: { 'lazy-modal-target' => 'frame' }}
           .p-4.text-center
             .spinner-border{role: 'status'}
               %span.visually-hidden Loading…

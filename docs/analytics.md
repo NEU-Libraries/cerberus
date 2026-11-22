@@ -328,14 +328,44 @@ The tab is smaller than a container's on purpose:
   picker and no Solr query.
 - It shows views, downloads and streams over the last 90 days of human traffic.
   Streams appear only for a Work that plays in the browser.
-- Each action gets its own chart on its own scale, rather than one stacked
-  chart. A Work's downloads and streams are usually a fraction of its views,
-  and would flatten under them.
 - It leaves out unique visitors, which the librarians do not use.
 - An admin or admin delegate gets a link to the Usage analytics dashboard,
   scoped to the Work, for other date ranges.
 
 `app/views/works/_analytics.html.haml` renders the tab.
+
+## The usage charts
+
+The Usage analytics dashboard, a container's Analytics tab and a Work's
+Analytics tab draw their charts through one partial, `shared/_usage_charts`.
+Each action (views, downloads, streams) gets a chart of its own, and so do
+unique visitors where the page shows them. Three rules shape every chart:
+
+- **One chart per action, not one stacked chart.** Downloads and streams are
+  usually a fraction of views, and flatten under them on a shared chart. A
+  separate chart also needs no control for hiding a series.
+- **A log axis.** A single spike day flattens every other day on a linear
+  axis. This made the v1 charts hard to read. On a log axis each step is ten
+  times the one below, so busy and quiet days both stay readable. A log axis has
+  no 0, so a day with no activity is a gap. The axis starts at 0.6, so a day
+  with one event still draws a bar. Stacking would not survive a log axis,
+  because a stacked segment's height would depend on the segments below it.
+- **No horizontal gridlines.** The axis labels only 1, 2 and 5 in each decade,
+  which is enough to read the scale. Hovering a bar gives the exact count.
+- **At least 10 events.** A chart appears only when its own total for the
+  period is `UsageChartsHelper::CHART_MINIMUM` (10) or more. Below that, a few
+  scattered bars suggest a trend that is not there, so the chart and its
+  heading are left out. Each chart is judged on its own total, so a Work with
+  40 views and 3 downloads shows the views chart only. The ledger above still
+  gives the exact totals. One note under the charts states the rule in v1's
+  words, with "a resource" for v1's "a file" because the charts also cover
+  collections and communities, and links to the DRS statistics subject guide
+  (`UsageChartsHelper::STATISTICS_GUIDE_URL`).
+
+Columns, not lines: the daily series carry no key for a zero-activity day, so a
+line would interpolate straight through the gaps.
+
+`usage_chart_controller.js` draws the log axis when its `scale` value is `log`.
 
 ## Building the scoping UI
 
@@ -363,6 +393,19 @@ resolved, or that a search result already returned.
 `HashWithIndifferentAccess`. Merging `:anchor` into one stringifies the key, and
 `url_for` honours only the symbol form. The anchor would come out as a literal
 `anchor=analytics` query param and the tab would be lost.
+
+`#analytics` is only the fallback. Both dashboards wrap their controls in the
+`carry-hash` controller, which puts the current fragment on every same-page
+form and link inside it, replacing any fragment the server built. A change of
+date range, segment, scope or filter therefore reloads the page on the tab
+the reader had open: `#files` on the Usage analytics dashboard, or
+`#analytics-files` on an edit page. Without it, a GET form drops the fragment
+when it submits, and a server-built link names at most the outer tab.
+
+The Analytics tab's own row (Content overview, Usage history, Top files, Top
+collections) is a `tab-hash` row nested inside the edit page's row.
+[`edit-surfaces.md`](edit-surfaces.md#nested-tab-rows) explains how one
+fragment opens both.
 
 ### Preserving params across a GET form
 
@@ -436,6 +479,13 @@ are more slices than colours.
 Content overview tab. v1 had a flat table of entity counts plus a file-type
 breakdown. This report is the equivalent in substance for v2's data shape, not a
 literal port.
+
+The Communities and Faculty & Staff counts appear only for the whole
+repository and for a Community. Both live only under a Community, so under a
+Collection or a Work they would always read 0. `composition_entity_types` in
+`Admin::ImpressionsHelper` picks the counts from the scoped item's class, and
+`composition_counted_phrase` builds the sentences that name them, so the
+figures and the text above them always agree.
 
 Composition is not a traffic metric. It ignores the date range and the segment,
 whatever `scope_fq` is. There is no "composition of the last 90 days" —

@@ -74,6 +74,23 @@ the browser never sees it.
 An unknown, hidden or standalone key falls back to the first in-page pane rather
 than opening nothing.
 
+### Nested tab rows
+
+A `tab-hash` row may sit inside a pane of another `tab-hash` row. The container
+Analytics tab does this: its Content overview, Usage history, Top files and Top
+collections row sits inside the edit page's `#analytics` pane.
+
+One fragment opens both rows. It names the innermost open pane, such as
+`#analytics-files`, and each row opens whichever of its own panes holds that
+pane. The outer row opens `#analytics`, and the inner row opens
+`#analytics-files`. For this to work, every pane id must be unique on the
+page, so prefix a nested row's panes with the outer pane's key.
+
+When a tab is shown, the row writes the innermost open pane into the URL, so a
+reload restores every level. There is one exception. The outer row opens its
+pane before the inner row reads the fragment, so it leaves a fragment alone when
+that fragment names a pane inside the one it just opened.
+
 ### Who may see a tab
 
 `edit_tab_visible?(key)` holds only the *user*-dependent gates. `TABS` holds the

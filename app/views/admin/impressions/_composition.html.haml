@@ -1,23 +1,20 @@
+-# locals: composition (RepositoryCompositionReport), scope_phrase (String,
+-# optional), scope_klass (String, optional) — the scoped item's class, nil for
+-# the whole repository.
 - entity = composition.entity_counts
 - visibility = composition.work_visibility
 - scope_phrase ||= 'across the DRS'
+- types = composition_entity_types(local_assigns[:scope_klass])
+- modifiers = { 'Community' => 'communities', 'Collection' => 'collections', 'Work' => 'works', 'Person' => 'people' }
 
 %p.text-muted.small.mb-3
-  Unfiltered counts of the communities, collections and works #{scope_phrase}. Storage used counts every stored version of every file, removed files included.
+  Unfiltered counts of the #{composition_counted_phrase(types)} #{scope_phrase}. Storage used counts every stored version of every file, removed files included.
 
 %dl.usage-ledger
-  .usage-ledger__item.usage-ledger__item--communities
-    %dt.usage-ledger__label Communities
-    %dd.usage-ledger__figure= number_with_delimiter(entity['Community'])
-  .usage-ledger__item.usage-ledger__item--collections
-    %dt.usage-ledger__label Collections
-    %dd.usage-ledger__figure= number_with_delimiter(entity['Collection'])
-  .usage-ledger__item.usage-ledger__item--works
-    %dt.usage-ledger__label Works
-    %dd.usage-ledger__figure= number_with_delimiter(entity['Work'])
-  .usage-ledger__item.usage-ledger__item--people
-    %dt.usage-ledger__label Faculty & Staff
-    %dd.usage-ledger__figure= number_with_delimiter(entity['Person'])
+  - types.each do |type|
+    .usage-ledger__item{class: "usage-ledger__item--#{modifiers.fetch(type)}"}
+      %dt.usage-ledger__label= Admin::ImpressionsHelper::COMPOSITION_LABELS.fetch(type)
+      %dd.usage-ledger__figure= number_with_delimiter(entity[type])
 
 %dl.usage-ledger
   .usage-ledger__item

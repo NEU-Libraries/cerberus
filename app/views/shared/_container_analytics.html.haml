@@ -2,7 +2,7 @@
 - noid = @analytics_base_item[:noid]
 - drilled = container_analytics_drilled?(@analytics_base_item, @analytics_effective_item)
 
-.edit-pane
+.edit-pane{data: {controller: 'carry-hash', action: 'submit->carry-hash#submit click->carry-hash#click'}}
   %p.text-muted.small.mb-3
     = container_analytics_scope_blurb(@analytics, @analytics_base_item, @analytics_effective_item)
 
@@ -22,7 +22,7 @@
             = link_to container_analytics_clear_facet_path(base_klass, noid), class: 'usage-scope__chip-clear', 'aria-label' => 'Clear filter' do
               %i.fa-solid.fa-xmark{'aria-hidden' => 'true'}
 
-    .usage-scope__controls{data: {controller: 'preserve-hash-form', action: 'submit->preserve-hash-form#submit'}}
+    .usage-scope__controls
       .usage-scope__item-picker
         = render 'admin/finder/search_form', url: container_analytics_path(base_klass, noid), q: params[:q], hidden: container_analytics_preserved_params, placeholder: "Look up a Work or Collection within this #{base_klass.downcase}…"
 
@@ -35,7 +35,7 @@
     - if @analytics_item_results
       = render 'admin/finder/results', results: @analytics_item_results, select_label: 'Scope', select_url: ->(doc) { container_analytics_item_select_url(base_klass, noid, doc) }
 
-  %ul.nav.nav-tabs.mb-0{role: 'tablist'}
+  %ul.nav.nav-tabs.mb-0{role: 'tablist', 'data-controller' => 'tab-hash'}
     %li.nav-item
       %button#analytics-composition-tab.nav-link.active{'aria-controls' => 'analytics-composition', 'aria-selected' => 'true', 'data-bs-target' => '#analytics-composition', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Content overview
     %li.nav-item
@@ -60,18 +60,7 @@
           %dt.usage-ledger__label Unique visitors · peak day
           %dd.usage-ledger__figure= number_with_delimiter(@analytics.unique_visitors_series.values.max || 0)
 
-      -# Columns, not lines: the daily series carry no key for a zero-activity
-      -# day, so a line interpolates straight through the gaps — at one
-      -# container's volume that renders as disconnected floating segments.
-      -# Stacking views onto downloads also makes the bar height read as total
-      -# activity for the day.
-      %section.usage-chart-block
-        %h2.usage-chart-block__title Views, downloads & streams in the last 90 days
-        .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-stacked-value' => 'true', 'usage-chart-dataset-value' => usage_timeseries(@analytics).to_json, 'usage-chart-colors-value' => usage_series_colors.to_json}}
-
-      %section.usage-chart-block
-        %h2.usage-chart-block__title Unique visitors in the last 90 days
-        .usage-chart{data: {controller: 'usage-chart', 'usage-chart-kind-value' => 'column', 'usage-chart-dataset-value' => usage_visitors_series(@analytics).to_json, 'usage-chart-colors-value' => %w[#5d569b].to_json}}
+      = render 'shared/usage_charts', report: @analytics, actions: ImpressionsReport::ACTIONS, period: 'in the last 90 days', visitors: true
 
     #analytics-files.tab-pane{'aria-labelledby' => 'analytics-files-tab', role: 'tabpanel'}
       = render 'shared/container_analytics_top_table', entries: @analytics.top_works, empty: usage_empty_message(@analytics)
@@ -80,7 +69,8 @@
         = render 'shared/container_analytics_top_table', entries: @analytics.top_containers, empty: usage_empty_message(@analytics)
     #analytics-composition.tab-pane.active{'aria-labelledby' => 'analytics-composition-tab', role: 'tabpanel'}
       = render 'admin/impressions/composition', composition: @analytics_composition,
-                                                scope_phrase: "in #{plain_text(@analytics_base_item[:title])}"
+                                                scope_phrase: "in #{plain_text(@analytics_base_item[:title])}",
+                                                scope_klass: @analytics_base_item[:klass]
 
   - if effective_user&.admin? || effective_user&.admin_delegate?
     .mt-3.text-center

@@ -9,7 +9,7 @@ export default class extends Controller {
     kind: { type: String, default: "line" },
     dataset: { type: Array, default: [] },
     colors: { type: Array, default: [] },
-    stacked: { type: Boolean, default: false },
+    scale: { type: String, default: "linear" },
   }
 
   async connect() {
@@ -23,6 +23,7 @@ export default class extends Controller {
 
     const chartClasses = { column: Chartkick.ColumnChart, pie: Chartkick.PieChart, line: Chartkick.LineChart }
     const ChartClass = chartClasses[this.kindValue] || Chartkick.LineChart
+    const log = this.scaleValue === "log"
 
     // A pie chart's "series" is one flat label/value list, not per-series lines —
     // its legend should always show (the slice labels), and points/curve are
@@ -33,17 +34,59 @@ export default class extends Controller {
           colors: this.colorsValue,
           points: false,
           curve: false,
-          stacked: this.stackedValue,
           library: {
             maintainAspectRatio: false,
             plugins: { legend: { display: this.datasetValue.length > 1, position: "bottom" } },
+            ...(log && { scales: { y: this.logAxis(this.peak(this.datasetValue)) }, layout: { padding: { top: 10 } } }),
           },
         }
 
-    this.chart = new ChartClass(this.element, this.datasetValue, options)
+    const dataset = log ? this.withoutZeros(this.datasetValue) : this.datasetValue
+    this.chart = new ChartClass(this.element, dataset, options)
   }
 
   disconnect() {
     this.chart?.destroy?.()
+  }
+
+  // The floor sits below 1 so a day with a single event still draws a bar.
+  // Labels only 1, 2 and 5 in each decade; the rest would crowd the axis.
+  // Chart.js leaves no room for the outer labels on a log axis, so the width
+  // is fixed and the chart is padded at the top (in connect); without both,
+  // the side and top labels are clipped. Ending on a labelled step gives the
+  // tallest bar a labelled ceiling.
+  logAxis(peak) {
+    return {
+      type: "logarithmic",
+      min: 0.6,
+      max: this.labelledStepAbove(peak),
+      afterFit: (scale) => { scale.width = 44 },
+      grid: { display: false },
+      ticks: {
+        autoSkip: false,
+        callback: (value) => {
+          const leading = value / 10 ** Math.floor(Math.log10(value))
+          return [1, 2, 5].some((n) => Math.abs(leading - n) < 1e-6) ? value.toLocaleString() : ""
+        },
+      },
+    }
+  }
+
+  peak(dataset) {
+    return Math.max(1, ...dataset.flatMap((series) => Object.values(series.data).map(Number)))
+  }
+
+  // The smallest 1, 2 or 5 step at or above n: 27 gives 50, 20 gives 20.
+  labelledStepAbove(n) {
+    const decade = 10 ** Math.floor(Math.log10(n))
+    return [1, 2, 5, 10].map((m) => m * decade).find((step) => step >= n)
+  }
+
+  // A log axis has no 0, so a quiet day becomes a gap instead of a bar.
+  withoutZeros(dataset) {
+    return dataset.map((series) => ({
+      ...series,
+      data: Object.fromEntries(Object.entries(series.data).map(([day, n]) => [day, n > 0 ? n : null])),
+    }))
   }
 }

@@ -7,6 +7,9 @@
 // rails_bootstrap_forms is a form-styling layer and is independent of
 // the override stack.
 @import 'colors';
+// Every modal zooms in rather than sliding down; Bootstrap's own suggestion
+// for a zoom.
+$modal-fade-transform: scale(.8);
 @import 'bootstrap';
 @import 'blacklight/blacklight';
 @import 'cerberus';

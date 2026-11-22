@@ -34,7 +34,10 @@ module Admin
       @report = build_report
       @item_results = search_items if params[:q].present?
       @composition = RepositoryCompositionReport.new(scope_fq: composition_scope_fq)
-      @composition_scope_phrase = "in #{item_params[:title]}" if @composition.scoped?
+      return unless @composition.scoped?
+
+      @composition_scope_phrase = "in #{item_params[:title]}"
+      @composition_scope_klass = item_params[:klass]
     end
 
     # CSV / Excel of the top-N tables (the quarterly-report artifact). Format

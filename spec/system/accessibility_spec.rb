@@ -70,7 +70,15 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     work
   end
 
+  # A wrong path renders an error page, and axe passes most of those, so the
+  # audit would report a page it never saw. Fail on the page instead.
+  def expect_audited_page
+    expect(page).to have_css('#main-container')
+    expect(page).to have_no_css('.error-page')
+  end
+
   def expect_axe_clean
+    expect_audited_page
     expect(page).to be_axe_clean.according_to(*AxeAudit::TAGS).skipping(:'color-contrast')
     expect(page).to be_axe_clean.checking_only(:'color-contrast')
                                 .excluding(*AxeAudit::CONTRAST_EXCEPTIONS)
@@ -114,7 +122,7 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     'a new set'          => -> { '/sets/new' },
     'the inbox'          => -> { '/inbox' },
     'a new message'      => -> { '/inbox/new' },
-    'the search history' => -> { '/search_history' }
+    'the search history' => -> { '/catalog/search_history' }
   }
 
   audits :admin_nuid, {
@@ -132,7 +140,6 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     'the loaders'         => -> { '/admin/loaders' },
     'a new loader'        => -> { '/admin/loaders/new' },
     'maintenance'         => -> { '/admin/maintenance' },
-    'system health'       => -> { '/admin/health' },
     'impressions'         => -> { '/admin/impressions' },
     'reparent'            => -> { '/admin/reparent' },
     'tombstones'          => -> { '/admin/tombstones' },
@@ -160,6 +167,33 @@ RSpec.describe 'Accessibility', :browser, type: :system do
     end
   end
   audits :admin_nuid, edit_tabs.to_h
+
+  # The test environment points Solid Queue at the primary database, which has
+  # no queue tables. The live probes would fail there and abort the example's
+  # transaction, and the layout's next query would raise. A down service and a
+  # queue snapshot also render every section the page has.
+  context 'as admin_nuid, with the system health probes stubbed' do
+    before do
+      sign_in_as(admin_nuid)
+      allow(HealthCheck).to receive(:call).and_return(stubbed_health_results)
+      allow(JobQueueStats).to receive(:call).and_return(
+        JobQueueStats::Snapshot.new(waiting_by_queue: { 'default' => 3 }, oldest_waiting_at: 25.minutes.ago,
+                                    running: 1, scheduled: 0, blocked: 0, failed: 2, workers: 1)
+      )
+    end
+
+    it 'system health passes axe' do
+      visit '/admin/health'
+      expect_axe_clean
+    end
+  end
+
+  def stubbed_health_results
+    HealthCheck.capabilities.index_with do |key|
+      HealthCheck::Result.new(capability: key, service: HealthCheck::SERVICES.fetch(key), ok: key != :records,
+                              latency_ms: 5, detail: key == :records ? 'Faraday::ConnectionFailed: refused' : nil)
+    end
+  end
 
   # The Health pane's report arrives in a lazy frame after the visit, so the
   # audit above sees only its placeholder. This one waits for the report.

@@ -233,7 +233,33 @@ RSpec.describe 'Admin::Impressions', type: :request do
       get '/admin/impressions', params: { item_noid: 'c1', item_uuid: 'uuid-c1', item_klass: 'Collection', item_title: 'Sample Collection' }
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('works in Sample Collection')
+      expect(response.body).to include('Unfiltered counts of the collections and works in Sample Collection')
+    end
+
+    # A collection holds no communities and no people, so both would read 0.
+    it 'leaves the Communities and Faculty & Staff counts out of a scoped Collection' do
+      allow(ContainerDescendantsQuery).to receive(:new).with(noid: 'c1', uuid: 'uuid-c1')
+                                                       .and_return(instance_double(ContainerDescendantsQuery, noids: ['c1'], work_noids: [], container_noids: ['c1'],
+                                                                                                              subtree_fq: 'id:uuid-c1'))
+      stub_composition(['id:uuid-c1'])
+
+      get '/admin/impressions', params: { item_noid: 'c1', item_uuid: 'uuid-c1', item_klass: 'Collection', item_title: 'Sample Collection' }
+
+      labels = response.parsed_body.css('#composition .usage-ledger__label').map(&:text)
+      expect(labels).to include('Collections', 'Works')
+      expect(labels).not_to include('Communities', 'Faculty & Staff')
+    end
+
+    it 'keeps all four counts for a scoped Community' do
+      allow(ContainerDescendantsQuery).to receive(:new).with(noid: 'm1', uuid: 'uuid-m1')
+                                                       .and_return(instance_double(ContainerDescendantsQuery, noids: ['m1'], work_noids: [], container_noids: ['m1'],
+                                                                                                              subtree_fq: 'id:uuid-m1'))
+      stub_composition(['id:uuid-m1'])
+
+      get '/admin/impressions', params: { item_noid: 'm1', item_uuid: 'uuid-m1', item_klass: 'Community', item_title: 'Sample Community' }
+
+      labels = response.parsed_body.css('#composition .usage-ledger__label').map(&:text)
+      expect(labels).to include('Communities', 'Collections', 'Works', 'Faculty & Staff')
     end
 
     it 'counts only the scoped Work itself' do

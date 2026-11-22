@@ -14,7 +14,8 @@
 - label_id = "add-to-set-label-#{noid}"
 - frame_id = "set-picker-#{noid}"
 
-.modal.fade{id: modal_id, tabindex: '-1', 'aria-labelledby' => label_id, 'aria-hidden' => 'true'}
+.modal.fade{id: modal_id, tabindex: '-1', 'aria-labelledby' => label_id, 'aria-hidden' => 'true',
+             data: { controller: 'lazy-modal' }}
   .modal-dialog.modal-dialog-centered.modal-dialog-scrollable
     -# `text-start` defends against `.text-end` ancestors in the host row
     -# (the icon rail) bleeding into the modal contents.
@@ -32,7 +33,8 @@
           %input.form-control{type: 'search', name: 'q', placeholder: 'Filter your sets by title…',
                               'aria-label' => 'Filter your sets by title', autocomplete: 'off',
                               data: { action: 'input->picker-search#search' }}
-        = turbo_frame_tag frame_id, src: picker_sets_path(:"#{kind}_id" => noid), loading: :lazy do
+        = turbo_frame_tag frame_id, src: picker_sets_path(:"#{kind}_id" => noid), loading: :lazy,
+                                    data: { 'lazy-modal-target' => 'frame' } do
           .py-2.small.text-muted Loading your sets…
       .modal-footer.justify-content-between
         -# Carries the item and this page, so the new set is created with the item
