@@ -351,6 +351,12 @@ Bootstrap does only for a modal it opened.
 Do not give such a modal a `min-height` to hide the jump. It leaves a short
 list sitting in empty space.
 
+Every modal is closed before Turbo caches the page it is leaving
+(`app/javascript/cerberus/modal_snapshot_reset.js`). Otherwise a link inside a
+modal, such as New set in Add to set, caches the page with the modal open, and
+Back restores a modal that its close button cannot close.
+`spec/system/modal_snapshot_spec.rb` covers it.
+
 ## What not to add
 
 - Tailwind, another CSS framework, or another design system.
