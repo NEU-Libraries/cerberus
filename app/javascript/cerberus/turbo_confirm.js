@@ -122,3 +122,15 @@ export function installTurboConfirm() {
 }
 
 installTurboConfirm()
+
+// The modal lives in <body>, so a page left after a confirm is cached holding a
+// copy. Back restores that copy beside the next one built, under the same ids,
+// and the live dialog's aria-labelledby names the stale title. Dropping the
+// modal here means the next confirm builds a fresh one.
+document.addEventListener("turbo:before-cache", () => {
+  if (!modalEl) return
+
+  modal.dispose()
+  modalEl.remove()
+  modalEl = null
+})
