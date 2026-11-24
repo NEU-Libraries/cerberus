@@ -227,6 +227,10 @@ room, as on a phone, the menu drops below and loses the arrow. Sort and Per page
 take this from `Cerberus::ResultsDropdownComponent`, which CatalogController
 sets as Blacklight's `dropdown_component`.
 
+The navbar's user menu hangs below its caret, so its arrow points up, drawn by
+the `menu-top-arrow` mixin. In the phone navbar panel the menu sits under the
+name rather than the caret, and takes no arrow.
+
 Give each surface one solid button for its main action: `btn-primary`, or
 `btn-success` for Save. Every other button takes a variant from
 `_tonal_buttons.scss`:
