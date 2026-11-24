@@ -355,11 +355,39 @@ Bootstrap does only for a modal it opened.
 Do not give such a modal a `min-height` to hide the jump. It leaves a short
 list sitting in empty space.
 
-Every modal is closed before Turbo caches the page it is leaving
-(`app/javascript/cerberus/modal_snapshot_reset.js`). Otherwise a link inside a
-modal, such as New set in Add to set, caches the page with the modal open, and
-Back restores a modal that its close button cannot close.
-`spec/system/modal_snapshot_spec.rb` covers it.
+Every modal is closed before Turbo caches the page it is leaving. The next
+section explains why.
+
+### Back and Forward restore the page as it was cached
+
+Turbo caches a page as it leaves it, and Back or Forward paints that copy
+without fetching it again. The order matters. Turbo fires
+`turbo:before-cache`, waits one tick, and clones the old `<body>` only after
+the new page has rendered and Stimulus has disconnected the old controllers.
+So the cache holds whatever `disconnect()` left behind.
+
+That gives two rules for anything that changes the page after it loads:
+
+- **A controller puts its element back as the server rendered it, in
+  `disconnect()`.** If the controller rewrites the markup, as video.js does,
+  the restored copy otherwise reaches `connect()` holding markup it cannot
+  mount on. `av_player_controller.js` saves the server markup and puts it back.
+  A controller that keeps state in the markup reads that state back in
+  `connect()`, as `metadata_section_clamp_controller.js` does. A controller
+  that raises something only once retires it in `disconnect()`, as
+  `set_toast_controller.js` does.
+- **Code that is not a controller cleans up on `turbo:before-cache`.**
+  `app/javascript/cerberus/snapshot_reset.js` closes open modals, dropdowns and
+  the phone navbar panel. A restored copy of any of them has no Bootstrap
+  instance behind it, so its close button, an outside click and Esc do nothing.
+  `turbo_confirm.js` removes its shared modal, so Back never restores a second
+  copy under the same ids.
+
+A collapse the reader opened elsewhere, such as a facet, stays open on Back.
+It has no instance to lose and closes again on its own toggle.
+
+`spec/system/modal_snapshot_spec.rb` and `spec/system/snapshot_restore_spec.rb`
+cover these.
 
 ## What not to add
 
