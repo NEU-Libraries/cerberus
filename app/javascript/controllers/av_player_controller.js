@@ -9,7 +9,13 @@ export default class extends Controller {
   static values = { audioPoster: Boolean }
 
   async connect() {
+    // Turbo caches the page after disconnect() has run, and dispose() deletes
+    // the <video>, so disconnect() puts this server markup back for the cache.
+    this.serverMarkup = this.element.innerHTML
+    const mount = (this.mount = Symbol("mount"))
     await import("video-js") // UMD build: registers window.videojs
+    // A visit can leave the page while the import is in flight.
+    if (this.mount !== mount) return
     // DRS never serves live streams — everything is video-on-demand. video.js
     // paints a "LIVE" badge whenever it can't determine a finite duration (e.g.
     // a byte response without a definitive total), which is always misleading
@@ -55,7 +61,10 @@ export default class extends Controller {
   }
 
   disconnect() {
+    this.mount = null
     this.labelObserver?.disconnect()
     this.player?.dispose?.()
+    this.player = null
+    this.element.innerHTML = this.serverMarkup
   }
 }
