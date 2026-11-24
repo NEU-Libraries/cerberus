@@ -12,7 +12,11 @@ const ANNOUNCE_AFTER = 150
 export default class extends Controller {
   static targets = ["message", "announce"]
 
+  // A toast is raised once. disconnect() retires it before Turbo caches the
+  // page, so a restored copy arrives hidden and must not announce again.
   connect() {
+    if (this.element.hidden) return
+
     requestAnimationFrame(() => this.element.classList.add("show"))
     this.announceTimer = setTimeout(() => this.announce(), ANNOUNCE_AFTER)
     this.arm()
@@ -21,6 +25,9 @@ export default class extends Controller {
   disconnect() {
     clearTimeout(this.timer)
     clearTimeout(this.announceTimer)
+    this.element.classList.remove("show")
+    this.element.hidden = true
+    this.announceTarget.textContent = ""
   }
 
   announce() {
