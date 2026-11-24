@@ -4,7 +4,9 @@ export default class extends Controller {
   static targets = ["container", "toggle"]
 
   connect() {
-    this.expanded = false
+    // Read from the markup: a Turbo cache restore brings back a value the
+    // reader left expanded, and its toggle must stay to collapse it again.
+    this.expanded = !this.containerTarget.classList.contains("metadata-section-clamped")
     this.updateToggle = this.updateToggle.bind(this)
 
     // Measure once after first paint, when scrollHeight/clientHeight are
