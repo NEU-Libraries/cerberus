@@ -94,6 +94,17 @@ A click made before the deferred files have landed would render the next page
 with only the first page's inline rules. The apply script therefore holds any
 `turbo:before-render` until both files have loaded or failed.
 
+Each link settles exactly once. Firefox fires `load` a second time when the
+script switches a link's `media` from `print` to `all`; Chrome does not. Counted
+twice, the number of files still waiting drops below zero, never equals zero
+again, and the script holds every later render for the life of the page. On a
+cold cache that froze every link click and form submit after the first page:
+the request completed and the URL changed, but the old page stayed up. A warm
+cache hid it, because a cached file already has its `sheet` when the script
+runs, so the script counts it once without a listener.
+`spec/system/deferred_stylesheets_spec.rb` fires the second `load` itself, since
+the browser lane runs Chrome.
+
 ## The render hold
 
 `<link rel="expect" href="#blacklight-modal" blocking="render">` holds the first
