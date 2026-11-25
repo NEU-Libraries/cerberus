@@ -54,11 +54,11 @@
       = form_with url: admin_open_maintenance_path, method: :post, class: 'well p-3 my-3 rounded-3' do |f|
         .mb-3
           = f.label :message, 'Message for the banner (optional)', class: 'form-label'
-          = f.text_field :message, class: 'form-control',
-                                   placeholder: 'Scheduled maintenance until 10:00'
-          .form-text
+          = f.text_field :message, class: 'form-control', 'aria-describedby' => 'maintenance_message_hint'
+          .form-text#maintenance_message_hint
             Shown on every page and on the page a refused write lands on. Say
-            when you expect to be finished.
+            when you expect to be finished. For example, “Scheduled maintenance
+            until 10:00”.
         .mb-3
           = f.label :retry_after, 'Ask callers to retry after (seconds, optional)', class: 'form-label'
           = f.number_field :retry_after, class: 'form-control', min: 1, style: 'max-width: 12rem;'

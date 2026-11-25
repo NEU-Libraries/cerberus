@@ -74,12 +74,17 @@
       .row.g-2
         .col-5
           %label.form-label.small{ for: 'caption_language_tag' } Language tag
-          %input#caption_language_tag.form-control.form-control-sm{ name: 'caption_language_tag', placeholder: 'es-MX',
-                                                                     autocomplete: 'off', spellcheck: 'false' }/
+          %input#caption_language_tag.form-control.form-control-sm{ name: 'caption_language_tag', autocomplete: 'off',
+                                                                     spellcheck: 'false', 'aria-describedby' => 'caption_language_tag_hint' }/
+          .form-text#caption_language_tag_hint
+            For example,
+            = succeed '.' do
+              %code.admin-registry-table__id es-MX
         .col-7
           %label.form-label.small{ for: 'caption_language_label' } Label in the player
-          %input#caption_language_label.form-control.form-control-sm{ name: 'caption_language_label', placeholder: 'Español (México)',
-                                                                       maxlength: CaptionTrack::LABEL_LIMIT }/
+          %input#caption_language_label.form-control.form-control-sm{ name: 'caption_language_label', maxlength: CaptionTrack::LABEL_LIMIT,
+                                                                       'aria-describedby' => 'caption_language_label_hint' }/
+          .form-text#caption_language_label_hint For example, “Español (México)”.
   %p.text-muted.small.mt-2.mb-0
     Caption files must be in WebVTT (.vtt) format. Contact repository staff for help converting caption files to WebVTT.
     Uploading a file in a language this work already has replaces that language's file, and the earlier one is kept in its version history.

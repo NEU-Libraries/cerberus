@@ -28,16 +28,19 @@
         = f.label :raw, 'Grouper group', class: 'admin-registry-form__label' do
           %i.fa-solid.fa-user-group{'aria-hidden' => 'true'}
           Grouper group
-        = f.text_field :raw, class: 'form-control admin-registry-form__input--id', placeholder: 'northeastern:drs:repository:loaders:marcom', autocomplete: 'off'
-        .admin-registry-form__hint
-          The raw colon-separated Grouper identifier, exactly as it appears on user and object records. It can’t be changed once saved.
+        = f.text_field :raw, class: 'form-control admin-registry-form__input--id', autocomplete: 'off',
+                       'aria-describedby' => 'group_raw_hint'
+        .admin-registry-form__hint#group_raw_hint
+          The raw colon-separated Grouper identifier, exactly as it appears on user and object records. It can’t be changed once saved. For example,
+          = succeed '.' do
+            %code.admin-registry-table__id northeastern:drs:repository:loaders:marcom
     .mb-0
       = f.label :cosmetic, 'Display name', class: 'admin-registry-form__label' do
         %i.fa-solid.fa-id-card{'aria-hidden' => 'true'}
         Display name
-      = f.text_field :cosmetic, class: 'form-control', placeholder: 'Marketing and Communications'
-      .admin-registry-form__hint
-        The friendly label shown wherever this group surfaces (inbox recipients, sharing, permissions). Without it the raw string is shown as-is.
+      = f.text_field :cosmetic, class: 'form-control', 'aria-describedby' => 'group_cosmetic_hint'
+      .admin-registry-form__hint#group_cosmetic_hint
+        The friendly label shown wherever this group surfaces (inbox recipients, sharing, permissions). Without it the raw string is shown as-is. For example, “Marketing and Communications”.
 
   .d-flex.gap-2.align-items-center.mt-4
     = f.submit class: 'btn btn-primary'
