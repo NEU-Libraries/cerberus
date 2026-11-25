@@ -303,6 +303,12 @@ during a visit. It needs no JavaScript. It covers each link click, Back and
 Forward, and the page that follows a form's redirect. It does not cover the
 form request itself: Turbo marks only the form busy, not `<html>`.
 
+Turbo clears the mark only when a visit completes. A visit that falls back to a
+full page load leaves the old page marked busy in the browser's back-forward
+cache. Back then restores that page, and no visit is left to clear the mark.
+`snapshot_reset.js` clears it on `pageshow`. `spec/system/busy_cursor_spec.rb`
+covers the rule, Back and Forward, and that restore.
+
 
 **Hover must never move or resize the element under the pointer.** No
 `translateY` lift, and no change to border width, padding or font weight. The
