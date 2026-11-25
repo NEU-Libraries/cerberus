@@ -17,6 +17,10 @@ production: &production
     class: SessionTrimJob
     queue: background
     schedule: every hour at minute 27
+  sweep_abandoned_uploads:
+    class: TusSweepJob
+    queue: background
+    schedule: every hour at minute 33
   # A day's counts depend only on that day's rows, so the hourly run re-derives
   # the two days still taking traffic. The nightly run re-derives the whole
   # window, so a change to the bot list (reclassify_user_agents, just before),

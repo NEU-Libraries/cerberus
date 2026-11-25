@@ -22,6 +22,11 @@ pin "tify", to: "tify.js", preload: false
 # av_player_controller, so only A/V work pages fetch it.
 pin "video-js", to: "video-js.js", preload: false
 
+# tus-js-client (vendored dist, MIT) for resumable uploads; UMD build that
+# registers window.tus. Dynamically imported by upload_progress_controller, so
+# only pages with a large-file form fetch it.
+pin "tus-js-client", to: "tus-js-client.js", preload: false
+
 pin_all_from "app/javascript/cerberus", under: "cerberus"
 pin_all_from "app/javascript/preview_controllers", under: "preview_controllers", preload: false
 # Preview is a separate application to avoid loading ace-builds for every page.

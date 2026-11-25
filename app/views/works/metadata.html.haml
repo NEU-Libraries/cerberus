@@ -5,7 +5,8 @@
 
 .metadata-form{ data: { controller: "group-permissions", "group-permissions-resource-value": "work" } }
   -# multipart because the Captions section carries a file input.
-  = bootstrap_form_tag(url: metadata_work_path(params[:id]), method: :patch, multipart: true) do |f|
+  = bootstrap_form_tag(url: metadata_work_path(params[:id]), method: :patch, multipart: true,
+                       data: upload_progress_form_data) do |f|
     = bootstrap_fields_for :work do |c|
       = render 'shared/descriptive_fields', f: c, descriptive: @descriptive, keywords: true, parts_editable: true
       -# Closed by default: this page's job is confirmation and it already runs
@@ -48,6 +49,7 @@
     - if @streaming_only_offered
       = render 'works/streaming_only', enabled: @streaming_only, audio: @streaming_only_audio
 
+    = render 'shared/upload_progress', extra_class: 'mt-3'
     .well.p-3.my-3.rounded-3
       = f.button :submit, class: 'btn btn-success'
       -# Plain link (not button_to) — `button_to` emits a nested <form>,

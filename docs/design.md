@@ -27,7 +27,7 @@ bracketing.
 
 | Surface | Chrome | Reference |
 |---|---|---|
-| A form section (label and control) | `.well.p-3.my-3.rounded-3` | the Move and Delete tabs in `works/edit` |
+| A form's fields (label and control) | none: they sit on the pane | Group Permissions, and the Move and Delete tabs in `works/edit` |
 | A form footer (Save and Cancel) | `.well.p-3.my-3.rounded-3` | the end of every tab in `works/edit` |
 | A tab pane | `.edit-pane`, with an `%h5.pb-2` heading and a `%p.text-muted.small` explainer | the Permissions tab in `works/edit` |
 | A standalone form or action page | the `.admin-registry` card shell | `admin/groups/new` |
@@ -60,8 +60,10 @@ and no shadow, and must not gain one. The fill alone makes it read as a panel,
 and `$well-bg` is pinned by contrast (see the palette below), so it cannot be
 lightened to make up for a weaker edge.
 
-A well reads as "a form section you fill in or submit". So:
+A well reads as "the part of a form you submit". So:
 
+- **Leave a form's fields out of the well.** Labels and controls sit on the
+  pane, and only the footer's buttons take the well, as in Group Permissions.
 - **Never wrap prose or a read-only readout in a well.** A readout beside a form
   footer looks like part of that form. Give it a bare section under a heading,
   as `works/_download_access` does.
@@ -227,6 +229,10 @@ room, as on a phone, the menu drops below and loses the arrow. Sort and Per page
 take this from `Cerberus::ResultsDropdownComponent`, which CatalogController
 sets as Blacklight's `dropdown_component`.
 
+The navbar's user menu hangs below its caret, so its arrow points up, drawn by
+the `menu-top-arrow` mixin. In the phone navbar panel the menu sits under the
+name rather than the caret, and takes no arrow.
+
 Give each surface one solid button for its main action: `btn-primary`, or
 `btn-success` for Save. Every other button takes a variant from
 `_tonal_buttons.scss`:
@@ -276,6 +282,43 @@ field. `file_field_controller.js` writes the chosen file's name in.
   would not.
 - `small: true` gives the compact size for a table row, as on Replace a file.
   `extra_class:` adds a spacing class to the field.
+- Every file field is a drop target, and shows a dashed blue edge while a file
+  is dragged over it.
+
+### Upload progress
+
+Every form that uploads a file shows the measured bar from
+`shared/_upload_progress`, not Turbo's time-driven one. Render the panel inside
+the form, near its submit button, and wire the form with
+`upload_progress_form_data`. [`uploads.md`](uploads.md) covers the wiring and
+the two ways a file is sent.
+
+### A click that navigates or saves shows the progress cursor
+
+From a click until the next page renders, the cursor is the progress cursor.
+Turbo's bar waits 750 ms before it shows, so on its own a click looks ignored
+for that long. The cursor answers at once, and it is the same signal a lazy
+modal gives while its frame loads.
+
+The rule in `_layout.scss` keys on the `aria-busy` that Turbo sets, and needs
+no JavaScript. It reads two marks:
+
+- **`<html>`, during a visit.** The cursor shows across the page, for each
+  link click, Back and Forward.
+- **A form, while its request is in flight.** The cursor shows over that form
+  only, which includes the Save button under the mouse. The page that follows
+  the form's redirect then marks `<html>`, so the cursor carries straight on.
+
+An upload form that sends by XHR leaves Turbo out, so its bar is the only
+signal until the next page arrives. A Turbo confirm dialog marks nothing: the
+form turns busy only after the user confirms.
+
+Turbo clears each mark only when its own request ends. A visit or submit that
+falls back to a full page load leaves the old page marked busy in the browser's
+back-forward cache. Back then restores that page, and no request is left to
+clear the mark. `snapshot_reset.js` clears every mark on `pageshow`.
+`spec/system/busy_cursor_spec.rb` covers the rule, Back and Forward, a search
+submit, and that restore.
 
 
 **Hover must never move or resize the element under the pointer.** No
@@ -351,11 +394,39 @@ Bootstrap does only for a modal it opened.
 Do not give such a modal a `min-height` to hide the jump. It leaves a short
 list sitting in empty space.
 
-Every modal is closed before Turbo caches the page it is leaving
-(`app/javascript/cerberus/modal_snapshot_reset.js`). Otherwise a link inside a
-modal, such as New set in Add to set, caches the page with the modal open, and
-Back restores a modal that its close button cannot close.
-`spec/system/modal_snapshot_spec.rb` covers it.
+Every modal is closed before Turbo caches the page it is leaving. The next
+section explains why.
+
+### Back and Forward restore the page as it was cached
+
+Turbo caches a page as it leaves it, and Back or Forward paints that copy
+without fetching it again. The order matters. Turbo fires
+`turbo:before-cache`, waits one tick, and clones the old `<body>` only after
+the new page has rendered and Stimulus has disconnected the old controllers.
+So the cache holds whatever `disconnect()` left behind.
+
+That gives two rules for anything that changes the page after it loads:
+
+- **A controller puts its element back as the server rendered it, in
+  `disconnect()`.** If the controller rewrites the markup, as video.js does,
+  the restored copy otherwise reaches `connect()` holding markup it cannot
+  mount on. `av_player_controller.js` saves the server markup and puts it back.
+  A controller that keeps state in the markup reads that state back in
+  `connect()`, as `metadata_section_clamp_controller.js` does. A controller
+  that raises something only once retires it in `disconnect()`, as
+  `set_toast_controller.js` does.
+- **Code that is not a controller cleans up on `turbo:before-cache`.**
+  `app/javascript/cerberus/snapshot_reset.js` closes open modals, dropdowns and
+  the phone navbar panel. A restored copy of any of them has no Bootstrap
+  instance behind it, so its close button, an outside click and Esc do nothing.
+  `turbo_confirm.js` removes its shared modal, so Back never restores a second
+  copy under the same ids.
+
+A collapse the reader opened elsewhere, such as a facet, stays open on Back.
+It has no instance to lose and closes again on its own toggle.
+
+`spec/system/modal_snapshot_spec.rb` and `spec/system/snapshot_restore_spec.rb`
+cover these.
 
 ## What not to add
 

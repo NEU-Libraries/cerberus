@@ -11,12 +11,19 @@ export default class extends Controller {
 
   connect() {
     this.show = this.show.bind(this)
+    this.dragOver = () => this.element.classList.add("file-field--dragover")
+    this.dragEnd = () => this.element.classList.remove("file-field--dragover")
     this.element.addEventListener("change", this.show)
+    this.element.addEventListener("dragenter", this.dragOver)
+    for (const type of ["dragleave", "drop"]) this.element.addEventListener(type, this.dragEnd)
     this.show()
   }
 
   disconnect() {
     this.element.removeEventListener("change", this.show)
+    this.element.removeEventListener("dragenter", this.dragOver)
+    for (const type of ["dragleave", "drop"]) this.element.removeEventListener(type, this.dragEnd)
+    this.dragEnd()
   }
 
   show() {

@@ -31,10 +31,11 @@
         - errors.each do |error|
           %li= error
 
-  = form_with url: dwc_work_path(work.id), method: :put, multipart: true do
+  = form_with url: dwc_work_path(work.id), method: :put, multipart: true, data: upload_progress_form_data do
     %label.form-label{for: 'dwc_file'} Darwin Core XML file
     = render layout: 'shared/file_field' do
       %input#dwc_file.file-field__input{name: 'dwc_file', type: 'file', accept: '.xml,application/xml,text/xml', required: true}/
+    = render 'shared/upload_progress', extra_class: 'mt-3'
     .well.p-3.my-3.rounded-3
       %button.btn.btn-primary{type: 'submit'}= held ? 'Replace record' : 'Upload record'
       = link_to 'Cancel', work_path(work.id), class: 'btn btn-warning'

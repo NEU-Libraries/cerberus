@@ -12,19 +12,25 @@ module StylesheetsHelper
   # A Turbo visit made before they land would render the next page with only
   # this page's inline rules, so the render waits for them. A failed load
   # releases it too, rather than hang the visit.
+  #
+  # Each link settles once. Firefox fires load again when media changes, and a
+  # second count would pass zero and hold every later render for good.
   APPLY_DEFERRED = <<~JS.squish.freeze
     (function () {
       var links = document.querySelectorAll('link[data-deferred-stylesheet]');
       var waiting = links.length;
       var held = [];
-      function settle() {
-        if (--waiting === 0) held.splice(0).forEach(function (resume) { resume(); });
-      }
       links.forEach(function (link) {
-        function apply() { link.media = 'all'; settle(); }
-        if (link.sheet) { apply(); return; }
-        link.addEventListener('load', apply);
-        link.addEventListener('error', settle);
+        var settled = false;
+        function settle(loaded) {
+          if (settled) return;
+          settled = true;
+          if (loaded) link.media = 'all';
+          if (--waiting === 0) held.splice(0).forEach(function (resume) { resume(); });
+        }
+        if (link.sheet) { settle(true); return; }
+        link.addEventListener('load', function () { settle(true); });
+        link.addEventListener('error', function () { settle(false); });
       });
       document.addEventListener('turbo:before-render', function (event) {
         if (waiting === 0) return;

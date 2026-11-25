@@ -50,6 +50,23 @@ RSpec.describe 'Works deposit form', type: :request do
     expect(upload['disabled']).to be_nil
   end
 
+  it 'sends the file over TUS ahead of the form, with a meter to show it' do
+    get new_collection_work_path(collection.id)
+
+    form = response.parsed_body.at_css('form.deposit-form')
+    expect(form['data-controller'].split).to include('terms-acceptance', 'upload-progress')
+    expect(form['data-upload-progress-tus-endpoint-value']).to eq(tus_uploads_path)
+    expect(form.at_css('[role=progressbar][data-upload-progress-target=panel]').key?('hidden')).to be(true)
+  end
+
+  # A resumable upload that expired, or was another user's, claims as nothing.
+  it 'sends a deposit naming no upload it can claim back to the form' do
+    post collection_works_path(collection.id), params: { terms_accepted: '1', tus_upload_id: SecureRandom.hex(16) }
+
+    expect(response).to redirect_to(new_collection_work_path(collection.id))
+    expect(flash[:alert]).to eq(WorksController::FILE_REQUIRED)
+  end
+
   # The action has to be a route that accepts POST — the failure mode here was a
   # form pointing at a GET-only path, which only shows up on submit.
   it 'names a path that routes to works#create' do

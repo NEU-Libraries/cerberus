@@ -8,6 +8,7 @@ class LoadsController < ApplicationController
   include Blacklight::Configurable
 
   copy_blacklight_config_from(CatalogController)
+  include UploadStaging
 
   # "PID" to match this field's own placeholder, the loader form's "Root collection
   # PID" label, and the manifest's PIDs column. The identifier is a NOID in v2, but
@@ -60,7 +61,7 @@ class LoadsController < ApplicationController
   end
 
   def create
-    archive = params.dig(:load_report, :archive)
+    archive = submitted_file(params.dig(:load_report, :archive))
     parent  = params.dig(:load_report, :parent_collection_id)
     return rerender_new('Please choose an archive file.', parent) if archive.blank?
     return rerender_new(destination_alert, parent) unless LoadDestination.call(loader: @loader, parent_id: parent)
@@ -171,19 +172,7 @@ class LoadsController < ApplicationController
       render template: 'errors/forbidden', status: :forbidden, layout: 'application'
     end
 
-    # FileUtils.cp against the Rails tempfile path — streaming copy,
-    # never File.write(file.read) which would slurp the archive into
-    # Ruby memory. Matches WorksController#stage_upload's shape.
     def save_archive(load_report, archive)
-      Outage.guard_storage do
-        dir = File.join(
-          Rails.application.config.x.cerberus.uploads_root,
-          'load_reports',
-          load_report.id.to_s
-        )
-        FileUtils.mkdir_p(dir)
-        dest = File.join(dir, archive.original_filename)
-        FileUtils.cp(archive.tempfile&.path.presence || archive.path, dest)
-      end
+      stage_upload(archive, File.join('load_reports', load_report.id.to_s))
     end
 end

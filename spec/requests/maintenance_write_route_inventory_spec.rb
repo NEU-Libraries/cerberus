@@ -56,7 +56,8 @@ RSpec.describe 'Maintenance write-route inventory', type: :request do
     accounts admin/associations admin/community_people admin/files admin/groups admin/impersonations
     admin/linked_members
     admin/loaders admin/people admin/reindex admin/reparent admin/tombstones
-    atlas atlas_tokens collections communities darwin_core_records loads messages person_profiles sets works xml
+    atlas atlas_tokens collections communities darwin_core_records loads messages person_profiles sets
+    tus_uploads works xml
   ].freeze
 
   def callback_filters(controller)

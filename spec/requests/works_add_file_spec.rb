@@ -96,6 +96,29 @@ RSpec.describe 'Works upload (add a file)', type: :request do
       expect(flash[:notice]).to be_present
     end
 
+    context 'when the file came ahead of the form over TUS' do
+      include_context 'with a scratch uploads root'
+
+      it 'stages the finished upload and queues AddFileJob with its filename' do
+        upload_record = finished_tus_upload(owner: editor.nuid, filename: 'scan.png')
+
+        expect do
+          post upload_work_path(work.id), params: { tus_upload_id: upload_record.id }
+        end.to have_enqueued_job(AddFileJob).with(work.id, File.join(uploads_root, work.id, 'scan.png'),
+                                                  'scan.png', kind_of(String))
+        expect(response).to redirect_to(work_path(work.id))
+      end
+
+      it 'treats an upload that has not finished as no file' do
+        upload_record = TusStore.create(length: 99, filename: 'scan.png', filetype: '', owner_id: editor.nuid)
+
+        expect do
+          post upload_work_path(work.id), params: { tus_upload_id: upload_record.id }
+        end.not_to have_enqueued_job(AddFileJob)
+        expect(response).to redirect_to(upload_work_path(work.id))
+      end
+    end
+
     it 'rejects a submission with no file, enqueues nothing, and flashes back to the form' do
       expect do
         post upload_work_path(work.id), params: {}

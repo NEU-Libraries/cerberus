@@ -7,6 +7,6 @@ import Blacklight from "blacklight-frontend"
 // Imported after turbo-rails so window.Turbo exists when it self-registers the
 // Bootstrap-modal confirm dialog in place of the native window.confirm().
 import "cerberus/turbo_confirm"
-import "cerberus/modal_snapshot_reset"
+import "cerberus/snapshot_reset"
 
 Turbo.config.drive.progressBarDelay = 750

@@ -3,7 +3,7 @@
 - form_data = { controller: 'terms-acceptance' }
 - if @publish_targets.present?
   - form_data = { controller: 'terms-acceptance deposit-promotion', 'deposit-promotion-genres-value': @publish_targets.transform_values { |target| target[:genres] }, 'deposit-promotion-requires-proxy-value': @publishing_for.present? }
-= form_tag(@create_path, multipart: true, class: 'deposit-form my-3', data: form_data) do |f|
+= form_tag(@create_path, multipart: true, class: 'deposit-form my-3', data: upload_progress_form_data(form_data, resumable: true)) do |f|
 
   .deposit-form__panel
     %header.deposit-form__head
@@ -41,6 +41,7 @@
           = file_field_tag 'binary', class: 'file-field__input', required: true
         %p.deposit-form__field-hint
           One file per deposit.
+        = render 'shared/upload_progress', extra_class: 'mt-3'
 
       -# Hidden during an acting-as session: impersonation already fixes the
       -# attribution (to the target), so offering the proxy radio would be a
