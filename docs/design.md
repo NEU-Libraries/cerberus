@@ -280,6 +280,16 @@ field. `file_field_controller.js` writes the chosen file's name in.
   would not.
 - `small: true` gives the compact size for a table row, as on Replace a file.
   `extra_class:` adds a spacing class to the field.
+- Every file field is a drop target, and shows a dashed blue edge while a file
+  is dragged over it.
+
+### Upload progress
+
+Every form that uploads a file shows the measured bar from
+`shared/_upload_progress`, not Turbo's time-driven one. Render the panel inside
+the form, near its submit button, and wire the form with
+`upload_progress_form_data`. [`uploads.md`](uploads.md) covers the wiring and
+the two ways a file is sent.
 
 
 **Hover must never move or resize the element under the pointer.** No
