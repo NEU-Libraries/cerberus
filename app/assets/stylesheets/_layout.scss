@@ -525,3 +525,12 @@ ol.breadcrumb {
 #main-container {
   margin-bottom: 20px;
 }
+
+// Turbo marks the root busy from the click until the next page renders, and
+// its bar waits 750 ms before showing. The cursor answers at once. Every
+// element is named because links and buttons set their own pointer cursor,
+// and the mouse is resting on the one that was clicked.
+html[aria-busy="true"],
+html[aria-busy="true"] * {
+  cursor: progress;
+}

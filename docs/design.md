@@ -291,6 +291,18 @@ the form, near its submit button, and wire the form with
 `upload_progress_form_data`. [`uploads.md`](uploads.md) covers the wiring and
 the two ways a file is sent.
 
+### A click that navigates shows the progress cursor
+
+From the click until the next page renders, the cursor is the progress cursor,
+everywhere on the page. Turbo's bar waits 750 ms before it shows, so on its own
+a click looks ignored for that long. The cursor answers at once, and it is the
+same signal a lazy modal gives while its frame loads.
+
+The rule in `_layout.scss` keys on the `aria-busy` that Turbo sets on `<html>`
+during a visit. It needs no JavaScript. It covers each link click, Back and
+Forward, and the page that follows a form's redirect. It does not cover the
+form request itself: Turbo marks only the form busy, not `<html>`.
+
 
 **Hover must never move or resize the element under the pointer.** No
 `translateY` lift, and no change to border width, padding or font weight. The
