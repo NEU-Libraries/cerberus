@@ -42,7 +42,7 @@
                     %i.fa-solid.fa-pen{'aria-hidden' => 'true'}
                     Edit
                   = button_to admin_group_path(group), method: :delete,
-                              class: 'admin-registry-table__edit btn btn-link p-0 text-danger',
+                              class: 'admin-registry-table__edit admin-registry-table__edit--danger',
                               form: { class: 'd-inline', data: { turbo_confirm: "Remove the display name for #{group.raw}? It will fall back to the raw group string." } } do
                     %i.fa-solid.fa-trash-can{'aria-hidden' => 'true'}
                     Delete
