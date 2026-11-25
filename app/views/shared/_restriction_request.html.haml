@@ -17,7 +17,9 @@
   = form_with url: public_send("request_restriction_#{resource}_path", params[:id]), method: :post do
     %label.form-label{ for: 'restriction_note' } Who should still be able to see it?
     %textarea.form-control#restriction_note{ name: 'request_note', rows: 3, required: true,
-      placeholder: 'Name the groups that should keep access, or say "nobody" to make it private.' }
+      'aria-describedby' => 'restriction_note_hint' }
+    .form-text#restriction_note_hint
+      Name the groups that should keep access, or say "nobody" to make it private.
     .well.p-3.my-3.rounded-3
       %button.btn.btn-primary{ type: 'submit' }
         %i.fa-solid.fa-lock.me-1{ 'aria-hidden' => 'true' }
