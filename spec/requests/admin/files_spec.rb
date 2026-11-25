@@ -281,6 +281,30 @@ RSpec.describe 'Admin::Files', type: :request do
         end.to have_enqueued_job(FileReplacementJob)
       end
 
+      context 'when the file came ahead of the form over TUS' do
+        include_context 'with a scratch uploads root'
+
+        it 'stages the finished upload by moving it, and queues the replacement' do
+          upload_record = finished_tus_upload(owner: admin_user.nuid)
+
+          expect do
+            post '/admin/files/replace', params: { work_id: 'w1', blob_noid: 'b1', tus_upload_id: upload_record.id }
+          end.to have_enqueued_job(FileReplacementJob).with('b1', 'w1', File.join(uploads_root, 'w1', 'image.png'),
+                                                            'image.png', kind_of(String))
+          expect(File).to exist(File.join(uploads_root, 'w1', 'image.png'))
+          expect(File).not_to exist(upload_record.data_path)
+        end
+
+        it "refuses another user's upload as if no file came" do
+          upload_record = finished_tus_upload(owner: '000000005')
+
+          expect do
+            post '/admin/files/replace', params: { work_id: 'w1', blob_noid: 'b1', tus_upload_id: upload_record.id }
+          end.not_to have_enqueued_job(FileReplacementJob)
+          expect(flash[:alert]).to eq('Choose a file to upload.')
+        end
+      end
+
       it 'rejects a submission with no file' do
         expect do
           post '/admin/files/replace', params: { work_id: 'w1', blob_noid: 'b1' }

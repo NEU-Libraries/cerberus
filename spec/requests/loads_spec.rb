@@ -265,6 +265,24 @@ RSpec.describe 'Loads', type: :request do
       expect(response).to redirect_to(loader_load_path(marcom_loader, LoadReport.last))
     end
 
+    context 'when the archive came ahead of the form over TUS' do
+      include_context 'with a scratch uploads root'
+
+      it 'moves the finished upload into the load report’s staging directory' do
+        allow(FileUtils).to receive(:mkdir_p).and_call_original
+        upload_record = finished_tus_upload(owner: marcom_user.nuid, filename: 'jpgs.zip',
+                                            source: Rails.root.join('spec/fixtures/files/jpgs.zip'))
+
+        post '/loaders/marcom/loads', params: { load_report:   { parent_collection_id: 'neu:c1' },
+                                                tus_upload_id: upload_record.id }
+
+        report = LoadReport.last
+        expect(report.source_filename).to eq('jpgs.zip')
+        expect(File).to exist(File.join(uploads_root, 'load_reports', report.id.to_s, 'jpgs.zip'))
+        expect(UnzipJob).to have_received(:perform_later).with(report.id)
+      end
+    end
+
     it 're-renders :new with 422 when archive is missing' do
       allow(AtlasRb::Collection).to receive(:children).and_return([])
       post '/loaders/marcom/loads', params: { load_report: { parent_collection_id: 'neu:c1' } }

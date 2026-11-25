@@ -64,7 +64,7 @@ module Admin
     end
 
     def replace
-      file = params[:binary]
+      file = submitted_file(params[:binary])
       return back_to_manage(alert: 'Choose a file to upload.') if file.blank?
       return back_to_manage(alert: type_mismatch_message(file)) if type_mismatch_message(file)
 
