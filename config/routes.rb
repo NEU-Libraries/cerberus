@@ -195,6 +195,17 @@ Rails.application.routes.draw do
     end
   end
 
+  # Resumable uploads (TUS 1.0.0). A large-file form sends its file here first,
+  # then submits only the upload's id. HEAD is routed on its own, so a GET to an
+  # upload is a 404 rather than a body-less 200. See docs/uploads.md.
+  scope controller: :tus_uploads do
+    post   'tus',     action: :create,  as: :tus_uploads
+    match  'tus',     action: :options, via: :options
+    match  'tus/:id', action: :show,    via: :head, as: :tus_upload
+    patch  'tus/:id', action: :update
+    delete 'tus/:id', action: :destroy
+  end
+
   # Download Queue — a per-session basket of individual files, downloaded later
   # as one streamed ZIP (reuses the bulk-download streaming tech). Anon-capable.
   # The zip stream lives on its own controller (ActionController::Live).
