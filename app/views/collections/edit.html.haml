@@ -17,12 +17,14 @@
 .tab-content
   #metadata.tab-pane{class: ('active' if open_tab == 'metadata'), "aria-labelledby" => "metadata-tab", role: "tabpanel"}
     .edit-pane
-      = bootstrap_form_tag(url: collection_path(params[:id]), method: :patch, multipart: true) do |f|
+      = bootstrap_form_tag(url: collection_path(params[:id]), method: :patch, multipart: true,
+                           data: upload_progress_form_data) do |f|
         %label.form-label{:for => "thumbnail"} Thumbnail
         = render layout: 'shared/file_field', locals: { extra_class: 'mb-3' } do
           %input#thumbnail.file-field__input{name: 'thumbnail', type: 'file'}/
         = bootstrap_fields_for :collection do |c|
           = render 'shared/descriptive_fields', f: c, descriptive: @descriptive, keywords: false
+        = render 'shared/upload_progress', extra_class: 'mt-3'
         .well.p-3.my-3.rounded-3
           = f.button :submit, class: "btn btn-success"
           = link_to "Cancel", collection_path(params[:id]), class: "btn btn-warning"

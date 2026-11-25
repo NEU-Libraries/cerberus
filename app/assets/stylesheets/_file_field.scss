@@ -75,9 +75,10 @@
     }
   }
 
-  // The loader's archive field is also a drop target; archive_upload_controller
-  // marks the input while a file is over it.
-  &:has(.is-dragover) {
+  // Every file field takes a dropped file natively but gives no sign that it
+  // will; file_field_controller marks the field while a file is over it, in
+  // the Cerberus blue, so the target is obvious before the file is let go.
+  &--dragover {
     border: 1px dashed $blue;
     background-color: color-mix(in srgb, #{$blue} 6%, white);
     box-shadow: 0 0 0 0.2rem color-mix(in srgb, #{$blue} 20%, transparent);

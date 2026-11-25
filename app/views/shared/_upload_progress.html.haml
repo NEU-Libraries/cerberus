@@ -1,0 +1,20 @@
+-# The meter for a form wired to upload_progress_controller.js; see
+-# docs/uploads.md. Hidden until a submit starts. role=progressbar without
+-# aria-valuenow reads as indeterminate, which is the state after the last byte
+-# is sent and before the server answers.
+.upload-progress{ class: local_assigns[:extra_class], hidden: true, role: 'progressbar',
+  'aria-label' => 'Upload progress', 'aria-valuemin' => 0, 'aria-valuemax' => 100,
+  data: { 'upload-progress-target' => 'panel' } }
+  .upload-progress__head
+    %span.upload-progress__label{ 'aria-hidden' => 'true', data: { 'upload-progress-target' => 'label' } } Uploading
+    %span.upload-progress__percent{ 'aria-hidden' => 'true', data: { 'upload-progress-target' => 'percent' } } 0%
+  .upload-progress__track
+    .upload-progress__fill{ style: 'width: 0%', data: { 'upload-progress-target' => 'fill' } }
+  -# The icon sits outside the target, because the controller rewrites the
+  -# note with textContent and would otherwise delete it.
+  .upload-progress__note
+    %i.fa-solid.fa-circle-info.me-1{'aria-hidden' => 'true'}
+    %span{ data: { 'upload-progress-target' => 'note' } } Keep this tab open until the upload finishes.
+-# Outside the hidden panel and empty at load, or a screen reader would not
+-# announce what the controller writes into it.
+%span.visually-hidden{ role: 'status', data: { 'upload-progress-target' => 'status' } }

@@ -17,7 +17,8 @@
 .tab-content
   #metadata.tab-pane{class: ('active' if open_tab == 'metadata'), "aria-labelledby" => "metadata-tab", role: "tabpanel"}
     .edit-pane
-      = bootstrap_form_tag(url: work_path(params[:id]), method: :patch, multipart: true) do |f|
+      = bootstrap_form_tag(url: work_path(params[:id]), method: :patch, multipart: true,
+                           data: upload_progress_form_data) do |f|
         = f.hidden_field :id, value: params[:id]
         %label.form-label{:for => "thumbnail"} Thumbnail
         = render layout: 'shared/file_field', locals: { extra_class: 'mb-3' } do
@@ -29,6 +30,7 @@
                                      removable: caption_steward?(effective_user)
         - if @showcases.any?
           = render 'works/showcase_category', showcases: @showcases, genres: @showcase_genres
+        = render 'shared/upload_progress', extra_class: 'mt-3'
         .well.p-3.my-3.rounded-3
           = f.button :submit, class: "btn btn-success"
           = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"

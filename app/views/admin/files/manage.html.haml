@@ -45,7 +45,7 @@
           Remove
 
     .admin-registry__body
-      = form_with url: admin_files_replace_path, method: :post, multipart: true do
+      = form_with url: admin_files_replace_path, method: :post, multipart: true, data: upload_progress_form_data(resumable: true) do
         = hidden_field_tag :work_id, params[:work_id]
         = hidden_field_tag :blob_noid, asset.noid
         .row.g-2.align-items-end
@@ -61,6 +61,7 @@
               Replace file
         %p.admin-registry-form__hint.mt-1
           Select the file you would like to use as the most recent version. Older versions will be retained.
+        = render 'shared/upload_progress', extra_class: 'mt-3'
 
     - if versions.any?
       .table-responsive
