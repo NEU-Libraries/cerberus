@@ -291,23 +291,32 @@ the form, near its submit button, and wire the form with
 `upload_progress_form_data`. [`uploads.md`](uploads.md) covers the wiring and
 the two ways a file is sent.
 
-### A click that navigates shows the progress cursor
+### A click that navigates or saves shows the progress cursor
 
-From the click until the next page renders, the cursor is the progress cursor,
-everywhere on the page. Turbo's bar waits 750 ms before it shows, so on its own
-a click looks ignored for that long. The cursor answers at once, and it is the
-same signal a lazy modal gives while its frame loads.
+From a click until the next page renders, the cursor is the progress cursor.
+Turbo's bar waits 750 ms before it shows, so on its own a click looks ignored
+for that long. The cursor answers at once, and it is the same signal a lazy
+modal gives while its frame loads.
 
-The rule in `_layout.scss` keys on the `aria-busy` that Turbo sets on `<html>`
-during a visit. It needs no JavaScript. It covers each link click, Back and
-Forward, and the page that follows a form's redirect. It does not cover the
-form request itself: Turbo marks only the form busy, not `<html>`.
+The rule in `_layout.scss` keys on the `aria-busy` that Turbo sets, and needs
+no JavaScript. It reads two marks:
 
-Turbo clears the mark only when a visit completes. A visit that falls back to a
-full page load leaves the old page marked busy in the browser's back-forward
-cache. Back then restores that page, and no visit is left to clear the mark.
-`snapshot_reset.js` clears it on `pageshow`. `spec/system/busy_cursor_spec.rb`
-covers the rule, Back and Forward, and that restore.
+- **`<html>`, during a visit.** The cursor shows across the page, for each
+  link click, Back and Forward.
+- **A form, while its request is in flight.** The cursor shows over that form
+  only, which includes the Save button under the mouse. The page that follows
+  the form's redirect then marks `<html>`, so the cursor carries straight on.
+
+An upload form that sends by XHR leaves Turbo out, so its bar is the only
+signal until the next page arrives. A Turbo confirm dialog marks nothing: the
+form turns busy only after the user confirms.
+
+Turbo clears each mark only when its own request ends. A visit or submit that
+falls back to a full page load leaves the old page marked busy in the browser's
+back-forward cache. Back then restores that page, and no request is left to
+clear the mark. `snapshot_reset.js` clears every mark on `pageshow`.
+`spec/system/busy_cursor_spec.rb` covers the rule, Back and Forward, a search
+submit, and that restore.
 
 
 **Hover must never move or resize the element under the pointer.** No

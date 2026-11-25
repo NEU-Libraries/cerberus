@@ -527,10 +527,14 @@ ol.breadcrumb {
 }
 
 // Turbo marks the root busy from the click until the next page renders, and
-// its bar waits 750 ms before showing. The cursor answers at once. Every
-// element is named because links and buttons set their own pointer cursor,
-// and the mouse is resting on the one that was clicked.
+// a form busy while its request is in flight. Its bar waits 750 ms before
+// showing; the cursor answers at once. Every element is named because links
+// and buttons set their own pointer cursor, and the mouse is resting on the
+// one that was clicked. !important because those rules outrank this one:
+// Bootstrap's `[type=submit]:not(:disabled)` does, and so do component rules.
 html[aria-busy="true"],
-html[aria-busy="true"] * {
-  cursor: progress;
+html[aria-busy="true"] *,
+form[aria-busy="true"],
+form[aria-busy="true"] * {
+  cursor: progress !important;
 }

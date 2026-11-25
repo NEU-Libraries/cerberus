@@ -50,10 +50,11 @@ document.addEventListener("turbo:before-cache", () => {
   closeNavbarPanels()
 })
 
-// The browser's own back-forward cache is a second way back. A visit that
-// falls back to a full page load freezes this document with `<html>` still
-// busy, and Turbo clears that only when a visit completes. Without this, the
-// restored page keeps the progress cursor until the next click.
+// The browser's own back-forward cache is a second way back. A visit or a
+// form submit that falls back to a full page load freezes this document still
+// marked busy, and Turbo clears a mark only when its own request ends. Without
+// this, the restored page keeps the progress cursor until the next click.
 window.addEventListener("pageshow", (event) => {
-  if (event.persisted) document.documentElement.removeAttribute("aria-busy")
+  if (!event.persisted) return
+  document.querySelectorAll("[aria-busy]").forEach((el) => el.removeAttribute("aria-busy"))
 })
