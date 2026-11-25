@@ -27,7 +27,7 @@ bracketing.
 
 | Surface | Chrome | Reference |
 |---|---|---|
-| A form section (label and control) | `.well.p-3.my-3.rounded-3` | the Move and Delete tabs in `works/edit` |
+| A form's fields (label and control) | none: they sit on the pane | Group Permissions, and the Move and Delete tabs in `works/edit` |
 | A form footer (Save and Cancel) | `.well.p-3.my-3.rounded-3` | the end of every tab in `works/edit` |
 | A tab pane | `.edit-pane`, with an `%h5.pb-2` heading and a `%p.text-muted.small` explainer | the Permissions tab in `works/edit` |
 | A standalone form or action page | the `.admin-registry` card shell | `admin/groups/new` |
@@ -60,8 +60,10 @@ and no shadow, and must not gain one. The fill alone makes it read as a panel,
 and `$well-bg` is pinned by contrast (see the palette below), so it cannot be
 lightened to make up for a weaker edge.
 
-A well reads as "a form section you fill in or submit". So:
+A well reads as "the part of a form you submit". So:
 
+- **Leave a form's fields out of the well.** Labels and controls sit on the
+  pane, and only the footer's buttons take the well, as in Group Permissions.
 - **Never wrap prose or a read-only readout in a well.** A readout beside a form
   footer looks like part of that form. Give it a bare section under a heading,
   as `works/_download_access` does.

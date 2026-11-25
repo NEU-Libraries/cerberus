@@ -43,7 +43,7 @@ When creating a Rails interface whole-cloth or editing one in place, work to the
 
 **The aesthetic, in one phrase:** *restrained, librarian/archival, institutional.*
 
-**Read [`docs/design.md`](docs/design.md) before changing any view, component or stylesheet.** It holds the rules: which container a surface gets (a `.well` is for form sections and footers only), the palette and the four coupled contrast tokens, type, the one-icon-per-concept vocabulary, tabs, buttons, hover, what not to add, and the Audit History tab as the worked example. A local `PreToolUse` hook blocks UI edits until the page has been read in the session.
+**Read [`docs/design.md`](docs/design.md) before changing any view, component or stylesheet.** It holds the rules: which container a surface gets (a `.well` is for form footers only), the palette and the four coupled contrast tokens, type, the one-icon-per-concept vocabulary, tabs, buttons, hover, what not to add, and the Audit History tab as the worked example. A local `PreToolUse` hook blocks UI edits until the page has been read in the session.
 
 ## Project Status
 
