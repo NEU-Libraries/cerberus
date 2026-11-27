@@ -316,7 +316,9 @@ form turns busy only after the user confirms.
 Turbo clears each mark only when its own request ends. A visit or submit that
 falls back to a full page load leaves the old page marked busy in the browser's
 back-forward cache. Back then restores that page, and no request is left to
-clear the mark. `snapshot_reset.js` clears every mark on `pageshow`.
+clear the mark. Turbo's progress bar is frozen the same way, and its trickle
+resumes on restore and never finishes. `snapshot_reset.js` clears every mark
+and hides the bar on `pageshow`.
 `spec/system/busy_cursor_spec.rb` covers the rule, Back and Forward, a search
 submit, and that restore.
 

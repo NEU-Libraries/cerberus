@@ -253,6 +253,18 @@
       color: $audit-tone-tombstone;
     }
 
+    // A row's Delete: red before the pointer arrives, as Edit is blue, and
+    // its hover keeps the red rather than taking the navy tint.
+    &--danger {
+      color: $danger;
+
+      &:hover {
+        background-color: color-mix(in srgb, $danger 8%, white);
+        border-color: color-mix(in srgb, $danger 24%, white);
+        color: $danger;
+      }
+    }
+
     .fa-solid { font-size: 0.85em; }
   }
 }

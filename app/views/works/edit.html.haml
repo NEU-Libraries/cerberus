@@ -96,7 +96,8 @@
       = form_with url: request_change_work_path(params[:id]), method: :post do
         = hidden_field_tag :request_action, "move"
         %label.form-label{for: "move_note"} Destination collection
-        %textarea.form-control#move_note{name: "request_note", rows: 3, required: true, placeholder: "Name the collection this work should move to."}
+        %textarea.form-control#move_note{name: "request_note", rows: 3, required: true, "aria-describedby" => "move_note_hint"}
+        .form-text#move_note_hint Name the collection this work should move to.
         .well.p-3.my-3.rounded-3
           %button.btn.btn-primary{type: "submit"}
             %i.fa-solid.fa-folder-open.me-1{"aria-hidden" => "true"}
@@ -109,7 +110,7 @@
       = form_with url: request_change_work_path(params[:id]), method: :post do
         = hidden_field_tag :request_action, "delete"
         %label.form-label{for: "delete_note"} Reason (optional)
-        %textarea.form-control#delete_note{name: "request_note", rows: 3, placeholder: "Optionally, tell the staff why this work should be deleted."}
+        %textarea.form-control#delete_note{name: "request_note", rows: 3}
         .well.p-3.my-3.rounded-3
           %button.btn.btn-danger{type: "submit"}
             %i.fa-solid.fa-trash-can.me-1{"aria-hidden" => "true"}

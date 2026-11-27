@@ -16,16 +16,19 @@
       = f.label :slug, class: 'admin-registry-form__label' do
         %i.fa-solid.fa-tag{'aria-hidden' => 'true'}
         Slug
-      = f.text_field :slug, class: 'form-control admin-registry-form__input--id', placeholder: 'marcom', autocomplete: 'off'
-      .admin-registry-form__hint
-        The text used in the loader URL. Use only lowercase letters, digits, dashes, and underscores.
+      = f.text_field :slug, class: 'form-control admin-registry-form__input--id', autocomplete: 'off',
+                     'aria-describedby' => 'loader_slug_hint'
+      .admin-registry-form__hint#loader_slug_hint
+        The text used in the loader URL. Use only lowercase letters, digits, dashes, and underscores. For example,
+        = succeed '.' do
+          %code.admin-registry-table__id marcom
     .mb-3
       = f.label :display_name, class: 'admin-registry-form__label' do
         %i.fa-solid.fa-id-card{'aria-hidden' => 'true'}
         Display name
-      = f.text_field :display_name, class: 'form-control', placeholder: 'Marketing and Communications'
-      .admin-registry-form__hint
-        The loader name will appear in the loader UI. Use a team or program name to differentiate it from other similar loaders.
+      = f.text_field :display_name, class: 'form-control', 'aria-describedby' => 'loader_display_name_hint'
+      .admin-registry-form__hint#loader_display_name_hint
+        The loader name will appear in the loader UI. Use a team or program name to differentiate it from other similar loaders. For example, “Marketing and Communications”.
     .mb-0
       = f.label :kind, class: 'admin-registry-form__label' do
         %i.fa-solid.fa-diagram-project{'aria-hidden' => 'true'}
@@ -47,8 +50,9 @@
       = f.label :group, 'Grouper group', class: 'admin-registry-form__label' do
         %i.fa-solid.fa-user-group{'aria-hidden' => 'true'}
         Grouper group
-      = f.text_field :group, class: 'form-control admin-registry-form__input--id', placeholder: 'northeastern:drs:repository:loaders:marcom', autocomplete: 'off'
-      .admin-registry-form__hint
+      = f.text_field :group, class: 'form-control admin-registry-form__input--id', autocomplete: 'off',
+                     'aria-describedby' => 'loader_group_hint'
+      .admin-registry-form__hint#loader_group_hint
         The full Grouper group path, starting with “northeastern:drs” (e.g., northeastern:drs:marketing_and_communications:staff). Members of this group will see this loader on their “My Loaders” page.
 
     .mb-0
