@@ -92,4 +92,15 @@ RSpec.describe 'The progress cursor while Turbo is busy', :browser, type: :syste
     expect(link_cursor).to eq('pointer')
     expect(search_button_cursor).to eq('pointer')
   end
+
+  # Turbo leaves its progress bar showing when it falls back to a full page
+  # load, so the restored page shows a bar that never finishes.
+  it 'hides the progress bar when the back-forward cache restores a page' do
+    visit "/collections/#{@collection.id}"
+    page.execute_script('Turbo.session.adapter.showProgressBar()')
+    expect(page).to have_css('.turbo-progress-bar', visible: :all)
+
+    page.execute_script('window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: true }))')
+    expect(page).to have_no_css('.turbo-progress-bar', visible: :all)
+  end
 end

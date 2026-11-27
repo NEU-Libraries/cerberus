@@ -54,7 +54,12 @@ document.addEventListener("turbo:before-cache", () => {
 // form submit that falls back to a full page load freezes this document still
 // marked busy, and Turbo clears a mark only when its own request ends. Without
 // this, the restored page keeps the progress cursor until the next click.
+// The progress bar is frozen the same way: Turbo navigates away without hiding
+// it, and on restore its trickle resumes and creeps toward the end forever.
 window.addEventListener("pageshow", (event) => {
   if (!event.persisted) return
   document.querySelectorAll("[aria-busy]").forEach((el) => el.removeAttribute("aria-busy"))
+  const adapter = window.Turbo?.session?.adapter
+  adapter?.hideVisitProgressBar?.()
+  adapter?.hideFormProgressBar?.()
 })
